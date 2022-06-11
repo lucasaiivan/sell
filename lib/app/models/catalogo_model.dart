@@ -10,7 +10,8 @@ class Product {
   String image = ""; // URL imagen
   String description = ""; // Informacion
   String code = "";
-  Timestamp creation = Timestamp.now(); // Marca de tiempo ( hora en que se creo el producto )
+  Timestamp creation =
+      Timestamp.now(); // Marca de tiempo ( hora en que se creo el producto )
   Timestamp upgrade =
       Timestamp.now(); // Marca de tiempo ( hora en que se edito el producto )
 
@@ -138,6 +139,7 @@ class ProductCatalogue {
   String currencySign = "\$"; // signo de la moneda
   // var optional
   bool select = false;
+  int quantity = 1;
 
   ProductCatalogue({
     // Valores del producto
@@ -161,6 +163,9 @@ class ProductCatalogue {
     this.idMark = '',
     this.nameMark = '',
     this.select = false,
+
+    // var app
+    this.quantity=1,
   });
 
   factory ProductCatalogue.fromMap(Map data) {
@@ -211,6 +216,7 @@ class ProductCatalogue {
       currencySign: data.containsKey('currencySign')
           ? data['currencySign']
           : data['signo_moneda'] ?? '',
+      quantity: data['quantity'] ?? 1,
       select: false,
     );
   }
@@ -233,11 +239,13 @@ class ProductCatalogue {
         "creation": creation,
         "upgrade": upgrade,
         "currencySign": currencySign,
+        "quantity":quantity,
       };
 
   Product convertProductoDefault() {
     // convertimos en el modelo para producto global
-    Product productoDefault = new Product(upgrade: Timestamp.now(), creation: Timestamp.now());
+    Product productoDefault =
+        new Product(upgrade: Timestamp.now(), creation: Timestamp.now());
     productoDefault.id = this.id;
     productoDefault.image = this.image;
     productoDefault.verified = this.verified;
@@ -251,6 +259,7 @@ class ProductCatalogue {
 
     return productoDefault;
   }
+
   ProductCatalogue updateData({required Product}) {
     // actualizamos los datos del documento publico
     this.id = Product.id;
@@ -263,7 +272,6 @@ class ProductCatalogue {
     this.code = Product.code;
     this.upgrade = Product.upgrade;
     this.creation = Product.creation;
-
     return this;
   }
 }
@@ -413,7 +421,7 @@ class ReportProduct {
   String idProduct = '';
   String idUserReport = '';
   String description = '';
-  late Timestamp time ; // Marca de tiempo ( hora en que se reporto el producto )
+  late Timestamp time; // Marca de tiempo ( hora en que se reporto el producto )
 
   ReportProduct({
     this.id = "",
@@ -446,6 +454,6 @@ class ReportProduct {
     idProduct = data['name'] ?? '';
     idUserReport = data['idUserReport'] ?? '';
     description = data['description'] ?? '';
-    time = data['time'] ;
+    time = data['time'];
   }
 }

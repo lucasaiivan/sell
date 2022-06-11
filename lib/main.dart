@@ -1,30 +1,44 @@
+import 'dart:io';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'app/modules/splash/bindings/splash_binding.dart';
 import 'app/routes/app_pages.dart';
+import 'app/utils/dynamicTheme_lb.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await GetStorage.init();
   SplashBinding().dependencies();
-
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  MyApp({super.key});
+  bool isDark = (GetStorage().read('isDarkMode') ?? false);
+  if (Platform.isAndroid) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      systemNavigationBarColor:
+          isDark ? ThemesDataApp.colorBlack : ThemesDataApp.colorLight,
+      statusBarColor:
+          isDark ? ThemesDataApp.colorBlack : ThemesDataApp.colorLight,
+      statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+      statusBarIconBrightness: isDark ? Brightness.dark : Brightness.light,
+      systemNavigationBarIconBrightness:
+          isDark ? Brightness.light : Brightness.dark,
+      systemNavigationBarDividerColor:
+          isDark ? ThemesDataApp.colorBlack : ThemesDataApp.colorLight,
+    ));
+  }
 
   // theme
+  Color colorDark = const Color.fromARGB(255, 43, 45, 57);
   ThemeData themeData = ThemeData(
     visualDensity: VisualDensity.adaptivePlatformDensity,
     brightness: Brightness.light,
     useMaterial3: true,
     primarySwatch: Colors.blue,
     backgroundColor: Colors.amber,
-    scaffoldBackgroundColor: Color.fromRGBO(247,245,242,1),
+    scaffoldBackgroundColor: const Color.fromRGBO(247, 245, 242, 1),
   );
   ThemeData themeDataDark = ThemeData(
     visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -32,19 +46,21 @@ class MyApp extends StatelessWidget {
     useMaterial3: true,
     primarySwatch: Colors.blue,
     backgroundColor: Colors.amber,
+    scaffoldBackgroundColor: colorDark,
+    appBarTheme: AppBarTheme(backgroundColor: colorDark),
+    drawerTheme: DrawerThemeData(backgroundColor: colorDark),
+    canvasColor: colorDark,
+    cardColor: colorDark,
+    dialogBackgroundColor: colorDark,
   );
 
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return GetMaterialApp(
-      title: "Punto de Venta",
-      initialRoute: AppPages.INITIAL,
-      getPages: AppPages.routes,
-      debugShowCheckedModeBanner: false,
-      themeMode: ThemeMode.dark,
-      theme: themeData,
-      darkTheme: themeDataDark,
-    );
-  }
+  runApp(GetMaterialApp(
+    title: "Punto de Venta",
+    initialRoute: AppPages.INITIAL,
+    getPages: AppPages.routes,
+    debugShowCheckedModeBanner: false,
+    themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
+    theme: themeData,
+    darkTheme: themeDataDark,
+  ));
 }
