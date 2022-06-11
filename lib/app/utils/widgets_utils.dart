@@ -7,6 +7,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:sell/app/models/catalogo_model.dart';
 import 'package:sell/app/modules/salesPage/controller/sales_controller.dart';
 import 'package:sell/app/modules/splash/controllers/splash_controller.dart';
+import 'package:sell/app/utils/dynamicTheme_lb.dart';
 import 'package:sell/app/utils/fuctions.dart';
 
 class ProductoItem extends StatefulWidget {
@@ -21,10 +22,6 @@ class ProductoItem extends StatefulWidget {
 class _ProductoItemState extends State<ProductoItem> {
   // controllers
   SalesController salesController = Get.find<SalesController>();
-
-  //var
-  late bool isFocus = false;
-
   @override
   Widget build(BuildContext context) {
     // aparición animada
@@ -35,7 +32,7 @@ class _ProductoItemState extends State<ProductoItem> {
         // widget
         child: Card(
           color: Colors.white,
-          elevation:2,
+          elevation: 2,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
           clipBehavior: Clip.antiAlias,
@@ -53,29 +50,83 @@ class _ProductoItemState extends State<ProductoItem> {
                   color: Colors.transparent,
                   child: InkWell(
                     mouseCursor: MouseCursor.uncontrolled,
-                    onTap: () {
-                      setState(() {
-                        isFocus = !isFocus;
-                      });
-                    },
+                    onTap: ()=>salesController.selectedItem(id: widget.producto.id),
                     onLongPress: () {},
                   ),
                 ),
               ),
-              isFocus
+              widget.producto.select
                   ? Align(
                       alignment: Alignment.topRight,
                       child: IconButton(
                           onPressed: () {
-                            salesController.removeProduct =
-                                widget.producto.id;
+                            salesController.removeProduct = widget.producto.id;
                           },
                           icon: const CircleAvatar(
+                              backgroundColor: Colors.red,
                               child: Icon(
                                 Icons.close,
                                 color: Colors.white,
-                              ),
-                              backgroundColor: Colors.red)))
+                              ))))
+                  : Container(),
+              widget.producto.quantity>1 || widget.producto.select
+                  ? Align(
+                      alignment: Alignment.topLeft,
+                      child: IconButton(
+                        onPressed: ()=>salesController.selectedItem(id: widget.producto.id),
+                        icon: CircleAvatar(
+                            backgroundColor: Colors.white,
+                            child: Center(
+                              child: Text(widget.producto.quantity.toString()),
+                            )),
+                      ))
+                  : Container(),
+              widget.producto.select
+                  ? Align(
+                      alignment: Alignment.bottomRight,
+                      child: IconButton(
+                          onPressed: () {
+                            if (widget.producto.quantity > 1) {
+                              widget.producto.quantity--;
+                              salesController.update();
+                            }
+                          },
+                          icon: const CircleAvatar(
+                              backgroundColor: Colors.grey,
+                              child: Icon(
+                                Icons.horizontal_rule,
+                                color: Colors.white,
+                              ))))
+                  : Container(),
+              widget.producto.select
+                  ? Align(
+                      alignment: Alignment.bottomLeft,
+                      child: IconButton(
+                          onPressed: () {
+                            widget.producto.quantity++;
+                            salesController.update();
+                          },
+                          icon: const CircleAvatar(
+                              backgroundColor: Colors.grey,
+                              child: Icon(
+                                Icons.add,
+                                color: Colors.white,
+                              ))))
+                  : Container(),
+              
+              widget.producto.select
+                  ? Align(
+                      alignment: Alignment.bottomCenter,
+                      child: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              widget.producto.select = !widget.producto.select;
+                            });
+                          },
+                          icon: const Icon(
+                            Icons.close,
+                            color: Colors.grey,
+                          )))
                   : Container(),
             ],
           ),
@@ -89,7 +140,8 @@ class _ProductoItemState extends State<ProductoItem> {
     // var
     String description = widget.producto.description != ''
         ? widget.producto.description.substring(0, 4)
-        : Publications.getFormatoPrecio(monto: widget.producto.salePrice);
+        : Publications.getFormatoPrecio(
+            monto: widget.producto.salePrice * widget.producto.quantity);
     return widget.producto.image != ""
         ? Container(
             width: double.infinity,
@@ -141,7 +193,8 @@ class _ProductoItemState extends State<ProductoItem> {
                     softWrap: false),
                 Text(
                     Publications.getFormatoPrecio(
-                        monto: widget.producto.salePrice),
+                        monto: widget.producto.salePrice *
+                            widget.producto.quantity),
                     style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16.0,
@@ -189,14 +242,10 @@ Widget drawerApp() {
             ],
           ),
         ),
-         ListTile(
-          leading: const Icon(Icons.color_lens_outlined),
-          title: const Text('Cambiar tema'),
-          onTap:() {
-            Get.changeThemeMode(
-                        Get.isDarkMode ? ThemeMode.light : ThemeMode.dark,
-                      );
-          },
+        const ListTile(
+          leading: Icon(Icons.color_lens_outlined),
+          title: Text('Cambiar tema'),
+          onTap: ThemeService.switchTheme,
         ),
         const ListTile(
           leading: Icon(Icons.close),

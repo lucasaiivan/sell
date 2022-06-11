@@ -41,37 +41,37 @@ class SalesController extends GetxController {
           'https://firebasestorage.googleapis.com/v0/b/commer-ef151.appspot.com/o/APP%2FARG%2FPRODUCTOS%2F7790270336307?alt=media&token=a8ff1c29-06e7-4eac-a32a-aff7dbec9d69',
     ),
     ProductCatalogue(
-      id: '112',
-      upgrade: Timestamp.now(),
-      creation: Timestamp.now(),
-      description: 'Don Satur agridulce',
-      salePrice: 120.0,
-      image: 'https://d3ugyf2ht6aenh.cloudfront.net/stores/001/232/784/products/bizcocho-don-satur-agridulce-x-200-g-copia1-ecbe7767b0e4a86fc516006593163352-480-0.png'
-    ),
+        id: '112',
+        upgrade: Timestamp.now(),
+        creation: Timestamp.now(),
+        description: 'Don Satur agridulce',
+        salePrice: 120.0,
+        image:
+            'https://d3ugyf2ht6aenh.cloudfront.net/stores/001/232/784/products/bizcocho-don-satur-agridulce-x-200-g-copia1-ecbe7767b0e4a86fc516006593163352-480-0.png'),
     ProductCatalogue(
-      id: '113',
-      upgrade: Timestamp.now(),
-      creation: Timestamp.now(),
-      description: 'Alfajor Jorgito',
-      salePrice: 50.0,
-      image: 'https://www.distribuidorapop.com.ar/wp-content/uploads/2016/08/alfajor-jorgito-chocolate-venta.jpg'
-    ),
+        id: '113',
+        upgrade: Timestamp.now(),
+        creation: Timestamp.now(),
+        description: 'Alfajor Jorgito',
+        salePrice: 50.0,
+        image:
+            'https://www.distribuidorapop.com.ar/wp-content/uploads/2016/08/alfajor-jorgito-chocolate-venta.jpg'),
     ProductCatalogue(
-      id: '114',
-      upgrade: Timestamp.now(),
-      creation: Timestamp.now(),
-      description: 'Lays Papa Fritas 60g',
-      salePrice: 130.0,
-      image: 'https://i.pinimg.com/originals/c1/cd/1c/c1cd1c2c0806879baeb96c2152cc4caa.jpg'
-    ),
+        id: '114',
+        upgrade: Timestamp.now(),
+        creation: Timestamp.now(),
+        description: 'Lays Papa Fritas 60g',
+        salePrice: 130.0,
+        image:
+            'https://i.pinimg.com/originals/c1/cd/1c/c1cd1c2c0806879baeb96c2152cc4caa.jpg'),
     ProductCatalogue(
-      id: '115',
-      upgrade: Timestamp.now(),
-      creation: Timestamp.now(),
-      description: 'Coca cola 1.5 L',
-      salePrice: 150.0,
-      image: 'https://jumboargentina.vtexassets.com/arquivos/ids/666704/Coca-cola-Sabor-Original-1-5-Lt-2-245092.jpg'
-    ),
+        id: '115',
+        upgrade: Timestamp.now(),
+        creation: Timestamp.now(),
+        description: 'Coca cola 1.5 L',
+        salePrice: 150.0,
+        image:
+            'https://jumboargentina.vtexassets.com/arquivos/ids/666704/Coca-cola-Sabor-Original-1-5-Lt-2-245092.jpg'),
     ProductCatalogue(
       id: '116',
       upgrade: Timestamp.now(),
@@ -100,10 +100,21 @@ class SalesController extends GetxController {
 
   // FUCTIONS
 
+  void selectedItem({required String id}) {
+    for (ProductCatalogue element in getListProductsSelested) {
+      if (element.id == id) {
+        element.select = true;
+      } else {
+        element.select = false;
+      }
+    }
+    update();
+  }
+
   double getCountPriceTotal() {
     double total = 0.0;
     for (var element in getListProductsSelested) {
-      total = total + element.salePrice;
+      total = total + (element.salePrice * element.quantity);
     }
     return total;
   }
@@ -119,7 +130,8 @@ class SalesController extends GetxController {
         textEditingControllerAddFlash.text = '';
         Get.back();
       } else {
-        Get.snackbar('No se puedo agregar 😔', 'Debe ingresar un valor distinto a 0');
+        Get.snackbar(
+            'No se puedo agregar 😔', 'Debe ingresar un valor distinto a 0');
       }
     } else {
       Get.snackbar('😔', 'Debe ingresar un valor valido');
