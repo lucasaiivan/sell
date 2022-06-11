@@ -1,9 +1,12 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:sell/app/models/catalogo_model.dart';
 import 'package:sell/app/modules/salesPage/controller/sales_controller.dart';
+import 'package:sell/app/modules/splash/controllers/splash_controller.dart';
 import 'package:sell/app/utils/fuctions.dart';
 
 class ProductoItem extends StatefulWidget {
@@ -20,7 +23,7 @@ class _ProductoItemState extends State<ProductoItem> {
   SalesController salesController = Get.find<SalesController>();
 
   //var
-  bool isFocus = false;
+  late bool isFocus = false;
 
   @override
   Widget build(BuildContext context) {
@@ -32,57 +35,49 @@ class _ProductoItemState extends State<ProductoItem> {
         // widget
         child: Card(
           color: Colors.white,
-          elevation: 1,
+          elevation:2,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
           clipBehavior: Clip.antiAlias,
-          child: MouseRegion(
-            onExit: (event) {
-              setState(() {
-                isFocus = false;
-              });
-            },
-            onHover: (event) {
-              setState(() {
-                isFocus = true;
-              });
-            },
-            child: Stack(
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(child: contentImage()),
-                    contentInfo(),
-                  ],
-                ),
-                Positioned.fill(
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      mouseCursor: MouseCursor.uncontrolled,
-                      onTap: () {},
-                      onLongPress: () {},
-                    ),
+          child: Stack(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: contentImage()),
+                  contentInfo(),
+                ],
+              ),
+              Positioned.fill(
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    mouseCursor: MouseCursor.uncontrolled,
+                    onTap: () {
+                      setState(() {
+                        isFocus = !isFocus;
+                      });
+                    },
+                    onLongPress: () {},
                   ),
                 ),
-                isFocus
-                    ? Align(
-                        alignment: Alignment.topRight,
-                        child: IconButton(
-                            onPressed: () {
-                              salesController.removeProduct =
-                                  widget.producto.id;
-                            },
-                            icon: const CircleAvatar(
-                                child: Icon(
-                                  Icons.close,
-                                  color: Colors.white,
-                                ),
-                                backgroundColor: Colors.red)))
-                    : Container(),
-              ],
-            ),
+              ),
+              isFocus
+                  ? Align(
+                      alignment: Alignment.topRight,
+                      child: IconButton(
+                          onPressed: () {
+                            salesController.removeProduct =
+                                widget.producto.id;
+                          },
+                          icon: const CircleAvatar(
+                              child: Icon(
+                                Icons.close,
+                                color: Colors.white,
+                              ),
+                              backgroundColor: Colors.red)))
+                  : Container(),
+            ],
           ),
         ),
       ),
@@ -163,13 +158,88 @@ Widget drawerApp() {
   //Los rieles de navegación brindan acceso a los destinos principales en las aplicaciones cuando se usan pantallas de tabletas y computadoras de escritorio.
 
   return Drawer(
-    child: ListView(
+    child: Column(
       children: [
-        ListTile(title: const Text('Vender'), onTap: () {}),
-        ListTile(title: const Text('Transacciones'), onTap: () {}),
-        ListTile(title: const Text('Stock'), onTap: () {}),
-        ListTile(title: const Text('Configuración'), onTap: () {}),
+        const SizedBox(height: 50),
+        const ListTile(
+          leading: CircleAvatar(
+            backgroundColor: Colors.grey,
+          ),
+          title: Text('Mi negocio'),
+        ),
+        Expanded(
+          child: ListView(
+            children: [
+              ListTile(
+                  leading: const Icon(Icons.attach_money_rounded),
+                  title: const Text('Vender'),
+                  onTap: () {}),
+              ListTile(
+                  leading: const Icon(Icons.check),
+                  title: const Text('Transacciones'),
+                  onTap: () {}),
+              ListTile(
+                  leading: const Icon(Icons.check_box_outline_blank_rounded),
+                  title: const Text('Stock'),
+                  onTap: () {}),
+              ListTile(
+                  leading: const Icon(Icons.settings),
+                  title: const Text('Configuración'),
+                  onTap: () {}),
+            ],
+          ),
+        ),
+         ListTile(
+          leading: const Icon(Icons.color_lens_outlined),
+          title: const Text('Cambiar tema'),
+          onTap:() {
+            Get.changeThemeMode(
+                        Get.isDarkMode ? ThemeMode.light : ThemeMode.dark,
+                      );
+          },
+        ),
+        const ListTile(
+          leading: Icon(Icons.close),
+          title: Text('Cerrar sesión'),
+          onTap: showDialogCerrarSesion,
+        ),
       ],
     ),
+  );
+}
+
+// cerrar sesión
+void showDialogCerrarSesion() {
+  Widget widget = AlertDialog(
+    title: const Text("Cerrar sesión"),
+    content: const Text("¿Estás seguro de que quieres cerrar la sesión?"),
+    actions: <Widget>[
+      // usually buttons at the bottom of the dialog
+      TextButton(
+          onPressed: () {
+            Get.back();
+          },
+          child: const Text('cancelar')),
+      TextButton(
+          child: const Text('si'),
+          onPressed: () async {
+            CustomFullScreenDialog.showDialog();
+
+            // Guardamos una referencia  de la cuenta seleccionada
+            GetStorage().write('idAccount', '');
+            //setIdAccountSelected = '';
+            // instancias de FirebaseAuth para proceder a cerrar sesión
+            final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+            Future.delayed(const Duration(seconds: 2)).then((_) {
+              firebaseAuth.signOut().then((value) async {
+                CustomFullScreenDialog.cancelDialog();
+              });
+            });
+          }),
+    ],
+  );
+
+  Get.dialog(
+    widget,
   );
 }

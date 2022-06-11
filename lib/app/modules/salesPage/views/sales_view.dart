@@ -1,9 +1,8 @@
-// ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:sell/app/models/catalogo_model.dart';
-import 'package:sell/app/utils/dimensions.dart';
 import 'package:sell/app/utils/fuctions.dart';
 import 'package:sell/app/utils/widgets_utils.dart';
 import 'package:search_page/search_page.dart';
@@ -25,7 +24,9 @@ class SalesView extends StatelessWidget {
               body: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  controller.getTicketView?Container():Expanded(child: body(controller: controller)),
+                  controller.getTicketView
+                      ? Container()
+                      : Expanded(child: body(controller: controller)),
                   drawerTicket(controller: controller),
                 ],
               ),
@@ -48,41 +49,11 @@ class SalesView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        /* Row(
-          crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 20,left: 20),
-              child: Row(
-                // ignore: prefer_const_literals_to_create_immutables
-                children: [
-                  Icon(Icons.check_circle_outline,color: Colors.green),
-                  SizedBox(width: 5),
-                  Text('Lector de código de barras activado',style: TextStyle(color: Colors.green,fontWeight: FontWeight.bold)),
-                ],
-              ),
-            ),
-            Expanded(child: Container()),
-            const Padding(
-              padding: EdgeInsets.only(top: 20,left: 20,right: 20),
-              child: Material(
-                color: Colors.black12,
-                borderRadius: BorderRadius.all(Radius.circular(12)),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12,vertical: 5),
-                  child: Text('Caja 1',style: TextStyle(fontWeight: FontWeight.bold),),
-                ),
-              ),
-            ),
-          ],
-        ), */
         Expanded(
           child: GridView.builder(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(12),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount:3,
-                crossAxisSpacing: 1.0,
-                mainAxisSpacing: 1.0),
+                crossAxisCount: 3, crossAxisSpacing: 1.0, mainAxisSpacing: 1.0),
             itemCount: controller.getListProductsSelested.length + 14,
             itemBuilder: (context, index) {
               // en la primera posición muestra el botón para agregar un nuevo objeto
@@ -155,7 +126,8 @@ class SalesView extends StatelessWidget {
         opacity: controller.getTicketView ? 1 : 0,
         duration: Duration(milliseconds: controller.getTicketView ? 1500 : 100),
         child: Padding(
-          padding: const EdgeInsets.only(bottom: 0,top: 12,right: 0,left:24),
+          padding:
+              const EdgeInsets.only(bottom: 0, top: 12, right: 0, left: 24),
           child: Material(
             borderRadius: const BorderRadius.all(Radius.circular(12)),
             color: Get.theme.dividerColor,
@@ -167,10 +139,39 @@ class SalesView extends StatelessWidget {
                   children: [
                     const Text('Ticket 1',
                         style: TextStyle(
-                            fontSize: 24, fontWeight: FontWeight.bold)),
+                            fontSize: 30, fontWeight: FontWeight.bold)),
                     Text(
                         'Total: ${Publications.getFormatoPrecio(monto: controller.getCountPriceTotal())}',
-                        style: const TextStyle(fontSize: 18)),
+                        style: const TextStyle(fontSize: 24)),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 24,top: 24,),
+                      child: Column(
+                        children: [
+                          const Text('Paga con:'),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              TextButton(
+                                  onPressed: () {},
+                                  child: Text('100',
+                                      style: TextStyle(fontSize: 24))),
+                              TextButton(
+                                  onPressed: () {},
+                                  child: Text('500',
+                                      style: TextStyle(fontSize: 24))),
+                              TextButton(
+                                  onPressed: () {},
+                                  child: Text('1000',
+                                      style: TextStyle(fontSize: 24))),
+                            ],
+                          ),
+                          ElevatedButton(child: const Text('Ingresar monto'),onPressed: () {},),
+                          const SizedBox(height: 12),
+                          const Text('Su vuelto es de: \$0'),
+                        ],
+                      ),
+                    ),
+                    
                   ],
                 ),
               ),
@@ -194,20 +195,62 @@ class SalesView extends StatelessWidget {
                   title: 'Vender ítem no registrado',
                   titlePadding: const EdgeInsets.all(20),
                   cancel: TextButton(
-                      onPressed: Get.back, child: const Text('Cancelar')),
-                  confirm: TextButton(
                       onPressed: () {
+                        controller.textEditingControllerAddFlash.text = '';
+                        Get.back();
+                      },
+                      child: const Text('Cancelar')),
+                  confirm: Theme(
+                    data: Get.theme.copyWith(brightness: Get.theme.brightness),
+                    child: TextButton(
+                        onPressed: () {
+                          controller.addSaleFlash(
+                              value: controller
+                                  .textEditingControllerAddFlash.text);
+                          controller.textEditingControllerAddFlash.text = '';
+                        },
+                        child: const Text('Agregar')),
+                  ),
+                  content: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: TextField(
+                      controller: controller.textEditingControllerAddFlash,
+                      keyboardType:
+                          TextInputType.numberWithOptions(decimal: false),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                            RegExp('[1234567890]'))
+                      ],
+                      decoration: InputDecoration(
+                        hintText: '\$',
+                        hintStyle: TextStyle(),
+                        enabledBorder: OutlineInputBorder(
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(16.0)),
+                            borderSide:
+                                BorderSide(color: Get.theme.dividerColor)),
+                        border: OutlineInputBorder(
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(16.0)),
+                            borderSide:
+                                BorderSide(color: Get.theme.dividerColor)),
+                        focusedBorder: OutlineInputBorder(
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(16.0)),
+                            borderSide:
+                                BorderSide(color: Get.theme.dividerColor)),
+                        labelText: "Escribe el monto",
+                        suffixStyle: TextStyle(),
+                      ),
+                      style: TextStyle(fontSize: 20.0),
+                      textInputAction: TextInputAction.done,
+                      onSubmitted: (value) {
                         controller.addSaleFlash(
                             value:
                                 controller.textEditingControllerAddFlash.text);
+                        controller.textEditingControllerAddFlash.text = '';
                       },
-                      child: const Text('Agregar')),
-                  content: TextField(
-                    autofocus: true,
-                    controller: controller.textEditingControllerAddFlash,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                        hintText: '\$0', border: OutlineInputBorder()),
+                    ),
                   ));
             },
             child: const Icon(
@@ -224,11 +267,16 @@ class SalesView extends StatelessWidget {
             )),
         const SizedBox(width: 8),
         FloatingActionButton.extended(
-            onPressed: () {
-              controller.setTicketView = true;
-            },
+            onPressed: controller.getListProductsSelested.length == 0
+                ? null
+                : () {
+                    controller.setTicketView = true;
+                  },
+            backgroundColor: controller.getListProductsSelested.length == 0
+                ? Colors.grey
+                : null,
             label: Text(
-                'Cobrar ${Publications.getFormatoPrecio(monto: controller.getCountPriceTotal())}')),
+                'Cobrar ${controller.getListProductsSelested.length == 0 ? '' : Publications.getFormatoPrecio(monto: controller.getCountPriceTotal())}')),
       ],
     );
   }
