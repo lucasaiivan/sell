@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -41,7 +40,7 @@ class SalesView extends StatelessWidget {
   // WIDGETS VIEWS
   PreferredSizeWidget appbar() {
     return AppBar(
-      title: Text('Vender'),
+      title: const Text('Vender'),
     );
   }
 
@@ -52,7 +51,7 @@ class SalesView extends StatelessWidget {
         Expanded(
           child: GridView.builder(
             padding: const EdgeInsets.all(12),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3, crossAxisSpacing: 1.0, mainAxisSpacing: 1.0),
             itemCount: controller.getListProductsSelested.length + 14,
             itemBuilder: (context, index) {
@@ -118,6 +117,7 @@ class SalesView extends StatelessWidget {
   }
 
   Widget drawerTicket({required SalesController controller}) {
+    
     return AnimatedContainer(
       width: controller.getTicketView ? Get.size.width : 0,
       curve: Curves.fastOutSlowIn,
@@ -126,52 +126,112 @@ class SalesView extends StatelessWidget {
         opacity: controller.getTicketView ? 1 : 0,
         duration: Duration(milliseconds: controller.getTicketView ? 1500 : 100),
         child: Padding(
-          padding:
-              const EdgeInsets.only(bottom: 0, top: 12, right: 0, left: 24),
+          padding:const EdgeInsets.only(bottom: 2, top: 12, right: 5, left: 24),
           child: Material(
             borderRadius: const BorderRadius.all(Radius.circular(12)),
-            color: Get.theme.dividerColor,
+            color: Get.theme.brightness == Brightness.dark
+                ? Colors.white10
+                : Colors.white,
             child: Drawer(
               backgroundColor: Colors.transparent,
               child: Center(
-                child: Column(
+                child:controller.getConfirmPurchase? const Text('Confirm Purchase'): Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('Ticket 1',
+                    const SizedBox(height: 24),
+                    const Text('Ticket',
+                        textAlign: TextAlign.start,
                         style: TextStyle(
                             fontSize: 30, fontWeight: FontWeight.bold)),
                     Text(
                         'Total: ${Publications.getFormatoPrecio(monto: controller.getCountPriceTotal())}',
-                        style: const TextStyle(fontSize: 24)),
+                        style: const TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold)),
+                    // lines ------
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 24,top: 24,),
+                      padding: const EdgeInsets.all(20.0),
+                      child: Dash(
+                          color: Get.theme.dividerColor, height: 5, width: 12),
+                    ),
+                    // view 2
+                    Expanded(
                       child: Column(
                         children: [
-                          const Text('Paga con:'),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              TextButton(
-                                  onPressed: () {},
-                                  child: Text('100',
-                                      style: TextStyle(fontSize: 24))),
-                              TextButton(
-                                  onPressed: () {},
-                                  child: Text('500',
-                                      style: TextStyle(fontSize: 24))),
-                              TextButton(
-                                  onPressed: () {},
-                                  child: Text('1000',
-                                      style: TextStyle(fontSize: 24))),
-                            ],
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              bottom: 24,
+                              top: 24,
+                            ),
+                            child: Column(
+                              children: [
+                                const Text('Paga con:'),
+                                const SizedBox(height: 12),
+                                ElevatedButton.icon(
+                                  style: ButtonStyle(
+                                      elevation: MaterialStateProperty.all(
+                                          controller.ticketModel.payMode ==
+                                                  'effective'
+                                              ? 5
+                                              : 0)),
+                                  icon: const Icon(Icons.person_outline_sharp),
+                                  onPressed: controller.voidShowDialogMount,
+                                  label: Text(controller.getTicketMount != 0.0
+                                      ? Publications.getFormatoPrecio(
+                                          monto: controller.getTicketMount)
+                                      : 'Ingresar efectivo'),
+                                ),
+                                ElevatedButton.icon(
+                                  style: ButtonStyle(
+                                      elevation: MaterialStateProperty.all(
+                                          controller.ticketModel.payMode ==
+                                                  'mercadopago'
+                                              ? 5
+                                              : 0)),
+                                  icon: const Icon(Icons.check_circle_rounded),
+                                  onPressed: () => controller.setPayModeTicket =
+                                      'mercadopago',
+                                  label: const Text('Mercado Pago'),
+                                ),
+                                ElevatedButton.icon(
+                                  style: ButtonStyle(
+                                      elevation: MaterialStateProperty.all(
+                                          controller.ticketModel.payMode ==
+                                                  'card'
+                                              ? 5
+                                              : 0)),
+                                  icon: const Icon(Icons.credit_card_outlined),
+                                  onPressed: () =>
+                                      controller.setPayModeTicket = 'card',
+                                  label:
+                                      const Text('Tarjeta de Debito/Credito'),
+                                ),
+                                const SizedBox(height: 12),
+                                controller.getTicketMount == 0 ||
+                                        controller.ticketModel.payMode !=
+                                            'effective'
+                                    ? Container()
+                                    : RichText(
+                                        textAlign: TextAlign.center,
+                                        text: TextSpan(
+                                          text: 'Vuelto:  ',
+                                          style: TextStyle(
+                                              color: Get.theme.textTheme
+                                                  .headline1?.color),
+                                          children: <TextSpan>[
+                                            TextSpan(
+                                              text: controller.getChangeMount(),
+                                              style:
+                                                  const TextStyle(fontSize: 30),
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                              ],
+                            ),
                           ),
-                          ElevatedButton(child: const Text('Ingresar monto'),onPressed: () {},),
-                          const SizedBox(height: 12),
-                          const Text('Su vuelto es de: \$0'),
                         ],
                       ),
                     ),
-                    
                   ],
                 ),
               ),
@@ -190,13 +250,16 @@ class SalesView extends StatelessWidget {
         FloatingActionButton(
             backgroundColor: Colors.amber,
             onPressed: () {
+              // default values
+              controller.textEditingControllerAddFlashPrice.text = '';
+              controller.textEditingControllerAddFlashDescription.text = '';
               // dialog show
               Get.defaultDialog(
-                  title: 'Vender ítem no registrado',
+                  title: 'Venta rápida',
                   titlePadding: const EdgeInsets.all(20),
                   cancel: TextButton(
                       onPressed: () {
-                        controller.textEditingControllerAddFlash.text = '';
+                        controller.textEditingControllerAddFlashPrice.text = '';
                         Get.back();
                       },
                       child: const Text('Cancelar')),
@@ -204,52 +267,58 @@ class SalesView extends StatelessWidget {
                     data: Get.theme.copyWith(brightness: Get.theme.brightness),
                     child: TextButton(
                         onPressed: () {
-                          controller.addSaleFlash(
-                              value: controller
-                                  .textEditingControllerAddFlash.text);
-                          controller.textEditingControllerAddFlash.text = '';
+                          controller.addSaleFlash();
+                          controller.textEditingControllerAddFlashPrice.text =
+                              '';
                         },
                         child: const Text('Agregar')),
                   ),
                   content: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: TextField(
-                      controller: controller.textEditingControllerAddFlash,
-                      keyboardType:
-                          TextInputType.numberWithOptions(decimal: false),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(
-                            RegExp('[1234567890]'))
+                    padding: const EdgeInsets.symmetric(vertical: 24),
+                    child: Column(
+                      children: [
+                        // mount textfield
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: TextField(
+                            autofocus: true,
+                            controller:
+                                controller.textEditingControllerAddFlashPrice,
+                            keyboardType: const TextInputType.numberWithOptions(
+                                decimal: false),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(
+                                  RegExp('[1234567890]'))
+                            ],
+                            decoration: const InputDecoration(
+                              hintText: '\$',
+                              labelText: "Escribe el precio",
+                            ),
+                            style: const TextStyle(fontSize: 20.0),
+                            textInputAction: TextInputAction.done,
+                            onSubmitted: (value) {
+                              controller.addSaleFlash();
+                              controller
+                                  .textEditingControllerAddFlashPrice.text = '';
+                            },
+                          ),
+                        ),
+                        // descrption textfield
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: TextField(
+                            autofocus: true,
+                            controller: controller
+                                .textEditingControllerAddFlashDescription,
+                            decoration: const InputDecoration(
+                                labelText: "Descripción (opcional)"),
+                            textInputAction: TextInputAction.done,
+                            onSubmitted: (value) {
+                              controller.addSaleFlash();
+                            },
+                          ),
+                        ),
                       ],
-                      decoration: InputDecoration(
-                        hintText: '\$',
-                        hintStyle: TextStyle(),
-                        enabledBorder: OutlineInputBorder(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(16.0)),
-                            borderSide:
-                                BorderSide(color: Get.theme.dividerColor)),
-                        border: OutlineInputBorder(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(16.0)),
-                            borderSide:
-                                BorderSide(color: Get.theme.dividerColor)),
-                        focusedBorder: OutlineInputBorder(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(16.0)),
-                            borderSide:
-                                BorderSide(color: Get.theme.dividerColor)),
-                        labelText: "Escribe el monto",
-                        suffixStyle: TextStyle(),
-                      ),
-                      style: TextStyle(fontSize: 20.0),
-                      textInputAction: TextInputAction.done,
-                      onSubmitted: (value) {
-                        controller.addSaleFlash(
-                            value:
-                                controller.textEditingControllerAddFlash.text);
-                        controller.textEditingControllerAddFlash.text = '';
-                      },
                     ),
                   ));
             },
@@ -271,6 +340,7 @@ class SalesView extends StatelessWidget {
                 ? null
                 : () {
                     controller.setTicketView = true;
+                    controller.setTicketMount = 0.0;
                   },
             backgroundColor: controller.getListProductsSelested.length == 0
                 ? Colors.grey
@@ -296,8 +366,42 @@ class SalesView extends StatelessWidget {
             )),
         const SizedBox(width: 8),
         FloatingActionButton.extended(
-            onPressed: () {}, label: const Text('Siguiente')),
+            onPressed: controller.confirmedPurchase,
+            label: const Text('Confirmar venta')),
       ],
+    );
+  }
+}
+
+class Dash extends StatelessWidget {
+  final double height;
+  final double width;
+  final Color color;
+
+  const Dash({this.height = 1, this.width = 3, this.color = Colors.black});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final boxWidth = constraints.constrainWidth();
+        final dashWidth = width;
+        final dashHeight = height;
+        final dashCount = (boxWidth / (2 * dashWidth)).floor();
+        return Flex(
+          children: List.generate(dashCount, (_) {
+            return SizedBox(
+              width: dashWidth,
+              height: dashHeight,
+              child: DecoratedBox(
+                decoration: BoxDecoration(color: color),
+              ),
+            );
+          }),
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          direction: Axis.horizontal,
+        );
+      },
     );
   }
 }
