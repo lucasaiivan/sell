@@ -32,13 +32,19 @@ Future<void> main() async {
 
   // theme
   Color colorDark = const Color.fromARGB(255, 43, 45, 57);
+  Color colorLight = const Color.fromRGBO(247, 245, 242, 1);
   ThemeData themeData = ThemeData(
     visualDensity: VisualDensity.adaptivePlatformDensity,
     brightness: Brightness.light,
     useMaterial3: true,
     primarySwatch: Colors.blue,
     backgroundColor: Colors.amber,
-    scaffoldBackgroundColor: const Color.fromRGBO(247, 245, 242, 1),
+    scaffoldBackgroundColor: colorLight,
+    appBarTheme: AppBarTheme(backgroundColor: colorLight),
+    drawerTheme: DrawerThemeData(backgroundColor: colorLight),
+    canvasColor: colorLight,
+    cardColor: colorLight,
+    dialogBackgroundColor: colorLight,
   );
   ThemeData themeDataDark = ThemeData(
     visualDensity: VisualDensity.adaptivePlatformDensity,
