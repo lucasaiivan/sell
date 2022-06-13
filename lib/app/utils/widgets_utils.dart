@@ -1,4 +1,4 @@
-import 'package:animate_do/animate_do.dart';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -50,7 +50,8 @@ class _ProductoItemState extends State<ProductoItem> {
                   color: Colors.transparent,
                   child: InkWell(
                     mouseCursor: MouseCursor.uncontrolled,
-                    onTap: ()=>salesController.selectedItem(id: widget.producto.id),
+                    onTap: () =>
+                        salesController.selectedItem(id: widget.producto.id),
                     onLongPress: () {},
                   ),
                 ),
@@ -69,11 +70,12 @@ class _ProductoItemState extends State<ProductoItem> {
                                 color: Colors.white,
                               ))))
                   : Container(),
-              widget.producto.quantity>1 || widget.producto.select
+              widget.producto.quantity > 1 || widget.producto.select
                   ? Align(
                       alignment: Alignment.topLeft,
                       child: IconButton(
-                        onPressed: ()=>salesController.selectedItem(id: widget.producto.id),
+                        onPressed: () => salesController.selectedItem(
+                            id: widget.producto.id),
                         icon: CircleAvatar(
                             backgroundColor: Colors.white,
                             child: Center(
@@ -83,7 +85,7 @@ class _ProductoItemState extends State<ProductoItem> {
                   : Container(),
               widget.producto.select
                   ? Align(
-                      alignment: Alignment.bottomRight,
+                      alignment: Alignment.bottomLeft,
                       child: IconButton(
                           onPressed: () {
                             if (widget.producto.quantity > 1) {
@@ -100,7 +102,7 @@ class _ProductoItemState extends State<ProductoItem> {
                   : Container(),
               widget.producto.select
                   ? Align(
-                      alignment: Alignment.bottomLeft,
+                      alignment: Alignment.bottomRight,
                       child: IconButton(
                           onPressed: () {
                             widget.producto.quantity++;
@@ -113,7 +115,6 @@ class _ProductoItemState extends State<ProductoItem> {
                                 color: Colors.white,
                               ))))
                   : Container(),
-              
               widget.producto.select
                   ? Align(
                       alignment: Alignment.bottomCenter,
@@ -290,5 +291,15 @@ void showDialogCerrarSesion() {
 
   Get.dialog(
     widget,
+  );
+}
+
+// notification
+void showMessageAlertApp({required String title,required String message}) {
+  Get.snackbar(
+    title, message,
+    margin: const EdgeInsets.all(12),
+    backgroundColor: Get.theme.brightness==Brightness.dark?Colors.transparent:Colors.white,
+    colorText: Get.theme.brightness==Brightness.dark?Colors.white:Colors.black
   );
 }

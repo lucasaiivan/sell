@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:sell/app/models/catalogo_model.dart';
 import 'package:sell/app/models/ticket_model.dart';
 import 'package:sell/app/utils/fuctions.dart';
+import 'package:sell/app/utils/widgets_utils.dart';
 
 class SalesController extends GetxController {
   // text field controllers
@@ -31,6 +32,10 @@ class SalesController extends GetxController {
     }
     setListProductsSelected = newList;
   }
+  int get getListProductsSelestedLength{
+    
+    return getListProductsSelested.length;
+  }
 
   // ticket
   TicketModel ticketModel = TicketModel(time: Timestamp.now());
@@ -40,9 +45,10 @@ class SalesController extends GetxController {
   }
 
   // state cofirnm purchase ticket view
-  final RxBool _confirmPurchase = false.obs;
-  bool get getConfirmPurchase => _confirmPurchase.value;
-  set setConfirmPurchase(bool value) => _confirmPurchase.value = value;
+  final RxBool _stateConfirmPurchase = false.obs;
+  bool get getStateConfirmPurchase => _stateConfirmPurchase.value;
+  set setStateConfirmPurchase(bool value) =>
+      _stateConfirmPurchase.value = value;
 
   // state ticket view
   final RxBool _ticketView = false.obs;
@@ -50,10 +56,10 @@ class SalesController extends GetxController {
   set setTicketView(bool value) => _ticketView.value = value;
 
   // mount  ticket
-  final RxDouble _ticketMount = 0.0.obs;
-  double get getTicketMount => _ticketMount.value;
-  set setTicketMount(double value) {
-    _ticketMount.value = value;
+  final RxDouble _valueReceivedTicket = 0.0.obs;
+  double get getValueReceivedTicket => _valueReceivedTicket.value;
+  set setValueReceivedTicket(double value) {
+    _valueReceivedTicket.value = value;
   }
 
   List<ProductCatalogue> listProducts = [
@@ -167,23 +173,35 @@ class SalesController extends GetxController {
         textEditingControllerAddFlashPrice.text = '';
         Get.back();
       } else {
-        Get.snackbar(
-            'No se puedo agregar 😔', 'Debe ingresar un valor distinto a 0');
+        showMessageAlertApp(title:'😔No se puedo agregar 😔',message: 'Debe ingresar un valor distinto a 0');
       }
     } else {
-      Get.snackbar('😔', 'Debe ingresar un valor valido');
+      showMessageAlertApp(title:'😔', message: 'Debe ingresar un valor valido');
     }
   }
 
-  String getChangeMount() {
-    if (getTicketMount == 0.0) return Publications.getFormatoPrecio(monto: 0);
-    double result = getTicketMount - getCountPriceTotal();
+  String getValueReceived() {
+    if (getValueReceivedTicket == 0.0)
+      return Publications.getFormatoPrecio(monto: 0);
+    double result = getValueReceivedTicket - getCountPriceTotal();
     return Publications.getFormatoPrecio(monto: result);
   }
-  
+
   void confirmedPurchase() {
     // el usuario confirmo su venta
-    setConfirmPurchase = true;
+    setStateConfirmPurchase = true;
+    // mostramos una vista 'confirm purchase' por 2 segundos
+    Future.delayed(
+      const Duration(milliseconds: 1300),
+      () {
+        // fdefault values
+        setListProductsSelected = [];
+        ticketModel = TicketModel(time: Timestamp.now());
+        //views
+        setStateConfirmPurchase = false;
+        setTicketView = false;
+      },
+    );
   }
 
   voidShowDialogMount() {
@@ -201,11 +219,21 @@ class SalesController extends GetxController {
           data: Get.theme.copyWith(brightness: Get.theme.brightness),
           child: TextButton(
               onPressed: () {
-                setTicketMount =
-                    double.parse(textEditingControllerTicketMount.text);
-                textEditingControllerTicketMount.text = '';
-                setPayModeTicket = 'effective';
-                Get.back();
+                //var
+                double valueReceived =
+                    textEditingControllerTicketMount.text == ''
+                        ? 0.0
+                        : double.parse(textEditingControllerTicketMount.text);
+                // condition : verificar si el usaurio ingreso un monto valido y que sea mayor al monto total del ticket
+                if (valueReceived >= getCountPriceTotal() && textEditingControllerTicketMount.text!='' ) {
+                  setValueReceivedTicket = valueReceived;
+                  textEditingControllerTicketMount.text = '';
+                  setPayModeTicket = 'effective';
+                  Get.back();
+                } else {
+                  showMessageAlertApp(title:'😔', message:'Tiene que ingresar un monto valido');
+
+                }
               },
               child: const Text('aceptar')),
         ),
@@ -223,7 +251,7 @@ class SalesController extends GetxController {
                             ? null
                             : () {
                                 setPayModeTicket = 'effective';
-                                setTicketMount = 100;
+                                setValueReceivedTicket = 100;
                                 Get.back();
                               },
                         child:
@@ -233,7 +261,7 @@ class SalesController extends GetxController {
                             ? null
                             : () {
                                 setPayModeTicket = 'effective';
-                                setTicketMount = 200;
+                                setValueReceivedTicket = 200;
                                 Get.back();
                               },
                         child:
@@ -243,7 +271,7 @@ class SalesController extends GetxController {
                             ? null
                             : () {
                                 setPayModeTicket = 'effective';
-                                setTicketMount = 500;
+                                setValueReceivedTicket = 500;
                                 Get.back();
                               },
                         child:
@@ -253,7 +281,7 @@ class SalesController extends GetxController {
                             ? null
                             : () {
                                 setPayModeTicket = 'effective';
-                                setTicketMount = 1000;
+                                setValueReceivedTicket = 1000;
                                 Get.back();
                               },
                         child:
@@ -279,11 +307,22 @@ class SalesController extends GetxController {
                   style: const TextStyle(fontSize: 20.0),
                   textInputAction: TextInputAction.done,
                   onSubmitted: (value) {
-                    setTicketMount =
-                        double.parse(textEditingControllerTicketMount.text);
-                    textEditingControllerTicketMount.text = '';
-                    setPayModeTicket = 'effective';
-                    Get.back();
+                    //var
+                    double valueReceived = textEditingControllerTicketMount
+                                .text ==
+                            ''
+                        ? 0.0
+                        : double.parse(textEditingControllerTicketMount.text);
+                    // condition : verificar si el usaurio ingreso un monto valido y que sea mayor al monto total del ticket
+                    if (valueReceived >= getCountPriceTotal()&& textEditingControllerTicketMount.text!='') {
+                      setValueReceivedTicket =
+                          double.parse(textEditingControllerTicketMount.text);
+                      textEditingControllerTicketMount.text = '';
+                      setPayModeTicket = 'effective';
+                      Get.back();
+                    } else {
+                      showMessageAlertApp(title:'😔',message: 'Tiene que ingresar un monto valido');
+                    }
                   },
                 ),
               ),

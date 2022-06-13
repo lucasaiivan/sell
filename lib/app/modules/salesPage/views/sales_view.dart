@@ -5,6 +5,7 @@ import 'package:sell/app/models/catalogo_model.dart';
 import 'package:sell/app/utils/fuctions.dart';
 import 'package:sell/app/utils/widgets_utils.dart';
 import 'package:search_page/search_page.dart';
+import '../../../utils/dynamicTheme_lb.dart';
 import '../controller/sales_controller.dart';
 
 class SalesView extends StatelessWidget {
@@ -117,7 +118,6 @@ class SalesView extends StatelessWidget {
   }
 
   Widget drawerTicket({required SalesController controller}) {
-    
     return AnimatedContainer(
       width: controller.getTicketView ? Get.size.width : 0,
       curve: Curves.fastOutSlowIn,
@@ -126,7 +126,8 @@ class SalesView extends StatelessWidget {
         opacity: controller.getTicketView ? 1 : 0,
         duration: Duration(milliseconds: controller.getTicketView ? 1500 : 100),
         child: Padding(
-          padding:const EdgeInsets.only(bottom: 2, top: 12, right: 5, left: 24),
+          padding:
+              const EdgeInsets.only(bottom: 2, top: 12, right: 5, left: 24),
           child: Material(
             borderRadius: const BorderRadius.all(Radius.circular(12)),
             color: Get.theme.brightness == Brightness.dark
@@ -135,105 +136,119 @@ class SalesView extends StatelessWidget {
             child: Drawer(
               backgroundColor: Colors.transparent,
               child: Center(
-                child:controller.getConfirmPurchase? const Text('Confirm Purchase'): Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const SizedBox(height: 24),
-                    const Text('Ticket',
-                        textAlign: TextAlign.start,
-                        style: TextStyle(
-                            fontSize: 30, fontWeight: FontWeight.bold)),
-                    Text(
-                        'Total: ${Publications.getFormatoPrecio(monto: controller.getCountPriceTotal())}',
-                        style: const TextStyle(
-                            fontSize: 24, fontWeight: FontWeight.bold)),
-                    // lines ------
-                    Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Dash(
-                          color: Get.theme.dividerColor, height: 5, width: 12),
-                    ),
-                    // view 2
-                    Expanded(
-                      child: Column(
+                child: controller.getStateConfirmPurchase
+                    ? widgetConfirmedPurchase()
+                    : Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
+                          const SizedBox(height: 20),
+                          const Text('Ticket',
+                              textAlign: TextAlign.start,
+                              style: TextStyle(
+                                  fontSize: 30, fontWeight: FontWeight.bold)),
+                          Text('${controller.getListProductsSelestedLength} items'),
+                          Text( 'Total: ${Publications.getFormatoPrecio(monto: controller.getCountPriceTotal())}',style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                          // lines ------
                           Padding(
-                            padding: const EdgeInsets.only(
-                              bottom: 24,
-                              top: 24,
-                            ),
-                            child: Column(
-                              children: [
-                                const Text('Paga con:'),
-                                const SizedBox(height: 12),
-                                ElevatedButton.icon(
-                                  style: ButtonStyle(
-                                      elevation: MaterialStateProperty.all(
-                                          controller.ticketModel.payMode ==
-                                                  'effective'
-                                              ? 5
-                                              : 0)),
-                                  icon: const Icon(Icons.person_outline_sharp),
-                                  onPressed: controller.voidShowDialogMount,
-                                  label: Text(controller.getTicketMount != 0.0
-                                      ? Publications.getFormatoPrecio(
-                                          monto: controller.getTicketMount)
-                                      : 'Ingresar efectivo'),
-                                ),
-                                ElevatedButton.icon(
-                                  style: ButtonStyle(
-                                      elevation: MaterialStateProperty.all(
-                                          controller.ticketModel.payMode ==
-                                                  'mercadopago'
-                                              ? 5
-                                              : 0)),
-                                  icon: const Icon(Icons.check_circle_rounded),
-                                  onPressed: () => controller.setPayModeTicket =
-                                      'mercadopago',
-                                  label: const Text('Mercado Pago'),
-                                ),
-                                ElevatedButton.icon(
-                                  style: ButtonStyle(
-                                      elevation: MaterialStateProperty.all(
-                                          controller.ticketModel.payMode ==
-                                                  'card'
-                                              ? 5
-                                              : 0)),
-                                  icon: const Icon(Icons.credit_card_outlined),
-                                  onPressed: () =>
-                                      controller.setPayModeTicket = 'card',
-                                  label:
-                                      const Text('Tarjeta de Debito/Credito'),
-                                ),
-                                const SizedBox(height: 12),
-                                controller.getTicketMount == 0 ||
-                                        controller.ticketModel.payMode !=
-                                            'effective'
-                                    ? Container()
-                                    : RichText(
-                                        textAlign: TextAlign.center,
-                                        text: TextSpan(
-                                          text: 'Vuelto:  ',
-                                          style: TextStyle(
-                                              color: Get.theme.textTheme
-                                                  .headline1?.color),
-                                          children: <TextSpan>[
-                                            TextSpan(
-                                              text: controller.getChangeMount(),
-                                              style:
-                                                  const TextStyle(fontSize: 30),
-                                            ),
-                                          ],
-                                        ),
-                                      )
-                              ],
+                            padding: const EdgeInsets.all(20.0),
+                            child: Dash(
+                                color: Get.theme.dividerColor,
+                                height: 5,
+                                width: 12),
+                          ),
+                          // view 2
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: 24,
+                                top: 24,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  const Text('Paga con:'),
+                                  const SizedBox(height: 12),
+                                  ElevatedButton.icon(
+                                    style: ButtonStyle(
+                                        elevation:
+                                            MaterialStateProperty.all(
+                                                controller.ticketModel
+                                                            .payMode ==
+                                                        'effective'
+                                                    ? 5
+                                                    : 0)),
+                                    icon: const Icon(
+                                        Icons.person_outline_sharp),
+                                    onPressed:
+                                        controller.voidShowDialogMount,
+                                    label: Text(
+                                        controller.getValueReceivedTicket !=
+                                                0.0
+                                            ? Publications.getFormatoPrecio(
+                                                monto: controller
+                                                    .getValueReceivedTicket)
+                                            : 'Ingresar efectivo'),
+                                  ),
+                                  ElevatedButton.icon(
+                                    style: ButtonStyle(
+                                        elevation:
+                                            MaterialStateProperty.all(
+                                                controller.ticketModel
+                                                            .payMode ==
+                                                        'mercadopago'
+                                                    ? 5
+                                                    : 0)),
+                                    icon: const Icon(
+                                        Icons.check_circle_rounded),
+                                    onPressed: () => controller
+                                        .setPayModeTicket = 'mercadopago',
+                                    label: const Text('Mercado Pago'),
+                                  ),
+                                  ElevatedButton.icon(
+                                    style: ButtonStyle(
+                                        elevation:
+                                            MaterialStateProperty.all(
+                                                controller.ticketModel
+                                                            .payMode ==
+                                                        'card'
+                                                    ? 5
+                                                    : 0)),
+                                    icon: const Icon(
+                                        Icons.credit_card_outlined),
+                                    onPressed: () => controller
+                                        .setPayModeTicket = 'card',
+                                    label: const Text(
+                                        'Tarjeta de Debito/Credito'),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  controller.getValueReceivedTicket == 0 ||
+                                          controller.ticketModel.payMode !=
+                                              'effective'
+                                      ? Container()
+                                      : RichText(
+                                          textAlign: TextAlign.center,
+                                          text: TextSpan(
+                                            text: 'Vuelto:  ',
+                                            style: TextStyle(
+                                                color: Get.theme.textTheme
+                                                    .headline1?.color),
+                                            children: <TextSpan>[
+                                              TextSpan(
+                                                text: controller
+                                                    .getValueReceived(),
+                                                style: const TextStyle(
+                                                    fontSize: 30),
+                                              ),
+                                            ],
+                                          ),
+                                        )
+                                ],
+                              ),
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
               ),
             ),
           ),
@@ -243,6 +258,51 @@ class SalesView extends StatelessWidget {
   }
 
   // WIDGETS COMPONENTS
+  Widget widgetConfirmedPurchase() {
+    // controller
+    final SalesController controller = Get.find();
+    // var
+    TextStyle styleText = const TextStyle(fontSize: 18);
+    return Theme(
+      data: ThemeData(brightness: Brightness.dark),
+      child: ElasticIn(
+        child: Material(
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
+          color: Colors.green[400],
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              // ignore: prefer_const_literals_to_create_immutables
+              children: [
+                // icon
+                const Icon(
+                  Icons.check_rounded,
+                  size: 120,
+                  color: Colors.white,
+                ),
+                const Text('Hecho',
+                    style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white)),
+                const SizedBox(height: 100),
+                Text(style: styleText,'Monto total: ${Publications.getFormatoPrecio(monto: controller.getCountPriceTotal())}'),
+                const SizedBox(height: 12),
+                controller.getValueReceivedTicket == 0
+                    ? Container()
+                    : Text(style: styleText,'Pago con: ${Publications.getFormatoPrecio(monto: (controller.getValueReceivedTicket))}'),
+                const SizedBox(height: 12),
+                controller.getValueReceivedTicket == 0
+                    ? Container()
+                    : Text(style: styleText,'Vuelto: ${Publications.getFormatoPrecio(monto: (controller.getValueReceivedTicket - controller.getCountPriceTotal()))}'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget floatingActionButton({required SalesController controller}) {
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -340,7 +400,7 @@ class SalesView extends StatelessWidget {
                 ? null
                 : () {
                     controller.setTicketView = true;
-                    controller.setTicketMount = 0.0;
+                    controller.setValueReceivedTicket = 0.0;
                   },
             backgroundColor: controller.getListProductsSelested.length == 0
                 ? Colors.grey
@@ -352,24 +412,26 @@ class SalesView extends StatelessWidget {
   }
 
   Widget floatingActionButtonTicket({required SalesController controller}) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        FloatingActionButton(
-            backgroundColor: Colors.grey,
-            onPressed: () {
-              controller.setTicketView = false;
-            },
-            child: const Icon(
-              Icons.close,
-              color: Colors.white,
-            )),
-        const SizedBox(width: 8),
-        FloatingActionButton.extended(
-            onPressed: controller.confirmedPurchase,
-            label: const Text('Confirmar venta')),
-      ],
-    );
+    return controller.getStateConfirmPurchase
+        ? Container()
+        : Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FloatingActionButton(
+                  backgroundColor: Colors.grey,
+                  onPressed: () {
+                    controller.setTicketView = false;
+                  },
+                  child: const Icon(
+                    Icons.close,
+                    color: Colors.white,
+                  )),
+              const SizedBox(width: 8),
+              FloatingActionButton.extended(
+                  onPressed: controller.confirmedPurchase,
+                  label: const Text('Confirmar venta')),
+            ],
+          );
   }
 }
 
