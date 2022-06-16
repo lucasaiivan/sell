@@ -28,110 +28,106 @@ class _ProductoItemState extends State<ProductoItem> {
     // aparición animada
     return ElasticIn(
       // transición animada
-      child: Hero(
-        tag: widget.producto.id,
-        // widget
-        child: Card(
-          color: Colors.white,
-          elevation: 2,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-          clipBehavior: Clip.antiAlias,
-          child: Stack(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(child: contentImage()),
-                  contentInfo(),
-                ],
-              ),
-              Positioned.fill(
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    mouseCursor: MouseCursor.uncontrolled,
-                    onTap: () =>
-                        salesController.selectedItem(id: widget.producto.id),
-                    onLongPress: () {},
-                  ),
+      child: Card(
+        color: Colors.white,
+        elevation: 2,
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: contentImage()),
+                contentInfo(),
+              ],
+            ),
+            Positioned.fill(
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  mouseCursor: MouseCursor.uncontrolled,
+                  onTap: () =>
+                      salesController.selectedItem(id: widget.producto.id),
+                  onLongPress: () {},
                 ),
               ),
-              widget.producto.select
-                  ? Align(
-                      alignment: Alignment.topRight,
-                      child: IconButton(
-                          onPressed: () {
-                            salesController.removeProduct = widget.producto.id;
-                          },
-                          icon: const CircleAvatar(
-                              backgroundColor: Colors.red,
-                              child: Icon(
-                                Icons.close,
-                                color: Colors.white,
-                              ))))
-                  : Container(),
-              widget.producto.quantity > 1 || widget.producto.select
-                  ? Align(
-                      alignment: Alignment.topLeft,
-                      child: IconButton(
-                        onPressed: () => salesController.selectedItem(
-                            id: widget.producto.id),
-                        icon: CircleAvatar(
-                            backgroundColor: Colors.white,
-                            child: Center(
-                              child: Text(widget.producto.quantity.toString()),
-                            )),
-                      ))
-                  : Container(),
-              widget.producto.select
-                  ? Align(
-                      alignment: Alignment.bottomLeft,
-                      child: IconButton(
-                          onPressed: () {
-                            if (widget.producto.quantity > 1) {
-                              widget.producto.quantity--;
-                              salesController.update();
-                            }
-                          },
-                          icon: const CircleAvatar(
-                              backgroundColor: Colors.grey,
-                              child: Icon(
-                                Icons.horizontal_rule,
-                                color: Colors.white,
-                              ))))
-                  : Container(),
-              widget.producto.select
-                  ? Align(
-                      alignment: Alignment.bottomRight,
-                      child: IconButton(
-                          onPressed: () {
-                            widget.producto.quantity++;
+            ),
+            widget.producto.select
+                ? Align(
+                    alignment: Alignment.topRight,
+                    child: IconButton(
+                        onPressed: () {
+                          salesController.removeProduct = widget.producto.id;
+                        },
+                        icon: const CircleAvatar(
+                            backgroundColor: Colors.red,
+                            child: Icon(
+                              Icons.close,
+                              color: Colors.white,
+                            ))))
+                : Container(),
+            widget.producto.quantity > 1 || widget.producto.select
+                ? Align(
+                    alignment: Alignment.topLeft,
+                    child: IconButton(
+                      onPressed: () =>
+                          salesController.selectedItem(id: widget.producto.id),
+                      icon: CircleAvatar(
+                          backgroundColor: Colors.white,
+                          child: Center(
+                            child: Text(widget.producto.quantity.toString()),
+                          )),
+                    ))
+                : Container(),
+            widget.producto.select
+                ? Align(
+                    alignment: Alignment.bottomLeft,
+                    child: IconButton(
+                        onPressed: () {
+                          if (widget.producto.quantity > 1) {
+                            widget.producto.quantity--;
                             salesController.update();
-                          },
-                          icon: const CircleAvatar(
-                              backgroundColor: Colors.grey,
-                              child: Icon(
-                                Icons.add,
-                                color: Colors.white,
-                              ))))
-                  : Container(),
-              widget.producto.select
-                  ? Align(
-                      alignment: Alignment.bottomCenter,
-                      child: IconButton(
-                          onPressed: () {
-                            setState(() {
-                              widget.producto.select = !widget.producto.select;
-                            });
-                          },
-                          icon: const Icon(
-                            Icons.close,
-                            color: Colors.grey,
-                          )))
-                  : Container(),
-            ],
-          ),
+                          }
+                        },
+                        icon: const CircleAvatar(
+                            backgroundColor: Colors.grey,
+                            child: Icon(
+                              Icons.horizontal_rule,
+                              color: Colors.white,
+                            ))))
+                : Container(),
+            widget.producto.select
+                ? Align(
+                    alignment: Alignment.bottomRight,
+                    child: IconButton(
+                        onPressed: () {
+                          widget.producto.quantity++;
+                          salesController.update();
+                        },
+                        icon: const CircleAvatar(
+                            backgroundColor: Colors.grey,
+                            child: Icon(
+                              Icons.add,
+                              color: Colors.white,
+                            ))))
+                : Container(),
+            widget.producto.select
+                ? Align(
+                    alignment: Alignment.bottomCenter,
+                    child: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            widget.producto.select = !widget.producto.select;
+                          });
+                        },
+                        icon: const Icon(
+                          Icons.close,
+                          color: Colors.grey,
+                        )))
+                : Container(),
+          ],
         ),
       ),
     );
@@ -141,7 +137,9 @@ class _ProductoItemState extends State<ProductoItem> {
   Widget contentImage() {
     // var
     String description = widget.producto.description != ''
-        ? widget.producto.description.substring(0, 4)
+        ? widget.producto.description.length >= 3
+            ? widget.producto.description.substring(0, 3)
+            : widget.producto.description.substring(0, 1)
         : Publications.getFormatoPrecio(
             monto: widget.producto.salePrice * widget.producto.quantity);
     return widget.producto.image != ""
@@ -243,19 +241,19 @@ Widget drawerApp() {
               ListTile(
                   leading: const Icon(Icons.attach_money_rounded),
                   title: const Text('Vender'),
-                  onTap: () {}),
+                  onTap: () => homeController.setIndexPage = 0 ),
               ListTile(
                   leading: const Icon(Icons.check),
                   title: const Text('Transacciones'),
-                  onTap: () {}),
+                  onTap: () => homeController.setIndexPage = 1),
               ListTile(
                   leading: const Icon(Icons.check_box_outline_blank_rounded),
                   title: const Text('Stock'),
-                  onTap: () {}),
+                  onTap: () => homeController.setIndexPage = 2),
               ListTile(
                   leading: const Icon(Icons.settings),
                   title: const Text('Configuración'),
-                  onTap: () {}),
+                  onTap: () => homeController.setIndexPage = 3),
             ],
           ),
         ),
@@ -325,12 +323,10 @@ void showMessageAlertApp({required String title, required String message}) {
 // Cuadro de Dialogo
 // un checkbox para agregar el producto a mi cátalogo
 class CheckBoxAddProduct extends StatefulWidget {
-
-  ProductCatalogue  productCatalogue = ProductCatalogue(creation: Timestamp.now(),upgrade: Timestamp.now());
+  ProductCatalogue productCatalogue =
+      ProductCatalogue(creation: Timestamp.now(), upgrade: Timestamp.now());
 
   CheckBoxAddProduct({super.key, required this.productCatalogue});
-
-  
 
   @override
   State<CheckBoxAddProduct> createState() => _CheckBoxAddProductState();
@@ -353,8 +349,10 @@ class _CheckBoxAddProductState extends State<CheckBoxAddProduct> {
           errorWidget: (context, url, error) =>
               CircleAvatar(backgroundColor: Get.theme.dividerColor),
         ),
-        title: const Text('Agregar mi cátalogo',style: TextStyle(fontSize: 14)),
-        subtitle: Text(widget.productCatalogue.description,style:const TextStyle(fontSize: 12),maxLines:2),
+        title:
+            const Text('Agregar mi cátalogo', style: TextStyle(fontSize: 14)),
+        subtitle: Text(widget.productCatalogue.description,
+            style: const TextStyle(fontSize: 12), maxLines: 2),
         value: check,
         checkColor: Colors.white,
         activeColor: Colors.blue,
