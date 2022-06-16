@@ -1,12 +1,11 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+
 import 'package:get/get.dart';
 import 'package:sell/app/models/catalogo_model.dart';
 import 'package:sell/app/models/ticket_model.dart';
-import 'package:sell/app/routes/app_pages.dart';
 import 'package:sell/app/services/database.dart';
 import 'package:sell/app/utils/fuctions.dart';
 import 'package:sell/app/utils/widgets_utils.dart';
@@ -38,7 +37,11 @@ class SalesController extends GetxController {
   }
 
   int get getListProductsSelestedLength {
-    return getListProductsSelested.length;
+    int count = 0;
+    for (ProductCatalogue element in getListProductsSelested) {
+      count += element.quantity;
+    }
+    return count;
   }
 
   // ticket
@@ -139,13 +142,30 @@ class SalesController extends GetxController {
   }
 
   // FUCTIONS
+
+  void verifyExistenceInSelected({required String id}) {
+    bool coincidence = false;
+    for (ProductCatalogue product in getListProductsSelested) {
+      if (product.id == id) {
+        product.quantity++;
+        coincidence = true;
+        update();
+      }
+    }
+    // si no hay coincidencia
+    if (coincidence == false) {
+      queryProduct(id: id);
+    }
+  }
+
   Future<void> scanBarcodeNormal() async {
     // Escanner Code - Abre en pantalla completa la camara para escanear el código
     try {
       late String barcodeScanRes;
       barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
           "#ff6666", "Cancel", true, ScanMode.BARCODE);
-      queryProduct(id: barcodeScanRes);
+
+      verifyExistenceInSelected(id: barcodeScanRes);
     } on PlatformException {
       Get.snackbar('scanBarcode', 'Failed to get platform version');
     }
@@ -258,7 +278,8 @@ class SalesController extends GetxController {
     // muestra este dialog cuando el producto no se encuentra en los registros de stock
 
     // var
-    bool? checkAddCatalogue = false;
+    FocusNode myFocusNode;
+
     Get.defaultDialog(
         title: 'Nuevo Producto',
         titlePadding: const EdgeInsets.all(20),
@@ -268,8 +289,12 @@ class SalesController extends GetxController {
           data: Get.theme.copyWith(brightness: Get.theme.brightness),
           child: TextButton(
               onPressed: () {
-                addProduct = productCatalogue;
-                Get.back();
+                if (productCatalogue.salePrice != 0.0) {
+                  addProduct = productCatalogue;
+                  Get.back();
+                } else {
+                  Get.snackbar('🙁 algo salio mal', 'Inserte un precio valido');
+                }
               },
               child: const Text('Agregar')),
         ),
@@ -304,9 +329,17 @@ class SalesController extends GetxController {
                   onSubmitted: (value) {
                     if (value != "") {
                       double valuePrice = double.parse(value);
-                      productCatalogue.salePrice = valuePrice;
-                      addProduct = productCatalogue;
-                      Get.back();
+                      if (valuePrice != 0.0) {
+                        productCatalogue.salePrice = valuePrice;
+                        addProduct = productCatalogue;
+                        Get.back();
+                      } else {
+                        Get.snackbar(
+                            '🙁 algo salio mal', 'Inserte un precio valido');
+                      }
+                    } else {
+                      Get.snackbar(
+                          '🙁 algo salio mal', 'Inserte un precio valido');
                     }
                   },
                 ),
@@ -319,6 +352,9 @@ class SalesController extends GetxController {
   void showDialogQuickSale() {
     // Dialog
     // dialogo para hacer una venta rapida
+
+    //var 
+    FocusNode myFocusNode = FocusNode();
     Get.defaultDialog(
         title: 'Venta rápida',
         titlePadding: const EdgeInsets.all(20),
@@ -357,24 +393,22 @@ class SalesController extends GetxController {
                     labelText: "Escribe el precio",
                   ),
                   style: const TextStyle(fontSize: 20.0),
-                  textInputAction: TextInputAction.done,
-                  onSubmitted: (value) {
-                    addSaleFlash();
-                    textEditingControllerAddFlashPrice.text = '';
-                  },
+                  textInputAction: TextInputAction.next,
                 ),
               ),
               // descrption textfield
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: TextField(
-                  autofocus: true,
+                  focusNode: myFocusNode,
+                  autofocus: false,
                   controller: textEditingControllerAddFlashDescription,
                   decoration: const InputDecoration(
                       labelText: "Descripción (opcional)"),
                   textInputAction: TextInputAction.done,
                   onSubmitted: (value) {
                     addSaleFlash();
+                    textEditingControllerAddFlashPrice.text = '';
                   },
                 ),
               ),

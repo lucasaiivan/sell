@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sell/app/utils/dimensions.dart';
+import 'package:sell/app/utils/widgets_utils.dart';
 
 class TransactionsView extends StatelessWidget {
   // ignore: prefer_const_constructors_in_immutables
@@ -9,7 +9,7 @@ class TransactionsView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: appbar(context: context),
-      drawer:AppDimensions.getNarrowLayout || AppDimensions.getNarrowUltraLayout? const Drawer(): null,
+      drawer: drawerApp(),
       body: body(context: context),
     );
   }
