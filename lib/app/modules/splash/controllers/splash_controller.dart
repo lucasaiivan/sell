@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sell/app/routes/app_pages.dart';
 
@@ -26,7 +27,8 @@ class SplashController extends GetxController {
   @override
   void onReady() async {
 
-    // Verificamos si tenemos una referencia de una cuenta guar
+    // Verificamos si tenemos una referencia de una cuenta guardada en GetStorage ( API del controlador de almacenamiento )
+    idAccount = GetStorage().read('idAccount') ?? '';
     
     /// Workers
     // Los trabajadores lo ayudarán y activarán devoluciones de llamadas específicas cuando ocurra un evento.
@@ -52,8 +54,14 @@ class SplashController extends GetxController {
     // aquí, según el estado de autentificación redirigir al usuario a la vista correspondiente
     if (isLoggedIn) {
       // si esta autentificado
-      Get.offAllNamed(Routes.HOME, arguments: {});
+      Get.offAllNamed(Routes.HOME, arguments: {
+        'currentUser': firebaseAuth.currentUser,
+        'idAccount': idAccount,
+      });
     } else {
+      // default values 
+      await GetStorage().write('idAccount', '');
+      await googleSign.signOut();
       // si no esta autentificado
       Get.offAllNamed(Routes.LOGIN);
     }

@@ -1,9 +1,13 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:get/get.dart';
 import 'package:sell/app/models/catalogo_model.dart';
 import 'package:sell/app/models/ticket_model.dart';
+import 'package:sell/app/routes/app_pages.dart';
+import 'package:sell/app/services/database.dart';
 import 'package:sell/app/utils/fuctions.dart';
 import 'package:sell/app/utils/widgets_utils.dart';
 
@@ -32,8 +36,8 @@ class SalesController extends GetxController {
     }
     setListProductsSelected = newList;
   }
-  int get getListProductsSelestedLength{
-    
+
+  int get getListProductsSelestedLength {
     return getListProductsSelested.length;
   }
 
@@ -135,6 +139,48 @@ class SalesController extends GetxController {
   }
 
   // FUCTIONS
+  Future<void> scanBarcodeNormal() async {
+    // Escanner Code - Abre en pantalla completa la camara para escanear el código
+    try {
+      late String barcodeScanRes;
+      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+          "#ff6666", "Cancel", true, ScanMode.BARCODE);
+      queryProduct(id: barcodeScanRes);
+    } on PlatformException {
+      Get.snackbar('scanBarcode', 'Failed to get platform version');
+    }
+  }
+
+  void queryProduct({required String id}) {
+    // consulta el id del producto en la base de datos global
+    if (id != '') {
+      // query
+      Database.readProductGlobalFuture(id: id).then((value) {
+        showDialogAddProductNew(
+            productCatalogue: ProductCatalogue.fromMap(value.data() as Map));
+        //Get.toNamed(Routes.PRODUCT,arguments: {'product': product.convertProductCatalogue()});
+      }).onError((error, stackTrace) {
+        // error o no existe en la db
+      }).catchError((error) {
+        // error al consultar db
+      });
+    }
+  }
+
+  void cleanTicketAlert() {
+    Get.defaultDialog(
+        title: 'Alerta',
+        middleText: '¿Desea descartar este ticket?',
+        confirm: TextButton.icon(
+            onPressed: () {
+              ticketModel = TicketModel(time: Timestamp.now());
+              setListProductsSelected = [];
+              setTicketView = false;
+              Get.back();
+            },
+            icon: const Icon(Icons.clear_rounded),
+            label: const Text('Descartar')));
+  }
 
   void selectedItem({required String id}) {
     for (ProductCatalogue element in getListProductsSelested) {
@@ -173,10 +219,13 @@ class SalesController extends GetxController {
         textEditingControllerAddFlashPrice.text = '';
         Get.back();
       } else {
-        showMessageAlertApp(title:'😔No se puedo agregar 😔',message: 'Debe ingresar un valor distinto a 0');
+        showMessageAlertApp(
+            title: '😔No se puedo agregar 😔',
+            message: 'Debe ingresar un valor distinto a 0');
       }
     } else {
-      showMessageAlertApp(title:'😔', message: 'Debe ingresar un valor valido');
+      showMessageAlertApp(
+          title: '😔', message: 'Debe ingresar un valor valido');
     }
   }
 
@@ -204,7 +253,137 @@ class SalesController extends GetxController {
     );
   }
 
-  voidShowDialogMount() {
+  void showDialogAddProductNew({required ProductCatalogue productCatalogue}) {
+    // Dialog
+    // muestra este dialog cuando el producto no se encuentra en los registros de stock
+
+    // var
+    bool? checkAddCatalogue = false;
+    Get.defaultDialog(
+        title: 'Nuevo Producto',
+        titlePadding: const EdgeInsets.all(20),
+        middleTextStyle: TextStyle(color: Get.theme.textTheme.bodyText1?.color),
+        cancel: TextButton(onPressed: Get.back, child: const Text('Cancelar')),
+        confirm: Theme(
+          data: Get.theme.copyWith(brightness: Get.theme.brightness),
+          child: TextButton(
+              onPressed: () {
+                addProduct = productCatalogue;
+                Get.back();
+              },
+              child: const Text('Agregar')),
+        ),
+        content: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24),
+          child: Column(
+            children: [
+              // permision: permiso para guardar el producto nuevo en mi cátalogo (app catalogo)
+              CheckBoxAddProduct(productCatalogue: productCatalogue),
+              // mount textfield
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: TextField(
+                  onChanged: (value) {
+                    if (value != "") {
+                      double valuePrice = double.parse(value);
+                      productCatalogue.salePrice = valuePrice;
+                    }
+                  },
+                  autofocus: true,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: false),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp('[1234567890]'))
+                  ],
+                  decoration: const InputDecoration(
+                    hintText: '\$',
+                    labelText: "Escribe el precio",
+                  ),
+                  style: const TextStyle(fontSize: 20.0),
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (value) {
+                    if (value != "") {
+                      double valuePrice = double.parse(value);
+                      productCatalogue.salePrice = valuePrice;
+                      addProduct = productCatalogue;
+                      Get.back();
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+        ));
+  }
+
+  void showDialogQuickSale() {
+    // Dialog
+    // dialogo para hacer una venta rapida
+    Get.defaultDialog(
+        title: 'Venta rápida',
+        titlePadding: const EdgeInsets.all(20),
+        cancel: TextButton(
+            onPressed: () {
+              textEditingControllerAddFlashPrice.text = '';
+              Get.back();
+            },
+            child: const Text('Cancelar')),
+        confirm: Theme(
+          data: Get.theme.copyWith(brightness: Get.theme.brightness),
+          child: TextButton(
+              onPressed: () {
+                addSaleFlash();
+                textEditingControllerAddFlashPrice.text = '';
+              },
+              child: const Text('Agregar')),
+        ),
+        content: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24),
+          child: Column(
+            children: [
+              // mount textfield
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: TextField(
+                  autofocus: true,
+                  controller: textEditingControllerAddFlashPrice,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: false),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp('[1234567890]'))
+                  ],
+                  decoration: const InputDecoration(
+                    hintText: '\$',
+                    labelText: "Escribe el precio",
+                  ),
+                  style: const TextStyle(fontSize: 20.0),
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (value) {
+                    addSaleFlash();
+                    textEditingControllerAddFlashPrice.text = '';
+                  },
+                ),
+              ),
+              // descrption textfield
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: TextField(
+                  autofocus: true,
+                  controller: textEditingControllerAddFlashDescription,
+                  decoration: const InputDecoration(
+                      labelText: "Descripción (opcional)"),
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (value) {
+                    addSaleFlash();
+                  },
+                ),
+              ),
+            ],
+          ),
+        ));
+  }
+
+  void showDialogMount() {
     // dialog show
     Get.defaultDialog(
         title: 'Con cuanto abona',
@@ -225,14 +404,16 @@ class SalesController extends GetxController {
                         ? 0.0
                         : double.parse(textEditingControllerTicketMount.text);
                 // condition : verificar si el usaurio ingreso un monto valido y que sea mayor al monto total del ticket
-                if (valueReceived >= getCountPriceTotal() && textEditingControllerTicketMount.text!='' ) {
+                if (valueReceived >= getCountPriceTotal() &&
+                    textEditingControllerTicketMount.text != '') {
                   setValueReceivedTicket = valueReceived;
                   textEditingControllerTicketMount.text = '';
                   setPayModeTicket = 'effective';
                   Get.back();
                 } else {
-                  showMessageAlertApp(title:'😔', message:'Tiene que ingresar un monto valido');
-
+                  showMessageAlertApp(
+                      title: '😔',
+                      message: 'Tiene que ingresar un monto valido');
                 }
               },
               child: const Text('aceptar')),
@@ -314,14 +495,17 @@ class SalesController extends GetxController {
                         ? 0.0
                         : double.parse(textEditingControllerTicketMount.text);
                     // condition : verificar si el usaurio ingreso un monto valido y que sea mayor al monto total del ticket
-                    if (valueReceived >= getCountPriceTotal()&& textEditingControllerTicketMount.text!='') {
+                    if (valueReceived >= getCountPriceTotal() &&
+                        textEditingControllerTicketMount.text != '') {
                       setValueReceivedTicket =
                           double.parse(textEditingControllerTicketMount.text);
                       textEditingControllerTicketMount.text = '';
                       setPayModeTicket = 'effective';
                       Get.back();
                     } else {
-                      showMessageAlertApp(title:'😔',message: 'Tiene que ingresar un monto valido');
+                      showMessageAlertApp(
+                          title: '😔',
+                          message: 'Tiene que ingresar un monto valido');
                     }
                   },
                 ),
