@@ -61,7 +61,7 @@ class SalesView extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3, crossAxisSpacing: 1.0, mainAxisSpacing: 1.0),
-            itemCount: controller.getListProductsSelested.length + 14,
+            itemCount: controller.getListProductsSelested.length + 15,
             itemBuilder: (context, index) {
               // en la primera posición muestra el botón para agregar un nuevo objeto
               if (index == 0) {
@@ -72,36 +72,13 @@ class SalesView extends StatelessWidget {
                   child: Stack(
                     children: [
                       Center(
-                          child: Icon(Icons.add,
+                          child: Icon(Icons.search,
                               color: Colors.grey.withOpacity(0.8), size: 30)),
                       Positioned.fill(
                         child: Material(
                           color: Colors.transparent,
                           child: InkWell(
-                            onTap: () {
-                              showSearch(
-                                context: context,
-                                delegate: SearchPage<ProductCatalogue>(
-                                  items: controller.listProducts,
-                                  searchLabel: 'Buscar',
-                                  suggestion:
-                                      const Center(child: Text('ej. alfajor')),
-                                  failure: const Center(
-                                      child: Text('No se encontro :(')),
-                                  filter: (product) =>
-                                      [product.description, product.nameMark],
-                                  builder: (product) => ListTile(
-                                    title: Text(product.nameMark),
-                                    subtitle: Text(product.description),
-                                    onTap: () {
-                                      controller.addProduct = product;
-                                      Get.back();
-                                      //Get.toNamed(Routes.PRODUCT,arguments: {'product': product});
-                                    },
-                                  ),
-                                ),
-                              );
-                            },
+                            onTap: () => controller.seach(context: context),
                           ),
                         ),
                       ),
@@ -330,7 +307,7 @@ class SalesView extends StatelessWidget {
             )),
         const SizedBox(width: 8),
         FloatingActionButton(
-            backgroundColor: Colors.grey,
+            backgroundColor: Colors.blue,
             onPressed: controller.scanBarcodeNormal,
             child: const Icon(
               Icons.qr_code_scanner_rounded,

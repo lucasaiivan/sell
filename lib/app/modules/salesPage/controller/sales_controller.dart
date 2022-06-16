@@ -1,9 +1,11 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
 import 'package:get/get.dart';
+import 'package:search_page/search_page.dart';
 import 'package:sell/app/models/catalogo_model.dart';
 import 'package:sell/app/models/ticket_model.dart';
 import 'package:sell/app/services/database.dart';
@@ -11,6 +13,9 @@ import 'package:sell/app/utils/fuctions.dart';
 import 'package:sell/app/utils/widgets_utils.dart';
 
 class SalesController extends GetxController {
+  // sound controller 'beat'
+  late AudioPlayer player;
+
   // text field controllers
   final TextEditingController textEditingControllerAddFlashPrice =
       TextEditingController();
@@ -142,6 +147,36 @@ class SalesController extends GetxController {
   }
 
   // FUCTIONS
+
+  void seach({required BuildContext context}) {
+    // buesque en la base de datos de cátegorias
+    Color colorAccent =
+        Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
+    showSearch(
+      context: context,
+      delegate: SearchPage<ProductCatalogue>(
+        items: listProducts,
+        searchLabel: 'Buscar',
+        searchStyle: TextStyle(
+            color:colorAccent),
+        barTheme: Get.theme.copyWith(
+            hintColor:colorAccent,
+            highlightColor: colorAccent),
+        suggestion: const Center(child: Text('ej. alfajor')),
+        failure: const Center(child: Text('No se encontro :(')),
+        filter: (product) => [product.description, product.nameMark],
+        builder: (product) => ListTile(
+          title: Text(product.nameMark),
+          subtitle: Text(product.description),
+          trailing: Text(Publications.getFormatoPrecio(monto: product.salePrice)),
+          onTap: () {
+            addProduct = product;
+            Get.back();
+          },
+        ),
+      ),
+    );
+  }
 
   void verifyExistenceInSelected({required String id}) {
     bool coincidence = false;
@@ -353,7 +388,7 @@ class SalesController extends GetxController {
     // Dialog
     // dialogo para hacer una venta rapida
 
-    //var 
+    //var
     FocusNode myFocusNode = FocusNode();
     Get.defaultDialog(
         title: 'Venta rápida',
