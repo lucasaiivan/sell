@@ -1,10 +1,11 @@
-
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:sell/app/models/catalogo_model.dart';
+import 'package:sell/app/modules/home/controller/home_controller.dart';
 import 'package:sell/app/modules/salesPage/controller/sales_controller.dart';
 import 'package:sell/app/modules/splash/controllers/splash_controller.dart';
 import 'package:sell/app/utils/dynamicTheme_lb.dart';
@@ -211,15 +212,30 @@ class _ProductoItemState extends State<ProductoItem> {
 Widget drawerApp() {
   //Los rieles de navegación brindan acceso a los destinos principales en las aplicaciones cuando se usan pantallas de tabletas y computadoras de escritorio.
 
+  // controllers
+  HomeController homeController = Get.find<HomeController>();
+
   return Drawer(
     child: Column(
       children: [
         const SizedBox(height: 50),
-        const ListTile(
-          leading: CircleAvatar(
-            backgroundColor: Colors.grey,
+        ListTile(
+          leading: Container(
+            padding: const EdgeInsets.all(12.0),
+            child: homeController.getAccountProfile.image == ''
+                ? CircleAvatar(backgroundColor: Get.theme.dividerColor)
+                : CachedNetworkImage(
+                    imageUrl: homeController.getAccountProfile.image,
+                    placeholder: (context, url) =>
+                        CircleAvatar(backgroundColor: Get.theme.dividerColor),
+                    imageBuilder: (context, image) => CircleAvatar(
+                      backgroundImage: image,
+                    ),
+                    errorWidget: (context, url, error) =>
+                        CircleAvatar(backgroundColor: Get.theme.dividerColor),
+                  ),
           ),
-          title: Text('Mi negocio'),
+          title: Text(homeController.getAccountProfile.name),
         ),
         Expanded(
           child: ListView(
@@ -295,11 +311,60 @@ void showDialogCerrarSesion() {
 }
 
 // notification
-void showMessageAlertApp({required String title,required String message}) {
-  Get.snackbar(
-    title, message,
-    margin: const EdgeInsets.all(12),
-    backgroundColor: Get.theme.brightness==Brightness.dark?Colors.transparent:Colors.white,
-    colorText: Get.theme.brightness==Brightness.dark?Colors.white:Colors.black
-  );
+void showMessageAlertApp({required String title, required String message}) {
+  Get.snackbar(title, message,
+      margin: const EdgeInsets.all(12),
+      backgroundColor: Get.theme.brightness == Brightness.dark
+          ? Colors.transparent
+          : Colors.white,
+      colorText: Get.theme.brightness == Brightness.dark
+          ? Colors.white
+          : Colors.black);
+}
+
+// Cuadro de Dialogo
+// un checkbox para agregar el producto a mi cátalogo
+class CheckBoxAddProduct extends StatefulWidget {
+
+  ProductCatalogue  productCatalogue = ProductCatalogue(creation: Timestamp.now(),upgrade: Timestamp.now());
+
+  CheckBoxAddProduct({super.key, required this.productCatalogue});
+
+  
+
+  @override
+  State<CheckBoxAddProduct> createState() => _CheckBoxAddProductState();
+}
+
+class _CheckBoxAddProductState extends State<CheckBoxAddProduct> {
+  bool check = false;
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: CheckboxListTile(
+        secondary: CachedNetworkImage(
+          imageUrl: widget.productCatalogue.image,
+          placeholder: (context, url) =>
+              CircleAvatar(backgroundColor: Get.theme.dividerColor),
+          imageBuilder: (context, image) => CircleAvatar(
+            backgroundImage: image,
+          ),
+          errorWidget: (context, url, error) =>
+              CircleAvatar(backgroundColor: Get.theme.dividerColor),
+        ),
+        title: const Text('Agregar mi cátalogo',style: TextStyle(fontSize: 14)),
+        subtitle: Text(widget.productCatalogue.description,style:const TextStyle(fontSize: 12),maxLines:2),
+        value: check,
+        checkColor: Colors.white,
+        activeColor: Colors.blue,
+        onChanged: (value) {
+          setState(() {
+            check = !check;
+            // prosedo a agregar el producto en el cátalogo
+          });
+        },
+      ),
+    );
+  }
 }

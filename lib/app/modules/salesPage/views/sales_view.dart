@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:sell/app/models/catalogo_model.dart';
 import 'package:sell/app/utils/fuctions.dart';
@@ -19,7 +18,7 @@ class SalesView extends StatelessWidget {
       initState: (_) {},
       builder: (controller) {
         return Obx(() => Scaffold(
-              appBar: appbar(),
+              appBar: appbar(controller: controller),
               drawer: drawerApp(),
               body: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -39,9 +38,17 @@ class SalesView extends StatelessWidget {
   }
 
   // WIDGETS VIEWS
-  PreferredSizeWidget appbar() {
+  PreferredSizeWidget appbar({required SalesController controller}) {
     return AppBar(
       title: const Text('Vender'),
+      actions: [
+        controller.getListProductsSelestedLength != 0
+            ? TextButton.icon(
+                icon: const Icon(Icons.clear_rounded),
+                label: const Text('Descartar'),
+                onPressed: controller.cleanTicketAlert)
+            : Container(),
+      ],
     );
   }
 
@@ -146,8 +153,12 @@ class SalesView extends StatelessWidget {
                               textAlign: TextAlign.start,
                               style: TextStyle(
                                   fontSize: 30, fontWeight: FontWeight.bold)),
-                          Text('${controller.getListProductsSelestedLength} items'),
-                          Text( 'Total: ${Publications.getFormatoPrecio(monto: controller.getCountPriceTotal())}',style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                          Text(
+                              '${controller.getListProductsSelestedLength} items'),
+                          Text(
+                              'Total: ${Publications.getFormatoPrecio(monto: controller.getCountPriceTotal())}',
+                              style: const TextStyle(
+                                  fontSize: 24, fontWeight: FontWeight.bold)),
                           // lines ------
                           Padding(
                             padding: const EdgeInsets.all(20.0),
@@ -171,20 +182,16 @@ class SalesView extends StatelessWidget {
                                   const SizedBox(height: 12),
                                   ElevatedButton.icon(
                                     style: ButtonStyle(
-                                        elevation:
-                                            MaterialStateProperty.all(
-                                                controller.ticketModel
-                                                            .payMode ==
-                                                        'effective'
-                                                    ? 5
-                                                    : 0)),
-                                    icon: const Icon(
-                                        Icons.person_outline_sharp),
-                                    onPressed:
-                                        controller.voidShowDialogMount,
+                                        elevation: MaterialStateProperty.all(
+                                            controller.ticketModel.payMode ==
+                                                    'effective'
+                                                ? 5
+                                                : 0)),
+                                    icon:
+                                        const Icon(Icons.person_outline_sharp),
+                                    onPressed: controller.showDialogMount,
                                     label: Text(
-                                        controller.getValueReceivedTicket !=
-                                                0.0
+                                        controller.getValueReceivedTicket != 0.0
                                             ? Publications.getFormatoPrecio(
                                                 monto: controller
                                                     .getValueReceivedTicket)
@@ -192,34 +199,30 @@ class SalesView extends StatelessWidget {
                                   ),
                                   ElevatedButton.icon(
                                     style: ButtonStyle(
-                                        elevation:
-                                            MaterialStateProperty.all(
-                                                controller.ticketModel
-                                                            .payMode ==
-                                                        'mercadopago'
-                                                    ? 5
-                                                    : 0)),
-                                    icon: const Icon(
-                                        Icons.check_circle_rounded),
+                                        elevation: MaterialStateProperty.all(
+                                            controller.ticketModel.payMode ==
+                                                    'mercadopago'
+                                                ? 5
+                                                : 0)),
+                                    icon:
+                                        const Icon(Icons.check_circle_rounded),
                                     onPressed: () => controller
                                         .setPayModeTicket = 'mercadopago',
                                     label: const Text('Mercado Pago'),
                                   ),
                                   ElevatedButton.icon(
                                     style: ButtonStyle(
-                                        elevation:
-                                            MaterialStateProperty.all(
-                                                controller.ticketModel
-                                                            .payMode ==
-                                                        'card'
-                                                    ? 5
-                                                    : 0)),
-                                    icon: const Icon(
-                                        Icons.credit_card_outlined),
-                                    onPressed: () => controller
-                                        .setPayModeTicket = 'card',
-                                    label: const Text(
-                                        'Tarjeta de Debito/Credito'),
+                                        elevation: MaterialStateProperty.all(
+                                            controller.ticketModel.payMode ==
+                                                    'card'
+                                                ? 5
+                                                : 0)),
+                                    icon:
+                                        const Icon(Icons.credit_card_outlined),
+                                    onPressed: () =>
+                                        controller.setPayModeTicket = 'card',
+                                    label:
+                                        const Text('Tarjeta de Debito/Credito'),
                                   ),
                                   const SizedBox(height: 12),
                                   controller.getValueReceivedTicket == 0 ||
@@ -286,15 +289,21 @@ class SalesView extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                         color: Colors.white)),
                 const SizedBox(height: 100),
-                Text(style: styleText,'Monto total: ${Publications.getFormatoPrecio(monto: controller.getCountPriceTotal())}'),
+                Text(
+                    style: styleText,
+                    'Monto total: ${Publications.getFormatoPrecio(monto: controller.getCountPriceTotal())}'),
                 const SizedBox(height: 12),
                 controller.getValueReceivedTicket == 0
                     ? Container()
-                    : Text(style: styleText,'Pago con: ${Publications.getFormatoPrecio(monto: (controller.getValueReceivedTicket))}'),
+                    : Text(
+                        style: styleText,
+                        'Pago con: ${Publications.getFormatoPrecio(monto: (controller.getValueReceivedTicket))}'),
                 const SizedBox(height: 12),
                 controller.getValueReceivedTicket == 0
                     ? Container()
-                    : Text(style: styleText,'Vuelto: ${Publications.getFormatoPrecio(monto: (controller.getValueReceivedTicket - controller.getCountPriceTotal()))}'),
+                    : Text(
+                        style: styleText,
+                        'Vuelto: ${Publications.getFormatoPrecio(monto: (controller.getValueReceivedTicket - controller.getCountPriceTotal()))}'),
               ],
             ),
           ),
@@ -313,74 +322,7 @@ class SalesView extends StatelessWidget {
               // default values
               controller.textEditingControllerAddFlashPrice.text = '';
               controller.textEditingControllerAddFlashDescription.text = '';
-              // dialog show
-              Get.defaultDialog(
-                  title: 'Venta rápida',
-                  titlePadding: const EdgeInsets.all(20),
-                  cancel: TextButton(
-                      onPressed: () {
-                        controller.textEditingControllerAddFlashPrice.text = '';
-                        Get.back();
-                      },
-                      child: const Text('Cancelar')),
-                  confirm: Theme(
-                    data: Get.theme.copyWith(brightness: Get.theme.brightness),
-                    child: TextButton(
-                        onPressed: () {
-                          controller.addSaleFlash();
-                          controller.textEditingControllerAddFlashPrice.text =
-                              '';
-                        },
-                        child: const Text('Agregar')),
-                  ),
-                  content: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 24),
-                    child: Column(
-                      children: [
-                        // mount textfield
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: TextField(
-                            autofocus: true,
-                            controller:
-                                controller.textEditingControllerAddFlashPrice,
-                            keyboardType: const TextInputType.numberWithOptions(
-                                decimal: false),
-                            inputFormatters: [
-                              FilteringTextInputFormatter.allow(
-                                  RegExp('[1234567890]'))
-                            ],
-                            decoration: const InputDecoration(
-                              hintText: '\$',
-                              labelText: "Escribe el precio",
-                            ),
-                            style: const TextStyle(fontSize: 20.0),
-                            textInputAction: TextInputAction.done,
-                            onSubmitted: (value) {
-                              controller.addSaleFlash();
-                              controller
-                                  .textEditingControllerAddFlashPrice.text = '';
-                            },
-                          ),
-                        ),
-                        // descrption textfield
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: TextField(
-                            autofocus: true,
-                            controller: controller
-                                .textEditingControllerAddFlashDescription,
-                            decoration: const InputDecoration(
-                                labelText: "Descripción (opcional)"),
-                            textInputAction: TextInputAction.done,
-                            onSubmitted: (value) {
-                              controller.addSaleFlash();
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ));
+              controller.showDialogQuickSale();
             },
             child: const Icon(
               Icons.flash_on_rounded,
@@ -389,7 +331,7 @@ class SalesView extends StatelessWidget {
         const SizedBox(width: 8),
         FloatingActionButton(
             backgroundColor: Colors.grey,
-            onPressed: () {},
+            onPressed: controller.scanBarcodeNormal,
             child: const Icon(
               Icons.qr_code_scanner_rounded,
               color: Colors.white,
