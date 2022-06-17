@@ -207,6 +207,209 @@ class _ProductoItemState extends State<ProductoItem> {
   }
 }
 
+class ListTileProductoItem extends StatefulWidget {
+  final ProductCatalogue producto;
+
+  ListTileProductoItem({required this.producto});
+
+  @override
+  State<ProductoItem> createState() => _ListTileProductoItemState();
+}
+
+class _ListTileProductoItemState extends State<ProductoItem> {
+  // controllers
+  SalesController salesController = Get.find<SalesController>();
+  @override
+  Widget build(BuildContext context) {
+    // aparición animada
+    return ElasticIn(
+      child: Card(
+        child: SizedBox(
+          height: 100,width:200,
+          child: Container()),
+      ),
+    );
+    return ElasticIn(
+      // transición animada
+      child: Card(
+        color: Colors.white,
+        elevation: 2,
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: contentImage()),
+                contentInfo(),
+              ],
+            ),
+            Positioned.fill(
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  mouseCursor: MouseCursor.uncontrolled,
+                  onTap: () =>
+                      salesController.selectedItem(id: widget.producto.id),
+                  onLongPress: () {},
+                ),
+              ),
+            ),
+            widget.producto.select
+                ? Align(
+                    alignment: Alignment.topRight,
+                    child: IconButton(
+                        onPressed: () {
+                          salesController.removeProduct = widget.producto.id;
+                        },
+                        icon: const CircleAvatar(
+                            backgroundColor: Colors.red,
+                            child: Icon(
+                              Icons.close,
+                              color: Colors.white,
+                            ))))
+                : Container(),
+            widget.producto.quantity > 1 || widget.producto.select
+                ? Align(
+                    alignment: Alignment.topLeft,
+                    child: IconButton(
+                      onPressed: () =>
+                          salesController.selectedItem(id: widget.producto.id),
+                      icon: CircleAvatar(
+                          backgroundColor: Colors.white,
+                          child: Center(
+                            child: Text(widget.producto.quantity.toString()),
+                          )),
+                    ))
+                : Container(),
+            widget.producto.select
+                ? Align(
+                    alignment: Alignment.bottomLeft,
+                    child: IconButton(
+                        onPressed: () {
+                          if (widget.producto.quantity > 1) {
+                            widget.producto.quantity--;
+                            salesController.update();
+                          }
+                        },
+                        icon: const CircleAvatar(
+                            backgroundColor: Colors.grey,
+                            child: Icon(
+                              Icons.horizontal_rule,
+                              color: Colors.white,
+                            ))))
+                : Container(),
+            widget.producto.select
+                ? Align(
+                    alignment: Alignment.bottomRight,
+                    child: IconButton(
+                        onPressed: () {
+                          widget.producto.quantity++;
+                          salesController.update();
+                        },
+                        icon: const CircleAvatar(
+                            backgroundColor: Colors.grey,
+                            child: Icon(
+                              Icons.add,
+                              color: Colors.white,
+                            ))))
+                : Container(),
+            widget.producto.select
+                ? Align(
+                    alignment: Alignment.bottomCenter,
+                    child: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            widget.producto.select = !widget.producto.select;
+                          });
+                        },
+                        icon: const Icon(
+                          Icons.close,
+                          color: Colors.grey,
+                        )))
+                : Container(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // WIDGETS COMPONETS
+  Widget contentImage() {
+    // var
+    String description = widget.producto.description != ''
+        ? widget.producto.description.length >= 3
+            ? widget.producto.description.substring(0, 3)
+            : widget.producto.description.substring(0, 1)
+        : Publications.getFormatoPrecio(
+            monto: widget.producto.salePrice * widget.producto.quantity);
+    return widget.producto.image != ""
+        ? Container(
+            width: double.infinity,
+            child: CachedNetworkImage(
+              fadeInDuration: const Duration(milliseconds: 200),
+              fit: BoxFit.cover,
+              imageUrl: widget.producto.image,
+              placeholder: (context, url) => Container(
+                color: Colors.grey[100],
+                child: Center(
+                  child: Text(description,
+                      style:
+                          const TextStyle(fontSize: 24.0, color: Colors.grey)),
+                ),
+              ),
+              errorWidget: (context, url, error) => Container(
+                color: Colors.grey[100],
+                child: Center(
+                  child: Text(description,
+                      style:
+                          const TextStyle(fontSize: 24.0, color: Colors.grey)),
+                ),
+              ),
+            ),
+          )
+        : Container(
+            color: Colors.grey[100],
+            child: Center(
+              child: Text(description,
+                  style: const TextStyle(fontSize: 24.0, color: Colors.grey)),
+            ),
+          );
+  }
+
+  Widget contentInfo() {
+    return widget.producto.description == ''
+        ? Container()
+        : Padding(
+            padding: const EdgeInsets.all(5.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(widget.producto.description,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.normal,
+                        fontSize: 14.0,
+                        color: Colors.grey),
+                    overflow: TextOverflow.fade,
+                    softWrap: false),
+                Text(
+                    Publications.getFormatoPrecio(
+                        monto: widget.producto.salePrice *
+                            widget.producto.quantity),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16.0,
+                        color: Colors.black),
+                    overflow: TextOverflow.fade,
+                    softWrap: false),
+              ],
+            ),
+          );
+  }
+}
+
 Widget drawerApp() {
   //Los rieles de navegación brindan acceso a los destinos principales en las aplicaciones cuando se usan pantallas de tabletas y computadoras de escritorio.
 
@@ -249,7 +452,7 @@ Widget drawerApp() {
                   onTap: () => homeController.setIndexPage = 1),
               ListTile(
                   leading: const Icon(Icons.check_box_outline_blank_rounded),
-                  title: const Text('Stock'),
+                  title: const Text('Catálogo'),
                   onTap: () => homeController.setIndexPage = 2),
               ListTile(
                   leading: const Icon(Icons.settings),
