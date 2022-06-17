@@ -219,7 +219,7 @@ Widget drawerApp() {
         const SizedBox(height: 50),
         ListTile(
           leading: Container(
-            padding: const EdgeInsets.all(12.0),
+            padding: const EdgeInsets.all(0.0),
             child: homeController.getAccountProfile.image == ''
                 ? CircleAvatar(backgroundColor: Get.theme.dividerColor)
                 : CachedNetworkImage(
@@ -234,6 +234,7 @@ Widget drawerApp() {
                   ),
           ),
           title: Text(homeController.getAccountProfile.name),
+          onLongPress: () {},
         ),
         Expanded(
           child: ListView(
@@ -241,7 +242,7 @@ Widget drawerApp() {
               ListTile(
                   leading: const Icon(Icons.attach_money_rounded),
                   title: const Text('Vender'),
-                  onTap: () => homeController.setIndexPage = 0 ),
+                  onTap: () => homeController.setIndexPage = 0),
               ListTile(
                   leading: const Icon(Icons.check),
                   title: const Text('Transacciones'),

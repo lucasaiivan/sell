@@ -27,6 +27,7 @@ class Publications {
   }
 
   // Recibe la fecha y la decha actual para devolver hace cuanto tiempo se publico
+  static String getFechaPublicacionFormating({required DateTime dateTime}) => DateFormat('dd/MM/yyyy HH:mm').format(dateTime).toString();
   static String getFechaPublicacion(
       DateTime fechaPublicacion, DateTime fechaActual) {
     String sFecha = "";

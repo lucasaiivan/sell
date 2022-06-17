@@ -38,19 +38,52 @@ class TransactionsView extends StatelessWidget {
   }
 
   Widget body({required BuildContext context}) {
-
     // others controllers
-  final TransactionsController transactionsController = Get.find();
+    final TransactionsController transactionsController = Get.find();
 
     return ListView.builder(
       itemCount: transactionsController.getTransactionsList.length,
       itemBuilder: (context, index) {
-        return ListTile(
-          tileColor: Colors.red,
-          title: Text(Publications.getFechaPublicacion(transactionsController.getTransactionsList[index].time.toDate(), Timestamp.now().toDate())),
-          subtitle: Text(transactionsController.getTransactionsList[index].payMode),
-          leading: const CircleAvatar(backgroundColor: Colors.grey),
-          trailing: Text(Publications.getFormatoPrecio(monto: transactionsController.getTransactionsList[index].priceTotal)),
+        // values 
+        String payMode = transactionsController.getPayModeFormat(idMode: transactionsController.getTransactionsList[index].payMode);
+
+        return Column(
+          children: [
+            ListTile(
+              onLongPress: () {},
+              title: Text(Publications.getFechaPublicacion(
+                  transactionsController.getTransactionsList[index].creation
+                      .toDate(),
+                  Timestamp.now().toDate())),
+              subtitle: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text('Pago con: $payMode'),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 5),
+                          child: Icon(Icons.circle, size: 8,color: Get.theme.dividerColor),
+                        ),
+                        Text(
+                            '${transactionsController.getTransactionsList[index].getLengh()} items'),
+                      ],
+                    ),
+                    Text(Publications.getFechaPublicacionFormating(
+                        dateTime: transactionsController
+                            .getTransactionsList[index].creation
+                            .toDate())),
+                  ],
+                ),
+              ),
+              trailing: Text(Publications.getFormatoPrecio(
+                  monto: transactionsController
+                      .getTransactionsList[index].priceTotal)),
+            ),
+            const Divider(height: 0),
+          ],
         );
       },
     );
