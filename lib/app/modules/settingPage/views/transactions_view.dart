@@ -26,14 +26,12 @@ class SettingPage extends StatelessWidget {
   // WIDGETS VIEWS
   PreferredSizeWidget appbar({required BuildContext context}) {
     return AppBar(
-      elevation: 0,
+      title: const Text('Configuración'),
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
     );
   }
 
   Widget body({required BuildContext context}) {
-    return Container(
-      child: const Center(child: Text('Configuración')),
-    );
+    return Container();
   }
 }

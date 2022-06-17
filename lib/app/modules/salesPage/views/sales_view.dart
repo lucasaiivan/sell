@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:sell/app/models/catalogo_model.dart';
 import 'package:sell/app/utils/fuctions.dart';
 import 'package:sell/app/utils/widgets_utils.dart';
-import 'package:search_page/search_page.dart';
 import '../../../utils/dynamicTheme_lb.dart';
 import '../controller/sales_controller.dart';
 
@@ -46,7 +44,7 @@ class SalesView extends StatelessWidget {
             ? TextButton.icon(
                 icon: const Icon(Icons.clear_rounded),
                 label: const Text('Descartar'),
-                onPressed: controller.cleanTicketAlert)
+                onPressed: controller.dialogCleanTicketAlert)
             : Container(),
       ],
     );
@@ -160,7 +158,7 @@ class SalesView extends StatelessWidget {
                                   ElevatedButton.icon(
                                     style: ButtonStyle(
                                         elevation: MaterialStateProperty.all(
-                                            controller.ticketModel.payMode ==
+                                            controller.getTicket.payMode ==
                                                     'effective'
                                                 ? 5
                                                 : 0)),
@@ -177,7 +175,7 @@ class SalesView extends StatelessWidget {
                                   ElevatedButton.icon(
                                     style: ButtonStyle(
                                         elevation: MaterialStateProperty.all(
-                                            controller.ticketModel.payMode ==
+                                            controller.getTicket.payMode ==
                                                     'mercadopago'
                                                 ? 5
                                                 : 0)),
@@ -190,7 +188,7 @@ class SalesView extends StatelessWidget {
                                   ElevatedButton.icon(
                                     style: ButtonStyle(
                                         elevation: MaterialStateProperty.all(
-                                            controller.ticketModel.payMode ==
+                                            controller.getTicket.payMode ==
                                                     'card'
                                                 ? 5
                                                 : 0)),
@@ -203,7 +201,7 @@ class SalesView extends StatelessWidget {
                                   ),
                                   const SizedBox(height: 12),
                                   controller.getValueReceivedTicket == 0 ||
-                                          controller.ticketModel.payMode !=
+                                          controller.getTicket.payMode !=
                                               'effective'
                                       ? Container()
                                       : RichText(

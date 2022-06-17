@@ -21,9 +21,9 @@ class HomeView extends GetView<HomeController> {
       case 2:
         return StockPage();
       case 3:
-        return StockPage();
-      default:
         return SettingPage();
+      default:
+        return SalesView();
     }
   }
 

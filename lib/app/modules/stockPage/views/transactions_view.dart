@@ -17,6 +17,13 @@ class StockPage extends StatelessWidget {
           appBar: appbar(context: context),
           drawer: drawerApp(),
           body: body(context: context),
+          floatingActionButton: FloatingActionButton(
+              backgroundColor: Colors.blue,
+              onPressed: () {}, //controller.add,
+              child: const Icon(
+                Icons.add,
+                color: Colors.white,
+              )),
         );
       },
     );
@@ -27,12 +34,22 @@ class StockPage extends StatelessWidget {
     return AppBar(
       elevation: 0,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      title: const Text('Stock'),
+      actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.filter_list))],
     );
   }
 
   Widget body({required BuildContext context}) {
-    return Container(
-      child: const Center(child: Text('stock')),
+    return ListView.builder(
+      itemCount: 5,
+      itemBuilder: (context, index) {
+        return ListTile(
+          title: Container(color: Colors.grey, width: 2, height: 14),
+          subtitle: Container(color: Colors.grey, width: 2, height: 14),
+          leading: const CircleAvatar(backgroundColor: Colors.grey),
+          trailing: Container(color: Colors.grey, width: 14, height: 14),
+        );
+      },
     );
   }
 }
