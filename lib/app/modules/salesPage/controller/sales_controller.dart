@@ -5,16 +5,24 @@ import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:search_page/search_page.dart';
 import 'package:sell/app/models/catalogo_model.dart';
 import 'package:sell/app/models/ticket_model.dart';
+import 'package:sell/app/modules/home/controller/home_controller.dart';
 import 'package:sell/app/services/database.dart';
 import 'package:sell/app/utils/fuctions.dart';
 import 'package:sell/app/utils/widgets_utils.dart';
 
 class SalesController extends GetxController {
-  // sound controller 'beat'
-  late AudioPlayer player;
+  // others controllers
+  final HomeController homeController = Get.find();
+
+  // efecto de sonido para escaner
+  void playSoundScan() async {
+    AudioCache cache = AudioCache();
+    cache.play("soundBip.mp3");
+  }
 
   // text field controllers
   final TextEditingController textEditingControllerAddFlashPrice =
@@ -50,9 +58,11 @@ class SalesController extends GetxController {
   }
 
   // ticket
-  TicketModel ticketModel = TicketModel(time: Timestamp.now());
+  TicketModel _ticket = TicketModel(time: Timestamp.now(), listPoduct: []);
+  TicketModel get getTicket => _ticket;
+  set setTicket(TicketModel value) => _ticket = value;
   set setPayModeTicket(String value) {
-    ticketModel.payMode = value;
+    _ticket.payMode = value;
     update();
   }
 
@@ -146,6 +156,22 @@ class SalesController extends GetxController {
     textEditingControllerTicketMount.dispose();
   }
 
+  // FIREBASE
+
+  void registerTransaction() {
+    // generate id
+    var id = Publications.generateUid();
+    //  set values
+    getTicket.id = id;
+    getTicket.listPoduct = getListProductsSelested;
+    getTicket.priceTotal = getCountPriceTotal();
+    getTicket.valueReceived = getValueReceivedTicket;
+    getTicket.time = Timestamp.now();
+    // set firestore
+    Database.refFirestoretransactions(idAccount: homeController.getAccountProfile.id) .doc(getTicket.id).set(getTicket.toJson());
+    
+  }
+
   // FUCTIONS
 
   void seach({required BuildContext context}) {
@@ -157,18 +183,17 @@ class SalesController extends GetxController {
       delegate: SearchPage<ProductCatalogue>(
         items: listProducts,
         searchLabel: 'Buscar',
-        searchStyle: TextStyle(
-            color:colorAccent),
-        barTheme: Get.theme.copyWith(
-            hintColor:colorAccent,
-            highlightColor: colorAccent),
+        searchStyle: TextStyle(color: colorAccent),
+        barTheme: Get.theme
+            .copyWith(hintColor: colorAccent, highlightColor: colorAccent),
         suggestion: const Center(child: Text('ej. alfajor')),
         failure: const Center(child: Text('No se encontro :(')),
         filter: (product) => [product.description, product.nameMark],
         builder: (product) => ListTile(
           title: Text(product.nameMark),
           subtitle: Text(product.description),
-          trailing: Text(Publications.getFormatoPrecio(monto: product.salePrice)),
+          trailing:
+              Text(Publications.getFormatoPrecio(monto: product.salePrice)),
           onTap: () {
             addProduct = product;
             Get.back();
@@ -198,8 +223,12 @@ class SalesController extends GetxController {
     try {
       late String barcodeScanRes;
       barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-          "#ff6666", "Cancel", true, ScanMode.BARCODE);
-
+        "#ff6666",
+        "Cancel",
+        true,
+        ScanMode.BARCODE,
+      );
+      playSoundScan();
       verifyExistenceInSelected(id: barcodeScanRes);
     } on PlatformException {
       Get.snackbar('scanBarcode', 'Failed to get platform version');
@@ -222,19 +251,21 @@ class SalesController extends GetxController {
     }
   }
 
-  void cleanTicketAlert() {
+  void dialogCleanTicketAlert() {
     Get.defaultDialog(
         title: 'Alerta',
         middleText: '¿Desea descartar este ticket?',
         confirm: TextButton.icon(
-            onPressed: () {
-              ticketModel = TicketModel(time: Timestamp.now());
-              setListProductsSelected = [];
-              setTicketView = false;
-              Get.back();
-            },
+            onPressed: cleanTicket,
             icon: const Icon(Icons.clear_rounded),
             label: const Text('Descartar')));
+  }
+
+  void cleanTicket() {
+    setTicket = TicketModel(time: Timestamp.now(), listPoduct: []);
+    setListProductsSelected = [];
+    setTicketView = false;
+    Get.back();
   }
 
   void selectedItem({required String id}) {
@@ -257,16 +288,18 @@ class SalesController extends GetxController {
   }
 
   void addSaleFlash() {
+
+    // generate id
+    var id = Publications.generateUid();
     // var
     String valuePrice = textEditingControllerAddFlashPrice.text;
     String valueDescription = textEditingControllerAddFlashDescription.text;
-    String idDefault = Timestamp.now().toString();
 
     if (valuePrice != '') {
       if (double.parse(valuePrice) != 0) {
         addProduct = ProductCatalogue(
-            id: idDefault,
-            code: idDefault,
+            id: id,
+            code: id,
             description: valueDescription,
             salePrice: double.parse(textEditingControllerAddFlashPrice.text),
             creation: Timestamp.now(),
@@ -285,13 +318,14 @@ class SalesController extends GetxController {
   }
 
   String getValueReceived() {
-    if (getValueReceivedTicket == 0.0)
-      return Publications.getFormatoPrecio(monto: 0);
+    if (getValueReceivedTicket == 0.0) return Publications.getFormatoPrecio(monto: 0);
     double result = getValueReceivedTicket - getCountPriceTotal();
     return Publications.getFormatoPrecio(monto: result);
   }
 
   void confirmedPurchase() {
+    // set firestore
+    registerTransaction();
     // el usuario confirmo su venta
     setStateConfirmPurchase = true;
     // mostramos una vista 'confirm purchase' por 2 segundos
@@ -300,7 +334,7 @@ class SalesController extends GetxController {
       () {
         // fdefault values
         setListProductsSelected = [];
-        ticketModel = TicketModel(time: Timestamp.now());
+        setTicket = TicketModel(time: Timestamp.now(), listPoduct: []);
         //views
         setStateConfirmPurchase = false;
         setTicketView = false;
@@ -312,8 +346,6 @@ class SalesController extends GetxController {
     // Dialog
     // muestra este dialog cuando el producto no se encuentra en los registros de stock
 
-    // var
-    FocusNode myFocusNode;
 
     Get.defaultDialog(
         title: 'Nuevo Producto',
