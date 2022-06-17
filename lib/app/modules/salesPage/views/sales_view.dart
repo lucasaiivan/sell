@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:sell/app/utils/fuctions.dart';
 import 'package:sell/app/utils/widgets_utils.dart';
@@ -79,7 +80,8 @@ class SalesView extends StatelessWidget {
                         child: Material(
                           color: Colors.transparent,
                           child: InkWell(
-                            onTap: ()=>controller.seach(context: buildContext),
+                            onTap: () =>
+                                controller.seach(context: buildContext),
                           ),
                         ),
                       ),
@@ -99,6 +101,51 @@ class SalesView extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget bodyListView({required SalesController controller}) {
+    return ListView.builder(
+      scrollDirection: Axis.vertical,
+      itemCount: controller.getListProductsSelestedLength+15,
+      itemBuilder: (context, index) {
+        // en la primera posición muestra el botón para agregar un nuevo objeto
+        if (index == 0) {
+          // item defaul add
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Card(
+              elevation: 0,
+              color: Colors.grey.withOpacity(0.1),
+              child: SizedBox(
+                height: 75,width: double.infinity,
+                child: Stack(
+                  children: [
+                    Center(
+                        child: Text('Buscar',style: TextStyle(fontSize: 18,color: Colors.grey.withOpacity(0.8))),),
+                    Positioned.fill(
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () => controller.seach(context: buildContext),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+
+        // mostramos un número de elementos vacíos de los cuales el primero tendrá un icono 'add'
+        if ((index) <= controller.getListProductsSelested.length) {
+          return ListTileProductoItem(
+              producto: controller.getListProductsSelested[index - 1]);
+        } else {
+          return SizedBox(child: Card(elevation: 0, color: Colors.grey.withOpacity(0.1)));
+        }
+      },
     );
   }
 
