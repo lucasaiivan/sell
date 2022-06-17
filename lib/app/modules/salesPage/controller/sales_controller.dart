@@ -34,7 +34,7 @@ class SalesController extends GetxController {
 
   // list product selected
   final RxList _listProductsSelected = [].obs;
-  List get getListProductsSelested => _listProductsSelected;
+  List  get getListProductsSelested => _listProductsSelected;
   set setListProductsSelected(List value) =>
       _listProductsSelected.value = value;
   set addProduct(ProductCatalogue product) =>
@@ -58,7 +58,7 @@ class SalesController extends GetxController {
   }
 
   // ticket
-  TicketModel _ticket = TicketModel(time: Timestamp.now(), listPoduct: []);
+  TicketModel _ticket = TicketModel(creation: Timestamp.now(), listPoduct: []);
   TicketModel get getTicket => _ticket;
   set setTicket(TicketModel value) => _ticket = value;
   set setPayModeTicket(String value) {
@@ -161,15 +161,21 @@ class SalesController extends GetxController {
   void registerTransaction() {
     // generate id
     var id = Publications.generateUid();
+    List listIdsProducts = [];
+    for (var element in getListProductsSelested) {
+      listIdsProducts.add({'id':element.id,'quantity':element.quantity,'description':element.description});
+    }
     //  set values
     getTicket.id = id;
-    getTicket.listPoduct = getListProductsSelested;
+    getTicket.listPoduct = listIdsProducts;
     getTicket.priceTotal = getCountPriceTotal();
     getTicket.valueReceived = getValueReceivedTicket;
-    getTicket.time = Timestamp.now();
+    getTicket.creation = Timestamp.now();
     // set firestore
-    Database.refFirestoretransactions(idAccount: homeController.getAccountProfile.id) .doc(getTicket.id).set(getTicket.toJson());
-    
+    Database.refFirestoretransactions(
+            idAccount: homeController.getAccountProfile.id)
+        .doc(getTicket.id)
+        .set(getTicket.toJson());
   }
 
   // FUCTIONS
@@ -262,7 +268,7 @@ class SalesController extends GetxController {
   }
 
   void cleanTicket() {
-    setTicket = TicketModel(time: Timestamp.now(), listPoduct: []);
+    setTicket = TicketModel(creation: Timestamp.now(), listPoduct: []);
     setListProductsSelected = [];
     setTicketView = false;
     Get.back();
@@ -288,7 +294,6 @@ class SalesController extends GetxController {
   }
 
   void addSaleFlash() {
-
     // generate id
     var id = Publications.generateUid();
     // var
@@ -334,7 +339,7 @@ class SalesController extends GetxController {
       () {
         // fdefault values
         setListProductsSelected = [];
-        setTicket = TicketModel(time: Timestamp.now(), listPoduct: []);
+        setTicket = TicketModel(creation: Timestamp.now(), listPoduct: []);
         //views
         setStateConfirmPurchase = false;
         setTicketView = false;
@@ -345,7 +350,6 @@ class SalesController extends GetxController {
   void showDialogAddProductNew({required ProductCatalogue productCatalogue}) {
     // Dialog
     // muestra este dialog cuando el producto no se encuentra en los registros de stock
-
 
     Get.defaultDialog(
         title: 'Nuevo Producto',

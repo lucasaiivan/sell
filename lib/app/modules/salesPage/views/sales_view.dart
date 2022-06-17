@@ -9,8 +9,11 @@ class SalesView extends StatelessWidget {
   // ignore: prefer_const_constructors_in_immutables
   SalesView({Key? key}) : super(key: key);
 
+  late BuildContext buildContext;
+
   @override
   Widget build(BuildContext context) {
+    buildContext = context;
     return GetBuilder<SalesController>(
       init: SalesController(),
       initState: (_) {},
@@ -76,7 +79,7 @@ class SalesView extends StatelessWidget {
                         child: Material(
                           color: Colors.transparent,
                           child: InkWell(
-                            onTap: () => controller.seach(context: context),
+                            onTap: ()=>controller.seach(context: buildContext),
                           ),
                         ),
                       ),

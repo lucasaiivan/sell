@@ -104,6 +104,19 @@ class TransactionsController extends GetxController {
   }
 
   // FUCTIONS
+  String getPayModeFormat({required idMode}) {
+    switch (idMode) {
+      case 'effective':
+        return 'Efectivo';
+      case 'mercadopago':
+        return 'Mercado Pago';
+      case 'card':
+        return 'Tarjeta Credito/Debito';
+      default:
+        return 'Sin esprecificar';
+    }
+  }
+
   double getCountPriceTotal() {
     double total = 0.0;
     for (var element in listProducts) {
