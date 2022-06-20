@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sell/app/modules/salesPage/views/sales_view.dart';
-import 'package:sell/app/modules/stockPage/views/transactions_view.dart';
+import 'package:sell/app/modules/cataloguePage/views/catalogue_view.dart';
 import 'package:sell/app/modules/transactionsPage/views/transactions_view.dart';
 
 import '../../settingPage/views/transactions_view.dart';
@@ -19,7 +19,7 @@ class HomeView extends GetView<HomeController> {
       case 1:
         return TransactionsView();
       case 2:
-        return StockPage();
+        return CataloguePage();
       case 3:
         return SettingPage();
       default:
