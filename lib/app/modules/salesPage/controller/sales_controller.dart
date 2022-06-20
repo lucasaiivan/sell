@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:search_page/search_page.dart';
 import 'package:sell/app/models/catalogo_model.dart';
 import 'package:sell/app/models/ticket_model.dart';
@@ -17,6 +16,29 @@ import 'package:sell/app/utils/widgets_utils.dart';
 class SalesController extends GetxController {
   // others controllers
   final HomeController homeController = Get.find();
+
+  // productos seleccionados recientemente
+  final RxList<ProductCatalogue> _recentlySelectedProductsList =
+      <ProductCatalogue>[].obs;
+  List<ProductCatalogue> get getRecentlySelectedProductsList =>
+      _recentlySelectedProductsList.reversed.toList();
+  set setRecentlySelectedProductsList(List<ProductCatalogue> value) =>
+      _recentlySelectedProductsList.value = value;
+  registerSelections({required ProductCatalogue productCatalogue}) {
+    bool repeat = false;
+    // seach
+    for (ProductCatalogue item in getRecentlySelectedProductsList) {
+      if (item.id == productCatalogue.id) {
+        repeat = true;
+      }
+    }
+    // add
+    // ignore: dead_code
+    if (repeat == false) {
+      productCatalogue.creation = Timestamp.now();
+      _recentlySelectedProductsList.add(productCatalogue);
+    }
+  }
 
   // efecto de sonido para escaner
   void playSoundScan() async {
@@ -34,11 +56,15 @@ class SalesController extends GetxController {
 
   // list product selected
   final RxList _listProductsSelected = [].obs;
-  List  get getListProductsSelested => _listProductsSelected;
+  List get getListProductsSelested => _listProductsSelected;
   set setListProductsSelected(List value) =>
       _listProductsSelected.value = value;
-  set addProduct(ProductCatalogue product) =>
-      _listProductsSelected.add(product);
+  set addProduct(ProductCatalogue product) {
+    product.quantity = 1;
+    product.select = false;
+    _listProductsSelected.add(product);
+  }
+
   set removeProduct(String id) {
     List newList = [];
     for (ProductCatalogue product in _listProductsSelected) {
@@ -84,7 +110,7 @@ class SalesController extends GetxController {
     _valueReceivedTicket.value = value;
   }
 
-  List<ProductCatalogue> listProducts = [
+  final List<ProductCatalogue> listProducts = [
     ProductCatalogue(
       id: '111',
       upgrade: Timestamp.now(),
@@ -161,9 +187,17 @@ class SalesController extends GetxController {
   void registerTransaction() {
     // generate id
     var id = Publications.generateUid();
+
     List listIdsProducts = [];
-    for (var element in getListProductsSelested) {
-      listIdsProducts.add({'id':element.id,'quantity':element.quantity,'description':element.description});
+
+    for (ProductCatalogue element in getListProductsSelested) {
+      registerSelections(productCatalogue: element);
+      // generamos una nueva lista con los id de los productos seleccionas
+      listIdsProducts.add({
+        'id': element.id,
+        'quantity': element.quantity,
+        'description': element.description
+      });
     }
     //  set values
     getTicket.id = id;
@@ -172,10 +206,10 @@ class SalesController extends GetxController {
     getTicket.valueReceived = getValueReceivedTicket;
     getTicket.creation = Timestamp.now();
     // set firestore
-    Database.refFirestoretransactions(
+    /* Database.refFirestoretransactions(
             idAccount: homeController.getAccountProfile.id)
         .doc(getTicket.id)
-        .set(getTicket.toJson());
+        .set(getTicket.toJson()); */
   }
 
   // FUCTIONS
@@ -201,7 +235,7 @@ class SalesController extends GetxController {
           trailing:
               Text(Publications.getFormatoPrecio(monto: product.salePrice)),
           onTap: () {
-            addProduct = product;
+            verifyExistenceInSelected(id: product.id);
             Get.back();
           },
         ),
@@ -210,11 +244,28 @@ class SalesController extends GetxController {
   }
 
   void verifyExistenceInSelected({required String id}) {
+    // verifica si el ID del producto esta en la lista de seleccionados
     bool coincidence = false;
     for (ProductCatalogue product in getListProductsSelested) {
       if (product.id == id) {
         product.quantity++;
         coincidence = true;
+        update();
+      }
+    }
+    // si no hay coincidencia
+    if (coincidence == false) {
+      verifyExistenceInCatalogue(id: id);
+    }
+  }
+
+  void verifyExistenceInCatalogue({required String id}) {
+    // verifica si el ID del producto esta en el catálogo de la cuenta
+    bool coincidence = false;
+    for (ProductCatalogue product in listProducts) {
+      if (product.id == id) {
+        coincidence = true;
+        addProduct = product;
         update();
       }
     }
@@ -323,7 +374,8 @@ class SalesController extends GetxController {
   }
 
   String getValueReceived() {
-    if (getValueReceivedTicket == 0.0) return Publications.getFormatoPrecio(monto: 0);
+    if (getValueReceivedTicket == 0.0)
+      return Publications.getFormatoPrecio(monto: 0);
     double result = getValueReceivedTicket - getCountPriceTotal();
     return Publications.getFormatoPrecio(monto: result);
   }

@@ -1,6 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
+import 'package:sell/app/models/catalogo_model.dart';
 import 'package:sell/app/utils/fuctions.dart';
 import 'package:sell/app/utils/widgets_utils.dart';
 import '../../../utils/dynamicTheme_lb.dart';
@@ -47,7 +48,7 @@ class SalesView extends StatelessWidget {
         controller.getListProductsSelestedLength != 0
             ? TextButton.icon(
                 icon: const Icon(Icons.clear_rounded),
-                label: const Text('Descartar'),
+                label: const Text('Descartar Ticket'),
                 onPressed: controller.dialogCleanTicketAlert)
             : Container(),
       ],
@@ -58,6 +59,7 @@ class SalesView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+        widgetProducts,
         Expanded(
           child: GridView.builder(
             padding: const EdgeInsets.all(12),
@@ -65,35 +67,10 @@ class SalesView extends StatelessWidget {
                 crossAxisCount: 3, crossAxisSpacing: 1.0, mainAxisSpacing: 1.0),
             itemCount: controller.getListProductsSelested.length + 15,
             itemBuilder: (context, index) {
-              // en la primera posición muestra el botón para agregar un nuevo objeto
-              if (index == 0) {
-                // item defaul add
-                return Card(
-                  elevation: 0,
-                  color: Colors.grey.withOpacity(0.1),
-                  child: Stack(
-                    children: [
-                      Center(
-                          child: Icon(Icons.search,
-                              color: Colors.grey.withOpacity(0.8), size: 30)),
-                      Positioned.fill(
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () =>
-                                controller.seach(context: buildContext),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
               // mostramos un número de elementos vacíos de los cuales el primero tendrá un icono 'add'
-              if ((index) <= controller.getListProductsSelested.length) {
+              if (index < controller.getListProductsSelested.length) {
                 return ProductoItem(
-                    producto: controller.getListProductsSelested[index - 1]);
+                    producto: controller.getListProductsSelested[index]);
               } else {
                 return Card(elevation: 0, color: Colors.grey.withOpacity(0.1));
               }
@@ -101,51 +78,6 @@ class SalesView extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  Widget bodyListView({required SalesController controller}) {
-    return ListView.builder(
-      scrollDirection: Axis.vertical,
-      itemCount: controller.getListProductsSelestedLength+15,
-      itemBuilder: (context, index) {
-        // en la primera posición muestra el botón para agregar un nuevo objeto
-        if (index == 0) {
-          // item defaul add
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Card(
-              elevation: 0,
-              color: Colors.grey.withOpacity(0.1),
-              child: SizedBox(
-                height: 75,width: double.infinity,
-                child: Stack(
-                  children: [
-                    Center(
-                        child: Text('Buscar',style: TextStyle(fontSize: 18,color: Colors.grey.withOpacity(0.8))),),
-                    Positioned.fill(
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () => controller.seach(context: buildContext),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        }
-
-        // mostramos un número de elementos vacíos de los cuales el primero tendrá un icono 'add'
-        if ((index) <= controller.getListProductsSelested.length) {
-          return ListTileProductoItem(
-              producto: controller.getListProductsSelested[index - 1]);
-        } else {
-          return SizedBox(child: Card(elevation: 0, color: Colors.grey.withOpacity(0.1)));
-        }
-      },
     );
   }
 
@@ -286,6 +218,132 @@ class SalesView extends StatelessWidget {
   }
 
   // WIDGETS COMPONENTS
+
+  Widget get widgetProducts {
+    // controller
+    final SalesController salesController = Get.find();
+
+    return SizedBox(
+      width: double.infinity,
+      height: 100,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 12),
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount:
+              salesController.getRecentlySelectedProductsList.length + 10,
+          itemBuilder: (context, index) {
+            if (index == 0) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(3.0),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(50),
+                          onTap: () {
+                            salesController.seach(context: context);
+                          },
+                          child: CircleAvatar(
+                            radius: 35,
+                            backgroundColor: Colors.grey.withOpacity(0.1),
+                            child: Icon(
+                              Icons.search,
+                              color: Colors.grey.withOpacity(0.8),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const Text('Buscar'),
+                    ],
+                  ),
+                  (index <
+                          salesController
+                              .getRecentlySelectedProductsList.length)
+                      ? circleAvatarProduct(productCatalogue: salesController.getRecentlySelectedProductsList[index])
+                      : Column(
+                        children: [
+                          CircleAvatar(
+                              backgroundColor: Colors.grey.withOpacity(0.1),
+                              radius: 35,
+                            ),
+                            const Text(''),
+                        ],
+                      ),
+                ],
+              );
+            }
+            // mostramos un número de elementos vacíos de los cuales el primero tendrá un icono 'add'
+            if (index <
+                salesController.getRecentlySelectedProductsList.length) {
+              return circleAvatarProduct(productCatalogue: salesController.getRecentlySelectedProductsList[index]);
+              
+            } else {
+              return Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(3.0),
+                    child: CircleAvatar(
+                      radius: 35,
+                      backgroundColor: Colors.grey.withOpacity(0.1),
+                    ),
+                  ),
+                  const Text(''),
+                ],
+              );
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget circleAvatarProduct({required ProductCatalogue productCatalogue}) {
+
+    // controller
+    final SalesController salesController = Get.find();
+
+    return Container(
+      width: 81.0,
+      height: 100.0,
+      padding: const EdgeInsets.all(5.0),
+      child: Column(
+        children: [
+          GestureDetector(
+            onTap: () {
+              salesController.verifyExistenceInSelected(id: productCatalogue.id);
+            },
+            child: Column(
+              children: <Widget>[
+                CachedNetworkImage(
+                  imageUrl: productCatalogue.image,
+                  placeholder: (context, url) =>
+                      CircleAvatar(backgroundColor: Get.theme.dividerColor),
+                  imageBuilder: (context, image) => CircleAvatar(
+                    radius: 35,
+                    backgroundImage: image,
+                  ),
+                  errorWidget: (context, url, error) =>
+                      CircleAvatar(radius: 35,backgroundColor: Get.theme.dividerColor),
+                ),
+                const SizedBox(
+                  height: 3.0,
+                ),
+                Text(productCatalogue.description,
+                    style: const TextStyle(
+                        fontSize: 12, fontWeight: FontWeight.normal),
+                    overflow: TextOverflow.fade,
+                    softWrap: false)
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget widgetConfirmedPurchase() {
     // controller
     final SalesController controller = Get.find();

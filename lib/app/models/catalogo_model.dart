@@ -139,7 +139,9 @@ class ProductCatalogue {
   String currencySign = "\$"; // signo de la moneda
   // var optional
   bool select = false;
-  int quantity = 1;
+  int quantity = 0;
+  bool stock = false;
+
 
   ProductCatalogue({
     // Valores del producto
@@ -165,7 +167,8 @@ class ProductCatalogue {
     this.select = false,
 
     // var app
-    this.quantity=1,
+    this.quantity = 1,
+    this.stock = false,
   });
 
   factory ProductCatalogue.fromMap(Map data) {
@@ -218,6 +221,7 @@ class ProductCatalogue {
           : data['signo_moneda'] ?? '',
       quantity: data['quantity'] ?? 1,
       select: false,
+      stock: false,
     );
   }
 
@@ -239,7 +243,8 @@ class ProductCatalogue {
         "creation": creation,
         "upgrade": upgrade,
         "currencySign": currencySign,
-        "quantity":quantity,
+        "quantity": quantity,
+        "stock": stock,
       };
 
   Product convertProductoDefault() {
@@ -262,16 +267,16 @@ class ProductCatalogue {
 
   ProductCatalogue updateData({required Product}) {
     // actualizamos los datos del documento publico
-    this.id = Product.id;
-    this.image = Product.image;
-    this.verified = Product.verified;
-    this.favorite = Product.favorite;
-    this.idMark = Product.idMark;
-    this.nameMark = Product.nameMark;
-    this.description = Product.description;
-    this.code = Product.code;
-    this.upgrade = Product.upgrade;
-    this.creation = Product.creation;
+    id = Product.id;
+    image = Product.image;
+    verified = Product.verified;
+    favorite = Product.favorite;
+    idMark = Product.idMark;
+    nameMark = Product.nameMark;
+    description = Product.description;
+    code = Product.code;
+    upgrade = Product.upgrade;
+    creation = Product.creation;
     return this;
   }
 }
