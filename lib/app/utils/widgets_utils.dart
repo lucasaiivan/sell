@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:sell/app/models/catalogo_model.dart';
 import 'package:sell/app/modules/home/controller/home_controller.dart';
-import 'package:sell/app/modules/salesPage/controller/sales_controller.dart';
+import 'package:sell/app/modules/sellPage/controller/sell_controller.dart';
 import 'package:sell/app/modules/splash/controllers/splash_controller.dart';
 import 'package:sell/app/utils/dynamicTheme_lb.dart';
 import 'package:sell/app/utils/fuctions.dart';

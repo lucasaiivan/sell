@@ -18,12 +18,8 @@ class SalesController extends GetxController {
   final HomeController homeController = Get.find();
 
   // productos seleccionados recientemente
-  final RxList<ProductCatalogue> _recentlySelectedProductsList =
-      <ProductCatalogue>[].obs;
   List<ProductCatalogue> get getRecentlySelectedProductsList =>
-      _recentlySelectedProductsList.reversed.toList();
-  set setRecentlySelectedProductsList(List<ProductCatalogue> value) =>
-      _recentlySelectedProductsList.value = value;
+      homeController.listProductSelecteds.reversed.toList();
   registerSelections({required ProductCatalogue productCatalogue}) {
     bool repeat = false;
     // seach
@@ -36,7 +32,8 @@ class SalesController extends GetxController {
     // ignore: dead_code
     if (repeat == false) {
       productCatalogue.creation = Timestamp.now();
-      _recentlySelectedProductsList.add(productCatalogue);
+
+      homeController.addToListProductSelecteds(item: productCatalogue);
     }
   }
 
@@ -110,71 +107,6 @@ class SalesController extends GetxController {
     _valueReceivedTicket.value = value;
   }
 
-  final List<ProductCatalogue> listProducts = [
-    ProductCatalogue(
-      id: '111',
-      upgrade: Timestamp.now(),
-      creation: Timestamp.now(),
-      description: 'MediaTarde',
-      salePrice: 90.0,
-      image:
-          'https://firebasestorage.googleapis.com/v0/b/commer-ef151.appspot.com/o/APP%2FARG%2FPRODUCTOS%2F7790270336307?alt=media&token=a8ff1c29-06e7-4eac-a32a-aff7dbec9d69',
-    ),
-    ProductCatalogue(
-        id: '112',
-        upgrade: Timestamp.now(),
-        creation: Timestamp.now(),
-        description: 'Don Satur agridulce',
-        salePrice: 120.0,
-        image:
-            'https://d3ugyf2ht6aenh.cloudfront.net/stores/001/232/784/products/bizcocho-don-satur-agridulce-x-200-g-copia1-ecbe7767b0e4a86fc516006593163352-480-0.png'),
-    ProductCatalogue(
-        id: '113',
-        upgrade: Timestamp.now(),
-        creation: Timestamp.now(),
-        description: 'Alfajor Jorgito',
-        salePrice: 50.0,
-        image:
-            'https://www.distribuidorapop.com.ar/wp-content/uploads/2016/08/alfajor-jorgito-chocolate-venta.jpg'),
-    ProductCatalogue(
-        id: '114',
-        upgrade: Timestamp.now(),
-        creation: Timestamp.now(),
-        description: 'Lays Papa Fritas 60g',
-        salePrice: 130.0,
-        image:
-            'https://i.pinimg.com/originals/c1/cd/1c/c1cd1c2c0806879baeb96c2152cc4caa.jpg'),
-    ProductCatalogue(
-        id: '115',
-        upgrade: Timestamp.now(),
-        creation: Timestamp.now(),
-        description: 'Coca cola 1.5 L',
-        salePrice: 150.0,
-        image:
-            'https://jumboargentina.vtexassets.com/arquivos/ids/666704/Coca-cola-Sabor-Original-1-5-Lt-2-245092.jpg'),
-    ProductCatalogue(
-      id: '116',
-      upgrade: Timestamp.now(),
-      creation: Timestamp.now(),
-      description: 'Don Satur Biscochos',
-      salePrice: 120.0,
-    ),
-    ProductCatalogue(
-      id: '117',
-      upgrade: Timestamp.now(),
-      creation: Timestamp.now(),
-      description: 'Alfajor Jorgito',
-      salePrice: 50.0,
-    ),
-    ProductCatalogue(
-      id: '118',
-      upgrade: Timestamp.now(),
-      creation: Timestamp.now(),
-      description: 'Lays Papa Fritas 60g',
-      salePrice: 130.0,
-    ),
-  ];
-
   @override
   void onClose() {
     textEditingControllerAddFlashDescription.dispose();
@@ -215,35 +147,74 @@ class SalesController extends GetxController {
   // FUCTIONS
 
   void seach({required BuildContext context}) {
-    // buesque en la base de datos de cátegorias
+    // Busca entre los productos de mi catálogo
+
+    // var
     Color colorAccent =
         Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
+    
     showSearch(
       context: context,
       delegate: SearchPage<ProductCatalogue>(
-        items: listProducts,
+        items: homeController.getCataloProducts,
         searchLabel: 'Buscar',
         searchStyle: TextStyle(color: colorAccent),
         barTheme: Get.theme
             .copyWith(hintColor: colorAccent, highlightColor: colorAccent),
         suggestion: const Center(child: Text('ej. alfajor')),
-        failure: const Center(child: Text('No se encontro :(')),
+        failure: const Center(child: Text('No se encontro en tu cátalogo:(')),
         filter: (product) => [product.description, product.nameMark],
-        builder: (product) => ListTile(
-          title: Text(product.nameMark),
-          subtitle: Text(product.description),
-          trailing:
-              Text(Publications.getFormatoPrecio(monto: product.salePrice)),
-          onTap: () {
-            verifyExistenceInSelected(id: product.id);
-            Get.back();
-          },
+        builder: (product) => Column(
+          children: [
+            ListTile(
+              title: Text(product.nameMark),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Text(product.description,maxLines: 2,overflow:TextOverflow.clip,),
+                  Text(product.code),
+                ],
+              ),
+              trailing:
+                  Text(Publications.getFormatoPrecio(monto: product.salePrice)),
+              onTap: () {
+                verifyExistenceInSelected(item: product);
+                Get.back();
+              },
+            ),
+            const Divider(),
+          ],
         ),
       ),
     );
   }
 
-  void verifyExistenceInSelected({required String id}) {
+  void verifyExistenceInSelected({required ProductCatalogue item}) {
+    if (item.code == '') {
+      addProduct = item;
+    } else {
+      // verifica si el ID del producto esta en la lista de seleccionados
+      bool coincidence = false;
+      for (ProductCatalogue product in getListProductsSelested) {
+        if (product.id == item.id) {
+          product.quantity++;
+          coincidence = true;
+          update();
+        }
+        if (product.code == item.code) {
+          product.quantity++;
+          coincidence = true;
+          update();
+        }
+      }
+      // si no hay coincidencia
+      if (coincidence == false) {
+        verifyExistenceInCatalogue(id: item.id);
+      }
+    }
+  }
+
+  void verifyExistenceInSelectedScanResult({required String id}) {
     // verifica si el ID del producto esta en la lista de seleccionados
     bool coincidence = false;
     for (ProductCatalogue product in getListProductsSelested) {
@@ -262,7 +233,7 @@ class SalesController extends GetxController {
   void verifyExistenceInCatalogue({required String id}) {
     // verifica si el ID del producto esta en el catálogo de la cuenta
     bool coincidence = false;
-    for (ProductCatalogue product in listProducts) {
+    for (ProductCatalogue product in homeController.getCataloProducts) {
       if (product.id == id) {
         coincidence = true;
         addProduct = product;
@@ -286,7 +257,7 @@ class SalesController extends GetxController {
         ScanMode.BARCODE,
       );
       playSoundScan();
-      verifyExistenceInSelected(id: barcodeScanRes);
+      verifyExistenceInSelectedScanResult(id: barcodeScanRes);
     } on PlatformException {
       Get.snackbar('scanBarcode', 'Failed to get platform version');
     }
@@ -355,7 +326,6 @@ class SalesController extends GetxController {
       if (double.parse(valuePrice) != 0) {
         addProduct = ProductCatalogue(
             id: id,
-            code: id,
             description: valueDescription,
             salePrice: double.parse(textEditingControllerAddFlashPrice.text),
             creation: Timestamp.now(),

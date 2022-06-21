@@ -12,35 +12,34 @@ class CataloguePageController extends GetxController {
   List<ProductCatalogue> get getCataloProducts => _catalogueBusiness;
   set setCatalogueProducts(List<ProductCatalogue> products) {
     _catalogueBusiness.value = products;
-    //catalogueFilter();
+    //...filter 
   }
 
   @override
   void onInit() async {
     super.onInit();
-    readCatalogueListProductsStream(id: homeController.getAccountProfile.id);
+    readProductsCatalogue();
   }
 
   @override
   void onClose() {}
 
   // FIREBASE
-  void readCatalogueListProductsStream({required String id}) {
+  void readProductsCatalogue() {
     // obtenemos los obj(productos) del catalogo de la cuenta del negocio
-    if (id != '') {
-      Database.readProductsCatalogueStream(id: id).listen((value) {
-        List<ProductCatalogue> list = [];
-        //  get
-        for (var element in value.docs) {
-          list.add(ProductCatalogue.fromMap(element.data()));
-        }
-        //  set
-        setCatalogueProducts = list;
-      }).onError((error) {
-        // error
-      });
-    }
+    Database.readProductsCatalogueStream(
+            id: homeController.getAccountProfile.id)
+        .listen((value) {
+      List<ProductCatalogue> list = [];
+      //  get
+      for (var element in value.docs) {
+        list.add(ProductCatalogue.fromMap(element.data()));
+      }
+      //  set values
+      setCatalogueProducts = list;
+      homeController.setCatalogueProducts = list;
+    }).onError((error) {
+      // error
+    });
   }
-
-  
 }

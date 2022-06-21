@@ -1,6 +1,9 @@
+import 'dart:ffi';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:sell/app/models/catalogo_model.dart';
+import 'package:intl/intl.dart';
 import 'package:sell/app/models/ticket_model.dart';
 import 'package:sell/app/services/database.dart';
 
@@ -23,59 +26,6 @@ class TransactionsController extends GetxController {
   bool get getTicketView => _ticketView.value;
   set setTicketView(bool value) => _ticketView.value = value;
 
-  List<ProductCatalogue> listProducts = [
-    ProductCatalogue(
-      upgrade: Timestamp.now(),
-      creation: Timestamp.now(),
-      description: 'MediaTarde',
-      salePrice: 90.0,
-      image:
-          'https://firebasestorage.googleapis.com/v0/b/commer-ef151.appspot.com/o/APP%2FARG%2FPRODUCTOS%2F7790270336307?alt=media&token=a8ff1c29-06e7-4eac-a32a-aff7dbec9d69',
-    ),
-    ProductCatalogue(
-      upgrade: Timestamp.now(),
-      creation: Timestamp.now(),
-      description: 'Don Satur agridulce',
-      salePrice: 120.0,
-    ),
-    ProductCatalogue(
-      upgrade: Timestamp.now(),
-      creation: Timestamp.now(),
-      description: 'Alfajor Jorgito',
-      salePrice: 50.0,
-    ),
-    ProductCatalogue(
-      upgrade: Timestamp.now(),
-      creation: Timestamp.now(),
-      description: 'Lays Papa Fritas 60g',
-      salePrice: 130.0,
-    ),
-    ProductCatalogue(
-      upgrade: Timestamp.now(),
-      creation: Timestamp.now(),
-      description: 'Coca cola',
-      salePrice: 150.0,
-    ),
-    ProductCatalogue(
-      upgrade: Timestamp.now(),
-      creation: Timestamp.now(),
-      description: 'Don Satur agridulce',
-      salePrice: 120.0,
-    ),
-    ProductCatalogue(
-      upgrade: Timestamp.now(),
-      creation: Timestamp.now(),
-      description: 'Alfajor Jorgito',
-      salePrice: 50.0,
-    ),
-    ProductCatalogue(
-      upgrade: Timestamp.now(),
-      creation: Timestamp.now(),
-      description: 'Lays Papa Fritas 60g',
-      salePrice: 130.0,
-    ),
-  ];
-
   @override
   void onInit() async {
     super.onInit();
@@ -86,10 +36,23 @@ class TransactionsController extends GetxController {
   void onClose() {}
 
   // FIREBASE
-  void readCatalogueListProductsStream({required String id}) {
+  void readCatalogueListProductsStream({required String id, int days = 30}) {
+    
+    // a la marca de tiempo actual le descontamos dias
+    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(Timestamp.now()
+        .toDate()
+        .subtract(Duration(days: days))
+        .millisecondsSinceEpoch);
+    // marca de tiempo actual
+    Timestamp timeEnd = Timestamp.now();
+
     // obtenemos los obj(productos) del catalogo de la cuenta del negocio
     if (id != '') {
-      Database.readTransactionsStream(idAccount: id).listen((value) {
+      Database.readTransactionsFilterTimeStream(
+        idAccount: id,
+        timeStart: timeStart,
+        timeEnd: timeEnd,
+      ).listen((value) {
         List<TicketModel> list = [];
         //  get
         for (var element in value.docs) {
@@ -97,8 +60,6 @@ class TransactionsController extends GetxController {
         }
         //  set
         setTransactionsList = list;
-      }).onError((error) {
-        // error
       });
     }
   }
@@ -115,13 +76,5 @@ class TransactionsController extends GetxController {
       default:
         return 'Sin esprecificar';
     }
-  }
-
-  double getCountPriceTotal() {
-    double total = 0.0;
-    for (var element in listProducts) {
-      total = total + element.salePrice;
-    }
-    return total;
   }
 }

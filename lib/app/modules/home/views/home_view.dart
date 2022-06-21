@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:sell/app/modules/salesPage/views/sales_view.dart';
+import 'package:sell/app/modules/sellPage/views/sell_view.dart';
 import 'package:sell/app/modules/cataloguePage/views/catalogue_view.dart';
 import 'package:sell/app/modules/transactionsPage/views/transactions_view.dart';
 

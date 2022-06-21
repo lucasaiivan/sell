@@ -46,8 +46,11 @@ dependencies:
 
   # state controller
   get: ^4.6.5 # GetX es una solución potente y extraligera para Flutter. Combina la gestión del estado de alto rendimiento, la inyección inteligente de dependencias y la gestión de rutas de forma rápida y práctica.
-  # others
+  # storage
+  sqflite: ^2.0.2+1
   get_storage: ^2.0.3
+  # others
+  path: ^1.8.2  # Una completa biblioteca de manipulación de rutas multiplataforma para Dart.
   url_launcher: ^6.1.2
   font_awesome_flutter: ^10.1.0
   animate_do: ^2.0.0 # Un paquete de animación inspirado en Animate.css , construido usando solo animaciones de Flutter, sin paquetes adicionales.
