@@ -10,10 +10,13 @@ import 'app/routes/app_pages.dart';
 import 'app/utils/dynamicTheme_lb.dart';
 
 Future<void> main() async {
+  // Evita errores causados ​​por la actualización de flutter. 
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await GetStorage.init();
-  SplashBinding().dependencies();
+  SplashBinding().dependencies(); 
+  
+  // theme
   bool isDark = (GetStorage().read('isDarkMode') ?? false);
   if (Platform.isAndroid) {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(

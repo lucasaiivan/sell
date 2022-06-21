@@ -40,7 +40,6 @@ class Database {
   
   // Firestore - CollectionReference
   static CollectionReference refFirestoretransactions({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/TRANSACTIONS');
-  static CollectionReference refFirestoreStock({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/STOCK/');
   static CollectionReference refFirestoreAccount() => FirebaseFirestore.instance.collection('/ACCOUNTS/');
   static CollectionReference refFirestoreCategory({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/CATEGORY/');
   static CollectionReference refFirestoreCatalogueProduct({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/CATALOGUE/');
@@ -49,6 +48,12 @@ class Database {
   static CollectionReference refFirestoreMark() =>FirebaseFirestore.instance.collection('/APP/ARG/MARCAS/');
   static CollectionReference refFirestoreReportProduct({String iso='ARG'}) =>FirebaseFirestore.instance.collection('/APP/$iso/REPORTS/');
 
+  // consultas compuestas
+   static Stream<QuerySnapshot<Map<String, dynamic>>> readTransactionsFilterTimeStream({required String idAccount,required Timestamp timeEnd,required Timestamp timeStart}) => FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/TRANSACTIONS/')
+        .orderBy('creation', descending: true)
+        .where('creation',isGreaterThan: timeStart)
+        .where('creation', isLessThan: timeEnd)
+        .snapshots();
   //  update value
   //  Para actualizar los datos en la base de datos, puede usar el update()método en el documentReferencerobjeto pasando los nuevos datos como un mapa. Para actualizar un documento en particular de la base de datos, deberá usar su ID de documento único .
   //...
