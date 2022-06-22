@@ -6,6 +6,8 @@ import 'package:sell/app/modules/home/views/home_view.dart';
 import 'package:sell/app/modules/splash/bindings/splash_binding.dart';
 import 'package:sell/app/modules/splash/views/splash_view.dart';
 import '../modules/auth/views/login_view.dart';
+import '../modules/cataloguePage/bindings/catalogue_binding.dart';
+import '../modules/cataloguePage/views/product_edit_view.dart';
 part 'app_routes.dart';
 
 class AppPages {
@@ -29,6 +31,16 @@ class AppPages {
       name: Routes.HOME,
       page: () => HomeView(),
       binding: HomeBinding(),
+    ),
+    GetPage(
+      name: Routes.HOME,
+      page: () => HomeView(),
+      binding: HomeBinding(),
+    ),
+    GetPage(
+      name: Routes.EDITPRODUCT,
+      page: () => ProductEdit(),
+      binding: ProductsEditBinding(),
     ),
   ];
 }

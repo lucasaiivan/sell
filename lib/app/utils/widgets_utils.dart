@@ -134,6 +134,7 @@ class _ProductoItemState extends State<ProductoItem> {
   }
 
   // WIDGETS COMPONETS
+  
   Widget contentImage() {
     // var
     String description = widget.producto.description != ''
@@ -423,10 +424,10 @@ Widget drawerApp() {
         ListTile(
           leading: Container(
             padding: const EdgeInsets.all(0.0),
-            child: homeController.getAccountProfile.image == ''
+            child: homeController.getProfileAccountSelected.image == ''
                 ? CircleAvatar(backgroundColor: Get.theme.dividerColor)
                 : CachedNetworkImage(
-                    imageUrl: homeController.getAccountProfile.image,
+                    imageUrl: homeController.getProfileAccountSelected.image,
                     placeholder: (context, url) =>
                         CircleAvatar(backgroundColor: Get.theme.dividerColor),
                     imageBuilder: (context, image) => CircleAvatar(
@@ -436,7 +437,7 @@ Widget drawerApp() {
                         CircleAvatar(backgroundColor: Get.theme.dividerColor),
                   ),
           ),
-          title: Text(homeController.getAccountProfile.name),
+          title: Text(homeController.getProfileAccountSelected.name==''?'Nombre':homeController.getProfileAccountSelected.name),
           onLongPress: () {},
         ),
         Expanded(
@@ -569,4 +570,51 @@ class _CheckBoxAddProductState extends State<CheckBoxAddProduct> {
       ),
     );
   }
+}
+
+class ComponentApp{
+  static PreferredSize linearProgressBarApp({Color color = Colors.purple}) {
+  return PreferredSize(
+      preferredSize: Size.fromHeight(0.0),
+      child: LinearProgressIndicator(
+          minHeight: 6.0,
+          backgroundColor: Colors.white.withOpacity(0.3),
+          valueColor: new AlwaysStoppedAnimation<Color>(color)));
+}
+}
+class ImageApp{
+
+  static Widget circleImage(
+    {required String url, required String texto, double size = 85.0}) {
+  //values
+  MaterialColor color = Utils.getRandomColor();
+  if (texto == '') texto = 'Image';
+
+  Widget imageDefault = CircleAvatar(
+    backgroundColor: color.withOpacity(0.1),
+    radius: size,
+    child: Text(texto.substring(0, 1),
+        style: TextStyle(
+          fontSize: size / 2,
+          color: color,
+          fontWeight: FontWeight.bold,
+        )),
+  );
+
+  return Container(
+    width: size,
+    height: size,
+    child: url == "" || url == "default"
+        ? imageDefault
+        : CachedNetworkImage(
+            imageUrl: url,
+            placeholder: (context, url) => imageDefault,
+            imageBuilder: (context, image) => CircleAvatar(
+              backgroundImage: image,
+              radius: size,
+            ),
+            errorWidget: (context, url, error) => imageDefault,
+          ),
+  );
+}
 }

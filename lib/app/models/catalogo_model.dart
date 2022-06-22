@@ -225,7 +225,7 @@ class ProductCatalogue {
       quantityStock: data['quantityStock'] ?? 0,
       sales: data['sales'] ?? 0,
       select: false,
-      stock: false,
+      stock: data['stock']?? false,
     );
   }
 

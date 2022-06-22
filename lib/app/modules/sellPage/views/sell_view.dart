@@ -56,28 +56,35 @@ class SalesView extends StatelessWidget {
   }
 
   Widget body({required SalesController controller}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        widgetProducts,
-        Expanded(
-          child: GridView.builder(
-            padding: const EdgeInsets.all(12),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3, crossAxisSpacing: 1.0, mainAxisSpacing: 1.0),
-            itemCount: controller.getListProductsSelested.length + 15,
-            itemBuilder: (context, index) {
-              // mostramos un número de elementos vacíos de los cuales el primero tendrá un icono 'add'
-              if (index < controller.getListProductsSelested.length) {
-                return ProductoItem(
-                    producto: controller.getListProductsSelested[index]);
-              } else {
-                return Card(elevation: 0, color: Colors.grey.withOpacity(0.1));
-              }
-            },
-          ),
-        ),
-      ],
+    return NestedScrollView(
+      /* le permite crear una lista de elementos que se desplazarían hasta que el cuerpo alcanzara la parte superior */
+      floatHeaderSlivers: true,
+      physics: const BouncingScrollPhysics(),
+      headerSliverBuilder: (context, innerBoxIsScrolled) {
+        return [
+          // atentos a cualquier cambio que surja en los datos de la lista de marcas
+          Obx(() => SliverList(
+                delegate: SliverChildListDelegate([
+                  widgetProducts,
+                ]),
+              )),
+        ];
+      },
+      body:GridView.builder(
+      padding: const EdgeInsets.all(12),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3, crossAxisSpacing: 1.0, mainAxisSpacing: 1.0),
+      itemCount: controller.getListProductsSelested.length + 15,
+      itemBuilder: (context, index) {
+        // mostramos un número de elementos vacíos de los cuales el primero tendrá un icono 'add'
+        if (index < controller.getListProductsSelested.length) {
+          return ProductoItem(
+              producto: controller.getListProductsSelested[index]);
+        } else {
+          return Card(elevation: 0, color: Colors.grey.withOpacity(0.1));
+        }
+      },
+    ),
     );
   }
 
@@ -228,8 +235,7 @@ class SalesView extends StatelessWidget {
       height: 125,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount:
-            salesController.getRecentlySelectedProductsList.length + 10,
+        itemCount: salesController.getRecentlySelectedProductsList.length + 10,
         itemBuilder: (context, index) {
           if (index == 0) {
             return Row(
@@ -238,7 +244,8 @@ class SalesView extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(left: 12),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(5.0),
@@ -261,30 +268,30 @@ class SalesView extends StatelessWidget {
                     ],
                   ),
                 ),
-                (index <
-                        salesController
-                            .getRecentlySelectedProductsList.length)
-                    ? circleAvatarProduct(productCatalogue: salesController.getRecentlySelectedProductsList[index])
+                (index < salesController.getRecentlySelectedProductsList.length)
+                    ? circleAvatarProduct(
+                        productCatalogue: salesController
+                            .getRecentlySelectedProductsList[index])
                     : Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: CircleAvatar(
-                    radius: 35,
-                    backgroundColor: Colors.grey.withOpacity(0.05),
-                  ),
-                ),
-                const Text(''),
-              ],
-            ),
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(5.0),
+                            child: CircleAvatar(
+                              radius: 35,
+                              backgroundColor: Colors.grey.withOpacity(0.05),
+                            ),
+                          ),
+                          const Text(''),
+                        ],
+                      ),
               ],
             );
           }
           // mostramos un número de elementos vacíos de los cuales el primero tendrá un icono 'add'
-          if (index <
-              salesController.getRecentlySelectedProductsList.length) {
-            return circleAvatarProduct(productCatalogue: salesController.getRecentlySelectedProductsList[index]);
-            
+          if (index < salesController.getRecentlySelectedProductsList.length) {
+            return circleAvatarProduct(
+                productCatalogue:
+                    salesController.getRecentlySelectedProductsList[index]);
           } else {
             return Column(
               children: [
@@ -305,7 +312,6 @@ class SalesView extends StatelessWidget {
   }
 
   Widget circleAvatarProduct({required ProductCatalogue productCatalogue}) {
-
     // controller
     final SalesController salesController = Get.find();
 
@@ -323,24 +329,38 @@ class SalesView extends StatelessWidget {
               children: <Widget>[
                 CachedNetworkImage(
                   imageUrl: productCatalogue.image,
-                  placeholder: (context, url) =>
-                      CircleAvatar(radius: 35,backgroundColor: Get.theme.dividerColor,child: Text(Publications.getFormatoPrecio(monto: productCatalogue.salePrice),style: TextStyle(color: Get.textTheme.bodyText1?.color))),
+                  placeholder: (context, url) => CircleAvatar(
+                      radius: 35,
+                      backgroundColor: Get.theme.dividerColor,
+                      child: Text(
+                          Publications.getFormatoPrecio(
+                              monto: productCatalogue.salePrice),
+                          style: TextStyle(
+                              color: Get.textTheme.bodyText1?.color))),
                   imageBuilder: (context, image) => CircleAvatar(
                     radius: 35,
                     backgroundImage: image,
                   ),
-                  errorWidget: (context, url, error) =>
-                      CircleAvatar(radius: 35,backgroundColor: Get.theme.dividerColor,child:Text(Publications.getFormatoPrecio(monto: productCatalogue.salePrice),style: TextStyle(color: Get.textTheme.bodyText1?.color)),),
+                  errorWidget: (context, url, error) => CircleAvatar(
+                    radius: 35,
+                    backgroundColor: Get.theme.dividerColor,
+                    child: Text(
+                        Publications.getFormatoPrecio(
+                            monto: productCatalogue.salePrice),
+                        style:
+                            TextStyle(color: Get.textTheme.bodyText1?.color)),
+                  ),
                 ),
                 const SizedBox(
                   height: 3.0,
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal:5),
+                  padding: const EdgeInsets.symmetric(horizontal: 5),
                   child: Text(productCatalogue.description,
                       style: const TextStyle(
                           fontSize: 12, fontWeight: FontWeight.normal),
-                      overflow: TextOverflow.fade,maxLines: 1,
+                      overflow: TextOverflow.fade,
+                      maxLines: 1,
                       softWrap: false),
                 )
               ],

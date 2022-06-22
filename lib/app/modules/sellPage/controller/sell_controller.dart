@@ -140,19 +140,19 @@ class SalesController extends GetxController {
     getTicket.creation = Timestamp.now();
     // set firestore
     Database.refFirestoretransactions(
-            idAccount: homeController.getAccountProfile.id)
+            idAccount: homeController.getProfileAccountSelected.id)
         .doc(getTicket.id)
         .set(getTicket.toJson());
     for (var element in listIdsProducts) {
       // registrar venta
       Database.dbProductStockSalesIncrement(
-            idAccount: homeController.getAccountProfile.id,
+            idAccount: homeController.getProfileAccountSelected.id,
             idProduct: element['id'],
             );
       // descontar de stock
       if(element['stock']??false){
         Database.dbProductStockDecrement(
-            idAccount: homeController.getAccountProfile.id,
+            idAccount: homeController.getProfileAccountSelected.id,
             idProduct: element['id'],
             );
       }
