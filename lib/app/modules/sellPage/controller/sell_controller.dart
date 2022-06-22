@@ -134,26 +134,30 @@ class SalesController extends GetxController {
     }
     //  set values
     getTicket.id = id;
+    getTicket.seller = homeController.getIdAccountSelected;
+    getTicket.cashRegister='1';
     getTicket.listPoduct = listIdsProducts;
     getTicket.priceTotal = getCountPriceTotal();
     getTicket.valueReceived = getValueReceivedTicket;
     getTicket.creation = Timestamp.now();
     // set firestore
     Database.refFirestoretransactions(
-            idAccount: homeController.getProfileAccountSelected.id)
+            idAccount: homeController.getIdAccountSelected)
         .doc(getTicket.id)
         .set(getTicket.toJson());
     for (var element in listIdsProducts) {
       // registrar venta
       Database.dbProductStockSalesIncrement(
-            idAccount: homeController.getProfileAccountSelected.id,
+            idAccount: homeController.getIdAccountSelected,
             idProduct: element['id'],
+            quantity: element['quantity']??1,
             );
       // descontar de stock
       if(element['stock']??false){
         Database.dbProductStockDecrement(
-            idAccount: homeController.getProfileAccountSelected.id,
+            idAccount: homeController.getIdAccountSelected,
             idProduct: element['id'],
+            quantity: element['quantity']??1,
             );
       }
     }

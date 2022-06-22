@@ -57,11 +57,11 @@ class AuthView extends GetView<LoginController> {
                 height: double.infinity,
                 width: double.infinity)),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
           child: ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
               elevation: 0,
-              padding: EdgeInsets.all(14.0),
+              padding: const EdgeInsets.all(14.0),
               onPrimary: Colors.white,
               primary: colorButton,
               shadowColor: colorButton,
@@ -88,7 +88,7 @@ class AuthView extends GetView<LoginController> {
   Widget widgetCheckAcceptPrivacyAndUsePolicy() {
     TextStyle defaultStyle =
         TextStyle(color: Get.theme.textTheme.bodyText1!.color);
-    TextStyle linkStyle = TextStyle(color: Colors.blue);
+    TextStyle linkStyle = const TextStyle(color: Colors.blue);
 
     RichText text = RichText(
       textAlign: TextAlign.center,
@@ -154,30 +154,27 @@ class AuthView extends GetView<LoginController> {
       double height = 200}) {
     // Pantallas integradas para la introducción a la aplicación
 
-    List<Widget> _pages = [
+    List<Widget> pages = [
       componente(
           iconData: Icons.qr_code_scanner_rounded,
-          assetName: 'assets/scan_img.png',
           texto: "ESCANEA CON TU CÁMARA",
           descripcion:
               "Solo tienes que enfocar tu cámara \nal código de barra de tu producto \npara obtener la información en el acto 👌",
           brightness: Get.theme.brightness),
       componente(
           iconData: Icons.monetization_on,
-          assetName: 'assets/compare_img.png',
           texto: "¿QUERES SABER EL PRECIO?",
           descripcion:
               "Compara precios de diferentes comerciantes o puedes compartir los tuyos",
           brightness: Get.theme.brightness),
       componente(
           iconData: Icons.category,
-          assetName: 'assets/catalogue_img.png',
           texto: "CREA TU CATÁLOGO",
           descripcion: "Arma tu catálogo con tus productos \n 🍫🍬🥫🍾",
           brightness: Get.theme.brightness),
     ];
 
-    return Container(
+    return SizedBox(
       width: width,
       height: height,
       child: Scaffold(
@@ -188,10 +185,9 @@ class AuthView extends GetView<LoginController> {
               _controller, //  El initialPageparámetro establecido en 0 significa que el primer elemento secundario del widget PageViewse mostrará primero (ya que es un índice basado en cero) */
           pageSnapping: true, // Deslizaiento automatico */
           scrollDirection: Axis.horizontal, // Dirección de deslizamiento */
-          children: _pages,
+          children: pages,
         ),
-        floatingActionButton: dotsIndicator(
-            context: context, pageController: _controller, pages: _pages),
+        floatingActionButton: dotsIndicator(context: context, pageController: _controller, pages: pages),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       ),
     );
@@ -301,17 +297,17 @@ class DotsIndicator extends AnimatedWidget {
     double selectedness = Curves.easeOut.transform(max(0.0,
         1.0 - ((controller.page ?? controller.initialPage) - index).abs()));
     double zoom = 1.0 + (_kMaxZoom - 1.0) * selectedness;
-    return new Container(
+    return  Container(
       width: _kDotSpacing,
       height: _kDotSpacing,
-      child: new Center(
-        child: new Material(
+      child:  Center(
+        child:  Material(
           color: color,
           type: MaterialType.circle,
-          child: new Container(
+          child: Container(
             width: _kDotSize * zoom,
             height: _kDotSize * zoom,
-            child: new InkWell(onTap: () => onPageSelected(index)),
+            child: InkWell(onTap: () => onPageSelected(index)),
           ),
         ),
       ),
@@ -319,9 +315,9 @@ class DotsIndicator extends AnimatedWidget {
   }
 
   Widget build(BuildContext context) {
-    return new Row(
+    return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: new List<Widget>.generate(itemCount, _buildDot),
+      children: List<Widget>.generate(itemCount, _buildDot),
     );
   }
 }

@@ -27,12 +27,26 @@ class TransactionsView extends StatelessWidget {
 
   // WIDGETS VIEWS
   PreferredSizeWidget appbar({required BuildContext context}) {
+    // others controllers
+    final TransactionsController transactionsController = Get.find();
+
     return AppBar(
       elevation: 0,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       title: const Text('Transacciones'),
       actions: [
-        IconButton(onPressed: () {}, icon: const Icon(Icons.filter_list))
+        PopupMenuButton(
+            onSelected: (selectedValue) {
+              transactionsController.filterList(key: selectedValue);
+            },
+            itemBuilder: (BuildContext ctx) => [
+                  const PopupMenuItem(
+                      child: Text('últimos 30 días'), value: '30'),
+                  const PopupMenuItem(
+                      child: Text('últimos 60 días'), value: '60'),
+                  const PopupMenuItem(
+                      child: Text('últimos 120 días'), value: '120'),
+                ])
       ],
     );
   }
@@ -50,25 +64,34 @@ class TransactionsView extends StatelessWidget {
               idMode:
                   transactionsController.getTransactionsList[index].payMode);
 
-          if(index==0){
+          if (index == 0) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 20),
-                child: Text('Hace un mes',
-                    style:
-                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              ),
-              ListTile(
-                onLongPress: () {},
-                title: Text(Publications.getFechaPublicacion(
-                    transactionsController.getTransactionsList[index].creation
-                        .toDate(),
-                    Timestamp.now().toDate())),
-                subtitle: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(transactionsController.getFilterText,
+                          style:const  TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold)),
+                      Text(transactionsController.getInfoPriceTotal(),
+                          textAlign: TextAlign.start),
+                    ],
+                  ),
+                ),
+                ListTile(
+                  contentPadding: const EdgeInsets.all(12),
+                  onLongPress: () {},
+                  title: Text(Publications.getFechaPublicacion(
+                      transactionsController.getTransactionsList[index].creation
+                          .toDate(),
+                      Timestamp.now().toDate())),
+                  subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
@@ -89,26 +112,28 @@ class TransactionsView extends StatelessWidget {
                               .toDate())),
                     ],
                   ),
+                  trailing: Text(
+                      Publications.getFormatoPrecio(
+                          monto: transactionsController
+                              .getTransactionsList[index].priceTotal),
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
                 ),
-                trailing: Text(Publications.getFormatoPrecio(
-                    monto: transactionsController
-                        .getTransactionsList[index].priceTotal)),
-              ),
-              const Divider(height: 0),
-            ],
-          );
+                const Divider(height: 0),
+              ],
+            );
           }
 
           return Column(
             children: [
               ListTile(
+                contentPadding: const EdgeInsets.all(12),
                 onLongPress: () {},
                 title: Text(Publications.getFechaPublicacion(
                     transactionsController.getTransactionsList[index].creation
                         .toDate(),
                     Timestamp.now().toDate())),
                 subtitle: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  padding: const EdgeInsets.only(),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -131,9 +156,11 @@ class TransactionsView extends StatelessWidget {
                     ],
                   ),
                 ),
-                trailing: Text(Publications.getFormatoPrecio(
-                    monto: transactionsController
-                        .getTransactionsList[index].priceTotal)),
+                trailing: Text(
+                    Publications.getFormatoPrecio(
+                        monto: transactionsController
+                            .getTransactionsList[index].priceTotal),
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
               ),
               const Divider(height: 0),
             ],

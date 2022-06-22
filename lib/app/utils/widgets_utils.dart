@@ -438,6 +438,7 @@ Widget drawerApp() {
                   ),
           ),
           title: Text(homeController.getProfileAccountSelected.name==''?'Nombre':homeController.getProfileAccountSelected.name),
+          trailing:const Icon(Icons.arrow_forward_ios),
           onLongPress: () {},
         ),
         Expanded(
@@ -452,7 +453,7 @@ Widget drawerApp() {
                   title: const Text('Transacciones'),
                   onTap: () => homeController.setIndexPage = 1),
               ListTile(
-                  leading: const Icon(Icons.check_box_outline_blank_rounded),
+                  leading: const Icon(Icons.apps_rounded),
                   title: const Text('Catálogo'),
                   onTap: () => homeController.setIndexPage = 2),
               ListTile(

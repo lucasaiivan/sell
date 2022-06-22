@@ -1,17 +1,20 @@
-import 'dart:ffi';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:sell/app/models/ticket_model.dart';
 import 'package:sell/app/services/database.dart';
+import 'package:sell/app/utils/fuctions.dart';
 
 import '../../home/controller/home_controller.dart';
 
 class TransactionsController extends GetxController {
   // others controllers
   final HomeController homeController = Get.find();
+
+  // text filter
+  String _filterText = '';
+  String get getFilterText => _filterText;
+  set setFilterText(String value) => _filterText = value;
 
   // list transactions
   List<TicketModel> _listTransactions = [];
@@ -29,15 +32,32 @@ class TransactionsController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
-    readCatalogueListProductsStream(id: homeController.getProfileAccountSelected.id);
+    filterList(key: '30');
   }
 
   @override
   void onClose() {}
 
+  // set/get
+  void filterList({required String key}) {
+    switch (key) {
+      case '30':
+        readCatalogueListProductsStream(days: 30);
+        setFilterText = 'Últimos 30 días';
+        break;
+      case '60':
+        readCatalogueListProductsStream(days: 60);
+        setFilterText = 'Últimos 60 días';
+        break;
+      case '120':
+        readCatalogueListProductsStream(days: 120);
+        setFilterText = 'Últimos 120 días';
+        break;
+    }
+  }
+
   // FIREBASE
-  void readCatalogueListProductsStream({required String id, int days = 30}) {
-    
+  void readCatalogueListProductsStream({int days = 30}) {
     // a la marca de tiempo actual le descontamos dias
     Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(Timestamp.now()
         .toDate()
@@ -47,9 +67,9 @@ class TransactionsController extends GetxController {
     Timestamp timeEnd = Timestamp.now();
 
     // obtenemos los obj(productos) del catalogo de la cuenta del negocio
-    if (id != '') {
+    if (homeController.getProfileAccountSelected.id != '') {
       Database.readTransactionsFilterTimeStream(
-        idAccount: id,
+        idAccount: homeController.getProfileAccountSelected.id,
         timeStart: timeStart,
         timeEnd: timeEnd,
       ).listen((value) {
@@ -65,6 +85,16 @@ class TransactionsController extends GetxController {
   }
 
   // FUCTIONS
+  String getInfoPriceTotal() {
+    double total = 0.0;
+
+    for (TicketModel ticket in getTransactionsList) {
+      total += ticket.priceTotal;
+    }
+
+    return '${Publications.getFormatoPrecio(monto: total)} de ${getTransactionsList.length} ventas';
+  }
+
   String getPayModeFormat({required idMode}) {
     switch (idMode) {
       case 'effective':

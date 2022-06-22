@@ -46,23 +46,28 @@ class CataloguePage extends StatelessWidget {
   }
 
   Widget body({required BuildContext context}) {
+
+    // controllers
+    final HomeController controller = Get.find();
+
     return DefaultTabController(
       length: 2,
       child: Column(
         children: <Widget>[
           Container(
-            constraints: BoxConstraints.expand(height: 50),
-            child: const TabBar(tabs: [
-              Tab(text: "Productos"),
-              Tab(text: "Stock"),
+            constraints:const BoxConstraints.expand(height: 50),
+            child: TabBar(
+              labelColor: Get.theme.textTheme.bodyText1?.color,
+              tabs: [
+                Tab(text: "${controller.getCataloProducts.length} productos"),
+                const Tab(text: "Cátegorias"),
             ]),
           ),
           Expanded(
-            child: TabBarView(children: [
+            child: TabBarView(
+              children: [
               widgetListVertical(),
-              Container(
-                child: Text("Articles Body"),
-              ),
+              viewCategory(),
             ]),
           )
         ],
@@ -84,55 +89,70 @@ class CataloguePage extends StatelessWidget {
 
             return Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  child: ListTile(
-                    onTap: () => cataloguePageController.toProductEdit(
-                        productCatalogue: productCatalogue),
-                    title: Text(productCatalogue.description,
-                        maxLines: 1),
-                    subtitle: Row(
-                      children: [
-                        Text(Publications.getFormatoPrecio(
-                            monto:productCatalogue.salePrice)),
-                        productCatalogue.sales==0?Container():Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 5),
-                            child: Icon(Icons.circle,
-                                size: 8, color: Get.theme.dividerColor),
-                          ),
-                          productCatalogue.sales==0?Container():Text('${productCatalogue.sales} ${productCatalogue.sales==1?'venta':'ventas'}'),
-                      ],
-                    ),
-                    leading: CachedNetworkImage(
-                      imageUrl: productCatalogue.image,
-                      placeholder: (context, url) =>
-                          CircleAvatar(backgroundColor: Get.theme.dividerColor),
-                      imageBuilder: (context, image) => CircleAvatar(
-                        backgroundImage: image,
-                      ),
-                      errorWidget: (context, url, error) =>
-                          CircleAvatar(backgroundColor: Get.theme.dividerColor),
-                    ),
-                    trailing:
-                        productCatalogue.stock
-                            ? Material(
-                                color: Get.theme.dividerColor,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(30.0)),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(productCatalogue.quantityStock
-                                      .toString()),
-                                ),
-                              )
-                            : null,
+                ListTile(
+                  contentPadding: const EdgeInsets.all(12),
+                  onTap: () => cataloguePageController.toProductEdit(
+                      productCatalogue: productCatalogue),
+                  title: Text(productCatalogue.description,
+                      maxLines: 1),
+                  subtitle: Row(
+                    children: [
+                      Text(Publications.getFormatoPrecio(
+                          monto:productCatalogue.salePrice)),
+                      productCatalogue.sales==0?Container():Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 5),
+                          child: Icon(Icons.circle,
+                              size: 8, color: Get.theme.dividerColor),
+                        ),
+                        productCatalogue.sales==0?Container():Text('${productCatalogue.sales} ${productCatalogue.sales==1?'venta':'ventas'}'),
+                    ],
                   ),
+                  leading: CachedNetworkImage(
+                    imageUrl: productCatalogue.image,
+                    placeholder: (context, url) =>
+                        CircleAvatar(backgroundColor: Get.theme.dividerColor),
+                    imageBuilder: (context, image) => CircleAvatar(
+                      backgroundImage: image,
+                    ),
+                    errorWidget: (context, url, error) =>
+                        CircleAvatar(backgroundColor: Get.theme.dividerColor),
+                  ),
+                  trailing:
+                      productCatalogue.stock
+                          ? Material(
+                              color: Get.theme.dividerColor,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30.0)),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(productCatalogue.quantityStock
+                                    .toString()),
+                              ),
+                            )
+                          : null,
                 ),
                 const Divider(height: 0),
               ],
             );
           },
         ));
+  }
+  Widget viewCategory(){
+    // mostramos las categorias en un lista
+    return ListView.builder(
+      itemCount: 10,
+      itemBuilder: (context, index) {
+        return Column(
+          children: [
+            ListTile(
+              title: Container(width: 100,height: 14,color: Colors.grey,),
+              subtitle: Container(width: 100,height: 14,color: Colors.grey,),
+              
+              ),
+              const Divider(),
+          ],
+        );
+    },);
   }
 
   // WIDGETS COMPONENTS

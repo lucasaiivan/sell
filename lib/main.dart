@@ -36,10 +36,13 @@ Future<void> main() async {
   // theme
   Color colorDark = const Color.fromARGB(255, 43, 45, 57);
   Color colorLight = const Color.fromRGBO(247, 245, 242, 1);
-  ThemeData themeData = ThemeData(
+  ThemeData themeData = ThemeData
+  (
+    popupMenuTheme: const PopupMenuThemeData(color: Colors.grey),
     visualDensity: VisualDensity.adaptivePlatformDensity,
     brightness: Brightness.light,
     useMaterial3: true,
+    indicatorColor: Colors.blue,
     primarySwatch: Colors.blue,
     backgroundColor: Colors.amber,
     scaffoldBackgroundColor: colorLight,
@@ -50,6 +53,8 @@ Future<void> main() async {
     dialogBackgroundColor: colorLight,
   );
   ThemeData themeDataDark = ThemeData(
+    popupMenuTheme: const PopupMenuThemeData(color: Colors.grey),
+    indicatorColor: Colors.blue,
     visualDensity: VisualDensity.adaptivePlatformDensity,
     brightness: Brightness.dark,
     useMaterial3: true,
