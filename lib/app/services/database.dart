@@ -48,8 +48,13 @@ class Database {
   static CollectionReference refFirestoreMark() =>FirebaseFirestore.instance.collection('/APP/ARG/MARCAS/');
   static CollectionReference refFirestoreReportProduct({String iso='ARG'}) =>FirebaseFirestore.instance.collection('/APP/$iso/REPORTS/');
 
-  // consultas compuestas
-   static Stream<QuerySnapshot<Map<String, dynamic>>> readTransactionsFilterTimeStream({required String idAccount,required Timestamp timeEnd,required Timestamp timeStart}) => FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/TRANSACTIONS/')
+  // set - Firestore
+  static Future dbProductStockSalesIncrement({required String idAccount, required String idProduct}) =>FirebaseFirestore.instance.collection('ACCOUNTS/$idAccount/CATALOGUE/').doc(idProduct).update({"sales": FieldValue.increment(1)}); 
+  static Future dbProductStockIncrement({required String idAccount, required String idProduct,required int quantity}) =>FirebaseFirestore.instance.collection('ACCOUNTS/$idAccount/CATALOGUE/').doc(idProduct).update({"quantityStock": FieldValue.increment(quantity)}); 
+  static Future dbProductStockDecrement({required String idAccount, required String idProduct}) =>FirebaseFirestore.instance.collection('ACCOUNTS/$idAccount/CATALOGUE/').doc(idProduct).update({"quantityStock": FieldValue.increment(-1)}); 
+  // get - consultas compuestas
+  static Stream<QuerySnapshot<Map<String, dynamic>>>readSalesProduct({required String idAccount}) =>FirebaseFirestore.instance.collection('ACCOUNTS/$idAccount/CATALOGUE').orderBy("sales", descending: true).limit(10).snapshots();
+  static Stream<QuerySnapshot<Map<String, dynamic>>> readTransactionsFilterTimeStream({required String idAccount,required Timestamp timeEnd,required Timestamp timeStart}) => FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/TRANSACTIONS/')
         .orderBy('creation', descending: true)
         .where('creation',isGreaterThan: timeStart)
         .where('creation', isLessThan: timeEnd)

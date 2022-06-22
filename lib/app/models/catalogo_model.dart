@@ -130,17 +130,17 @@ class ProductCatalogue {
       Timestamp.now(); // Marca de tiempo ( hora en que se creo el documento )
   Timestamp upgrade = Timestamp
       .now(); // Marca de tiempo ( hora en que se actualizaron los datos )
-
-  // Datos del producto
   bool verified = false; // estado de verificación por un moderador
-  // Var
+  int quantityStock = 0;
+  int sales = 0;
+  bool stock = false;
   double salePrice = 0.0;
   double purchasePrice = 0.0;
   String currencySign = "\$"; // signo de la moneda
   // var optional
   bool select = false;
   int quantity = 0;
-  bool stock = false;
+
 
 
   ProductCatalogue({
@@ -155,10 +155,13 @@ class ProductCatalogue {
     this.nameCategory = '',
     this.subcategory = "",
     this.nameSubcategory = '',
+    this.stock = false,
+    this.quantityStock=0,
     required this.creation,
     required this.upgrade,
 
     // value account
+    this.sales = 0,
     this.salePrice = 0.0,
     this.purchasePrice = 0.0,
     this.currencySign = "\$",
@@ -168,7 +171,6 @@ class ProductCatalogue {
 
     // var app
     this.quantity = 1,
-    this.stock = false,
   });
 
   factory ProductCatalogue.fromMap(Map data) {
@@ -220,6 +222,8 @@ class ProductCatalogue {
           ? data['currencySign']
           : data['signo_moneda'] ?? '',
       quantity: data['quantity'] ?? 1,
+      quantityStock: data['quantityStock'] ?? 0,
+      sales: data['sales'] ?? 0,
       select: false,
       stock: false,
     );
@@ -245,6 +249,8 @@ class ProductCatalogue {
         "currencySign": currencySign,
         "quantity": quantity,
         "stock": stock,
+        "quantityStock": quantityStock,
+        "sales": sales,
       };
 
   Product convertProductoDefault() {
