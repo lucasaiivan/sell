@@ -324,7 +324,7 @@ class SalesView extends StatelessWidget {
                 CachedNetworkImage(
                   imageUrl: productCatalogue.image,
                   placeholder: (context, url) =>
-                      CircleAvatar(backgroundColor: Get.theme.dividerColor,child: Text(Publications.getFormatoPrecio(monto: productCatalogue.salePrice))),
+                      CircleAvatar(radius: 35,backgroundColor: Get.theme.dividerColor,child: Text(Publications.getFormatoPrecio(monto: productCatalogue.salePrice),style: TextStyle(color: Get.textTheme.bodyText1?.color))),
                   imageBuilder: (context, image) => CircleAvatar(
                     radius: 35,
                     backgroundImage: image,
@@ -335,11 +335,14 @@ class SalesView extends StatelessWidget {
                 const SizedBox(
                   height: 3.0,
                 ),
-                Text(productCatalogue.description,
-                    style: const TextStyle(
-                        fontSize: 12, fontWeight: FontWeight.normal),
-                    overflow: TextOverflow.clip,maxLines: 1,
-                    softWrap: false)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal:5),
+                  child: Text(productCatalogue.description,
+                      style: const TextStyle(
+                          fontSize: 12, fontWeight: FontWeight.normal),
+                      overflow: TextOverflow.fade,maxLines: 1,
+                      softWrap: false),
+                )
               ],
             ),
           ),

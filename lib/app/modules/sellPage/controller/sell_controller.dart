@@ -18,8 +18,9 @@ class SalesController extends GetxController {
   final HomeController homeController = Get.find();
 
   // productos seleccionados recientemente
-  List<ProductCatalogue> get getRecentlySelectedProductsList =>
-      homeController.listProductSelecteds.reversed.toList();
+
+
+  List<ProductCatalogue> get getRecentlySelectedProductsList => homeController.getProductsSelectedsList;
   registerSelections({required ProductCatalogue productCatalogue}) {
     bool repeat = false;
     // seach
@@ -123,12 +124,12 @@ class SalesController extends GetxController {
     List listIdsProducts = [];
 
     for (ProductCatalogue element in getListProductsSelested) {
-      registerSelections(productCatalogue: element);
       // generamos una nueva lista con los id de los productos seleccionas
       listIdsProducts.add({
         'id': element.id,
         'quantity': element.quantity,
-        'description': element.description
+        'description': element.description,
+        'stock': element.stock,
       });
     }
     //  set values
@@ -138,10 +139,24 @@ class SalesController extends GetxController {
     getTicket.valueReceived = getValueReceivedTicket;
     getTicket.creation = Timestamp.now();
     // set firestore
-    /* Database.refFirestoretransactions(
+    Database.refFirestoretransactions(
             idAccount: homeController.getAccountProfile.id)
         .doc(getTicket.id)
-        .set(getTicket.toJson()); */
+        .set(getTicket.toJson());
+    for (var element in listIdsProducts) {
+      // registrar venta
+      Database.dbProductStockSalesIncrement(
+            idAccount: homeController.getAccountProfile.id,
+            idProduct: element['id'],
+            );
+      // descontar de stock
+      if(element['stock']??false){
+        Database.dbProductStockDecrement(
+            idAccount: homeController.getAccountProfile.id,
+            idProduct: element['id'],
+            );
+      }
+    }
   }
 
   // FUCTIONS
@@ -152,7 +167,7 @@ class SalesController extends GetxController {
     // var
     Color colorAccent =
         Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
-    
+
     showSearch(
       context: context,
       delegate: SearchPage<ProductCatalogue>(
@@ -169,9 +184,14 @@ class SalesController extends GetxController {
             ListTile(
               title: Text(product.nameMark),
               subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Text(product.description,maxLines: 2,overflow:TextOverflow.clip,),
+                  Text(
+                    product.description,
+                    maxLines: 2,
+                    overflow: TextOverflow.clip,
+                  ),
                   Text(product.code),
                 ],
               ),
@@ -197,11 +217,6 @@ class SalesController extends GetxController {
       bool coincidence = false;
       for (ProductCatalogue product in getListProductsSelested) {
         if (product.id == item.id) {
-          product.quantity++;
-          coincidence = true;
-          update();
-        }
-        if (product.code == item.code) {
           product.quantity++;
           coincidence = true;
           update();
