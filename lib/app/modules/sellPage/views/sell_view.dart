@@ -7,6 +7,7 @@ import 'package:sell/app/utils/widgets_utils.dart';
 import '../../../utils/dynamicTheme_lb.dart';
 import '../controller/sell_controller.dart';
 
+// ignore: must_be_immutable
 class SalesView extends StatelessWidget {
   // ignore: prefer_const_constructors_in_immutables
   SalesView({Key? key}) : super(key: key);
@@ -235,7 +236,7 @@ class SalesView extends StatelessWidget {
       height: 125,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: salesController.getRecentlySelectedProductsList.length + 10,
+        itemCount: salesController.getRecentlySelectedProductsList.length + (salesController.getRecentlySelectedProductsList.length>5?0:10),
         itemBuilder: (context, index) {
           if (index == 0) {
             return Row(

@@ -2,15 +2,20 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TicketModel {
   String id = '';
+  String seller = ''; // nombre del vendedor
+  String cashRegister = ''; // nombre o numero de caja que se efectuo la venta
   String payMode = 'efective';
   double priceTotal = 0.0;
   double valueReceived = 0.0;
   List<dynamic> listPoduct = [];
-  late Timestamp creation; // Marca de tiempo ( hora en que se reporto el producto )
+  late Timestamp
+      creation; // Marca de tiempo ( hora en que se reporto el producto )
 
   TicketModel({
     this.id = "",
     this.payMode = "",
+    this.seller = "",
+    this.cashRegister = "",
     this.priceTotal = 0.0,
     this.valueReceived = 0.0,
     required this.listPoduct,
@@ -27,6 +32,8 @@ class TicketModel {
   Map<String, dynamic> toJson() => {
         "id": id,
         "payMode": payMode,
+        "seller": seller,
+        "cashRegister": cashRegister,
         "priceTotal": priceTotal,
         "valueReceived": valueReceived,
         "listPoduct": listPoduct,
@@ -36,6 +43,8 @@ class TicketModel {
     return TicketModel(
       id: data['id'] ?? '',
       payMode: data['payMode'] ?? '',
+      seller: data['seller'] ?? '',
+      cashRegister: data['cashRegister'] ?? '',
       priceTotal: data['priceTotal'] ?? 0.0,
       valueReceived: data['valueReceived'] ?? 0.0,
       listPoduct: data['listPoduct'] ?? [],
@@ -48,6 +57,8 @@ class TicketModel {
 
     id = data['id'] ?? '';
     payMode = data['payMode'] ?? '';
+    seller = data['seller'] ?? '';
+    cashRegister = data['cashRegister'] ?? '';
     priceTotal = data['priceTotal'];
     listPoduct = data['listPoduct'];
     creation = data['creation'];
