@@ -6,6 +6,23 @@ import 'package:sell/app/models/user_model.dart';
 import 'package:sell/app/services/database.dart';
 
 class HomeController extends GetxController {
+
+
+  // category list
+  RxList<Category> _categoryList = <Category>[].obs;
+  List<Category> get getCatalogueCategoryList => _categoryList;
+  set setCatalogueCategoryList(List<Category> value) {
+    _categoryList.value = value;
+    update(['tab']);
+  }
+
+  // subcategory list selected
+  RxList<Category> _subCategoryList = <Category>[].obs;
+  List<Category> get getsubCatalogueCategoryList => _subCategoryList;
+  set setCataloguesubCategoryList(List<Category> value) {
+    _subCategoryList.value = value;
+  }
+
   // list products for catalogue
 
   final RxList<ProductCatalogue> _catalogueBusiness = <ProductCatalogue>[].obs;
@@ -32,10 +49,13 @@ class HomeController extends GetxController {
   set setUserAccountAuth(User user) => _userAccountAuth = user;
 
   // profile user
-  ProfileAccountModel _accountProfile =
+  ProfileAccountModel _accountProfileSelected =
       ProfileAccountModel(creation: Timestamp.now());
-  ProfileAccountModel get getAccountProfile => _accountProfile;
-  set setAccountProfile(ProfileAccountModel value) => _accountProfile = value;
+  ProfileAccountModel get getProfileAccountSelected => _accountProfileSelected;
+  set setProfileAccountSelected(ProfileAccountModel value) => _accountProfileSelected = value;
+
+  // id account selected
+  String get getIdAccountSelected => _accountProfileSelected.id;
 
   final RxInt _indexPage = 0.obs;
   int get getIndexPage => _indexPage.value;
@@ -60,7 +80,7 @@ class HomeController extends GetxController {
   // QUERIES FIRESTORE
   void readAccountsData({required String idAccount}) {
     //default values
-    setAccountProfile = ProfileAccountModel(creation: Timestamp.now());
+    setProfileAccountSelected = ProfileAccountModel(creation: Timestamp.now());
 
     // load
     readProductsCatalogue(idAccount: idAccount);
@@ -70,7 +90,7 @@ class HomeController extends GetxController {
       Database.readProfileAccountModelFuture(idAccount).then((value) {
         //get
         if (value.exists) {
-          setAccountProfile =
+          setProfileAccountSelected =
               ProfileAccountModel.fromDocumentSnapshot(documentSnapshot: value);
           //  agregamos los datos del perfil de la cuenta en la lista para mostrar al usuario
           /* if (profileAccount.id != '') {
@@ -113,4 +133,25 @@ class HomeController extends GetxController {
       // error
     });
   }
+
+  Future<void> categoryDelete({required String idCategory}) async =>
+      await Database.refFirestoreCategory(
+              idAccount: getUserAccountAuth.uid)
+          .doc(idCategory)
+          .delete();
+  Future<void> categoryUpdate({required Category categoria}) async {
+    // ref
+    var documentReferencer =
+        Database.refFirestoreCategory(idAccount: getProfileAccountSelected.id)
+            .doc(categoria.id);
+    // Actualizamos los datos
+    documentReferencer
+        .set(Map<String, dynamic>.from(categoria.toJson()),
+            SetOptions(merge: true))
+        .whenComplete(() {
+      print("######################## FIREBASE updateAccount whenComplete");
+    }).catchError((e) => print(
+            "######################## FIREBASE updateAccount catchError: $e"));
+  }
+
 }

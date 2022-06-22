@@ -3,6 +3,8 @@ import 'package:sell/app/models/catalogo_model.dart';
 import 'package:sell/app/modules/home/controller/home_controller.dart';
 import 'package:sell/app/services/database.dart';
 
+import '../../../routes/app_pages.dart';
+
 class CataloguePageController extends GetxController {
   // others controllers
   final HomeController homeController = Get.find();
@@ -28,7 +30,7 @@ class CataloguePageController extends GetxController {
   void readProductsCatalogue() {
     // obtenemos los obj(productos) del catalogo de la cuenta del negocio
     Database.readProductsCatalogueStream(
-            id: homeController.getAccountProfile.id)
+            id: homeController.getProfileAccountSelected.id)
         .listen((value) {
       List<ProductCatalogue> list = [];
       //  get
@@ -41,5 +43,12 @@ class CataloguePageController extends GetxController {
     }).onError((error) {
       // error
     });
+  }
+
+  // FUCTIONS
+
+  // navigator
+  void toProductEdit({required ProductCatalogue productCatalogue}) {
+    Get.toNamed(Routes.EDITPRODUCT, arguments: {'product': productCatalogue});
   }
 }

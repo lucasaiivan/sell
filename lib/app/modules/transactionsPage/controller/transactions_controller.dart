@@ -29,7 +29,7 @@ class TransactionsController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
-    readCatalogueListProductsStream(id: homeController.getAccountProfile.id);
+    readCatalogueListProductsStream(id: homeController.getProfileAccountSelected.id);
   }
 
   @override

@@ -1,7 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:sell/app/models/catalogo_model.dart';
 import 'package:sell/app/modules/cataloguePage/controller/catalogue_controller.dart';
+import 'package:sell/app/modules/home/controller/home_controller.dart';
 import 'package:sell/app/utils/fuctions.dart';
 import 'package:sell/app/utils/widgets_utils.dart';
 
@@ -36,7 +38,7 @@ class CataloguePage extends StatelessWidget {
     return AppBar(
       elevation: 0,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      title: const Text('Catalogo'),
+      title: const Text('Catálogo'),
       actions: [
         IconButton(onPressed: () {}, icon: const Icon(Icons.filter_list))
       ],
@@ -44,28 +46,65 @@ class CataloguePage extends StatelessWidget {
   }
 
   Widget body({required BuildContext context}) {
+    return DefaultTabController(
+      length: 2,
+      child: Column(
+        children: <Widget>[
+          Container(
+            constraints: BoxConstraints.expand(height: 50),
+            child: const TabBar(tabs: [
+              Tab(text: "Productos"),
+              Tab(text: "Stock"),
+            ]),
+          ),
+          Expanded(
+            child: TabBarView(children: [
+              widgetListVertical(),
+              Container(
+                child: Text("Articles Body"),
+              ),
+            ]),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget widgetListVertical() {
     // controllers
     final CataloguePageController cataloguePageController = Get.find();
+    final HomeController controller = Get.find();
 
     return Obx(() => ListView.builder(
-          itemCount: cataloguePageController.getCataloProducts.length,
+          itemCount: controller.getCataloProducts.length,
           itemBuilder: (context, index) {
+            // get
+            ProductCatalogue productCatalogue =
+                controller.getCataloProducts[index];
+
             return Column(
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 5),
                   child: ListTile(
-                    onLongPress: () {},
-                    title: Text(
-                        cataloguePageController
-                            .getCataloProducts[index].description,
+                    onTap: () => cataloguePageController.toProductEdit(
+                        productCatalogue: productCatalogue),
+                    title: Text(productCatalogue.description,
                         maxLines: 1),
-                    subtitle: Text(Publications.getFormatoPrecio(
-                        monto: cataloguePageController
-                            .getCataloProducts[index].salePrice)),
+                    subtitle: Row(
+                      children: [
+                        Text(Publications.getFormatoPrecio(
+                            monto:productCatalogue.salePrice)),
+                        productCatalogue.sales==0?Container():Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 5),
+                            child: Icon(Icons.circle,
+                                size: 8, color: Get.theme.dividerColor),
+                          ),
+                          productCatalogue.sales==0?Container():Text('${productCatalogue.sales} ${productCatalogue.sales==1?'venta':'ventas'}'),
+                      ],
+                    ),
                     leading: CachedNetworkImage(
-                      imageUrl: cataloguePageController
-                          .getCataloProducts[index].image,
+                      imageUrl: productCatalogue.image,
                       placeholder: (context, url) =>
                           CircleAvatar(backgroundColor: Get.theme.dividerColor),
                       imageBuilder: (context, image) => CircleAvatar(
@@ -74,15 +113,19 @@ class CataloguePage extends StatelessWidget {
                       errorWidget: (context, url, error) =>
                           CircleAvatar(backgroundColor: Get.theme.dividerColor),
                     ),
-                    trailing: cataloguePageController
-                          .getCataloProducts[index].stock? Material(
-                      color: Get.theme.dividerColor ,
-                      shape: RoundedRectangleBorder(  borderRadius: BorderRadius.circular(30.0)),
-                      child: Padding(
-                        padding:const EdgeInsets.all(8.0),
-                        child: Text(cataloguePageController.getCataloProducts[index].quantity.toString()),
-                      ),
-                    ):null,
+                    trailing:
+                        productCatalogue.stock
+                            ? Material(
+                                color: Get.theme.dividerColor,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30.0)),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(productCatalogue.quantityStock
+                                      .toString()),
+                                ),
+                              )
+                            : null,
                   ),
                 ),
                 const Divider(height: 0),
@@ -92,10 +135,8 @@ class CataloguePage extends StatelessWidget {
         ));
   }
 
-
-
   // WIDGETS COMPONENTS
-   Widget get widgetProducts {
+  Widget get widgetProducts {
     return SizedBox(
       width: double.infinity,
       height: 100,
@@ -113,7 +154,10 @@ class CataloguePage extends StatelessWidget {
                     child: CircleAvatar(
                       radius: 35,
                       backgroundColor: Colors.grey.withOpacity(0.1),
-                      child: Icon(Icons.search,color: Colors.grey.withOpacity(0.8),),
+                      child: Icon(
+                        Icons.search,
+                        color: Colors.grey.withOpacity(0.8),
+                      ),
                     ),
                   ),
                   Padding(
