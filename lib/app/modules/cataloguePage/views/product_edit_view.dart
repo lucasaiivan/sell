@@ -160,7 +160,7 @@ class ProductEdit extends StatelessWidget {
                 disabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.grey.withOpacity(0.3)),
                 ),
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
                 labelText: "Descripción"),
             textInputAction: TextInputAction.done,
             controller: controller.controllerTextEdit_descripcion,
@@ -450,6 +450,17 @@ class ProductEdit extends StatelessWidget {
   }
 
   /* WIDGETS COMPONENT */
+  Widget textfielButton({required String labelText}){
+    return TextField(
+      decoration: InputDecoration(
+                disabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey.withOpacity(0.3)),
+                ),
+                border: const OutlineInputBorder(),
+                labelText: labelText),
+
+    );
+  }
   Widget buttonsCategory() {
     // Text of Button
     Text textCategory = Text(
