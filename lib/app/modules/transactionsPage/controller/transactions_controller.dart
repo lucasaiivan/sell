@@ -32,7 +32,7 @@ class TransactionsController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
-    filterList(key: '30');
+    filterList(key: 'hoy');
   }
 
   @override
@@ -41,6 +41,10 @@ class TransactionsController extends GetxController {
   // set/get
   void filterList({required String key}) {
     switch (key) {
+      case 'hoy':
+        readCatalogueProductsOfTheDay();
+        setFilterText = 'El día de hoy';
+        break;
       case '30':
         readCatalogueListProductsStream(days: 30);
         setFilterText = 'Últimos 30 días';
@@ -63,6 +67,31 @@ class TransactionsController extends GetxController {
         .toDate()
         .subtract(Duration(days: days))
         .millisecondsSinceEpoch);
+    // marca de tiempo actual
+    Timestamp timeEnd = Timestamp.now();
+
+    // obtenemos los obj(productos) del catalogo de la cuenta del negocio
+    if (homeController.getProfileAccountSelected.id != '') {
+      Database.readTransactionsFilterTimeStream(
+        idAccount: homeController.getProfileAccountSelected.id,
+        timeStart: timeStart,
+        timeEnd: timeEnd,
+      ).listen((value) {
+        List<TicketModel> list = [];
+        //  get
+        for (var element in value.docs) {
+          list.add(TicketModel.fromMap(element.data()));
+        }
+        //  set
+        setTransactionsList = list;
+      });
+    }
+  }
+  void readCatalogueProductsOfTheDay() {
+    // obtenemos los documentos creados en el día 
+
+    // a la marca de tiempo actual le descontamos las horas del día
+    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(Timestamp.now().toDate().subtract(Duration(hours: Timestamp.now().toDate().hour)).millisecondsSinceEpoch);
     // marca de tiempo actual
     Timestamp timeEnd = Timestamp.now();
 

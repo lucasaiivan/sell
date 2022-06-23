@@ -46,7 +46,6 @@ class CataloguePage extends StatelessWidget {
   }
 
   Widget body({required BuildContext context}) {
-
     // controllers
     final HomeController controller = Get.find();
 
@@ -55,17 +54,15 @@ class CataloguePage extends StatelessWidget {
       child: Column(
         children: <Widget>[
           Container(
-            constraints:const BoxConstraints.expand(height: 50),
-            child: TabBar(
-              labelColor: Get.theme.textTheme.bodyText1?.color,
-              tabs: [
-                Tab(text: "${controller.getCataloProducts.length} productos"),
-                const Tab(text: "Cátegorias"),
+            constraints: const BoxConstraints.expand(height: 50),
+            child:
+                TabBar(labelColor: Get.theme.textTheme.bodyText1?.color, tabs: [
+              Tab(text: "${controller.getCataloProducts.length} productos"),
+              const Tab(text: "Cátegorias"),
             ]),
           ),
           Expanded(
-            child: TabBarView(
-              children: [
+            child: TabBarView(children: [
               widgetListVertical(),
               viewCategory(),
             ]),
@@ -83,28 +80,42 @@ class CataloguePage extends StatelessWidget {
     return Obx(() => ListView.builder(
           itemCount: controller.getCataloProducts.length,
           itemBuilder: (context, index) {
-            // get
+            // values
             ProductCatalogue productCatalogue =
                 controller.getCataloProducts[index];
+            Color tileColor = productCatalogue.stock?(productCatalogue.quantityStock==0?Colors.red.withOpacity(0.5):Colors.transparent):Colors.transparent;
+            String alertStockText = productCatalogue.stock?(productCatalogue.quantityStock==0?'Sin stock':''):'';
 
             return Column(
               children: [
                 ListTile(
+                  tileColor: tileColor,
                   contentPadding: const EdgeInsets.all(12),
                   onTap: () => cataloguePageController.toProductEdit(
                       productCatalogue: productCatalogue),
-                  title: Text(productCatalogue.description,
-                      maxLines: 1),
-                  subtitle: Row(
+                  title: Text(productCatalogue.description, maxLines: 1),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(Publications.getFormatoPrecio(
-                          monto:productCatalogue.salePrice)),
-                      productCatalogue.sales==0?Container():Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 5),
-                          child: Icon(Icons.circle,
-                              size: 8, color: Get.theme.dividerColor),
-                        ),
-                        productCatalogue.sales==0?Container():Text('${productCatalogue.sales} ${productCatalogue.sales==1?'venta':'ventas'}'),
+                      Row(
+                        children: [
+                          Text(Publications.getFormatoPrecio(
+                              monto: productCatalogue.salePrice)),
+                          productCatalogue.sales == 0
+                              ? Container()
+                              : Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 5),
+                                  child: Icon(Icons.circle,
+                                      size: 8, color: Get.theme.dividerColor),
+                                ),
+                          productCatalogue.sales == 0
+                              ? Container()
+                              : Text(
+                                  '${productCatalogue.sales} ${productCatalogue.sales == 1 ? 'venta' : 'ventas'}'),
+                        ],
+                      ),
+                      alertStockText==''?Container():Text(alertStockText),
                     ],
                   ),
                   leading: CachedNetworkImage(
@@ -117,19 +128,18 @@ class CataloguePage extends StatelessWidget {
                     errorWidget: (context, url, error) =>
                         CircleAvatar(backgroundColor: Get.theme.dividerColor),
                   ),
-                  trailing:
-                      productCatalogue.stock
-                          ? Material(
-                              color: Get.theme.dividerColor,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30.0)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(productCatalogue.quantityStock
-                                    .toString()),
-                              ),
-                            )
-                          : null,
+                  trailing: productCatalogue.stock
+                      ? Material(
+                          color: Get.theme.dividerColor,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30.0)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child:
+                                Text(productCatalogue.quantityStock.toString()),
+                          ),
+                        )
+                      : null,
                 ),
                 const Divider(height: 0),
               ],
@@ -137,7 +147,8 @@ class CataloguePage extends StatelessWidget {
           },
         ));
   }
-  Widget viewCategory(){
+
+  Widget viewCategory() {
     // mostramos las categorias en un lista
     return ListView.builder(
       itemCount: 10,
@@ -145,14 +156,22 @@ class CataloguePage extends StatelessWidget {
         return Column(
           children: [
             ListTile(
-              title: Container(width: 100,height: 14,color: Colors.grey,),
-              subtitle: Container(width: 100,height: 14,color: Colors.grey,),
-              
+              title: Container(
+                width: 100,
+                height: 14,
+                color: Colors.grey,
               ),
-              const Divider(),
+              subtitle: Container(
+                width: 100,
+                height: 14,
+                color: Colors.grey,
+              ),
+            ),
+            const Divider(),
           ],
         );
-    },);
+      },
+    );
   }
 
   // WIDGETS COMPONENTS
