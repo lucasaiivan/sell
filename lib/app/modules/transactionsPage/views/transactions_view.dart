@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:sell/app/utils/fuctions.dart';
 import 'package:sell/app/utils/widgets_utils.dart';
 
+import '../../../utils/dynamicTheme_lb.dart';
 import '../controller/transactions_controller.dart';
 
 class TransactionsView extends StatelessWidget {
@@ -40,6 +41,8 @@ class TransactionsView extends StatelessWidget {
               transactionsController.filterList(key: selectedValue);
             },
             itemBuilder: (BuildContext ctx) => [
+              const PopupMenuItem(
+                      child: Text('Hoy'), value: 'hoy'),
                   const PopupMenuItem(
                       child: Text('últimos 30 días'), value: '30'),
                   const PopupMenuItem(
@@ -55,42 +58,43 @@ class TransactionsView extends StatelessWidget {
     // others controllers
     final TransactionsController transactionsController = Get.find();
 
-    return Expanded(
-      child: ListView.builder(
-        itemCount: transactionsController.getTransactionsList.length,
-        itemBuilder: (context, index) {
-          // values
-          String payMode = transactionsController.getPayModeFormat(
-              idMode:
-                  transactionsController.getTransactionsList[index].payMode);
+    return ListView.builder(
+      itemCount: transactionsController.getTransactionsList.length,
+      itemBuilder: (context, index) {
+        // values
+        String payMode = transactionsController.getPayModeFormat(
+            idMode:
+                transactionsController.getTransactionsList[index].payMode);
 
-          if (index == 0) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(transactionsController.getFilterText,
-                          style:const  TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold)),
-                      Text(transactionsController.getInfoPriceTotal(),
-                          textAlign: TextAlign.start),
-                    ],
-                  ),
+        if (index == 0) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(transactionsController.getFilterText,
+                        style:const  TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.w900)),
+                    Text(transactionsController.getInfoPriceTotal(),
+                        textAlign: TextAlign.start,style:const  TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w200)),
+                  ],
                 ),
-                ListTile(
+              ),
+              ElasticIn(
+                child: ListTile(
                   contentPadding: const EdgeInsets.all(12),
                   onLongPress: () {},
                   title: Text(Publications.getFechaPublicacion(
                       transactionsController.getTransactionsList[index].creation
                           .toDate(),
-                      Timestamp.now().toDate())),
+                      Timestamp.now().toDate()),style: const TextStyle(fontWeight: FontWeight.w400)),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -116,22 +120,24 @@ class TransactionsView extends StatelessWidget {
                       Publications.getFormatoPrecio(
                           monto: transactionsController
                               .getTransactionsList[index].priceTotal),
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                      style: const TextStyle(fontWeight: FontWeight.w300)),
                 ),
-                const Divider(height: 0),
-              ],
-            );
-          }
+              ),
+              const Divider(height: 0),
+            ],
+          );
+        }
 
-          return Column(
-            children: [
-              ListTile(
+        return Column(
+          children: [
+            ElasticIn(
+              child: ListTile(
                 contentPadding: const EdgeInsets.all(12),
                 onLongPress: () {},
                 title: Text(Publications.getFechaPublicacion(
                     transactionsController.getTransactionsList[index].creation
                         .toDate(),
-                    Timestamp.now().toDate())),
+                    Timestamp.now().toDate()),style: const TextStyle(fontWeight: FontWeight.w400)),
                 subtitle: Padding(
                   padding: const EdgeInsets.only(),
                   child: Column(
@@ -160,13 +166,13 @@ class TransactionsView extends StatelessWidget {
                     Publications.getFormatoPrecio(
                         monto: transactionsController
                             .getTransactionsList[index].priceTotal),
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                    style: const TextStyle(fontWeight: FontWeight.w300)),
               ),
-              const Divider(height: 0),
-            ],
-          );
-        },
-      ),
+            ),
+            const Divider(height: 0),
+          ],
+        );
+      },
     );
   }
 }

@@ -82,7 +82,7 @@ class SalesView extends StatelessWidget {
           return ProductoItem(
               producto: controller.getListProductsSelested[index]);
         } else {
-          return Card(elevation: 0, color: Colors.grey.withOpacity(0.1));
+          return ElasticIn(child: Card(elevation: 0, color: Colors.grey.withOpacity(0.1)));
         }
       },
     ),
@@ -244,29 +244,31 @@ class SalesView extends StatelessWidget {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(left: 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(5.0),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(50),
-                          onTap: () {
-                            salesController.seach(context: context);
-                          },
-                          child: CircleAvatar(
-                            radius: 35,
-                            backgroundColor: Colors.grey.withOpacity(0.1),
-                            child: Icon(
-                              Icons.search,
-                              color: Colors.grey.withOpacity(0.8),
+                  child: ElasticIn(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(5.0),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(50),
+                            onTap: () {
+                              salesController.seach(context: context);
+                            },
+                            child: CircleAvatar(
+                              radius: 35,
+                              backgroundColor: Colors.grey.withOpacity(0.1),
+                              child: Icon(
+                                Icons.search,
+                                color: Colors.grey.withOpacity(0.8),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      const Text('Buscar'),
-                    ],
+                        const Text('Buscar'),
+                      ],
+                    ),
                   ),
                 ),
                 (index < salesController.getRecentlySelectedProductsList.length)
@@ -294,17 +296,19 @@ class SalesView extends StatelessWidget {
                 productCatalogue:
                     salesController.getRecentlySelectedProductsList[index]);
           } else {
-            return Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: CircleAvatar(
-                    radius: 35,
-                    backgroundColor: Colors.grey.withOpacity(0.05),
+            return ElasticIn(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: CircleAvatar(
+                      radius: 35,
+                      backgroundColor: Colors.grey.withOpacity(0.05),
+                    ),
                   ),
-                ),
-                const Text(''),
-              ],
+                  const Text(''),
+                ],
+              ),
             );
           }
         },
@@ -316,58 +320,60 @@ class SalesView extends StatelessWidget {
     // controller
     final SalesController salesController = Get.find();
 
-    return Container(
-      width: 81.0,
-      height: 110.0,
-      padding: const EdgeInsets.all(5.0),
-      child: Column(
-        children: [
-          GestureDetector(
-            onTap: () {
-              salesController.verifyExistenceInSelected(item: productCatalogue);
-            },
-            child: Column(
-              children: <Widget>[
-                CachedNetworkImage(
-                  imageUrl: productCatalogue.image,
-                  placeholder: (context, url) => CircleAvatar(
+    return ElasticIn(
+      child: Container(
+        width: 81.0,
+        height: 110.0,
+        padding: const EdgeInsets.all(5.0),
+        child: Column(
+          children: [
+            GestureDetector(
+              onTap: () {
+                salesController.verifyExistenceInSelected(item: productCatalogue);
+              },
+              child: Column(
+                children: <Widget>[
+                  CachedNetworkImage(
+                    imageUrl: productCatalogue.image,
+                    placeholder: (context, url) => CircleAvatar(
+                        radius: 35,
+                        backgroundColor: Get.theme.dividerColor,
+                        child: Text(
+                            Publications.getFormatoPrecio(
+                                monto: productCatalogue.salePrice),
+                            style: TextStyle(
+                                color: Get.textTheme.bodyText1?.color))),
+                    imageBuilder: (context, image) => CircleAvatar(
+                      radius: 35,
+                      backgroundImage: image,
+                    ),
+                    errorWidget: (context, url, error) => CircleAvatar(
                       radius: 35,
                       backgroundColor: Get.theme.dividerColor,
                       child: Text(
                           Publications.getFormatoPrecio(
                               monto: productCatalogue.salePrice),
-                          style: TextStyle(
-                              color: Get.textTheme.bodyText1?.color))),
-                  imageBuilder: (context, image) => CircleAvatar(
-                    radius: 35,
-                    backgroundImage: image,
+                          style:
+                              TextStyle(color: Get.textTheme.bodyText1?.color)),
+                    ),
                   ),
-                  errorWidget: (context, url, error) => CircleAvatar(
-                    radius: 35,
-                    backgroundColor: Get.theme.dividerColor,
-                    child: Text(
-                        Publications.getFormatoPrecio(
-                            monto: productCatalogue.salePrice),
-                        style:
-                            TextStyle(color: Get.textTheme.bodyText1?.color)),
+                  const SizedBox(
+                    height: 3.0,
                   ),
-                ),
-                const SizedBox(
-                  height: 3.0,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 5),
-                  child: Text(productCatalogue.description,
-                      style: const TextStyle(
-                          fontSize: 12, fontWeight: FontWeight.normal),
-                      overflow: TextOverflow.fade,
-                      maxLines: 1,
-                      softWrap: false),
-                )
-              ],
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    child: Text(productCatalogue.description,
+                        style: const TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.normal),
+                        overflow: TextOverflow.fade,
+                        maxLines: 1,
+                        softWrap: false),
+                  )
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

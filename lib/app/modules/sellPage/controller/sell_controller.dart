@@ -19,8 +19,8 @@ class SalesController extends GetxController {
 
   // productos seleccionados recientemente
 
-
-  List<ProductCatalogue> get getRecentlySelectedProductsList => homeController.getProductsSelectedsList;
+  List<ProductCatalogue> get getRecentlySelectedProductsList =>
+      homeController.getProductsSelectedsList;
   registerSelections({required ProductCatalogue productCatalogue}) {
     bool repeat = false;
     // seach
@@ -135,7 +135,7 @@ class SalesController extends GetxController {
     //  set values
     getTicket.id = id;
     getTicket.seller = homeController.getIdAccountSelected;
-    getTicket.cashRegister='1';
+    getTicket.cashRegister = '1';
     getTicket.listPoduct = listIdsProducts;
     getTicket.priceTotal = getCountPriceTotal();
     getTicket.valueReceived = getValueReceivedTicket;
@@ -148,22 +148,33 @@ class SalesController extends GetxController {
     for (var element in listIdsProducts) {
       // registrar venta
       Database.dbProductStockSalesIncrement(
-            idAccount: homeController.getIdAccountSelected,
-            idProduct: element['id'],
-            quantity: element['quantity']??1,
-            );
+        idAccount: homeController.getIdAccountSelected,
+        idProduct: element['id'],
+        quantity: element['quantity'] ?? 1,
+      );
       // descontar de stock
-      if(element['stock']??false){
-        Database.dbProductStockDecrement(
-            idAccount: homeController.getIdAccountSelected,
-            idProduct: element['id'],
-            quantity: element['quantity']??1,
-            );
+      if (element['stock'] ?? false) {
+        if(checkDiminish(key: element['id'], quantity: element['quantity'] ?? 1)){
+          Database.dbProductStockDecrement(
+          idAccount: homeController.getIdAccountSelected,
+          idProduct: element['id'],
+          quantity: element['quantity'] ?? 1,
+        );
+        }
       }
     }
   }
 
   // FUCTIONS
+  bool checkDiminish({required String key, required int quantity}) {
+    // validamos que se pueda seguir disminullendo el número de stock
+    for (ProductCatalogue element in homeController.getCataloProducts) {
+      if (element.id == key) {
+        return element.quantityStock >= quantity;
+      }
+    }
+    return false;
+  }
 
   void seach({required BuildContext context}) {
     // Busca entre los productos de mi catálogo
