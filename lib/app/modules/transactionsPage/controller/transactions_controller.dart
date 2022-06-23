@@ -42,30 +42,60 @@ class TransactionsController extends GetxController {
   void filterList({required String key}) {
     switch (key) {
       case 'hoy':
-        readCatalogueProductsOfTheDay();
+        readTransactionsOfTheDay();
         setFilterText = 'El día de hoy';
         break;
-      case '30':
-        readCatalogueListProductsStream(days: 30);
-        setFilterText = 'Últimos 30 días';
+      case 'este mes':
+        readTransactionsThisMonth();
+        setFilterText = 'Este mes';
         break;
-      case '60':
-        readCatalogueListProductsStream(days: 60);
-        setFilterText = 'Últimos 60 días';
+      case 'el mes pasado':
+        readTransactionsLastMonth();
+        setFilterText = 'El mes pasado';
         break;
-      case '120':
-        readCatalogueListProductsStream(days: 120);
-        setFilterText = 'Últimos 120 días';
+      case 'este año':
+        readTransactionsThisYear();
+        setFilterText = 'Este año';
         break;
     }
   }
 
   // FIREBASE
-  void readCatalogueListProductsStream({int days = 30}) {
+  void readTransactionsThisYear() {
+    //obtenemos los documentos creados este año
+
     // a la marca de tiempo actual le descontamos dias
+    DateTime getTime = Timestamp.now().toDate();
+    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(
+        DateTime(getTime.year, 1, 1, 0).millisecondsSinceEpoch);
+    // marca de tiempo actual
+    Timestamp timeEnd = Timestamp.now();
+
+    // obtenemos los obj(productos) del catalogo de la cuenta del negocio
+    if (homeController.getProfileAccountSelected.id != '') {
+      Database.readTransactionsFilterTimeStream(
+        idAccount: homeController.getProfileAccountSelected.id,
+        timeStart: timeStart,
+        timeEnd: timeEnd,
+      ).listen((value) {
+        List<TicketModel> list = [];
+        //  get
+        for (var element in value.docs) {
+          list.add(TicketModel.fromMap(element.data()));
+        }
+        //  set
+        setTransactionsList = list;
+      });
+    }
+  }
+
+  void readTransactionsOfTheDay() {
+    // obtenemos los documentos creados en el día
+
+    // a la marca de tiempo actual le descontamos las horas del día
     Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(Timestamp.now()
         .toDate()
-        .subtract(Duration(days: days))
+        .subtract(Duration(hours: Timestamp.now().toDate().hour))
         .millisecondsSinceEpoch);
     // marca de tiempo actual
     Timestamp timeEnd = Timestamp.now();
@@ -87,11 +117,70 @@ class TransactionsController extends GetxController {
       });
     }
   }
+
+  void readTransactionsThisMonth() {
+    //obtenemos los documentos creados este mes
+ 
+    // marca de tiempo actual
+    DateTime getTime = Timestamp.now().toDate();
+    //  a la marca de tiempo actual le descontamos dias del mes
+    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(DateTime(getTime.year, getTime.month,1, 0).millisecondsSinceEpoch);
+    // marca de tiempo actual
+    Timestamp timeEnd = Timestamp.now();
+
+    // obtenemos los obj(productos) del catalogo de la cuenta del negocio
+    if (homeController.getProfileAccountSelected.id != '') {
+      Database.readTransactionsFilterTimeStream(
+        idAccount: homeController.getProfileAccountSelected.id,
+        timeStart: timeStart,
+        timeEnd: timeEnd,
+      ).listen((value) {
+        List<TicketModel> list = [];
+        //  get
+        for (var element in value.docs) {
+          list.add(TicketModel.fromMap(element.data()));
+        }
+        //  set
+        setTransactionsList = list;
+      });
+    }
+  }
+  void readTransactionsLastMonth() {
+    //obtenemos los documentos creados este mes
+ 
+    // marca de tiempo actual
+    DateTime getTime = Timestamp.now().toDate();
+    //  a la marca de tiempo actual le descontamos dias del mes
+    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(DateTime(getTime.year, getTime.month-1,1, 0).millisecondsSinceEpoch);
+    // marca de tiempo actual
+    Timestamp timeEnd = Timestamp.now();
+
+    // obtenemos los obj(productos) del catalogo de la cuenta del negocio
+    if (homeController.getProfileAccountSelected.id != '') {
+      Database.readTransactionsFilterTimeStream(
+        idAccount: homeController.getProfileAccountSelected.id,
+        timeStart: timeStart,
+        timeEnd: timeEnd,
+      ).listen((value) {
+        List<TicketModel> list = [];
+        //  get
+        for (var element in value.docs) {
+          list.add(TicketModel.fromMap(element.data()));
+        }
+        //  set
+        setTransactionsList = list;
+      });
+    }
+  }
+
   void readCatalogueProductsOfTheDay() {
-    // obtenemos los documentos creados en el día 
+    // obtenemos los documentos creados en el día
 
     // a la marca de tiempo actual le descontamos las horas del día
-    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(Timestamp.now().toDate().subtract(Duration(hours: Timestamp.now().toDate().hour)).millisecondsSinceEpoch);
+    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(Timestamp.now()
+        .toDate()
+        .subtract(Duration(hours: Timestamp.now().toDate().hour))
+        .millisecondsSinceEpoch);
     // marca de tiempo actual
     Timestamp timeEnd = Timestamp.now();
 

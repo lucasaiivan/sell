@@ -14,7 +14,7 @@ import 'package:sell/app/utils/fuctions.dart';
 class ProductoItem extends StatefulWidget {
   final ProductCatalogue producto;
 
-  ProductoItem({required this.producto});
+  const ProductoItem({super.key, required this.producto});
 
   @override
   State<ProductoItem> createState() => _ProductoItemState();

@@ -41,14 +41,13 @@ class TransactionsView extends StatelessWidget {
               transactionsController.filterList(key: selectedValue);
             },
             itemBuilder: (BuildContext ctx) => [
-              const PopupMenuItem(
-                      child: Text('Hoy'), value: 'hoy'),
+                  const PopupMenuItem(value: 'hoy', child: Text('Hoy')),
                   const PopupMenuItem(
-                      child: Text('últimos 30 días'), value: '30'),
+                      value: 'este mes', child: Text('Este mes')),
                   const PopupMenuItem(
-                      child: Text('últimos 60 días'), value: '60'),
+                      value: 'el mes pasado', child: Text('El mes pasado')),
                   const PopupMenuItem(
-                      child: Text('últimos 120 días'), value: '120'),
+                      value: 'este año', child: Text('Este año')),
                 ])
       ],
     );
@@ -58,13 +57,16 @@ class TransactionsView extends StatelessWidget {
     // others controllers
     final TransactionsController transactionsController = Get.find();
 
+    if (transactionsController.getTransactionsList.isEmpty) {
+      return Center(child: Text('Sin transacciones ${transactionsController.getFilterText.toLowerCase()}'));
+    }
+
     return ListView.builder(
       itemCount: transactionsController.getTransactionsList.length,
       itemBuilder: (context, index) {
         // values
         String payMode = transactionsController.getPayModeFormat(
-            idMode:
-                transactionsController.getTransactionsList[index].payMode);
+            idMode: transactionsController.getTransactionsList[index].payMode);
 
         if (index == 0) {
           return Column(
@@ -79,10 +81,11 @@ class TransactionsView extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(transactionsController.getFilterText,
-                        style:const  TextStyle(
+                        style: const TextStyle(
                             fontSize: 24, fontWeight: FontWeight.w900)),
                     Text(transactionsController.getInfoPriceTotal(),
-                        textAlign: TextAlign.start,style:const  TextStyle(
+                        textAlign: TextAlign.start,
+                        style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w200)),
                   ],
                 ),
@@ -91,10 +94,13 @@ class TransactionsView extends StatelessWidget {
                 child: ListTile(
                   contentPadding: const EdgeInsets.all(12),
                   onLongPress: () {},
-                  title: Text(Publications.getFechaPublicacion(
-                      transactionsController.getTransactionsList[index].creation
-                          .toDate(),
-                      Timestamp.now().toDate()),style: const TextStyle(fontWeight: FontWeight.w400)),
+                  title: Text(
+                      Publications.getFechaPublicacion(
+                          transactionsController
+                              .getTransactionsList[index].creation
+                              .toDate(),
+                          Timestamp.now().toDate()),
+                      style: const TextStyle(fontWeight: FontWeight.w400)),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -134,10 +140,13 @@ class TransactionsView extends StatelessWidget {
               child: ListTile(
                 contentPadding: const EdgeInsets.all(12),
                 onLongPress: () {},
-                title: Text(Publications.getFechaPublicacion(
-                    transactionsController.getTransactionsList[index].creation
-                        .toDate(),
-                    Timestamp.now().toDate()),style: const TextStyle(fontWeight: FontWeight.w400)),
+                title: Text(
+                    Publications.getFechaPublicacion(
+                        transactionsController
+                            .getTransactionsList[index].creation
+                            .toDate(),
+                        Timestamp.now().toDate()),
+                    style: const TextStyle(fontWeight: FontWeight.w400)),
                 subtitle: Padding(
                   padding: const EdgeInsets.only(),
                   child: Column(
