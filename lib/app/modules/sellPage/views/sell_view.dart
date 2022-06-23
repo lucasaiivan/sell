@@ -66,26 +66,27 @@ class SalesView extends StatelessWidget {
           // atentos a cualquier cambio que surja en los datos de la lista de marcas
           Obx(() => SliverList(
                 delegate: SliverChildListDelegate([
-                  widgetProducts,
+                  widgeSeach,
                 ]),
               )),
         ];
       },
-      body:GridView.builder(
-      padding: const EdgeInsets.all(12),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3, crossAxisSpacing: 1.0, mainAxisSpacing: 1.0),
-      itemCount: controller.getListProductsSelested.length + 15,
-      itemBuilder: (context, index) {
-        // mostramos un número de elementos vacíos de los cuales el primero tendrá un icono 'add'
-        if (index < controller.getListProductsSelested.length) {
-          return ProductoItem(
-              producto: controller.getListProductsSelested[index]);
-        } else {
-          return ElasticIn(child: Card(elevation: 0, color: Colors.grey.withOpacity(0.1)));
-        }
-      },
-    ),
+      body: GridView.builder(
+        padding: const EdgeInsets.all(12),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3, crossAxisSpacing: 1.0, mainAxisSpacing: 1.0),
+        itemCount: controller.getListProductsSelested.length + 15,
+        itemBuilder: (context, index) {
+          // mostramos un número de elementos vacíos de los cuales el primero tendrá un icono 'add'
+          if (index < controller.getListProductsSelested.length) {
+            return ProductoItem(
+                producto: controller.getListProductsSelested[index]);
+          } else {
+            return ElasticIn(
+                child: Card(elevation: 0, color: Colors.grey.withOpacity(0.1)));
+          }
+        },
+      ),
     );
   }
 
@@ -227,7 +228,7 @@ class SalesView extends StatelessWidget {
 
   // WIDGETS COMPONENTS
 
-  Widget get widgetProducts {
+  Widget get widgeSeach {
     // controller
     final SalesController salesController = Get.find();
 
@@ -236,57 +237,24 @@ class SalesView extends StatelessWidget {
       height: 125,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: salesController.getRecentlySelectedProductsList.length + (salesController.getRecentlySelectedProductsList.length>5?0:10),
+        itemCount: salesController.getRecentlySelectedProductsList.length +
+            (salesController.getRecentlySelectedProductsList.length > 5
+                ? 0
+                : 10),
         itemBuilder: (context, index) {
           if (index == 0) {
             return Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 12),
-                  child: ElasticIn(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(5.0),
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(50),
-                            onTap: () {
-                              salesController.seach(context: context);
-                            },
-                            child: CircleAvatar(
-                              radius: 35,
-                              backgroundColor: Colors.grey.withOpacity(0.1),
-                              child: Icon(
-                                Icons.search,
-                                color: Colors.grey.withOpacity(0.8),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const Text('Buscar'),
-                      ],
-                    ),
-                  ),
-                ),
+                ElasticIn(
+                    child: circleAvatarBSeachDefault(
+                        context: context, seach: true)),
                 (index < salesController.getRecentlySelectedProductsList.length)
                     ? circleAvatarProduct(
                         productCatalogue: salesController
                             .getRecentlySelectedProductsList[index])
-                    : Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(5.0),
-                            child: CircleAvatar(
-                              radius: 35,
-                              backgroundColor: Colors.grey.withOpacity(0.05),
-                            ),
-                          ),
-                          const Text(''),
-                        ],
-                      ),
+                    : ElasticIn(
+                        child: circleAvatarBSeachDefault(context: context)),
               ],
             );
           }
@@ -297,28 +265,92 @@ class SalesView extends StatelessWidget {
                     salesController.getRecentlySelectedProductsList[index]);
           } else {
             return ElasticIn(
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(5.0),
-                    child: CircleAvatar(
-                      radius: 35,
-                      backgroundColor: Colors.grey.withOpacity(0.05),
-                    ),
-                  ),
-                  const Text(''),
-                ],
-              ),
-            );
+                child: circleAvatarBSeachDefault(context: context));
           }
         },
       ),
     );
   }
 
+  Widget circleAvatarBSeachDefault(
+      {bool seach = false, required BuildContext context}) {
+    // controller
+    final SalesController salesController = Get.find();
+
+    // values
+    double radius = 35.0;
+    double spaceImageText = 10;
+
+    return seach
+        ? ElasticIn(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 7),
+              child: Container(
+                width: 81.0,
+                height: 110.0,
+                padding: const EdgeInsets.all(5),
+                child: Column(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        salesController.seach(context: context);
+                      },
+                      child: Column(
+                        children: <Widget>[
+                          CircleAvatar(
+                            radius: radius,
+                            backgroundColor: Colors.grey.withOpacity(0.1),
+                            child: const Icon(Icons.search,
+                                color: Colors.white60),
+                          ),
+                          SizedBox(
+                            height:spaceImageText,
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 5),
+                            child: Text('Buscar',
+                                style: TextStyle(
+                                    fontSize: 12, fontWeight: FontWeight.normal),
+                                overflow: TextOverflow.fade,
+                                maxLines: 1,
+                                softWrap: false),
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          )
+        : Padding(
+            padding: const EdgeInsets.only(left: 12),
+            child: ElasticIn(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: CircleAvatar(
+                      radius: radius,
+                      backgroundColor: Colors.grey.withOpacity(0.1),
+                    ),
+                  ),
+                  const Text('Buscar'),
+                ],
+              ),
+            ),
+          );
+  }
+
   Widget circleAvatarProduct({required ProductCatalogue productCatalogue}) {
     // controller
     final SalesController salesController = Get.find();
+
+    // values
+    double radius = 35.0;
+    double spaceImageText = 10;
 
     return ElasticIn(
       child: Container(
@@ -329,14 +361,15 @@ class SalesView extends StatelessWidget {
           children: [
             GestureDetector(
               onTap: () {
-                salesController.verifyExistenceInSelected(item: productCatalogue);
+                salesController.verifyExistenceInSelected(
+                    item: productCatalogue);
               },
               child: Column(
                 children: <Widget>[
                   CachedNetworkImage(
                     imageUrl: productCatalogue.image,
                     placeholder: (context, url) => CircleAvatar(
-                        radius: 35,
+                        radius: radius,
                         backgroundColor: Get.theme.dividerColor,
                         child: Text(
                             Publications.getFormatoPrecio(
@@ -344,11 +377,11 @@ class SalesView extends StatelessWidget {
                             style: TextStyle(
                                 color: Get.textTheme.bodyText1?.color))),
                     imageBuilder: (context, image) => CircleAvatar(
-                      radius: 35,
+                      radius: radius,
                       backgroundImage: image,
                     ),
                     errorWidget: (context, url, error) => CircleAvatar(
-                      radius: 35,
+                      radius: radius,
                       backgroundColor: Get.theme.dividerColor,
                       child: Text(
                           Publications.getFormatoPrecio(
@@ -357,8 +390,8 @@ class SalesView extends StatelessWidget {
                               TextStyle(color: Get.textTheme.bodyText1?.color)),
                     ),
                   ),
-                  const SizedBox(
-                    height: 3.0,
+                  SizedBox(
+                    height:spaceImageText,
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 5),

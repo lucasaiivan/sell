@@ -7,6 +7,8 @@ import 'package:sell/app/modules/home/controller/home_controller.dart';
 import 'package:sell/app/utils/fuctions.dart';
 import 'package:sell/app/utils/widgets_utils.dart';
 
+import '../../../utils/dynamicTheme_lb.dart';
+
 class CataloguePage extends StatelessWidget {
   // ignore: prefer_const_constructors_in_immutables
   CataloguePage({Key? key}) : super(key: key);
@@ -74,76 +76,12 @@ class CataloguePage extends StatelessWidget {
 
   Widget widgetListVertical() {
     // controllers
-    final CataloguePageController cataloguePageController = Get.find();
     final HomeController controller = Get.find();
 
     return Obx(() => ListView.builder(
           itemCount: controller.getCataloProducts.length,
           itemBuilder: (context, index) {
-            // values
-            ProductCatalogue productCatalogue =
-                controller.getCataloProducts[index];
-            Color tileColor = productCatalogue.stock?(productCatalogue.quantityStock==0?Colors.red.withOpacity(0.5):Colors.transparent):Colors.transparent;
-            String alertStockText = productCatalogue.stock?(productCatalogue.quantityStock==0?'Sin stock':''):'';
-
-            return Column(
-              children: [
-                ListTile(
-                  tileColor: tileColor,
-                  contentPadding: const EdgeInsets.all(12),
-                  onTap: () => cataloguePageController.toProductEdit(
-                      productCatalogue: productCatalogue),
-                  title: Text(productCatalogue.description, maxLines: 1),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(Publications.getFormatoPrecio(
-                              monto: productCatalogue.salePrice)),
-                          productCatalogue.sales == 0
-                              ? Container()
-                              : Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 5),
-                                  child: Icon(Icons.circle,
-                                      size: 8, color: Get.theme.dividerColor),
-                                ),
-                          productCatalogue.sales == 0
-                              ? Container()
-                              : Text(
-                                  '${productCatalogue.sales} ${productCatalogue.sales == 1 ? 'venta' : 'ventas'}'),
-                        ],
-                      ),
-                      alertStockText==''?Container():Text(alertStockText),
-                    ],
-                  ),
-                  leading: CachedNetworkImage(
-                    imageUrl: productCatalogue.image,
-                    placeholder: (context, url) =>
-                        CircleAvatar(backgroundColor: Get.theme.dividerColor),
-                    imageBuilder: (context, image) => CircleAvatar(
-                      backgroundImage: image,
-                    ),
-                    errorWidget: (context, url, error) =>
-                        CircleAvatar(backgroundColor: Get.theme.dividerColor),
-                  ),
-                  trailing: productCatalogue.stock
-                      ? Material(
-                          color: Get.theme.dividerColor,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30.0)),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child:
-                                Text(productCatalogue.quantityStock.toString()),
-                          ),
-                        )
-                      : null,
-                ),
-                const Divider(height: 0),
-              ],
-            );
+            return listTileProduct(item: controller.getCataloProducts[index]);
           },
         ));
   }
@@ -175,6 +113,78 @@ class CataloguePage extends StatelessWidget {
   }
 
   // WIDGETS COMPONENTS
+  Widget listTileProduct({required ProductCatalogue item}) {
+
+    //  controller
+    final CataloguePageController cataloguePageController = Get.find();
+    // values
+    Color tileColor = item.stock
+        ? (item.quantityStock == 0
+            ? Colors.red.withOpacity(0.5)
+            : Colors.transparent)
+        : Colors.transparent;
+    String alertStockText =
+        item.stock ? (item.quantityStock == 0 ? 'Sin stock' : '') : '';
+
+    return ElasticIn(
+      child: Column(
+        children: [
+          ListTile(
+            tileColor: tileColor,
+            contentPadding: const EdgeInsets.all(12),
+            onTap: () =>
+                cataloguePageController.toProductEdit(productCatalogue: item),
+            title: Text(item.description, maxLines: 1),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(Publications.getFormatoPrecio(monto: item.salePrice)),
+                    item.sales == 0
+                        ? Container()
+                        : Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 5),
+                            child: Icon(Icons.circle,
+                                size: 8, color: Get.theme.dividerColor),
+                          ),
+                    item.sales == 0
+                        ? Container()
+                        : Text(
+                            '${item.sales} ${item.sales == 1 ? 'venta' : 'ventas'}'),
+                  ],
+                ),
+                alertStockText == '' ? Container() : Text(alertStockText),
+              ],
+            ),
+            leading: CachedNetworkImage(
+              imageUrl: item.image,
+              placeholder: (context, url) =>
+                  CircleAvatar(backgroundColor: Get.theme.dividerColor),
+              imageBuilder: (context, image) => CircleAvatar(
+                backgroundImage: image,
+              ),
+              errorWidget: (context, url, error) =>
+                  CircleAvatar(backgroundColor: Get.theme.dividerColor),
+            ),
+            trailing: item.stock
+                ? Material(
+                    color: Get.theme.dividerColor,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(item.quantityStock.toString()),
+                    ),
+                  )
+                : null,
+          ),
+          const Divider(height: 0),
+        ],
+      ),
+    );
+  }
+
   Widget get widgetProducts {
     return SizedBox(
       width: double.infinity,
