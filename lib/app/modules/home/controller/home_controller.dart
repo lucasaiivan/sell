@@ -6,8 +6,6 @@ import 'package:sell/app/models/user_model.dart';
 import 'package:sell/app/services/database.dart';
 
 class HomeController extends GetxController {
-
-
   // category list
   RxList<Category> _categoryList = <Category>[].obs;
   List<Category> get getCatalogueCategoryList => _categoryList;
@@ -52,7 +50,8 @@ class HomeController extends GetxController {
   ProfileAccountModel _accountProfileSelected =
       ProfileAccountModel(creation: Timestamp.now());
   ProfileAccountModel get getProfileAccountSelected => _accountProfileSelected;
-  set setProfileAccountSelected(ProfileAccountModel value) => _accountProfileSelected = value;
+  set setProfileAccountSelected(ProfileAccountModel value) =>
+      _accountProfileSelected = value;
 
   // id account selected
   String get getIdAccountSelected => _accountProfileSelected.id;
@@ -82,26 +81,36 @@ class HomeController extends GetxController {
     //default values
     setProfileAccountSelected = ProfileAccountModel(creation: Timestamp.now());
 
-    // load
-    readProductsCatalogue(idAccount: idAccount);
-
     // obtenemos los datos de la cuenta
     if (idAccount != '') {
       Database.readProfileAccountModelFuture(idAccount).then((value) {
         //get
         if (value.exists) {
-          setProfileAccountSelected =
-              ProfileAccountModel.fromDocumentSnapshot(documentSnapshot: value);
+          setProfileAccountSelected = ProfileAccountModel.fromDocumentSnapshot(documentSnapshot: value);
           //  agregamos los datos del perfil de la cuenta en la lista para mostrar al usuario
           /* if (profileAccount.id != '') {
             //addManagedAccount(profileData: profileAccount);
           } */
+           // load
+            readProductsCatalogue(idAccount: idAccount);
+            readListCategoryListFuture(idAccount: idAccount);
         }
       }).catchError((error) {
         print('########################home readManagedAccountsData: ' +
             error.toString());
       });
     }
+  }
+
+  void readListCategoryListFuture({required String idAccount}) {
+    // obtenemos la categorias creadas por el usuario
+    Database.readCategoriesQueryStream(idAccount: idAccount)
+        .listen((event) {
+      List<Category> list = [];
+      event.docs
+          .forEach((element) => list.add(Category.fromMap(element.data())));
+      setCatalogueCategoryList = list;
+    });
   }
 
   loadProductsOutstanding() {
@@ -114,7 +123,7 @@ class HomeController extends GetxController {
         list.add(ProductCatalogue.fromMap(element.data()));
       }
       //  set values
-      saveListProductSelecteds(list: list); 
+      saveListProductSelecteds(list: list);
     });
   }
 
@@ -135,8 +144,7 @@ class HomeController extends GetxController {
   }
 
   Future<void> categoryDelete({required String idCategory}) async =>
-      await Database.refFirestoreCategory(
-              idAccount: getUserAccountAuth.uid)
+      await Database.refFirestoreCategory(idAccount: getUserAccountAuth.uid)
           .doc(idCategory)
           .delete();
   Future<void> categoryUpdate({required Category categoria}) async {
@@ -153,5 +161,4 @@ class HomeController extends GetxController {
     }).catchError((e) => print(
             "######################## FIREBASE updateAccount catchError: $e"));
   }
-
 }

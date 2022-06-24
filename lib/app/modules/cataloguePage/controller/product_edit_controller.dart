@@ -226,8 +226,8 @@ class ControllerProductsEdit extends GetxController {
   }
 
   // FUNCTIONES
-  isStock() {
-    getProduct.stock = !getProduct.stock;
+  set setStock(bool value) {
+    getProduct.stock =value;
     update(['updateAll']);
   }
   updateAll() => update(['updateAll']);
@@ -246,9 +246,9 @@ class ControllerProductsEdit extends GetxController {
     if (getProduct.id != '') {
       if (getProduct.description != '') {
         if (getProduct.idMark != '' && getProduct.nameMark != '') {
-          if (getProduct.salePrice != 0 && getAccountAuth ||
-              getProduct.salePrice == 0 && getAccountAuth == false) {
-            // update view
+          if (getProduct.salePrice != 0 && getAccountAuth ||getProduct.salePrice == 0 && getAccountAuth == false) {
+            if((getProduct.stock)?(getProduct.quantityStock>=1):true){
+              // update view
             setSaveIndicator = true;
             setTextAppBar = 'Espere por favor...';
             updateAll();
@@ -314,9 +314,11 @@ class ControllerProductsEdit extends GetxController {
               getProduct.verified = true; // TODO : release to false
               saveProductPublic();
             }
+            }else{
+              Get.snackbar('Stock no valido 😐', 'debe proporcionar un cantidad');
+            }
           } else {
-            Get.snackbar(
-                'Antes de continuar 😐', 'debe proporcionar un precio');
+            Get.snackbar('Antes de continuar 😐', 'debe proporcionar un precio');
           }
         } else {
           Get.snackbar(
@@ -492,8 +494,8 @@ class ControllerProductsEdit extends GetxController {
     if (getXFileImage.path != '') {
       // el usuario cargo un nueva imagen externa
       return AspectRatio(
-        child: Image.file(File(getXFileImage.path), fit: BoxFit.cover),
         aspectRatio: 1 / 1,
+        child: Image.file(File(getXFileImage.path), fit: BoxFit.cover),
       );
     } else {
       // se visualiza la imagen del producto
@@ -506,14 +508,12 @@ class ControllerProductsEdit extends GetxController {
                 imageUrl: getProduct.image,
                 placeholder: (context, url) => Container(
                   color: Colors.grey.withOpacity(0.3),
-                  child: Center(child: Icon(Icons.cloud, color: Colors.white)),
+                  child: const Center(child: Icon(Icons.cloud, color: Colors.white)),
                 ),
-                imageBuilder: (context, image) => Container(
-                  child: Image(image: image),
-                ),
+                imageBuilder: (context, image) => Image(image: image),
                 errorWidget: (context, url, error) => Container(
                   color: Colors.grey.withOpacity(0.3),
-                  child: Center(child: Icon(Icons.error, color: Colors.white)),
+                  child: const Center(child: Icon(Icons.error, color: Colors.white)),
                 ),
               ),
       );
@@ -522,9 +522,9 @@ class ControllerProductsEdit extends GetxController {
 
   void showDialogDelete() {
     Widget widget = AlertDialog(
-      title: new Text(
+      title: const Text(
           "¿Seguro que quieres eliminar este producto de tu catálogo?"),
-      content: new Text(
+      content: const Text(
           "El producto será eliminado de tu catálogo y toda la información acumulada"),
       actions: <Widget>[
         // usually buttons at the bottom of the dialog
@@ -572,13 +572,13 @@ class ControllerProductsEdit extends GetxController {
 
   //TODO: eliminar para release
   // DEVELOPER OPTIONS
-  isFavorite() {
-    getProduct.favorite = !getProduct.favorite;
+  setFavorite({required bool value}) {
+    getProduct.favorite =value;
     update(['updateAll']);
   }
 
-  checkProduct() {
-    getProduct.verified = !getProduct.verified;
+  setCheckVerified({required bool value}) {
+    getProduct.verified =value;
     update(['updateAll']);
   }
 
