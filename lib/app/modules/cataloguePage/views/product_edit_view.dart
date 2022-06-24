@@ -50,22 +50,28 @@ class ProductEdit extends StatelessWidget {
                   appBar: AppBar(
                     elevation: 0.0,
                     backgroundColor: Get.theme.scaffoldBackgroundColor,
-                    iconTheme:Theme.of(context).iconTheme.copyWith(color: colorAccent),
+                    iconTheme: Theme.of(context)
+                        .iconTheme
+                        .copyWith(color: colorAccent),
                     title: controller.getSaveIndicator
-                        ? Text(controller.getTextAppBar,style: TextStyle(fontSize: 18.0, color: colorAccent))
-                        : Text(controller.getIsCatalogue ? 'Editar' : 'Nuevo',style: TextStyle(fontSize: 18.0, color: colorAccent)),
+                        ? Text(controller.getTextAppBar,
+                            style:
+                                TextStyle(fontSize: 18.0, color: colorAccent))
+                        : Text(controller.getIsCatalogue ? 'Editar' : 'Nuevo',
+                            style:
+                                TextStyle(fontSize: 18.0, color: colorAccent)),
                   ),
                   body: Center(
-                    child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.all(12.0),
-                      child: Icon(Icons.wifi_off_rounded),
-                    ),
-                    Text('No hay internet'),
-                  ],
-                )),
+                      child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.all(12.0),
+                        child: Icon(Icons.wifi_off_rounded),
+                      ),
+                      Text('No hay internet'),
+                    ],
+                  )),
                 );
               }
               ;
@@ -82,17 +88,22 @@ class ProductEdit extends StatelessWidget {
     return AppBar(
       elevation: 0.0,
       backgroundColor: Get.theme.scaffoldBackgroundColor,
-      iconTheme:Theme.of(contextPrincipal).iconTheme.copyWith(color: colorAccent),
+      iconTheme:
+          Theme.of(contextPrincipal).iconTheme.copyWith(color: colorAccent),
       title: controller.getSaveIndicator
-          ? Text(controller.getTextAppBar,style: TextStyle(fontSize: 18.0, color: colorAccent))
-          : Text(controller.getIsCatalogue ? 'Editar' : 'Nuevo',style: TextStyle(fontSize: 18.0, color: colorAccent)),
+          ? Text(controller.getTextAppBar,
+              style: TextStyle(fontSize: 18.0, color: colorAccent))
+          : Text(controller.getIsCatalogue ? 'Editar' : 'Nuevo',
+              style: TextStyle(fontSize: 18.0, color: colorAccent)),
       actions: <Widget>[
         controller.getSaveIndicator
             ? Container()
             : IconButton(
-                    icon:const Icon(Icons.check), onPressed: controller.save),
+                icon: const Icon(Icons.check), onPressed: controller.save),
       ],
-      bottom: controller.getSaveIndicator ? ComponentApp.linearProgressBarApp() : null,
+      bottom: controller.getSaveIndicator
+          ? ComponentApp.linearProgressBarApp()
+          : null,
     );
   }
 
@@ -170,7 +181,8 @@ class ProductEdit extends StatelessWidget {
           TextButton(
               onPressed: () async {
                 String clave = controller.controllerTextEdit_descripcion.text;
-                String url ="https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa";
+                String url =
+                    "https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa";
                 if (await canLaunch(url)) {
                   await launch(url);
                 } else {
@@ -181,7 +193,8 @@ class ProductEdit extends StatelessWidget {
           TextButton(
               onPressed: () async {
                 String clave = controller.getProduct.code;
-                String url ="https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa";
+                String url =
+                    "https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa";
                 if (await canLaunch(url)) {
                   await launch(url);
                 } else {
@@ -190,46 +203,14 @@ class ProductEdit extends StatelessWidget {
               },
               child: Text('Buscar en código Google')),
           space,
-          // fin widget debug
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              onPressed: () {
-                if (controller.getNewProduct || controller.getEditModerator) {
-                  controller.showModalSelectMarca();
-                }
-              },
-              child: controller.getMarkSelected.id == ''
-                  ? Text("Seleccionar marca")
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        controller.getMarkSelected.id == 'other'
-                            ? Container()
-                            : ImageApp.circleImage(
-                                size: 25,
-                                url: controller.getMarkSelected.image,
-                                texto: controller.getMarkSelected.name),
-                        controller.getMarkSelected.id == 'other'
-                            ? Container()
-                            : SizedBox(width: 8),
-                        Text(controller.getMarkSelected.name,
-                            style: TextStyle(
-                                color: controller.getNewProduct ||
-                                        controller.getEditModerator
-                                    ? null
-                                    : Colors.grey))
-                      ],
-                    ),
-              style: ButtonStyle(
-                  side: controller.getEditModerator || controller.getNewProduct
-                      ? null
-                      : MaterialStateProperty.all(
-                          BorderSide(color: Get.theme.scaffoldBackgroundColor)),
-                  padding: MaterialStateProperty.all<EdgeInsets>(
-                      EdgeInsets.all(16))),
-            ),
-          ),
+          textfielButton(
+              textValue: controller.getMarkSelected.name,
+              labelText: controller.getMarkSelected.id == ''
+                  ? 'seleccionar una marca'
+                  : 'Marca',
+              onTap: controller.getNewProduct || controller.getEditModerator
+                  ? controller.showModalSelectMarca()
+                  : () {}),
           // buttons categoty
           !controller.getAccountAuth ? Container() : space,
           !controller.getAccountAuth ? Container() : buttonsCategory(),
@@ -270,7 +251,7 @@ class ProductEdit extends StatelessWidget {
                       controller: controller.controllerTextEdit_precio_venta,
                     ),
                     space,
-                     FilterChip(
+                    FilterChip(
                       labelStyle: const TextStyle(color: Colors.white),
                       checkmarkColor: Colors.white,
                       selectedColor: Colors.blue,
@@ -280,22 +261,29 @@ class ProductEdit extends StatelessWidget {
                           : 'Habilitar control de stock'),
                       onSelected: (bool value) {
                         if (!controller.getSaveIndicator) {
-                            controller.isStock();
-                          }
+                          controller.isStock();
+                        }
                       },
                     ),
-                    controller.getProduct.stock ?space: Container(),
-                    controller.getProduct.stock ?TextField(
-                      enabled: !controller.getSaveIndicator,
-                      keyboardType:const TextInputType.numberWithOptions(decimal: false),
-                      onChanged: (value) => controller.getProduct.quantityStock =int.parse(controller.controllerTextEdit_quantityStock.text) ,
-                      decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: "Stock"),
-                      textInputAction: TextInputAction.done,
-                      //style: textStyle,
-                      controller: controller.controllerTextEdit_quantityStock,
-                    ):Container(),
+                    controller.getProduct.stock ? space : Container(),
+                    controller.getProduct.stock
+                        ? TextField(
+                            enabled: !controller.getSaveIndicator,
+                            keyboardType: const TextInputType.numberWithOptions(
+                                decimal: false),
+                            onChanged: (value) =>
+                                controller.getProduct.quantityStock = int.parse(
+                                    controller
+                                        .controllerTextEdit_quantityStock.text),
+                            decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                labelText: "Stock"),
+                            textInputAction: TextInputAction.done,
+                            //style: textStyle,
+                            controller:
+                                controller.controllerTextEdit_quantityStock,
+                          )
+                        : Container(),
                     space,
                   ],
                 ),
@@ -334,7 +322,10 @@ class ProductEdit extends StatelessWidget {
                               horizontal: 0, vertical: 5),
                           colorAccent: Colors.white,
                           colorButton: Colors.red,
-                          icon: const Icon(Icons.delete,color: Colors.white,),
+                          icon: const Icon(
+                            Icons.delete,
+                            color: Colors.white,
+                          ),
                           text: 'Eliminar de mi catálogo',
                           onPressed: controller.showDialogDelete),
                     )
@@ -450,66 +441,51 @@ class ProductEdit extends StatelessWidget {
   }
 
   /* WIDGETS COMPONENT */
-  Widget textfielButton({required String labelText}){
-    return TextField(
-      decoration: InputDecoration(
-                disabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey.withOpacity(0.3)),
-                ),
-                border: const OutlineInputBorder(),
-                labelText: labelText),
-
+  Widget textfielButton(
+      {required String labelText,
+      String textValue = '',
+      required Function() onTap}) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(5),
+      onTap: onTap,
+      child: TextField(
+        enabled: false,
+        controller: TextEditingController(text: textValue),
+        decoration: InputDecoration(
+            disabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.grey.withOpacity(0.3)),
+            ),
+            border: const OutlineInputBorder(),
+            labelText: labelText),
+      ),
     );
   }
-  Widget buttonsCategory() {
-    // Text of Button
-    Text textCategory = Text(
-        controller.getCategory.id == ''
-            ? 'Categoría'
-            : controller.getCategory.name,
-        maxLines: 1,
-        style: TextStyle(
-            color: controller.getCategory.id == '' ? null : Colors.grey,
-            overflow: TextOverflow.ellipsis));
-    Text textSubcategory = Text(
-        controller.getSubcategory.id == ''
-            ? 'Subcategoría'
-            : controller.getSubcategory.name,
-        maxLines: 1,
-        style: TextStyle(
-            color: controller.getSubcategory.id == '' ? null : Colors.grey,
-            overflow: TextOverflow.ellipsis));
 
+  Widget buttonsCategory() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       mainAxisSize: MainAxisSize.max,
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Expanded(
-          flex: 1,
-          child: OutlinedButton(
-            onPressed: controller.getSaveIndicator ? null : SelectCategory.show,
-            child: textCategory,
-            style: ButtonStyle(
-                padding:
-                    MaterialStateProperty.all<EdgeInsets>(EdgeInsets.all(16))),
-          ),
+        textfielButton(
+          textValue: controller.getCategory.id == ''
+              ? ''
+              : controller.getCategory.name,
+          labelText: controller.getCategory.id == ''
+              ? 'Seleccionar categoría'
+              : 'Categoría',
+          onTap: controller.getSaveIndicator ? () {} : SelectCategory.show,
         ),
-        SizedBox(width: 5),
-        Expanded(
-          flex: 1,
-          child: OutlinedButton(
-            onPressed: controller.getSaveIndicator
-                ? null
-                : controller.getCategory.id == ''
-                    ? null
-                    : SelectSubCategoria.show,
-            child: textSubcategory,
-            style: ButtonStyle(
-                padding:
-                    MaterialStateProperty.all<EdgeInsets>(EdgeInsets.all(16))),
-          ),
-        )
+        textfielButton(
+            textValue: controller.getCategory.id == ''
+                ? ''
+                : controller.getCategory.name,
+            labelText: controller.getCategory.id == ''
+                ? 'Seleccionar subcategoría'
+                : 'Subcategoría',
+            onTap: controller.getSaveIndicator
+                ? () {}
+                : controller.getSubcategory.id == ''
+                    ? () {}
+                    : SelectSubCategoria.show),
       ],
     );
   }
@@ -686,12 +662,11 @@ class _SelectCategoryState extends State<SelectCategory> {
   Widget popupMenuItemCategoria({required Category categoria}) {
     final HomeController controller = Get.find();
 
-    return  PopupMenuButton(
+    return PopupMenuButton(
       icon: Icon(Icons.more_vert),
       itemBuilder: (_) => <PopupMenuItem<String>>[
         PopupMenuItem<String>(child: const Text('Editar'), value: 'editar'),
-        PopupMenuItem<String>(
-            child: const Text('Eliminar'), value: 'eliminar'),
+        PopupMenuItem<String>(child: const Text('Eliminar'), value: 'eliminar'),
       ],
       onSelected: (value) async {
         switch (value) {
@@ -707,18 +682,18 @@ class _SelectCategoryState extends State<SelectCategory> {
                   content: Row(
                     children: <Widget>[
                       const Expanded(
-                        child: Text(
-                            "¿Desea continuar eliminando esta categoría?"),
+                        child:
+                            Text("¿Desea continuar eliminando esta categoría?"),
                       )
                     ],
                   ),
                   actions: <Widget>[
-                     TextButton(
+                    TextButton(
                         child: const Text('CANCEL'),
                         onPressed: () {
                           Navigator.pop(context);
                         }),
-                     TextButton(
+                    TextButton(
                         child: loadSave == false
                             ? Text("ELIMINAR")
                             : CircularProgressIndicator(),
@@ -946,7 +921,7 @@ class _SelectSubCategoriaState extends State<SelectSubCategoria> {
   Widget popupMenuItemSubcategoria({required Category subcategoria}) {
     final ControllerProductsEdit controllerProductsEdit = Get.find();
 
-    return  PopupMenuButton(
+    return PopupMenuButton(
       icon: const Icon(Icons.more_vert),
       itemBuilder: (_) => <PopupMenuItem<String>>[
         const PopupMenuItem<String>(child: Text('Editar'), value: 'editar'),
@@ -961,23 +936,23 @@ class _SelectSubCategoriaState extends State<SelectSubCategoria> {
             await showDialog<String>(
               context: context,
               builder: (context) {
-                return  AlertDialog(
+                return AlertDialog(
                   contentPadding: const EdgeInsets.all(16.0),
-                  content:  Row(
+                  content: Row(
                     children: <Widget>[
-                       Expanded(
-                        child:  Text(
+                      Expanded(
+                        child: Text(
                             "¿Desea continuar eliminando esta subategoría?"),
                       )
                     ],
                   ),
                   actions: <Widget>[
-                     TextButton(
+                    TextButton(
                         child: const Text('CANCEL'),
                         onPressed: () {
                           Navigator.pop(context);
                         }),
-                     TextButton(
+                    TextButton(
                         child: loadSave == false
                             ? Text("ELIMINAR")
                             : CircularProgressIndicator(),
@@ -987,10 +962,12 @@ class _SelectSubCategoriaState extends State<SelectSubCategoria> {
                           // save
                           await controllerProductsEdit
                               .categoryUpdate(
-                                  categoria: controllerProductsEdit.getCategorySelect)
+                                  categoria:
+                                      controllerProductsEdit.getCategorySelect)
                               .whenComplete(() => Navigator.pop(context))
                               .catchError((error, stackTrace) => setState(() {
-                                    loadSave = false;}));
+                                    loadSave = false;
+                                  }));
                         })
                   ],
                 );
@@ -1018,27 +995,27 @@ class _SelectSubCategoriaState extends State<SelectSubCategoria> {
     await showDialog<String>(
       context: context,
       builder: (context) {
-        return  AlertDialog(
+        return AlertDialog(
           contentPadding: const EdgeInsets.all(16.0),
-          content:  Row(
+          content: Row(
             children: <Widget>[
-               Expanded(
-                child:  TextField(
+              Expanded(
+                child: TextField(
                   controller: textEditingController,
                   autofocus: true,
-                  decoration:  InputDecoration(
+                  decoration: InputDecoration(
                       labelText: 'Subcategoría', hintText: 'Ej. golosinas'),
                 ),
               )
             ],
           ),
           actions: <Widget>[
-             TextButton(
+            TextButton(
                 child: const Text('CANCEL'),
                 onPressed: () {
                   Get.back();
                 }),
-             TextButton(
+            TextButton(
                 child: loadSave == false
                     ? Text(newProduct ? 'GUARDAR' : "ACTUALIZAR")
                     : CircularProgressIndicator(),
@@ -1113,8 +1090,15 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
                         children: [
                           getWidgetOptionOther(),
                           Divider(endIndent: 12.0, indent: 12.0, height: 0),
-                          controllerProductsEdit.getUltimateSelectionMark.id =='' ||controllerProductsEdit.getUltimateSelectionMark.id =='other'
-                            ? Container(): listTile(marcaSelect: controllerProductsEdit.getUltimateSelectionMark),
+                          controllerProductsEdit.getUltimateSelectionMark.id ==
+                                      '' ||
+                                  controllerProductsEdit
+                                          .getUltimateSelectionMark.id ==
+                                      'other'
+                              ? Container()
+                              : listTile(
+                                  marcaSelect: controllerProductsEdit
+                                      .getUltimateSelectionMark),
                           Divider(endIndent: 12.0, indent: 12.0, height: 0),
                           listTile(marcaSelect: marcaSelect),
                           Divider(endIndent: 12.0, indent: 12.0, height: 0),
@@ -1194,7 +1178,9 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
     } else {
       controllerProductsEdit.getMarks.forEach((element) {
         if (element.id == 'other') {
-          widget = listTile(marcaSelect: element,);
+          widget = listTile(
+            marcaSelect: element,
+          );
         }
       });
     }
@@ -1257,15 +1243,21 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
     );
   }
 
-  Widget listTile({required Mark marcaSelect,bool icon = true}) {
+  Widget listTile({required Mark marcaSelect, bool icon = true}) {
     return ListTile(
       contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      trailing: !icon?null:ImageApp.circleImage(texto: marcaSelect.name, url: marcaSelect.image, size: 50.0),
+      trailing: !icon
+          ? null
+          : ImageApp.circleImage(
+              texto: marcaSelect.name, url: marcaSelect.image, size: 50.0),
       dense: true,
       title: Text(marcaSelect.name,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontSize: 18.0, color: Get.theme.textTheme.bodyText1!.color)),
-      subtitle: marcaSelect.description==''?null:Text(marcaSelect.description, overflow: TextOverflow.ellipsis),
+          style: TextStyle(
+              fontSize: 18.0, color: Get.theme.textTheme.bodyText1!.color)),
+      subtitle: marcaSelect.description == ''
+          ? null
+          : Text(marcaSelect.description, overflow: TextOverflow.ellipsis),
       onTap: () {
         controllerProductsEdit.setUltimateSelectionMark = marcaSelect;
         controllerProductsEdit.setMarkSelected = marcaSelect;
@@ -1299,7 +1291,6 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
   }
 }
 
-
 // TODO : delete release
 class CreateMark extends StatefulWidget {
   late final Mark mark;
@@ -1318,7 +1309,7 @@ class _CreateMarkState extends State<CreateMark> {
   bool newMark = false;
   String title = 'Crear nueva marca';
   bool load = false;
-  TextStyle textStyle =  const TextStyle(fontSize: 24.0);
+  TextStyle textStyle = const TextStyle(fontSize: 24.0);
   ImagePicker _picker = ImagePicker();
   XFile xFile = XFile('');
 
@@ -1357,11 +1348,11 @@ class _CreateMarkState extends State<CreateMark> {
       actions: [
         newMark
             ? Container()
-            : IconButton(onPressed: delete, icon:const Icon(Icons.delete)),
+            : IconButton(onPressed: delete, icon: const Icon(Icons.delete)),
         load
             ? Container()
             : IconButton(
-                icon:const Icon(Icons.check),
+                icon: const Icon(Icons.check),
                 onPressed: save,
               ),
       ],
@@ -1413,7 +1404,7 @@ class _CreateMarkState extends State<CreateMark> {
             enabled: !load,
             controller: TextEditingController(text: widget.mark.name),
             onChanged: (value) => widget.mark.name = value,
-            decoration:const InputDecoration(
+            decoration: const InputDecoration(
                 border: OutlineInputBorder(), labelText: "Nombre de la marca"),
             style: textStyle,
           ),
@@ -1422,7 +1413,7 @@ class _CreateMarkState extends State<CreateMark> {
           padding: const EdgeInsets.all(12.0),
           child: TextField(
             enabled: !load,
-            controller:TextEditingController(text: widget.mark.description),
+            controller: TextEditingController(text: widget.mark.description),
             onChanged: (value) => widget.mark.description = value,
             decoration: const InputDecoration(
                 border: OutlineInputBorder(),
@@ -1482,7 +1473,7 @@ class _CreateMarkState extends State<CreateMark> {
     if (widget.mark.id == '') {
       widget.mark.id = uuid.v1();
       if (widget.mark.id == '') {
-        widget.mark.id =  DateTime.now().millisecondsSinceEpoch.toString();
+        widget.mark.id = DateTime.now().millisecondsSinceEpoch.toString();
       }
     }
     if (widget.mark.name != '') {
@@ -1506,11 +1497,11 @@ class _CreateMarkState extends State<CreateMark> {
                   .doc(widget.mark.id)
                   .set(widget.mark.toJson())
                   .whenComplete(() {
-                    controllerProductsEdit.setUltimateSelectionMark = widget.mark;
-                    controllerProductsEdit.setMarkSelected = widget.mark;
-                    // agregar el obj manualmente para evitar consulta a la db  innecesaria
-                    controllerProductsEdit.getMarks.add(widget.mark);
-                    Get.back();
+                controllerProductsEdit.setUltimateSelectionMark = widget.mark;
+                controllerProductsEdit.setMarkSelected = widget.mark;
+                // agregar el obj manualmente para evitar consulta a la db  innecesaria
+                controllerProductsEdit.getMarks.add(widget.mark);
+                Get.back();
               });
             })
             .onError((error, stackTrace) {})
