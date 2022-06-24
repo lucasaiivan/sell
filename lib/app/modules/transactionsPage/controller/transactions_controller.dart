@@ -66,8 +66,7 @@ class TransactionsController extends GetxController {
 
     // a la marca de tiempo actual le descontamos dias
     DateTime getTime = Timestamp.now().toDate();
-    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(
-        DateTime(getTime.year, 1, 1, 0).millisecondsSinceEpoch);
+    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(DateTime(getTime.year, 1, 1, 0).millisecondsSinceEpoch);
     // marca de tiempo actual
     Timestamp timeEnd = Timestamp.now();
 
@@ -146,14 +145,14 @@ class TransactionsController extends GetxController {
     }
   }
   void readTransactionsLastMonth() {
-    //obtenemos los documentos creados este mes
+    //obtenemos los documentos creados el mes pasado
  
     // marca de tiempo actual
     DateTime getTime = Timestamp.now().toDate();
     //  a la marca de tiempo actual le descontamos dias del mes
     Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(DateTime(getTime.year, getTime.month-1,1, 0).millisecondsSinceEpoch);
     // marca de tiempo actual
-    Timestamp timeEnd = Timestamp.now();
+    Timestamp timeEnd = Timestamp.fromMillisecondsSinceEpoch(DateTime(getTime.year, getTime.month,1, 0).millisecondsSinceEpoch);
 
     // obtenemos los obj(productos) del catalogo de la cuenta del negocio
     if (homeController.getProfileAccountSelected.id != '') {
