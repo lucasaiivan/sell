@@ -300,8 +300,8 @@ class SalesView extends StatelessWidget {
                           CircleAvatar(
                             radius: radius,
                             backgroundColor: Colors.grey.withOpacity(0.1),
-                            child: const Icon(Icons.search,
-                                color: Colors.white60),
+                            child: Icon(Icons.search,
+                                color:Get.theme.brightness==Brightness.dark?Colors.white:Colors.black54),
                           ),
                           SizedBox(
                             height:spaceImageText,

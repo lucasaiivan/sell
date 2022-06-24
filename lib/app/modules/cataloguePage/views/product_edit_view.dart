@@ -69,7 +69,7 @@ class ProductEdit extends StatelessWidget {
                         padding: EdgeInsets.all(12.0),
                         child: Icon(Icons.wifi_off_rounded),
                       ),
-                      Text('No hay internet'),
+                      const Text('No hay internet'),
                     ],
                   )),
                 );
@@ -111,6 +111,7 @@ class ProductEdit extends StatelessWidget {
     return Scaffold(
       appBar: appBar(contextPrincipal: context),
       body: ListView(
+        scrollDirection: Axis.vertical,
         children: [
           widgetsImagen(),
           widgetFormEditText(),
@@ -154,7 +155,7 @@ class ProductEdit extends StatelessWidget {
 
   Widget widgetFormEditText() {
     return Container(
-      padding: EdgeInsets.all(12.0),
+      padding: const EdgeInsets.all(12.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -209,7 +210,7 @@ class ProductEdit extends StatelessWidget {
                   ? 'seleccionar una marca'
                   : 'Marca',
               onTap: controller.getNewProduct || controller.getEditModerator
-                  ? controller.showModalSelectMarca()
+                  ? controller.showModalSelectMarca
                   : () {}),
           // buttons categoty
           !controller.getAccountAuth ? Container() : space,
@@ -224,11 +225,11 @@ class ProductEdit extends StatelessWidget {
                     TextField(
                       enabled: !controller.getSaveIndicator,
                       keyboardType:
-                          TextInputType.numberWithOptions(decimal: true),
+                          const TextInputType.numberWithOptions(decimal: true),
                       onChanged: (value) =>
                           controller.getProduct.purchasePrice = controller
                               .controllerTextEdit_precio_compra.numberValue,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                           border: OutlineInputBorder(),
                           labelText: "Precio de compra"),
                       textInputAction: TextInputAction.next,
@@ -251,38 +252,40 @@ class ProductEdit extends StatelessWidget {
                       controller: controller.controllerTextEdit_precio_venta,
                     ),
                     space,
-                    FilterChip(
-                      labelStyle: const TextStyle(color: Colors.white),
-                      checkmarkColor: Colors.white,
-                      selectedColor: Colors.blue,
-                      selected: controller.getProduct.stock,
-                      label: Text(controller.getProduct.stock
+                    CheckboxListTile(
+                      enabled:controller.getSaveIndicator?false:true,
+                      checkColor: Colors.white,
+                      activeColor: Colors.blue,
+                      value: controller.getProduct.stock,
+                      title: Text(controller.getProduct.stock
                           ? 'Quitar de stock'
                           : 'Habilitar control de stock'),
-                      onSelected: (bool value) {
+                      onChanged: (value) {
                         if (!controller.getSaveIndicator) {
-                          controller.isStock();
+                          controller.setStock=value??false;
                         }
                       },
                     ),
                     controller.getProduct.stock ? space : Container(),
                     controller.getProduct.stock
-                        ? TextField(
-                            enabled: !controller.getSaveIndicator,
-                            keyboardType: const TextInputType.numberWithOptions(
-                                decimal: false),
-                            onChanged: (value) =>
-                                controller.getProduct.quantityStock = int.parse(
-                                    controller
-                                        .controllerTextEdit_quantityStock.text),
-                            decoration: const InputDecoration(
-                                border: OutlineInputBorder(),
-                                labelText: "Stock"),
-                            textInputAction: TextInputAction.done,
-                            //style: textStyle,
-                            controller:
-                                controller.controllerTextEdit_quantityStock,
-                          )
+                        ? ElasticIn(
+                          child: TextField(
+                              enabled: !controller.getSaveIndicator,
+                              keyboardType: const TextInputType.numberWithOptions(
+                                  decimal: false),
+                              onChanged: (value) =>
+                                  controller.getProduct.quantityStock = int.parse(
+                                      controller
+                                          .controllerTextEdit_quantityStock.text),
+                              decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  labelText: "Stock"),
+                              textInputAction: TextInputAction.done,
+                              //style: textStyle,
+                              controller:
+                                  controller.controllerTextEdit_quantityStock,
+                            ),
+                        )
                         : Container(),
                     space,
                   ],
@@ -297,10 +300,10 @@ class ProductEdit extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Icon(Icons.qr_code_2_rounded, size: 14),
-                        SizedBox(width: 5),
+                        const Icon(Icons.qr_code_2_rounded, size: 14),
+                        const SizedBox(width: 5),
                         Text(controller.getProduct.code,
-                            style: TextStyle(
+                            style: const TextStyle(
                                 height: 1,
                                 fontSize: 12,
                                 fontWeight: FontWeight.normal)),
@@ -321,7 +324,7 @@ class ProductEdit extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 0, vertical: 5),
                           colorAccent: Colors.white,
-                          colorButton: Colors.red,
+                          colorButton: Colors.red.shade400,
                           icon: const Icon(
                             Icons.delete,
                             color: Colors.white,
@@ -336,9 +339,9 @@ class ProductEdit extends StatelessWidget {
               ? Container()
               : Column(
                   children: [
-                    SizedBox(height: 20.0),
+                    const SizedBox(height: 20.0),
                     Row(
-                      children: [
+                      children: const [
                         Expanded(
                             child: Divider(
                           height: 3.0,
@@ -356,43 +359,29 @@ class ProductEdit extends StatelessWidget {
                       ],
                     ),
                     SizedBox(height: !controller.getSaveIndicator ? 20.0 : 0.0),
-                    FilterChip(
-                      labelStyle: TextStyle(color: Colors.white),
-                      checkmarkColor: Colors.white,
-                      selectedColor: controller.getSaveIndicator
-                          ? null
-                          : controller.getEditModerator
-                              ? Colors.amber
-                              : Colors.grey,
-                      selected: controller.getProduct.favorite,
-                      label: Text(controller.getProduct.favorite
-                          ? 'Quitar de destacado'
-                          : 'Agregar a destacado'),
-                      onSelected: (bool value) {
-                        if (controller.getEditModerator) {
-                          if (!controller.getSaveIndicator) {
-                            controller.isFavorite();
-                          }
+                    CheckboxListTile(
+                      enabled: controller.getEditModerator?controller.getSaveIndicator?false:true:false,
+                      checkColor: Colors.white,
+                      activeColor: Colors.blue,
+                      value: controller.getProduct.favorite,
+                      title: Text(controller.getProduct.favorite? 'Detacado': 'Sin destacar'),
+                      onChanged: (value) {
+                        if (!controller.getSaveIndicator) {
+                          controller.setFavorite(value: value??false);
                         }
                       },
                     ),
                     SizedBox(height: !controller.getSaveIndicator ? 20.0 : 0.0),
-                    FilterChip(
-                      labelStyle: TextStyle(color: Colors.white),
-                      checkmarkColor: Colors.white,
-                      selectedColor: controller.getSaveIndicator
-                          ? null
-                          : controller.getEditModerator
-                              ? Colors.blue
-                              : Colors.grey,
-                      selected: controller.getProduct.verified,
-                      label: Text(controller.getProduct.verified
-                          ? 'Quitar de Verificado'
-                          : 'Verificar'),
-                      onSelected: (bool value) {
+                    CheckboxListTile(
+                      enabled: controller.getEditModerator?controller.getSaveIndicator?false:true:false,
+                      checkColor: Colors.white,
+                      activeColor: Colors.blue,
+                      value: controller.getProduct.verified,
+                      title: Text(controller.getProduct.verified? 'Verificado': 'Sin verificar'),
+                      onChanged: (value) {
                         if (controller.getEditModerator) {
                           if (!controller.getSaveIndicator) {
-                            controller.checkProduct();
+                            controller.setCheckVerified(value: value??false);
                           }
                         }
                       },
@@ -403,7 +392,7 @@ class ProductEdit extends StatelessWidget {
                         : button(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 0, vertical: 5),
-                            icon: Icon(Icons.security, color: Colors.white),
+                            icon: const Icon(Icons.security, color: Colors.white),
                             onPressed: () {
                               if (controller.getEditModerator) {
                                 controller.showDialogSaveOPTDeveloper();
@@ -419,19 +408,19 @@ class ProductEdit extends StatelessWidget {
                                 ? 'Actualizar documento'
                                 : "Editar documento",
                           ),
-                    SizedBox(height: 20.0),
+                    const SizedBox(height: 20.0),
                     controller.getSaveIndicator
                         ? Container()
                         : button(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 0, vertical: 5),
-                            icon: Icon(Icons.security, color: Colors.white),
+                            icon: const Icon(Icons.security, color: Colors.white),
                             onPressed: controller.showDialogDeleteOPTDeveloper,
                             colorAccent: Colors.white,
                             colorButton: Colors.red,
                             text: "Eliminar documento",
                           ),
-                    SizedBox(height: 50.0),
+                    const SizedBox(height: 50.0),
                   ],
                   // fin widget debug
                 ),
@@ -463,29 +452,42 @@ class ProductEdit extends StatelessWidget {
 
   Widget buttonsCategory() {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        textfielButton(
-          textValue: controller.getCategory.id == ''
-              ? ''
-              : controller.getCategory.name,
-          labelText: controller.getCategory.id == ''
-              ? 'Seleccionar categoría'
-              : 'Categoría',
-          onTap: controller.getSaveIndicator ? () {} : SelectCategory.show,
-        ),
-        textfielButton(
+        Expanded(
+          flex: 1,
+          child: textfielButton(
             textValue: controller.getCategory.id == ''
                 ? ''
                 : controller.getCategory.name,
             labelText: controller.getCategory.id == ''
-                ? 'Seleccionar subcategoría'
-                : 'Subcategoría',
+                ? 'Seleccionar categoría'
+                : 'Categoría',
             onTap: controller.getSaveIndicator
                 ? () {}
                 : controller.getSubcategory.id == ''
                     ? () {}
-                    : SelectSubCategoria.show),
+                    : SelectCategory.show,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          flex: 1,
+          child: textfielButton(
+              textValue: controller.getCategory.id == ''
+                  ? ''
+                  : controller.getSubcategory.name,
+              labelText: controller.getCategory.id == ''
+                  ? 'Seleccionar subcategoría'
+                  : 'Subcategoría',
+              onTap: controller.getSaveIndicator
+                  ? () {}
+                  : controller.getSubcategory.id == ''
+                      ? () {}
+                      : SelectSubCategoria.show),
+        ),
       ],
     );
   }
@@ -535,7 +537,7 @@ class SelectCategory extends StatefulWidget {
       backgroundColor: Get.theme.scaffoldBackgroundColor,
       enableDrag: true,
       isDismissible: true,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20), topRight: Radius.circular(20))),
     );
@@ -565,17 +567,17 @@ class _SelectCategoryState extends State<SelectCategory> {
 
   @override
   Widget build(BuildContext buildContext) {
-    if (welcomeController.getCatalogueCategoryList.length == 0) {
+    if (welcomeController.getCatalogueCategoryList.isEmpty) {
       return ListTile(
         onTap: () => showDialogSetCategoria(categoria: Category()),
-        title: Text('Crear categoría', style: TextStyle(fontSize: 18)),
-        trailing: Icon(Icons.add),
+        title: const Text('Crear categoría', style: TextStyle(fontSize: 18)),
+        trailing: const Icon(Icons.add),
       );
     }
 
     return Obx(
       () => ListView.builder(
-        padding: EdgeInsets.symmetric(vertical: 15.0),
+        padding: const EdgeInsets.symmetric(vertical: 15.0),
         shrinkWrap: true,
         itemCount: welcomeController.getCatalogueCategoryList.length,
         itemBuilder: (BuildContext context, int index) {
@@ -587,22 +589,22 @@ class _SelectCategoryState extends State<SelectCategory> {
                   children: <Widget>[
                     Row(
                       children: [
-                        Expanded(
+                        const Expanded(
                             child: Padding(
-                          padding: const EdgeInsets.all(20.0),
+                          padding: EdgeInsets.all(20.0),
                           child:
                               Text('Categoría', style: TextStyle(fontSize: 18)),
                         )),
                         IconButton(
-                            icon: Icon(Icons.add),
+                            icon: const Icon(Icons.add),
                             padding: const EdgeInsets.all(20.0),
                             onPressed: () =>
                                 showDialogSetCategoria(categoria: Category()))
                       ],
                     ),
                     ListTile(
-                      contentPadding:
-                          EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 12.0),
                       leading: CircleAvatar(
                         backgroundColor: color.withOpacity(0.1),
                         radius: 24.0,
