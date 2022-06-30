@@ -37,11 +37,13 @@ class TransactionsView extends StatelessWidget {
       title: const Text('Transacciones'),
       actions: [
         PopupMenuButton(
+          icon: const Icon(Icons.filter_list),
             onSelected: (selectedValue) {
               transactionsController.filterList(key: selectedValue);
             },
             itemBuilder: (BuildContext ctx) => [
                   const PopupMenuItem(value: 'hoy', child: Text('Hoy')),
+                  const PopupMenuItem(value: 'ayer', child: Text('Ayer')),
                   const PopupMenuItem(
                       value: 'este mes', child: Text('Este mes')),
                   const PopupMenuItem(

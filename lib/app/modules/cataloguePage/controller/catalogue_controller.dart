@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:sell/app/models/catalogo_model.dart';
 import 'package:sell/app/modules/home/controller/home_controller.dart';
@@ -46,6 +47,26 @@ class CataloguePageController extends GetxController {
   }
 
   // FUCTIONS
+  Future<void> categoryDelete({required String idCategory}) async =>
+      await Database.refFirestoreCategory(
+              idAccount: homeController.getProfileAccountSelected.id)
+          .doc(idCategory)
+          .delete();
+  Future<void> categoryUpdate({required Category categoria}) async {
+    // ref
+    var documentReferencer =
+        Database.refFirestoreCategory(idAccount: homeController.getProfileAccountSelected.id)
+            .doc(categoria.id);
+    // Actualizamos los datos
+    documentReferencer
+        .set(Map<String, dynamic>.from(categoria.toJson()),
+            SetOptions(merge: true))
+        .whenComplete(() {
+      print("######################## FIREBASE updateAccount whenComplete");
+    }).catchError((e) => print(
+            "######################## FIREBASE updateAccount catchError: $e"));
+  }
+
 
   // navigator
   void toProductEdit({required ProductCatalogue productCatalogue}) {

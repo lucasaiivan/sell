@@ -77,6 +77,7 @@ class HomeController extends GetxController {
   void onClose() {}
 
   // QUERIES FIRESTORE
+  
   void readAccountsData({required String idAccount}) {
     //default values
     setProfileAccountSelected = ProfileAccountModel(creation: Timestamp.now());
@@ -94,6 +95,7 @@ class HomeController extends GetxController {
            // load
             readProductsCatalogue(idAccount: idAccount);
             readListCategoryListFuture(idAccount: idAccount);
+            
         }
       }).catchError((error) {
         print('########################home readManagedAccountsData: ' +
@@ -107,8 +109,9 @@ class HomeController extends GetxController {
     Database.readCategoriesQueryStream(idAccount: idAccount)
         .listen((event) {
       List<Category> list = [];
-      event.docs
-          .forEach((element) => list.add(Category.fromMap(element.data())));
+      for (var element in event.docs) {
+        list.add(Category.fromMap(element.data()));
+      }
       setCatalogueCategoryList = list;
     });
   }

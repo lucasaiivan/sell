@@ -87,34 +87,67 @@ class CataloguePage extends StatelessWidget {
   }
 
   Widget viewCategory() {
-    // mostramos las categorias en un lista
-    return ListView.builder(
-      itemCount: 10,
-      itemBuilder: (context, index) {
-        return Column(
-          children: [
-            ListTile(
-              title: Container(
-                width: 100,
-                height: 14,
-                color: Colors.grey,
-              ),
-              subtitle: Container(
-                width: 100,
-                height: 14,
-                color: Colors.grey,
-              ),
-            ),
-            const Divider(),
-          ],
-        );
-      },
+
+    // controllers
+    final HomeController controller = Get.find();
+    
+    if (controller.getCatalogueCategoryList.isEmpty) {
+      return ListTile(
+        onTap:() => showDialogSetCategoria(categoria: Category()),
+        title: const Text('Crear categoría', style: TextStyle(fontSize: 18)),
+        trailing:const Icon(Icons.add),
+      );
+    }
+    return Obx(
+      () => ListView.builder(
+        padding: const EdgeInsets.symmetric(vertical: 15.0),
+        shrinkWrap: true,
+        itemCount: controller.getCatalogueCategoryList.length,
+        itemBuilder: (BuildContext context, int index) {
+
+          //get 
+          Category categoria = controller.getCatalogueCategoryList[index];
+          MaterialColor color = Utils.getRandomColor();
+          
+          return index == 0
+              ? Column(
+                  children: <Widget>[
+                    controller.getCatalogueCategoryList.isNotEmpty
+                        ? ListTile(
+                            contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                            leading: CircleAvatar(
+                              backgroundColor: color.withOpacity(0.1),
+                              radius: 24.0,
+                              child: Icon(Icons.all_inclusive,color: color),
+                            ),
+                            dense: true,
+                            title: const Text("Mostrar todos",
+                                style:  TextStyle(fontWeight: FontWeight.w400)),
+                            onTap: () {
+                              //controller.catalogueFilterReset();
+                              Get.back();
+                            },
+                          )
+                        : Container(),
+                    const Divider(endIndent: 12.0, indent: 12.0, height: 0.0),
+                    listTileCategoryItem(categoria: categoria),
+                    const Divider(endIndent: 12.0, indent: 12.0, height: 0.0),
+                  ],
+                )
+              : Column(
+                  children: <Widget>[
+                    listTileCategoryItem(categoria: categoria),
+                    const Divider(endIndent: 12.0, indent: 12.0, height: 0.0),
+                  ],
+                );
+        },
+      ),
     );
+
   }
 
   // WIDGETS COMPONENTS
   Widget listTileProduct({required ProductCatalogue item}) {
-
     //  controller
     final CataloguePageController cataloguePageController = Get.find();
     // values
@@ -183,6 +216,134 @@ class CataloguePage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget listTileCategoryItem({required Category categoria}) {
+    //  values
+    MaterialColor color = Utils.getRandomColor();
+
+    return ListTile(
+      contentPadding: const EdgeInsets.all(12),
+      leading: CircleAvatar(
+        backgroundColor: color.withOpacity(0.1),
+        radius: 24.0,
+        child: categoria.name != ""
+            ? Text(categoria.name.substring(0, 1),
+                style: TextStyle( color: color, fontWeight: FontWeight.bold))
+            :const  Text("C"),
+      ),
+      dense: true,
+      title: Text(categoria.name,style: const TextStyle(fontWeight: FontWeight.w400)),
+      onTap: () {
+        /* Get.back();
+        controller.setCategorySelect = categoria;
+        ViewSubCategoria.show(categoria: categoria); */
+      },
+      trailing: dropdownButtonCategory(categoria: categoria),
+    );
+  }
+
+  // menu options
+  Widget dropdownButtonCategory({required Category categoria}) {
+    final CataloguePageController controller = Get.find();
+
+    return DropdownButton<String>(
+      icon: const Icon(Icons.more_vert),
+      value: null,
+      elevation: 10,
+      underline: Container(),
+      items: const [
+        DropdownMenuItem(
+          value: 'editar',
+          child: Text("Editar"),
+        ),
+        DropdownMenuItem(
+          value: 'eliminar',
+          child: Text("Eliminar"),
+        ),
+      ],
+      onChanged: (value) async {
+        switch (value) {
+          case "editar":
+            showDialogSetCategoria(categoria: categoria);
+            break;
+          case "eliminar":
+           Get.defaultDialog(
+            title: 'Alerta',
+            middleText: '¿Desea continuar eliminando esta categoría?',
+            confirm: TextButton.icon(
+              onPressed: () async {
+                controller.categoryDelete(idCategory: categoria.id);
+                Get.back();
+              },
+              icon: const Icon(Icons.clear_rounded),
+              label: const Text('Si, Eliminar')),
+            cancel: TextButton.icon(
+              onPressed: () => Get.back(),
+              icon: const Icon(Icons.delete),
+              label: const Text('Descartar')),
+              );
+            break;
+        }
+      },
+    );
+  }
+
+  showDialogSetCategoria({required Category categoria}) async {
+    final CataloguePageController controller = Get.find();
+    bool loadSave = false;
+    bool newProduct = false;
+    TextEditingController textEditingController =
+        TextEditingController(text: categoria.name);
+
+    if (categoria.id == '') {
+      newProduct = true;
+      categoria =  Category();
+      categoria.id =  DateTime.now().millisecondsSinceEpoch.toString();
+    }
+    
+    await Get.dialog(AlertDialog(
+      contentPadding: const EdgeInsets.all(16.0),
+      content: Row(
+        children: <Widget>[
+          Expanded(
+            child: TextField(
+              controller: textEditingController,
+              autofocus: true,
+              decoration: const InputDecoration(
+                  labelText: 'Categoria', hintText: 'Ej. golosinas'),
+            ),
+          )
+        ],
+      ),
+      actions: <Widget>[
+        TextButton(
+            child: const Text('CANCEL'),
+            onPressed: () {
+              Get.back();
+            }),
+        TextButton(
+            child: loadSave == false
+                ? Text(newProduct ? 'GUARDAR' : "ACTUALIZAR")
+                : const CircularProgressIndicator(),
+            onPressed: () async {
+              if (textEditingController.text != '') {
+                // set
+                categoria.name = textEditingController.text;
+                loadSave = true;
+                controller.update();
+                // save
+                await controller
+                    .categoryUpdate(categoria: categoria)
+                    .whenComplete(() => Get.back())
+                    .catchError((error, stackTrace) {
+                  loadSave = false;
+                  controller.update();
+                });
+              }
+            })
+      ],
+    ));
   }
 
   Widget get widgetProducts {
