@@ -8,6 +8,7 @@ import 'package:sell/app/modules/splash/views/splash_view.dart';
 import '../modules/auth/views/login_view.dart';
 import '../modules/cataloguePage/bindings/catalogue_binding.dart';
 import '../modules/cataloguePage/views/product_edit_view.dart';
+import '../modules/cataloguePage/views/productsSearch_view.dart';
 part 'app_routes.dart';
 
 class AppPages {
@@ -41,6 +42,11 @@ class AppPages {
       name: Routes.EDITPRODUCT,
       page: () => ProductEdit(),
       binding: ProductsEditBinding(),
+    ),
+    GetPage(
+      name: Routes.SEACH_PRODUCT,
+      page: () => ProductsSearch(),
+      binding: ProductsSarchBinding(),
     ),
   ];
 }
