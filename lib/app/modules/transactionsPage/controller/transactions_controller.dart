@@ -45,6 +45,10 @@ class TransactionsController extends GetxController {
         readTransactionsOfTheDay();
         setFilterText = 'El día de hoy';
         break;
+      case 'ayer':
+        readTransactionsYesterday();
+        setFilterText = 'Ayer';
+        break;
       case 'este mes':
         readTransactionsThisMonth();
         setFilterText = 'Este mes';
@@ -98,6 +102,37 @@ class TransactionsController extends GetxController {
         .millisecondsSinceEpoch);
     // marca de tiempo actual
     Timestamp timeEnd = Timestamp.now();
+
+    // obtenemos los obj(productos) del catalogo de la cuenta del negocio
+    if (homeController.getProfileAccountSelected.id != '') {
+      Database.readTransactionsFilterTimeStream(
+        idAccount: homeController.getProfileAccountSelected.id,
+        timeStart: timeStart,
+        timeEnd: timeEnd,
+      ).listen((value) {
+        List<TicketModel> list = [];
+        //  get
+        for (var element in value.docs) {
+          list.add(TicketModel.fromMap(element.data()));
+        }
+        //  set
+        setTransactionsList = list;
+      });
+    }
+  }
+  void readTransactionsYesterday() {
+    // obtenemos los documentos creados en el día de ayer de la fecha actual
+
+    // a la marca de tiempo actual le descontamos las horas del día
+    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(Timestamp.now()
+        .toDate()
+        .subtract(Duration(hours: Timestamp.now().toDate().hour,days: 1))
+        .millisecondsSinceEpoch);
+    // marca de tiempo actual
+    Timestamp timeEnd = Timestamp.fromMillisecondsSinceEpoch(Timestamp.now()
+        .toDate()
+        .subtract(Duration(hours: Timestamp.now().toDate().hour))
+        .millisecondsSinceEpoch);
 
     // obtenemos los obj(productos) del catalogo de la cuenta del negocio
     if (homeController.getProfileAccountSelected.id != '') {
