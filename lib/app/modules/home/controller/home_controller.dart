@@ -15,7 +15,7 @@ class HomeController extends GetxController {
   }
 
   // subcategory list selected
-  RxList<Category> _subCategoryList = <Category>[].obs;
+  final RxList<Category> _subCategoryList = <Category>[].obs;
   List<Category> get getsubCatalogueCategoryList => _subCategoryList;
   set setCataloguesubCategoryList(List<Category> value) {
     _subCategoryList.value = value;
@@ -31,8 +31,8 @@ class HomeController extends GetxController {
   }
 
   // list products selecteds
-  RxList<ProductCatalogue> _listProductSelecteds = <ProductCatalogue>[].obs;
-  get getProductsSelectedsList => _listProductSelecteds.value;
+  final RxList<ProductCatalogue> _listProductSelecteds = <ProductCatalogue>[].obs;
+  get getProductsSelectedsList => _listProductSelecteds;
   saveListProductSelecteds({required List<ProductCatalogue> list}) {
     _listProductSelecteds.value = list;
   }
@@ -75,6 +75,29 @@ class HomeController extends GetxController {
 
   @override
   void onClose() {}
+
+  // FUNCTIONS
+  bool isCatalogue({required String id}) {
+    bool iscatalogue = false;
+    List list = getCataloProducts;
+    list.forEach((element) {
+      if (element.id == id) {
+        iscatalogue = true;
+      }
+    });
+    return iscatalogue;
+  }
+
+  ProductCatalogue getProductCatalogue({required String id}) {
+    ProductCatalogue product =
+        ProductCatalogue(creation: Timestamp.now(), upgrade: Timestamp.now());
+    getCataloProducts.forEach((element) {
+      if (element.id == id) {
+        product = element;
+      }
+    });
+    return product;
+  }
 
   // QUERIES FIRESTORE
   

@@ -6,7 +6,6 @@ import 'package:sell/app/modules/cataloguePage/controller/catalogue_controller.d
 import 'package:sell/app/modules/home/controller/home_controller.dart';
 import 'package:sell/app/utils/fuctions.dart';
 import 'package:sell/app/utils/widgets_utils.dart';
-
 import '../../../utils/dynamicTheme_lb.dart';
 
 class CataloguePage extends StatelessWidget {
@@ -18,18 +17,12 @@ class CataloguePage extends StatelessWidget {
     return GetBuilder<CataloguePageController>(
       init: CataloguePageController(),
       initState: (_) {},
-      builder: (_) {
+      builder: (controller) {
         return Scaffold(
           appBar: appbar(context: context),
           drawer: drawerApp(),
           body: body(context: context),
-          floatingActionButton: FloatingActionButton(
-              backgroundColor: Colors.blue,
-              onPressed: () {}, //controller.add,
-              child: const Icon(
-                Icons.add,
-                color: Colors.white,
-              )),
+          floatingActionButton: floatingActionButton(controller:controller),
         );
       },
     );
@@ -87,15 +80,14 @@ class CataloguePage extends StatelessWidget {
   }
 
   Widget viewCategory() {
-
     // controllers
     final HomeController controller = Get.find();
-    
+
     if (controller.getCatalogueCategoryList.isEmpty) {
       return ListTile(
-        onTap:() => showDialogSetCategoria(categoria: Category()),
+        onTap: () => showDialogSetCategoria(categoria: Category()),
         title: const Text('Crear categoría', style: TextStyle(fontSize: 18)),
-        trailing:const Icon(Icons.add),
+        trailing: const Icon(Icons.add),
       );
     }
     return Obx(
@@ -104,25 +96,25 @@ class CataloguePage extends StatelessWidget {
         shrinkWrap: true,
         itemCount: controller.getCatalogueCategoryList.length,
         itemBuilder: (BuildContext context, int index) {
-
-          //get 
+          //get
           Category categoria = controller.getCatalogueCategoryList[index];
           MaterialColor color = Utils.getRandomColor();
-          
+
           return index == 0
               ? Column(
                   children: <Widget>[
                     controller.getCatalogueCategoryList.isNotEmpty
                         ? ListTile(
-                            contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                            contentPadding: const EdgeInsets.symmetric(
+                                vertical: 8.0, horizontal: 12.0),
                             leading: CircleAvatar(
                               backgroundColor: color.withOpacity(0.1),
                               radius: 24.0,
-                              child: Icon(Icons.all_inclusive,color: color),
+                              child: Icon(Icons.all_inclusive, color: color),
                             ),
                             dense: true,
                             title: const Text("Mostrar todos",
-                                style:  TextStyle(fontWeight: FontWeight.w400)),
+                                style: TextStyle(fontWeight: FontWeight.w400)),
                             onTap: () {
                               //controller.catalogueFilterReset();
                               Get.back();
@@ -143,10 +135,19 @@ class CataloguePage extends StatelessWidget {
         },
       ),
     );
-
   }
 
   // WIDGETS COMPONENTS
+  Widget floatingActionButton({required CataloguePageController  controller}) {
+    return FloatingActionButton(
+        backgroundColor: Colors.blue,
+        onPressed: ()=> controller.toSeachProduct(), 
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+        ));
+  }
+
   Widget listTileProduct({required ProductCatalogue item}) {
     //  controller
     final CataloguePageController cataloguePageController = Get.find();
@@ -229,11 +230,12 @@ class CataloguePage extends StatelessWidget {
         radius: 24.0,
         child: categoria.name != ""
             ? Text(categoria.name.substring(0, 1),
-                style: TextStyle( color: color, fontWeight: FontWeight.bold))
-            :const  Text("C"),
+                style: TextStyle(color: color, fontWeight: FontWeight.bold))
+            : const Text("C"),
       ),
       dense: true,
-      title: Text(categoria.name,style: const TextStyle(fontWeight: FontWeight.w400)),
+      title: Text(categoria.name,
+          style: const TextStyle(fontWeight: FontWeight.w400)),
       onTap: () {
         /* Get.back();
         controller.setCategorySelect = categoria;
@@ -268,21 +270,21 @@ class CataloguePage extends StatelessWidget {
             showDialogSetCategoria(categoria: categoria);
             break;
           case "eliminar":
-           Get.defaultDialog(
-            title: 'Alerta',
-            middleText: '¿Desea continuar eliminando esta categoría?',
-            confirm: TextButton.icon(
-              onPressed: () async {
-                controller.categoryDelete(idCategory: categoria.id);
-                Get.back();
-              },
-              icon: const Icon(Icons.clear_rounded),
-              label: const Text('Si, Eliminar')),
-            cancel: TextButton.icon(
-              onPressed: () => Get.back(),
-              icon: const Icon(Icons.delete),
-              label: const Text('Descartar')),
-              );
+            Get.defaultDialog(
+              title: 'Alerta',
+              middleText: '¿Desea continuar eliminando esta categoría?',
+              confirm: TextButton.icon(
+                  onPressed: () async {
+                    controller.categoryDelete(idCategory: categoria.id);
+                    Get.back();
+                  },
+                  icon: const Icon(Icons.clear_rounded),
+                  label: const Text('Si, Eliminar')),
+              cancel: TextButton.icon(
+                  onPressed: () => Get.back(),
+                  icon: const Icon(Icons.delete),
+                  label: const Text('Descartar')),
+            );
             break;
         }
       },
@@ -298,10 +300,10 @@ class CataloguePage extends StatelessWidget {
 
     if (categoria.id == '') {
       newProduct = true;
-      categoria =  Category();
-      categoria.id =  DateTime.now().millisecondsSinceEpoch.toString();
+      categoria = Category();
+      categoria.id = DateTime.now().millisecondsSinceEpoch.toString();
     }
-    
+
     await Get.dialog(AlertDialog(
       contentPadding: const EdgeInsets.all(16.0),
       content: Row(

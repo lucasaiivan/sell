@@ -47,6 +47,15 @@ class CataloguePageController extends GetxController {
   }
 
   // FUCTIONS
+  void toProductNew({required String id}) {
+    //values default
+    ProductCatalogue productCatalogue = ProductCatalogue(id: id,code: id,creation: Timestamp.now(),upgrade: Timestamp.now());  
+    // navega hacia una nueva vista para crear un nuevo producto
+    Get.toNamed(Routes.EDITPRODUCT,arguments: {'new': true, 'product': productCatalogue});
+  }
+  void toSeachProduct(){
+    Get.toNamed(Routes.SEACH_PRODUCT,arguments: {'id':''});
+  }
   Future<void> categoryDelete({required String idCategory}) async =>
       await Database.refFirestoreCategory(
               idAccount: homeController.getProfileAccountSelected.id)

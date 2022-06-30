@@ -199,8 +199,7 @@ class ControllerProductsEdit extends GetxController {
     setAccountAuth = homeController.getIdAccountSelected != '';
 
     // se obtiene el parametro y decidimos si es una vista para editrar o un producto nuevo
-    setProduct = Get.arguments['product'] ??
-        ProductCatalogue(upgrade: Timestamp.now(), creation: Timestamp.now());
+    setProduct = Get.arguments['product'] ??ProductCatalogue(upgrade: Timestamp.now(), creation: Timestamp.now());
     setNewProduct = Get.arguments['new'] ?? false;
     // load data product
     loadDataProduct();

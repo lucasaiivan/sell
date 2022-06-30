@@ -11,6 +11,18 @@ import 'package:sell/app/modules/splash/controllers/splash_controller.dart';
 import 'package:sell/app/utils/dynamicTheme_lb.dart';
 import 'package:sell/app/utils/fuctions.dart';
 
+import '../modules/cataloguePage/controller/catalogue_controller.dart';
+import '../routes/app_pages.dart';
+
+PreferredSize linearProgressBarApp({Color color = Colors.purple}) {
+  return PreferredSize(
+      preferredSize: Size.fromHeight(0.0),
+      child: LinearProgressIndicator(
+          minHeight: 6.0,
+          backgroundColor: Colors.white.withOpacity(0.3),
+          valueColor: new AlwaysStoppedAnimation<Color>(color)));
+}
+
 class ProductoItem extends StatefulWidget {
   final ProductCatalogue producto;
 
@@ -626,4 +638,108 @@ class ImageApp{
           ),
   );
 }
+}
+
+class WidgetSuggestionProduct extends StatelessWidget {
+  //values
+  
+  bool searchButton = false;
+  List<Product> list = <Product>[];
+  WidgetSuggestionProduct({required this.list, this.searchButton = false});
+
+  @override
+  Widget build(BuildContext context) {
+    // controllers
+    CataloguePageController homeController = Get.find<CataloguePageController>();
+
+    if (list.isEmpty) return Container();
+    // values 
+    Color? colorAccent =  Get.theme.textTheme.subtitle1?.color;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Text(
+            "sugerencias para ti",
+            style: Get.theme.textTheme.subtitle1,
+          ),
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            !searchButton
+                ? Container()
+                : InkWell(
+                    onTap: () => Get.toNamed(Routes.SEACH_PRODUCT,
+                        arguments: {'id': ''}),
+                    borderRadius: BorderRadius.circular(50),
+                    child: Padding(
+                      padding: const EdgeInsets.all(5.0),
+                      child: FadeInLeft(
+                        child: CircleAvatar(
+                            radius: 30,
+                            backgroundColor: colorAccent,
+                            child: CircleAvatar(
+                                radius: 28,
+                                backgroundColor:Get.theme.scaffoldBackgroundColor,
+                                child: Icon(Icons.search,
+                                    color: colorAccent))),
+                      ),
+                    ),
+                  ),
+            SizedBox(
+                width: 200,
+                height: 100,
+                child: Center(
+                  child: ListView.builder(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      itemCount: list.length,
+                      itemBuilder: (context, index) {
+
+                        return Align(
+                          widthFactor: 0.5,
+                          child: InkWell(
+                            onTap: () => 
+                            homeController.toProductEdit(productCatalogue: list[index].convertProductCatalogue()),
+                            borderRadius: BorderRadius.circular(50),
+                            child: Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: FadeInRight(
+                                child: CircleAvatar(
+                                    backgroundColor: colorAccent,
+                                    foregroundColor: colorAccent,
+                                    radius: 30,
+                                    child: CircleAvatar(
+                                      backgroundColor: Colors.grey[100],
+                                        foregroundColor: Colors.grey[100],
+                                        radius: 28,
+                                        child: ClipRRect(
+                                          borderRadius:BorderRadius.circular(50),
+                                          child: CachedNetworkImage(
+                                            fadeInDuration: const Duration(milliseconds: 200),
+                                            fit: BoxFit.cover,
+                                            imageUrl: list[index].image,
+                                            placeholder: (context, url) => CircleAvatar(backgroundColor: Colors.grey[100],foregroundColor: Colors.grey[100]),
+                                            errorWidget: (context, url, error) => CircleAvatar(backgroundColor: Colors.grey[100],foregroundColor: Colors.grey[100]),
+                                          ),
+                                        ))
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                )),
+          ],
+        ),
+      ],
+    );
+  }
 }
