@@ -459,7 +459,9 @@ Widget drawerApp() {
           ),
           title: Text(homeController.getProfileAccountSelected.name==''?'Nombre':homeController.getProfileAccountSelected.name),
           trailing:const Icon(Icons.arrow_forward_ios),
-          onLongPress: () {},
+          onTap: () {
+            Get.toNamed('/account');
+          },
         ),
         Expanded(
           child: ListView(
@@ -476,10 +478,6 @@ Widget drawerApp() {
                   leading: const Icon(Icons.apps_rounded),
                   title: const Text('Catálogo'),
                   onTap: () => homeController.setIndexPage = 2),
-              ListTile(
-                  leading: const Icon(Icons.settings),
-                  title: const Text('Configuración'),
-                  onTap: () => homeController.setIndexPage = 3),
             ],
           ),
         ),

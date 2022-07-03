@@ -23,7 +23,6 @@ class ControllerProductsEdit extends GetxController {
   Category get getCategorySelect => _categorySelect.value;
   set setCategorySelect(Category value) {
     // set
-    _subCategorySelect.value = Category();
     _categorySelect.value = value;
     update();
   }
@@ -48,14 +47,6 @@ class ControllerProductsEdit extends GetxController {
             "######################## FIREBASE updateAccount catchError: $e"));
   }
 
-  //  subCategory selected
-  Rx<Category> _subCategorySelect = Category().obs;
-  Category get getsubCategorySelect => _subCategorySelect.value;
-  set setsubCategorySelect(Category value) {
-    // set
-    _subCategorySelect.value = value;
-    update();
-  }
 
   // category list
   RxList<Category> _categoryList = <Category>[].obs;
@@ -63,13 +54,6 @@ class ControllerProductsEdit extends GetxController {
   set setCatalogueCategoryList(List<Category> value) {
     _categoryList.value = value;
     update(['tab']);
-  }
-
-  // subcategory list selected
-  RxList<Category> _subCategoryList = <Category>[].obs;
-  List<Category> get getsubCatalogueCategoryList => _subCategoryList;
-  set setCataloguesubCategoryList(List<Category> value) {
-    _subCategoryList.value = value;
   }
 
   // state internet

@@ -64,17 +64,17 @@ class ProductEdit extends StatelessWidget {
                   body: Center(
                       child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Padding(
+                    children: const[
+                      Padding(
                         padding: EdgeInsets.all(12.0),
                         child: Icon(Icons.wifi_off_rounded),
                       ),
-                      const Text('No hay internet'),
+                      Text('No hay internet'),
                     ],
                   )),
                 );
               }
-              ;
+              
               return scaffold(context: context);
             });
       },
@@ -136,7 +136,7 @@ class ProductEdit extends StatelessWidget {
               : controller.getNewProduct || controller.getEditModerator
                   ? IconButton(
                       onPressed: controller.getLoadImageCamera,
-                      icon: Icon(Icons.camera_alt, color: Colors.grey))
+                      icon: const Icon(Icons.camera_alt, color: Colors.grey))
                   : Container(),
           //  image
           controller.loadImage(),
@@ -146,7 +146,7 @@ class ProductEdit extends StatelessWidget {
               : controller.getNewProduct || controller.getEditModerator
                   ? IconButton(
                       onPressed: controller.getLoadImageGalery,
-                      icon: Icon(Icons.image, color: Colors.grey))
+                      icon: const Icon(Icons.image, color: Colors.grey))
                   : Container(),
         ],
       ),
@@ -190,7 +190,7 @@ class ProductEdit extends StatelessWidget {
                   throw 'Could not launch $url';
                 }
               },
-              child: Text('Buscar descripción en Google')),
+              child: const Text('Buscar descripción en Google')),
           TextButton(
               onPressed: () async {
                 String clave = controller.getProduct.code;
@@ -202,7 +202,7 @@ class ProductEdit extends StatelessWidget {
                   throw 'Could not launch $url';
                 }
               },
-              child: Text('Buscar en código Google')),
+              child: const Text('Buscar en código Google')),
           space,
           textfielButton(
               textValue: controller.getMarkSelected.name,
@@ -214,7 +214,19 @@ class ProductEdit extends StatelessWidget {
                   : () {}),
           // buttons categoty
           !controller.getAccountAuth ? Container() : space,
-          !controller.getAccountAuth ? Container() : buttonsCategory(),
+          !controller.getAccountAuth ? Container() : textfielButton(
+      textValue: controller.getCategory.id == ''
+          ? ''
+          : controller.getCategory.name,
+      labelText: controller.getCategory.id == ''
+          ? 'Seleccionar categoría'
+          : 'Categoría',
+      onTap: controller.getSaveIndicator
+          ? () {}
+          : controller.getSubcategory.id == ''
+              ? () {}
+              : SelectCategory.show,
+    ),
           space,
           // textfield prices
           !controller.getAccountAuth
@@ -450,47 +462,6 @@ class ProductEdit extends StatelessWidget {
     );
   }
 
-  Widget buttonsCategory() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      mainAxisSize: MainAxisSize.max,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Expanded(
-          flex: 1,
-          child: textfielButton(
-            textValue: controller.getCategory.id == ''
-                ? ''
-                : controller.getCategory.name,
-            labelText: controller.getCategory.id == ''
-                ? 'Seleccionar categoría'
-                : 'Categoría',
-            onTap: controller.getSaveIndicator
-                ? () {}
-                : controller.getSubcategory.id == ''
-                    ? () {}
-                    : SelectCategory.show,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          flex: 1,
-          child: textfielButton(
-              textValue: controller.getCategory.id == ''
-                  ? ''
-                  : controller.getSubcategory.name,
-              labelText: controller.getCategory.id == ''
-                  ? 'Seleccionar subcategoría'
-                  : 'Subcategoría',
-              onTap: controller.getSaveIndicator
-                  ? () {}
-                  : controller.getSubcategory.id == ''
-                      ? () {}
-                      : SelectSubCategoria.show),
-        ),
-      ],
-    );
-  }
 
   Widget button(
       {double width = double.infinity,
@@ -504,14 +475,14 @@ class ProductEdit extends StatelessWidget {
     return FadeInRight(
         child: Padding(
       padding: padding,
-      child: Container(
+      child: SizedBox(
         width: width,
         child: ElevatedButton.icon(
           onPressed: onPressed,
           style: ElevatedButton.styleFrom(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5)),
-              padding: EdgeInsets.all(12.0),
+              padding: const EdgeInsets.all(12.0),
               primary: colorButton,
               textStyle: TextStyle(color: colorAccent)),
           icon: icon,
@@ -620,19 +591,18 @@ class _SelectCategoryState extends State<SelectCategory> {
                         controllerProductsEdit.setCategory = categoria;
                         controllerProductsEdit.updateAll();
                         Get.back();
-                        SelectSubCategoria.show();
                       },
                       trailing: popupMenuItemCategoria(categoria: categoria),
                     ),
-                    Divider(endIndent: 12.0, indent: 12.0, height: 0.0),
+                    const Divider(endIndent: 12.0, indent: 12.0, height: 0.0),
                   ],
                 )
               : Column(
                   children: <Widget>[
-                    Divider(endIndent: 12.0, indent: 12.0, height: 0.0),
+                    const Divider(endIndent: 12.0, indent: 12.0, height: 0.0),
                     ListTile(
                       contentPadding:
-                          EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                          const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
                       leading: CircleAvatar(
                         backgroundColor: color.withOpacity(0.1),
                         radius: 24.0,
@@ -642,7 +612,7 @@ class _SelectCategoryState extends State<SelectCategory> {
                                     fontSize: 18.0,
                                     color: color,
                                     fontWeight: FontWeight.bold))
-                            : Text("C"),
+                            : const Text("C"),
                       ),
                       dense: true,
                       title: Text(categoria.name),
@@ -650,7 +620,6 @@ class _SelectCategoryState extends State<SelectCategory> {
                         controllerProductsEdit.setCategory = categoria;
                         controllerProductsEdit.setSubcategory = Category();
                         Get.back();
-                        SelectSubCategoria.show();
                       },
                       trailing: popupMenuItemCategoria(categoria: categoria),
                     ),
@@ -767,273 +736,6 @@ class _SelectCategoryState extends State<SelectCategory> {
                         Get.back();
                       });
                     }).catchError((error, stackTrace) =>
-                            setState(() => loadSave = false));
-                  }
-                })
-          ],
-        );
-      },
-    );
-  }
-}
-
-// subcategory
-class SelectSubCategoria extends StatefulWidget {
-  SelectSubCategoria();
-
-  @override
-  _SelectSubCategoriaState createState() => _SelectSubCategoriaState();
-
-  static void show() {
-    Widget widget = SelectSubCategoria();
-    // muestre la hoja inferior modal de getx
-    Get.bottomSheet(
-      widget,
-      backgroundColor: Get.theme.scaffoldBackgroundColor,
-      enableDrag: true,
-      isDismissible: true,
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20), topRight: Radius.circular(20))),
-    );
-  }
-}
-
-class _SelectSubCategoriaState extends State<SelectSubCategoria> {
-  _SelectSubCategoriaState();
-
-  // Variables
-  late Category categoriaSelected;
-  bool crearSubCategoria = false, loadSave = false;
-  final ControllerProductsEdit controllerProductsEdit = Get.find();
-
-  @override
-  void initState() {
-    categoriaSelected = controllerProductsEdit.getCategory;
-    crearSubCategoria = false;
-    loadSave = false;
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext buildContext) {
-    if (categoriaSelected.subcategories.length == 0) {
-      return ListTile(
-        title: Text('Crear subategoría', style: TextStyle(fontSize: 18)),
-        trailing: Icon(Icons.add),
-        onTap: () => showDialogSetSubcategoria(subcategoria: Category()),
-      );
-    }
-
-    return ListView.builder(
-      padding: EdgeInsets.symmetric(vertical: 15.0),
-      shrinkWrap: true,
-      itemCount: categoriaSelected.subcategories.length,
-      itemBuilder: (BuildContext _, int index) {
-        Category subcategoria = new Category(
-            id: categoriaSelected.subcategories.keys
-                .elementAt(index)
-                .toString(),
-            name: categoriaSelected.subcategories.values
-                .elementAt(index)
-                .toString());
-        MaterialColor colorIcon = Utils.getRandomColor();
-
-        return index == 0
-            ? Column(
-                children: <Widget>[
-                  Row(
-                    children: [
-                      Expanded(
-                          child: Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child:
-                            Text('Subategoría', style: TextStyle(fontSize: 18)),
-                      )),
-                      IconButton(
-                          icon: Icon(Icons.add),
-                          padding: const EdgeInsets.all(20.0),
-                          onPressed: () => showDialogSetSubcategoria(
-                              subcategoria: Category()))
-                    ],
-                  ),
-                  Divider(endIndent: 12.0, indent: 12.0, height: 0.0),
-                  ListTile(
-                    contentPadding:
-                        EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                    leading: CircleAvatar(
-                      backgroundColor: colorIcon.withOpacity(0.1),
-                      radius: 24.0,
-                      child: Text(subcategoria.name.substring(0, 1),
-                          style: TextStyle(
-                              fontSize: 18.0,
-                              color: colorIcon,
-                              fontWeight: FontWeight.bold)),
-                    ),
-                    dense: true,
-                    title: Text(subcategoria.name),
-                    onTap: () {
-                      controllerProductsEdit.setSubcategory = subcategoria;
-                      Get.back();
-                    },
-                    trailing:
-                        popupMenuItemSubcategoria(subcategoria: subcategoria),
-                  ),
-                  Divider(endIndent: 12.0, indent: 12.0, height: 0.0),
-                ],
-              )
-            : Column(
-                children: <Widget>[
-                  ListTile(
-                    contentPadding:
-                        EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                    leading: CircleAvatar(
-                      backgroundColor: colorIcon.withOpacity(0.1),
-                      radius: 24.0,
-                      child: subcategoria.name != ""
-                          ? Text(subcategoria.name.substring(0, 1),
-                              style: TextStyle(
-                                  fontSize: 18.0,
-                                  color: colorIcon,
-                                  fontWeight: FontWeight.bold))
-                          : Text("C"),
-                    ),
-                    dense: true,
-                    title: Text(subcategoria.name),
-                    onTap: () {
-                      controllerProductsEdit.setSubcategory = subcategoria;
-                      controllerProductsEdit.updateAll();
-                      Get.back();
-                    },
-                    trailing:
-                        popupMenuItemSubcategoria(subcategoria: subcategoria),
-                  ),
-                  Divider(endIndent: 12.0, indent: 12.0, height: 0.0),
-                ],
-              );
-      },
-    );
-  }
-
-  Widget popupMenuItemSubcategoria({required Category subcategoria}) {
-    final ControllerProductsEdit controllerProductsEdit = Get.find();
-
-    return PopupMenuButton(
-      icon: const Icon(Icons.more_vert),
-      itemBuilder: (_) => <PopupMenuItem<String>>[
-        const PopupMenuItem<String>(child: Text('Editar'), value: 'editar'),
-        const PopupMenuItem<String>(child: Text('Eliminar'), value: 'eliminar'),
-      ],
-      onSelected: (value) async {
-        switch (value) {
-          case "editar":
-            showDialogSetSubcategoria(subcategoria: subcategoria);
-            break;
-          case "eliminar":
-            await showDialog<String>(
-              context: context,
-              builder: (context) {
-                return AlertDialog(
-                  contentPadding: const EdgeInsets.all(16.0),
-                  content: Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Text(
-                            "¿Desea continuar eliminando esta subategoría?"),
-                      )
-                    ],
-                  ),
-                  actions: <Widget>[
-                    TextButton(
-                        child: const Text('CANCEL'),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        }),
-                    TextButton(
-                        child: loadSave == false
-                            ? Text("ELIMINAR")
-                            : CircularProgressIndicator(),
-                        onPressed: () async {
-                          controllerProductsEdit.getCategorySelect.subcategories
-                              .remove(subcategoria.id);
-                          // save
-                          await controllerProductsEdit
-                              .categoryUpdate(
-                                  categoria:
-                                      controllerProductsEdit.getCategorySelect)
-                              .whenComplete(() => Navigator.pop(context))
-                              .catchError((error, stackTrace) => setState(() {
-                                    loadSave = false;
-                                  }));
-                        })
-                  ],
-                );
-              },
-            );
-            break;
-        }
-      },
-    );
-  }
-
-  showDialogSetSubcategoria({required Category subcategoria}) async {
-    final HomeController controller = Get.find();
-    bool loadSave = false;
-    bool newProduct = false;
-    TextEditingController textEditingController =
-        TextEditingController(text: subcategoria.name);
-
-    if (subcategoria.id == '') {
-      newProduct = true;
-      subcategoria = new Category();
-      subcategoria.id = new DateTime.now().millisecondsSinceEpoch.toString();
-    }
-
-    await showDialog<String>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          contentPadding: const EdgeInsets.all(16.0),
-          content: Row(
-            children: <Widget>[
-              Expanded(
-                child: TextField(
-                  controller: textEditingController,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                      labelText: 'Subcategoría', hintText: 'Ej. golosinas'),
-                ),
-              )
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-                child: const Text('CANCEL'),
-                onPressed: () {
-                  Get.back();
-                }),
-            TextButton(
-                child: loadSave == false
-                    ? Text(newProduct ? 'GUARDAR' : "ACTUALIZAR")
-                    : CircularProgressIndicator(),
-                onPressed: () async {
-                  if (textEditingController.text != '') {
-                    // set
-                    subcategoria.name = textEditingController.text;
-                    controllerProductsEdit.getCategory
-                        .subcategories[subcategoria.id] = subcategoria.name;
-                    setState(() => loadSave = true);
-                    // save
-                    await controller
-                        .categoryUpdate(
-                            categoria: controllerProductsEdit.getCategory)
-                        .whenComplete(() => Get.back())
-                        .catchError((error, stackTrace) =>
                             setState(() => loadSave = false));
                   }
                 })

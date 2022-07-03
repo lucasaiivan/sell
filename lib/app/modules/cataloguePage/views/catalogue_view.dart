@@ -18,31 +18,32 @@ class CataloguePage extends StatelessWidget {
       init: CataloguePageController(),
       initState: (_) {},
       builder: (controller) {
-        return Scaffold(
-          appBar: appbar(context: context),
-          drawer: drawerApp(),
-          body: body(context: context),
-          floatingActionButton: floatingActionButton(controller:controller),
-        );
+        return Obx(() => Scaffold(
+              appBar: appbar(context: context),
+              drawer: drawerApp(),
+              body: body(context: context),
+              floatingActionButton:
+                  floatingActionButton(controller: controller),
+            ));
       },
     );
   }
 
   // WIDGETS VIEWS
   PreferredSizeWidget appbar({required BuildContext context}) {
+    // controllers
+    final CataloguePageController controller = Get.find();
+
     return AppBar(
       elevation: 0,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      title: const Text('Catálogo'),
-      actions: [
-        IconButton(onPressed: () {}, icon: const Icon(Icons.filter_list))
-      ],
+      title: Text(controller.getTextTitleAppBar),
     );
   }
 
   Widget body({required BuildContext context}) {
     // controllers
-    final HomeController controller = Get.find();
+    final CataloguePageController controller = Get.find();
 
     return DefaultTabController(
       length: 2,
@@ -69,7 +70,7 @@ class CataloguePage extends StatelessWidget {
 
   Widget widgetListVertical() {
     // controllers
-    final HomeController controller = Get.find();
+    final CataloguePageController controller = Get.find();
 
     return Obx(() => ListView.builder(
           itemCount: controller.getCataloProducts.length,
@@ -82,6 +83,7 @@ class CataloguePage extends StatelessWidget {
   Widget viewCategory() {
     // controllers
     final HomeController controller = Get.find();
+    final CataloguePageController cataloguePageController = Get.find();
 
     if (controller.getCatalogueCategoryList.isEmpty) {
       return ListTile(
@@ -116,20 +118,19 @@ class CataloguePage extends StatelessWidget {
                             title: const Text("Mostrar todos",
                                 style: TextStyle(fontWeight: FontWeight.w400)),
                             onTap: () {
-                              //controller.catalogueFilterReset();
-                              Get.back();
+                              cataloguePageController.setSelectedCategory =Category(name: 'Cátalogo');
                             },
                           )
                         : Container(),
-                    const Divider(endIndent: 12.0, indent: 12.0, height: 0.0),
+                    const Divider(endIndent: 0.0, indent: 0.0, height: 0.0),
                     listTileCategoryItem(categoria: categoria),
-                    const Divider(endIndent: 12.0, indent: 12.0, height: 0.0),
+                    const Divider(endIndent: 0.0, indent: 0.0, height: 0.0),
                   ],
                 )
               : Column(
                   children: <Widget>[
                     listTileCategoryItem(categoria: categoria),
-                    const Divider(endIndent: 12.0, indent: 12.0, height: 0.0),
+                    const Divider(endIndent: 0.0, indent: 0.0, height: 0.0),
                   ],
                 );
         },
@@ -138,10 +139,10 @@ class CataloguePage extends StatelessWidget {
   }
 
   // WIDGETS COMPONENTS
-  Widget floatingActionButton({required CataloguePageController  controller}) {
+  Widget floatingActionButton({required CataloguePageController controller}) {
     return FloatingActionButton(
         backgroundColor: Colors.blue,
-        onPressed: ()=> controller.toSeachProduct(), 
+        onPressed: () => controller.toSeachProduct(),
         child: const Icon(
           Icons.add,
           color: Colors.white,
@@ -220,6 +221,9 @@ class CataloguePage extends StatelessWidget {
   }
 
   Widget listTileCategoryItem({required Category categoria}) {
+    // controllers
+    final CataloguePageController controller = Get.find();
+
     //  values
     MaterialColor color = Utils.getRandomColor();
 
@@ -237,9 +241,7 @@ class CataloguePage extends StatelessWidget {
       title: Text(categoria.name,
           style: const TextStyle(fontWeight: FontWeight.w400)),
       onTap: () {
-        /* Get.back();
-        controller.setCategorySelect = categoria;
-        ViewSubCategoria.show(categoria: categoria); */
+        controller.setSelectedCategory = categoria;
       },
       trailing: dropdownButtonCategory(categoria: categoria),
     );
