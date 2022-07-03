@@ -1,9 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:sell/app/models/catalogo_model.dart';
 import 'package:sell/app/models/user_model.dart';
 import 'package:sell/app/services/database.dart';
+
+import '../../../routes/app_pages.dart';
 
 class HomeController extends GetxController {
   // category list
@@ -186,5 +189,15 @@ class HomeController extends GetxController {
       print("######################## FIREBASE updateAccount whenComplete");
     }).catchError((e) => print(
             "######################## FIREBASE updateAccount catchError: $e"));
+  }
+
+  // Cambiar de cuenta
+  void accountChange({required String idAccount}) {
+    // save key/values Storage
+    GetStorage().write('idAccount', idAccount);
+    Get.offAllNamed(Routes.HOME, arguments: {
+      'currentUser': getUserAccountAuth,
+      'idAccount': idAccount,
+    });
   }
 }

@@ -10,12 +10,22 @@ class CataloguePageController extends GetxController {
   // others controllers
   final HomeController homeController = Get.find();
 
+  // text titleBar
+  Category _selectedCategory = Category();
+  String get getTextTitleAppBar => _selectedCategory.name;
+  Category get getSelectedCategory => _selectedCategory;
+  set setSelectedCategory(Category value) {
+    _selectedCategory = value;
+    catalogueFilter();
+    update();
+  }
+
   // catalogue
   final RxList<ProductCatalogue> _catalogueBusiness = <ProductCatalogue>[].obs;
   List<ProductCatalogue> get getCataloProducts => _catalogueBusiness;
   set setCatalogueProducts(List<ProductCatalogue> products) {
     _catalogueBusiness.value = products;
-    //...filter 
+    //...filter
   }
 
   @override
@@ -30,32 +40,40 @@ class CataloguePageController extends GetxController {
   // FIREBASE
   void readProductsCatalogue() {
     // obtenemos los obj(productos) del catalogo de la cuenta del negocio
-    Database.readProductsCatalogueStream(
-            id: homeController.getProfileAccountSelected.id)
-        .listen((value) {
-      List<ProductCatalogue> list = [];
-      //  get
-      for (var element in value.docs) {
-        list.add(ProductCatalogue.fromMap(element.data()));
-      }
-      //  set values
-      setCatalogueProducts = list;
-      homeController.setCatalogueProducts = list;
-    }).onError((error) {
-      // error
-    });
+    setCatalogueProducts = homeController.getCataloProducts;
   }
 
   // FUCTIONS
+  void catalogueFilter() {
+    List<ProductCatalogue> list = [];
+
+    //filter
+    if (getSelectedCategory.id != '') {
+      for (var element in homeController.getCataloProducts) {
+        if (getSelectedCategory.id == element.category) {
+          list.add(element);
+        }
+      }
+    }else{
+      list = homeController.getCataloProducts;
+    }
+    // set
+    setCatalogueProducts = list;
+  }
+
   void toProductNew({required String id}) {
     //values default
-    ProductCatalogue productCatalogue = ProductCatalogue(id: id,code: id,creation: Timestamp.now(),upgrade: Timestamp.now());  
+    ProductCatalogue productCatalogue = ProductCatalogue(
+        id: id, code: id, creation: Timestamp.now(), upgrade: Timestamp.now());
     // navega hacia una nueva vista para crear un nuevo producto
-    Get.toNamed(Routes.EDITPRODUCT,arguments: {'new': true, 'product': productCatalogue});
+    Get.toNamed(Routes.EDITPRODUCT,
+        arguments: {'new': true, 'product': productCatalogue});
   }
-  void toSeachProduct(){
-    Get.toNamed(Routes.SEACH_PRODUCT,arguments: {'id':''});
+
+  void toSeachProduct() {
+    Get.toNamed(Routes.SEACH_PRODUCT, arguments: {'id': ''});
   }
+
   Future<void> categoryDelete({required String idCategory}) async =>
       await Database.refFirestoreCategory(
               idAccount: homeController.getProfileAccountSelected.id)
@@ -63,9 +81,9 @@ class CataloguePageController extends GetxController {
           .delete();
   Future<void> categoryUpdate({required Category categoria}) async {
     // ref
-    var documentReferencer =
-        Database.refFirestoreCategory(idAccount: homeController.getProfileAccountSelected.id)
-            .doc(categoria.id);
+    var documentReferencer = Database.refFirestoreCategory(
+            idAccount: homeController.getProfileAccountSelected.id)
+        .doc(categoria.id);
     // Actualizamos los datos
     documentReferencer
         .set(Map<String, dynamic>.from(categoria.toJson()),
@@ -75,7 +93,6 @@ class CataloguePageController extends GetxController {
     }).catchError((e) => print(
             "######################## FIREBASE updateAccount catchError: $e"));
   }
-
 
   // navigator
   void toProductEdit({required ProductCatalogue productCatalogue}) {

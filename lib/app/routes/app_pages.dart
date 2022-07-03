@@ -5,6 +5,8 @@ import 'package:sell/app/modules/home/bindings/home_binding.dart';
 import 'package:sell/app/modules/home/views/home_view.dart';
 import 'package:sell/app/modules/splash/bindings/splash_binding.dart';
 import 'package:sell/app/modules/splash/views/splash_view.dart';
+import '../modules/account/bindings/account_binding.dart';
+import '../modules/account/views/account_view.dart';
 import '../modules/auth/views/login_view.dart';
 import '../modules/cataloguePage/bindings/catalogue_binding.dart';
 import '../modules/cataloguePage/views/product_edit_view.dart';
@@ -18,6 +20,11 @@ class AppPages {
   static const INITIAL = Routes.SPLASH;
 
   static final routes = [
+    GetPage(
+      name: Routes.ACCOUNT,
+      page: () => AccountView(),
+      binding: AccountBinding(),
+    ),
     GetPage(
       name: Routes.LOGIN,
       page: () => AuthView(),
