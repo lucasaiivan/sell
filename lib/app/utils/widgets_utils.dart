@@ -11,12 +11,120 @@ import 'package:sell/app/modules/splash/controllers/splash_controller.dart';
 import 'package:sell/app/utils/dynamicTheme_lb.dart';
 import 'package:sell/app/utils/fuctions.dart';
 
+import '../models/user_model.dart';
 import '../modules/cataloguePage/controller/catalogue_controller.dart';
 import '../routes/app_pages.dart';
 
+class WidgetButtonListTile extends StatelessWidget {
+  final HomeController controller = Get.find<HomeController>();
+
+  WidgetButtonListTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return buttonListTileCrearCuenta();
+  }
+
+  Widget buttonListTileCrearCuenta() {
+    return ListTile(
+      contentPadding:
+          const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15.0),
+      leading: const Icon(Icons.add),
+      dense: true,
+      title: const Text("Crear catálogo", style: TextStyle(fontSize: 16.0)),
+      onTap: () {
+        Get.back();
+        Get.toNamed(Routes.ACCOUNT);
+      },
+    );
+  }
+
+  Widget buttonListTileItemCuenta(
+      {required ProfileAccountModel perfilNegocio,
+      bool adminPropietario = false}) {
+    if (perfilNegocio.id == '') {
+      return Container();
+    }
+    return Column(
+      children: <Widget>[
+        ListTile(
+          leading: ClipRRect(
+            borderRadius: BorderRadius.circular(10000.0),
+            child: perfilNegocio.image != '' || perfilNegocio.image.isNotEmpty
+                ? CachedNetworkImage(
+                    fadeInDuration: const Duration(milliseconds: 200),
+                    fit: BoxFit.cover,
+                    imageUrl: perfilNegocio.image.contains('https://')
+                        ? perfilNegocio.image
+                        : "https://${perfilNegocio.image}",
+                    placeholder: (context, url) => CircleAvatar(
+                      backgroundColor: Colors.black26,
+                      radius: 24.0,
+                      child: Text(perfilNegocio.name.substring(0, 1),
+                          style: const TextStyle(
+                              fontSize: 18.0,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold)),
+                    ),
+                    imageBuilder: (context, image) => CircleAvatar(
+                      backgroundImage: image,
+                      radius: 24.0,
+                    ),
+                    errorWidget: (context, url, error) => CircleAvatar(
+                      backgroundColor: Colors.black26,
+                      radius: 24.0,
+                      child: Text(perfilNegocio.name.substring(0, 1),
+                          style: const TextStyle(
+                              fontSize: 18.0,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold)),
+                    ),
+                  )
+                : CircleAvatar(
+                    backgroundColor: Colors.black26,
+                    radius: 24.0,
+                    child: Text(perfilNegocio.name.substring(0, 1),
+                        style: const TextStyle(
+                            fontSize: 18.0,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold)),
+                  ),
+          ),
+          dense: true,
+          title: Text(perfilNegocio.name),
+          subtitle: !adminPropietario
+              ? Text(perfilNegocio.idAuthUserCreation)
+              : Row(
+                  children: [
+                    Icon(
+                      Icons.security,
+                      size: 12.0,
+                      color: Get.theme.hintColor,
+                    ),
+                    const SizedBox(width: 2.0),
+                    const Text("Mi cuenta")
+                  ],
+                ),
+          trailing: Radio(
+            activeColor: Get.theme.primaryColor,
+            value: controller.isSelected(id: perfilNegocio.id) ? 0 : 1,
+            groupValue: 0,
+            onChanged: (val) {
+              controller.accountChange(idAccount: perfilNegocio.id);
+            },
+          ),
+          onTap: () {
+            controller.accountChange(idAccount: perfilNegocio.id);
+          },
+        ),
+      ],
+    );
+  }
+}
+
 PreferredSize linearProgressBarApp({Color color = Colors.purple}) {
   return PreferredSize(
-      preferredSize: Size.fromHeight(0.0),
+      preferredSize: const Size.fromHeight(0.0),
       child: LinearProgressIndicator(
           minHeight: 6.0,
           backgroundColor: Colors.white.withOpacity(0.3),
@@ -37,12 +145,12 @@ class _ProductoItemState extends State<ProductoItem> {
   SalesController salesController = Get.find<SalesController>();
   @override
   Widget build(BuildContext context) {
-
-    String alertStockText = widget.producto.stock?(widget.producto.quantityStock==0?'Sin stock':''):'';
+    String alertStockText = widget.producto.stock
+        ? (widget.producto.quantityStock == 0 ? 'Sin stock' : '')
+        : '';
 
     // aparición animada
     return ElasticIn(
-      
       // transición animada
       child: Card(
         color: Colors.white,
@@ -55,10 +163,23 @@ class _ProductoItemState extends State<ProductoItem> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                alertStockText==''?Container():Container(width: double.infinity,color: Colors.red,child: Center(child: Padding(
-            padding: const EdgeInsets.all(2.0),
-            child: Text(alertStockText,style: const TextStyle(color: Colors.white,fontSize: 10,fontWeight: FontWeight.bold),),
-          )),),
+                alertStockText == ''
+                    ? Container()
+                    : Container(
+                        width: double.infinity,
+                        color: Colors.red,
+                        child: Center(
+                            child: Padding(
+                          padding: const EdgeInsets.all(2.0),
+                          child: Text(
+                            alertStockText,
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        )),
+                      ),
                 Expanded(child: contentImage()),
                 contentInfo(),
               ],
@@ -154,7 +275,7 @@ class _ProductoItemState extends State<ProductoItem> {
   }
 
   // WIDGETS COMPONETS
-  
+
   Widget contentImage() {
     // var
     String description = widget.producto.description != ''
@@ -245,9 +366,7 @@ class _ListTileProductoItemState extends State<ProductoItem> {
     // aparición animada
     return ElasticIn(
       child: Card(
-        child: SizedBox(
-          height: 100,width:200,
-          child: Container()),
+        child: SizedBox(height: 100, width: 200, child: Container()),
       ),
     );
     return ElasticIn(
@@ -434,65 +553,70 @@ class _ListTileProductoItemState extends State<ProductoItem> {
 Widget drawerApp() {
   //Los rieles de navegación brindan acceso a los destinos principales en las aplicaciones cuando se usan pantallas de tabletas y computadoras de escritorio.
 
-  // controllers
-  HomeController homeController = Get.find<HomeController>();
 
-  return Drawer(
-    child: Column(
-      children: [
-        const SizedBox(height: 50),
-        ListTile(
-          leading: Container(
-            padding: const EdgeInsets.all(0.0),
-            child: homeController.getProfileAccountSelected.image == ''
-                ? CircleAvatar(backgroundColor: Get.theme.dividerColor)
-                : CachedNetworkImage(
-                    imageUrl: homeController.getProfileAccountSelected.image,
-                    placeholder: (context, url) =>
-                        CircleAvatar(backgroundColor: Get.theme.dividerColor),
-                    imageBuilder: (context, image) => CircleAvatar(
-                      backgroundImage: image,
-                    ),
-                    errorWidget: (context, url, error) =>
-                        CircleAvatar(backgroundColor: Get.theme.dividerColor),
-                  ),
-          ),
-          title: Text(homeController.getProfileAccountSelected.name==''?'Nombre':homeController.getProfileAccountSelected.name),
-          trailing:const Icon(Icons.arrow_forward_ios),
-          onTap: () {
-            Get.toNamed('/account');
-          },
+  return GetBuilder<HomeController>(
+    builder: (homeController) {
+      return Drawer(
+        child: Column(
+          children: [
+            const SizedBox(height: 50),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(0.0),
+                child: homeController.getProfileAccountSelected.image == ''
+                    ? CircleAvatar(backgroundColor: Get.theme.dividerColor)
+                    : CachedNetworkImage(
+                        imageUrl:
+                            homeController.getProfileAccountSelected.image,
+                        placeholder: (context, url) => CircleAvatar(
+                            backgroundColor: Get.theme.dividerColor),
+                        imageBuilder: (context, image) => CircleAvatar(
+                          backgroundImage: image,
+                        ),
+                        errorWidget: (context, url, error) => CircleAvatar(
+                            backgroundColor: Get.theme.dividerColor),
+                      ),
+              ),
+              title: Text(homeController.getProfileAccountSelected.name == ''
+                  ? 'Nombre'
+                  : homeController.getProfileAccountSelected.name),
+              trailing: const Icon(Icons.arrow_right_rounded),
+              onTap: () {
+                Get.toNamed('/account');
+              },
+            ),
+            Expanded(
+              child: ListView(
+                children: [
+                  ListTile(
+                      leading: const Icon(Icons.attach_money_rounded),
+                      title: const Text('Vender'),
+                      onTap: () => homeController.setIndexPage = 0),
+                  ListTile(
+                      leading: const Icon(Icons.check),
+                      title: const Text('Transacciones'),
+                      onTap: () => homeController.setIndexPage = 1),
+                  ListTile(
+                      leading: const Icon(Icons.apps_rounded),
+                      title: const Text('Catálogo'),
+                      onTap: () => homeController.setIndexPage = 2),
+                ],
+              ),
+            ),
+            const ListTile(
+              leading: Icon(Icons.color_lens_outlined),
+              title: Text('Cambiar tema'),
+              onTap: ThemeService.switchTheme,
+            ),
+            const ListTile(
+              leading: Icon(Icons.close),
+              title: Text('Cerrar sesión'),
+              onTap: showDialogCerrarSesion,
+            ),
+          ],
         ),
-        Expanded(
-          child: ListView(
-            children: [
-              ListTile(
-                  leading: const Icon(Icons.attach_money_rounded),
-                  title: const Text('Vender'),
-                  onTap: () => homeController.setIndexPage = 0),
-              ListTile(
-                  leading: const Icon(Icons.check),
-                  title: const Text('Transacciones'),
-                  onTap: () => homeController.setIndexPage = 1),
-              ListTile(
-                  leading: const Icon(Icons.apps_rounded),
-                  title: const Text('Catálogo'),
-                  onTap: () => homeController.setIndexPage = 2),
-            ],
-          ),
-        ),
-        const ListTile(
-          leading: Icon(Icons.color_lens_outlined),
-          title: Text('Cambiar tema'),
-          onTap: ThemeService.switchTheme,
-        ),
-        const ListTile(
-          leading: Icon(Icons.close),
-          title: Text('Cerrar sesión'),
-          onTap: showDialogCerrarSesion,
-        ),
-      ],
-    ),
+      );
+    },
   );
 }
 
@@ -591,56 +715,56 @@ class _CheckBoxAddProductState extends State<CheckBoxAddProduct> {
   }
 }
 
-class ComponentApp{
+class ComponentApp {
   static PreferredSize linearProgressBarApp({Color color = Colors.purple}) {
-  return PreferredSize(
-      preferredSize: Size.fromHeight(0.0),
-      child: LinearProgressIndicator(
-          minHeight: 6.0,
-          backgroundColor: Colors.white.withOpacity(0.3),
-          valueColor: new AlwaysStoppedAnimation<Color>(color)));
+    return PreferredSize(
+        preferredSize: const Size.fromHeight(0.0),
+        child: LinearProgressIndicator(
+            minHeight: 6.0,
+            backgroundColor: Colors.white.withOpacity(0.3),
+            valueColor: new AlwaysStoppedAnimation<Color>(color)));
+  }
 }
-}
-class ImageApp{
 
+class ImageApp {
   static Widget circleImage(
-    {required String url, required String texto, double size = 85.0}) {
-  //values
-  MaterialColor color = Utils.getRandomColor();
-  if (texto == '') texto = 'Image';
+      {required String url, required String texto, double size = 85.0}) {
+    //values
+    MaterialColor color = Utils.getRandomColor();
+    if (texto == '') texto = 'Image';
 
-  Widget imageDefault = CircleAvatar(
-    backgroundColor: color.withOpacity(0.1),
-    radius: size,
-    child: Text(texto.substring(0, 1),
-        style: TextStyle(
-          fontSize: size / 2,
-          color: color,
-          fontWeight: FontWeight.bold,
-        )),
-  );
+    Widget imageDefault = CircleAvatar(
+      backgroundColor: color.withOpacity(0.1),
+      radius: size,
+      child: Text(texto.substring(0, 1),
+          style: TextStyle(
+            fontSize: size / 2,
+            color: color,
+            fontWeight: FontWeight.bold,
+          )),
+    );
 
-  return Container(
-    width: size,
-    height: size,
-    child: url == "" || url == "default"
-        ? imageDefault
-        : CachedNetworkImage(
-            imageUrl: url,
-            placeholder: (context, url) => imageDefault,
-            imageBuilder: (context, image) => CircleAvatar(
-              backgroundImage: image,
-              radius: size,
+    return Container(
+      width: size,
+      height: size,
+      child: url == "" || url == "default"
+          ? imageDefault
+          : CachedNetworkImage(
+              imageUrl: url,
+              placeholder: (context, url) => imageDefault,
+              imageBuilder: (context, image) => CircleAvatar(
+                backgroundImage: image,
+                radius: size,
+              ),
+              errorWidget: (context, url, error) => imageDefault,
             ),
-            errorWidget: (context, url, error) => imageDefault,
-          ),
-  );
-}
+    );
+  }
 }
 
 class WidgetSuggestionProduct extends StatelessWidget {
   //values
-  
+
   bool searchButton = false;
   List<Product> list = <Product>[];
   WidgetSuggestionProduct({required this.list, this.searchButton = false});
@@ -648,11 +772,12 @@ class WidgetSuggestionProduct extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // controllers
-    CataloguePageController homeController = Get.find<CataloguePageController>();
+    CataloguePageController homeController =
+        Get.find<CataloguePageController>();
 
     if (list.isEmpty) return Container();
-    // values 
-    Color? colorAccent =  Get.theme.textTheme.subtitle1?.color;
+    // values
+    Color? colorAccent = Get.theme.textTheme.subtitle1?.color;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -685,9 +810,9 @@ class WidgetSuggestionProduct extends StatelessWidget {
                             backgroundColor: colorAccent,
                             child: CircleAvatar(
                                 radius: 28,
-                                backgroundColor:Get.theme.scaffoldBackgroundColor,
-                                child: Icon(Icons.search,
-                                    color: colorAccent))),
+                                backgroundColor:
+                                    Get.theme.scaffoldBackgroundColor,
+                                child: Icon(Icons.search, color: colorAccent))),
                       ),
                     ),
                   ),
@@ -700,12 +825,12 @@ class WidgetSuggestionProduct extends StatelessWidget {
                       scrollDirection: Axis.horizontal,
                       itemCount: list.length,
                       itemBuilder: (context, index) {
-
                         return Align(
                           widthFactor: 0.5,
                           child: InkWell(
-                            onTap: () => 
-                            homeController.toProductEdit(productCatalogue: list[index].convertProductCatalogue()),
+                            onTap: () => homeController.toProductEdit(
+                                productCatalogue:
+                                    list[index].convertProductCatalogue()),
                             borderRadius: BorderRadius.circular(50),
                             child: Padding(
                               padding: const EdgeInsets.all(5.0),
@@ -715,20 +840,32 @@ class WidgetSuggestionProduct extends StatelessWidget {
                                     foregroundColor: colorAccent,
                                     radius: 30,
                                     child: CircleAvatar(
-                                      backgroundColor: Colors.grey[100],
+                                        backgroundColor: Colors.grey[100],
                                         foregroundColor: Colors.grey[100],
                                         radius: 28,
                                         child: ClipRRect(
-                                          borderRadius:BorderRadius.circular(50),
+                                          borderRadius:
+                                              BorderRadius.circular(50),
                                           child: CachedNetworkImage(
-                                            fadeInDuration: const Duration(milliseconds: 200),
+                                            fadeInDuration: const Duration(
+                                                milliseconds: 200),
                                             fit: BoxFit.cover,
                                             imageUrl: list[index].image,
-                                            placeholder: (context, url) => CircleAvatar(backgroundColor: Colors.grey[100],foregroundColor: Colors.grey[100]),
-                                            errorWidget: (context, url, error) => CircleAvatar(backgroundColor: Colors.grey[100],foregroundColor: Colors.grey[100]),
+                                            placeholder: (context, url) =>
+                                                CircleAvatar(
+                                                    backgroundColor:
+                                                        Colors.grey[100],
+                                                    foregroundColor:
+                                                        Colors.grey[100]),
+                                            errorWidget:
+                                                (context, url, error) =>
+                                                    CircleAvatar(
+                                                        backgroundColor:
+                                                            Colors.grey[100],
+                                                        foregroundColor:
+                                                            Colors.grey[100]),
                                           ),
-                                        ))
-                                ),
+                                        ))),
                               ),
                             ),
                           ),

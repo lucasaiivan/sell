@@ -58,7 +58,8 @@ class CataloguePage extends StatelessWidget {
             ]),
           ),
           Expanded(
-            child: TabBarView(children: [
+            child: TabBarView(
+              children: [
               widgetListVertical(),
               viewCategory(),
             ]),
@@ -140,9 +141,11 @@ class CataloguePage extends StatelessWidget {
 
   // WIDGETS COMPONENTS
   Widget floatingActionButton({required CataloguePageController controller}) {
+
+
     return FloatingActionButton(
         backgroundColor: Colors.blue,
-        onPressed: () => controller.toSeachProduct(),
+        onPressed: () => controller.toSeachProduct(), //showDialogSetCategoria(categoria: Category()),
         child: const Icon(
           Icons.add,
           color: Colors.white,

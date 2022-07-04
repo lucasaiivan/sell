@@ -40,7 +40,9 @@ class AccountView extends GetView<AccountController> {
                     children: [
                       Column(
                         children: <Widget>[
-                          controller.newAccount?widgetNewAccount():Container(),
+                          controller.newAccount
+                              ? widgetNewAccount()
+                              : Container(),
                           const SizedBox(
                             height: 12.0,
                           ),
@@ -49,9 +51,13 @@ class AccountView extends GetView<AccountController> {
                               ? Container()
                               : TextButton(
                                   onPressed: () {
-                                    if (controller.getSavingIndicator==false) {_showModalBottomSheetCambiarImagen(context: buildContext);}
+                                    if (controller.getSavingIndicator ==
+                                        false) {
+                                      _showModalBottomSheetCambiarImagen(
+                                          context: buildContext);
+                                    }
                                   },
-                                  child: Text("Cambiar imagen")),
+                                  child: const Text("Cambiar imagen")),
                           const SizedBox(
                             height: 24.0,
                           ),
@@ -80,7 +86,7 @@ class AccountView extends GetView<AccountController> {
         IconButton(
           icon: controller.getSavingIndicator
               ? Container()
-              : Icon(Icons.check_sharp),
+              : const Icon(Icons.check_sharp),
           onPressed: controller.saveAccount,
         )
       ],
@@ -99,8 +105,7 @@ class AccountView extends GetView<AccountController> {
                   title: const Text('Capturar una imagen'),
                   onTap: () {
                     Navigator.pop(bc);
-                    controller.setImageSource(
-                        imageSource: ImageSource.camera);
+                    controller.setImageSource(imageSource: ImageSource.camera);
                   }),
               ListTile(
                 leading: const Icon(Icons.image),
@@ -120,12 +125,12 @@ class AccountView extends GetView<AccountController> {
       padding: const EdgeInsets.all(20.0),
       child: Center(
           child: ElasticIn(
-            child: const Text(
-                'Hola 😃, primero dinos el nombre de tu negocio para poder crear tu catálogo \n\n 👇',
-                style: TextStyle(fontSize: 18),
-                textAlign: TextAlign.center,
-            ),
-          )),
+        child: const Text(
+          'Hola 😃, primero dinos el nombre de tu negocio para poder crear tu catálogo \n\n 👇',
+          style: TextStyle(fontSize: 18),
+          textAlign: TextAlign.center,
+        ),
+      )),
     );
   }
 
@@ -183,148 +188,145 @@ class AccountView extends GetView<AccountController> {
   }
 
   Widget widgetFormEditText({required BuildContext context}) {
-    return Obx(() => Container(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              TextField(
-                enabled: !controller.getSavingIndicator,
-                minLines: 1,
-                maxLines: 5,
-                keyboardType: TextInputType.multiline,
-                onChanged: (value) => controller.profileAccount.name = value,
-                decoration: const InputDecoration(
-                  filled: true,
-                  labelText: "Nombre del Negocio",
-                  prefixIcon: Icon(Icons.other_houses_outlined),
-                ),
-                controller:
-                    TextEditingController(text: controller.profileAccount.name),
-                textInputAction: TextInputAction.next,
-                focusNode: focusTextEdiNombre,
-                onSubmitted: (term) {
-                  _fieldFocusChange(
-                      context, focusTextEdiNombre, focusTextEditDescripcion);
-                },
+    return Obx(() => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            TextField(
+              enabled: !controller.getSavingIndicator,
+              minLines: 1,
+              maxLines: 5,
+              keyboardType: TextInputType.multiline,
+              onChanged: (value) => controller.profileAccount.name = value,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: "Nombre del Negocio",
+                prefixIcon: Icon(Icons.other_houses_outlined),
               ),
-              const Divider(color: Colors.transparent, thickness: 1),
-              TextField(
-                enabled: !controller.getSavingIndicator,
+              controller:
+                  TextEditingController(text: controller.profileAccount.name),
+              textInputAction: TextInputAction.next,
+              focusNode: focusTextEdiNombre,
+              onSubmitted: (term) {
+                _fieldFocusChange(
+                    context, focusTextEdiNombre, focusTextEditDescripcion);
+              },
+            ),
+            const Divider(color: Colors.transparent, thickness: 1),
+            TextField(
+              enabled: !controller.getSavingIndicator,
+              minLines: 1,
+              maxLines: 5,
+              keyboardType: TextInputType.multiline,
+              onChanged: (value) =>
+                  controller.profileAccount.description = value,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: "Descripción (opcional)",
+              ),
+              controller: TextEditingController(
+                  text: controller.profileAccount.description),
+              textInputAction: TextInputAction.next,
+              focusNode: focusTextEditDescripcion,
+              onSubmitted: (term) {
+                _fieldFocusChange(context, focusTextEditDescripcion,
+                    focusTextEditDescripcion);
+              },
+            ),
+            const Divider(color: Colors.transparent, thickness: 1),
+            InkWell(
+              onTap: () =>
+                  _bottomPickerSelectCurreny(list: ["\$"], context: context),
+              child: TextField(
                 minLines: 1,
                 maxLines: 5,
                 keyboardType: TextInputType.multiline,
+                enabled: false,
+                decoration: const InputDecoration(
+                  labelText: "Signo de moneda",
+                  filled: true,
+                  prefixIcon: Icon(Icons.monetization_on_outlined),
+                ),
+                controller: controller.getControllerTextEditSignoMoneda,
                 onChanged: (value) =>
-                    controller.profileAccount.description = value,
-                decoration: const InputDecoration(
-                  filled: true,
-                  labelText: "Descripción (opcional)",
-                ),
-                controller: TextEditingController(
-                    text: controller.profileAccount.description),
-                textInputAction: TextInputAction.next,
-                focusNode: focusTextEditDescripcion,
-                onSubmitted: (term) {
-                  _fieldFocusChange(context, focusTextEditDescripcion,
-                      focusTextEditDescripcion);
-                },
+                    controller.profileAccount.currencySign = value,
               ),
-              const Divider(color: Colors.transparent, thickness: 1),
-              InkWell(
-                onTap: () =>
-                    _bottomPickerSelectCurreny(list: ["\$"], context: context),
-                child: TextField(
+            ),
+            const SizedBox(
+              height: 24.0,
+            ),
+            const Text("Ubicación", style: TextStyle(fontSize: 24.0)),
+            const SizedBox(
+              height: 24.0,
+            ),
+            TextField(
+              enabled: !controller.getSavingIndicator,
+              onChanged: (value) => controller.profileAccount.address = value,
+              decoration: const InputDecoration(
+                labelText: "Dirección (ocional)",
+                filled: true,
+              ),
+              controller: TextEditingController(
+                  text: controller.profileAccount.address),
+              textInputAction: TextInputAction.next,
+              focusNode: focusTextEditDireccion,
+              onSubmitted: (term) {
+                _fieldFocusChange(
+                    context, focusTextEditDireccion, focusTextEditCiudad);
+              },
+            ),
+            const Divider(color: Colors.transparent, thickness: 1),
+            TextField(
+              enabled: !controller.getSavingIndicator,
+              onChanged: (value) => controller.profileAccount.town = value,
+              decoration: const InputDecoration(
+                labelText: "Ciudad (ocional)",
+                filled: true,
+              ),
+              controller:
+                  TextEditingController(text: controller.profileAccount.town),
+            ),
+            const Divider(color: Colors.transparent, thickness: 1),
+            InkWell(
+              onTap: () => controller.profileAccount.country == ''
+                  ? _bottomPickerSelectCountries(
+                      list: controller.getCountries, context: context)
+                  : _bottomPickerSelectCities(
+                      list: controller.getCities, context: context),
+              child: TextField(
                   minLines: 1,
                   maxLines: 5,
                   keyboardType: TextInputType.multiline,
                   enabled: false,
                   decoration: const InputDecoration(
-                    labelText: "Signo de moneda",
+                    labelText: "Provincia",
                     filled: true,
-                    prefixIcon: Icon(Icons.monetization_on_outlined),
+                    prefixIcon: Icon(Icons.business),
                   ),
-                  controller: controller.getControllerTextEditSignoMoneda,
-                  onChanged: (value) =>
-                      controller.profileAccount.currencySign = value,
-                ),
-              ),
-              const SizedBox(
-                height: 24.0,
-              ),
-              const Text("Ubicación", style: TextStyle(fontSize: 24.0)),
-              const SizedBox(
-                height: 24.0,
-              ),
-              TextField(
-                enabled: !controller.getSavingIndicator,
-                onChanged: (value) => controller.profileAccount.address = value,
+                  controller: controller.getControllerTextEditProvincia,
+                  onChanged: (value) {
+                    controller.profileAccount.province = value;
+                  }),
+            ),
+            const Divider(color: Colors.transparent, thickness: 1),
+            InkWell(
+              onTap: () => _bottomPickerSelectCountries(
+                  list: controller.getCountries, context: context),
+              child: TextField(
+                minLines: 1,
+                maxLines: 5,
+                keyboardType: TextInputType.multiline,
+                enabled: false,
                 decoration: const InputDecoration(
-                  labelText: "Dirección (ocional)",
+                  labelText: "Pais",
                   filled: true,
+                  prefixIcon: Icon(Icons.location_on_outlined),
                 ),
-                controller: TextEditingController(
-                    text: controller.profileAccount.address),
-                textInputAction: TextInputAction.next,
-                focusNode: focusTextEditDireccion,
-                onSubmitted: (term) {
-                  _fieldFocusChange(
-                      context, focusTextEditDireccion, focusTextEditCiudad);
-                },
+                controller: controller.getControllerTextEditPais,
+                onChanged: (value) => controller.profileAccount.country = value,
               ),
-              const Divider(color: Colors.transparent, thickness: 1),
-              TextField(
-                enabled: !controller.getSavingIndicator,
-                onChanged: (value) => controller.profileAccount.town = value,
-                decoration: const InputDecoration(
-                  labelText: "Ciudad (ocional)",
-                  filled: true,
-                ),
-                controller:
-                    TextEditingController(text: controller.profileAccount.town),
-              ),
-              const Divider(color: Colors.transparent, thickness: 1),
-              InkWell(
-                onTap: () => controller.profileAccount.country == ''
-                    ? _bottomPickerSelectCountries(
-                        list: controller.getCountries, context: context)
-                    : _bottomPickerSelectCities(
-                        list: controller.getCities, context: context),
-                child: TextField(
-                    minLines: 1,
-                    maxLines: 5,
-                    keyboardType: TextInputType.multiline,
-                    enabled: false,
-                    decoration: const InputDecoration(
-                      labelText: "Provincia",
-                      filled: true,
-                      prefixIcon: Icon(Icons.business),
-                    ),
-                    controller: controller.getControllerTextEditProvincia,
-                    onChanged: (value) {
-                      controller.profileAccount.province = value;
-                    }),
-              ),
-              const Divider(color: Colors.transparent, thickness: 1),
-              InkWell(
-                onTap: () => _bottomPickerSelectCountries(
-                    list: controller.getCountries, context: context),
-                child: TextField(
-                  minLines: 1,
-                  maxLines: 5,
-                  keyboardType: TextInputType.multiline,
-                  enabled: false,
-                  decoration: const InputDecoration(
-                    labelText: "Pais",
-                    filled: true,
-                    prefixIcon: Icon(Icons.location_on_outlined),
-                  ),
-                  controller: controller.getControllerTextEditPais,
-                  onChanged: (value) =>
-                      controller.profileAccount.country = value,
-                ),
-              ),
-              const SizedBox(width: 50.0, height: 50.0),
-            ],
-          ),
+            ),
+            const SizedBox(width: 50.0, height: 50.0),
+          ],
         ));
   }
 
