@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:sell/app/models/catalogo_model.dart';
@@ -7,8 +9,10 @@ import 'package:sell/app/models/user_model.dart';
 import 'package:sell/app/services/database.dart';
 
 import '../../../routes/app_pages.dart';
+import '../../../utils/widgets_utils.dart';
 
 class HomeController extends GetxController {
+
   // category list
   RxList<Category> _categoryList = <Category>[].obs;
   List<Category> get getCatalogueCategoryList => _categoryList;
@@ -50,15 +54,36 @@ class HomeController extends GetxController {
   set setUserAccountAuth(User user) => _userAccountAuth = user;
 
   // profile user
-  ProfileAccountModel _accountProfileSelected =
-      ProfileAccountModel(creation: Timestamp.now());
+  ProfileAccountModel _accountProfileSelected =ProfileAccountModel(creation: Timestamp.now());
   ProfileAccountModel get getProfileAccountSelected => _accountProfileSelected;
-  set setProfileAccountSelected(ProfileAccountModel value) =>
-      _accountProfileSelected = value;
-
-  // id account selected
+  set setProfileAccountSelected(ProfileAccountModel value) => _accountProfileSelected = value;
   String get getIdAccountSelected => _accountProfileSelected.id;
+  bool isSelected({required String id}) {
+    bool isSelected = false;
+    for (ProfileAccountModel obj in getManagedAccountData) {
+      if (obj.id == getIdAccountSelected) {
+        if (id == getIdAccountSelected) {
+          isSelected = true;
+        }
+      }
+    }
 
+    return isSelected;
+  }
+
+  // administrator account list
+  RxList<ProfileAccountModel> _managedAccountDataList = <ProfileAccountModel>[].obs;
+  List<ProfileAccountModel> get getManagedAccountData => _managedAccountDataList;
+  set setManagedAccountData(List<ProfileAccountModel> value) =>_managedAccountDataList.value = value;
+  void addManagedAccount({required ProfileAccountModel profileData}) {
+    // default values
+    _managedAccountDataList = <ProfileAccountModel>[].obs;
+    // agregamos la nueva cuenta
+    return _managedAccountDataList.add(profileData);
+  }
+
+
+// index
   final RxInt _indexPage = 0.obs;
   int get getIndexPage => _indexPage.value;
   set setIndexPage(int value) => _indexPage.value = value;
@@ -71,9 +96,7 @@ class HomeController extends GetxController {
     Map map = Get.arguments as Map;
     // verificamos y obtenemos los datos pasados por parametro
     setUserAccountAuth = map['currentUser'];
-    map.containsKey('idAccount')
-        ? readAccountsData(idAccount: getUserAccountAuth.uid)
-        : readAccountsData(idAccount: '');
+    map.containsKey('idAccount') ? readAccountsData(idAccount: getUserAccountAuth.uid) : readAccountsData(idAccount: '');
   }
 
   @override
@@ -83,22 +106,22 @@ class HomeController extends GetxController {
   bool isCatalogue({required String id}) {
     bool iscatalogue = false;
     List list = getCataloProducts;
-    list.forEach((element) {
+    for (var element in list) {
       if (element.id == id) {
         iscatalogue = true;
       }
-    });
+    }
     return iscatalogue;
   }
 
   ProductCatalogue getProductCatalogue({required String id}) {
     ProductCatalogue product =
         ProductCatalogue(creation: Timestamp.now(), upgrade: Timestamp.now());
-    getCataloProducts.forEach((element) {
+    for (var element in getCataloProducts) {
       if (element.id == id) {
         product = element;
       }
-    });
+    }
     return product;
   }
 
@@ -199,5 +222,33 @@ class HomeController extends GetxController {
       'currentUser': getUserAccountAuth,
       'idAccount': idAccount,
     });
+  }
+
+  // BottomSheet - Getx
+  void showModalBottomSheetSelectAccount() {
+    // muestra las cuentas en el que este usuario tiene acceso
+    Widget widget = getManagedAccountData.isEmpty
+        ? WidgetButtonListTile().buttonListTileCrearCuenta()
+        : ListView.builder(
+            padding: const EdgeInsets.symmetric(vertical: 15.0),
+            shrinkWrap: true,
+            itemCount: getManagedAccountData.length,
+            itemBuilder: (BuildContext context, int index) {
+              return WidgetButtonListTile().buttonListTileItemCuenta(
+                  perfilNegocio: getManagedAccountData[index],
+                  adminPropietario:  getManagedAccountData[index].id == getUserAccountAuth.uid);
+            },
+          );
+
+    // muestre la hoja inferior modal de getx
+    Get.bottomSheet(
+      widget,
+      backgroundColor: Get.theme.scaffoldBackgroundColor,
+      enableDrag: true,
+      isDismissible: true,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20), topRight: Radius.circular(20))),
+    );
   }
 }

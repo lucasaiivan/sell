@@ -10,14 +10,14 @@ import '../../home/controller/home_controller.dart';
 
 class AccountController extends GetxController {
   // controllers
-  late final HomeController homeController;
+  HomeController homeController = Get.find();
 
   // state validation accoun
   bool newAccount = false;
   // state loading
   bool stateLoding = true;
 
-  void refresh() => update(['load']);
+
 
   late final Rx<TextEditingController> _controllerTextEditProvincia =
       TextEditingController().obs;
@@ -33,12 +33,9 @@ class AccountController extends GetxController {
   set setControllerTextEditPais(TextEditingController value) =>
       controllerTextEditPais.value = value;
 
-  late final Rx<TextEditingController> controllerTextEditSignoMoneda =
-      TextEditingController().obs;
-  TextEditingController get getControllerTextEditSignoMoneda =>
-      controllerTextEditSignoMoneda.value;
-  set setControllerTextEditSignoMoneda(TextEditingController value) =>
-      controllerTextEditSignoMoneda.value = value;
+  late final Rx<TextEditingController> controllerTextEditSignoMoneda =TextEditingController().obs;
+  TextEditingController get getControllerTextEditSignoMoneda =>controllerTextEditSignoMoneda.value;
+  set setControllerTextEditSignoMoneda(TextEditingController value) =>controllerTextEditSignoMoneda.value = value;
 
   // values
   final RxList<String> _listCities = [
@@ -73,8 +70,7 @@ class AccountController extends GetxController {
   List<String> get getCountries => _listountries;
 
   // account profile
-  Rx<ProfileAccountModel> _profileAccount =
-      ProfileAccountModel(creation: Timestamp.now()).obs;
+  final Rx<ProfileAccountModel> _profileAccount = ProfileAccountModel(creation: Timestamp.now()).obs;
   ProfileAccountModel get profileAccount => _profileAccount.value;
   set setProfileAccount(ProfileAccountModel user) =>
       _profileAccount.value = user;
@@ -109,7 +105,6 @@ class AccountController extends GetxController {
   @override
   void onInit() async {
     // obtenemos los datos del controlador principal
-    homeController = Get.find();
     verifyAccount(idAccount: homeController.getUserAccountAuth.uid);
 
     super.onInit();
@@ -124,11 +119,8 @@ class AccountController extends GetxController {
   void onClose() {}
 
   void verifyAccount({required String idAccount}) {
-    Database.readProfileAccountModelFuture(idAccount).then((value) {
-      if (value.exists) {
-        // get
-        ProfileAccountModel accountProfile =
-            ProfileAccountModel.fromDocumentSnapshot(documentSnapshot: value);
+    // get
+        ProfileAccountModel accountProfile = homeController.getProfileAccountSelected;
         // set
         setProfileAccount = accountProfile;
         newAccount = false;
@@ -140,17 +132,6 @@ class AccountController extends GetxController {
             TextEditingController(text: profileAccount.currencySign);
         stateLoding = false;
         update(['load']);
-      } else {
-        profileAccount.id = idAccount;
-        newAccount = true;
-        stateLoding = false;
-        update(['load']);
-      }
-    }).catchError((error) {
-      Get.back();
-      Get.snackbar('Mi perfil',
-          'Se ha producido un error, compruebe su conexión a Internet');
-    });
   }
 
   void saveAccount() async {

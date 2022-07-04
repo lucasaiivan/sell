@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sell/app/models/catalogo_model.dart';
 import 'package:sell/app/modules/home/controller/home_controller.dart';
@@ -6,9 +7,11 @@ import 'package:sell/app/services/database.dart';
 
 import '../../../routes/app_pages.dart';
 
-class CataloguePageController extends GetxController {
+class CataloguePageController extends GetxController with GetSingleTickerProviderStateMixin {
   // others controllers
   final HomeController homeController = Get.find();
+
+
 
   // text titleBar
   Category _selectedCategory = Category();
@@ -32,6 +35,7 @@ class CataloguePageController extends GetxController {
   void onInit() async {
     super.onInit();
     readProductsCatalogue();
+    
   }
 
   @override
@@ -54,7 +58,7 @@ class CataloguePageController extends GetxController {
           list.add(element);
         }
       }
-    }else{
+    } else {
       list = homeController.getCataloProducts;
     }
     // set
