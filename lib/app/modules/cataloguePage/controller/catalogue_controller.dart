@@ -7,14 +7,14 @@ import 'package:sell/app/services/database.dart';
 
 import '../../../routes/app_pages.dart';
 
-class CataloguePageController extends GetxController with GetSingleTickerProviderStateMixin {
+class CataloguePageController extends GetxController
+    with GetSingleTickerProviderStateMixin {
   // others controllers
   final HomeController homeController = Get.find();
-
-
+  late TabController tabController;
 
   // text titleBar
-  Category _selectedCategory = Category();
+  Category _selectedCategory = Category(name: 'Cátalogo');
   String get getTextTitleAppBar => _selectedCategory.name;
   Category get getSelectedCategory => _selectedCategory;
   set setSelectedCategory(Category value) {
@@ -34,8 +34,8 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
   @override
   void onInit() async {
     super.onInit();
+    tabController = TabController(vsync: this, length: 2);
     readProductsCatalogue();
-    
   }
 
   @override
@@ -70,8 +70,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     ProductCatalogue productCatalogue = ProductCatalogue(
         id: id, code: id, creation: Timestamp.now(), upgrade: Timestamp.now());
     // navega hacia una nueva vista para crear un nuevo producto
-    Get.toNamed(Routes.EDITPRODUCT,
-        arguments: {'new': true, 'product': productCatalogue});
+    Get.toNamed(Routes.EDITPRODUCT,arguments: {'new': true, 'product': productCatalogue});
   }
 
   void toSeachProduct() {
