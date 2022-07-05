@@ -45,27 +45,25 @@ class CataloguePage extends StatelessWidget {
     // controllers
     final CataloguePageController controller = Get.find();
 
-    return DefaultTabController(
-      length: 2,
-      child: Column(
-        children: <Widget>[
-          Container(
-            constraints: const BoxConstraints.expand(height: 50),
-            child:
-                TabBar(labelColor: Get.theme.textTheme.bodyText1?.color, tabs: [
-              Tab(text: "${controller.getCataloProducts.length} productos"),
-              const Tab(text: "Cátegorias"),
-            ]),
-          ),
-          Expanded(
-            child: TabBarView(
-              children: [
-              widgetListVertical(),
-              viewCategory(),
-            ]),
-          )
-        ],
-      ),
+    return Column(
+      children: <Widget>[
+        Container(
+          constraints: const BoxConstraints.expand(height: 50),
+          child: TabBar(
+              controller: controller.tabController,
+              labelColor: Get.theme.textTheme.bodyText1?.color,
+              tabs: [
+                Tab(text: "${controller.getCataloProducts.length} productos"),
+                const Tab(text: "Cátegorias"),
+              ]),
+        ),
+        Expanded(
+          child: TabBarView(controller: controller.tabController, children: [
+            widgetListVertical(),
+            viewCategory(),
+          ]),
+        )
+      ],
     );
   }
 
@@ -109,17 +107,18 @@ class CataloguePage extends StatelessWidget {
                     controller.getCatalogueCategoryList.isNotEmpty
                         ? ListTile(
                             contentPadding: const EdgeInsets.symmetric(
-                                vertical: 8.0, horizontal: 12.0),
+                                vertical: 12.0, horizontal: 12.0),
                             leading: CircleAvatar(
                               backgroundColor: color.withOpacity(0.1),
                               radius: 24.0,
                               child: Icon(Icons.all_inclusive, color: color),
                             ),
                             dense: true,
-                            title: const Text("Mostrar todos",
-                                style: TextStyle(fontWeight: FontWeight.w400)),
+                            title: Text("Mostrar todos",
+                                style: Get.theme.textTheme.bodyText1),
                             onTap: () {
-                              cataloguePageController.setSelectedCategory =Category(name: 'Cátalogo');
+                              cataloguePageController.setSelectedCategory =
+                                  Category(name: 'Cátalogo');
                             },
                           )
                         : Container(),
@@ -141,11 +140,11 @@ class CataloguePage extends StatelessWidget {
 
   // WIDGETS COMPONENTS
   Widget floatingActionButton({required CataloguePageController controller}) {
-
-
     return FloatingActionButton(
         backgroundColor: Colors.blue,
-        onPressed: () => controller.toSeachProduct(), //showDialogSetCategoria(categoria: Category()),
+        onPressed: () => controller.tabController.index == 0
+            ? controller.toSeachProduct()
+            : showDialogSetCategoria(categoria: Category()),
         child: const Icon(
           Icons.add,
           color: Colors.white,
@@ -170,8 +169,7 @@ class CataloguePage extends StatelessWidget {
           ListTile(
             tileColor: tileColor,
             contentPadding: const EdgeInsets.all(12),
-            onTap: () =>
-                cataloguePageController.toProductEdit(productCatalogue: item),
+            onTap: () => cataloguePageController.toProductEdit(productCatalogue: item),
             title: Text(item.description, maxLines: 1),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -228,21 +226,14 @@ class CataloguePage extends StatelessWidget {
     final CataloguePageController controller = Get.find();
 
     //  values
-    MaterialColor color = Utils.getRandomColor();
+    String title =
+        categoria.name.substring(0, 1).toUpperCase() + categoria.name.substring(1);
 
     return ListTile(
       contentPadding: const EdgeInsets.all(12),
-      leading: CircleAvatar(
-        backgroundColor: color.withOpacity(0.1),
-        radius: 24.0,
-        child: categoria.name != ""
-            ? Text(categoria.name.substring(0, 1),
-                style: TextStyle(color: color, fontWeight: FontWeight.bold))
-            : const Text("C"),
-      ),
       dense: true,
-      title: Text(categoria.name,
-          style: const TextStyle(fontWeight: FontWeight.w400)),
+      title: Text(title,
+          style: Get.theme.textTheme.bodyText1),
       onTap: () {
         controller.setSelectedCategory = categoria;
       },
