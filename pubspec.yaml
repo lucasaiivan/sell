@@ -43,6 +43,9 @@ dependencies:
   firebase_core: ^1.17.0
   firebase_crashlytics: ^2.8.1
   firebase_auth: ^3.3.19
+  # Google Pay
+  in_app_review: ^2.0.4
+
 
   # state controller
   get: ^4.6.5 # GetX es una solución potente y extraligera para Flutter. Combina la gestión del estado de alto rendimiento, la inyección inteligente de dependencias y la gestión de rutas de forma rápida y práctica.

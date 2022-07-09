@@ -57,7 +57,7 @@ class ProductEdit extends StatelessWidget {
                         ? Text(controller.getTextAppBar,
                             style:
                                 TextStyle(fontSize: 18.0, color: colorAccent))
-                        : Text(controller.getIsCatalogue ? 'Editar' : 'Nuevo',
+                        : Text('Espere por favor...',
                             style:
                                 TextStyle(fontSize: 18.0, color: colorAccent)),
                   ),
@@ -99,7 +99,7 @@ class ProductEdit extends StatelessWidget {
         controller.getSaveIndicator
             ? Container()
             : IconButton(
-                icon: const Icon(Icons.check), onPressed: controller.save),
+                icon: Icon(controller.getIsCatalogue?Icons.check:Icons.add), onPressed: controller.save),
       ],
       bottom: controller.getSaveIndicator
           ? ComponentApp.linearProgressBarApp()
