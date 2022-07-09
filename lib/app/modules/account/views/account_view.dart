@@ -332,134 +332,98 @@ class AccountView extends GetView<AccountController> {
 
   void _bottomPickerSelectCities(
       {required List list, required BuildContext context}) async {
-    //  el usuario va a seleccionar una opción
-    int _index = 0;
     //  Muestra una hoja inferior de diseño de material modal
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          height: 200.0,
-          color: Colors.white,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return Wrap(
             children: <Widget>[
-              CupertinoButton(
-                  child: const Text("Cancel"),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  }),
-              Expanded(
-                child: CupertinoPicker(
-                    scrollController:
-                        FixedExtentScrollController(initialItem: 0),
-                    itemExtent: 32.0,
-                    backgroundColor: Colors.white,
-                    onSelectedItemChanged: (int index) => _index = index,
-                    children: List<Widget>.generate(list.length,
-                        (int index) => Center(child: Text(list[index])))),
+              const ListTile(
+                title: Center(
+                  child: Text("Selecciona una provincia"),
+                ),
               ),
-              CupertinoButton(
-                child: const Text("Ok"),
-                onPressed: () {
-                  controller.getControllerTextEditProvincia.text = list[_index];
-                  controller.profileAccount.province = list[_index];
-                  Navigator.pop(context);
-                },
+              ListView(
+                shrinkWrap: true,
+                children: List<Widget>.generate(
+                    list.length,
+                    (int index) => ListTile(
+                          minVerticalPadding: 12,
+                          title: Text(list[index]),
+                          onTap: () {
+                            controller.getControllerTextEditProvincia.text = list[index];
+                            controller.profileAccount.province = list[index];
+                            Get.back();
+                          },
+                        )),
               ),
             ],
-          ),
-        );
-      },
-    );
+          );
+        });
   }
 
   void _bottomPickerSelectCountries(
       {required List list, required BuildContext context}) async {
-    //  el usuario va a seleccionar una opción
-    int _index = 0;
     //  Muestra una hoja inferior de diseño de material modal
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          height: 200.0,
-          color: Colors.white,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return Wrap(
             children: <Widget>[
-              CupertinoButton(
-                  child: const Text("Cancel"),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  }),
-              Expanded(
-                child: CupertinoPicker(
-                    scrollController:
-                        FixedExtentScrollController(initialItem: 0),
-                    itemExtent: 32.0,
-                    backgroundColor: Colors.white,
-                    onSelectedItemChanged: (int index) => _index = index,
-                    children: List<Widget>.generate(list.length,
-                        (int index) => Center(child: Text(list[index])))),
+              const ListTile(
+                title: Center(
+                  child: Text("Seleccione un pais"),
+                ),
               ),
-              CupertinoButton(
-                child: const Text("Ok"),
-                onPressed: () {
-                  controller.profileAccount.country = list[_index];
-                  controller.getControllerTextEditPais.text = list[_index];
-                  Get.back();
-                },
+              ListView(
+                shrinkWrap: true,
+                children: List<Widget>.generate(
+                    list.length,
+                    (int index) => ListTile(
+                          minVerticalPadding: 12,
+                          title: Text(list[index]),
+                          onTap: () {
+                            controller.profileAccount.country = list[index];
+                            controller.getControllerTextEditPais.text =
+                                list[index];
+                            Get.back();
+                          },
+                        )),
               ),
             ],
-          ),
-        );
-      },
-    );
+          );
+        });
   }
 
   void _bottomPickerSelectCurreny(
       {required List list, required BuildContext context}) async {
-    //  el usuario va a seleccionar una opción
-    int _index = 0;
     //  Muestra una hoja inferior de diseño de material modal
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          height: 200.0,
-          color: Colors.white,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return Wrap(
             children: <Widget>[
-              CupertinoButton(
-                  child: const Text("Cancel"),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  }),
-              Expanded(
-                child: CupertinoPicker(
-                    scrollController:
-                        FixedExtentScrollController(initialItem: 0),
-                    itemExtent: 32.0,
-                    backgroundColor: Colors.white,
-                    onSelectedItemChanged: (int index) => _index = index,
-                    children: List<Widget>.generate(list.length,
-                        (int index) => Center(child: Text(list[index])))),
+              const ListTile(
+                title: Center(
+                  child: Text("Selecciona el signo de la moneda"),
+                ),
               ),
-              CupertinoButton(
-                child: const Text("Ok"),
-                onPressed: () {
-                  controller.profileAccount.currencySign = list[_index];
-                  controller.getControllerTextEditSignoMoneda.text =
-                      list[_index];
-                  Navigator.pop(context);
-                },
+              ListView(
+                shrinkWrap: true,
+                children: List<Widget>.generate(
+                    list.length,
+                    (int index) => ListTile(
+                          minVerticalPadding: 12,
+                          title: Text(list[index]),
+                          onTap: () {
+                            controller.profileAccount.currencySign = list[index];
+                            controller.getControllerTextEditSignoMoneda.text =list[index];
+                            Get.back();
+                          },
+                        )),
               ),
             ],
-          ),
-        );
-      },
-    );
+          );
+        });
   }
 }
