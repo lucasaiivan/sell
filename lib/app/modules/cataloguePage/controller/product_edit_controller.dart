@@ -49,7 +49,7 @@ class ControllerProductsEdit extends GetxController {
 
 
   // category list
-  RxList<Category> _categoryList = <Category>[].obs;
+  final RxList<Category> _categoryList = <Category>[].obs;
   List<Category> get getCatalogueCategoryList => _categoryList;
   set setCatalogueCategoryList(List<Category> value) {
     _categoryList.value = value;
@@ -116,13 +116,12 @@ class ControllerProductsEdit extends GetxController {
   ProductCatalogue get getProduct => _product;
 
   // TextEditingController
-  TextEditingController controllerTextEdit_descripcion =
+  TextEditingController controllerTextEditDescripcion =
       TextEditingController();
-  TextEditingController controllerTextEdit_quantityStock =
-      TextEditingController();
-  MoneyMaskedTextController controllerTextEdit_precio_venta =
+  TextEditingController controllerTextEditQuantityStock =TextEditingController();
+  MoneyMaskedTextController controllerTextEditPrecioVenta =
       MoneyMaskedTextController();
-  MoneyMaskedTextController controllerTextEdit_precio_compra =
+  MoneyMaskedTextController controllerTextEditPrecioCompra =
       MoneyMaskedTextController();
 
   // mark
@@ -165,7 +164,7 @@ class ControllerProductsEdit extends GetxController {
   Category get getSubcategory => _subcategory;
 
   // imagen
-  ImagePicker _picker = ImagePicker();
+  final ImagePicker _picker = ImagePicker();
   XFile _xFileImage = XFile('');
   set setXFileImage(XFile value) => _xFileImage = value;
   XFile get getXFileImage => _xFileImage;
@@ -217,12 +216,12 @@ class ControllerProductsEdit extends GetxController {
   back() => Get.back();
 
   isCatalogue() {
-    homeController.getCataloProducts.forEach((element) {
+    for (var element in homeController.getCataloProducts) {
       if (element.id == getProduct.id) {
         setIsCatalogue = true;
         update(['updateAll']);
       }
-    });
+    }
   }
 
   Future<void> save() async {
@@ -328,7 +327,7 @@ class ControllerProductsEdit extends GetxController {
           // set
           Product newProduct = getProduct.convertProductoDefault();
           newProduct.idAccount = homeController.getProfileAccountSelected.id;
-          newProduct.upgrade = Timestamp.fromDate(new DateTime.now());
+          newProduct.upgrade = Timestamp.fromDate( DateTime.now());
 
           // firestore - save product public
           await Database.refFirestoreProductPublic()
@@ -391,12 +390,11 @@ class ControllerProductsEdit extends GetxController {
 
   void loadDataProduct() {
     // set
-    controllerTextEdit_descripcion =
+    controllerTextEditDescripcion =
         TextEditingController(text: getProduct.description);
-    controllerTextEdit_precio_venta =
-        MoneyMaskedTextController(initialValue: getProduct.salePrice);
-    controllerTextEdit_precio_compra =
-        MoneyMaskedTextController(initialValue: getProduct.purchasePrice);
+    controllerTextEditPrecioVenta =MoneyMaskedTextController(initialValue: getProduct.salePrice);
+    controllerTextEditPrecioCompra =MoneyMaskedTextController(initialValue: getProduct.purchasePrice);
+    controllerTextEditQuantityStock =TextEditingController(text: getProduct.quantityStock.toString());
 
     // primero verificamos que no tenga el metadato del dato de la marca para hacer un consulta inecesaria
     if (getProduct.idMark != '') readMarkProducts();
@@ -404,7 +402,7 @@ class ControllerProductsEdit extends GetxController {
   }
 
   void readMarkProducts() {
-    if (!getProduct.idMark.isEmpty) {
+    if (getProduct.idMark.isNotEmpty) {
       Database.readMarkFuture(id: getProduct.idMark).then((value) {
         setMarkSelected = Mark.fromMap(value.data() as Map);
         getProduct.nameMark = getMarkSelected.name; // guardamos un metadato
@@ -567,18 +565,18 @@ class ControllerProductsEdit extends GetxController {
 
   void showDialogDeleteOPTDeveloper() {
     Get.dialog(AlertDialog(
-      title: new Text(
+      title: const Text(
           "¿Seguro que quieres eliminar este documento definitivamente? (Mods)"),
-      content: new Text(
+      content: const Text(
           "El producto será eliminado de tu catálogo ,de la base de dato global y toda la información acumulada menos el historial de precios registrado"),
       actions: <Widget>[
         // usually buttons at the bottom of the dialog
-        new TextButton(
-          child: new Text("Cancelar"),
+        TextButton(
+          child: const Text("Cancelar"),
           onPressed: () => Get.back(),
         ),
-        new TextButton(
-          child: new Text("Borrar"),
+        TextButton(
+          child: const Text("Borrar"),
           onPressed: () {
             Get.back();
             deleteProducPublic();
@@ -590,17 +588,17 @@ class ControllerProductsEdit extends GetxController {
 
   void showDialogSaveOPTDeveloper() {
     Get.dialog(AlertDialog(
-      title: new Text("¿Seguro que quieres actualizar este docuemnto? (Mods)"),
-      content: new Text(
+      title: const Text("¿Seguro que quieres actualizar este docuemnto? (Mods)"),
+      content: const Text(
           "El producto será actualizado de tu catálogo ,de la base de dato global y toda la información acumulada menos el historial de precios registrado"),
       actions: <Widget>[
         // usually buttons at the bottom of the dialog
-        new TextButton(
-          child: new Text("Cancelar"),
+        TextButton(
+          child: const Text("Cancelar"),
           onPressed: () => Get.back(),
         ),
-        new TextButton(
-          child: new Text("Actualizar"),
+        TextButton(
+          child: const Text("Actualizar"),
           onPressed: () {
             Get.back();
             save();
@@ -649,7 +647,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
           child: list.length == 0
               ? widgetAnimLoad()
               : ListView.builder(
-                  padding: EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.only(bottom: 12),
                   shrinkWrap: true,
                   itemCount: list.length,
                   itemBuilder: (BuildContext context, int index) {
@@ -658,7 +656,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
                       return Column(
                         children: [
                           getWidgetOptionOther(),
-                          Divider(endIndent: 12.0, indent: 12.0, height: 0),
+                          const Divider(endIndent: 12.0, indent: 12.0, height: 0),
                           controllerProductsEdit.getUltimateSelectionMark.id ==
                                       '' ||
                                   controllerProductsEdit
@@ -668,16 +666,16 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
                               : listTile(
                                   marcaSelect: controllerProductsEdit
                                       .getUltimateSelectionMark),
-                          Divider(endIndent: 12.0, indent: 12.0, height: 0),
+                          const Divider(endIndent: 12.0, indent: 12.0, height: 0),
                           listTile(marcaSelect: marcaSelect),
-                          Divider(endIndent: 12.0, indent: 12.0, height: 0),
+                          const Divider(endIndent: 12.0, indent: 12.0, height: 0),
                         ],
                       );
                     }
                     return Column(
                       children: <Widget>[
                         listTile(marcaSelect: marcaSelect),
-                        Divider(endIndent: 12.0, indent: 12.0, height: 0),
+                        const Divider(endIndent: 12.0, indent: 12.0, height: 0),
                       ],
                     );
                   },
@@ -695,44 +693,44 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
           child: Shimmer.fromColors(
-              child: Card(child: Container(width: double.infinity, height: 50)),
               highlightColor: Colors.grey.withOpacity(0.01),
-              baseColor: Get.theme.scaffoldBackgroundColor),
+              baseColor: Get.theme.scaffoldBackgroundColor,
+              child: const Card(child: SizedBox(width: double.infinity, height: 50))),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
           child: Shimmer.fromColors(
-              child: Card(child: Container(width: double.infinity, height: 50)),
               highlightColor: Colors.grey.withOpacity(0.01),
-              baseColor: Get.theme.scaffoldBackgroundColor),
+              baseColor: Get.theme.scaffoldBackgroundColor,
+              child: const Card(child: SizedBox(width: double.infinity, height: 50))),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
           child: Shimmer.fromColors(
-              child: Card(child: Container(width: double.infinity, height: 50)),
               highlightColor: Colors.grey.withOpacity(0.01),
-              baseColor: Get.theme.scaffoldBackgroundColor),
+              baseColor: Get.theme.scaffoldBackgroundColor,
+              child: const Card(child: SizedBox(width: double.infinity, height: 50))),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
           child: Shimmer.fromColors(
-              child: Card(child: Container(width: double.infinity, height: 50)),
               highlightColor: Colors.grey.withOpacity(0.01),
-              baseColor: Get.theme.scaffoldBackgroundColor),
+              baseColor: Get.theme.scaffoldBackgroundColor,
+              child: const Card(child: SizedBox(width: double.infinity, height: 50))),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
           child: Shimmer.fromColors(
-              child: Card(child: Container(width: double.infinity, height: 50)),
               highlightColor: Colors.grey.withOpacity(0.01),
-              baseColor: Get.theme.scaffoldBackgroundColor),
+              baseColor: Get.theme.scaffoldBackgroundColor,
+              child: const Card(child: SizedBox(width: double.infinity, height: 50))),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
           child: Shimmer.fromColors(
-              child: Card(child: Container(width: double.infinity, height: 50)),
               highlightColor: Colors.grey.withOpacity(0.01),
-              baseColor: Get.theme.scaffoldBackgroundColor),
+              baseColor: Get.theme.scaffoldBackgroundColor,
+              child: const Card(child: SizedBox(width: double.infinity, height: 50))),
         ),
       ],
     ));
@@ -765,7 +763,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
               const EdgeInsets.only(bottom: 12, left: 12, right: 12, top: 12),
           child: Row(
             children: [
-              Expanded(child: Text('Marcas', style: TextStyle(fontSize: 18))),
+              const Expanded(child: Text('Marcas', style: TextStyle(fontSize: 18))),
               // TODO : delete icon 'add new mark for release'
               IconButton(
                   onPressed: () {
@@ -775,9 +773,9 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
                             upgrade: Timestamp.now(),
                             creation: Timestamp.now())));
                   },
-                  icon: Icon(Icons.add)),
+                  icon: const Icon(Icons.add)),
               IconButton(
-                icon: Icon(Icons.search),
+                icon: const Icon(Icons.search),
                 onPressed: () {
                   Get.back();
                   showSearch(
@@ -785,10 +783,10 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
                     delegate: SearchPage<Mark>(
                       items: list,
                       searchLabel: 'Buscar marca',
-                      suggestion: Center(
+                      suggestion: const Center(
                         child: Text('ej. Miller'),
                       ),
-                      failure: Center(
+                      failure: const Center(
                         child: Text('No se encontro :('),
                       ),
                       filter: (product) => [
@@ -798,7 +796,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
                       builder: (mark) => Column(
                         children: <Widget>[
                           listTile(marcaSelect: mark),
-                          Divider(endIndent: 12.0, indent: 12.0, height: 0),
+                          const Divider(endIndent: 12.0, indent: 12.0, height: 0),
                         ],
                       ),
                     ),
@@ -874,11 +872,11 @@ class _CreateMarkState extends State<CreateMark> {
   final ControllerProductsEdit controllerProductsEdit = Get.find();
 
   //var
-  var uuid = Uuid();
+  var uuid = const Uuid();
   bool newMark = false;
   String title = 'Crear nueva marca';
   bool load = false;
-  TextStyle textStyle = new TextStyle(fontSize: 24.0);
+  TextStyle textStyle = const TextStyle(fontSize: 24.0);
   ImagePicker _picker = ImagePicker();
   XFile xFile = XFile('');
 
@@ -917,11 +915,11 @@ class _CreateMarkState extends State<CreateMark> {
       actions: [
         newMark
             ? Container()
-            : IconButton(onPressed: delete, icon: Icon(Icons.delete)),
+            : IconButton(onPressed: delete, icon: const Icon(Icons.delete)),
         load
             ? Container()
             : IconButton(
-                icon: Icon(Icons.check),
+                icon: const Icon(Icons.check),
                 onPressed: save,
               ),
       ],
@@ -963,7 +961,7 @@ class _CreateMarkState extends State<CreateMark> {
                   ? Container()
                   : TextButton(
                       onPressed: getLoadImageMark,
-                      child: Text("Cambiar imagen")),
+                      child: const Text("Cambiar imagen")),
             ],
           ),
         ),
@@ -971,9 +969,9 @@ class _CreateMarkState extends State<CreateMark> {
           padding: const EdgeInsets.all(12.0),
           child: TextField(
             enabled: !load,
-            controller: new TextEditingController(text: widget.mark.name),
+            controller: TextEditingController(text: widget.mark.name),
             onChanged: (value) => widget.mark.name = value,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
                 border: OutlineInputBorder(), labelText: "Nombre de la marca"),
             style: textStyle,
           ),
@@ -983,9 +981,9 @@ class _CreateMarkState extends State<CreateMark> {
           child: TextField(
             enabled: !load,
             controller:
-                new TextEditingController(text: widget.mark.description),
+                TextEditingController(text: widget.mark.description),
             onChanged: (value) => widget.mark.description = value,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 labelText: "Descripción (opcional)"),
             style: textStyle,
@@ -1043,7 +1041,7 @@ class _CreateMarkState extends State<CreateMark> {
     if (widget.mark.id == '') {
       widget.mark.id = uuid.v1();
       if (widget.mark.id == '') {
-        widget.mark.id = new DateTime.now().millisecondsSinceEpoch.toString();
+        widget.mark.id = DateTime.now().millisecondsSinceEpoch.toString();
       }
     }
     if (widget.mark.name != '') {

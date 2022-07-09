@@ -38,6 +38,9 @@ class CataloguePage extends StatelessWidget {
       elevation: 0,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       title: Text(controller.getTextTitleAppBar),
+      actions: const [
+        Icon(Icons.search),
+      ],
     );
   }
 
