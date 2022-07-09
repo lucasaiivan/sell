@@ -175,13 +175,13 @@ class ProductEdit extends StatelessWidget {
                 border: const OutlineInputBorder(),
                 labelText: "Descripción"),
             textInputAction: TextInputAction.done,
-            controller: controller.controllerTextEdit_descripcion,
+            controller: controller.controllerTextEditDescripcion,
           ),
           //TODO: eliminar para desarrrollo
           // widget debug
           TextButton(
               onPressed: () async {
-                String clave = controller.controllerTextEdit_descripcion.text;
+                String clave = controller.controllerTextEditDescripcion.text;
                 String url =
                     "https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa";
                 if (await canLaunch(url)) {
@@ -240,13 +240,13 @@ class ProductEdit extends StatelessWidget {
                           const TextInputType.numberWithOptions(decimal: true),
                       onChanged: (value) =>
                           controller.getProduct.purchasePrice = controller
-                              .controllerTextEdit_precio_compra.numberValue,
+                              .controllerTextEditPrecioCompra.numberValue,
                       decoration: const InputDecoration(
                           border: OutlineInputBorder(),
                           labelText: "Precio de compra"),
                       textInputAction: TextInputAction.next,
                       //style: textStyle,
-                      controller: controller.controllerTextEdit_precio_compra,
+                      controller: controller.controllerTextEditPrecioCompra,
                     ),
                     space,
                     TextField(
@@ -255,13 +255,13 @@ class ProductEdit extends StatelessWidget {
                           const TextInputType.numberWithOptions(decimal: true),
                       onChanged: (value) => controller.getProduct.salePrice =
                           controller
-                              .controllerTextEdit_precio_venta.numberValue,
+                              .controllerTextEditPrecioVenta.numberValue,
                       decoration: const InputDecoration(
                           border: OutlineInputBorder(),
                           labelText: "Precio de venta"),
                       textInputAction: TextInputAction.done,
                       //style: textStyle,
-                      controller: controller.controllerTextEdit_precio_venta,
+                      controller: controller.controllerTextEditPrecioVenta,
                     ),
                     space,
                     CheckboxListTile(
@@ -283,19 +283,14 @@ class ProductEdit extends StatelessWidget {
                         ? ElasticIn(
                           child: TextField(
                               enabled: !controller.getSaveIndicator,
-                              keyboardType: const TextInputType.numberWithOptions(
-                                  decimal: false),
-                              onChanged: (value) =>
-                                  controller.getProduct.quantityStock = int.parse(
-                                      controller
-                                          .controllerTextEdit_quantityStock.text),
+                              keyboardType: TextInputType.number,
+                              onChanged: (value) => controller.getProduct.quantityStock = int.parse(controller.controllerTextEditQuantityStock.text),
                               decoration: const InputDecoration(
                                   border: OutlineInputBorder(),
                                   labelText: "Stock"),
                               textInputAction: TextInputAction.done,
                               //style: textStyle,
-                              controller:
-                                  controller.controllerTextEdit_quantityStock,
+                              controller: controller.controllerTextEditQuantityStock,
                             ),
                         )
                         : Container(),

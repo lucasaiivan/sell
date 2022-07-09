@@ -129,7 +129,7 @@ PreferredSize linearProgressBarApp({Color color = Colors.purple}) {
       child: LinearProgressIndicator(
           minHeight: 6.0,
           backgroundColor: Colors.white.withOpacity(0.3),
-          valueColor: new AlwaysStoppedAnimation<Color>(color)));
+          valueColor: AlwaysStoppedAnimation<Color>(color)));
 }
 
 class ProductoItem extends StatefulWidget {

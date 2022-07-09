@@ -351,6 +351,9 @@ class SalesView extends StatelessWidget {
     double radius = 35.0;
     double spaceImageText = 10;
 
+    // alert control stock
+    bool stateAlertStock =productCatalogue.stock?productCatalogue.quantityStock<5:false;
+
     return ElasticIn(
       child: Container(
         width: 81.0,
@@ -376,8 +379,22 @@ class SalesView extends StatelessWidget {
                             style: TextStyle(
                                 color: Get.textTheme.bodyText1?.color))),
                     imageBuilder: (context, image) => CircleAvatar(
-                      radius: radius,
-                      backgroundImage: image,
+                        radius: radius,
+                        backgroundColor: Colors.red,
+                      child: Padding(
+                        padding: EdgeInsets.all(stateAlertStock?1:0),
+                        child:  CircleAvatar(
+                          radius: radius,
+                          backgroundColor: Get.theme.scaffoldBackgroundColor,
+                          child: Padding(
+                            padding: EdgeInsets.all(stateAlertStock?3:0),
+                            child: CircleAvatar(
+                                  radius: radius,
+                                  backgroundImage: image,
+                                ),
+                          ),
+                        ),
+                      ),
                     ),
                     errorWidget: (context, url, error) => CircleAvatar(
                       radius: radius,
