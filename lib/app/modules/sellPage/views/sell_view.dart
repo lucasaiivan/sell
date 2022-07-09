@@ -300,8 +300,7 @@ class SalesView extends StatelessWidget {
                           CircleAvatar(
                             radius: radius,
                             backgroundColor: Colors.grey.withOpacity(0.1),
-                            child: Icon(Icons.search,
-                                color:Get.theme.brightness==Brightness.dark?Colors.white:Colors.black54),
+                            child: Icon(Icons.search,color:Get.theme.brightness==Brightness.dark?Colors.white:Colors.black54),
                           ),
                           SizedBox(
                             height:spaceImageText,
@@ -337,7 +336,7 @@ class SalesView extends StatelessWidget {
                       backgroundColor: Colors.grey.withOpacity(0.1),
                     ),
                   ),
-                  const Text('Buscar'),
+                  const Text(''),
                 ],
               ),
             ),
@@ -532,7 +531,7 @@ class Dash extends StatelessWidget {
   final double width;
   final Color color;
 
-  const Dash({this.height = 1, this.width = 3, this.color = Colors.black});
+  const Dash({super.key, this.height = 1, this.width = 3, this.color = Colors.black});
 
   @override
   Widget build(BuildContext context) {

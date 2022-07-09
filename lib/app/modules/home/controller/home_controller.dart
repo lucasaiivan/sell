@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -7,11 +9,17 @@ import 'package:get_storage/get_storage.dart';
 import 'package:sell/app/models/catalogo_model.dart';
 import 'package:sell/app/models/user_model.dart';
 import 'package:sell/app/services/database.dart';
-
+import 'package:in_app_review/in_app_review.dart';
 import '../../../routes/app_pages.dart';
 import '../../../utils/widgets_utils.dart';
+import 'package:in_app_review/in_app_review.dart';
+
+enum Availability { loading, available, unavailable }
 
 class HomeController extends GetxController {
+
+  late Availability _availability = Availability.loading;
+  InAppReview _inAppReview = InAppReview.instance;
 
   // category list
   RxList<Category> _categoryList = <Category>[].obs;
@@ -38,7 +46,8 @@ class HomeController extends GetxController {
   }
 
   // list products selecteds
-  final RxList<ProductCatalogue> _listProductSelecteds = <ProductCatalogue>[].obs;
+  final RxList<ProductCatalogue> _listProductSelecteds =
+      <ProductCatalogue>[].obs;
   get getProductsSelectedsList => _listProductSelecteds;
   saveListProductSelecteds({required List<ProductCatalogue> list}) {
     _listProductSelecteds.value = list;
@@ -54,9 +63,11 @@ class HomeController extends GetxController {
   set setUserAccountAuth(User user) => _userAccountAuth = user;
 
   // profile user
-  ProfileAccountModel _accountProfileSelected =ProfileAccountModel(creation: Timestamp.now());
+  ProfileAccountModel _accountProfileSelected =
+      ProfileAccountModel(creation: Timestamp.now());
   ProfileAccountModel get getProfileAccountSelected => _accountProfileSelected;
-  set setProfileAccountSelected(ProfileAccountModel value) => _accountProfileSelected = value;
+  set setProfileAccountSelected(ProfileAccountModel value) =>
+      _accountProfileSelected = value;
   String get getIdAccountSelected => _accountProfileSelected.id;
   bool isSelected({required String id}) {
     bool isSelected = false;
@@ -72,16 +83,18 @@ class HomeController extends GetxController {
   }
 
   // administrator account list
-  RxList<ProfileAccountModel> _managedAccountDataList = <ProfileAccountModel>[].obs;
-  List<ProfileAccountModel> get getManagedAccountData => _managedAccountDataList;
-  set setManagedAccountData(List<ProfileAccountModel> value) =>_managedAccountDataList.value = value;
+  RxList<ProfileAccountModel> _managedAccountDataList =
+      <ProfileAccountModel>[].obs;
+  List<ProfileAccountModel> get getManagedAccountData =>
+      _managedAccountDataList;
+  set setManagedAccountData(List<ProfileAccountModel> value) =>
+      _managedAccountDataList.value = value;
   void addManagedAccount({required ProfileAccountModel profileData}) {
     // default values
     _managedAccountDataList = <ProfileAccountModel>[].obs;
     // agregamos la nueva cuenta
     return _managedAccountDataList.add(profileData);
   }
-
 
 // index
   final RxInt _indexPage = 0.obs;
@@ -92,11 +105,23 @@ class HomeController extends GetxController {
   void onInit() async {
     super.onInit();
 
+     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        final isAvailable = await _inAppReview.isAvailable();
+
+        _availability = isAvailable && !Platform.isAndroid? Availability.available: Availability.unavailable;
+      } catch (e) {
+         _availability = Availability.unavailable;
+      }
+    });
+
     // obtenemos por parametro los datos de la cuenta de atentificación
     Map map = Get.arguments as Map;
     // verificamos y obtenemos los datos pasados por parametro
     setUserAccountAuth = map['currentUser'];
-    map.containsKey('idAccount') ? readAccountsData(idAccount: getUserAccountAuth.uid) : readAccountsData(idAccount: '');
+    map.containsKey('idAccount')
+        ? readAccountsData(idAccount: getUserAccountAuth.uid)
+        : readAccountsData(idAccount: '');
   }
 
   @override
@@ -126,7 +151,7 @@ class HomeController extends GetxController {
   }
 
   // QUERIES FIRESTORE
-  
+
   void readAccountsData({required String idAccount}) {
     //default values
     setProfileAccountSelected = ProfileAccountModel(creation: Timestamp.now());
@@ -136,15 +161,15 @@ class HomeController extends GetxController {
       Database.readProfileAccountModelFuture(idAccount).then((value) {
         //get
         if (value.exists) {
-          setProfileAccountSelected = ProfileAccountModel.fromDocumentSnapshot(documentSnapshot: value);
+          setProfileAccountSelected =
+              ProfileAccountModel.fromDocumentSnapshot(documentSnapshot: value);
           //  agregamos los datos del perfil de la cuenta en la lista para mostrar al usuario
           /* if (profileAccount.id != '') {
             //addManagedAccount(profileData: profileAccount);
           } */
-           // load
-            readProductsCatalogue(idAccount: idAccount);
-            readListCategoryListFuture(idAccount: idAccount);
-            
+          // load
+          readProductsCatalogue(idAccount: idAccount);
+          readListCategoryListFuture(idAccount: idAccount);
         }
       }).catchError((error) {
         print('########################home readManagedAccountsData: ' +
@@ -155,8 +180,7 @@ class HomeController extends GetxController {
 
   void readListCategoryListFuture({required String idAccount}) {
     // obtenemos la categorias creadas por el usuario
-    Database.readCategoriesQueryStream(idAccount: idAccount)
-        .listen((event) {
+    Database.readCategoriesQueryStream(idAccount: idAccount).listen((event) {
       List<Category> list = [];
       for (var element in event.docs) {
         list.add(Category.fromMap(element.data()));
@@ -236,7 +260,8 @@ class HomeController extends GetxController {
             itemBuilder: (BuildContext context, int index) {
               return WidgetButtonListTile().buttonListTileItemCuenta(
                   perfilNegocio: getManagedAccountData[index],
-                  adminPropietario:  getManagedAccountData[index].id == getUserAccountAuth.uid);
+                  adminPropietario: getManagedAccountData[index].id ==
+                      getUserAccountAuth.uid);
             },
           );
 
@@ -251,4 +276,5 @@ class HomeController extends GetxController {
               topLeft: Radius.circular(20), topRight: Radius.circular(20))),
     );
   }
+
 }

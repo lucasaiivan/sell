@@ -53,7 +53,7 @@ class CataloguePage extends StatelessWidget {
               controller: controller.tabController,
               labelColor: Get.theme.textTheme.bodyText1?.color,
               tabs: [
-                Tab(text: "${controller.getCataloProducts.length} productos"),
+                Tab(text: controller.getCataloProducts.isEmpty?"Productos":"${controller.getCataloProducts.length} productos"),
                 const Tab(text: "Cátegorias"),
               ]),
         ),
@@ -71,6 +71,10 @@ class CataloguePage extends StatelessWidget {
     // controllers
     final CataloguePageController controller = Get.find();
 
+    if (controller.getCataloProducts.isEmpty) {
+      return const Center(child: Text('Sin productos'),);
+    }
+
     return Obx(() => ListView.builder(
           itemCount: controller.getCataloProducts.length,
           itemBuilder: (context, index) {
@@ -85,11 +89,7 @@ class CataloguePage extends StatelessWidget {
     final CataloguePageController cataloguePageController = Get.find();
 
     if (controller.getCatalogueCategoryList.isEmpty) {
-      return ListTile(
-        onTap: () => showDialogSetCategoria(categoria: Category()),
-        title: const Text('Crear categoría', style: TextStyle(fontSize: 18)),
-        trailing: const Icon(Icons.add),
-      );
+      return const Center(child: Text('Sin cátegorias'),);
     }
     return Obx(
       () => ListView.builder(
@@ -117,8 +117,9 @@ class CataloguePage extends StatelessWidget {
                             title: Text("Mostrar todos",
                                 style: Get.theme.textTheme.bodyText1),
                             onTap: () {
-                              cataloguePageController.setSelectedCategory =
-                                  Category(name: 'Cátalogo');
+                              cataloguePageController.setSelectedCategory =Category(name: 'Cátalogo');
+                              // desplaza la vista a la lista de los productos
+                              cataloguePageController.tabController.animateTo(0);
                             },
                           )
                         : Container(),
@@ -236,6 +237,7 @@ class CataloguePage extends StatelessWidget {
           style: Get.theme.textTheme.bodyText1),
       onTap: () {
         controller.setSelectedCategory = categoria;
+        controller.tabController.animateTo(0);
       },
       trailing: dropdownButtonCategory(categoria: categoria),
     );
@@ -250,6 +252,7 @@ class CataloguePage extends StatelessWidget {
       value: null,
       elevation: 10,
       underline: Container(),
+      dropdownColor: Get.theme.popupMenuTheme.color,
       items: const [
         DropdownMenuItem(
           value: 'editar',

@@ -15,7 +15,7 @@ class AuthView extends GetView<LoginController> {
 
   // var
   static Color colorFondo = Colors.deepPurple, colorAccent = Colors.deepPurple;
-  static PageController _controller = PageController(initialPage: 0);
+  final PageController _controller = PageController();
   late Size
       screenSize; // Obtenemos las vavriables de la dimension de la pantalla
 
@@ -103,7 +103,8 @@ class AuthView extends GetView<LoginController> {
               style: linkStyle,
               recognizer: TapGestureRecognizer()
                 ..onTap = () async {
-                  final Uri url = Uri.parse('https://sites.google.com/view/producto-app/t%C3%A9rminos-y-condiciones-de-uso/');
+                  final Uri url = Uri.parse(
+                      'https://sites.google.com/view/producto-app/t%C3%A9rminos-y-condiciones-de-uso/');
                   if (!await launchUrl(url)) throw 'Could not launch $url';
                 }),
           const TextSpan(text: ' así también como la '),
@@ -112,7 +113,8 @@ class AuthView extends GetView<LoginController> {
               style: linkStyle,
               recognizer: TapGestureRecognizer()
                 ..onTap = () async {
-                  final Uri url = Uri.parse('https://sites.google.com/view/producto-app/pol%C3%ADticas-de-privacidad');
+                  final Uri url = Uri.parse(
+                      'https://sites.google.com/view/producto-app/pol%C3%ADticas-de-privacidad');
                   if (!await launchUrl(url)) throw 'Could not launch $url';
                 }),
         ],
@@ -126,7 +128,8 @@ class AuthView extends GetView<LoginController> {
             activeColor: Colors.blue,
             title: text,
             value: controller.getStateCheckAcceptPrivacyAndUsePolicy,
-            onChanged: (value) => controller.setStateCheckAcceptPrivacyAndUsePolicy = value!,
+            onChanged: (value) =>
+                controller.setStateCheckAcceptPrivacyAndUsePolicy = value!,
           ),
         ));
   }
@@ -156,20 +159,18 @@ class AuthView extends GetView<LoginController> {
 
     List<Widget> pages = [
       componente(
-          iconData: Icons.qr_code_scanner_rounded,
-          texto: "ESCANEA CON TU CÁMARA",
-          descripcion:
-              "Solo tienes que enfocar tu cámara \nal código de barra de tu producto \npara obtener la información en el acto 👌",
+          iconData: Icons.monetization_on,
+          texto: "VENTAS",
+          descripcion:'Vende de una forma simple 😊',
           brightness: Get.theme.brightness),
       componente(
-          iconData: Icons.monetization_on,
-          texto: "¿QUERES SABER EL PRECIO?",
-          descripcion:
-              "Compara precios de diferentes comerciantes o puedes compartir los tuyos",
+          iconData: Icons.analytics_outlined,
+          texto: "TRANSACCIONES",
+          descripcion:'Observa las transacciones que has realizado 💰',
           brightness: Get.theme.brightness),
       componente(
           iconData: Icons.category,
-          texto: "CREA TU CATÁLOGO",
+          texto: "CATÁLOGO",
           descripcion: "Arma tu catálogo con tus productos \n 🍫🍬🥫🍾",
           brightness: Get.theme.brightness),
     ];
@@ -187,7 +188,8 @@ class AuthView extends GetView<LoginController> {
           scrollDirection: Axis.horizontal, // Dirección de deslizamiento */
           children: pages,
         ),
-        floatingActionButton: dotsIndicator(context: context, pageController: _controller, pages: pages),
+        floatingActionButton: dotsIndicator(
+            context: context, pageController: _controller, pages: pages),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       ),
     );
@@ -219,11 +221,11 @@ class AuthView extends GetView<LoginController> {
                   )
                 : Icon(iconData,
                     size: 100.0, color: colorPrimary.withOpacity(0.5)),
-            SizedBox(height: 20.0),
+            const SizedBox(height: 20.0),
             Text(texto,
                 style: TextStyle(fontSize: 20.0, color: colorPrimary),
                 textAlign: TextAlign.center),
-            SizedBox(height: 12.0),
+            const SizedBox(height: 12.0),
             descripcion != ""
                 ? Text(
                     descripcion,
@@ -256,16 +258,15 @@ class AuthView extends GetView<LoginController> {
                           color: Brightness.dark == Theme.of(context).brightness
                               ? Colors.black
                               : Colors.white,
-                          shape: CircleBorder()),
-                      child: child == null
-                          ? IconButton(
+                          shape: const CircleBorder()),
+                      child: child ??
+                          IconButton(
                               icon: Icon(icon),
                               color: Brightness.dark ==
                                       Theme.of(context).brightness
                                   ? Colors.white
                                   : Colors.black,
-                              onPressed: onPressed)
-                          : child))));
+                              onPressed: onPressed)))));
 }
 
 /// Un indicador que muestra la página actualmente seleccionada de un PageController
@@ -274,7 +275,7 @@ class DotsIndicator extends AnimatedWidget {
       {required this.controller,
       required this.itemCount,
       required this.onPageSelected,
-      this.color: Colors.white})
+      this.color = Colors.white})
       : super(listenable: controller);
   // El PageController que representa este DotsIndicator.
   final PageController controller;
@@ -294,17 +295,25 @@ class DotsIndicator extends AnimatedWidget {
   static const double _kDotSpacing = 25.0;
 
   Widget _buildDot(int index) {
-    double selectedness = Curves.easeOut.transform(max(0.0,
-        1.0 - ((controller.page ?? controller.initialPage) - index).abs()));
+    // values
+    late double selectedness;
+    try {
+      selectedness = Curves.easeOut.transform(max(0.0,
+          1.0 - ((controller.page ?? controller.initialPage) - index).abs()));
+    } catch (_) {
+      // failed: controller.page
+      selectedness= 0;
+    }
     double zoom = 1.0 + (_kMaxZoom - 1.0) * selectedness;
-    return  Container(
+
+    return SizedBox(
       width: _kDotSpacing,
       height: _kDotSpacing,
-      child:  Center(
-        child:  Material(
+      child: Center(
+        child: Material(
           color: color,
           type: MaterialType.circle,
-          child: Container(
+          child: SizedBox(
             width: _kDotSize * zoom,
             height: _kDotSize * zoom,
             child: InkWell(onTap: () => onPageSelected(index)),
@@ -314,6 +323,7 @@ class DotsIndicator extends AnimatedWidget {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,

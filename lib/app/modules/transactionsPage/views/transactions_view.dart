@@ -39,18 +39,13 @@ class TransactionsView extends StatelessWidget {
       actions: [
         PopupMenuButton(
           icon: const Icon(Icons.filter_list),
-            onSelected: (selectedValue) {
-              transactionsController.filterList(key: selectedValue);
-            },
+            onSelected: (selectedValue) {transactionsController.filterList(key: selectedValue);},
             itemBuilder: (BuildContext ctx) => [
                   const PopupMenuItem(value: 'hoy', child: Text('Hoy')),
                   const PopupMenuItem(value: 'ayer', child: Text('Ayer')),
-                  const PopupMenuItem(
-                      value: 'este mes', child: Text('Este mes')),
-                  const PopupMenuItem(
-                      value: 'el mes pasado', child: Text('El mes pasado')),
-                  const PopupMenuItem(
-                      value: 'este año', child: Text('Este año')),
+                  const PopupMenuItem(value: 'este mes', child: Text('Este mes')),
+                  const PopupMenuItem(value: 'el mes pasado', child: Text('El mes pasado')),
+                  const PopupMenuItem(value: 'este año', child: Text('Este año')),
                 ])
       ],
     );
@@ -68,9 +63,6 @@ class TransactionsView extends StatelessWidget {
     return ListView.builder(
       itemCount: transactionsController.getTransactionsList.length,
       itemBuilder: (context, index) {
-        // values
-        String payMode = transactionsController.getPayModeFormat(idMode: transactionsController.getTransactionsList[index].payMode);
-
         if (index == 0) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,

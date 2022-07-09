@@ -76,6 +76,11 @@ public final class GeneratedPluginRegistrant {
       Log.e(TAG, "Error registering plugin image_picker_android, io.flutter.plugins.imagepicker.ImagePickerPlugin", e);
     }
     try {
+      flutterEngine.getPlugins().add(new dev.britannio.in_app_review.InAppReviewPlugin());
+    } catch(Exception e) {
+      Log.e(TAG, "Error registering plugin in_app_review, dev.britannio.in_app_review.InAppReviewPlugin", e);
+    }
+    try {
       flutterEngine.getPlugins().add(new dev.fluttercommunity.plus.network_info.NetworkInfoPlusPlugin());
     } catch(Exception e) {
       Log.e(TAG, "Error registering plugin network_info_plus, dev.fluttercommunity.plus.network_info.NetworkInfoPlusPlugin", e);
