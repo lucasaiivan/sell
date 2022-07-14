@@ -17,8 +17,6 @@ class AccountController extends GetxController {
   // state loading
   bool stateLoding = true;
 
-
-
   late final Rx<TextEditingController> _controllerTextEditProvincia =
       TextEditingController().obs;
   TextEditingController get getControllerTextEditProvincia =>
@@ -33,9 +31,12 @@ class AccountController extends GetxController {
   set setControllerTextEditPais(TextEditingController value) =>
       controllerTextEditPais.value = value;
 
-  late final Rx<TextEditingController> controllerTextEditSignoMoneda =TextEditingController().obs;
-  TextEditingController get getControllerTextEditSignoMoneda =>controllerTextEditSignoMoneda.value;
-  set setControllerTextEditSignoMoneda(TextEditingController value) =>controllerTextEditSignoMoneda.value = value;
+  late final Rx<TextEditingController> controllerTextEditSignoMoneda =
+      TextEditingController().obs;
+  TextEditingController get getControllerTextEditSignoMoneda =>
+      controllerTextEditSignoMoneda.value;
+  set setControllerTextEditSignoMoneda(TextEditingController value) =>
+      controllerTextEditSignoMoneda.value = value;
 
   // values
   final RxList<String> _listCities = [
@@ -70,7 +71,8 @@ class AccountController extends GetxController {
   List<String> get getCountries => _listountries;
 
   // account profile
-  final Rx<ProfileAccountModel> _profileAccount = ProfileAccountModel(creation: Timestamp.now()).obs;
+  final Rx<ProfileAccountModel> _profileAccount =
+      ProfileAccountModel(creation: Timestamp.now()).obs;
   ProfileAccountModel get profileAccount => _profileAccount.value;
   set setProfileAccount(ProfileAccountModel user) =>
       _profileAccount.value = user;
@@ -120,29 +122,30 @@ class AccountController extends GetxController {
 
   void verifyAccount({required String idAccount}) {
     // get
-        ProfileAccountModel accountProfile = homeController.getProfileAccountSelected;
-        // set
-        setProfileAccount = accountProfile;
-        newAccount = false;
-        setControllerTextEditProvincia =
-            TextEditingController(text: profileAccount.province);
-        setControllerTextEditPais =
-            TextEditingController(text: profileAccount.country);
-        setControllerTextEditSignoMoneda =
-            TextEditingController(text: profileAccount.currencySign);
-        stateLoding = false;
-        update(['load']);
+    ProfileAccountModel accountProfile =
+        homeController.getProfileAccountSelected;
+    // set
+    setProfileAccount = accountProfile;
+    newAccount = profileAccount.name=='';
+    setControllerTextEditProvincia =
+        TextEditingController(text: profileAccount.province);
+    setControllerTextEditPais =
+        TextEditingController(text: profileAccount.country);
+    setControllerTextEditSignoMoneda =
+        TextEditingController(text: profileAccount.currencySign);
+    stateLoding = false;
+    update(['load']);
   }
 
   void saveAccount() async {
+    //
     if (profileAccount.name != "") {
       if (getControllerTextEditProvincia.text != "") {
         if (getControllerTextEditPais.text != "") {
           // get
-          _profileAccount.value.province = getControllerTextEditProvincia.text;
-          _profileAccount.value.country = getControllerTextEditPais.text;
-          _profileAccount.value.currencySign =
-              getControllerTextEditSignoMoneda.text;
+          profileAccount.province = getControllerTextEditProvincia.text;
+          profileAccount.country = getControllerTextEditPais.text;
+          profileAccount.currencySign = getControllerTextEditSignoMoneda.text;
           setSavingIndicator = true;
 
           // comprobar existencia de creacion de cuenta
@@ -160,7 +163,7 @@ class AccountController extends GetxController {
                 await (await uploadTask).ref.getDownloadURL();
           }
 
-          // actualizar los datos
+          // si la cuenta no existe, se crea una nueva de lo contrario de actualiza los datos
           newAccount
               ? createAccount(data: profileAccount.toJson())
               : updateAccount(data: profileAccount.toJson());
@@ -179,6 +182,7 @@ class AccountController extends GetxController {
     if (data['id'] != '') {
       // db ref
       var documentReferencer = Database.refFirestoreAccount().doc(data['id']);
+
       // Actualizamos los datos de la cuenta
       documentReferencer
           .update(Map<String, dynamic>.from(data))
@@ -196,17 +200,32 @@ class AccountController extends GetxController {
 
   Future<void> createAccount({required Map<String, dynamic> data}) async {
     // Esto guarda un documento con los datos de la cuenta por crear
+
+    // vales
+    UserModel user = UserModel(
+        email: homeController.getUserAccountAuth.email ?? 'null',
+        superAdmin: true);
+    //...
     if (data['id'] != '') {
-      // db ref
+      // referencias
       var documentReferencer = Database.refFirestoreAccount().doc(data['id']);
-      await documentReferencer.set(data).whenComplete(() {homeController.accountChange(idAccount: data['id']);
+      var refFirestoreUserAccountsList =
+          Database.refFirestoreUserAccountsList(email: user.email)
+              .doc(data['id']);
+      var refFirestoreAccountsUsersList =
+          Database.refFirestoreAccountsUsersList(idAccount: data['id'])
+              .doc(user.email);
+
+      // se crea un nuevo documento
+      await documentReferencer.set(data).whenComplete(() {
+        refFirestoreAccountsUsersList.set(user.toJson(),SetOptions(merge: true));
+        refFirestoreUserAccountsList.set(Map<String, dynamic>.from({'id':data['id'],'superAdmin':true}),SetOptions(merge: true));
+        homeController.accountChange(idAccount: data['id']);
         Get.back();
-        print("######################## FIREBASE saveAccount whenComplete");
       }).catchError((e) {
         setSavingIndicator = false;
         Get.snackbar('No se puedo guardar los datos',
             'Puede ser un problema de conexión');
-        print("######################## FIREBASE saveAccount catchError: $e");
       });
     }
   }
