@@ -84,13 +84,10 @@ class CataloguePageController extends GetxController
           .delete();
   Future<void> categoryUpdate({required Category categoria}) async {
     // ref
-    var documentReferencer = Database.refFirestoreCategory(
-            idAccount: homeController.getProfileAccountSelected.id)
-        .doc(categoria.id);
+    var documentReferencer = Database.refFirestoreCategory(idAccount: homeController.getProfileAccountSelected.id).doc(categoria.id);
     // Actualizamos los datos
     documentReferencer
-        .set(Map<String, dynamic>.from(categoria.toJson()),
-            SetOptions(merge: true))
+        .set(Map<String, dynamic>.from(categoria.toJson()),SetOptions(merge: true))
         .whenComplete(() {
       print("######################## FIREBASE updateAccount whenComplete");
     }).catchError((e) => print(

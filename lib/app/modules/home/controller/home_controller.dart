@@ -1,28 +1,27 @@
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:sell/app/models/catalogo_model.dart';
 import 'package:sell/app/models/user_model.dart';
 import 'package:sell/app/services/database.dart';
-import 'package:in_app_review/in_app_review.dart';
 import '../../../routes/app_pages.dart';
 import '../../../utils/widgets_utils.dart';
-import 'package:in_app_review/in_app_review.dart';
 
 enum Availability { loading, available, unavailable }
 
 class HomeController extends GetxController {
-
-  late Availability _availability = Availability.loading;
-  InAppReview _inAppReview = InAppReview.instance;
+  // list admins users
+  final RxList<UserModel> _adminsUsersList = <UserModel>[].obs;
+  List<UserModel> get getAdminsUsersList => _adminsUsersList;
+  set setAdminsUsersList(List<UserModel> list) {
+    _adminsUsersList.value = list;
+    //...filter
+  }
 
   // category list
-  RxList<Category> _categoryList = <Category>[].obs;
+  final RxList<Category> _categoryList = <Category>[].obs;
   List<Category> get getCatalogueCategoryList => _categoryList;
   set setCatalogueCategoryList(List<Category> value) {
     _categoryList.value = value;
@@ -37,7 +36,6 @@ class HomeController extends GetxController {
   }
 
   // list products for catalogue
-
   final RxList<ProductCatalogue> _catalogueBusiness = <ProductCatalogue>[].obs;
   List<ProductCatalogue> get getCataloProducts => _catalogueBusiness;
   set setCatalogueProducts(List<ProductCatalogue> products) {
@@ -61,8 +59,12 @@ class HomeController extends GetxController {
   late User _userAccountAuth;
   User get getUserAccountAuth => _userAccountAuth;
   set setUserAccountAuth(User user) => _userAccountAuth = user;
+  //  profile Admin User
+  UserModel _adminUser = UserModel();
+  UserModel get getProfileAdminUser => _adminUser;
+  set setProfileAdminUser(UserModel user) => _adminUser = user;
 
-  // profile user
+  // profile account selected
   ProfileAccountModel _accountProfileSelected =
       ProfileAccountModel(creation: Timestamp.now());
   ProfileAccountModel get getProfileAccountSelected => _accountProfileSelected;
@@ -83,17 +85,15 @@ class HomeController extends GetxController {
   }
 
   // administrator account list
-  RxList<ProfileAccountModel> _managedAccountDataList =
+  final RxList<ProfileAccountModel> _managedAccountDataList =
       <ProfileAccountModel>[].obs;
   List<ProfileAccountModel> get getManagedAccountData =>
       _managedAccountDataList;
   set setManagedAccountData(List<ProfileAccountModel> value) =>
       _managedAccountDataList.value = value;
-  void addManagedAccount({required ProfileAccountModel profileData}) {
-    // default values
-    _managedAccountDataList = <ProfileAccountModel>[].obs;
+  set addManagedAccount(ProfileAccountModel profileData) {
     // agregamos la nueva cuenta
-    return _managedAccountDataList.add(profileData);
+    _managedAccountDataList.add(profileData);
   }
 
 // index
@@ -105,22 +105,12 @@ class HomeController extends GetxController {
   void onInit() async {
     super.onInit();
 
-     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      try {
-        final isAvailable = await _inAppReview.isAvailable();
-
-        _availability = isAvailable && !Platform.isAndroid? Availability.available: Availability.unavailable;
-      } catch (e) {
-         _availability = Availability.unavailable;
-      }
-    });
-
     // obtenemos por parametro los datos de la cuenta de atentificación
     Map map = Get.arguments as Map;
     // verificamos y obtenemos los datos pasados por parametro
     setUserAccountAuth = map['currentUser'];
     map.containsKey('idAccount')
-        ? readAccountsData(idAccount: getUserAccountAuth.uid)
+        ? readAccountsData(idAccount: map['idAccount'])
         : readAccountsData(idAccount: '');
   }
 
@@ -156,6 +146,8 @@ class HomeController extends GetxController {
     //default values
     setProfileAccountSelected = ProfileAccountModel(creation: Timestamp.now());
 
+    // obtenemos las cuentas asociada a este email
+    readUserAccountsList(email: getUserAccountAuth.email ?? 'null');
     // obtenemos los datos de la cuenta
     if (idAccount != '') {
       Database.readProfileAccountModelFuture(idAccount).then((value) {
@@ -168,7 +160,11 @@ class HomeController extends GetxController {
             //addManagedAccount(profileData: profileAccount);
           } */
           // load
+
+          readDataAdminUser(
+              email: getUserAccountAuth.email ?? 'null', idAccount: idAccount);
           readProductsCatalogue(idAccount: idAccount);
+          readAdminsUsers(idAccount: idAccount);
           readListCategoryListFuture(idAccount: idAccount);
         }
       }).catchError((error) {
@@ -189,10 +185,9 @@ class HomeController extends GetxController {
     });
   }
 
-  loadProductsOutstanding() {
+  loadProductsOutstanding({required String idAccount}) {
     // productos destacados
-    Database.readSalesProduct(idAccount: getUserAccountAuth.uid)
-        .listen((value) {
+    Database.readSalesProduct(idAccount: idAccount).listen((value) {
       List<ProductCatalogue> list = [];
       //  get
       for (var element in value.docs) {
@@ -212,15 +207,60 @@ class HomeController extends GetxController {
         list.add(ProductCatalogue.fromMap(element.data()));
       }
       //  set values
-      loadProductsOutstanding();
+      loadProductsOutstanding(idAccount: idAccount);
       setCatalogueProducts = list;
     }).onError((error) {
       // error
     });
   }
 
+  void readAdminsUsers({required String idAccount}) {
+    // obtenemos los usuarios administradores de la cuenta
+    Database.readQueryStreamAdminsUsers(idAccount: idAccount).listen((value) {
+      List<UserModel> list = [];
+      //  get
+      for (var element in value.docs) {
+        list.add(UserModel.fromMap(element.data()));
+      }
+      //  set values
+      setAdminsUsersList = list;
+    }).onError((error) {
+      // error
+    });
+  }
+
+  void readDataAdminUser({required String idAccount, required String email}) {
+    // obtenemos los datos del usuario administrador
+    Database.readFutureAdminUser(idAccount: idAccount, email: email)
+        .then((value) {
+      if (value.exists) {
+        setProfileAdminUser =
+            UserModel.fromDocumentSnapshot(documentSnapshot: value);
+      }
+    });
+  }
+
+  void readUserAccountsList({required String email}) {
+    // obtenemos la lista de cuentas del usuario
+    Database.refFirestoreUserAccountsList(email: email).get().then((value) {
+      //  get
+      for (var element in value.docs) {
+        if (element.get('id') != '') {
+          Database.readProfileAccountModelFuture(element.get('id'))
+              .then((value) {
+            ProfileAccountModel profileAccountModel =
+                ProfileAccountModel.fromDocumentSnapshot(
+                    documentSnapshot: value);
+            addManagedAccount = profileAccountModel;
+          });
+        }
+      }
+    });
+  }
+
   Future<void> categoryDelete({required String idCategory}) async =>
-      await Database.refFirestoreCategory(idAccount: getUserAccountAuth.uid)
+      await Database.refFirestoreCategory(
+              idAccount: getProfileAccountSelected.id)
           .doc(idCategory)
           .delete();
   Future<void> categoryUpdate({required Category categoria}) async {
@@ -250,7 +290,7 @@ class HomeController extends GetxController {
 
   // BottomSheet - Getx
   void showModalBottomSheetSelectAccount() {
-    // muestra las cuentas en el que este usuario tiene acceso
+    // muestra las cuentas en el que el usuario tiene accesos
     Widget widget = getManagedAccountData.isEmpty
         ? WidgetButtonListTile().buttonListTileCrearCuenta()
         : ListView.builder(
@@ -258,16 +298,32 @@ class HomeController extends GetxController {
             shrinkWrap: true,
             itemCount: getManagedAccountData.length,
             itemBuilder: (BuildContext context, int index) {
-              return WidgetButtonListTile().buttonListTileItemCuenta(
-                  perfilNegocio: getManagedAccountData[index],
-                  adminPropietario: getManagedAccountData[index].id ==
-                      getUserAccountAuth.uid);
-            },
+              return WidgetButtonListTile().buttonListTileItemCuenta(perfilNegocio: getManagedAccountData[index]);
+            }, 
           );
-
+    Widget buttonEditAccount = getProfileAdminUser.superAdmin
+        ? Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: TextButton(
+              child: const Text('Editar perfil'),
+              onPressed: () {
+                Get.back();
+                Get.toNamed(Routes.ACCOUNT);
+              },
+            ),
+        ):const Padding(
+          padding: EdgeInsets.all(20.0),
+          child: Text('Tienes que ser administrador para editar esta cuenta',textAlign: TextAlign.center),
+        );
     // muestre la hoja inferior modal de getx
     Get.bottomSheet(
-      widget,
+      Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          widget,
+          buttonEditAccount,
+        ],
+      ),
       backgroundColor: Get.theme.scaffoldBackgroundColor,
       enableDrag: true,
       isDismissible: true,
@@ -276,5 +332,4 @@ class HomeController extends GetxController {
               topLeft: Radius.circular(20), topRight: Radius.circular(20))),
     );
   }
-
 }

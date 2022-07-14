@@ -41,14 +41,14 @@ class WidgetButtonListTile extends StatelessWidget {
   }
 
   Widget buttonListTileItemCuenta(
-      {required ProfileAccountModel perfilNegocio,
-      bool adminPropietario = false}) {
+      {required ProfileAccountModel perfilNegocio}) {
     if (perfilNegocio.id == '') {
       return Container();
     }
     return Column(
       children: <Widget>[
         ListTile(
+          contentPadding: const EdgeInsets.symmetric(vertical: 5,horizontal: 12),
           leading: ClipRRect(
             borderRadius: BorderRadius.circular(10000.0),
             child: perfilNegocio.image != '' || perfilNegocio.image.isNotEmpty
@@ -93,21 +93,8 @@ class WidgetButtonListTile extends StatelessWidget {
           ),
           dense: true,
           title: Text(perfilNegocio.name),
-          subtitle: !adminPropietario
-              ? Text(perfilNegocio.idAuthUserCreation)
-              : Row(
-                  children: [
-                    Icon(
-                      Icons.security,
-                      size: 12.0,
-                      color: Get.theme.hintColor,
-                    ),
-                    const SizedBox(width: 2.0),
-                    const Text("Mi cuenta")
-                  ],
-                ),
           trailing: Radio(
-            activeColor: Get.theme.primaryColor,
+            activeColor: Colors.blue,
             value: controller.isSelected(id: perfilNegocio.id) ? 0 : 1,
             groupValue: 0,
             onChanged: (val) {
@@ -146,9 +133,10 @@ class _ProductoItemState extends State<ProductoItem> {
   SalesController salesController = Get.find<SalesController>();
   @override
   Widget build(BuildContext context) {
-
     //  values
-    final String alertStockText = widget.producto.stock? (widget.producto.quantityStock == 0 ? 'Sin stock' : ''): '';
+    final String alertStockText = widget.producto.stock
+        ? (widget.producto.quantityStock == 0 ? 'Sin stock' : '')
+        : '';
 
     // aparición animada
     return ElasticIn(
@@ -186,13 +174,14 @@ class _ProductoItemState extends State<ProductoItem> {
                 contentInfo(),
               ],
             ),
-            // selected 
+            // selected
             Positioned.fill(
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
                   mouseCursor: MouseCursor.uncontrolled,
-                  onTap: () => salesController.selectedItem(id: widget.producto.id),
+                  onTap: () =>
+                      salesController.selectedItem(id: widget.producto.id),
                   onLongPress: () {},
                 ),
               ),
@@ -226,7 +215,8 @@ class _ProductoItemState extends State<ProductoItem> {
                           child: CircleAvatar(
                               backgroundColor: Colors.white,
                               child: Center(
-                                child: Text(widget.producto.quantity.toString()),
+                                child:
+                                    Text(widget.producto.quantity.toString()),
                               )),
                         ),
                       ),
@@ -362,13 +352,14 @@ class _ProductoItemState extends State<ProductoItem> {
   }
 }
 
-
 Widget drawerApp() {
   //Los rieles de navegación brindan acceso a los destinos principales en las aplicaciones cuando se usan pantallas de tabletas y computadoras de escritorio.
 
-
   return GetBuilder<HomeController>(
     builder: (homeController) {
+      // values
+      String email = homeController.getUserAccountAuth.email ?? 'null';
+
       return Drawer(
         child: Column(
           children: [
@@ -390,12 +381,13 @@ Widget drawerApp() {
                             backgroundColor: Get.theme.dividerColor),
                       ),
               ),
-              title: Text(homeController.getProfileAccountSelected.name == ''
-                  ? 'Mi perfil'
+              title: Text(homeController.getIdAccountSelected == ''
+                  ? 'Seleccionar una cuenta'
                   : homeController.getProfileAccountSelected.name),
+              subtitle:homeController.getIdAccountSelected == ''?null: Text(homeController.getProfileAdminUser.superAdmin?'Administrador':'Usuario estandar'),
               trailing: const Icon(Icons.arrow_right_rounded),
               onTap: () {
-                Get.toNamed('/account');
+                homeController.showModalBottomSheetSelectAccount();
               },
             ),
             Expanded(
@@ -421,22 +413,25 @@ Widget drawerApp() {
               title: const Text('Dejanos tu opinión 😃'),
               subtitle: const Text('Nos intereza saber lo que piensas'),
               onTap: () async {
-            Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.logicabooleana.commer.producto');
-            if (await canLaunchUrl(uri)) {
-              await launchUrl(uri);
-            } else {
-              throw 'Could not launch $uri';
-            }
-          },
+                Uri uri = Uri.parse(
+                    'https://play.google.com/store/apps/details?id=com.logicabooleana.commer.producto');
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri);
+                } else {
+                  throw 'Could not launch $uri';
+                }
+              },
             ),
             const ListTile(
               leading: Icon(Icons.color_lens_outlined),
               title: Text('Cambiar tema'),
               onTap: ThemeService.switchTheme,
             ),
-            const ListTile(
+            ListTile(
+              // ignore: prefer_const_constructors
               leading: Icon(Icons.close),
-              title: Text('Cerrar sesión'),
+              title: const Text('Cerrar sesión'),
+              subtitle: Text(email),
               onTap: showDialogCerrarSesion,
             ),
           ],
@@ -448,6 +443,10 @@ Widget drawerApp() {
 
 // cerrar sesión
 void showDialogCerrarSesion() {
+
+  // others controllers
+  final HomeController homeController = Get.find();
+
   Widget widget = AlertDialog(
     title: const Text("Cerrar sesión"),
     content: const Text("¿Estás seguro de que quieres cerrar la sesión?"),
@@ -465,7 +464,7 @@ void showDialogCerrarSesion() {
 
             // Guardamos una referencia  de la cuenta seleccionada
             GetStorage().write('idAccount', '');
-            //setIdAccountSelected = '';
+            homeController.setProfileAccountSelected=ProfileAccountModel(creation: Timestamp.now());
             // instancias de FirebaseAuth para proceder a cerrar sesión
             final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
             Future.delayed(const Duration(seconds: 2)).then((_) {
