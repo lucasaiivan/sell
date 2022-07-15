@@ -73,7 +73,7 @@ class HomeController extends GetxController {
   String get getIdAccountSelected => _accountProfileSelected.id;
   bool isSelected({required String id}) {
     bool isSelected = false;
-    for (ProfileAccountModel obj in getManagedAccountData) {
+    for (ProfileAccountModel obj in getManagedAccountsList) {
       if (obj.id == getIdAccountSelected) {
         if (id == getIdAccountSelected) {
           isSelected = true;
@@ -85,15 +85,14 @@ class HomeController extends GetxController {
   }
 
   // administrator account list
-  final RxList<ProfileAccountModel> _managedAccountDataList =
+  final RxList<ProfileAccountModel> _managedAccountsList =
       <ProfileAccountModel>[].obs;
-  List<ProfileAccountModel> get getManagedAccountData =>
-      _managedAccountDataList;
-  set setManagedAccountData(List<ProfileAccountModel> value) =>
-      _managedAccountDataList.value = value;
-  set addManagedAccount(ProfileAccountModel profileData) {
+  List<ProfileAccountModel> get getManagedAccountsList => _managedAccountsList;
+  set setManagedAccountsList(List<ProfileAccountModel> value) =>
+      _managedAccountsList.value = value;
+  set addManagedAccountsList(ProfileAccountModel profileData) {
     // agregamos la nueva cuenta
-    _managedAccountDataList.add(profileData);
+    _managedAccountsList.add(profileData);
   }
 
 // index
@@ -145,12 +144,13 @@ class HomeController extends GetxController {
   void readAccountsData({required String idAccount}) {
     //default values
     setProfileAccountSelected = ProfileAccountModel(creation: Timestamp.now());
+    getProfileAccountSelected.id=idAccount;
 
     // obtenemos las cuentas asociada a este email
     readUserAccountsList(email: getUserAccountAuth.email ?? 'null');
     // obtenemos los datos de la cuenta
     if (idAccount != '') {
-      Database.readProfileAccountModelFuture(idAccount).then((value) {
+      Database.readProfileAccountModelFuture(getProfileAccountSelected.id).then((value) {
         //get
         if (value.exists) {
           setProfileAccountSelected =
@@ -251,7 +251,7 @@ class HomeController extends GetxController {
             ProfileAccountModel profileAccountModel =
                 ProfileAccountModel.fromDocumentSnapshot(
                     documentSnapshot: value);
-            addManagedAccount = profileAccountModel;
+            addManagedAccountsList = profileAccountModel;
           });
         }
       }
@@ -291,30 +291,39 @@ class HomeController extends GetxController {
   // BottomSheet - Getx
   void showModalBottomSheetSelectAccount() {
     // muestra las cuentas en el que el usuario tiene accesos
-    Widget widget = getManagedAccountData.isEmpty
+    Widget widget = getManagedAccountsList.isEmpty
         ? WidgetButtonListTile().buttonListTileCrearCuenta()
         : ListView.builder(
             padding: const EdgeInsets.symmetric(vertical: 15.0),
             shrinkWrap: true,
-            itemCount: getManagedAccountData.length,
+            itemCount: getManagedAccountsList.length,
             itemBuilder: (BuildContext context, int index) {
-              return WidgetButtonListTile().buttonListTileItemCuenta(perfilNegocio: getManagedAccountData[index]);
-            }, 
+              return WidgetButtonListTile().buttonListTileItemCuenta(
+                  perfilNegocio: getManagedAccountsList[index]);
+            },
           );
-    Widget buttonEditAccount = getProfileAdminUser.superAdmin
-        ? Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: TextButton(
-              child: const Text('Editar perfil'),
-              onPressed: () {
-                Get.back();
-                Get.toNamed(Routes.ACCOUNT);
-              },
-            ),
-        ):const Padding(
-          padding: EdgeInsets.all(20.0),
-          child: Text('Tienes que ser administrador para editar esta cuenta',textAlign: TextAlign.center),
-        );
+
+    Widget buttonEditAccount = getManagedAccountsList.isEmpty
+        ? Container()
+        : getProfileAdminUser.superAdmin
+            ? Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: TextButton(
+                  child: const Text('Editar perfil'),
+                  onPressed: () {
+                    Get.back();
+                    Get.toNamed(Routes.ACCOUNT);
+                  },
+                ),
+              )
+            : getIdAccountSelected == ''
+                ? Container()
+                : const Padding(
+                    padding: EdgeInsets.all(20.0),
+                    child: Text(
+                        'Tienes que ser administrador para editar esta cuenta',
+                        textAlign: TextAlign.center),
+                  );
     // muestre la hoja inferior modal de getx
     Get.bottomSheet(
       Column(

@@ -48,7 +48,8 @@ class WidgetButtonListTile extends StatelessWidget {
     return Column(
       children: <Widget>[
         ListTile(
-          contentPadding: const EdgeInsets.symmetric(vertical: 5,horizontal: 12),
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 5, horizontal: 12),
           leading: ClipRRect(
             borderRadius: BorderRadius.circular(10000.0),
             child: perfilNegocio.image != '' || perfilNegocio.image.isNotEmpty
@@ -381,10 +382,17 @@ Widget drawerApp() {
                             backgroundColor: Get.theme.dividerColor),
                       ),
               ),
-              title: Text(homeController.getIdAccountSelected == ''
-                  ? 'Seleccionar una cuenta'
-                  : homeController.getProfileAccountSelected.name),
-              subtitle:homeController.getIdAccountSelected == ''?null: Text(homeController.getProfileAdminUser.superAdmin?'Administrador':'Usuario estandar'),
+              title: Text(
+                  homeController.getIdAccountSelected == ''
+                      ? 'Seleccionar una cuenta'
+                      : homeController.getProfileAccountSelected.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis),
+              subtitle: homeController.getIdAccountSelected == ''
+                  ? null
+                  : Text(homeController.getProfileAdminUser.superAdmin
+                      ? 'Administrador'
+                      : 'Usuario estandar'),
               trailing: const Icon(Icons.arrow_right_rounded),
               onTap: () {
                 homeController.showModalBottomSheetSelectAccount();
@@ -431,7 +439,8 @@ Widget drawerApp() {
               // ignore: prefer_const_constructors
               leading: Icon(Icons.close),
               title: const Text('Cerrar sesión'),
-              subtitle: Text(email),
+              subtitle:
+                  Text(email, maxLines: 1, overflow: TextOverflow.ellipsis),
               onTap: showDialogCerrarSesion,
             ),
           ],
@@ -441,9 +450,44 @@ Widget drawerApp() {
   );
 }
 
+Widget widgetTextButton() {
+  // others controllers
+  final HomeController homeController = Get.find();
+
+  return Material(
+      child: Center(
+          child: Stack(
+            fit: StackFit.expand,
+    children: [
+      Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text('Hola 🖐️'),
+          const SizedBox(height: 20),
+          TextButton(
+            child: const Text('Selecciona una cuenta'),
+            onPressed: () {
+              homeController.showModalBottomSheetSelectAccount();
+            },
+          ),
+        ],
+      ),
+      Column(
+        children: [
+          Expanded(child: Container()),
+          const Padding(
+            padding: EdgeInsets.all(20.0),
+            child: TextButton(onPressed: showDialogCerrarSesion, child: Text('Cerrar sesión')),
+          ),
+        ],
+      ),
+    ],
+  )));
+}
+
 // cerrar sesión
 void showDialogCerrarSesion() {
-
   // others controllers
   final HomeController homeController = Get.find();
 
@@ -464,7 +508,8 @@ void showDialogCerrarSesion() {
 
             // Guardamos una referencia  de la cuenta seleccionada
             GetStorage().write('idAccount', '');
-            homeController.setProfileAccountSelected=ProfileAccountModel(creation: Timestamp.now());
+            homeController.setProfileAccountSelected =
+                ProfileAccountModel(creation: Timestamp.now());
             // instancias de FirebaseAuth para proceder a cerrar sesión
             final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
             Future.delayed(const Duration(seconds: 2)).then((_) {
