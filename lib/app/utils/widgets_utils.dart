@@ -540,9 +540,9 @@ void showMessageAlertApp({required String title, required String message}) {
 
 // Cuadro de Dialogo
 // un checkbox para agregar el producto a mi cátalogo
+// ignore: must_be_immutable
 class CheckBoxAddProduct extends StatefulWidget {
-  ProductCatalogue productCatalogue =
-      ProductCatalogue(creation: Timestamp.now(), upgrade: Timestamp.now());
+  late ProductCatalogue productCatalogue ;
 
   CheckBoxAddProduct({super.key, required this.productCatalogue});
 
@@ -551,7 +551,12 @@ class CheckBoxAddProduct extends StatefulWidget {
 }
 
 class _CheckBoxAddProductState extends State<CheckBoxAddProduct> {
+
+  // others controllers
+  final HomeController homeController = Get.find();
+  //  values
   bool check = false;
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -576,8 +581,8 @@ class _CheckBoxAddProductState extends State<CheckBoxAddProduct> {
         activeColor: Colors.blue,
         onChanged: (value) {
           setState(() {
-            check = !check;
-            // prosedo a agregar el producto en el cátalogo
+            check=!check;
+            homeController.checkAddProductToCatalogue = check;
           });
         },
       ),

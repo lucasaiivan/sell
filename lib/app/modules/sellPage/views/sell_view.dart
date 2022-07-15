@@ -373,32 +373,19 @@ class SalesView extends StatelessWidget {
               },
               child: Column(
                 children: <Widget>[
+
+                  // image
                   CachedNetworkImage(
                     imageUrl: productCatalogue.image,
-                    placeholder: (context, url) => CircleAvatar(
-                        radius: radius,
-                        backgroundColor: Get.theme.dividerColor,
-                        child: Text(
-                            Publications.getFormatoPrecio(
-                                monto: productCatalogue.salePrice),
-                            style: TextStyle(
-                                color: Get.textTheme.bodyText1?.color))),
+                    placeholder: (context, url) => CircleAvatar(radius: radius,backgroundColor: Get.theme.dividerColor,child: Text(Publications.getFormatoPrecio(monto: productCatalogue.salePrice),style: TextStyle(color: Get.textTheme.bodyText1?.color))),
                     imageBuilder: (context, image) => CircleAvatar(
                         radius: radius,
-                        backgroundColor: Colors.red,
-                      child: Padding(
-                        padding: EdgeInsets.all(stateAlertStock?1:0),
-                        child:  CircleAvatar(
-                          radius: radius,
-                          backgroundColor: Get.theme.scaffoldBackgroundColor,
-                          child: Padding(
-                            padding: EdgeInsets.all(stateAlertStock?3:0),
-                            child: CircleAvatar(
-                                  radius: radius,
-                                  backgroundImage: image,
-                                ),
-                          ),
-                        ),
+                        backgroundColor: stateAlertStock?Colors.red:Get.theme.dividerColor,
+                      child: CircleAvatar(
+                        radius: radius-1.5,
+                        backgroundColor: stateAlertStock?Colors.red:Get.theme.scaffoldBackgroundColor,
+                        child: CircleAvatar(radius: radius-3,backgroundColor: Get.theme.scaffoldBackgroundColor,
+                          child: Padding(padding: EdgeInsets.all(stateAlertStock?3:0),child: CircleAvatar(radius: radius,backgroundImage: image))),
                       ),
                     ),
                     errorWidget: (context, url, error) => CircleAvatar(

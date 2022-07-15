@@ -18,9 +18,8 @@ class SalesController extends GetxController {
   final HomeController homeController = Get.find();
 
   // productos seleccionados recientemente
-
   List<ProductCatalogue> get getRecentlySelectedProductsList =>
-      homeController.getProductsSelectedsList;
+      homeController.getProductsOutstandingList;
   registerSelections({required ProductCatalogue productCatalogue}) {
     bool repeat = false;
     // seach
@@ -154,12 +153,13 @@ class SalesController extends GetxController {
       );
       // descontar de stock
       if (element['stock'] ?? false) {
-        if(checkDiminish(key: element['id'], quantity: element['quantity'] ?? 1)){
+        if (checkDiminish(
+            key: element['id'], quantity: element['quantity'] ?? 1)) {
           Database.dbProductStockDecrement(
-          idAccount: homeController.getIdAccountSelected,
-          idProduct: element['id'],
-          quantity: element['quantity'] ?? 1,
-        );
+            idAccount: homeController.getIdAccountSelected,
+            idProduct: element['id'],
+            quantity: element['quantity'] ?? 1,
+          );
         }
       }
     }
@@ -245,7 +245,7 @@ class SalesController extends GetxController {
   }
 
   void verifyExistenceInSelectedScanResult({required String id}) {
-    // verifica si el ID del producto esta en la lista de seleccionados
+    // primero se verifica si el producto esta en la lista de productos deleccionados
     bool coincidence = false;
     for (ProductCatalogue product in getListProductsSelested) {
       if (product.id == id) {
@@ -254,25 +254,26 @@ class SalesController extends GetxController {
         update();
       }
     }
-    // si no hay coincidencia
+    // si no hay coincidencia verificamos si esta en el cátalogo de productos de la cuenta
     if (coincidence == false) {
       verifyExistenceInCatalogue(id: id);
     }
   }
 
   void verifyExistenceInCatalogue({required String id}) {
-    // verifica si el ID del producto esta en el catálogo de la cuenta
+    // verificamos si el producto esta en el catálogo de productos de la cuenta
     bool coincidence = false;
     for (ProductCatalogue product in homeController.getCataloProducts) {
+      // si el producto se encuentra en el cátalgo de la cuenta se agrega a la lista de productos seleccionados
       if (product.id == id) {
         coincidence = true;
         addProduct = product;
         update();
       }
     }
-    // si no hay coincidencia
+    // si el producto no se encuentra en el cátalogo de la cuenta se va consultar en la base de datos de productos publicos
     if (coincidence == false) {
-      queryProduct(id: id);
+      queryProductDbPublic(id: id);
     }
   }
 
@@ -293,18 +294,21 @@ class SalesController extends GetxController {
     }
   }
 
-  void queryProduct({required String id}) {
-    // consulta el id del producto en la base de datos global
+  void queryProductDbPublic({required String id}) {
+    // consulta el código existe en la base de datos de productos publicos
     if (id != '') {
       // query
       Database.readProductGlobalFuture(id: id).then((value) {
         showDialogAddProductNew(
             productCatalogue: ProductCatalogue.fromMap(value.data() as Map));
-        //Get.toNamed(Routes.PRODUCT,arguments: {'product': product.convertProductCatalogue()});
       }).onError((error, stackTrace) {
         // error o no existe en la db
+        showDialogQuickSale();
+        Get.snackbar('Lo siento',
+            '🙁 no se encontro el producto en nuestra base de datos');
       }).catchError((error) {
         // error al consultar db
+        Get.snackbar('ah ocurrido algo', 'Fallo el escaneo');
       });
     }
   }
@@ -374,8 +378,9 @@ class SalesController extends GetxController {
   }
 
   String getValueReceived() {
-    if (getValueReceivedTicket == 0.0)
+    if (getValueReceivedTicket == 0.0) {
       return Publications.getFormatoPrecio(monto: 0);
+    }
     double result = getValueReceivedTicket - getCountPriceTotal();
     return Publications.getFormatoPrecio(monto: result);
   }
@@ -414,6 +419,9 @@ class SalesController extends GetxController {
               onPressed: () {
                 if (productCatalogue.salePrice != 0.0) {
                   addProduct = productCatalogue;
+                  if (homeController.checkAddProductToCatalogue) {
+                    homeController.addProductToCatalogue(product: productCatalogue);
+                  }
                   Get.back();
                 } else {
                   Get.snackbar('🙁 algo salio mal', 'Inserte un precio valido');
@@ -425,7 +433,7 @@ class SalesController extends GetxController {
           padding: const EdgeInsets.symmetric(vertical: 24),
           child: Column(
             children: [
-              // permision: permiso para guardar el producto nuevo en mi cátalogo (app catalogo)
+              // return Widget view : permision: permiso para guardar el producto nuevo en mi cátalogo (app catalogo)
               CheckBoxAddProduct(productCatalogue: productCatalogue),
               // mount textfield
               Padding(

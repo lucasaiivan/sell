@@ -8,10 +8,13 @@ import 'package:sell/app/models/user_model.dart';
 import 'package:sell/app/services/database.dart';
 import '../../../routes/app_pages.dart';
 import '../../../utils/widgets_utils.dart';
-
-enum Availability { loading, available, unavailable }
+import '../../sellPage/controller/sell_controller.dart';
 
 class HomeController extends GetxController {
+
+  // value state : este valor valida si el usuario quiere que el código escaado quiere agregarlo a su cátalogue
+  bool checkAddProductToCatalogue = false;
+  
   // list admins users
   final RxList<UserModel> _adminsUsersList = <UserModel>[].obs;
   List<UserModel> get getAdminsUsersList => _adminsUsersList;
@@ -28,13 +31,6 @@ class HomeController extends GetxController {
     update(['tab']);
   }
 
-  // subcategory list selected
-  final RxList<Category> _subCategoryList = <Category>[].obs;
-  List<Category> get getsubCatalogueCategoryList => _subCategoryList;
-  set setCataloguesubCategoryList(List<Category> value) {
-    _subCategoryList.value = value;
-  }
-
   // list products for catalogue
   final RxList<ProductCatalogue> _catalogueBusiness = <ProductCatalogue>[].obs;
   List<ProductCatalogue> get getCataloProducts => _catalogueBusiness;
@@ -44,15 +40,15 @@ class HomeController extends GetxController {
   }
 
   // list products selecteds
-  final RxList<ProductCatalogue> _listProductSelecteds =
+  final RxList<ProductCatalogue> _productsOutstandingList =
       <ProductCatalogue>[].obs;
-  get getProductsSelectedsList => _listProductSelecteds;
-  saveListProductSelecteds({required List<ProductCatalogue> list}) {
-    _listProductSelecteds.value = list;
+  get getProductsOutstandingList => _productsOutstandingList;
+  set setProductsOutstandingList(List<ProductCatalogue> list) {
+    _productsOutstandingList.value = list;
   }
 
   addToListProductSelecteds({required ProductCatalogue item}) {
-    _listProductSelecteds.add(item);
+    _productsOutstandingList.add(item);
   }
 
   //  authentication account profile
@@ -144,13 +140,14 @@ class HomeController extends GetxController {
   void readAccountsData({required String idAccount}) {
     //default values
     setProfileAccountSelected = ProfileAccountModel(creation: Timestamp.now());
-    getProfileAccountSelected.id=idAccount;
+    getProfileAccountSelected.id = idAccount;
 
     // obtenemos las cuentas asociada a este email
     readUserAccountsList(email: getUserAccountAuth.email ?? 'null');
     // obtenemos los datos de la cuenta
     if (idAccount != '') {
-      Database.readProfileAccountModelFuture(getProfileAccountSelected.id).then((value) {
+      Database.readProfileAccountModelFuture(getProfileAccountSelected.id)
+          .then((value) {
         //get
         if (value.exists) {
           setProfileAccountSelected =
@@ -186,7 +183,9 @@ class HomeController extends GetxController {
   }
 
   loadProductsOutstanding({required String idAccount}) {
-    // productos destacados
+    // obtenemos los productos más vendidos
+    setProductsOutstandingList = [];
+    // Firestore get
     Database.readSalesProduct(idAccount: idAccount).listen((value) {
       List<ProductCatalogue> list = [];
       //  get
@@ -194,7 +193,7 @@ class HomeController extends GetxController {
         list.add(ProductCatalogue.fromMap(element.data()));
       }
       //  set values
-      saveListProductSelecteds(list: list);
+      setProductsOutstandingList = list;
     });
   }
 
@@ -202,15 +201,19 @@ class HomeController extends GetxController {
     // obtenemos los obj(productos) del catalogo de la cuenta del negocio
     Database.readProductsCatalogueStream(id: idAccount).listen((value) {
       List<ProductCatalogue> list = [];
-      //  get
-      for (var element in value.docs) {
-        list.add(ProductCatalogue.fromMap(element.data()));
+
+      if (value.docs.isNotEmpty) {
+        //  get
+        for (var element in value.docs) {
+          list.add(ProductCatalogue.fromMap(element.data()));
+        }
       }
       //  set values
       loadProductsOutstanding(idAccount: idAccount);
       setCatalogueProducts = list;
     }).onError((error) {
       // error
+      setCatalogueProducts = [];
     });
   }
 
@@ -278,8 +281,42 @@ class HomeController extends GetxController {
             "######################## FIREBASE updateAccount catchError: $e"));
   }
 
+  void addProductToCatalogue({required ProductCatalogue product}) async {
+    // values : registra el precio en una colección publica para todos los usuarios
+    Price precio = Price(
+      id: getProfileAccountSelected.id,
+      idAccount: getProfileAccountSelected.id,
+      imageAccount: getProfileAccountSelected.image,
+      nameAccount: getProfileAccountSelected.name,
+      price: product.salePrice,
+      currencySign: product.currencySign,
+      province: getProfileAccountSelected.province,
+      town: getProfileAccountSelected.town,
+      time: Timestamp.fromDate(DateTime.now()),
+    );
+    // Firebase set : se guarda un documento con la referencia del precio del producto
+    await Database.refFirestoreRegisterPrice(
+            idProducto: product.id, isoPAis: 'ARG')
+        .doc(precio.id)
+        .set(precio.toJson());
+
+    // Firebase set : se actualiza los datos del producto del cátalogo de la cuenta
+    Database.refFirestoreCatalogueProduct(
+            idAccount: getProfileAccountSelected.id)
+        .doc(product.id)
+        .set(product.toJson())
+        .whenComplete(() async {})
+        .onError((error, stackTrace) => null)
+        .catchError((_) => null);
+  }
+
   // Cambiar de cuenta
   void accountChange({required String idAccount}) {
+    // default values of controllers
+    setCatalogueCategoryList = [];
+    setCatalogueCategoryList = [];
+    setCatalogueProducts = [];
+    setProductsOutstandingList = [];
     // save key/values Storage
     GetStorage().write('idAccount', idAccount);
     Get.offAllNamed(Routes.HOME, arguments: {
