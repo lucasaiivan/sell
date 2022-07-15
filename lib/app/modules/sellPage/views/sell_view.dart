@@ -5,6 +5,7 @@ import 'package:sell/app/models/catalogo_model.dart';
 import 'package:sell/app/utils/fuctions.dart';
 import 'package:sell/app/utils/widgets_utils.dart';
 import '../../../utils/dynamicTheme_lb.dart';
+import '../../home/controller/home_controller.dart';
 import '../controller/sell_controller.dart';
 
 // ignore: must_be_immutable
@@ -14,9 +15,13 @@ class SalesView extends StatelessWidget {
 
   late BuildContext buildContext;
 
+  // others controllers
+  final HomeController homeController = Get.find();
+
   @override
   Widget build(BuildContext context) {
     buildContext = context;
+
     return GetBuilder<SalesController>(
       init: SalesController(),
       initState: (_) {},

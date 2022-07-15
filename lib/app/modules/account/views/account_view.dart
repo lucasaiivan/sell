@@ -257,34 +257,24 @@ class AccountView extends GetView<AccountController> {
             const SizedBox(
               height: 24.0,
             ),
-            TextField(
-              enabled: !controller.getSavingIndicator,
-              onChanged: (value) => controller.profileAccount.address = value,
-              decoration: const InputDecoration(
-                labelText: "Dirección (ocional)",
-                filled: true,
+            InkWell(
+              onTap: () => _bottomPickerSelectCountries(
+                  list: controller.getCountries, context: context),
+              child: TextField(
+                minLines: 1,
+                maxLines: 5,
+                keyboardType: TextInputType.multiline,
+                enabled: false,
+                decoration: const InputDecoration(
+                  labelText: "Pais",
+                  filled: true,
+                  prefixIcon: Icon(Icons.location_on_outlined),
+                ),
+                controller: controller.getControllerTextEditPais,
+                onChanged: (value) => controller.profileAccount.country = value,
               ),
-              controller: TextEditingController(
-                  text: controller.profileAccount.address),
-              textInputAction: TextInputAction.next,
-              focusNode: focusTextEditDireccion,
-              onSubmitted: (term) {
-                _fieldFocusChange(
-                    context, focusTextEditDireccion, focusTextEditCiudad);
-              },
             ),
-            const Divider(color: Colors.transparent, thickness: 1),
-            TextField(
-              enabled: !controller.getSavingIndicator,
-              onChanged: (value) => controller.profileAccount.town = value,
-              decoration: const InputDecoration(
-                labelText: "Ciudad (ocional)",
-                filled: true,
-              ),
-              controller:
-                  TextEditingController(text: controller.profileAccount.town),
-            ),
-            const Divider(color: Colors.transparent, thickness: 1),
+            const SizedBox(width: 12.0, height: 12.0),
             InkWell(
               onTap: () => controller.profileAccount.country == ''
                   ? _bottomPickerSelectCountries(
@@ -307,24 +297,37 @@ class AccountView extends GetView<AccountController> {
                   }),
             ),
             const Divider(color: Colors.transparent, thickness: 1),
-            InkWell(
-              onTap: () => _bottomPickerSelectCountries(
-                  list: controller.getCountries, context: context),
-              child: TextField(
-                minLines: 1,
-                maxLines: 5,
-                keyboardType: TextInputType.multiline,
-                enabled: false,
-                decoration: const InputDecoration(
-                  labelText: "Pais",
-                  filled: true,
-                  prefixIcon: Icon(Icons.location_on_outlined),
-                ),
-                controller: controller.getControllerTextEditPais,
-                onChanged: (value) => controller.profileAccount.country = value,
+            TextField(
+              enabled: !controller.getSavingIndicator,
+              onChanged: (value) => controller.profileAccount.town = value,
+              decoration: const InputDecoration(
+                labelText: "Ciudad (ocional)",
+                filled: true,
               ),
+              controller:
+                  TextEditingController(text: controller.profileAccount.town),
             ),
-            const SizedBox(width: 50.0, height: 50.0),
+            const Divider(color: Colors.transparent, thickness: 1),
+            TextField(
+              enabled: !controller.getSavingIndicator,
+              onChanged: (value) => controller.profileAccount.address = value,
+              decoration: const InputDecoration(
+                labelText: "Dirección (ocional)",
+                filled: true,
+              ),
+              controller: TextEditingController(
+                  text: controller.profileAccount.address),
+              textInputAction: TextInputAction.next,
+              focusNode: focusTextEditDireccion,
+              onSubmitted: (term) {
+                _fieldFocusChange(
+                    context, focusTextEditDireccion, focusTextEditCiudad);
+              },
+            ),
+            const Divider(color: Colors.transparent, thickness: 1),
+            
+            
+            
           ],
         ));
   }
