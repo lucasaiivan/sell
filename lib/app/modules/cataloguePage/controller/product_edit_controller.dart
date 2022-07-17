@@ -116,8 +116,8 @@ class ControllerProductsEdit extends GetxController {
 
   // TextEditingController
   TextEditingController controllerTextEditDescripcion = TextEditingController();
-  TextEditingController controllerTextEditQuantityStock =
-      TextEditingController();
+  TextEditingController controllerTextEditQuantityStock = TextEditingController();
+  TextEditingController controllerTextEditAlertStock = TextEditingController();
   MoneyMaskedTextController controllerTextEditPrecioVenta =
       MoneyMaskedTextController();
   MoneyMaskedTextController controllerTextEditPrecioCompra =
@@ -393,7 +393,7 @@ class ControllerProductsEdit extends GetxController {
         MoneyMaskedTextController(initialValue: getProduct.purchasePrice);
     controllerTextEditQuantityStock =
         TextEditingController(text: getProduct.quantityStock.toString());
-
+    controllerTextEditAlertStock = TextEditingController(text: getProduct.alertStock.toString());
     // primero verificamos que no tenga el metadato del dato de la marca para hacer un consulta inecesaria
     if (getProduct.idMark != '') readMarkProducts();
     if (getProduct.category != '') readCategory();

@@ -105,8 +105,6 @@ class CataloguePageController extends GetxController
     Get.toNamed(Routes.EDITPRODUCT, arguments: {'product': productCatalogue});
   }
 
-  
-
   void seach({required BuildContext context}) {
     // Busca entre los productos de mi catálogo
 
@@ -153,5 +151,59 @@ class CataloguePageController extends GetxController
         ),
       ),
     );
+  }
+
+  void filterAlertStock() {
+
+    // obtenemos una lista nueva con los productos que tienen un stock
+    List<ProductCatalogue> stockActivateList = [];
+    for (var element in getCataloProducts) {
+      if (element.stock) {
+        stockActivateList.add(element);
+      }
+    }
+    stockActivateList
+        .sort((a, b) => a.quantityStock.compareTo(b.quantityStock));
+
+    // obtenemos una lista nueva con los productos que no tienen el stock activado
+    List<ProductCatalogue> stockDesactivateList = [];
+    for (var element in getCataloProducts) {
+      if (element.stock == false) {
+        stockDesactivateList.add(element);
+      }
+    }
+    stockDesactivateList.sort((a, b) => b.quantityStock.compareTo(a.quantityStock));
+    // creamos una nueva lista con todos los productos ya filtrados
+    List<ProductCatalogue> newFilterList = [];
+    for (var element in stockActivateList) {
+      newFilterList.add(element);
+    }
+    for (var element in stockDesactivateList) {
+      newFilterList.add(element);
+    }
+    // actualizamos la lista para mostrar al usuario
+    setCatalogueProducts = newFilterList;
+  }
+
+  Widget get viewStockAlert {
+    // buscamos los productos que tengan un stock vacio o bajo
+    int countProducts = 0;
+    for (var product in getCataloProducts) {
+      if (product.quantityStock <= product.alertStock && product.stock) {
+        countProducts++;
+      }
+    }
+    if (countProducts == 0) {
+      return Container();
+    } else {
+      return Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: TextButton(
+            onPressed: filterAlertStock,
+            child: Text('Tienes $countProducts productos con stock bajas',
+                style: const TextStyle(
+                    fontSize: 16, fontWeight: FontWeight.w200))),
+      );
+    }
   }
 }
