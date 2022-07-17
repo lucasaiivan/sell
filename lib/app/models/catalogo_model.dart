@@ -134,14 +134,13 @@ class ProductCatalogue {
   int quantityStock = 0;
   int sales = 0;
   bool stock = false;
+  int alertStock = 5;
   double salePrice = 0.0;
   double purchasePrice = 0.0;
   String currencySign = "\$"; // signo de la moneda
   // var optional
   bool select = false;
   int quantity = 0;
-
-
 
   ProductCatalogue({
     // Valores del producto
@@ -156,7 +155,8 @@ class ProductCatalogue {
     this.subcategory = "",
     this.nameSubcategory = '',
     this.stock = false,
-    this.quantityStock=0,
+    this.quantityStock = 0,
+    this.alertStock = 5,
     required this.creation,
     required this.upgrade,
 
@@ -168,7 +168,6 @@ class ProductCatalogue {
     this.idMark = '',
     this.nameMark = '',
     this.select = false,
-
     // var app
     this.quantity = 1,
   });
@@ -225,7 +224,8 @@ class ProductCatalogue {
       quantityStock: data['quantityStock'] ?? 0,
       sales: data['sales'] ?? 0,
       select: false,
-      stock: data['stock']?? false,
+      stock: data['stock'] ?? false,
+      alertStock: data['alertStock'] ?? 5,
     );
   }
 
@@ -251,22 +251,22 @@ class ProductCatalogue {
         "stock": stock,
         "quantityStock": quantityStock,
         "sales": sales,
+        "alertStock": alertStock,
       };
 
   Product convertProductoDefault() {
     // convertimos en el modelo para producto global
-    Product productoDefault =
-        new Product(upgrade: Timestamp.now(), creation: Timestamp.now());
-    productoDefault.id = this.id;
-    productoDefault.image = this.image;
-    productoDefault.verified = this.verified;
-    productoDefault.favorite = this.favorite;
-    productoDefault.idMark = this.idMark;
-    productoDefault.nameMark = this.nameMark;
-    productoDefault.description = this.description;
-    productoDefault.code = this.code;
-    productoDefault.upgrade = this.upgrade;
-    productoDefault.creation = this.creation;
+    Product productoDefault = Product(upgrade: Timestamp.now(), creation: Timestamp.now());
+    productoDefault.id = id;
+    productoDefault.image = image;
+    productoDefault.verified = verified;
+    productoDefault.favorite = favorite;
+    productoDefault.idMark =  idMark;
+    productoDefault.nameMark =  nameMark;
+    productoDefault.description =  description;
+    productoDefault.code = code;
+    productoDefault.upgrade =  upgrade;
+    productoDefault.creation =  creation;
 
     return productoDefault;
   }

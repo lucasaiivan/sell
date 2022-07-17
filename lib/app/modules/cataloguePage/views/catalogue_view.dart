@@ -39,7 +39,9 @@ class CataloguePage extends StatelessWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       title: Text(controller.getTextTitleAppBar),
       actions: [
-        IconButton(icon: const Icon(Icons.search),onPressed: (() =>  controller.seach(context: context) )),
+        IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: (() => controller.seach(context: context))),
       ],
     );
   }
@@ -56,7 +58,10 @@ class CataloguePage extends StatelessWidget {
               controller: controller.tabController,
               labelColor: Get.theme.textTheme.bodyText1?.color,
               tabs: [
-                Tab(text: controller.getCataloProducts.isEmpty?"Productos":"${controller.getCataloProducts.length} productos"),
+                Tab(
+                    text: controller.getCataloProducts.isEmpty
+                        ? "Productos"
+                        : "${controller.getCataloProducts.length} productos"),
                 const Tab(text: "Cátegorias"),
               ]),
         ),
@@ -75,12 +80,23 @@ class CataloguePage extends StatelessWidget {
     final CataloguePageController controller = Get.find();
 
     if (controller.getCataloProducts.isEmpty) {
-      return const Center(child: Text('Sin productos'),);
+      return const Center(
+        child: Text('Sin productos'),
+      );
     }
 
     return Obx(() => ListView.builder(
           itemCount: controller.getCataloProducts.length,
           itemBuilder: (context, index) {
+            if (index == 0) {
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  controller.viewStockAlert,
+                  listTileProduct(item: controller.getCataloProducts[index]),
+                ],
+              );
+            }
             return listTileProduct(item: controller.getCataloProducts[index]);
           },
         ));
@@ -92,7 +108,9 @@ class CataloguePage extends StatelessWidget {
     final CataloguePageController cataloguePageController = Get.find();
 
     if (controller.getCatalogueCategoryList.isEmpty) {
-      return const Center(child: Text('Sin cátegorias'),);
+      return const Center(
+        child: Text('Sin cátegorias'),
+      );
     }
     return Obx(
       () => ListView.builder(
@@ -120,9 +138,11 @@ class CataloguePage extends StatelessWidget {
                             title: Text("Mostrar todos",
                                 style: Get.theme.textTheme.bodyText1),
                             onTap: () {
-                              cataloguePageController.setSelectedCategory =Category(name: 'Cátalogo');
+                              cataloguePageController.setSelectedCategory =
+                                  Category(name: 'Cátalogo');
                               // desplaza la vista a la lista de los productos
-                              cataloguePageController.tabController.animateTo(0);
+                              cataloguePageController.tabController
+                                  .animateTo(0);
                             },
                           )
                         : Container(),
@@ -160,7 +180,7 @@ class CataloguePage extends StatelessWidget {
     final CataloguePageController cataloguePageController = Get.find();
     // values
     Color tileColor = item.stock
-        ? (item.quantityStock == 0
+        ? (item.quantityStock <= item.alertStock
             ? Colors.red.withOpacity(0.5)
             : Colors.transparent)
         : Colors.transparent;
@@ -173,7 +193,8 @@ class CataloguePage extends StatelessWidget {
           ListTile(
             tileColor: tileColor,
             contentPadding: const EdgeInsets.all(12),
-            onTap: () => cataloguePageController.toProductEdit(productCatalogue: item),
+            onTap: () =>
+                cataloguePageController.toProductEdit(productCatalogue: item),
             title: Text(item.description, maxLines: 1),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -230,14 +251,13 @@ class CataloguePage extends StatelessWidget {
     final CataloguePageController controller = Get.find();
 
     //  values
-    String title =
-        categoria.name.substring(0, 1).toUpperCase() + categoria.name.substring(1);
+    String title = categoria.name.substring(0, 1).toUpperCase() +
+        categoria.name.substring(1);
 
     return ListTile(
       contentPadding: const EdgeInsets.all(12),
       dense: true,
-      title: Text(title,
-          style: Get.theme.textTheme.bodyText1),
+      title: Text(title, style: Get.theme.textTheme.bodyText1),
       onTap: () {
         controller.setSelectedCategory = categoria;
         controller.tabController.animateTo(0);
