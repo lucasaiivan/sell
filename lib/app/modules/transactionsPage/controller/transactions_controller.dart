@@ -70,7 +70,8 @@ class TransactionsController extends GetxController {
 
     // a la marca de tiempo actual le descontamos dias
     DateTime getTime = Timestamp.now().toDate();
-    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(DateTime(getTime.year, 1, 1, 0).millisecondsSinceEpoch);
+    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(
+        DateTime(getTime.year, 1, 1, 0).millisecondsSinceEpoch);
     // marca de tiempo actual
     Timestamp timeEnd = Timestamp.now();
 
@@ -120,13 +121,14 @@ class TransactionsController extends GetxController {
       });
     }
   }
+
   void readTransactionsYesterday() {
     // obtenemos los documentos creados en el día de ayer de la fecha actual
 
     // a la marca de tiempo actual le descontamos las horas del día
     Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(Timestamp.now()
         .toDate()
-        .subtract(Duration(hours: Timestamp.now().toDate().hour,days: 1))
+        .subtract(Duration(hours: Timestamp.now().toDate().hour, days: 1))
         .millisecondsSinceEpoch);
     // marca de tiempo actual
     Timestamp timeEnd = Timestamp.fromMillisecondsSinceEpoch(Timestamp.now()
@@ -154,11 +156,12 @@ class TransactionsController extends GetxController {
 
   void readTransactionsThisMonth() {
     //obtenemos los documentos creados este mes
- 
+
     // marca de tiempo actual
     DateTime getTime = Timestamp.now().toDate();
     //  a la marca de tiempo actual le descontamos dias del mes
-    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(DateTime(getTime.year, getTime.month,1, 0).millisecondsSinceEpoch);
+    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(
+        DateTime(getTime.year, getTime.month, 1, 0).millisecondsSinceEpoch);
     // marca de tiempo actual
     Timestamp timeEnd = Timestamp.now();
 
@@ -179,15 +182,18 @@ class TransactionsController extends GetxController {
       });
     }
   }
+
   void readTransactionsLastMonth() {
     //obtenemos los documentos creados el mes pasado
- 
+
     // marca de tiempo actual
     DateTime getTime = Timestamp.now().toDate();
     //  a la marca de tiempo actual le descontamos dias del mes
-    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(DateTime(getTime.year, getTime.month-1,1, 0).millisecondsSinceEpoch);
+    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(
+        DateTime(getTime.year, getTime.month - 1, 1, 0).millisecondsSinceEpoch);
     // marca de tiempo actual
-    Timestamp timeEnd = Timestamp.fromMillisecondsSinceEpoch(DateTime(getTime.year, getTime.month,1, 0).millisecondsSinceEpoch);
+    Timestamp timeEnd = Timestamp.fromMillisecondsSinceEpoch(
+        DateTime(getTime.year, getTime.month, 1, 0).millisecondsSinceEpoch);
 
     // obtenemos los obj(productos) del catalogo de la cuenta del negocio
     if (homeController.getProfileAccountSelected.id != '') {
@@ -258,5 +264,30 @@ class TransactionsController extends GetxController {
       default:
         return 'Sin esprecificar';
     }
+  }
+
+  void deleteSale({required TicketModel ticketModel}) {
+    Widget widget = AlertDialog(
+      title: const Text('¿Seguro que quieres eliminar esta venta?',textAlign: TextAlign.center),
+      content: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+        TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: const Text('Cancelar')),
+        TextButton(
+            onPressed: () {
+              Database.refFirestoretransactions(
+                      idAccount: homeController.getIdAccountSelected)
+                  .doc(ticketModel.id)
+                  .delete();
+              Get.back();
+            },
+            child: const Text('si, eliminar')),
+      ]),
+    );
+    Get.dialog(widget);
   }
 }

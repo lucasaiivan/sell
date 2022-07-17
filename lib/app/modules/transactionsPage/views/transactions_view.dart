@@ -113,7 +113,7 @@ class TransactionsView extends StatelessWidget {
     return ElasticIn(
               child: ListTile(
                 contentPadding: const EdgeInsets.all(12),
-                onLongPress: () {},
+                onLongPress:() =>  transactionsController.deleteSale(ticketModel:ticketModel ),
                 title: Text(Publications.getFechaPublicacion(ticketModel.creation.toDate(),Timestamp.now().toDate()),style: const TextStyle(fontWeight: FontWeight.w400)),
                 subtitle: Padding(
                   padding: const EdgeInsets.only(),

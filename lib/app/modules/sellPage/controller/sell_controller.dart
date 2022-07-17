@@ -350,7 +350,7 @@ class SalesController extends GetxController {
   }
 
   void addSaleFlash() {
-    // generate id
+    // generate new ID
     var id = Publications.generateUid();
     // var
     String valuePrice = textEditingControllerAddFlashPrice.text;
@@ -358,22 +358,14 @@ class SalesController extends GetxController {
 
     if (valuePrice != '') {
       if (double.parse(valuePrice) != 0) {
-        addProduct = ProductCatalogue(
-            id: id,
-            description: valueDescription,
-            salePrice: double.parse(textEditingControllerAddFlashPrice.text),
-            creation: Timestamp.now(),
-            upgrade: Timestamp.now());
+        addProduct = ProductCatalogue(id: id,description: valueDescription,salePrice: double.parse(textEditingControllerAddFlashPrice.text),creation: Timestamp.now(),upgrade: Timestamp.now());
         textEditingControllerAddFlashPrice.text = '';
         Get.back();
       } else {
-        showMessageAlertApp(
-            title: '😔No se puedo agregar 😔',
-            message: 'Debe ingresar un valor distinto a 0');
+        showMessageAlertApp(title: '😔No se puedo agregar 😔',message: 'Debe ingresar un valor distinto a 0');
       }
     } else {
-      showMessageAlertApp(
-          title: '😔', message: 'Debe ingresar un valor valido');
+      showMessageAlertApp(title: '😔', message: 'Debe ingresar un valor valido');
     }
   }
 
@@ -481,8 +473,7 @@ class SalesController extends GetxController {
   }
 
   void showDialogQuickSale() {
-    // Dialog
-    // dialogo para hacer una venta rapida
+    // Dialog view : Hacer una venta rapida
 
     //var
     FocusNode myFocusNode = FocusNode();

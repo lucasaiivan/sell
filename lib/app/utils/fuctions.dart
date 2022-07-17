@@ -8,7 +8,7 @@ import 'package:intl/intl.dart';
 class Publications {
 
 
-  static String generateUid() => DateFormat('ddMMyyyyHHmm').format(Timestamp.now().toDate()).toString();
+  static String generateUid() => DateFormat('ddMMyyyyHHmmss').format(Timestamp.now().toDate()).toString();
   // obtiene un double y devuelve un monto formateado
   static String getFormatoPrecio(
       {String moneda = "\$", required double monto}) {
