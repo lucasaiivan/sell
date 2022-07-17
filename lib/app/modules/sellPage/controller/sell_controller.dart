@@ -194,9 +194,17 @@ class SalesController extends GetxController {
         suggestion: const Center(child: Text('ej. alfajor')),
         failure: const Center(child: Text('No se encontro en tu cátalogo:(')),
         filter: (product) => [product.description, product.nameMark],
-        builder: (product) => Column(
+        builder: (product) {
+
+          // values
+          Color tileColor = product.stock? (product.quantityStock <= product.alertStock? Colors.red.withOpacity(0.5): Colors.transparent): Colors.transparent;
+          String alertStockText =product.stock ? (product.quantityStock == 0 ? 'Sin stock' : '${product.quantityStock} en stock') : '';
+
+          return Column(
           children: [
             ListTile(
+              contentPadding:const EdgeInsets.symmetric(horizontal: 20,vertical: 12),
+              tileColor: tileColor,
               title: Text(product.nameMark),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,7 +215,17 @@ class SalesController extends GetxController {
                     maxLines: 2,
                     overflow: TextOverflow.clip,
                   ),
-                  Text(product.code),
+                  Row(
+                    children: [
+                      Text(product.code),
+                      alertStockText==''?Container():Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 5),
+                            child: Icon(Icons.circle,
+                                size: 8, color: Get.theme.dividerColor),
+                          ),
+                      Text(alertStockText),
+                    ],
+                  ),
                 ],
               ),
               trailing:
@@ -217,9 +235,10 @@ class SalesController extends GetxController {
                 Get.back();
               },
             ),
-            const Divider(),
+            const Divider(height: 0),
           ],
-        ),
+        );
+        },
       ),
     );
   }
