@@ -243,14 +243,11 @@ class ControllerProductsEdit extends GetxController {
               if (getXFileImage.path != '') {
                 // image - Si el "path" es distinto '' quiere decir que ahi una nueva imagen para actualizar
                 // si es asi procede a guardar la imagen en la base de la app
-                Reference ref =
-                    Database.referenceStorageProductPublic(id: getProduct.id);
+                Reference ref = Database.referenceStorageProductPublic(id: getProduct.id);
                 UploadTask uploadTask = ref.putFile(File(getXFileImage.path));
                 await uploadTask;
                 // obtenemos la url de la imagen guardada
-                await ref
-                    .getDownloadURL()
-                    .then((value) => getProduct.image = value);
+                await ref.getDownloadURL().then((value) => getProduct.image = value);
               }
               if (getAccountAuth) {
                 // procede agregrar el producto en el cátalogo

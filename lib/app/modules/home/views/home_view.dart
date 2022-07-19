@@ -32,7 +32,9 @@ class HomeView extends GetView<HomeController> {
 
     return Obx(() {
       
-      return getView(index: controller.getIndexPage);
+      return WillPopScope(
+        onWillPop: ()=>controller.onBackPressed(context: context),
+      child: getView(index: controller.getIndexPage));
     });
   }
 }

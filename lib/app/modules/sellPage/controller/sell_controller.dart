@@ -114,6 +114,7 @@ class SalesController extends GetxController {
     textEditingControllerTicketMount.dispose();
   }
 
+
   // FIREBASE
 
   void registerTransaction() {
