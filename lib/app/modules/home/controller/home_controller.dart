@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:sell/app/models/catalogo_model.dart';
@@ -113,6 +116,39 @@ class HomeController extends GetxController {
   void onClose() {}
 
   // FUNCTIONS
+  Future<bool> onBackPressed({required BuildContext context})async{
+
+    // si el usuario no se encuentra en el index 0, va a devolver la vista al index 0
+    if(getIndexPage!=0){
+      setIndexPage = 0 ;
+      return false;
+    }
+    
+    final  shouldPop = await showDialog<bool>(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('¿Realmente quieres salir de la app?',textAlign: TextAlign.center),
+              actionsAlignment: MainAxisAlignment.spaceBetween,
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Get.back();
+                  },
+                  child: const Text('Cancelar'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    if (Platform.isIOS) {exit(0);} else {SystemNavigator.pop();}
+                  },
+                  child: const Text('Si'),
+                ),
+              ],
+            );
+          },
+        );
+        return shouldPop!;
+  } 
   bool isCatalogue({required String id}) {
     bool iscatalogue = false;
     List list = getCataloProducts;

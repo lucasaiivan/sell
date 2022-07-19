@@ -5,19 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sell/app/modules/account/controller/account_controller.dart';
-
 import '../../../utils/widgets_utils.dart';
 
 class AccountView extends GetView<AccountController> {
   // VAriables
 
   final FocusNode focusTextEdiNombre = FocusNode();
-  final FocusNode focusTextEditDescripcion = FocusNode();
-  final FocusNode focusTextEditCategoriaNombre = FocusNode();
-  final FocusNode focusTextEditDireccion = FocusNode();
-  final FocusNode focusTextEditCiudad = FocusNode();
-  final FocusNode focusTextEditProvincia = FocusNode();
-  final FocusNode focusTextEditPais = FocusNode();
 
   @override
   Widget build(BuildContext buildContext) {
@@ -180,11 +173,6 @@ class AccountView extends GetView<AccountController> {
     );
   }
 
-  _fieldFocusChange(
-      BuildContext context, FocusNode currentFocus, FocusNode nextFocus) {
-    currentFocus.unfocus();
-    FocusScope.of(context).requestFocus(nextFocus);
-  }
 
   Widget widgetFormEditText({required BuildContext context}) {
     return Obx(() => Column(
@@ -205,10 +193,6 @@ class AccountView extends GetView<AccountController> {
                   TextEditingController(text: controller.profileAccount.name),
               textInputAction: TextInputAction.next,
               focusNode: focusTextEdiNombre,
-              onSubmitted: (term) {
-                _fieldFocusChange(
-                    context, focusTextEdiNombre, focusTextEditDescripcion);
-              },
             ),
             const Divider(color: Colors.transparent, thickness: 1),
             TextField(
@@ -225,16 +209,11 @@ class AccountView extends GetView<AccountController> {
               controller: TextEditingController(
                   text: controller.profileAccount.description),
               textInputAction: TextInputAction.next,
-              focusNode: focusTextEditDescripcion,
-              onSubmitted: (term) {
-                _fieldFocusChange(context, focusTextEditDescripcion,
-                    focusTextEditDescripcion);
-              },
             ),
             const Divider(color: Colors.transparent, thickness: 1),
             InkWell(
               onTap: () =>
-                  _bottomPickerSelectCurreny(list: ["\$"], context: context),
+                  _bottomPickerSelectCurreny(list: ["ARG\$"], context: context),
               child: TextField(
                 minLines: 1,
                 maxLines: 5,
@@ -246,8 +225,7 @@ class AccountView extends GetView<AccountController> {
                   prefixIcon: Icon(Icons.monetization_on_outlined),
                 ),
                 controller: controller.getControllerTextEditSignoMoneda,
-                onChanged: (value) =>
-                    controller.profileAccount.currencySign = value,
+                onChanged: (value) => controller.profileAccount.currencySign = value,
               ),
             ),
             const SizedBox(
@@ -318,11 +296,6 @@ class AccountView extends GetView<AccountController> {
               controller: TextEditingController(
                   text: controller.profileAccount.address),
               textInputAction: TextInputAction.next,
-              focusNode: focusTextEditDireccion,
-              onSubmitted: (term) {
-                _fieldFocusChange(
-                    context, focusTextEditDireccion, focusTextEditCiudad);
-              },
             ),
             const Divider(color: Colors.transparent, thickness: 1),
             
