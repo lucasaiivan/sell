@@ -212,6 +212,10 @@ class ControllerProductsEdit extends GetxController {
     getProduct.stock = value;
     update(['updateAll']);
   }
+  set setFavorite(bool value) {
+    getProduct.favorite = value;
+    update(['updateAll']);
+  }
 
   updateAll() => update(['updateAll']);
   back() => Get.back();
@@ -254,7 +258,6 @@ class ControllerProductsEdit extends GetxController {
 
                 // Mods - save data product global
                 if (getNewProduct || getEditModerator) {
-                  getProduct.verified = true; // TODO : release to false
                   saveProductPublic();
                 }
 
@@ -322,14 +325,11 @@ class ControllerProductsEdit extends GetxController {
           newProduct.upgrade = Timestamp.fromDate(DateTime.now());
 
           // firestore - save product public
-          await Database.refFirestoreProductPublic()
-              .doc(newProduct.id)
-              .set(newProduct.toJson())
-              .whenComplete(() {
-            Get.back();
-            Get.back();
-            Get.snackbar(
-                'Estupendo 😃', 'Gracias por contribuir a la comunidad');
+          await Database.refFirestoreProductPublic().doc(newProduct.id).set(newProduct.toJson())
+            .whenComplete(() {
+              Get.back();
+              Get.back();
+              Get.snackbar('Estupendo 😃', 'Gracias por contribuir a la comunidad');
           });
         } else {
           Get.snackbar(
@@ -550,8 +550,8 @@ class ControllerProductsEdit extends GetxController {
 
   //TODO: eliminar para release
   // DEVELOPER OPTIONS
-  setFavorite({required bool value}) {
-    getProduct.favorite = value;
+  setOutstanding({required bool value}) {
+    getProduct.outstanding = value;
     update(['updateAll']);
   }
 
@@ -596,7 +596,7 @@ class ControllerProductsEdit extends GetxController {
           onPressed: () => Get.back(),
         ),
         TextButton(
-          child: const Text("Actualizar"),
+          child: const Text("Si, actualizar"),
           onPressed: () {
             Get.back();
             save();
@@ -750,13 +750,13 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
     if (controllerProductsEdit.getMarks.isEmpty) {
       widget = Container();
     } else {
-      controllerProductsEdit.getMarks.forEach((element) {
+      for (var element in controllerProductsEdit.getMarks) {
         if (element.id == 'other') {
           widget = listTile(
             marcaSelect: element,
           );
         }
-      });
+      }
     }
     return widget;
   }
@@ -848,14 +848,14 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
 
   // functions
   loadMarks() async {
-    if (controllerProductsEdit.getMarks.length == 0) {
+    if (controllerProductsEdit.getMarks.isEmpty) {
       await Database.readListMarksFuture().then((value) {
         setState(() {
-          value.docs.forEach((element) {
+          for (var element in value.docs) {
             Mark mark = Mark.fromMap(element.data());
             mark.id = element.id;
             list.add(mark);
-          });
+          }
           controllerProductsEdit.setMarks = list;
         });
       });

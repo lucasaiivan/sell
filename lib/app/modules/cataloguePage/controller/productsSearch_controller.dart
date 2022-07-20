@@ -161,11 +161,12 @@ class ControllerProductsSearch extends GetxController {
   }
 
   void queryProductSuggestion() {
-    if (getListProductsSuggestions.length == 0) {
+    if (getListProductsSuggestions.isEmpty) {
       Database.readProductsFuture(limit: 5).then((value) {
         List<Product> newList = [];
-        value.docs
-            .forEach((element) => newList.add(Product.fromMap(element.data())));
+        for (var element in value.docs) {
+          newList.add(Product.fromMap(element.data()));
+        }
         setListProductsSuggestions = newList;
         update(['updateAll']);
       });

@@ -39,9 +39,21 @@ class CataloguePage extends StatelessWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       title: Text(controller.getTextTitleAppBar),
       actions: [
+      
         IconButton(
             icon: const Icon(Icons.search),
             onPressed: (() => controller.seach(context: context))),
+        PopupMenuButton(
+            icon: const Icon(Icons.filter_list),
+            onSelected: (selectedValue) {
+              controller.catalogueFilter(key: selectedValue);
+            },
+            itemBuilder: (BuildContext ctx) => [
+                  const PopupMenuItem(value: '0', child: Text('Mostrar con stock')),
+                  const PopupMenuItem(value: '1', child: Text('Mostrar favoritos')),
+                  const PopupMenuItem(value: '2', child: Text('Mostrar con stock bajos')),
+                  const PopupMenuItem(value: '3', child: Text('Mostrar todos')),
+                ]),
       ],
     );
   }
@@ -180,11 +192,7 @@ class CataloguePage extends StatelessWidget {
     //  controller
     final CataloguePageController cataloguePageController = Get.find();
     // values
-    Color tileColor = item.stock
-        ? (item.quantityStock <= item.alertStock
-            ? Colors.red.withOpacity(0.5)
-            : Colors.transparent)
-        : Colors.transparent;
+    Color tileColor = item.stock? (item.quantityStock <= item.alertStock? Colors.red.withOpacity(0.3): item.favorite?Colors.amber.withOpacity(0.1):Colors.transparent): item.favorite?Colors.amber.withOpacity(0.1):Colors.transparent;
     String alertStockText =
         item.stock ? (item.quantityStock == 0 ? 'Sin stock' : '') : '';
 

@@ -45,12 +45,9 @@ class TransactionsView extends StatelessWidget {
             itemBuilder: (BuildContext ctx) => [
                   const PopupMenuItem(value: 'hoy', child: Text('Hoy')),
                   const PopupMenuItem(value: 'ayer', child: Text('Ayer')),
-                  const PopupMenuItem(
-                      value: 'este mes', child: Text('Este mes')),
-                  const PopupMenuItem(
-                      value: 'el mes pasado', child: Text('El mes pasado')),
-                  const PopupMenuItem(
-                      value: 'este año', child: Text('Este año')),
+                  const PopupMenuItem(value: 'este mes', child: Text('Este mes')),
+                  const PopupMenuItem(value: 'el mes pasado', child: Text('El mes pasado')),
+                  const PopupMenuItem(value: 'este año', child: Text('Este año')),
                 ])
       ],
     );

@@ -21,7 +21,7 @@ class CataloguePageController extends GetxController
   Category get getSelectedCategory => _selectedCategory;
   set setSelectedCategory(Category value) {
     _selectedCategory = value;
-    catalogueFilter();
+    catalogueCategoryFilter();
     update();
   }
 
@@ -50,7 +50,7 @@ class CataloguePageController extends GetxController
   }
 
   // FUCTIONS
-  void catalogueFilter() {
+  void catalogueCategoryFilter() {
     List<ProductCatalogue> list = [];
 
     //filter
@@ -63,6 +63,37 @@ class CataloguePageController extends GetxController
     } else {
       list = homeController.getCataloProducts;
     }
+    // set
+    setCatalogueProducts = list;
+  }
+  void catalogueFilter({required String key}) {
+    List<ProductCatalogue> list = [];
+
+    //filter
+    if( key==''){
+        list = homeController.getCataloProducts;
+      }else{
+        switch(key){
+          case '0': //  Mostrar productos con stock
+            List<ProductCatalogue> listSFilter = [];
+            for(ProductCatalogue item in homeController.getCataloProducts){if(item.stock)listSFilter.add(item);}
+            for(ProductCatalogue item in listSFilter){list.add(item);}
+            break;
+          case '1': //  Mostrar productos favoritos
+            List<ProductCatalogue> listSFilter = [];
+            for(ProductCatalogue item in homeController.getCataloProducts){if(item.favorite)listSFilter.add(item);}
+            for(ProductCatalogue item in listSFilter){list.add(item);}
+            break;
+          case '2': // Mostrar productos con stock bajos
+            List<ProductCatalogue> listSFilter = [];
+            for(ProductCatalogue item in homeController.getCataloProducts){if(item.stock){if(item.quantityStock<=item.alertStock){listSFilter.add(item);}}}
+            for(ProductCatalogue item in listSFilter){list.add(item);}
+            break;
+          case '3': // Mostrar todos
+            list = homeController.getCataloProducts;
+            break; 
+        }
+      }
     // set
     setCatalogueProducts = list;
   }

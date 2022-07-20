@@ -41,8 +41,10 @@ class HomeController extends GetxController {
     _catalogueBusiness.value = products;
     //...filter
   }
+  // lista de porductos seleccionados por el usuario para la venta
+  List listProductsSelected = [];
 
-  // list products selecteds
+  // list products más vendidos
   final RxList<ProductCatalogue> _productsOutstandingList =
       <ProductCatalogue>[].obs;
   get getProductsOutstandingList => _productsOutstandingList;
@@ -228,8 +230,30 @@ class HomeController extends GetxController {
       for (var element in value.docs) {
         list.add(ProductCatalogue.fromMap(element.data()));
       }
+
+      // filtramos los productos que esten marcados como favoritos
+      List <ProductCatalogue> favoriteList = [];
+      for (ProductCatalogue element in list) {
+        if(element.favorite){
+          favoriteList.add(element);
+        }
+      }
+      List <ProductCatalogue> filterList = [];
+      for (ProductCatalogue element in list) {
+        if(element.favorite== false){
+          filterList.add(element);
+        }
+      }
+      // contruimos una nueva lista con los producto ordenados
+      List <ProductCatalogue> finalList = [];
+      for (ProductCatalogue element in favoriteList) {
+        finalList.add(element);
+      }
+      for (ProductCatalogue element in filterList) {
+        finalList.add(element);
+      }
       //  set values
-      setProductsOutstandingList = list;
+      setProductsOutstandingList = finalList;
     });
   }
 
