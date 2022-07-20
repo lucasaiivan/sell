@@ -18,8 +18,7 @@ class SalesController extends GetxController {
   final HomeController homeController = Get.find();
 
   // productos seleccionados recientemente
-  List<ProductCatalogue> get getRecentlySelectedProductsList =>
-      homeController.getProductsOutstandingList;
+  List<ProductCatalogue> get getRecentlySelectedProductsList => homeController.getProductsOutstandingList;
   registerSelections({required ProductCatalogue productCatalogue}) {
     bool repeat = false;
     // seach
@@ -140,42 +139,20 @@ class SalesController extends GetxController {
     getTicket.priceTotal = getCountPriceTotal();
     getTicket.valueReceived = getValueReceivedTicket;
     getTicket.creation = Timestamp.now();
-    // set firestore
-    Database.refFirestoretransactions(
-            idAccount: homeController.getIdAccountSelected)
-        .doc(getTicket.id)
-        .set(getTicket.toJson());
+    // set firestore : guarda la transacción
+    Database.refFirestoretransactions(idAccount: homeController.getIdAccountSelected).doc(getTicket.id).set(getTicket.toJson());
     for (var element in listIdsProducts) {
-      // registrar venta
-      Database.dbProductStockSalesIncrement(
-        idAccount: homeController.getIdAccountSelected,
-        idProduct: element['id'],
-        quantity: element['quantity'] ?? 1,
-      );
-      // descontar de stock
+      // set firestore : hace un incremento en el valor sales'ventas'  del producto
+      Database.dbProductStockSalesIncrement(idAccount: homeController.getIdAccountSelected,idProduct: element['id'],quantity: element['quantity'] ?? 1);
+      // set firestore : hace un descremento en el valor 'stock' del producto
       if (element['stock'] ?? false) {
-        if (checkDiminish(
-            key: element['id'], quantity: element['quantity'] ?? 1)) {
-          Database.dbProductStockDecrement(
-            idAccount: homeController.getIdAccountSelected,
-            idProduct: element['id'],
-            quantity: element['quantity'] ?? 1,
-          );
-        }
+        // set firestore : hace un descremento en el valor 'stock'
+        Database.dbProductStockDecrement(idAccount: homeController.getIdAccountSelected,idProduct: element['id'],quantity: element['quantity'] ?? 1,);
       }
     }
   }
 
   // FUCTIONS
-  bool checkDiminish({required String key, required int quantity}) {
-    // validamos que se pueda seguir disminullendo el número de stock
-    for (ProductCatalogue element in homeController.getCataloProducts) {
-      if (element.id == key) {
-        return element.quantityStock >= quantity;
-      }
-    }
-    return false;
-  }
 
   void seach({required BuildContext context}) {
     // Busca entre los productos de mi catálogo

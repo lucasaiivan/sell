@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -32,7 +34,7 @@ class WidgetButtonListTile extends StatelessWidget {
           const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15.0),
       leading: const Icon(Icons.add),
       dense: true,
-      title: const Text("Crear catálogo", style: TextStyle(fontSize: 16.0)),
+      title: const Text("Crear mi perfil", style: TextStyle(fontSize: 16.0)),
       onTap: () {
         Get.back();
         Get.toNamed(Routes.ACCOUNT);
@@ -417,6 +419,23 @@ Widget drawerApp() {
               ),
             ),
             ListTile(
+              leading: const Icon(Icons.launch_rounded),
+              title: const Text('Producto App'),
+              onTap: () async {
+                
+                // values
+                Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.logicabooleana.commer.producto');
+                // primero probamos si podemos abrir la app de lo contrario redireccionara para la tienda de aplicaciones
+                try{
+                  await LaunchApp.openApp(androidPackageName: 'com.logicabooleana.commer.producto');
+                }catch(_){
+                  if (await canLaunchUrl(uri)) { await launchUrl(uri);} else {throw 'Could not launch $uri';}
+                }
+              },
+            ),
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(vertical: 12,horizontal: 12),
+              tileColor: Colors.grey.withOpacity(0.1),
               leading: const Icon(Icons.thumbs_up_down_outlined),
               title: const Text('Dejanos tu opinión 😃'),
               subtitle: const Text('Nos intereza saber lo que piensas'),
@@ -450,7 +469,9 @@ Widget drawerApp() {
   );
 }
 
-Widget widgetTextButton() {
+Widget viewDefault() {
+  // vista por defecto que se le muestra al usuario para que seleccione un cuenta
+
   // others controllers
   final HomeController homeController = Get.find();
 
@@ -505,11 +526,15 @@ void showDialogCerrarSesion() {
           child: const Text('si'),
           onPressed: () async {
             CustomFullScreenDialog.showDialog();
-
-            // Guardamos una referencia  de la cuenta seleccionada
+            // default values
+            homeController.setProfileAccountSelected=ProfileAccountModel(creation: Timestamp.now());
+            homeController.setCatalogueCategoryList = [];
+            homeController.setCatalogueCategoryList = [];
+            homeController.setCatalogueProducts = [];
+            homeController.setProductsOutstandingList = [];
+            // save key/values Storage
             GetStorage().write('idAccount', '');
-            homeController.setProfileAccountSelected =
-                ProfileAccountModel(creation: Timestamp.now());
+            homeController.setProfileAccountSelected = ProfileAccountModel(creation: Timestamp.now());
             // instancias de FirebaseAuth para proceder a cerrar sesión
             final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
             Future.delayed(const Duration(seconds: 2)).then((_) {

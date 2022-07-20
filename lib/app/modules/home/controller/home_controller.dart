@@ -371,8 +371,7 @@ class HomeController extends GetxController {
             shrinkWrap: true,
             itemCount: getManagedAccountsList.length,
             itemBuilder: (BuildContext context, int index) {
-              return WidgetButtonListTile().buttonListTileItemCuenta(
-                  perfilNegocio: getManagedAccountsList[index]);
+              return WidgetButtonListTile().buttonListTileItemCuenta(perfilNegocio: getManagedAccountsList[index]);
             },
           );
 

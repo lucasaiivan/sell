@@ -118,7 +118,7 @@ class AccountView extends GetView<AccountController> {
       child: Center(
           child: ElasticIn(
         child: const Text(
-          'Hola 😃, primero dinos el nombre de tu negocio para poder crear tu catálogo \n\n 👇',
+          'Hola 😃, dinos un poco de tu negocio\n\n 👇',
           style: TextStyle(fontSize: 18),
           textAlign: TextAlign.center,
         ),

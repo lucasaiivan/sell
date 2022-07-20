@@ -496,17 +496,17 @@ class SalesView extends StatelessWidget {
             )),
         const SizedBox(width: 8),
         FloatingActionButton.extended(
-            onPressed: controller.getListProductsSelested.length == 0
+            onPressed: controller.getListProductsSelested.isEmpty
                 ? null
                 : () {
                     controller.setTicketView = true;
                     controller.setValueReceivedTicket = 0.0;
                   },
-            backgroundColor: controller.getListProductsSelested.length == 0
+            backgroundColor: controller.getListProductsSelested.isEmpty
                 ? Colors.grey
                 : null,
             label: Text(
-                'Cobrar ${controller.getListProductsSelested.length == 0 ? '' : Publications.getFormatoPrecio(monto: controller.getCountPriceTotal())}')),
+                'Cobrar ${controller.getListProductsSelested.isEmpty ? '' : Publications.getFormatoPrecio(monto: controller.getCountPriceTotal())}')),
       ],
     );
   }
