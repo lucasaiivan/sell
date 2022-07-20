@@ -418,6 +418,37 @@ Widget drawerApp() {
                 ],
               ),
             ),
+            ListTile(
+              leading: const Icon(Icons.launch_rounded),
+              title: const Text('Producto App'),
+              onTap: () async {
+                
+                // values
+                Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.logicabooleana.commer.producto');
+                // primero probamos si podemos abrir la app de lo contrario redireccionara para la tienda de aplicaciones
+                try{
+                  await LaunchApp.openApp(androidPackageName: 'com.logicabooleana.commer.producto');
+                }catch(_){
+                  if (await canLaunchUrl(uri)) { await launchUrl(uri);} else {throw 'Could not launch $uri';}
+                }
+              },
+            ),
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(vertical: 12,horizontal: 12),
+              tileColor: Colors.grey.withOpacity(0.1),
+              leading: const Icon(Icons.thumbs_up_down_outlined),
+              title: const Text('Dejanos tu opinión 😃'),
+              subtitle: const Text('Nos intereza saber lo que piensas'),
+              onTap: () async {
+                Uri uri = Uri.parse(
+                    'https://play.google.com/store/apps/details?id=com.logicabooleana.commer.producto');
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri);
+                } else {
+                  throw 'Could not launch $uri';
+                }
+              },
+            ),
             const ListTile(
               leading: Icon(Icons.color_lens_outlined),
               title: Text('Cambiar tema'),
