@@ -54,12 +54,8 @@ class ProductEdit extends StatelessWidget {
                         .iconTheme
                         .copyWith(color: colorAccent),
                     title: controller.getSaveIndicator
-                        ? Text(controller.getTextAppBar,
-                            style:
-                                TextStyle(fontSize: 18.0, color: colorAccent))
-                        : Text('Espere por favor...',
-                            style:
-                                TextStyle(fontSize: 18.0, color: colorAccent)),
+                        ? Text(controller.getTextAppBar,style: TextStyle(fontSize: 18.0, color: colorAccent))
+                        : Text('Espere por favor...',style: TextStyle(fontSize: 18.0, color: colorAccent)),
                   ),
                   body: Center(
                       child: Column(
@@ -171,7 +167,7 @@ class ProductEdit extends StatelessWidget {
             onChanged: (value) => controller.getProduct.description = value,
             decoration: InputDecoration(
                 disabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey.withOpacity(0.3)),
+                  borderSide: BorderSide(color: controller.getProduct.description == ''?Colors.grey:Get.theme.scaffoldBackgroundColor),
                 ),
                 border: const OutlineInputBorder(),
                 labelText: "Descripción"),
@@ -264,11 +260,26 @@ class ProductEdit extends StatelessWidget {
                     CheckboxListTile(
                       enabled: controller.getSaveIndicator ? false : true,
                       checkColor: Colors.white,
+                      activeColor: Colors.amber,
+                      value: controller.getProduct.favorite,
+                      title: Text(controller.getProduct.favorite
+                          ? 'En mis favoritos'
+                          : 'Agregar a favoritos'),
+                      onChanged: (value) {
+                        if (!controller.getSaveIndicator) {
+                          controller.setFavorite = value ?? false;
+                        }
+                      },
+                    ),
+                    space,
+                    CheckboxListTile(
+                      enabled: controller.getSaveIndicator ? false : true,
+                      checkColor: Colors.white,
                       activeColor: Colors.blue,
                       value: controller.getProduct.stock,
                       title: Text(controller.getProduct.stock
-                          ? 'Quitar de stock'
-                          : 'Habilitar control de stock'),
+                          ? 'Control de stock habilitado'
+                          : 'Activar control de Stock'),
                       onChanged: (value) {
                         if (!controller.getSaveIndicator) {
                           controller.setStock = value ?? false;
@@ -396,13 +407,13 @@ class ProductEdit extends StatelessWidget {
                           : false,
                       checkColor: Colors.white,
                       activeColor: Colors.blue,
-                      value: controller.getProduct.favorite,
-                      title: Text(controller.getProduct.favorite
+                      value: controller.getProduct.outstanding,
+                      title: Text(controller.getProduct.outstanding
                           ? 'Detacado'
                           : 'Sin destacar'),
                       onChanged: (value) {
                         if (!controller.getSaveIndicator) {
-                          controller.setFavorite(value: value ?? false);
+                          controller.setOutstanding(value: value ?? false);
                         }
                       },
                     ),
@@ -437,10 +448,9 @@ class ProductEdit extends StatelessWidget {
                                 const Icon(Icons.security, color: Colors.white),
                             onPressed: () {
                               if (controller.getEditModerator) {
-                                controller.showDialogSaveOPTDeveloper();
+                                controller.save();
                               }
-                              controller.setEditModerator =
-                                  !controller.getEditModerator;
+                              controller.setEditModerator = !controller.getEditModerator;
                             },
                             colorAccent: Colors.white,
                             colorButton: controller.getEditModerator

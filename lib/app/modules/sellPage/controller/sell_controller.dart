@@ -50,25 +50,24 @@ class SalesController extends GetxController {
   final TextEditingController textEditingControllerTicketMount =
       TextEditingController();
 
-  // list product selected
-  final RxList _listProductsSelected = [].obs;
-  List get getListProductsSelested => _listProductsSelected;
-  set setListProductsSelected(List value) =>
-      _listProductsSelected.value = value;
+  // list : lista de productos seleccionados por el usaurio para la venta
+  List get getListProductsSelested => homeController.listProductsSelected;
+  set setListProductsSelected(List value) => homeController.listProductsSelected = value;
   set addProduct(ProductCatalogue product) {
     product.quantity = 1;
     product.select = false;
-    _listProductsSelected.add(product);
+    homeController.listProductsSelected.add(product);
   }
 
   set removeProduct(String id) {
     List newList = [];
-    for (ProductCatalogue product in _listProductsSelected) {
+    for (ProductCatalogue product in homeController.listProductsSelected) {
       if (product.id != id) {
         newList.add(product);
       }
     }
     setListProductsSelected = newList;
+    update();
   }
 
   int get getListProductsSelestedLength {
@@ -175,7 +174,7 @@ class SalesController extends GetxController {
         builder: (product) {
 
           // values
-          Color tileColor = product.stock? (product.quantityStock <= product.alertStock? Colors.red.withOpacity(0.5): Colors.transparent): Colors.transparent;
+          Color tileColor = product.stock? (product.quantityStock <= product.alertStock? Colors.red.withOpacity(0.3): product.favorite?Colors.amber.withOpacity(0.1):Colors.transparent): product.favorite?Colors.amber.withOpacity(0.1):Colors.transparent;
           String alertStockText =product.stock ? (product.quantityStock == 0 ? 'Sin stock' : '${product.quantityStock} en stock') : '';
 
           return Column(
@@ -209,7 +208,7 @@ class SalesController extends GetxController {
               trailing:
                   Text(Publications.getFormatoPrecio(monto: product.salePrice)),
               onTap: () {
-                verifyExistenceInSelected(item: product);
+                selectedProduct(item: product);
                 Get.back();
               },
             ),
@@ -221,7 +220,10 @@ class SalesController extends GetxController {
     );
   }
 
-  void verifyExistenceInSelected({required ProductCatalogue item}) {
+  void selectedProduct({required ProductCatalogue item}) {
+    // agregamos un nuevo producto a la venta
+
+  // verificamos si se trata de un código existente
     if (item.code == '') {
       addProduct = item;
     } else {

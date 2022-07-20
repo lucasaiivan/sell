@@ -252,25 +252,18 @@ class SalesView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ElasticIn(
-                    child: circleAvatarBSeachDefault(
-                        context: context, seach: true)),
+                    child: circleAvatarBSeachDefault(context: context, seach: true)),
                 (index < salesController.getRecentlySelectedProductsList.length)
-                    ? circleAvatarProduct(
-                        productCatalogue: salesController
-                            .getRecentlySelectedProductsList[index])
-                    : ElasticIn(
-                        child: circleAvatarBSeachDefault(context: context)),
+                    ? circleAvatarProduct(productCatalogue: salesController.getRecentlySelectedProductsList[index])
+                    : ElasticIn(child: circleAvatarBSeachDefault(context: context)),
               ],
             );
           }
           // mostramos un número de elementos vacíos de los cuales el primero tendrá un icono 'add'
           if (index < salesController.getRecentlySelectedProductsList.length) {
-            return circleAvatarProduct(
-                productCatalogue:
-                    salesController.getRecentlySelectedProductsList[index]);
+            return circleAvatarProduct(productCatalogue:salesController.getRecentlySelectedProductsList[index]);
           } else {
-            return ElasticIn(
-                child: circleAvatarBSeachDefault(context: context));
+            return ElasticIn(child: circleAvatarBSeachDefault(context: context));
           }
         },
       ),
@@ -358,6 +351,7 @@ class SalesView extends StatelessWidget {
 
     // alert control stock
     bool stateAlertStock =productCatalogue.stock?productCatalogue.quantityStock<5:false;
+    Color borderCicleColor = stateAlertStock?Colors.red: productCatalogue.favorite?Colors.amber: Get.theme.dividerColor;
 
     return ElasticIn(
       child: Container(
@@ -368,8 +362,7 @@ class SalesView extends StatelessWidget {
           children: [
             GestureDetector(
               onTap: () {
-                salesController.verifyExistenceInSelected(
-                    item: productCatalogue);
+                salesController.selectedProduct(item: productCatalogue);
               },
               child: Column(
                 children: <Widget>[
@@ -380,12 +373,12 @@ class SalesView extends StatelessWidget {
                     placeholder: (context, url) => CircleAvatar(radius: radius,backgroundColor: Get.theme.dividerColor,child: Text(Publications.getFormatoPrecio(monto: productCatalogue.salePrice),style: TextStyle(color: Get.textTheme.bodyText1?.color))),
                     imageBuilder: (context, image) => CircleAvatar(
                         radius: radius,
-                        backgroundColor: stateAlertStock?Colors.red:Get.theme.dividerColor,
+                        backgroundColor: borderCicleColor,
                       child: CircleAvatar(
                         radius: radius-1.5,
-                        backgroundColor: stateAlertStock?Colors.red:Get.theme.scaffoldBackgroundColor,
-                        child: CircleAvatar(radius: radius-3,backgroundColor: Get.theme.scaffoldBackgroundColor,
-                          child: Padding(padding: EdgeInsets.all(stateAlertStock?3:0),child: CircleAvatar(radius: radius,backgroundImage: image))),
+                        backgroundColor: Get.theme.scaffoldBackgroundColor,
+                        child: CircleAvatar(radius: radius-5,backgroundColor: Get.theme.scaffoldBackgroundColor,
+                          child: CircleAvatar(radius: radius,backgroundImage: image)),
                       ),
                     ),
                     errorWidget: (context, url, error) => CircleAvatar(

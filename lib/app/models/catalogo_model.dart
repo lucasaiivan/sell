@@ -4,7 +4,7 @@ class Product {
   String id = "";
   String idAccount = ''; // ID del negocios que actualizo el producto
   bool verified = false; // estado de verificación  al un moderador
-  bool favorite = false;
+  bool outstanding = false;
   String idMark = ""; // ID de la marca por defecto esta vacia
   String nameMark = '';
   String image = ""; // URL imagen
@@ -19,7 +19,7 @@ class Product {
     this.id = "",
     this.idAccount = '',
     this.verified = false,
-    this.favorite = false,
+    this.outstanding = false,
     this.idMark = "",
     this.nameMark = '',
     this.image = "",
@@ -33,7 +33,7 @@ class Product {
         "id": id,
         'idAccount': idAccount,
         "verified": verified,
-        "favorite": favorite,
+        "outstanding": outstanding,
         "idMark": idMark,
         'nameMark': nameMark,
         "image": image,
@@ -52,7 +52,7 @@ class Product {
       verified: data.containsKey('verified')
           ? data['verified']
           : data['verificado'] ?? false,
-      favorite: data['favorite'] ?? false,
+      outstanding: data['favorite'] ?? false,
       idMark:
           data.containsKey('idMark') ? data['idMark'] : data['id_marca'] ?? '',
       nameMark: data['nameMark'] ?? '',
@@ -81,7 +81,7 @@ class Product {
     verified = data.containsKey('verified')
         ? data['verified']
         : data['verificado'] ?? false;
-    favorite = data['favorite'] ?? false;
+    outstanding = data['favorite'] ?? false;
     idMark =
         data.containsKey('idMark') ? data['idMark'] : data['id_marca'] ?? '';
     nameMark = data['nameMark'] ?? '';
@@ -98,12 +98,12 @@ class Product {
         : data['timestamp_creation'] ?? Timestamp.now();
   }
   ProductCatalogue convertProductCatalogue() {
-    ProductCatalogue productoNegocio = new ProductCatalogue(
+    ProductCatalogue productoNegocio =   ProductCatalogue(
         upgrade: Timestamp.now(), creation: Timestamp.now());
     productoNegocio.id = this.id;
     productoNegocio.image = this.image;
     productoNegocio.verified = this.verified;
-    productoNegocio.favorite = this.favorite;
+    productoNegocio.favorite = this.outstanding;
     productoNegocio.idMark = this.idMark;
     productoNegocio.nameMark = this.nameMark;
     productoNegocio.description = this.description;
@@ -116,6 +116,7 @@ class Product {
 class ProductCatalogue {
   // valores del producto
   String id = "";
+  bool outstanding = false; // producto destacado
   bool favorite = false;
   String idMark = ""; // ID de la marca por defecto esta vacia
   String nameMark = ''; // nombre de la marca
@@ -147,6 +148,7 @@ class ProductCatalogue {
     this.id = "",
     this.verified = false,
     this.favorite = false,
+    this.outstanding = false,
     this.image = "",
     this.description = "",
     this.code = "",
@@ -179,6 +181,7 @@ class ProductCatalogue {
       verified: data.containsKey('verified')
           ? data['verified']
           : data['verificado'] ?? false,
+      outstanding:  data['outstanding'] ?? false,
       favorite: data.containsKey('favorite')
           ? data['favorite']
           : data['favorito'] ?? false,
@@ -231,6 +234,7 @@ class ProductCatalogue {
 
   Map<String, dynamic> toJson() => {
         "id": id,
+        'outstanding':outstanding,
         "verified": verified,
         "favorite": favorite,
         "idMark": idMark,
@@ -260,7 +264,7 @@ class ProductCatalogue {
     productoDefault.id = id;
     productoDefault.image = image;
     productoDefault.verified = verified;
-    productoDefault.favorite = favorite;
+    productoDefault.outstanding = outstanding;
     productoDefault.idMark =  idMark;
     productoDefault.nameMark =  nameMark;
     productoDefault.description =  description;
