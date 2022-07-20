@@ -67,7 +67,7 @@ class CataloguePage extends StatelessWidget {
         ),
         Expanded(
           child: TabBarView(controller: controller.tabController, children: [
-            widgetListVertical(),
+            viewCatalogueProductsVerticalList(),
             viewCategory(),
           ]),
         )
@@ -75,10 +75,11 @@ class CataloguePage extends StatelessWidget {
     );
   }
 
-  Widget widgetListVertical() {
+  Widget viewCatalogueProductsVerticalList() {
     // controllers
     final CataloguePageController controller = Get.find();
 
+    // si el cátalogo esta vacio
     if (controller.getCataloProducts.isEmpty) {
       return const Center(
         child: Text('Sin productos'),

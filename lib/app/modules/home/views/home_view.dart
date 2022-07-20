@@ -28,13 +28,13 @@ class HomeView extends GetView<HomeController> {
   @override
   Widget build(BuildContext context) {
 
-    if (controller.getProfileAccountSelected.id == ''){return widgetTextButton();}
+    if (controller.getProfileAccountSelected.id == ''){return viewDefault();}
 
     return Obx(() {
       
       return WillPopScope(
         onWillPop: ()=>controller.onBackPressed(context: context),
-      child: getView(index: controller.getIndexPage));
+        child: getView(index: controller.getIndexPage));
     });
   }
 }

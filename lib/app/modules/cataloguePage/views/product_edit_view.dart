@@ -179,7 +179,6 @@ class ProductEdit extends StatelessWidget {
             controller: controller.controllerTextEditDescripcion,
           ),
           //TODO: eliminar para desarrrollo
-          // widget debug
           TextButton(
               onPressed: () async {
                 String clave = controller.controllerTextEditDescripcion.text;
@@ -205,14 +204,12 @@ class ProductEdit extends StatelessWidget {
               },
               child: const Text('Buscar en código Google')),
           space,
+          // textfield 'seleccionar marca'
           textfielButton(
+            borderSideColor: controller.getMarkSelected.id == ''?Colors.grey:Get.theme.scaffoldBackgroundColor,
               textValue: controller.getMarkSelected.name,
-              labelText: controller.getMarkSelected.id == ''
-                  ? 'seleccionar una marca'
-                  : 'Marca',
-              onTap: controller.getNewProduct || controller.getEditModerator
-                  ? controller.showModalSelectMarca
-                  : () {}),
+              labelText: controller.getMarkSelected.id == ''? 'seleccionar una marca': 'Marca',
+              onTap: controller.getNewProduct || controller.getEditModerator? controller.showModalSelectMarca: () {}),
           // buttons categoty
           !controller.getAccountAuth ? Container() : space,
           !controller.getAccountAuth
@@ -479,6 +476,7 @@ class ProductEdit extends StatelessWidget {
   Widget textfielButton(
       {required String labelText,
       String textValue = '',
+      Color borderSideColor=Colors.grey,
       required Function() onTap}) {
     return InkWell(
       borderRadius: BorderRadius.circular(5),
@@ -488,7 +486,7 @@ class ProductEdit extends StatelessWidget {
         controller: TextEditingController(text: textValue),
         decoration: InputDecoration(
             disabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey.withOpacity(0.3)),
+              borderSide: BorderSide(color: borderSideColor.withOpacity(0.3)),
             ),
             border: const OutlineInputBorder(),
             labelText: labelText),
