@@ -257,9 +257,7 @@ class ControllerProductsEdit extends GetxController {
                 // procede agregrar el producto en el cátalogo
 
                 // Mods - save data product global
-                if (getNewProduct || getEditModerator) {
-                  saveProductPublic();
-                }
+                if (getNewProduct || getEditModerator) {saveProductPublic();}
 
                 // values : registra el precio en una colección publica para todos los usuarios
                 Price precio = Price(
@@ -609,9 +607,10 @@ class ControllerProductsEdit extends GetxController {
 
 // select mark
 class WidgetSelectMark extends StatefulWidget {
-  WidgetSelectMark({Key? key}) : super(key: key);
+  const WidgetSelectMark({Key? key}) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _WidgetSelectMarkState createState() => _WidgetSelectMarkState();
 }
 
@@ -638,24 +637,33 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
   }
 
   Widget widgetView() {
-    return Column(
-      children: [
-        widgetAdd(),
-        Expanded(
-          child: list.length == 0
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Marcas'),
+        actions: [
+          // TODO : delete icon 'add new mark for release'
+          //IconButton(onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},icon: const Icon(Icons.add)),
+          IconButton(icon: const Icon(Icons.search),onPressed: () {Get.back();showSeachMarks();})
+        ],
+      ),
+      body: Expanded(
+          child: list.isEmpty
               ? widgetAnimLoad()
               : ListView.builder(
                   padding: const EdgeInsets.only(bottom: 12),
                   shrinkWrap: true,
                   itemCount: list.length,
                   itemBuilder: (BuildContext context, int index) {
+
+                    //  values
                     Mark marcaSelect = list[index];
+
                     if (index == 0) {
                       return Column(
                         children: [
                           getWidgetOptionOther(),
-                          const Divider(
-                              endIndent: 12.0, indent: 12.0, height: 0),
+                          const Divider(endIndent: 12.0, indent: 12.0, height: 0),
                           controllerProductsEdit.getUltimateSelectionMark.id ==
                                       '' ||
                                   controllerProductsEdit
@@ -682,7 +690,6 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
                   },
                 ),
         ),
-      ],
     );
   }
 
@@ -762,75 +769,34 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
   }
 
   // WIDGETS COMPONENT
-  Widget widgetAdd() {
-    return Column(
-      children: <Widget>[
-        Padding(
-          padding:
-              const EdgeInsets.only(bottom: 12, left: 12, right: 12, top: 12),
-          child: Row(
-            children: [
-              const Expanded(
-                  child: Text('Marcas', style: TextStyle(fontSize: 18))),
-              // TODO : delete icon 'add new mark for release'
-              IconButton(
-                  onPressed: () {
-                    Get.back();
-                    Get.to(() => CreateMark(
-                        mark: Mark(
-                            upgrade: Timestamp.now(),
-                            creation: Timestamp.now())));
-                  },
-                  icon: const Icon(Icons.add)),
-              IconButton(
-                icon: const Icon(Icons.search),
-                onPressed: () {
-                  Get.back();
-                  showSearch(
-                    context: context,
-                    delegate: SearchPage<Mark>(
-                      items: list,
-                      searchLabel: 'Buscar marca',
-                      suggestion: const Center(
-                        child: Text('ej. Miller'),
-                      ),
-                      failure: const Center(
-                        child: Text('No se encontro :('),
-                      ),
-                      filter: (product) => [
-                        product.name,
-                        product.description,
-                      ],
-                      builder: (mark) => Column(
-                        children: <Widget>[
-                          listTile(marcaSelect: mark),
-                          const Divider(
-                              endIndent: 12.0, indent: 12.0, height: 0),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              )
-            ],
-          ),
-        ),
-      ],
+  showSeachMarks(){
+
+    // buscar cátegoria
+
+    // var
+    Color colorAccent = Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
+
+    showSearch(
+      context: context,
+      delegate: SearchPage<Mark>(
+        searchStyle: TextStyle(color: colorAccent),
+        barTheme: Get.theme.copyWith(hintColor: colorAccent, highlightColor: colorAccent),
+        items: list,
+        searchLabel: 'Buscar marca',
+        suggestion: const Center(child: Text('ej. Miller')),
+        failure: const Center(child: Text('No se encontro :(')),
+        filter: (product) => [product.name,product.description],
+        builder: (mark) => Column(children: <Widget>[listTile(marcaSelect: mark),const Divider(endIndent: 12.0, indent: 12.0, height: 0)]),
+      ),
     );
   }
 
   Widget listTile({required Mark marcaSelect, bool icon = true}) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      trailing: !icon
-          ? null
-          : ImageApp.circleImage(
-              texto: marcaSelect.name, url: marcaSelect.image, size: 50.0),
+      trailing: !icon? null: ImageApp.circleImage(texto: marcaSelect.name, url: marcaSelect.image, size: 50.0),
       dense: true,
-      title: Text(marcaSelect.name,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-              fontSize: 18.0, color: Get.theme.textTheme.bodyText1!.color)),
+      title: Text(marcaSelect.name,overflow: TextOverflow.ellipsis),
       subtitle: marcaSelect.description == ''
           ? null
           : Text(marcaSelect.description, overflow: TextOverflow.ellipsis),
@@ -869,10 +835,11 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
 
 // TODO : delete release
 class CreateMark extends StatefulWidget {
-  late final Mark mark;
-  CreateMark({required this.mark, Key? key}) : super(key: key);
+  final Mark mark;
+  const CreateMark({required this.mark, Key? key}) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _CreateMarkState createState() => _CreateMarkState();
 }
 
@@ -886,7 +853,7 @@ class _CreateMarkState extends State<CreateMark> {
   String title = 'Crear nueva marca';
   bool load = false;
   TextStyle textStyle = const TextStyle(fontSize: 24.0);
-  ImagePicker _picker = ImagePicker();
+  final ImagePicker _picker = ImagePicker();
   XFile xFile = XFile('');
 
   @override
@@ -1048,31 +1015,23 @@ class _CreateMarkState extends State<CreateMark> {
     widget.mark.verified = true;
     if (widget.mark.id == '') {
       widget.mark.id = uuid.v1();
-      if (widget.mark.id == '') {
-        widget.mark.id = DateTime.now().millisecondsSinceEpoch.toString();
-      }
+      if (widget.mark.id == '') {widget.mark.id = DateTime.now().millisecondsSinceEpoch.toString();}
     }
     if (widget.mark.name != '') {
       // image save
       // Si el "path" es distinto '' procede a guardar la imagen en la base de dato de almacenamiento
       if (xFile.path != '') {
-        Reference ref =
-            Database.referenceStorageProductPublic(id: widget.mark.id);
+        Reference ref = Database.referenceStorageProductPublic(id: widget.mark.id);
         // referencia de la imagen
         UploadTask uploadTask = ref.putFile(File(xFile.path));
         // cargamos la imagen a storage
         await uploadTask;
         // obtenemos la url de la imagen guardada
-        await ref
-            .getDownloadURL()
-            .then((value) async {
+        await ref.getDownloadURL().then((value) async {
               // set
               widget.mark.image = value;
               // mark save
-              await Database.refFirestoreMark()
-                  .doc(widget.mark.id)
-                  .set(widget.mark.toJson())
-                  .whenComplete(() {
+              await Database.refFirestoreMark().doc(widget.mark.id).set(widget.mark.toJson()).whenComplete(() {
                 controllerProductsEdit.setUltimateSelectionMark = widget.mark;
                 controllerProductsEdit.setMarkSelected = widget.mark;
                 // agregar el obj manualmente para evitar consulta a la db  innecesaria
@@ -1084,10 +1043,7 @@ class _CreateMarkState extends State<CreateMark> {
             .catchError((_) {});
       } else {
         // mark save
-        await Database.refFirestoreMark()
-            .doc(widget.mark.id)
-            .set(widget.mark.toJson())
-            .whenComplete(() {
+        await Database.refFirestoreMark().doc(widget.mark.id).set(widget.mark.toJson()).whenComplete(() {
           controllerProductsEdit.setUltimateSelectionMark = widget.mark;
           controllerProductsEdit.setMarkSelected = widget.mark;
           // agregar el obj manualmente para evitar consulta a la db  innecesaria

@@ -90,9 +90,16 @@ class CataloguePage extends StatelessWidget {
   Widget viewCatalogueProductsVerticalList() {
     // controllers
     final CataloguePageController controller = Get.find();
+    final HomeController homeController = Get.find();
 
     // si el cátalogo esta vacio
     if (controller.getCataloProducts.isEmpty) {
+
+      // mostramos las sugerencias de productos en el primer inicio de la aplicación
+      if(homeController.aProductIsAddedForTheFirstTime){
+        return Center(child: controller.widgetSuggestionProduct);
+      }
+
       return const Center(
         child: Text('Sin productos'),
       );

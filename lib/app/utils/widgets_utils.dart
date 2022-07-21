@@ -1,3 +1,7 @@
+// ignore_for_file: must_be_immutable
+
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
@@ -418,7 +422,7 @@ Widget drawerApp() {
                 ],
               ),
             ),
-            ListTile(
+            /* ListTile(
               leading: const Icon(Icons.launch_rounded),
               title: const Text('Producto App'),
               onTap: () async {
@@ -429,7 +433,7 @@ Widget drawerApp() {
                 try{
                   await LaunchApp.openApp(androidPackageName: 'com.logicabooleana.commer.producto');
                 }catch(_){
-                  if (await canLaunchUrl(uri)) { await launchUrl(uri);} else {throw 'Could not launch $uri';}
+                  if (await canLaunchUrl(uri)) { await launchUrl(uri,mode: LaunchMode.externalApplication);} else {throw 'Could not launch $uri';}
                 }
               },
             ),
@@ -443,10 +447,29 @@ Widget drawerApp() {
                 Uri uri = Uri.parse(
                     'https://play.google.com/store/apps/details?id=com.logicabooleana.commer.producto');
                 if (await canLaunchUrl(uri)) {
-                  await launchUrl(uri);
+                  await launchUrl(uri,mode: LaunchMode.externalApplication);
                 } else {
                   throw 'Could not launch $uri';
                 }
+              },
+            ), */
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(vertical: 12,horizontal: 12),
+              tileColor: Colors.grey.withOpacity(0.1),
+              leading: const Icon(Icons.whatsapp_rounded),
+              title: const Text('Dejanos tu opinión 😃'),
+              subtitle: const Text('Nos intereza saber lo que piensas'),
+              onTap: () async{
+                
+                // abre la app de mensajeria
+                String whatsAppUrl = "";
+                String phoneNumber = '541134862939';
+                String description = "hola, estoy probando la App!";
+                whatsAppUrl ='https://wa.me/+$phoneNumber?text=${Uri.parse(description)}';
+                if (await canLaunch(whatsAppUrl)) {
+                  await launch(whatsAppUrl);
+                }
+
               },
             ),
             const ListTile(
@@ -484,7 +507,10 @@ Widget viewDefault() {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text('Hola 🖐️'),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: Text('Hola 🖐️\n\nEsto es una app en desarrollo muy pronto estara lista\n',textAlign: TextAlign.center),
+          ),
           const SizedBox(height: 20),
           TextButton(
             child: const Text('Selecciona una cuenta'),
@@ -528,13 +554,13 @@ void showDialogCerrarSesion() {
             CustomFullScreenDialog.showDialog();
             // default values
             homeController.setProfileAccountSelected=ProfileAccountModel(creation: Timestamp.now());
+            homeController.setProfileAdminUser = UserModel ();
             homeController.setCatalogueCategoryList = [];
             homeController.setCatalogueCategoryList = [];
             homeController.setCatalogueProducts = [];
             homeController.setProductsOutstandingList = [];
             // save key/values Storage
             GetStorage().write('idAccount', '');
-            homeController.setProfileAccountSelected = ProfileAccountModel(creation: Timestamp.now());
             // instancias de FirebaseAuth para proceder a cerrar sesión
             final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
             Future.delayed(const Duration(seconds: 2)).then((_) {
@@ -622,7 +648,7 @@ class ComponentApp {
         child: LinearProgressIndicator(
             minHeight: 6.0,
             backgroundColor: Colors.white.withOpacity(0.3),
-            valueColor: new AlwaysStoppedAnimation<Color>(color)));
+            valueColor: AlwaysStoppedAnimation<Color>(color)));
   }
 }
 
@@ -644,7 +670,7 @@ class ImageApp {
           )),
     );
 
-    return Container(
+    return SizedBox(
       width: size,
       height: size,
       child: url == "" || url == "default"
@@ -667,17 +693,17 @@ class WidgetSuggestionProduct extends StatelessWidget {
 
   bool searchButton = false;
   List<Product> list = <Product>[];
-  WidgetSuggestionProduct({required this.list, this.searchButton = false});
+  WidgetSuggestionProduct({super.key, required this.list, this.searchButton = false});
 
   @override
   Widget build(BuildContext context) {
     // controllers
-    CataloguePageController homeController =
-        Get.find<CataloguePageController>();
+    CataloguePageController homeController = Get.find<CataloguePageController>();
 
     if (list.isEmpty) return Container();
     // values
     Color? colorAccent = Get.theme.textTheme.subtitle1?.color;
+    double radius = 32.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -687,7 +713,7 @@ class WidgetSuggestionProduct extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.all(12.0),
           child: Text(
-            "sugerencias para ti",
+            "sugerencias para vos",
             style: Get.theme.textTheme.subtitle1,
           ),
         ),
@@ -706,10 +732,10 @@ class WidgetSuggestionProduct extends StatelessWidget {
                       padding: const EdgeInsets.all(5.0),
                       child: FadeInLeft(
                         child: CircleAvatar(
-                            radius: 30,
+                            radius: radius,
                             backgroundColor: colorAccent,
                             child: CircleAvatar(
-                                radius: 28,
+                                radius: radius-2,
                                 backgroundColor:
                                     Get.theme.scaffoldBackgroundColor,
                                 child: Icon(Icons.search, color: colorAccent))),
@@ -717,7 +743,7 @@ class WidgetSuggestionProduct extends StatelessWidget {
                     ),
                   ),
             SizedBox(
-                width: 200,
+                width: Get.size.width,
                 height: 100,
                 child: Center(
                   child: ListView.builder(
@@ -738,11 +764,11 @@ class WidgetSuggestionProduct extends StatelessWidget {
                                 child: CircleAvatar(
                                     backgroundColor: colorAccent,
                                     foregroundColor: colorAccent,
-                                    radius: 30,
+                                    radius: radius,
                                     child: CircleAvatar(
                                         backgroundColor: Colors.grey[100],
                                         foregroundColor: Colors.grey[100],
-                                        radius: 28,
+                                        radius: radius-2,
                                         child: ClipRRect(
                                           borderRadius:
                                               BorderRadius.circular(50),
