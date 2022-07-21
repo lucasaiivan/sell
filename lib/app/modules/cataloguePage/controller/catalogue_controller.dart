@@ -5,6 +5,7 @@ import 'package:search_page/search_page.dart';
 import 'package:sell/app/models/catalogo_model.dart';
 import 'package:sell/app/modules/home/controller/home_controller.dart';
 import 'package:sell/app/services/database.dart';
+import 'package:sell/app/utils/widgets_utils.dart';
 
 import '../../../routes/app_pages.dart';
 import '../../../utils/fuctions.dart';
@@ -257,4 +258,26 @@ class CataloguePageController extends GetxController
       );
     }
   }
+
+
+  Widget get widgetSuggestionProduct{
+    // widget : este texto se va a mostrar en la primera venta
+
+    // comprobamos si es la primera ves que se inicia la aplicación
+    if(homeController.theFirstSaleWasMade){
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(top: 50,left: 12,right: 12,bottom: 20),
+            child: Opacity(opacity: 0.8,child: Text('¡Agrega tu primer producto!',textAlign: TextAlign.center,style: TextStyle(fontSize: 20))),
+          ),
+          TextButton(onPressed: toSeachProduct,child: const Text('Agregar')),
+        ],
+      );
+      }
+    // si no es la primera ves que se inicica la aplicación devuelve una vistra vacia
+    return Container();
+  }
+
 }

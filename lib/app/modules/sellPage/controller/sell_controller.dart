@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-
 import 'package:get/get.dart';
 import 'package:search_page/search_page.dart';
 import 'package:sell/app/models/catalogo_model.dart';
@@ -22,38 +21,27 @@ class SalesController extends GetxController {
   registerSelections({required ProductCatalogue productCatalogue}) {
     bool repeat = false;
     // seach
-    for (ProductCatalogue item in getRecentlySelectedProductsList) {
-      if (item.id == productCatalogue.id) {
-        repeat = true;
-      }
-    }
+    for (ProductCatalogue item in getRecentlySelectedProductsList) {if (item.id == productCatalogue.id) {repeat = true; } }
     // add
     // ignore: dead_code
     if (repeat == false) {
       productCatalogue.creation = Timestamp.now();
-
       homeController.addToListProductSelecteds(item: productCatalogue);
     }
   }
 
   // efecto de sonido para escaner
-  void playSoundScan() async {
-    AudioCache cache = AudioCache();
-    cache.play("soundBip.mp3");
-  }
+  void playSoundScan() async {AudioCache cache = AudioCache();cache.play("soundBip.mp3");}
 
   // text field controllers
-  final TextEditingController textEditingControllerAddFlashPrice =
-      TextEditingController();
-  final TextEditingController textEditingControllerAddFlashDescription =
-      TextEditingController();
-  final TextEditingController textEditingControllerTicketMount =
-      TextEditingController();
+  final TextEditingController textEditingControllerAddFlashPrice = TextEditingController();
+  final TextEditingController textEditingControllerAddFlashDescription =TextEditingController();
+  final TextEditingController textEditingControllerTicketMount =TextEditingController();
 
   // list : lista de productos seleccionados por el usaurio para la venta
   List get getListProductsSelested => homeController.listProductsSelected;
   set setListProductsSelected(List value) => homeController.listProductsSelected = value;
-  set addProduct(ProductCatalogue product) {
+  void addProduct({required ProductCatalogue product}) {
     product.quantity = 1;
     product.select = false;
     homeController.listProductsSelected.add(product);
@@ -62,9 +50,7 @@ class SalesController extends GetxController {
   set removeProduct(String id) {
     List newList = [];
     for (ProductCatalogue product in homeController.listProductsSelected) {
-      if (product.id != id) {
-        newList.add(product);
-      }
+      if (product.id != id) {newList.add(product);}
     }
     setListProductsSelected = newList;
     update();
@@ -104,7 +90,6 @@ class SalesController extends GetxController {
   set setValueReceivedTicket(double value) {
     _valueReceivedTicket.value = value;
   }
-
   @override
   void onClose() {
     textEditingControllerAddFlashDescription.dispose();
@@ -157,8 +142,7 @@ class SalesController extends GetxController {
     // Busca entre los productos de mi catálogo
 
     // var
-    Color colorAccent =
-        Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
+    Color colorAccent = Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
 
     showSearch(
       context: context,
@@ -166,8 +150,7 @@ class SalesController extends GetxController {
         items: homeController.getCataloProducts,
         searchLabel: 'Buscar',
         searchStyle: TextStyle(color: colorAccent),
-        barTheme: Get.theme
-            .copyWith(hintColor: colorAccent, highlightColor: colorAccent),
+        barTheme: Get.theme.copyWith(hintColor: colorAccent, highlightColor: colorAccent),
         suggestion: const Center(child: Text('ej. alfajor')),
         failure: const Center(child: Text('No se encontro en tu cátalogo:(')),
         filter: (product) => [product.description, product.nameMark],
@@ -225,7 +208,7 @@ class SalesController extends GetxController {
 
   // verificamos si se trata de un código existente
     if (item.code == '') {
-      addProduct = item;
+      addProduct(product: item);
     } else {
       // verifica si el ID del producto esta en la lista de seleccionados
       bool coincidence = false;
@@ -266,7 +249,7 @@ class SalesController extends GetxController {
       // si el producto se encuentra en el cátalgo de la cuenta se agrega a la lista de productos seleccionados
       if (product.id == id) {
         coincidence = true;
-        addProduct = product;
+        addProduct(product: product);
         update();
       }
     }
@@ -298,13 +281,11 @@ class SalesController extends GetxController {
     if (id != '') {
       // query
       Database.readProductGlobalFuture(id: id).then((value) {
-        showDialogAddProductNew(
-            productCatalogue: ProductCatalogue.fromMap(value.data() as Map));
+        showDialogAddProductNew(productCatalogue: ProductCatalogue.fromMap(value.data() as Map));
       }).onError((error, stackTrace) {
         // error o no existe en la db
         showDialogQuickSale();
-        Get.snackbar('Lo siento',
-            '🙁 no se encontro el producto en nuestra base de datos');
+        Get.snackbar('Lo siento','🙁 no se encontro el producto en nuestra base de datos');
       }).catchError((error) {
         // error al consultar db
         Get.snackbar('ah ocurrido algo', 'Fallo el escaneo');
@@ -326,6 +307,7 @@ class SalesController extends GetxController {
     setTicket = TicketModel(creation: Timestamp.now(), listPoduct: []);
     setListProductsSelected = [];
     setTicketView = false;
+    update();
     Get.back();
   }
 
@@ -357,8 +339,9 @@ class SalesController extends GetxController {
 
     if (valuePrice != '') {
       if (double.parse(valuePrice) != 0) {
-        addProduct = ProductCatalogue(id: id,description: valueDescription,salePrice: double.parse(textEditingControllerAddFlashPrice.text),creation: Timestamp.now(),upgrade: Timestamp.now());
+        addProduct(product: ProductCatalogue(id: id,description: valueDescription,salePrice: double.parse(textEditingControllerAddFlashPrice.text),creation: Timestamp.now(),upgrade: Timestamp.now()));
         textEditingControllerAddFlashPrice.text = '';
+        update();
         Get.back();
       } else {
         showMessageAlertApp(title: '😔No se puedo agregar 😔',message: 'Debe ingresar un valor distinto a 0');
@@ -377,6 +360,9 @@ class SalesController extends GetxController {
   }
 
   void confirmedPurchase() {
+
+    // quita los textos de presentación
+    homeController.theFirstSaleWasMade=false;
     // set firestore
     registerTransaction();
     // el usuario confirmo su venta
@@ -409,10 +395,9 @@ class SalesController extends GetxController {
           child: TextButton(
               onPressed: () {
                 if (productCatalogue.salePrice != 0.0) {
-                  addProduct = productCatalogue;
-                  if (homeController.checkAddProductToCatalogue) {
-                    homeController.addProductToCatalogue(product: productCatalogue);
-                  }
+                  addProduct(product: productCatalogue);
+                  if (homeController.checkAddProductToCatalogue) {homeController.addProductToCatalogue(product: productCatalogue);}
+                  update();
                   Get.back();
                 } else {
                   Get.snackbar('🙁 algo salio mal', 'Inserte un precio valido');
@@ -437,15 +422,9 @@ class SalesController extends GetxController {
                     }
                   },
                   autofocus: true,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: false),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp('[1234567890]'))
-                  ],
-                  decoration: const InputDecoration(
-                    hintText: '\$',
-                    labelText: "Escribe el precio",
-                  ),
+                  keyboardType:const TextInputType.numberWithOptions(decimal: false),
+                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp('[1234567890]'))],
+                  decoration: const InputDecoration(hintText: '\$',labelText: "Escribe el precio"),
                   style: const TextStyle(fontSize: 20.0),
                   textInputAction: TextInputAction.done,
                   onSubmitted: (value) {
@@ -453,16 +432,12 @@ class SalesController extends GetxController {
                       double valuePrice = double.parse(value);
                       if (valuePrice != 0.0) {
                         productCatalogue.salePrice = valuePrice;
-                        addProduct = productCatalogue;
+                        addProduct(product: productCatalogue);
+                        if (homeController.checkAddProductToCatalogue) {homeController.addProductToCatalogue(product: productCatalogue);}
+                        update();
                         Get.back();
-                      } else {
-                        Get.snackbar(
-                            '🙁 algo salio mal', 'Inserte un precio valido');
-                      }
-                    } else {
-                      Get.snackbar(
-                          '🙁 algo salio mal', 'Inserte un precio valido');
-                    }
+                      } else {Get.snackbar('🙁 algo salio mal', 'Inserte un precio valido');}
+                    } else {Get.snackbar('🙁 algo salio mal', 'Inserte un precio valido');}
                   },
                 ),
               ),
@@ -668,5 +643,57 @@ class SalesController extends GetxController {
             ],
           ),
         ));
+  }
+  
+  Widget get widgetSelectedProductsInformation{
+    // widget : información de productos seleccionados que se va a mostrar al usuario por unica vez
+
+    // comprobamos si es la primera ves que se inicia la aplicación
+    if(homeController.theFirstSaleWasMade){
+      return Column(
+        children: const [
+          Padding(
+            padding: EdgeInsets.all(20.0),
+            child: Opacity(opacity: 0.8,child: Text('En estos artículos vacíos aparecerán los productos que selecciones para vender\n    👇',textAlign: TextAlign.start,style: TextStyle(fontSize: 20))),
+          ),
+        ],
+      );
+      }
+    // si no es la primera ves que se inicica la aplicación devuelve una vistra vacia
+    return Container();
+  }
+  Widget get widgetProductSuggestionInfo{
+    // widget : información de sugerencias de los productos que se va a mostrar al usuario por unica ves
+
+    // comprobamos si es la primera ves que se inicia la aplicación
+    if(homeController.theFirstSaleWasMade){
+      return Column(
+        children: const [
+          Padding(
+            padding: EdgeInsets.all(20.0),
+            child: Opacity(opacity: 0.8,child: Text('Aquí vamos a sugerirte algunos productos 😉',textAlign: TextAlign.end,style: TextStyle(fontSize: 20))),
+          ),
+        ],
+      );
+      }
+    // si no es la primera ves que se inicica la aplicación devuelve una vistra vacia
+    return Container();
+  }
+  Widget get widgetTextFirstSale{
+    // widget : este texto se va a mostrar en la primera venta
+
+    // comprobamos si es la primera ves que se inicia la aplicación
+    if(homeController.theFirstSaleWasMade){
+      return Column(
+        children: const [
+          Padding(
+            padding: EdgeInsets.only(top: 50,left: 12,right: 12,bottom: 20),
+            child: Opacity(opacity: 0.8,child: Text('¡Elige el método de pago y listo\n😁\nregistra tu primera venta!',textAlign: TextAlign.center,style: TextStyle(fontSize: 20))),
+          ),
+        ],
+      );
+      }
+    // si no es la primera ves que se inicica la aplicación devuelve una vistra vacia
+    return Container();
   }
 }

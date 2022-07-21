@@ -11,9 +11,30 @@ import 'package:sell/app/models/user_model.dart';
 import 'package:sell/app/services/database.dart';
 import '../../../routes/app_pages.dart';
 import '../../../utils/widgets_utils.dart';
-import '../../sellPage/controller/sell_controller.dart';
 
 class HomeController extends GetxController {
+
+  // ¿Se hizo la primera venta?
+  bool theFirstSaleWasMade=false;
+  void checkFfTheFirstSaleWasMade()async{
+    // si al leelo por primera ves no existe sabemos que es la primera vesz
+    GetStorage().read('theFirstSaleWasMade') ?? true;
+    // luego se salva el guarda el dato para posteriormente saber que no es la primera vez que se inicia sesion
+    await GetStorage().write('theFirstSaleWasMade', false);
+    // se actualiza la vista
+    update();
+  }
+
+  // ¿Se agrega un producto por primera vez?
+  bool aProductIsAddedForTheFirstTime=false;
+  void checkIfAProductIsAddedForTheFirstTime()async{
+    // si al leelo por primera ves no existe sabemos que es la primera vez
+    GetStorage().read('aProductIsAddedForTheFirstTime') ?? true;
+    // luego se salva el guarda el dato para posteriormente saber que no es la primera vez que se inicia sesion
+    await GetStorage().write('aProductIsAddedForTheFirstTime', false);
+    // se actualiza la vista
+    update();
+  }
 
   // value state : este valor valida si el usuario quiere que el código escaado quiere agregarlo a su cátalogue
   bool checkAddProductToCatalogue = false;
@@ -104,7 +125,8 @@ class HomeController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
-
+    checkFfTheFirstSaleWasMade();
+    checkIfAProductIsAddedForTheFirstTime();
     // obtenemos por parametro los datos de la cuenta de atentificación
     Map map = Get.arguments as Map;
     // verificamos y obtenemos los datos pasados por parametro
@@ -163,8 +185,7 @@ class HomeController extends GetxController {
   }
 
   ProductCatalogue getProductCatalogue({required String id}) {
-    ProductCatalogue product =
-        ProductCatalogue(creation: Timestamp.now(), upgrade: Timestamp.now());
+    ProductCatalogue product = ProductCatalogue(creation: Timestamp.now(), upgrade: Timestamp.now());
     for (var element in getCataloProducts) {
       if (element.id == id) {
         product = element;
@@ -321,11 +342,7 @@ class HomeController extends GetxController {
     });
   }
 
-  Future<void> categoryDelete({required String idCategory}) async =>
-      await Database.refFirestoreCategory(
-              idAccount: getProfileAccountSelected.id)
-          .doc(idCategory)
-          .delete();
+  Future<void> categoryDelete({required String idCategory}) async => await Database.refFirestoreCategory(idAccount: getProfileAccountSelected.id).doc(idCategory).delete();
   Future<void> categoryUpdate({required Category categoria}) async {
     // ref
     var documentReferencer =
@@ -437,4 +454,6 @@ class HomeController extends GetxController {
               topLeft: Radius.circular(20), topRight: Radius.circular(20))),
     );
   }
+
+  
 }

@@ -170,57 +170,36 @@ class ProductEdit extends StatelessWidget {
                   borderSide: BorderSide(color: controller.getProduct.description == ''?Colors.grey:Get.theme.scaffoldBackgroundColor),
                 ),
                 border: const OutlineInputBorder(),
-                labelText: "Descripción"),
+                labelText: "Descripción del producto"),
             textInputAction: TextInputAction.done,
             controller: controller.controllerTextEditDescripcion,
           ),
           //TODO: eliminar para desarrrollo
-          TextButton(
+          /* TextButton(
               onPressed: () async {
                 String clave = controller.controllerTextEditDescripcion.text;
-                String url =
-                    "https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa";
-                if (await canLaunch(url)) {
-                  await launch(url);
-                } else {
-                  throw 'Could not launch $url';
-                }
+                Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
+                if (await canLaunchUrl(uri)) { await launchUrl(uri,mode: LaunchMode.externalApplication);} else {throw 'Could not launch $uri';}
               },
               child: const Text('Buscar descripción en Google')),
           TextButton(
               onPressed: () async {
                 String clave = controller.getProduct.code;
-                String url =
-                    "https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa";
-                if (await canLaunch(url)) {
-                  await launch(url);
-                } else {
-                  throw 'Could not launch $url';
-                }
+                Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
+                if (await canLaunchUrl(uri)) { await launchUrl(uri,mode: LaunchMode.externalApplication);} else {throw 'Could not launch $uri';}
               },
-              child: const Text('Buscar en código Google')),
+              child: const Text('Buscar en código Google')),  */
           space,
           // textfield 'seleccionar marca'
           textfielButton(
-            borderSideColor: controller.getMarkSelected.id == ''?Colors.grey:Get.theme.scaffoldBackgroundColor,
-              textValue: controller.getMarkSelected.name,
-              labelText: controller.getMarkSelected.id == ''? 'seleccionar una marca': 'Marca',
-              onTap: controller.getNewProduct || controller.getEditModerator? controller.showModalSelectMarca: () {}),
-          // buttons categoty
+            borderSideColor: controller.getMarkSelected.id == ''?Colors.grey:controller.getNewProduct?Colors.grey:Get.theme.scaffoldBackgroundColor,
+            textValue: controller.getMarkSelected.name,
+            labelText: controller.getMarkSelected.id == ''? 'seleccionar una marca': 'Marca',
+            onTap: controller.getNewProduct || controller.getEditModerator? controller.showModalSelectMarca : () {}
+          ),
           !controller.getAccountAuth ? Container() : space,
-          !controller.getAccountAuth
-              ? Container()
-              : textfielButton(
-                  textValue: controller.getCategory.id == ''
-                      ? ''
-                      : controller.getCategory.name,
-                  labelText: controller.getCategory.id == ''
-                      ? 'Seleccionar categoría'
-                      : 'Categoría',
-                  onTap: controller.getSaveIndicator
-                      ? () {}
-                      : SelectCategory.show,
-                ),
+          // textfield : seleccionar cátegoria
+          !controller.getAccountAuth? Container(): textfielButton(textValue: controller.getCategory.id == ''? '': controller.getCategory.name,labelText: controller.getCategory.id == ''? 'Seleccionar categoría': 'Categoría',onTap: controller.getSaveIndicator? () {}: SelectCategory.show,),
           space,
           // textfield prices
           !controller.getAccountAuth
@@ -331,6 +310,8 @@ class ProductEdit extends StatelessWidget {
                   ],
                 ),
           !controller.getNewProduct ? Container() : space,
+
+          // text : código del producto
           controller.getProduct.code != ""
               ? Opacity(
                   opacity: 0.8,
@@ -340,13 +321,9 @@ class ProductEdit extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        const Icon(Icons.qr_code_2_rounded, size: 14),
+                        const Icon(Icons.qr_code_2_rounded, size: 16),
                         const SizedBox(width: 5),
-                        Text(controller.getProduct.code,
-                            style: const TextStyle(
-                                height: 1,
-                                fontSize: 12,
-                                fontWeight: FontWeight.normal)),
+                        Text(controller.getProduct.code,style: const TextStyle(height: 1,fontSize: 14,fontWeight: FontWeight.normal)),
                       ],
                     ),
                   ),
@@ -375,7 +352,7 @@ class ProductEdit extends StatelessWidget {
                   : Container(),
           //TODO: eliminar para desarrrollo
           /* OPCIONES PARA DESARROLLADOR - ELIMINAR ESTE CÓDIGO PARA PRODUCCION */
-          controller.getNewProduct
+          /* controller.getNewProduct
               ? Container()
               : Column(
                   children: [
@@ -442,32 +419,22 @@ class ProductEdit extends StatelessWidget {
                     controller.getSaveIndicator
                         ? Container()
                         : button(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 0, vertical: 5),
-                            icon:
-                                const Icon(Icons.security, color: Colors.white),
+                            padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
+                            icon:const Icon(Icons.security, color: Colors.white),
                             onPressed: () {
-                              if (controller.getEditModerator) {
-                                controller.save();
-                              }
+                              if (controller.getEditModerator) {controller.save();}
                               controller.setEditModerator = !controller.getEditModerator;
                             },
                             colorAccent: Colors.white,
-                            colorButton: controller.getEditModerator
-                                ? Colors.green
-                                : Colors.orange,
-                            text: controller.getEditModerator
-                                ? 'Actualizar documento'
-                                : "Editar documento",
+                            colorButton: controller.getEditModerator? Colors.green: Colors.orange,
+                            text: controller.getEditModerator? 'Actualizar documento': "Editar documento",
                           ),
                     const SizedBox(height: 20.0),
                     controller.getSaveIndicator
                         ? Container()
                         : button(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 0, vertical: 5),
-                            icon:
-                                const Icon(Icons.security, color: Colors.white),
+                            padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
+                            icon:const Icon(Icons.security, color: Colors.white),
                             onPressed: controller.showDialogDeleteOPTDeveloper,
                             colorAccent: Colors.white,
                             colorButton: Colors.red,
@@ -476,7 +443,7 @@ class ProductEdit extends StatelessWidget {
                     const SizedBox(height: 50.0),
                   ],
                   // fin widget debug
-                ),
+                ), */
                     ]             ,
       ),
     );
@@ -536,9 +503,11 @@ class ProductEdit extends StatelessWidget {
 
 // category
 class SelectCategory extends StatefulWidget {
-  SelectCategory();
+  // ignore: prefer_const_constructors_in_immutables
+  SelectCategory({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _SelectCategoryState createState() => _SelectCategoryState();
 
   static void show() {
@@ -549,9 +518,7 @@ class SelectCategory extends StatefulWidget {
       backgroundColor: Get.theme.scaffoldBackgroundColor,
       enableDrag: true,
       isDismissible: true,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20), topRight: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
     );
   }
 }
@@ -579,84 +546,28 @@ class _SelectCategoryState extends State<SelectCategory> {
 
   @override
   Widget build(BuildContext buildContext) {
-    if (welcomeController.getCatalogueCategoryList.isEmpty) {
-      return ListTile(
-        onTap: () => showDialogSetCategoria(categoria: Category()),
-        title: const Text('Crear categoría', style: TextStyle(fontSize: 18)),
-        trailing: const Icon(Icons.add),
-      );
-    }
 
-    return Obx(
-      () => ListView.builder(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Categoría'),
+        actions: [
+          IconButton(icon: const Icon(Icons.add),onPressed: () => showDialogSetCategoria(categoria: Category())),
+        ],
+      ),
+      body:welcomeController.getCatalogueCategoryList.isEmpty?const Center(child: Text('Sin cátegorias'),): ListView.builder(
         padding: const EdgeInsets.symmetric(vertical: 15.0),
         shrinkWrap: true,
         itemCount: welcomeController.getCatalogueCategoryList.length,
         itemBuilder: (BuildContext context, int index) {
-          Category categoria =
-              welcomeController.getCatalogueCategoryList[index];
-          MaterialColor color = Utils.getRandomColor();
-          return index == 0
-              ? Column(
+          //  values
+          Category categoria =welcomeController.getCatalogueCategoryList[index];
+          
+          return Column(
                   children: <Widget>[
-                    Row(
-                      children: [
-                        const Expanded(
-                            child: Padding(
-                          padding: EdgeInsets.all(20.0),
-                          child:
-                              Text('Categoría', style: TextStyle(fontSize: 18)),
-                        )),
-                        IconButton(
-                            icon: const Icon(Icons.add),
-                            padding: const EdgeInsets.all(20.0),
-                            onPressed: () =>
-                                showDialogSetCategoria(categoria: Category()))
-                      ],
-                    ),
                     ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 8.0, horizontal: 12.0),
-                      leading: CircleAvatar(
-                        backgroundColor: color.withOpacity(0.1),
-                        radius: 24.0,
-                        child: Text(categoria.name.substring(0, 1),
-                            style: TextStyle(
-                                fontSize: 18.0,
-                                color: color,
-                                fontWeight: FontWeight.bold)),
-                      ),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
                       dense: true,
-                      title: Text(categoria.name),
-                      onTap: () {
-                        controllerProductsEdit.setCategory = categoria;
-                        controllerProductsEdit.updateAll();
-                        Get.back();
-                      },
-                      trailing: popupMenuItemCategoria(categoria: categoria),
-                    ),
-                    const Divider(endIndent: 12.0, indent: 12.0, height: 0.0),
-                  ],
-                )
-              : Column(
-                  children: <Widget>[
-                    const Divider(endIndent: 12.0, indent: 12.0, height: 0.0),
-                    ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 8.0, horizontal: 12.0),
-                      leading: CircleAvatar(
-                        backgroundColor: color.withOpacity(0.1),
-                        radius: 24.0,
-                        child: categoria.name != ""
-                            ? Text(categoria.name.substring(0, 1),
-                                style: TextStyle(
-                                    fontSize: 18.0,
-                                    color: color,
-                                    fontWeight: FontWeight.bold))
-                            : const Text("C"),
-                      ),
-                      dense: true,
-                      title: Text(categoria.name),
+                      title: Text(categoria.name.substring(0, 1).toUpperCase() + categoria.name.substring(1)),
                       onTap: () {
                         controllerProductsEdit.setCategory = categoria;
                         controllerProductsEdit.setSubcategory = Category();
@@ -664,21 +575,23 @@ class _SelectCategoryState extends State<SelectCategory> {
                       },
                       trailing: popupMenuItemCategoria(categoria: categoria),
                     ),
+                    const Divider(endIndent: 12.0, indent: 12.0, height: 0.0),
                   ],
                 );
         },
       ),
     );
+
   }
 
   Widget popupMenuItemCategoria({required Category categoria}) {
     final HomeController controller = Get.find();
 
     return PopupMenuButton(
-      icon: Icon(Icons.more_vert),
+      icon: const Icon(Icons.more_vert),
       itemBuilder: (_) => <PopupMenuItem<String>>[
-        PopupMenuItem<String>(child: const Text('Editar'), value: 'editar'),
-        PopupMenuItem<String>(child: const Text('Eliminar'), value: 'eliminar'),
+        const PopupMenuItem<String>(value: 'editar', child: Text('Editar')),
+        const PopupMenuItem<String>(value: 'eliminar', child: Text('Eliminar')),
       ],
       onSelected: (value) async {
         switch (value) {
@@ -692,11 +605,8 @@ class _SelectCategoryState extends State<SelectCategory> {
                 return AlertDialog(
                   contentPadding: const EdgeInsets.all(16.0),
                   content: Row(
-                    children: <Widget>[
-                      const Expanded(
-                        child:
-                            Text("¿Desea continuar eliminando esta categoría?"),
-                      )
+                    children: const <Widget>[
+                      Expanded(child:Text("¿Desea continuar eliminando esta categoría?"))
                     ],
                   ),
                   actions: <Widget>[
@@ -706,12 +616,13 @@ class _SelectCategoryState extends State<SelectCategory> {
                           Navigator.pop(context);
                         }),
                     TextButton(
-                        child: loadSave == false
-                            ? Text("ELIMINAR")
-                            : CircularProgressIndicator(),
+                        child: loadSave == false? const Text("ELIMINAR"): const CircularProgressIndicator(),
                         onPressed: () async {
-                          controller.categoryDelete(idCategory: categoria.id);
-                          Navigator.pop(context);
+                          controller.categoryDelete(idCategory: categoria.id).then((value) {
+                              setState(() {
+                                Get.back();
+                              });
+                            });
                         })
                   ],
                 );
@@ -732,52 +643,44 @@ class _SelectCategoryState extends State<SelectCategory> {
 
     if (categoria.id == '') {
       newProduct = true;
-      categoria = new Category();
-      categoria.id = new DateTime.now().millisecondsSinceEpoch.toString();
+      categoria =  Category();
+      categoria.id =  DateTime.now().millisecondsSinceEpoch.toString();
     }
 
     await showDialog<String>(
       context: context,
       builder: (context) {
-        return new AlertDialog(
+        return  AlertDialog(
           contentPadding: const EdgeInsets.all(16.0),
-          content: new Row(
+          content:  Row(
             children: <Widget>[
-              new Expanded(
-                child: new TextField(
+               Expanded(
+                child:  TextField(
                   controller: textEditingController,
                   autofocus: true,
-                  decoration: new InputDecoration(
+                  decoration: const InputDecoration(
                       labelText: 'Categoria', hintText: 'Ej. golosinas'),
                 ),
               )
             ],
           ),
           actions: <Widget>[
-            new TextButton(
+            TextButton(
                 child: const Text('CANCEL'),
                 onPressed: () {
                   Get.back();
                 }),
-            new TextButton(
-                child: loadSave == false
-                    ? Text(newProduct ? 'GUARDAR' : "ACTUALIZAR")
-                    : CircularProgressIndicator(),
+            TextButton( child: loadSave == false? Text(newProduct ? 'GUARDAR' : "ACTUALIZAR"): const CircularProgressIndicator(),
                 onPressed: () async {
                   if (textEditingController.text != '') {
                     // set
                     categoria.name = textEditingController.text;
                     setState(() => loadSave = true);
                     // save
-                    await controller
-                        .categoryUpdate(categoria: categoria)
-                        .whenComplete(() {
+                    await controller.categoryUpdate(categoria: categoria).whenComplete(() {
                       welcomeController.getCatalogueCategoryList.add(categoria);
-                      setState(() {
-                        Get.back();
-                      });
-                    }).catchError((error, stackTrace) =>
-                            setState(() => loadSave = false));
+                      setState(() {Get.back();});
+                    }).catchError((error, stackTrace) =>setState(() => loadSave = false));
                   }
                 })
           ],
@@ -871,44 +774,44 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
           child: Shimmer.fromColors(
-              child: Card(child: Container(width: double.infinity, height: 50)),
               highlightColor: Colors.grey.withOpacity(0.01),
-              baseColor: Get.theme.scaffoldBackgroundColor),
+              baseColor: Get.theme.scaffoldBackgroundColor,
+              child: Card(child: Container(width: double.infinity, height: 50))),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
           child: Shimmer.fromColors(
-              child: Card(child: Container(width: double.infinity, height: 50)),
               highlightColor: Colors.grey.withOpacity(0.01),
-              baseColor: Get.theme.scaffoldBackgroundColor),
+              baseColor: Get.theme.scaffoldBackgroundColor,
+              child: Card(child: Container(width: double.infinity, height: 50))),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
           child: Shimmer.fromColors(
-              child: Card(child: Container(width: double.infinity, height: 50)),
               highlightColor: Colors.grey.withOpacity(0.01),
-              baseColor: Get.theme.scaffoldBackgroundColor),
+              baseColor: Get.theme.scaffoldBackgroundColor,
+              child: Card(child: Container(width: double.infinity, height: 50))),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
           child: Shimmer.fromColors(
-              child: Card(child: Container(width: double.infinity, height: 50)),
               highlightColor: Colors.grey.withOpacity(0.01),
-              baseColor: Get.theme.scaffoldBackgroundColor),
+              baseColor: Get.theme.scaffoldBackgroundColor,
+              child: Card(child: Container(width: double.infinity, height: 50))),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
           child: Shimmer.fromColors(
-              child: Card(child: Container(width: double.infinity, height: 50)),
               highlightColor: Colors.grey.withOpacity(0.01),
-              baseColor: Get.theme.scaffoldBackgroundColor),
+              baseColor: Get.theme.scaffoldBackgroundColor,
+              child: Card(child: Container(width: double.infinity, height: 50))),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
           child: Shimmer.fromColors(
-              child: Card(child: Container(width: double.infinity, height: 50)),
               highlightColor: Colors.grey.withOpacity(0.01),
-              baseColor: Get.theme.scaffoldBackgroundColor),
+              baseColor: Get.theme.scaffoldBackgroundColor,
+              child: Card(child: Container(width: double.infinity, height: 50))),
         ),
       ],
     ));

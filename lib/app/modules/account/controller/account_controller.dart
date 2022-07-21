@@ -40,7 +40,7 @@ class AccountController extends GetxController {
 
   // values
   final RxList<String> _listCities = [
-    'Buenos Aires',
+    'Buenos Aires	',
     'Catamarca',
     'Chaco',
     'Chubut',
@@ -65,9 +65,7 @@ class AccountController extends GetxController {
     'Tierra del Fuego',
   ].obs;
   List<String> get getCities => _listCities;
-  final RxList<String> _listountries = [
-    'Argentina',
-  ].obs;
+  final RxList<String> _listountries = ['Argentina '].obs;
   List<String> get getCountries => _listountries;
 
   // account profile

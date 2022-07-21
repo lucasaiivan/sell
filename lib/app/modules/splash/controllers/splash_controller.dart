@@ -54,10 +54,7 @@ class SplashController extends GetxController {
     // aquí, según el estado de autentificación redirigir al usuario a la vista correspondiente
     if (isLoggedIn) {
       // si esta autentificado
-      Get.offAllNamed(Routes.HOME, arguments: {
-        'currentUser': firebaseAuth.currentUser,
-        'idAccount': idAccount,
-      });
+      Get.offAllNamed(Routes.HOME, arguments: {'currentUser': firebaseAuth.currentUser,'idAccount': idAccount});
     } else {
       // default values 
       await GetStorage().write('idAccount', '');

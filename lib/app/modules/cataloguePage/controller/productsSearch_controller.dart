@@ -76,7 +76,7 @@ class ControllerProductsSearch extends GetxController {
   get getColorTextField => _colorTextField;
 
   // TextEditingController
-  TextEditingController textEditingController = new TextEditingController();
+  TextEditingController textEditingController =  TextEditingController(text: '');
   set setTextEditingController(TextEditingController editingController) =>
       textEditingController = editingController;
   TextEditingController get getTextEditingController => textEditingController;

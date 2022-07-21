@@ -92,9 +92,7 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                         !controller.getStateSearch
                             ? FadeInRight(
                                 child: button(
-                                  icon: Icon(Icons.copy,
-                                      color:
-                                          controller.getButtonData.colorText),
+                                  icon: Icon(Icons.copy,color: controller.getButtonData.colorText),
                                   onPressed: () {
                                     // obtenemos los datos de porta papeles del dispositivo
                                     FlutterClipboard.paste().then((value) {
@@ -111,7 +109,7 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                                       }
                                     });
                                   },
-                                  text: "Pegar",
+                                  text: "Pegar de porta papeles",
                                   colorAccent:
                                       controller.getButtonData.colorText,
                                   colorButton:
@@ -177,7 +175,7 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                                 child: button(
                                   fontSize: 16,
                                   padding: 16,
-                                  icon: Text('💪'),
+                                  icon: const Text('💪'),
                                   onPressed: () {
                                     controller.toProductNew(
                                         id: controller
@@ -192,7 +190,7 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                               )
                             : Container(),
                         // TODO: delete release
-                        SizedBox(height: 12.0),
+                        /* SizedBox(height: 12.0),
                         FadeInRight(
                           child: button(
                             icon: Icon(
@@ -237,7 +235,7 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                             colorButton: controller.getButtonData.colorButton,
                           ),
                         ),
-                        SizedBox(width: 50.0, height: 50.0),
+                        SizedBox(width: 50.0, height: 50.0), */
                       ],
                     ),
                   ),
@@ -278,58 +276,43 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
   }
 
   Widget textField() {
+
+    
+
     return TextField(
-      controller: controller.textEditingController,
-      keyboardType: const TextInputType.numberWithOptions(decimal: false),
-      inputFormatters: [
-        FilteringTextInputFormatter.allow(RegExp('[1234567890]'))
-      ],
-      onChanged: (value) {
-        //controller.setCodeBar = value;
-        controller.updateAll();
-      },
-      decoration: InputDecoration(
-        suffixIcon: IconButton(
-          onPressed: () {
-            controller.clean();
-          },
-          icon: controller.textEditingController.value.text != ""
-              ? Icon(Icons.clear, color: controller.getColorTextField)
-              : Container(),
-        ),
-        hintText: 'ej. 77565440001743',
-        hintStyle: TextStyle(color: Get.theme.hintColor.withOpacity(0.3)),
-        enabledBorder: OutlineInputBorder(
-            borderRadius: const BorderRadius.all(Radius.circular(16.0)),
-            borderSide: BorderSide(color: controller.getColorTextField)),
-        border: OutlineInputBorder(
-            borderRadius: const BorderRadius.all(Radius.circular(16.0)),
-            borderSide: BorderSide(color: controller.getColorTextField)),
-        focusedBorder: OutlineInputBorder(
-            borderRadius: const BorderRadius.all(Radius.circular(16.0)),
-            borderSide: BorderSide(color: controller.getColorTextField)),
-        labelStyle: TextStyle(color: controller.getColorTextField),
-        labelText: "Escribe el código de barra",
-        suffixStyle: TextStyle(color: controller.getColorTextField),
-      ),
-      style: TextStyle(fontSize: 20.0, color: controller.getColorTextField),
-      textInputAction: TextInputAction.search,
-      onSubmitted: (value) {
-        //  Se llama cuando el usuario indica que ha terminado de editar el texto en el campo
-        controller.queryProduct(
-            id: controller.textEditingController.value.text);
-      },
-    );
+              controller: controller.textEditingController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: false),
+              inputFormatters: [FilteringTextInputFormatter.allow(RegExp('[1234567890]'))],
+              decoration: InputDecoration(
+                  suffixIcon: controller.textEditingController.value.text == ""?null:IconButton(onPressed: ()=>controller.clean(),icon: Icon(Icons.clear, color: controller.getColorTextField)),
+                  filled: true,
+                  hintText: 'ej. 77565440001743',
+                  hintStyle: TextStyle(color: Get.theme.hintColor.withOpacity(0.3)),
+                  enabledBorder: OutlineInputBorder(borderRadius: const BorderRadius.all(Radius.circular(16.0)),borderSide: BorderSide(color: controller.getColorTextField)),
+                  border: OutlineInputBorder(borderRadius: const BorderRadius.all(Radius.circular(16.0)),borderSide: BorderSide(color: controller.getColorTextField)),
+                  focusedBorder: OutlineInputBorder(borderRadius: const BorderRadius.all(Radius.circular(16.0)),borderSide: BorderSide(color: controller.getColorTextField)),
+                  labelStyle: TextStyle(color: controller.getColorTextField),
+                  labelText: "Escribe el código de barra",
+                  suffixStyle: TextStyle(color: controller.getColorTextField),
+                ),
+              style: TextStyle(fontSize: 20.0, color: controller.getColorTextField),
+              textInputAction: TextInputAction.search,
+              onSubmitted: (value) {
+                //  Se llama cuando el usuario indica que ha terminado de editar el texto en el campo
+                controller.queryProduct( id: controller.textEditingController.value.text);
+              },
+            );
   }
+  
 
   Widget widgetSuggestions({required List<Product> list}) {
-    if (list.length == 0) return Container();
+    if (list.isEmpty) return Container();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Padding(
-          padding: const EdgeInsets.all(12.0),
+        const Padding(
+          padding: EdgeInsets.all(12.0),
           child: Text("sugerencias para ti"),
         ),
         Stack(
@@ -344,15 +327,15 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                   padding: const EdgeInsets.all(5.0),
                   child: FadeInRight(
                     child: CircleAvatar(
+                        radius: 26,
+                        backgroundColor: Get.theme.primaryColor,
                         child: CircleAvatar(
+                            radius: 24,
                             child: ClipRRect(
+                              borderRadius: BorderRadius.circular(999),
                               child: CachedNetworkImage(
                                   imageUrl: list[0].image, fit: BoxFit.cover),
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            radius: 24),
-                        radius: 26,
-                        backgroundColor: Get.theme.primaryColor),
+                            ))),
                   ),
                 ),
               ),
@@ -367,15 +350,15 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                   padding: const EdgeInsets.all(5.0),
                   child: FadeInRight(
                     child: CircleAvatar(
+                        radius: 26,
+                        backgroundColor: Get.theme.primaryColor,
                         child: CircleAvatar(
+                            radius: 24,
                             child: ClipRRect(
+                              borderRadius: BorderRadius.circular(999),
                               child: CachedNetworkImage(
                                   imageUrl: list[1].image, fit: BoxFit.cover),
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            radius: 24),
-                        radius: 26,
-                        backgroundColor: Get.theme.primaryColor),
+                            ))),
                   ),
                 ),
               ),
@@ -390,15 +373,15 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                   padding: const EdgeInsets.all(5.0),
                   child: FadeInRight(
                     child: CircleAvatar(
+                        radius: 26,
+                        backgroundColor: Get.theme.primaryColor,
                         child: CircleAvatar(
+                            radius: 24,
                             child: ClipRRect(
+                              borderRadius: BorderRadius.circular(999),
                               child: CachedNetworkImage(
                                   imageUrl: list[2].image, fit: BoxFit.cover),
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            radius: 24),
-                        radius: 26,
-                        backgroundColor: Get.theme.primaryColor),
+                            ))),
                   ),
                 ),
               ),
@@ -413,15 +396,15 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                   padding: const EdgeInsets.all(5.0),
                   child: FadeInRight(
                     child: CircleAvatar(
+                        radius: 26,
+                        backgroundColor: Get.theme.primaryColor,
                         child: CircleAvatar(
+                            radius: 24,
                             child: ClipRRect(
+                              borderRadius: BorderRadius.circular(999),
                               child: CachedNetworkImage(
                                   imageUrl: list[3].image, fit: BoxFit.cover),
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            radius: 24),
-                        radius: 26,
-                        backgroundColor: Get.theme.primaryColor),
+                            ))),
                   ),
                 ),
               ),

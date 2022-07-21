@@ -12,6 +12,8 @@ class AccountView extends GetView<AccountController> {
 
   final FocusNode focusTextEdiNombre = FocusNode();
 
+  AccountView({super.key});
+
   @override
   Widget build(BuildContext buildContext) {
     return scaffold(buildContext: buildContext);
@@ -32,27 +34,21 @@ class AccountView extends GetView<AccountController> {
                     children: [
                       Column(
                         children: <Widget>[
-                          controller.newAccount
-                              ? widgetNewAccount()
-                              : Container(),
-                          const SizedBox(
-                            height: 12.0,
-                          ),
+                          // text : informativo
+                          controller.newAccount?widgetText(text: 'Dinos un poco de tu negocio\n\n 👇'): Container(),
+                          const SizedBox(height: 12.0),
+                          // imagen : avatar del negocio
                           widgetsImagen(),
+                          // button  : actualizart imagen
                           controller.getSavingIndicator
                               ? Container()
                               : TextButton(
                                   onPressed: () {
-                                    if (controller.getSavingIndicator ==
-                                        false) {
-                                      _showModalBottomSheetCambiarImagen(
-                                          context: buildContext);
-                                    }
+                                    if (controller.getSavingIndicator == false) {_showModalBottomSheetCambiarImagen(context: buildContext);}
                                   },
-                                  child: const Text("Cambiar imagen")),
-                          const SizedBox(
-                            height: 24.0,
-                          ),
+                                  child: const Text("actualizar imagen")
+                                ),
+                          // TextFuield views
                           widgetFormEditText(context: buildContext),
                         ],
                       ),
@@ -112,14 +108,13 @@ class AccountView extends GetView<AccountController> {
         });
   }
 
-  Widget widgetNewAccount() {
+  Widget widgetText({required String text}) {
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Center(
           child: ElasticIn(
-        child: const Text(
-          'Hola 😃, dinos un poco de tu negocio\n\n 👇',
-          style: TextStyle(fontSize: 18),
+        child: Text(text,
+          style: const TextStyle(fontSize: 18),
           textAlign: TextAlign.center,
         ),
       )),
@@ -175,45 +170,40 @@ class AccountView extends GetView<AccountController> {
 
 
   Widget widgetFormEditText({required BuildContext context}) {
+
+    // creamos la vista del formulario 
     return Obx(() => Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
+
+            // textfiel: nombre del negocio
             TextField(
               enabled: !controller.getSavingIndicator,
               minLines: 1,
               maxLines: 5,
               keyboardType: TextInputType.multiline,
               onChanged: (value) => controller.profileAccount.name = value,
-              decoration: const InputDecoration(
-                filled: true,
-                labelText: "Nombre del Negocio",
-                prefixIcon: Icon(Icons.other_houses_outlined),
-              ),
-              controller:
-                  TextEditingController(text: controller.profileAccount.name),
+              decoration: const InputDecoration(filled: true,labelText: "Nombre del Negocio",prefixIcon: Icon(Icons.other_houses_outlined)),
+              controller:TextEditingController(text: controller.profileAccount.name),
               textInputAction: TextInputAction.next,
               focusNode: focusTextEdiNombre,
             ),
             const Divider(color: Colors.transparent, thickness: 1),
+            // textfiel: descripción
             TextField(
               enabled: !controller.getSavingIndicator,
               minLines: 1,
               maxLines: 5,
               keyboardType: TextInputType.multiline,
-              onChanged: (value) =>
-                  controller.profileAccount.description = value,
-              decoration: const InputDecoration(
-                filled: true,
-                labelText: "Descripción (opcional)",
-              ),
-              controller: TextEditingController(
-                  text: controller.profileAccount.description),
+              onChanged: (value) => controller.profileAccount.description = value,
+              decoration: const InputDecoration(filled: true,labelText: "Descripción (opcional)"),
+              controller: TextEditingController(text: controller.profileAccount.description),
               textInputAction: TextInputAction.next,
             ),
             const Divider(color: Colors.transparent, thickness: 1),
+            // textfiel: signo de moneda
             InkWell(
-              onTap: () =>
-                  _bottomPickerSelectCurreny(list: ["ARG\$"], context: context),
+              onTap: () => _bottomPickerSelectCurreny(list: ["ARG\$"], context: context),
               child: TextField(
                 minLines: 1,
                 maxLines: 5,
@@ -228,37 +218,29 @@ class AccountView extends GetView<AccountController> {
                 onChanged: (value) => controller.profileAccount.currencySign = value,
               ),
             ),
-            const SizedBox(
-              height: 24.0,
-            ),
-            const Text("Ubicación", style: TextStyle(fontSize: 24.0)),
-            const SizedBox(
-              height: 24.0,
-            ),
+            const SizedBox(height: 24.0),
+            // text : texto informativo
+            controller.newAccount?widgetText(text: '¿Donde se encuentra?\n\n 🌍'): const Text("Ubicación", style: TextStyle(fontSize: 24.0)),
+            const SizedBox(height: 24.0),
+            // textfiel: seleccionar un pais
             InkWell(
-              onTap: () => _bottomPickerSelectCountries(
-                  list: controller.getCountries, context: context),
+              onTap: () => bottomPickerSelectCountries(list: controller.getCountries, context: context),
               child: TextField(
                 minLines: 1,
                 maxLines: 5,
                 keyboardType: TextInputType.multiline,
                 enabled: false,
-                decoration: const InputDecoration(
-                  labelText: "Pais",
-                  filled: true,
-                  prefixIcon: Icon(Icons.location_on_outlined),
-                ),
+                decoration: const InputDecoration(labelText: "Pais",filled: true,prefixIcon: Icon(Icons.location_on_outlined)),
                 controller: controller.getControllerTextEditPais,
                 onChanged: (value) => controller.profileAccount.country = value,
               ),
             ),
             const SizedBox(width: 12.0, height: 12.0),
+            // textfiel: seleccionar una provincia
             InkWell(
               onTap: () => controller.profileAccount.country == ''
-                  ? _bottomPickerSelectCountries(
-                      list: controller.getCountries, context: context)
-                  : _bottomPickerSelectCities(
-                      list: controller.getCities, context: context),
+                  ? bottomPickerSelectCountries(list: controller.getCountries, context: context)
+                  : bottomPickerSelectCities(list: controller.getCities, context: context),
               child: TextField(
                   minLines: 1,
                   maxLines: 5,
@@ -275,6 +257,7 @@ class AccountView extends GetView<AccountController> {
                   }),
             ),
             const Divider(color: Colors.transparent, thickness: 1),
+            // textfiel: ciudad
             TextField(
               enabled: !controller.getSavingIndicator,
               onChanged: (value) => controller.profileAccount.town = value,
@@ -286,6 +269,7 @@ class AccountView extends GetView<AccountController> {
                   TextEditingController(text: controller.profileAccount.town),
             ),
             const Divider(color: Colors.transparent, thickness: 1),
+            // textfiel: dirección/calle
             TextField(
               enabled: !controller.getSavingIndicator,
               onChanged: (value) => controller.profileAccount.address = value,
@@ -297,28 +281,30 @@ class AccountView extends GetView<AccountController> {
                   text: controller.profileAccount.address),
               textInputAction: TextInputAction.next,
             ),
-            const Divider(color: Colors.transparent, thickness: 1),
-            
+            const SizedBox(height: 50),
+            // text : informativo 
+            controller.newAccount?Column(
+              children: [
+                widgetText(text: 'listo! eso es todo! 💪'),
+                TextButton(onPressed:controller.saveAccount, child: const Text('Guardar')),
+                const SizedBox(height: 50),
+              ],
+            ): Container(),
             
             
           ],
         ));
   }
 
-  void _bottomPickerSelectCities(
+  void bottomPickerSelectCities(
       {required List list, required BuildContext context}) async {
     //  Muestra una hoja inferior de diseño de material modal
     showModalBottomSheet(
         context: context,
         builder: (context) {
-          return Wrap(
-            children: <Widget>[
-              const ListTile(
-                title: Center(
-                  child: Text("Selecciona una provincia"),
-                ),
-              ),
-              ListView(
+          return Scaffold(
+            appBar: AppBar(title: const Text('Seleccione una provincia')),
+            body: ListView(
                 shrinkWrap: true,
                 children: List<Widget>.generate(
                     list.length,
@@ -332,25 +318,19 @@ class AccountView extends GetView<AccountController> {
                           },
                         )),
               ),
-            ],
           );
         });
   }
 
-  void _bottomPickerSelectCountries(
+  void bottomPickerSelectCountries(
       {required List list, required BuildContext context}) async {
     //  Muestra una hoja inferior de diseño de material modal
     showModalBottomSheet(
         context: context,
         builder: (context) {
-          return Wrap(
-            children: <Widget>[
-              const ListTile(
-                title: Center(
-                  child: Text("Seleccione un pais"),
-                ),
-              ),
-              ListView(
+          return Scaffold(
+            appBar: AppBar(title: const Text('Seleccione un pais')),
+            body: ListView(
                 shrinkWrap: true,
                 children: List<Widget>.generate(
                     list.length,
@@ -359,13 +339,12 @@ class AccountView extends GetView<AccountController> {
                           title: Text(list[index]),
                           onTap: () {
                             controller.profileAccount.country = list[index];
-                            controller.getControllerTextEditPais.text =
-                                list[index];
+                            controller.getControllerTextEditPais.text =list[index];
                             Get.back();
+                            bottomPickerSelectCities(list: controller.getCities, context: context);
                           },
                         )),
               ),
-            ],
           );
         });
   }
@@ -376,14 +355,9 @@ class AccountView extends GetView<AccountController> {
     showModalBottomSheet(
         context: context,
         builder: (context) {
-          return Wrap(
-            children: <Widget>[
-              const ListTile(
-                title: Center(
-                  child: Text("Selecciona el signo de la moneda"),
-                ),
-              ),
-              ListView(
+          return Scaffold(
+            appBar: AppBar(title: const Text('Seleccione el signo de la moneda')),
+            body: ListView(
                 shrinkWrap: true,
                 children: List<Widget>.generate(
                     list.length,
@@ -397,7 +371,6 @@ class AccountView extends GetView<AccountController> {
                           },
                         )),
               ),
-            ],
           );
         });
   }
