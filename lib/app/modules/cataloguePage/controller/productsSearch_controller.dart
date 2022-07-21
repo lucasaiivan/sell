@@ -241,8 +241,7 @@ class ControllerProductsSearch extends GetxController {
       itemCount: getListExcelToJson.length,
       itemBuilder: (context, index) {
         // values
-        final ProductCatalogue productValue = ProductCatalogue(
-            creation: Timestamp.now(), upgrade: Timestamp.now());
+        final ProductCatalogue productValue = ProductCatalogue(creation: Timestamp.now(), upgrade: Timestamp.now());
         // set values
         productValue.id = getListExcelToJson[index]['Código'];
         productValue.code = getListExcelToJson[index]['Código'];
@@ -267,8 +266,7 @@ class ControllerProductsSearch extends GetxController {
                   productValue.description,
                   maxLines: 2,
                 ),
-                subtitle: Text(
-                    productValue.code + ' \$${productValue.salePrice.toInt()}'),
+                subtitle: Text('${productValue.code} \$${productValue.salePrice.toInt()}'),
                 onTap: () {
                   //  set
                   productSelect = productValue;
@@ -281,7 +279,7 @@ class ControllerProductsSearch extends GetxController {
     );
     Get.dialog(
       AlertDialog(
-        content: Container(width: 500, height: double.infinity, child: widget),
+        content: SizedBox(width: 500, height: double.infinity, child: widget),
         actions: [
           TextButton(
             child: const Text("Close"),
@@ -294,7 +292,17 @@ class ControllerProductsSearch extends GetxController {
 
   // var
   final RxList<Product> _lisProductsVerified = <Product>[].obs;
-  List<Product> get getListProductsVerified => _lisProductsVerified;
+  List<Product> get getListProductsVerified {
+
+    for (var i = 0; i < _lisProductsVerified.length; i++) {
+      for (var j = 0; j < homeController.getCataloProducts.length; j++) {
+        if( _lisProductsVerified[i].id == homeController.getCataloProducts[j].id ){
+          _lisProductsVerified.removeAt(i);
+        }
+      }
+    }
+    return _lisProductsVerified;
+  }
   set setListProductsVerified(List<Product> value) =>
       _lisProductsVerified.value = value;
 
@@ -310,6 +318,7 @@ class ControllerProductsSearch extends GetxController {
   }
 
   void openDialogListProductVerified({required List<Product> list}) {
+
     Widget widget = ListView.builder(
       itemCount: list.length,
       itemBuilder: (context, index) {

@@ -190,52 +190,49 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                               )
                             : Container(),
                         // TODO: delete release
-                        /* SizedBox(height: 12.0),
+                        const SizedBox(height: 12.0),
                         FadeInRight(
                           child: button(
                             icon: Icon(
-                                controller.getListExcelToJson.length == 0
+                                controller.getListExcelToJson.isEmpty
                                     ? Icons.file_present_sharp
                                     : Icons.view_list_sharp,
                                 color: controller.getButtonData.colorText),
                             onPressed: () {
-                              if (controller.getListExcelToJson.length == 0) {
+                              if (controller.getListExcelToJson.isEmpty) {
                                 controller.convert();
                               } else {
                                 controller.openDialogListExcel();
                               }
                             },
-                            text: controller.getListExcelToJson.length == 0
+                            text: controller.getListExcelToJson.isEmpty
                                 ? "Cargar Archivo Excel de productos"
                                 : 'ver lista de excel',
                             colorAccent: controller.getButtonData.colorText,
                             colorButton: controller.getButtonData.colorButton,
                           ),
                         ),
-                        SizedBox(height: 12.0),
+                        const SizedBox(height: 12.0),
                         FadeInRight(
                           child: button(
                             icon: Icon(
-                                controller.getListProductsVerified.length == 0
+                                controller.getListProductsVerified.isEmpty
                                     ? Icons.change_circle_outlined
                                     : Icons.verified,
                                 color: controller.getButtonData.colorText),
                             onPressed: () {
-                              if (controller.getListProductsVerified.length ==
-                                  0) {
+                              if (controller.getListProductsVerified.isEmpty) {
                                 controller.readProduct();
                               } else {
                                 controller.openDialogListProductVerified(list: controller.getListProductsVerified);
                               }
                             },
-                            text: controller.getListProductsVerified.length == 0
-                                ? "Cargar productos para verificar"
-                                : '${controller.getListProductsVerified.length} productos para verificar',
+                            text: controller.getListProductsVerified.isEmpty? "Cargar productos para verificar": '${controller.getListProductsVerified.length} productos para verificar',
                             colorAccent: controller.getButtonData.colorText,
                             colorButton: controller.getButtonData.colorButton,
                           ),
                         ),
-                        SizedBox(width: 50.0, height: 50.0), */
+                        const SizedBox(width: 50.0, height: 50.0), 
                       ],
                     ),
                   ),

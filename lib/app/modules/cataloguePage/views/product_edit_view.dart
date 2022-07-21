@@ -175,7 +175,7 @@ class ProductEdit extends StatelessWidget {
             controller: controller.controllerTextEditDescripcion,
           ),
           //TODO: eliminar para desarrrollo
-          /* TextButton(
+          TextButton(
               onPressed: () async {
                 String clave = controller.controllerTextEditDescripcion.text;
                 Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
@@ -188,7 +188,7 @@ class ProductEdit extends StatelessWidget {
                 Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
                 if (await canLaunchUrl(uri)) { await launchUrl(uri,mode: LaunchMode.externalApplication);} else {throw 'Could not launch $uri';}
               },
-              child: const Text('Buscar en código Google')),  */
+              child: const Text('Buscar en código Google')), 
           space,
           // textfield 'seleccionar marca'
           textfielButton(
@@ -241,9 +241,7 @@ class ProductEdit extends StatelessWidget {
                       checkColor: Colors.white,
                       activeColor: Colors.amber,
                       value: controller.getProduct.favorite,
-                      title: Text(controller.getProduct.favorite
-                          ? 'En mis favoritos'
-                          : 'Agregar a favoritos'),
+                      title: const Text('Favorito'),
                       onChanged: (value) {
                         if (!controller.getSaveIndicator) {
                           controller.setFavorite = value ?? false;
@@ -256,9 +254,7 @@ class ProductEdit extends StatelessWidget {
                       checkColor: Colors.white,
                       activeColor: Colors.blue,
                       value: controller.getProduct.stock,
-                      title: Text(controller.getProduct.stock
-                          ? 'Control de stock habilitado'
-                          : 'Activar control de Stock'),
+                      title: const Text('Control de stock'),
                       onChanged: (value) {
                         if (!controller.getSaveIndicator) {
                           controller.setStock = value ?? false;
@@ -352,7 +348,7 @@ class ProductEdit extends StatelessWidget {
                   : Container(),
           //TODO: eliminar para desarrrollo
           /* OPCIONES PARA DESARROLLADOR - ELIMINAR ESTE CÓDIGO PARA PRODUCCION */
-          /* controller.getNewProduct
+          controller.getNewProduct
               ? Container()
               : Column(
                   children: [
@@ -385,9 +381,7 @@ class ProductEdit extends StatelessWidget {
                       checkColor: Colors.white,
                       activeColor: Colors.blue,
                       value: controller.getProduct.outstanding,
-                      title: Text(controller.getProduct.outstanding
-                          ? 'Detacado'
-                          : 'Sin destacar'),
+                      title: const Text('Detacado'),
                       onChanged: (value) {
                         if (!controller.getSaveIndicator) {
                           controller.setOutstanding(value: value ?? false);
@@ -404,9 +398,7 @@ class ProductEdit extends StatelessWidget {
                       checkColor: Colors.white,
                       activeColor: Colors.blue,
                       value: controller.getProduct.verified,
-                      title: Text(controller.getProduct.verified
-                          ? 'Verificado'
-                          : 'Sin verificar'),
+                      title: const Text('Verificado'),
                       onChanged: (value) {
                         if (controller.getEditModerator) {
                           if (!controller.getSaveIndicator) {
@@ -443,7 +435,7 @@ class ProductEdit extends StatelessWidget {
                     const SizedBox(height: 50.0),
                   ],
                   // fin widget debug
-                ), */
+                ), 
                     ]             ,
       ),
     );
