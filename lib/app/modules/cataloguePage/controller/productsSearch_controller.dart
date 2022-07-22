@@ -9,6 +9,7 @@ import 'package:sell/app/models/catalogo_model.dart';
 import 'package:sell/app/routes/app_pages.dart';
 import 'package:sell/app/services/database.dart';
 import 'package:sell/app/utils/dynamicTheme_lb.dart';
+import 'package:sell/app/utils/fuctions.dart';
 
 import '../../home/controller/home_controller.dart';
 
@@ -123,7 +124,7 @@ class ControllerProductsSearch extends GetxController {
       setStateSearch = true;
       update(['updateAll']);
       // query
-      Database.readProductGlobalFuture(id: id).then((value) {
+      Database.readProductPublicFuture(id: id).then((value) {
         Product product = Product.fromMap(value.data() as Map);
         toProductView(porduct: product.convertProductCatalogue());
       }).onError((error, stackTrace) {
@@ -297,16 +298,18 @@ class ControllerProductsSearch extends GetxController {
   List<Product> get getListProductsVerified {
 
     for (var i = 0; i < _lisProductsVerified.length; i++) {
+
       for (var j = 0; j < homeController.getCataloProducts.length; j++) {
         if( _lisProductsVerified[i].id == homeController.getCataloProducts[j].id ){
-          _lisProductsVerified.removeAt(i);
+          if(homeController.getCataloProducts[j].verified){
+            _lisProductsVerified.removeAt(i);
+          }
         }
       }
     }
     return _lisProductsVerified;
   }
-  set setListProductsVerified(List<Product> value) =>
-      _lisProductsVerified.value = value;
+  set setListProductsVerified(List<Product> value) => _lisProductsVerified.value = value;
 
   void readProduct() {
     Database.readProductsVerifiedFuture().then((value) {
@@ -318,39 +321,51 @@ class ControllerProductsSearch extends GetxController {
       update(['updateAll']);
     });
   }
-
-  void openDialogListProductVerified({required List<Product> list}) {
-
-    Widget widget = ListView.builder(
+  openDialogListProductVerified({required List<Product> list}) {
+    Widget widget = Scaffold(
+      appBar: AppBar(title: const Text('Productos sin verificar')),
+      body: ListView.builder(
       itemCount: list.length,
       itemBuilder: (context, index) {
         // values
         final Product productValue = list[index];
 
         return ListTile(
-          title: Text(
-            productValue.description,
-            maxLines: 2,
+          contentPadding: const EdgeInsets.all(12),
+          title: Text(productValue.nameMark,maxLines: 1,overflow:TextOverflow.clip),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(productValue.description,maxLines:1,overflow:TextOverflow.clip,textAlign: TextAlign.start,),
+              Row(
+                children: [
+                  // text : code
+                  productValue.code!=''?Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)):Container(),
+                  productValue.code!=''? Text(productValue.code):Container(),
+                  // text : marca de tiempo
+                  Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
+                  Text(Publications.getFechaPublicacion(productValue.creation.toDate(), Timestamp.now().toDate())),
+                ],
+              ),
+            ],
           ),
-          subtitle: Text(
-              'code: ${productValue.code} \naccount: ${productValue.idAccount}'),
           onTap: () {
-            Get.toNamed(Routes.EDITPRODUCT,
-                arguments: {'product': productValue.convertProductCatalogue()});
+            Get.back();
+            Get.toNamed(Routes.EDITPRODUCT,arguments: {'product': productValue.convertProductCatalogue()});
           },
         );
       },
+    ),
     );
-    Get.dialog(
-      AlertDialog(
-        content: SizedBox(width: 500, height: double.infinity, child: widget),
-        actions: [
-          TextButton(
-            child: const Text("Close"),
-            onPressed: () => Get.back(),
-          ),
-        ],
-      ),
+    // muestre la hoja inferior modal de getx
+    Get.bottomSheet(
+      widget,
+      backgroundColor: Get.theme.scaffoldBackgroundColor,
+      enableDrag: true,
+      isDismissible: true,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20), topRight: Radius.circular(20))),
     );
   }
 }

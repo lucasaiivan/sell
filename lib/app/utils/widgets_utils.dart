@@ -748,7 +748,7 @@ class WidgetSuggestionProduct extends StatelessWidget {
                         return Align(
                           widthFactor: 0.5,
                           child: InkWell(
-                            onTap: () => homeController.toProductEdit(productCatalogue:list[index].convertProductCatalogue()),
+                            onTap: () => homeController.toProductEdit(productCatalogue: list[index].convertProductCatalogue()),
                             borderRadius: BorderRadius.circular(50),
                             child: Padding(
                               padding: const EdgeInsets.all(5.0),
@@ -762,26 +762,13 @@ class WidgetSuggestionProduct extends StatelessWidget {
                                         foregroundColor: Colors.grey[100],
                                         radius: radius-2,
                                         child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(50),
+                                          borderRadius:BorderRadius.circular(50),
                                           child: CachedNetworkImage(
-                                            fadeInDuration: const Duration(
-                                                milliseconds: 200),
+                                            fadeInDuration: const Duration( milliseconds: 200),
                                             fit: BoxFit.cover,
                                             imageUrl: list[index].image,
-                                            placeholder: (context, url) =>
-                                                CircleAvatar(
-                                                    backgroundColor:
-                                                        Colors.grey[100],
-                                                    foregroundColor:
-                                                        Colors.grey[100]),
-                                            errorWidget:
-                                                (context, url, error) =>
-                                                    CircleAvatar(
-                                                        backgroundColor:
-                                                            Colors.grey[100],
-                                                        foregroundColor:
-                                                            Colors.grey[100]),
+                                            placeholder: (context, url) =>CircleAvatar(backgroundColor:Colors.grey[100],foregroundColor:Colors.grey[100]),
+                                            errorWidget:(context, url, error) =>CircleAvatar(backgroundColor:Colors.grey[100],foregroundColor:Colors.grey[100]),
                                           ),
                                         ))),
                               ),

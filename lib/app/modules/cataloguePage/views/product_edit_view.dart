@@ -87,16 +87,12 @@ class ProductEdit extends StatelessWidget {
       iconTheme:
           Theme.of(contextPrincipal).iconTheme.copyWith(color: colorAccent),
       title: controller.getSaveIndicator
-          ? Text(controller.getTextAppBar,
-              style: TextStyle(fontSize: 18.0, color: colorAccent))
-          : Text(controller.getIsCatalogue ? 'Editar' : 'Nuevo',
-              style: TextStyle(fontSize: 18.0, color: colorAccent)),
+          ? Text(controller.getTextAppBar,style: TextStyle(fontSize: 18.0, color: colorAccent))
+          : Text(controller.getIsCatalogue ? 'Editar' : 'Nuevo',style: TextStyle(fontSize: 18.0, color: colorAccent)),
       actions: <Widget>[
         controller.getSaveIndicator
             ? Container()
-            : IconButton(
-                icon: Icon(controller.getIsCatalogue ? Icons.check : Icons.add),
-                onPressed: controller.save),
+            : IconButton(icon: Icon(controller.getIsCatalogue ? Icons.check : Icons.add),onPressed: controller.save),
       ],
       bottom: controller.getSaveIndicator
           ? ComponentApp.linearProgressBarApp()
@@ -341,7 +337,9 @@ class ProductEdit extends StatelessWidget {
                       child: button(padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),colorAccent: Colors.white,colorButton: Colors.red.shade400,icon: const Icon(Icons.delete,color: Colors.white),text: 'Eliminar de mi catálogo', onPressed: controller.showDialogDelete),
                     )
                   : Container(),
+            controller.widgetTextButtonAddProduct,
             const SizedBox(height: 20.0),
+          
           //TODO: eliminar para desarrrollo
           /* OPCIONES PARA DESARROLLADOR - ELIMINAR ESTE CÓDIGO PARA PRODUCCION */
           controller.getNewProduct

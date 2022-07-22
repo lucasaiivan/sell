@@ -312,7 +312,7 @@ class SalesController extends GetxController {
     // consulta el código existe en la base de datos de productos publicos
     if (id != '') {
       // query
-      Database.readProductGlobalFuture(id: id).then((value) {
+      Database.readProductPublicFuture(id: id).then((value) {
         showDialogAddProductNew(productCatalogue: ProductCatalogue.fromMap(value.data() as Map));
       }).onError((error, stackTrace) {
         // error o no existe en la db
@@ -717,6 +717,7 @@ class SalesController extends GetxController {
     // comprobamos si es la primera ves que se inicia la aplicación
     if(homeController.theFirstSaleWasMade){
       return Column(
+        crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.center,
         children: const [
           Padding(
             padding: EdgeInsets.only(top: 50,left: 12,right: 12,bottom: 20),

@@ -21,7 +21,7 @@ class Database {
   static Future<QuerySnapshot<Map<String, dynamic>>> readListMarksFuture() =>FirebaseFirestore.instance.collection('/APP/ARG/MARCAS').get();
   static Future<QuerySnapshot<Map<String, dynamic>>> readProductsVerifiedFuture() => FirebaseFirestore.instance.collection('APP/ARG/PRODUCTOS').where("verified", isEqualTo: false).get();
   // future - DocumentSnapshot
-  static Future<DocumentSnapshot<Map<String, dynamic>>> readProductGlobalFuture({required String id}) =>FirebaseFirestore.instance.collection('/APP/ARG/PRODUCTOS/').doc(id).get();
+  static Future<DocumentSnapshot<Map<String, dynamic>>> readProductPublicFuture({required String id}) =>FirebaseFirestore.instance.collection('/APP/ARG/PRODUCTOS/').doc(id).get();
   static Future<DocumentSnapshot<Map<String, dynamic>>>readProfileAccountModelFuture(String id) =>FirebaseFirestore.instance.collection('ACCOUNTS').doc(id).get();
   static Future<DocumentSnapshot<Map<String, dynamic>>>readProductCatalogueFuture({required String idAccount, required String idProduct}) =>FirebaseFirestore.instance.collection('ACCOUNTS/$idAccount/CATALOGUE/').doc(idProduct).get();
   static Future<DocumentSnapshot<Map<String, dynamic>>>readCategotyCatalogueFuture({required String idAccount, required String idCategory}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/CATEGORY/').doc(idCategory).get();
