@@ -4,7 +4,7 @@ class Product {
   String id = "";
   String idAccount = ''; // ID del negocios que actualizo el producto
   bool verified = false; // estado de verificación  al un moderador
-  bool outstanding = false;
+  bool outstanding = false; // producto destacado
   String idMark = ""; // ID de la marca por defecto esta vacia
   String nameMark = '';
   String image = ""; // URL imagen

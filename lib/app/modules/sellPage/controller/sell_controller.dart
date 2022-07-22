@@ -153,13 +153,13 @@ class SalesController extends GetxController {
         barTheme: Get.theme.copyWith(hintColor: colorAccent, highlightColor: colorAccent),
         suggestion: const Center(child: Text('ej. alfajor')),
         failure: const Center(child: Text('No se encontro en tu cátalogo:(')),
-        filter: (product) => [product.description, product.nameMark],
+        filter: (product) => [product.description, product.nameMark,product.code],
         builder: (product) {
 
           // values
           Color tileColor = product.stock? (product.quantityStock <= product.alertStock? Colors.red.withOpacity(0.3): product.favorite?Colors.amber.withOpacity(0.1):Colors.transparent): product.favorite?Colors.amber.withOpacity(0.1):Colors.transparent;
           String alertStockText =product.stock ? (product.quantityStock == 0 ? 'Sin stock' : '${product.quantityStock} en stock') : '';
-
+          
           return Column(
           children: [
             ListTile(
@@ -172,24 +172,56 @@ class SalesController extends GetxController {
                 children: [
                   Text(
                     product.description,
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.clip,
                   ),
+                  
                   Row(
-                    children: [
-                      Text(product.code),
-                      alertStockText==''?Container():Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 5),
-                            child: Icon(Icons.circle,
-                                size: 8, color: Get.theme.dividerColor),
-                          ),
-                      Text(alertStockText),
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      // text : code
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
+                            Text(product.code),
+                          ],
+                        ),
+                        // favorite
+                        product.favorite?Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
+                            const Text('Favorito'),
+                          ],
+                        ):Container(),
                     ],
                   ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                        //  text : alert stock
+                        alertStockText != ''?Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
+                            Text(alertStockText),
+                          ],
+                        ):Container(),
+                        // text : cantidad de ventas
+                        product.sales == 0? Container():Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
+                            Text('${product.sales} ${product.sales == 1 ? 'venta' : 'ventas'}'),
+                          ],
+                        ),
+                    ],
+                  ),
+
                 ],
               ),
-              trailing:
-                  Text(Publications.getFormatoPrecio(monto: product.salePrice)),
+              trailing: Text(Publications.getFormatoPrecio(monto: product.salePrice)),
               onTap: () {
                 selectedProduct(item: product);
                 Get.back();

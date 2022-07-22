@@ -697,10 +697,12 @@ class WidgetSuggestionProduct extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     // controllers
     CataloguePageController homeController = Get.find<CataloguePageController>();
 
     if (list.isEmpty) return Container();
+
     // values
     Color? colorAccent = Get.theme.textTheme.subtitle1?.color;
     double radius = 32.0;
@@ -712,10 +714,7 @@ class WidgetSuggestionProduct extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.all(12.0),
-          child: Text(
-            "sugerencias para vos",
-            style: Get.theme.textTheme.subtitle1,
-          ),
+          child: Text("sugerencias para vos",style: Get.theme.textTheme.subtitle1),
         ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -725,8 +724,7 @@ class WidgetSuggestionProduct extends StatelessWidget {
             !searchButton
                 ? Container()
                 : InkWell(
-                    onTap: () => Get.toNamed(Routes.SEACH_PRODUCT,
-                        arguments: {'id': ''}),
+                    onTap: () => Get.toNamed(Routes.SEACH_PRODUCT,arguments: {'id': ''}),
                     borderRadius: BorderRadius.circular(50),
                     child: Padding(
                       padding: const EdgeInsets.all(5.0),
@@ -734,11 +732,7 @@ class WidgetSuggestionProduct extends StatelessWidget {
                         child: CircleAvatar(
                             radius: radius,
                             backgroundColor: colorAccent,
-                            child: CircleAvatar(
-                                radius: radius-2,
-                                backgroundColor:
-                                    Get.theme.scaffoldBackgroundColor,
-                                child: Icon(Icons.search, color: colorAccent))),
+                            child: CircleAvatar(radius: radius-2,backgroundColor:Get.theme.scaffoldBackgroundColor,child: Icon(Icons.search, color: colorAccent))),
                       ),
                     ),
                   ),
@@ -754,9 +748,7 @@ class WidgetSuggestionProduct extends StatelessWidget {
                         return Align(
                           widthFactor: 0.5,
                           child: InkWell(
-                            onTap: () => homeController.toProductEdit(
-                                productCatalogue:
-                                    list[index].convertProductCatalogue()),
+                            onTap: () => homeController.toProductEdit(productCatalogue:list[index].convertProductCatalogue()),
                             borderRadius: BorderRadius.circular(50),
                             child: Padding(
                               padding: const EdgeInsets.all(5.0),

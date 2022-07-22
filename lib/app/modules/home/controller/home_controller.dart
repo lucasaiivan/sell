@@ -18,7 +18,7 @@ class HomeController extends GetxController {
   bool theFirstSaleWasMade=false;
   void checkFfTheFirstSaleWasMade()async{
     // si al leelo por primera ves no existe sabemos que es la primera vesz
-    GetStorage().read('theFirstSaleWasMade') ?? true;
+    theFirstSaleWasMade = true;//GetStorage().read('theFirstSaleWasMade') ?? true;
     // luego se salva el guarda el dato para posteriormente saber que no es la primera vez que se inicia sesion
     await GetStorage().write('theFirstSaleWasMade', false);
     // se actualiza la vista
@@ -66,40 +66,32 @@ class HomeController extends GetxController {
   List listProductsSelected = [];
 
   // list products más vendidos
-  final RxList<ProductCatalogue> _productsOutstandingList =
-      <ProductCatalogue>[].obs;
+  final RxList<ProductCatalogue> _productsOutstandingList = <ProductCatalogue>[].obs;
   get getProductsOutstandingList => _productsOutstandingList;
-  set setProductsOutstandingList(List<ProductCatalogue> list) {
-    _productsOutstandingList.value = list;
-  }
+  set setProductsOutstandingList(List<ProductCatalogue> list) { _productsOutstandingList.value = list;}
 
-  addToListProductSelecteds({required ProductCatalogue item}) {
-    _productsOutstandingList.add(item);
-  }
+  addToListProductSelecteds({required ProductCatalogue item}) {_productsOutstandingList.add(item);}
 
   //  authentication account profile
   late User _userAccountAuth;
   User get getUserAccountAuth => _userAccountAuth;
   set setUserAccountAuth(User user) => _userAccountAuth = user;
+
   //  profile Admin User
   UserModel _adminUser = UserModel();
   UserModel get getProfileAdminUser => _adminUser;
   set setProfileAdminUser(UserModel user) => _adminUser = user;
 
   // profile account selected
-  ProfileAccountModel _accountProfileSelected =
-      ProfileAccountModel(creation: Timestamp.now());
+  ProfileAccountModel _accountProfileSelected = ProfileAccountModel(creation: Timestamp.now());
   ProfileAccountModel get getProfileAccountSelected => _accountProfileSelected;
-  set setProfileAccountSelected(ProfileAccountModel value) =>
-      _accountProfileSelected = value;
+  set setProfileAccountSelected(ProfileAccountModel value) => _accountProfileSelected = value;
   String get getIdAccountSelected => _accountProfileSelected.id;
   bool isSelected({required String id}) {
     bool isSelected = false;
     for (ProfileAccountModel obj in getManagedAccountsList) {
       if (obj.id == getIdAccountSelected) {
-        if (id == getIdAccountSelected) {
-          isSelected = true;
-        }
+        if (id == getIdAccountSelected) {isSelected = true;}
       }
     }
 
@@ -107,11 +99,9 @@ class HomeController extends GetxController {
   }
 
   // administrator account list
-  final RxList<ProfileAccountModel> _managedAccountsList =
-      <ProfileAccountModel>[].obs;
+  final RxList<ProfileAccountModel> _managedAccountsList =<ProfileAccountModel>[].obs;
   List<ProfileAccountModel> get getManagedAccountsList => _managedAccountsList;
-  set setManagedAccountsList(List<ProfileAccountModel> value) =>
-      _managedAccountsList.value = value;
+  set setManagedAccountsList(List<ProfileAccountModel> value) =>_managedAccountsList.value = value;
   set addManagedAccountsList(ProfileAccountModel profileData) {
     // agregamos la nueva cuenta
     _managedAccountsList.add(profileData);
