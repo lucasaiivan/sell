@@ -229,7 +229,7 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                             colorButton: controller.getButtonData.colorButton,
                           ),
                         ),
-                        const SizedBox(width: 50.0, height: 50.0), 
+                        const SizedBox(width: 50.0, height: 50.0),  
                       ],
                     ),
                   ),
