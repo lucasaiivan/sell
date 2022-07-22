@@ -181,15 +181,15 @@ class ControllerProductsEdit extends GetxController {
     setAccountAuth = homeController.getIdAccountSelected != '';
 
     // se obtiene el parametro y decidimos si es una vista para editrar o un producto nuevo
-    setProduct = Get.arguments['product'] ??
-        ProductCatalogue(upgrade: Timestamp.now(), creation: Timestamp.now());
+    setProduct = Get.arguments['product'] ?? ProductCatalogue(upgrade: Timestamp.now(), creation: Timestamp.now());
     setNewProduct = Get.arguments['new'] ?? false;
     // load data product
-    loadDataProduct();
+    loadDataFormProduct();
     if (getNewProduct == false) {
       // el documento existe
-      getDataProduct(id: getProduct.id);
       isCatalogue();
+      getDataProduct(id: getProduct.id);
+      
     }
 
     super.onInit();
@@ -223,7 +223,9 @@ class ControllerProductsEdit extends GetxController {
   isCatalogue() {
     for (var element in homeController.getCataloProducts) {
       if (element.id == getProduct.id) {
+        // get values
         setIsCatalogue = true;
+        setProduct = element;
         update(['updateAll']);
       }
     }
@@ -383,32 +385,29 @@ class ControllerProductsEdit extends GetxController {
   }
 
   void getDataProduct({required String id}) {
+    // lee el documento del producto
     if (id != '') {
-      Database.readProductGlobalFuture(id: id).then((value) {
+      Database.readProductPublicFuture(id: id).then((value) {
         //  get
         Product product = Product.fromMap(value.data() as Map);
         //  set
-        setProduct = getProduct.updateData(Product: product);
-        loadDataProduct();
+        setProduct = getProduct.updateData(product: product);
+        loadDataFormProduct();
       }).catchError((error) {
         printError(info: error.toString());
       }).onError((error, stackTrace) {
-        loadDataProduct();
+        loadDataFormProduct();
         printError(info: error.toString());
       });
     }
   }
 
-  void loadDataProduct() {
+  void loadDataFormProduct() {
     // set
-    controllerTextEditDescripcion =
-        TextEditingController(text: getProduct.description);
-    controllerTextEditPrecioVenta =
-        MoneyMaskedTextController(initialValue: getProduct.salePrice);
-    controllerTextEditPrecioCompra =
-        MoneyMaskedTextController(initialValue: getProduct.purchasePrice);
-    controllerTextEditQuantityStock =
-        TextEditingController(text: getProduct.quantityStock.toString());
+    controllerTextEditDescripcion =TextEditingController(text: getProduct.description);
+    controllerTextEditPrecioVenta =MoneyMaskedTextController(initialValue: getProduct.salePrice);
+    controllerTextEditPrecioCompra =MoneyMaskedTextController(initialValue: getProduct.purchasePrice);
+    controllerTextEditQuantityStock =TextEditingController(text: getProduct.quantityStock.toString());
     controllerTextEditAlertStock = TextEditingController(text: getProduct.alertStock.toString());
     // primero verificamos que no tenga el metadato del dato de la marca para hacer un consulta inecesaria
     if (getProduct.idMark != '') readMarkProducts();
@@ -623,6 +622,26 @@ class ControllerProductsEdit extends GetxController {
         ),
       ],
     ));
+  }
+
+  Widget get widgetTextButtonAddProduct{
+    // widget : este texto button se va a mostrar por unica ves 
+
+    // comprobamos si es la primera ves que se inicia la aplicación
+    if(homeController.aProductIsAddedForTheFirstTime){
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(top: 50,left: 12,right: 12,bottom: 20),
+            child: Opacity(opacity: 0.8,child: Text('¡Eso es todo 😃!',textAlign: TextAlign.center,style: TextStyle(fontSize: 20))),
+          ),
+          TextButton(onPressed: save,child: const Text('Agregar a mi cátalogo')),
+        ],
+      );
+      }
+    // si no es la primera ves que se inicica la aplicación devuelve una vistra vacia
+    return Container();
   }
 }
 
@@ -850,6 +869,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
       setState(() => list = controllerProductsEdit.getMarks);
     }
   }
+  
 }
 
 // TODO : delete release
@@ -1074,4 +1094,5 @@ class _CreateMarkState extends State<CreateMark> {
       Get.snackbar('', 'Debes escribir un nombre de la marca');
     }
   }
+
 }

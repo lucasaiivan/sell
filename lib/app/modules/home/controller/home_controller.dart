@@ -18,7 +18,7 @@ class HomeController extends GetxController {
   bool theFirstSaleWasMade=false;
   void checkFfTheFirstSaleWasMade()async{
     // si al leelo por primera ves no existe sabemos que es la primera vesz
-    theFirstSaleWasMade = true;//GetStorage().read('theFirstSaleWasMade') ?? true;
+    theFirstSaleWasMade = GetStorage().read('theFirstSaleWasMade') ?? true;
     // luego se salva el guarda el dato para posteriormente saber que no es la primera vez que se inicia sesion
     await GetStorage().write('theFirstSaleWasMade', false);
     // se actualiza la vista
@@ -29,7 +29,7 @@ class HomeController extends GetxController {
   bool aProductIsAddedForTheFirstTime=false;
   void checkIfAProductIsAddedForTheFirstTime()async{
     // si al leelo por primera ves no existe sabemos que es la primera vez
-    GetStorage().read('aProductIsAddedForTheFirstTime') ?? true;
+    aProductIsAddedForTheFirstTime = GetStorage().read('aProductIsAddedForTheFirstTime') ?? true;
     // luego se salva el guarda el dato para posteriormente saber que no es la primera vez que se inicia sesion
     await GetStorage().write('aProductIsAddedForTheFirstTime', false);
     // se actualiza la vista

@@ -46,28 +46,16 @@ class Product {
   factory Product.fromMap(Map data) {
     return Product(
       id: data['id'] ?? '',
-      idAccount: data.containsKey('idAccount')
-          ? data['idAccount']
-          : data['id_negocio'] ?? '',
-      verified: data.containsKey('verified')
-          ? data['verified']
-          : data['verificado'] ?? false,
-      outstanding: data['favorite'] ?? false,
-      idMark:
-          data.containsKey('idMark') ? data['idMark'] : data['id_marca'] ?? '',
+      idAccount: data.containsKey('idAccount')? data['idAccount']: data['id_negocio'] ?? '',
+      verified: data.containsKey('verified')? data['verified']: data['verificado'] ?? false,
+      outstanding: data['outstanding'] ?? false,
+      idMark:data.containsKey('idMark') ? data['idMark'] : data['id_marca'] ?? '',
       nameMark: data['nameMark'] ?? '',
-      image:
-          data.containsKey('image') ? data['image'] : data['urlimagen'] ?? '',
-      description: data.containsKey('description')
-          ? data['description']
-          : data['descripcion'] ?? '',
+      image:data.containsKey('image') ? data['image'] : data['urlimagen'] ?? '',
+      description: data.containsKey('description')? data['description']: data['descripcion'] ?? '',
       code: data.containsKey('code') ? data['code'] : data['codigo'] ?? '',
-      upgrade: data.containsKey('upgrade')
-          ? data['upgrade']
-          : data['timestamp_actualizacion'] ?? Timestamp.now(),
-      creation: data.containsKey('creation')
-          ? data['creation']
-          : data['timestamp_creation'] ?? Timestamp.now(),
+      upgrade: data.containsKey('upgrade')? data['upgrade']: data['timestamp_actualizacion'] ?? Timestamp.now(),
+      creation: data.containsKey('creation')? data['creation']: data['timestamp_creation'] ?? Timestamp.now(),
     );
   }
   Product.fromDocumentSnapshot({required DocumentSnapshot documentSnapshot}) {
@@ -75,41 +63,33 @@ class Product {
     Map data = documentSnapshot.data() as Map;
     // set
     id = data['id'] ?? '';
-    idAccount = data.containsKey('idAccount')
-        ? data['idAccount']
-        : data['id_negocio'] ?? '';
-    verified = data.containsKey('verified')
-        ? data['verified']
-        : data['verificado'] ?? false;
-    outstanding = data['favorite'] ?? false;
-    idMark =
-        data.containsKey('idMark') ? data['idMark'] : data['id_marca'] ?? '';
+    idAccount = data.containsKey('idAccount')? data['idAccount']: data['id_negocio'] ?? '';
+    verified = data.containsKey('verified')? data['verified']: data['verificado'] ?? false;
+    outstanding = data['outstanding'] ?? false;
+    idMark =data.containsKey('idMark') ? data['idMark'] : data['id_marca'] ?? '';
     nameMark = data['nameMark'] ?? '';
     image = data.containsKey('image') ? data['image'] : data['urlimagen'] ?? '';
-    description = data.containsKey('description')
-        ? data['description']
-        : data['descripcion'] ?? '';
+    description = data.containsKey('description')? data['description']: data['descripcion'] ?? '';
     code = data.containsKey('code') ? data['code'] : data['codigo'] ?? '';
-    upgrade = data.containsKey('upgrade')
-        ? data['upgrade']
-        : data['timestamp_actualizacion'] ?? Timestamp.now();
-    creation = data.containsKey('creation')
-        ? data['creation']
-        : data['timestamp_creation'] ?? Timestamp.now();
+    upgrade = data.containsKey('upgrade')? data['upgrade']: data['timestamp_actualizacion'] ?? Timestamp.now();
+    creation = data.containsKey('creation')? data['creation']: data['timestamp_creation'] ?? Timestamp.now();
   }
   ProductCatalogue convertProductCatalogue() {
-    ProductCatalogue productoNegocio =   ProductCatalogue(
-        upgrade: Timestamp.now(), creation: Timestamp.now());
-    productoNegocio.id = this.id;
-    productoNegocio.image = this.image;
-    productoNegocio.verified = this.verified;
-    productoNegocio.favorite = this.outstanding;
-    productoNegocio.idMark = this.idMark;
-    productoNegocio.nameMark = this.nameMark;
-    productoNegocio.description = this.description;
-    productoNegocio.code = this.code;
+    //  create value
+    ProductCatalogue productCatalogue =   ProductCatalogue(upgrade: Timestamp.now(), creation: Timestamp.now());
+    //  set
+    productCatalogue.id = id;
+    productCatalogue.image = image;
+    productCatalogue.verified = verified;
+    productCatalogue.outstanding = outstanding;
+    productCatalogue.idMark = idMark;
+    productCatalogue.nameMark = nameMark;
+    productCatalogue.description = description;
+    productCatalogue.code = code;
+    productCatalogue.upgrade = upgrade;
+    productCatalogue.creation = creation;
 
-    return productoNegocio;
+    return productCatalogue;
   }
 }
 
@@ -275,18 +255,18 @@ class ProductCatalogue {
     return productoDefault;
   }
 
-  ProductCatalogue updateData({required Product}) {
+  ProductCatalogue updateData({required Product product}) {
     // actualizamos los datos del documento publico
-    id = Product.id;
-    image = Product.image;
-    verified = Product.verified;
-    favorite = Product.favorite;
-    idMark = Product.idMark;
-    nameMark = Product.nameMark;
-    description = Product.description;
-    code = Product.code;
-    upgrade = Product.upgrade;
-    creation = Product.creation;
+    id = product.id;
+    image = product.image;
+    verified = product.verified;
+    outstanding = product.outstanding;
+    idMark = product.idMark;
+    nameMark = product.nameMark;
+    description = product.description;
+    code = product.code;
+    upgrade = product.upgrade;
+    creation = product.creation;
     return this;
   }
 }
