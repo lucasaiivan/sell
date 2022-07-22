@@ -79,7 +79,10 @@ class AuthView extends GetView<LoginController> {
             onPressed: controller.login,
           ),
         ),
-        widgetCheckAcceptPrivacyAndUsePolicy(),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 20),
+          child: widgetCheckAcceptPrivacyAndUsePolicy(),
+        ),
       ],
     );
   }
@@ -161,7 +164,7 @@ class AuthView extends GetView<LoginController> {
       componente(
           iconData: Icons.monetization_on,
           texto: "VENTAS",
-          descripcion:'Vende de una forma simple 😊',
+          descripcion:'Registra tus ventas de una forma simple 😊',
           brightness: Get.theme.brightness),
       componente(
           iconData: Icons.analytics_outlined,
@@ -171,7 +174,7 @@ class AuthView extends GetView<LoginController> {
       componente(
           iconData: Icons.category,
           texto: "CATÁLOGO",
-          descripcion: "Arma tu catálogo con tus productos \n 🍫🍬🥫🍾",
+          descripcion: "Arma tu catálogo y controla el stock de tus productos \n 🍫🍬🥫🍾",
           brightness: Get.theme.brightness),
     ];
 
@@ -188,8 +191,7 @@ class AuthView extends GetView<LoginController> {
           scrollDirection: Axis.horizontal, // Dirección de deslizamiento */
           children: pages,
         ),
-        floatingActionButton: dotsIndicator(
-            context: context, pageController: _controller, pages: pages),
+        floatingActionButton: dotsIndicator(context: context, pageController: _controller, pages: pages),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       ),
     );
