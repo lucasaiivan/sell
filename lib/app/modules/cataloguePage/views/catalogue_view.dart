@@ -23,8 +23,7 @@ class CataloguePage extends StatelessWidget {
               appBar: appbar(context: context),
               drawer: drawerApp(),
               body: body(context: context),
-              floatingActionButton:
-                  floatingActionButton(controller: controller),
+              floatingActionButton:floatingActionButton(controller: controller),
             ));
       },
     );

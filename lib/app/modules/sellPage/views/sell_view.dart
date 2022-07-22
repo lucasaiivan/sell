@@ -32,15 +32,11 @@ class SalesView extends StatelessWidget {
               body: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  controller.getTicketView
-                      ? Container()
-                      : Expanded(child: body(controller: controller)),
+                  controller.getTicketView? Container(): Expanded(child: body(controller: controller)),
                   drawerTicket(controller: controller),
                 ],
               ),
-              floatingActionButton: controller.getTicketView
-                  ? floatingActionButtonTicket(controller: controller)
-                  : floatingActionButton(controller: controller),
+              floatingActionButton: controller.getTicketView ? floatingActionButtonTicket(controller: controller): floatingActionButton(controller: controller),
             ));
       },
     );
@@ -52,10 +48,7 @@ class SalesView extends StatelessWidget {
       title: const Text('Vender'),
       actions: [
         controller.getListProductsSelestedLength != 0
-            ? TextButton.icon(
-                icon: const Icon(Icons.clear_rounded),
-                label: const Text('Descartar Ticket'),
-                onPressed: controller.dialogCleanTicketAlert)
+            ? TextButton.icon(icon: const Icon(Icons.clear_rounded),label: const Text('Descartar Ticket'),onPressed: controller.dialogCleanTicketAlert)
             : Container(),
       ],
     );
@@ -69,10 +62,7 @@ class SalesView extends StatelessWidget {
       headerSliverBuilder: (context, innerBoxIsScrolled) {
         return [
           // atentos a cualquier cambio que surja en los datos de la lista de marcas
-          //Obx(() => SliverList(delegate: SliverChildListDelegate([controller.widgetProductSuggestionInfo,widgeSeach]))),
-          SliverList(
-              delegate: SliverChildListDelegate(
-                  [controller.widgetProductSuggestionInfo, widgeSeach]))
+          SliverList(delegate: SliverChildListDelegate([controller.widgetProductSuggestionInfo, widgeSeach]))
         ];
       },
       body: Column(
@@ -81,20 +71,14 @@ class SalesView extends StatelessWidget {
           Expanded(
             child: GridView.builder(
               padding: const EdgeInsets.all(12),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 1.0,
-                  mainAxisSpacing: 1.0),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3,crossAxisSpacing: 1.0,mainAxisSpacing: 1.0),
               itemCount: controller.getListProductsSelested.length + 15,
               itemBuilder: (context, index) {
                 // mostramos un número de elementos vacíos de los cuales el primero tendrá un icono 'add'
                 if (index < controller.getListProductsSelested.length) {
-                  return ProductoItem(
-                      producto: controller.getListProductsSelested[index]);
+                  return ProductoItem(producto: controller.getListProductsSelested[index]);
                 } else {
-                  return ElasticIn(
-                      child: Card(
-                          elevation: 0, color: Colors.grey.withOpacity(0.1)));
+                  return ElasticIn(child: Card(elevation: 0, color: Colors.grey.withOpacity(0.1)));
                 }
               },
             ),
