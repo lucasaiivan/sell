@@ -156,11 +156,29 @@ class ProductEdit extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
+
+          // text : código del producto
+          controller.getProduct.code != ""
+              ? Opacity(
+                  opacity: 0.8,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        controller.getProduct.verified?const Icon(Icons.verified_rounded,color: Colors.blue, size: 20):const Icon(Icons.qr_code_2_rounded, size: 20),
+                        const SizedBox(width: 5),
+                        Text(controller.getProduct.code,style: const TextStyle(height: 1,fontSize: 14,fontWeight: FontWeight.normal)),
+                      ],
+                    ),
+                  ),
+                )
+              : Container(),
+
           space,
           TextField(
-            enabled: controller.getSaveIndicator
-                ? false
-                : controller.getEditModerator || controller.getNewProduct,
+            enabled: controller.getSaveIndicator? false: controller.getEditModerator || controller.getNewProduct,
             minLines: 1,
             maxLines: 5,
             keyboardType: TextInputType.multiline,
@@ -188,7 +206,7 @@ class ProductEdit extends StatelessWidget {
                 Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
                 if (await canLaunchUrl(uri)) { await launchUrl(uri,mode: LaunchMode.externalApplication);} else {throw 'Could not launch $uri';}
               },
-              child: const Text('Buscar en código Google')), 
+              child: const Text('Buscar en código Google')),
           space,
           // textfield 'seleccionar marca'
           textfielButton(
@@ -249,103 +267,81 @@ class ProductEdit extends StatelessWidget {
                       },
                     ),
                     space,
-                    CheckboxListTile(
-                      enabled: controller.getSaveIndicator ? false : true,
-                      checkColor: Colors.white,
-                      activeColor: Colors.blue,
-                      value: controller.getProduct.stock,
-                      title: const Text('Control de stock'),
-                      onChanged: (value) {
-                        if (!controller.getSaveIndicator) {
-                          controller.setStock = value ?? false;
-                        }
-                      },
+                    // control stock
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 500),
+                      color: controller.getProduct.stock?Colors.black12:Colors.transparent,
+                      child: Column(
+                        children: [
+                          CheckboxListTile(
+                            enabled: controller.getSaveIndicator ? false : true,
+                            checkColor: Colors.white,
+                            activeColor: Colors.blue,
+                            value: controller.getProduct.stock,
+                            title: const Text('Control de stock'),
+                            onChanged: (value) {
+                              if (!controller.getSaveIndicator) {
+                                controller.setStock = value ?? false;
+                              }
+                            },
+                          ),
+                          controller.getProduct.stock ? space : Container(),
+                          controller.getProduct.stock
+                              ? ElasticIn(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                                    child: TextField(
+                                      enabled: !controller.getSaveIndicator,
+                                      keyboardType: TextInputType.number,
+                                      onChanged: (value) =>
+                                          controller.getProduct.quantityStock =
+                                              int.parse(controller
+                                                  .controllerTextEditQuantityStock
+                                                  .text),
+                                      decoration: const InputDecoration(
+                                          border: OutlineInputBorder(),
+                                          labelText: "Stock"),
+                                      textInputAction: TextInputAction.done,
+                                      //style: textStyle,
+                                      controller:
+                                          controller.controllerTextEditQuantityStock,
+                                    ),
+                                  ),
+                                )
+                              : Container(),
+                          controller.getProduct.stock ? space : Container(),
+                          controller.getProduct.stock
+                              ? ElasticIn(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
+                                    child: TextField(
+                                      enabled: !controller.getSaveIndicator,
+                                      keyboardType: TextInputType.number,
+                                      onChanged: (value) =>controller.getProduct.alertStock = int.parse(controller.controllerTextEditAlertStock.text),
+                                      decoration: const InputDecoration(border: OutlineInputBorder(),labelText: "Alerta de stock"),
+                                      textInputAction: TextInputAction.done,
+                                      //style: textStyle,
+                                      controller: controller.controllerTextEditAlertStock,
+                                    ),
+                                  ),
+                                )
+                              : Container(),
+                        ],
+                      ),
                     ),
-                    controller.getProduct.stock ? space : Container(),
-                    controller.getProduct.stock
-                        ? ElasticIn(
-                            child: TextField(
-                              enabled: !controller.getSaveIndicator,
-                              keyboardType: TextInputType.number,
-                              onChanged: (value) =>
-                                  controller.getProduct.quantityStock =
-                                      int.parse(controller
-                                          .controllerTextEditQuantityStock
-                                          .text),
-                              decoration: const InputDecoration(
-                                  border: OutlineInputBorder(),
-                                  labelText: "Stock"),
-                              textInputAction: TextInputAction.done,
-                              //style: textStyle,
-                              controller:
-                                  controller.controllerTextEditQuantityStock,
-                            ),
-                          )
-                        : Container(),
-                    controller.getProduct.stock ? space : Container(),
-                    controller.getProduct.stock
-                        ? ElasticIn(
-                            child: TextField(
-                              enabled: !controller.getSaveIndicator,
-                              keyboardType: TextInputType.number,
-                              onChanged: (value) =>
-                                  controller.getProduct.alertStock = int.parse(
-                                      controller
-                                          .controllerTextEditAlertStock.text),
-                              decoration: const InputDecoration(
-                                  border: OutlineInputBorder(),
-                                  labelText: "Alerta de stock"),
-                              textInputAction: TextInputAction.done,
-                              //style: textStyle,
-                              controller:
-                                  controller.controllerTextEditAlertStock,
-                            ),
-                          )
-                        : Container(),
-                    space,
                   ],
                 ),
-          !controller.getNewProduct ? Container() : space,
-
-          // text : código del producto
-          controller.getProduct.code != ""
-              ? Opacity(
-                  opacity: 0.8,
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        const Icon(Icons.qr_code_2_rounded, size: 16),
-                        const SizedBox(width: 5),
-                        Text(controller.getProduct.code,style: const TextStyle(height: 1,fontSize: 14,fontWeight: FontWeight.normal)),
-                      ],
-                    ),
-                  ),
-                )
-              : Container(),
-          space,
+          //space,
           controller.getSaveIndicator
               ? Container()
               : controller.getIsCatalogue
                   ? Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.only(
-                          bottom: 12, top: 40, left: 0, right: 0),
-                      child: button(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 0, vertical: 5),
-                          colorAccent: Colors.white,
-                          colorButton: Colors.red.shade400,
-                          icon: const Icon(
-                            Icons.delete,
-                            color: Colors.white,
-                          ),
-                          text: 'Eliminar de mi catálogo',
-                          onPressed: controller.showDialogDelete),
+                      padding: const EdgeInsets.only(bottom: 12, top: 40, left: 0, right: 0),
+                      child: button(padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),colorAccent: Colors.white,colorButton: Colors.red.shade400,icon: const Icon(Icons.delete,color: Colors.white),text: 'Eliminar de mi catálogo', onPressed: controller.showDialogDelete),
                     )
                   : Container(),
+            const SizedBox(height: 20.0),
           //TODO: eliminar para desarrrollo
           /* OPCIONES PARA DESARROLLADOR - ELIMINAR ESTE CÓDIGO PARA PRODUCCION */
           controller.getNewProduct
@@ -355,29 +351,14 @@ class ProductEdit extends StatelessWidget {
                     const SizedBox(height: 20.0),
                     Row(
                       children: const [
-                        Expanded(
-                            child: Divider(
-                          height: 3.0,
-                          endIndent: 12.0,
-                          indent: 12.0,
-                          thickness: 2,
-                        )),
+                        Expanded(child: Divider(height: 3.0,endIndent: 12.0,indent: 12.0,thickness: 2)),
                         Text("OPCIONES PARA MODERADOR"),
-                        Expanded(
-                            child: Divider(
-                                thickness: 2,
-                                height: 3.0,
-                                endIndent: 12.0,
-                                indent: 12.0))
+                        Expanded(child: Divider(thickness: 2,height: 3.0, endIndent: 12.0,indent: 12.0))
                       ],
                     ),
                     SizedBox(height: !controller.getSaveIndicator ? 20.0 : 0.0),
                     CheckboxListTile(
-                      enabled: controller.getEditModerator
-                          ? controller.getSaveIndicator
-                              ? false
-                              : true
-                          : false,
+                      enabled: controller.getEditModerator ? controller.getSaveIndicator? false: true: false,
                       checkColor: Colors.white,
                       activeColor: Colors.blue,
                       value: controller.getProduct.outstanding,
@@ -414,7 +395,7 @@ class ProductEdit extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
                             icon:const Icon(Icons.security, color: Colors.white),
                             onPressed: () {
-                              if (controller.getEditModerator) {controller.save();}
+                              if (controller.getEditModerator) {controller.saveProductPublic();}
                               controller.setEditModerator = !controller.getEditModerator;
                             },
                             colorAccent: Colors.white,
@@ -435,7 +416,7 @@ class ProductEdit extends StatelessWidget {
                     const SizedBox(height: 50.0),
                   ],
                   // fin widget debug
-                ), 
+                ),
                     ]             ,
       ),
     );
@@ -717,10 +698,10 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
       children: [
         widgetAdd(),
         Expanded(
-          child: list.length == 0
+          child: list.isEmpty
               ? widgetAnimLoad()
               : ListView.builder(
-                  padding: EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.only(bottom: 12),
                   shrinkWrap: true,
                   itemCount: list.length,
                   itemBuilder: (BuildContext context, int index) {
@@ -729,7 +710,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
                       return Column(
                         children: [
                           getWidgetOptionOther(),
-                          Divider(endIndent: 12.0, indent: 12.0, height: 0),
+                          const Divider(endIndent: 12.0, indent: 12.0, height: 0),
                           controllerProductsEdit.getUltimateSelectionMark.id ==
                                       '' ||
                                   controllerProductsEdit
@@ -739,16 +720,16 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
                               : listTile(
                                   marcaSelect: controllerProductsEdit
                                       .getUltimateSelectionMark),
-                          Divider(endIndent: 12.0, indent: 12.0, height: 0),
+                          const Divider(endIndent: 12.0, indent: 12.0, height: 0),
                           listTile(marcaSelect: marcaSelect),
-                          Divider(endIndent: 12.0, indent: 12.0, height: 0),
+                          const Divider(endIndent: 12.0, indent: 12.0, height: 0),
                         ],
                       );
                     }
                     return Column(
                       children: <Widget>[
                         listTile(marcaSelect: marcaSelect),
-                        Divider(endIndent: 12.0, indent: 12.0, height: 0),
+                        const Divider(endIndent: 12.0, indent: 12.0, height: 0),
                       ],
                     );
                   },
@@ -768,42 +749,42 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
           child: Shimmer.fromColors(
               highlightColor: Colors.grey.withOpacity(0.01),
               baseColor: Get.theme.scaffoldBackgroundColor,
-              child: Card(child: Container(width: double.infinity, height: 50))),
+              child: const Card(child: SizedBox(width: double.infinity, height: 50))),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
           child: Shimmer.fromColors(
               highlightColor: Colors.grey.withOpacity(0.01),
               baseColor: Get.theme.scaffoldBackgroundColor,
-              child: Card(child: Container(width: double.infinity, height: 50))),
+              child: const Card(child: SizedBox(width: double.infinity, height: 50))),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
           child: Shimmer.fromColors(
               highlightColor: Colors.grey.withOpacity(0.01),
               baseColor: Get.theme.scaffoldBackgroundColor,
-              child: Card(child: Container(width: double.infinity, height: 50))),
+              child: const Card(child: SizedBox(width: double.infinity, height: 50))),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
           child: Shimmer.fromColors(
               highlightColor: Colors.grey.withOpacity(0.01),
               baseColor: Get.theme.scaffoldBackgroundColor,
-              child: Card(child: Container(width: double.infinity, height: 50))),
+              child: const Card(child: SizedBox(width: double.infinity, height: 50))),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
           child: Shimmer.fromColors(
               highlightColor: Colors.grey.withOpacity(0.01),
               baseColor: Get.theme.scaffoldBackgroundColor,
-              child: Card(child: Container(width: double.infinity, height: 50))),
+              child: const Card(child: SizedBox(width: double.infinity, height: 50))),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
           child: Shimmer.fromColors(
               highlightColor: Colors.grey.withOpacity(0.01),
               baseColor: Get.theme.scaffoldBackgroundColor,
-              child: Card(child: Container(width: double.infinity, height: 50))),
+              child: const Card(child: SizedBox(width: double.infinity, height: 50))),
         ),
       ],
     ));
@@ -816,13 +797,13 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
     if (controllerProductsEdit.getMarks.isEmpty) {
       widget = Container();
     } else {
-      controllerProductsEdit.getMarks.forEach((element) {
+      for (var element in controllerProductsEdit.getMarks) {
         if (element.id == 'other') {
           widget = listTile(
             marcaSelect: element,
           );
         }
-      });
+      }
     }
     return widget;
   }
@@ -836,7 +817,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
               const EdgeInsets.only(bottom: 12, left: 12, right: 12, top: 12),
           child: Row(
             children: [
-              Expanded(child: Text('Marcas', style: TextStyle(fontSize: 18))),
+              const Expanded(child: Text('Marcas', style: TextStyle(fontSize: 18))),
               // TODO : delete icon 'add new mark for release'
               IconButton(
                   onPressed: () {
@@ -846,9 +827,9 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
                             upgrade: Timestamp.now(),
                             creation: Timestamp.now())));
                   },
-                  icon: Icon(Icons.add)),
+                  icon: const Icon(Icons.add)),
               IconButton(
-                icon: Icon(Icons.search),
+                icon: const Icon(Icons.search),
                 onPressed: () {
                   Get.back();
                   showSearch(
@@ -856,10 +837,10 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
                     delegate: SearchPage<Mark>(
                       items: list,
                       searchLabel: 'Buscar marca',
-                      suggestion: Center(
+                      suggestion: const Center(
                         child: Text('ej. Miller'),
                       ),
-                      failure: Center(
+                      failure: const Center(
                         child: Text('No se encontro :('),
                       ),
                       filter: (product) => [
@@ -869,7 +850,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
                       builder: (mark) => Column(
                         children: <Widget>[
                           listTile(marcaSelect: mark),
-                          Divider(endIndent: 12.0, indent: 12.0, height: 0),
+                          const Divider(endIndent: 12.0, indent: 12.0, height: 0),
                         ],
                       ),
                     ),
@@ -885,7 +866,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
 
   Widget listTile({required Mark marcaSelect, bool icon = true}) {
     return ListTile(
-      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       trailing: !icon
           ? null
           : ImageApp.circleImage(
@@ -945,12 +926,12 @@ class _CreateMarkState extends State<CreateMark> {
   final ControllerProductsEdit controllerProductsEdit = Get.find();
 
   //var
-  var uuid = Uuid();
+  var uuid = const Uuid();
   bool newMark = false;
   String title = 'Crear nueva marca';
   bool load = false;
   TextStyle textStyle = const TextStyle(fontSize: 24.0);
-  ImagePicker _picker = ImagePicker();
+  final ImagePicker _picker = ImagePicker();
   XFile xFile = XFile('');
 
   @override

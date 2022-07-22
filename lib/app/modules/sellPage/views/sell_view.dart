@@ -193,17 +193,13 @@ class SalesView extends StatelessWidget {
       height: 125,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: salesController.getRecentlySelectedProductsList.length +
-            (salesController.getRecentlySelectedProductsList.length > 5
-                ? 0
-                : 10),
+        itemCount: salesController.getRecentlySelectedProductsList.length +(salesController.getRecentlySelectedProductsList.length > 5? 0: 10),
         itemBuilder: (context, index) {
           if (index == 0) {
             return Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ElasticIn(
-                    child: circleAvatarBSeachDefault(context: context, seach: true)),
+                ElasticIn(child: circleAvatarBSeachDefault(context: context, seach: true)),
                 (index < salesController.getRecentlySelectedProductsList.length)
                     ? circleAvatarProduct(productCatalogue: salesController.getRecentlySelectedProductsList[index])
                     : ElasticIn(child: circleAvatarBSeachDefault(context: context)),

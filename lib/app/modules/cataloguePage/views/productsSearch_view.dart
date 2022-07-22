@@ -79,10 +79,7 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                 padding:const EdgeInsets.all(0.0),
                 shrinkWrap: true,
                 children: [
-                  controller.getproductDoesNotExist
-                      ? Container()
-                      : WidgetSuggestionProduct(
-                          list: controller.getListProductsSuggestions),
+                  controller.getproductDoesNotExist? Container(): WidgetSuggestionProduct(list: controller.getListProductsSuggestions),
                   Padding(
                     padding: const EdgeInsets.all(20.0),
                     child: Column(

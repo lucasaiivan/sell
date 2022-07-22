@@ -27,6 +27,7 @@ class ControllerProductsSearch extends GetxController {
 
   @override
   void onInit() {
+
     // obtenemos los datos del controlador principal
     homeController = Get.find();
     // llamado inmediatamente después de que se asigna memoria al widget - ej. fetchApi();
@@ -110,8 +111,7 @@ class ControllerProductsSearch extends GetxController {
 
   // list productos sujeridos
   static List<Product> _listProductsSuggestion = [];
-  set setListProductsSuggestions(List<Product> list) =>
-      _listProductsSuggestion = list;
+  set setListProductsSuggestions(List<Product> list) => _listProductsSuggestion = list;
   List<Product> get getListProductsSuggestions => _listProductsSuggestion;
 
   get getproductDoesNotExist => _productDoesNotExist;
@@ -162,12 +162,14 @@ class ControllerProductsSearch extends GetxController {
 
   void queryProductSuggestion() {
     if (getListProductsSuggestions.isEmpty) {
-      Database.readProductsFuture(limit: 5).then((value) {
+      Database.readProductsFuture(limit: 6).then((value) {
+
+        // values 
         List<Product> newList = [];
-        for (var element in value.docs) {
-          newList.add(Product.fromMap(element.data()));
-        }
+        for (var element in value.docs) {newList.add(Product.fromMap(element.data()));}
+        // set
         setListProductsSuggestions = newList;
+        // actualizamos la vista
         update(['updateAll']);
       });
     }
@@ -177,7 +179,7 @@ class ControllerProductsSearch extends GetxController {
     Get.back();
      // TODO :  comrpobar si el producto esta en el cátalogo
      // ...
-    //Get.toNamed(Routes.PRODUCT, arguments: {'product': porduct});
+    Get.toNamed(Routes.EDITPRODUCT, arguments: {'product': porduct});
   }
 
   void toProductNew({required String id}) {

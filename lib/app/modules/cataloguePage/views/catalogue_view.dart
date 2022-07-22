@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sell/app/models/catalogo_model.dart';
@@ -209,40 +210,34 @@ class CataloguePage extends StatelessWidget {
           ListTile(
             tileColor: tileColor,
             contentPadding: const EdgeInsets.all(12),
-            onTap: () =>
-                cataloguePageController.toProductEdit(productCatalogue: item),
+            onTap: () => cataloguePageController.toProductEdit(productCatalogue: item),
             title: Text(item.description, maxLines: 1),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Text(Publications.getFormatoPrecio(monto: item.salePrice)),
-                    item.sales == 0
-                        ? Container()
-                        : Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 5),
-                            child: Icon(Icons.circle,
-                                size: 8, color: Get.theme.dividerColor),
-                          ),
-                    item.sales == 0
-                        ? Container()
-                        : Text(
-                            '${item.sales} ${item.sales == 1 ? 'venta' : 'ventas'}'),
+                    Text(Publications.getFormatoPrecio(monto: item.salePrice),style: const TextStyle(fontWeight:FontWeight.bold )),
+                    Padding(padding: const EdgeInsets.symmetric(horizontal: 3),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
+                    Text(Publications.getFechaPublicacion(item.upgrade.toDate(), Timestamp.now().toDate())),
+                    item.sales == 0? Container(): Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
+                    item.sales == 0? Container(): Text('${item.sales} ${item.sales == 1 ? 'venta' : 'ventas'}'),
                   ],
                 ),
-                alertStockText == '' ? Container() : Text(alertStockText),
+                Row(
+                  children: [
+                    item.favorite? const Text('Favorito'):Container(),
+                    item.favorite && alertStockText != ''? Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)):Container(),
+                    alertStockText == '' ? Container() : Text(alertStockText),
+                  ],
+                ),
               ],
             ),
             leading: CachedNetworkImage(
               imageUrl: item.image,
-              placeholder: (context, url) =>
-                  CircleAvatar(backgroundColor: Get.theme.dividerColor),
-              imageBuilder: (context, image) => CircleAvatar(
-                backgroundImage: image,
-              ),
-              errorWidget: (context, url, error) =>
-                  CircleAvatar(backgroundColor: Get.theme.dividerColor),
+              placeholder: (context, url) =>CircleAvatar(backgroundColor: Get.theme.dividerColor),
+              imageBuilder: (context, image) => CircleAvatar(backgroundImage: image),
+              errorWidget: (context, url, error) =>CircleAvatar(backgroundColor: Get.theme.dividerColor),
             ),
             trailing: item.stock
                 ? Material(
@@ -384,64 +379,5 @@ class CataloguePage extends StatelessWidget {
             })
       ],
     ));
-  }
-
-  Widget get widgetProducts {
-    return SizedBox(
-      width: double.infinity,
-      height: 100,
-      child: Padding(
-        padding: const EdgeInsets.only(left: 12),
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          itemCount: 10,
-          itemBuilder: (context, index) {
-            if (index == 0) {
-              return Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(3.0),
-                    child: CircleAvatar(
-                      radius: 35,
-                      backgroundColor: Colors.grey.withOpacity(0.1),
-                      child: Icon(
-                        Icons.search,
-                        color: Colors.grey.withOpacity(0.8),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(3.0),
-                    child: CircleAvatar(
-                      radius: 35,
-                      backgroundColor: Colors.grey.withOpacity(0.1),
-                    ),
-                  ),
-                ],
-              );
-            }
-
-            return Padding(
-              padding: const EdgeInsets.all(3.0),
-              child: CircleAvatar(
-                radius: 35,
-                backgroundColor: Colors.grey.withOpacity(0.1),
-              ),
-            );
-            /* return CachedNetworkImage(
-                      imageUrl: cataloguePageController
-                          .getCataloProducts[index].image,
-                      placeholder: (context, url) =>
-                          CircleAvatar(backgroundColor: Get.theme.dividerColor),
-                      imageBuilder: (context, image) => CircleAvatar(
-                        backgroundImage: image,
-                      ),
-                      errorWidget: (context, url, error) =>
-                          CircleAvatar(backgroundColor: Get.theme.dividerColor),
-                    ); */
-          },
-        ),
-      ),
-    );
   }
 }

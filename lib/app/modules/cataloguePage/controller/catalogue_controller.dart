@@ -151,15 +151,14 @@ class CataloguePageController extends GetxController
         items: homeController.getCataloProducts,
         searchLabel: 'Buscar',
         searchStyle: TextStyle(color: colorAccent),
-        barTheme: Get.theme
-            .copyWith(hintColor: colorAccent, highlightColor: colorAccent),
+        barTheme: Get.theme  .copyWith(hintColor: colorAccent, highlightColor: colorAccent),
         suggestion: const Center(child: Text('ej. alfajor')),
         failure: const Center(child: Text('No se encontro en tu cátalogo:(')),
         filter: (product) => [product.description, product.nameMark],
         builder: (product) {
 
           // values
-          Color tileColor = product.stock? (product.quantityStock <= product.alertStock? Colors.red.withOpacity(0.5): Colors.transparent): Colors.transparent;
+          Color tileColor = product.stock? (product.quantityStock <= product.alertStock? Colors.red.withOpacity(0.5): product.favorite?Colors.amber.withOpacity(0.3):Colors.transparent) : product.favorite?Colors.amber.withOpacity(0.3):Colors.transparent;
           String alertStockText =product.stock ? (product.quantityStock == 0 ? 'Sin stock' : '${product.quantityStock} en stock') : '';
 
           return Column(
@@ -178,16 +177,18 @@ class CataloguePageController extends GetxController
                     overflow: TextOverflow.clip,
                   ),
                   Row(
-                    children: [
-                      Text(product.code),
-                      alertStockText==''?Container():Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 5),
-                            child: Icon(Icons.circle,
-                                size: 8, color: Get.theme.dividerColor),
-                          ),
-                      Text(alertStockText),
-                    ],
-                  ),
+                  children: [
+                    // text : favorite
+                    product.favorite?Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)):Container(),
+                    product.favorite? const Text('Favorito'):Container(),
+                    //  text : alert stock
+                    product.favorite && alertStockText != ''? Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)):Container(),
+                    alertStockText == '' ? Container() : Text(alertStockText),
+                    // text : cantidad de ventas
+                    product.sales == 0? Container(): Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
+                    product.sales == 0? Container(): Text('${product.sales} ${product.sales == 1 ? 'venta' : 'ventas'}'),
+                  ],
+                ), 
                 ],
               ),
               trailing:

@@ -233,17 +233,19 @@ class ControllerProductsEdit extends GetxController {
     if (getProduct.id != '') {
       if (getProduct.description != '') {
         if (getProduct.idMark != '' && getProduct.nameMark != '') {
-          if (getProduct.salePrice != 0 && getAccountAuth ||
-              getProduct.salePrice == 0 && getAccountAuth == false) {
+
+
+          if (getProduct.salePrice != 0 && getAccountAuth ||getProduct.salePrice == 0 && getAccountAuth == false) {
             if ((getProduct.stock) ? (getProduct.quantityStock >= 1) : true) {
+              
               // update view
               setSaveIndicator = true;
               setTextAppBar = 'Espere por favor...';
               updateAll();
 
-              // set
+              // set : marca de tiempo
               getProduct.upgrade = Timestamp.now();
-              // iamge
+              // actualizar imagen
               if (getXFileImage.path != '') {
                 // image - Si el "path" es distinto '' quiere decir que ahi una nueva imagen para actualizar
                 // si es asi procede a guardar la imagen en la base de la app
@@ -253,13 +255,13 @@ class ControllerProductsEdit extends GetxController {
                 // obtenemos la url de la imagen guardada
                 await ref.getDownloadURL().then((value) => getProduct.image = value);
               }
-              if (getAccountAuth) {
-                // procede agregrar el producto en el cátalogo
-
-                // Mods - save data product global
-                if (getNewProduct || getEditModerator) {saveProductPublic();}
-
-                // values : registra el precio en una colección publica para todos los usuarios
+              // procede agregrar el producto en el cátalogo
+              // Mods - save data product global
+              if (getNewProduct || getEditModerator) {
+                  setProductPublicFirestore(product: getProduct.convertProductoDefault());
+              }
+              
+              // Registra el precio en una colección publica
                 Price precio = Price(
                   id: homeController.getProfileAccountSelected.id,
                   idAccount: homeController.getProfileAccountSelected.id,
@@ -272,21 +274,24 @@ class ControllerProductsEdit extends GetxController {
                   time: Timestamp.fromDate(DateTime.now()),
                 );
                 // Firebase set : se guarda un documento con la referencia del precio del producto
-                await Database.refFirestoreRegisterPrice(idProducto: getProduct.id, isoPAis: 'ARG').doc(precio.id).set(precio.toJson());
+                Database.refFirestoreRegisterPrice(idProducto: getProduct.id, isoPAis: 'ARG').doc(precio.id).set(precio.toJson());
 
                 // Firebase set : se actualiza los datos del producto del cátalogo de la cuenta
-                Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id)
-                    .doc(getProduct.id)
+                if(getNewProduct){
+                  Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id)
                     .set(getProduct.toJson())
                     .whenComplete(() async {
-                      await Future.delayed(const Duration(seconds: 3)).then((value) {setSaveIndicator = false;Get.back();Get.back();});
+                      await Future.delayed(const Duration(seconds: 3)).then((value) {setSaveIndicator = false; Get.back();});
                     })
-                    .onError((error, stackTrace) => setSaveIndicator = false)
-                    .catchError((_) => setSaveIndicator = false);
-              } else {
-                getProduct.verified = true; // TODO : release to false
-                saveProductPublic();
-              }
+                    .onError((error, stackTrace) => setSaveIndicator = false).catchError((_) => setSaveIndicator = false);
+                }else{
+                  Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id)
+                    .update(getProduct.toJson())
+                    .whenComplete(() async {
+                      await Future.delayed(const Duration(seconds: 3)).then((value) {setSaveIndicator = false; Get.back(); });
+                    })
+                    .onError((error, stackTrace) => setSaveIndicator = false).catchError((_) => setSaveIndicator = false);
+                }
             } else {
               Get.snackbar(
                   'Stock no valido 😐', 'debe proporcionar un cantidad');
@@ -306,37 +311,53 @@ class ControllerProductsEdit extends GetxController {
     }
   }
 
-  Future<void> saveProductPublic() async {
+  void saveProductPublic() async {
     // esta función procede a guardar el documento de una colleción publica
 
     if (getProduct.id != '') {
       if (getProduct.description != '') {
         if (getProduct.idMark != '') {
-          // activate indicator load
-          setSaveIndicator = true;
-          setTextAppBar = 'Espere por favor...';
-          updateAll();
 
-          // set
-          Product newProduct = getProduct.convertProductoDefault();
-          newProduct.idAccount = homeController.getProfileAccountSelected.id;
-          newProduct.upgrade = Timestamp.fromDate(DateTime.now());
+            // activate - indicator load
+            setSaveIndicator = true;
+            setTextAppBar = 'Espere por favor...';
+            updateAll();
+            
+            // values 
+            Product product = getProduct.convertProductoDefault();
 
-          // firestore - save product public
-          await Database.refFirestoreProductPublic().doc(newProduct.id).set(newProduct.toJson())
-            .whenComplete(() {
-              Get.back();
-              Get.back();
-              Get.snackbar('Estupendo 😃', 'Gracias por contribuir a la comunidad');
-          });
+            // set firestore
+            if(getNewProduct){
+              Database.refFirestoreProductPublic().doc(product.id).set(product.toJson()).whenComplete(() {
+                Get.back();
+                Get.snackbar('Estupendo 😃', 'Gracias por contribuir a la comunidad');
+              });
+            }else{
+              Database.refFirestoreProductPublic().doc(product.id).update(product.toJson()).whenComplete(() {
+                Get.back();
+                Get.snackbar('Estupendo 😃', 'Gracias por contribuir a la comunidad');
+              });
+            }
+            
         } else {
-          Get.snackbar(
-              'No se puedo continuar 😐', 'debes seleccionar una marca');
+          Get.snackbar('No se puedo continuar 😐', 'debes seleccionar una marca');
         }
       } else {
-        Get.snackbar('No se puedo continuar 👎',
-            'debes escribir una descripción del producto');
+        Get.snackbar('No se puedo continuar 👎','debes escribir una descripción del producto');
       }
+    }
+  }
+  void setProductPublicFirestore({required Product product})  {
+    // esta función procede a guardar el documento de una colleción publica
+    //  get
+    product.idAccount = homeController.getProfileAccountSelected.id;
+    product.upgrade = Timestamp.fromDate(DateTime.now());
+
+    // set firestore - save product public
+    if(getNewProduct){
+      Database.refFirestoreProductPublic().doc(product.id).set(product.toJson());
+    }else{
+      Database.refFirestoreProductPublic().doc(product.id).update(product.toJson());
     }
   }
 
@@ -643,53 +664,51 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         title: const Text('Marcas'),
         actions: [
           // TODO : delete icon 'add new mark for release'
-          //IconButton(onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},icon: const Icon(Icons.add)),
+          IconButton(onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},icon: const Icon(Icons.add)),
           IconButton(icon: const Icon(Icons.search),onPressed: () {Get.back();showSeachMarks();})
         ],
       ),
-      body: Expanded(
-          child: list.isEmpty
-              ? widgetAnimLoad()
-              : ListView.builder(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  shrinkWrap: true,
-                  itemCount: list.length,
-                  itemBuilder: (BuildContext context, int index) {
+      body: list.isEmpty
+          ? widgetAnimLoad()
+          : ListView.builder(
+              padding: const EdgeInsets.only(bottom: 12),
+              shrinkWrap: true,
+              itemCount: list.length,
+              itemBuilder: (BuildContext context, int index) {
 
-                    //  values
-                    Mark marcaSelect = list[index];
+                //  values
+                Mark marcaSelect = list[index];
 
-                    if (index == 0) {
-                      return Column(
-                        children: [
-                          getWidgetOptionOther(),
-                          const Divider(endIndent: 12.0, indent: 12.0, height: 0),
-                          controllerProductsEdit.getUltimateSelectionMark.id ==
-                                      '' ||
-                                  controllerProductsEdit
-                                          .getUltimateSelectionMark.id ==
-                                      'other'
-                              ? Container()
-                              : listTile(
-                                  marcaSelect: controllerProductsEdit
-                                      .getUltimateSelectionMark),
-                          const Divider(
-                              endIndent: 12.0, indent: 12.0, height: 0),
-                          listTile(marcaSelect: marcaSelect),
-                          const Divider(
-                              endIndent: 12.0, indent: 12.0, height: 0),
-                        ],
-                      );
-                    }
-                    return Column(
-                      children: <Widget>[
-                        listTile(marcaSelect: marcaSelect),
-                        const Divider(endIndent: 12.0, indent: 12.0, height: 0),
-                      ],
-                    );
-                  },
-                ),
-        ),
+                if (index == 0) {
+                  return Column(
+                    children: [
+                      getWidgetOptionOther(),
+                      const Divider(endIndent: 12.0, indent: 12.0, height: 0),
+                      controllerProductsEdit.getUltimateSelectionMark.id ==
+                                  '' ||
+                              controllerProductsEdit
+                                      .getUltimateSelectionMark.id ==
+                                  'other'
+                          ? Container()
+                          : listTile(
+                              marcaSelect: controllerProductsEdit
+                                  .getUltimateSelectionMark),
+                      const Divider(
+                          endIndent: 12.0, indent: 12.0, height: 0),
+                      listTile(marcaSelect: marcaSelect),
+                      const Divider(
+                          endIndent: 12.0, indent: 12.0, height: 0),
+                    ],
+                  );
+                }
+                return Column(
+                  children: <Widget>[
+                    listTile(marcaSelect: marcaSelect),
+                    const Divider(endIndent: 12.0, indent: 12.0, height: 0),
+                  ],
+                );
+              },
+            ),
     );
   }
 
