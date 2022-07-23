@@ -55,8 +55,7 @@ class ControllerProductsSearch extends GetxController {
   }
 
   // product
-  ProductCatalogue productSelect =
-      ProductCatalogue(upgrade: Timestamp.now(), creation: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now());
+  ProductCatalogue productSelect = ProductCatalogue(upgrade: Timestamp.now(), creation: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now());
 
   // list excel to json
   static List<Map<String, dynamic>> listExcelToJson = [];
@@ -254,8 +253,7 @@ class ControllerProductsSearch extends GetxController {
         productValue.code = getListExcelToJson[index]['Código'];
         productValue.description = getListExcelToJson[index]['Producto'];
         productValue.purchasePrice = double.tryParse(getListExcelToJson[index]['P. Costo'].toString().replaceAll('\$', '').replaceAll(',', '.')) ??0.0;
-        productValue.salePrice = double.tryParse(getListExcelToJson[index]
-                    ['P. Venta'].toString().replaceAll('\$', '').replaceAll(',', '.')) ??0.0;
+        productValue.salePrice = double.tryParse(getListExcelToJson[index]['P. Venta'].toString().replaceAll('\$', '').replaceAll(',', '.')) ??0.0;
 
         return homeController.isCatalogue(id: productValue.code)
             ? Container()
