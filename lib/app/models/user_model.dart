@@ -142,6 +142,7 @@ class ProfileAccountModel {
     Map data = documentSnapshot.data() as Map;
 
     //  set
+    creation = data["creation"];
     id = data.containsKey('id') ? data['id'] : documentSnapshot.id;
     username = data["username"] ?? '';
     image =

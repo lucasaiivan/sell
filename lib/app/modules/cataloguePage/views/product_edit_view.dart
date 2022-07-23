@@ -346,7 +346,16 @@ class ProductEdit extends StatelessWidget {
           
           //TODO: eliminar para desarrrollo
           /* OPCIONES PARA DESARROLLADOR - ELIMINAR ESTE CÓDIGO PARA PRODUCCION */
-          Column(
+          widgetForModerator,
+          ]             ,
+      ),
+    );
+  }
+
+  /* WIDGETS COMPONENT */
+Widget get widgetForModerator{
+  // TODO : delete release
+  return Column(
                   children: [
                     const SizedBox(height: 20.0),
                     Row(
@@ -421,13 +430,8 @@ class ProductEdit extends StatelessWidget {
                     const SizedBox(height: 50.0),
                   ],
                   // fin widget debug
-                )
-          ]             ,
-      ),
-    );
-  }
-
-  /* WIDGETS COMPONENT */
+                );
+}
   Widget textfielButton(
       {required String labelText,
       String textValue = '',
@@ -918,6 +922,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
 }
 
 // TODO : delete release
+
 class CreateMark extends StatefulWidget {
   late final Mark mark;
   CreateMark({required this.mark, Key? key}) : super(key: key);

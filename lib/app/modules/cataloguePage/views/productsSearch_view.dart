@@ -187,7 +187,21 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                               )
                             : Container(),
                         // TODO: delete release
-                        const SizedBox(height: 12.0),
+                        widgetForModerator,
+                      ],
+                    ),
+                  ),
+                ] //your list view content here
+                ),
+          );
+        });
+  }
+
+  /* WIDGETS COMPONENT */
+  Widget get widgetForModerator{
+    return Column(
+      children: [
+        const SizedBox(height: 12.0),
                         FadeInRight(
                           child: button(
                             icon: Icon(
@@ -229,18 +243,10 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                             colorButton: controller.getButtonData.colorButton,
                           ),
                         ),
-                        const SizedBox(width: 50.0, height: 50.0),  
-                      ],
-                    ),
-                  ),
-                ] //your list view content here
-                ),
-          );
-        });
+                        const SizedBox(width: 50.0, height: 50.0), 
+      ],
+    );
   }
-
-  /* WIDGETS COMPONENT */
-
   Widget button(
       {required Widget icon,
       required String text,
