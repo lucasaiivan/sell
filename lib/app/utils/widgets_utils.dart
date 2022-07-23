@@ -54,48 +54,30 @@ class WidgetButtonListTile extends StatelessWidget {
     return Column(
       children: <Widget>[
         ListTile(
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 5, horizontal: 12),
+          contentPadding:const EdgeInsets.symmetric(vertical: 5, horizontal: 12),
           leading: ClipRRect(
             borderRadius: BorderRadius.circular(10000.0),
             child: perfilNegocio.image != '' || perfilNegocio.image.isNotEmpty
                 ? CachedNetworkImage(
                     fadeInDuration: const Duration(milliseconds: 200),
                     fit: BoxFit.cover,
-                    imageUrl: perfilNegocio.image.contains('https://')
-                        ? perfilNegocio.image
-                        : "https://${perfilNegocio.image}",
+                    imageUrl: perfilNegocio.image.contains('https://')? perfilNegocio.image : "https://${perfilNegocio.image}",
                     placeholder: (context, url) => CircleAvatar(
                       backgroundColor: Colors.black26,
                       radius: 24.0,
-                      child: Text(perfilNegocio.name.substring(0, 1),
-                          style: const TextStyle(
-                              fontSize: 18.0,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold)),
+                      child: Text(perfilNegocio.name.substring(0, 1),style: const TextStyle( fontSize: 18.0,color: Colors.white,fontWeight: FontWeight.bold)),
                     ),
-                    imageBuilder: (context, image) => CircleAvatar(
-                      backgroundImage: image,
-                      radius: 24.0,
-                    ),
+                    imageBuilder: (context, image) => CircleAvatar(backgroundImage: image,radius: 24.0),
                     errorWidget: (context, url, error) => CircleAvatar(
                       backgroundColor: Colors.black26,
                       radius: 24.0,
-                      child: Text(perfilNegocio.name.substring(0, 1),
-                          style: const TextStyle(
-                              fontSize: 18.0,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold)),
+                      child: Text(perfilNegocio.name.substring(0, 1),style: const TextStyle(fontSize: 18.0,color: Colors.white,fontWeight: FontWeight.bold)),
                     ),
                   )
                 : CircleAvatar(
                     backgroundColor: Colors.black26,
                     radius: 24.0,
-                    child: Text(perfilNegocio.name.substring(0, 1),
-                        style: const TextStyle(
-                            fontSize: 18.0,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold)),
+                    child: Text(perfilNegocio.name.substring(0, 1),style: const TextStyle(fontSize: 18.0,color: Colors.white,fontWeight: FontWeight.bold)),
                   ),
           ),
           dense: true,
@@ -377,28 +359,14 @@ Widget drawerApp() {
                 child: homeController.getProfileAccountSelected.image == ''
                     ? CircleAvatar(backgroundColor: Get.theme.dividerColor)
                     : CachedNetworkImage(
-                        imageUrl:
-                            homeController.getProfileAccountSelected.image,
-                        placeholder: (context, url) => CircleAvatar(
-                            backgroundColor: Get.theme.dividerColor),
-                        imageBuilder: (context, image) => CircleAvatar(
-                          backgroundImage: image,
-                        ),
-                        errorWidget: (context, url, error) => CircleAvatar(
-                            backgroundColor: Get.theme.dividerColor),
+                        imageUrl:homeController.getProfileAccountSelected.image,
+                        placeholder: (context, url) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
+                        imageBuilder: (context, image) => CircleAvatar(backgroundImage: image),
+                        errorWidget: (context, url, error) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
                       ),
               ),
-              title: Text(
-                  homeController.getIdAccountSelected == ''
-                      ? 'Seleccionar una cuenta'
-                      : homeController.getProfileAccountSelected.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis),
-              subtitle: homeController.getIdAccountSelected == ''
-                  ? null
-                  : Text(homeController.getProfileAdminUser.superAdmin
-                      ? 'Administrador'
-                      : 'Usuario estandar'),
+              title: Text(homeController.getIdAccountSelected == ''? 'Seleccionar una cuenta': homeController.getProfileAccountSelected.name,maxLines: 1,overflow: TextOverflow.ellipsis),
+              subtitle: homeController.getIdAccountSelected == ''? null: Text(homeController.getProfileAdminUser.superAdmin? 'Administrador': 'Usuario estandar'),
               trailing: const Icon(Icons.arrow_right_rounded),
               onTap: () {
                 homeController.showModalBottomSheetSelectAccount();

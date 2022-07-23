@@ -265,7 +265,7 @@ class CataloguePageController extends GetxController
     // widget : este texto se va a mostrar en la primera venta
 
     // comprobamos si es la primera ves que se inicia la aplicación
-    if(homeController.theFirstSaleWasMade){
+    if(homeController.salesUserGuideVisibility){
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [

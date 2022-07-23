@@ -90,9 +90,9 @@ class ControllerProductsEdit extends GetxController {
   String get getTextAppBar => _textAppbar;
 
   // variable para saber si el producto ya esta o no en el cátalogo
-  bool _inCatalogue = false;
-  set setIsCatalogue(bool value) => _inCatalogue = value;
-  bool get getIsCatalogue => _inCatalogue;
+  bool _itsInTheCatalogue = false;
+  set setItsInTheCatalogue(bool value) => _itsInTheCatalogue = value;
+  bool get itsInTheCatalogue => _itsInTheCatalogue;
 
   // variable para mostrar al usuario una viste para editar o crear un nuevo producto
   bool _newProduct = true;
@@ -224,7 +224,7 @@ class ControllerProductsEdit extends GetxController {
     for (var element in homeController.getCataloProducts) {
       if (element.id == getProduct.id) {
         // get values
-        setIsCatalogue = true;
+        setItsInTheCatalogue = true;
         setProduct = element;
         update(['updateAll']);
       }
@@ -239,6 +239,9 @@ class ControllerProductsEdit extends GetxController {
 
           if (getProduct.salePrice != 0 && getAccountAuth ||getProduct.salePrice == 0 && getAccountAuth == false) {
             if ((getProduct.stock) ? (getProduct.quantityStock >= 1) : true) {
+
+              // Deshabilitar la guía del usuario del catálogo
+              homeController.disableCatalogUserGuide();
               
               // update view
               setSaveIndicator = true;
@@ -284,15 +287,21 @@ class ControllerProductsEdit extends GetxController {
                     .set(getProduct.toJson())
                     .whenComplete(() async {
                       await Future.delayed(const Duration(seconds: 3)).then((value) {setSaveIndicator = false; Get.back();});
-                    })
-                    .onError((error, stackTrace) => setSaveIndicator = false).catchError((_) => setSaveIndicator = false);
+                    }).onError((error, stackTrace) => setSaveIndicator = false).catchError((_) => setSaveIndicator = false);
                 }else{
-                  Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id)
-                    .update(getProduct.toJson())
-                    .whenComplete(() async {
-                      await Future.delayed(const Duration(seconds: 3)).then((value) {setSaveIndicator = false; Get.back(); });
-                    })
-                    .onError((error, stackTrace) => setSaveIndicator = false).catchError((_) => setSaveIndicator = false);
+                  if(itsInTheCatalogue){
+                    Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id)
+                      .update(getProduct.toJson())
+                      .whenComplete(() async {
+                        await Future.delayed(const Duration(seconds: 3)).then((value) {setSaveIndicator = false; Get.back(); });
+                    }).onError((error, stackTrace) => setSaveIndicator = false).catchError((_) => setSaveIndicator = false);
+                  }else{
+                    Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id)
+                      .set(getProduct.toJson())
+                      .whenComplete(() async {
+                        await Future.delayed(const Duration(seconds: 3)).then((value) {setSaveIndicator = false; Get.back(); });
+                    }).onError((error, stackTrace) => setSaveIndicator = false).catchError((_) => setSaveIndicator = false);
+                  }
                 }
             } else {
               Get.snackbar(
@@ -628,7 +637,7 @@ class ControllerProductsEdit extends GetxController {
     // widget : este texto button se va a mostrar por unica ves 
 
     // comprobamos si es la primera ves que se inicia la aplicación
-    if(homeController.aProductIsAddedForTheFirstTime){
+    if(homeController.catalogUserHuideVisibility){
       return Column(
         crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.center,
         children: [
