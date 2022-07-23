@@ -640,7 +640,7 @@ class ControllerProductsEdit extends GetxController {
     // widget : este texto button se va a mostrar por unica ves 
 
     // comprobamos si es la primera ves que se inicia la aplicación
-    if(homeController.catalogUserHuideVisibility){
+    if(homeController.catalogUserHuideVisibility && !homeController.isCatalogue(id: getProduct.id)){
       return Column(
         crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.center,
         children: [

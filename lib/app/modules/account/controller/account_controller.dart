@@ -152,19 +152,13 @@ class AccountController extends GetxController {
           }
           // si se cargo una nueva imagen procede a guardar la imagen en Storage
           if (getImageUpdate) {
-            UploadTask uploadTask =
-                Database.referenceStorageAccountImageProfile(
-                        id: profileAccount.id)
-                    .putFile(File(getxFile.path));
+            UploadTask uploadTask = Database.referenceStorageAccountImageProfile(id: profileAccount.id).putFile(File(getxFile.path));
             // para obtener la URL de la imagen de firebase storage
-            profileAccount.image =
-                await (await uploadTask).ref.getDownloadURL();
+            profileAccount.image = await (await uploadTask).ref.getDownloadURL();
           }
 
           // si la cuenta no existe, se crea una nueva de lo contrario de actualiza los datos
-          newAccount
-              ? createAccount(data: profileAccount.toJson())
-              : updateAccount(data: profileAccount.toJson());
+          newAccount? createAccount(data: profileAccount.toJson()): updateAccount(data: profileAccount.toJson());
         } else {
           Get.snackbar('😮', 'Debe proporcionar un pais de origen');
         }
@@ -182,9 +176,7 @@ class AccountController extends GetxController {
       var documentReferencer = Database.refFirestoreAccount().doc(data['id']);
 
       // Actualizamos los datos de la cuenta
-      documentReferencer
-          .update(Map<String, dynamic>.from(data))
-          .whenComplete(() {
+      documentReferencer.update(Map<String, dynamic>.from(data)).whenComplete(() {
         Get.back();
         print("######################## FIREBASE updateAccount whenComplete");
       }).catchError((e) {

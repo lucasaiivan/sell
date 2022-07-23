@@ -117,76 +117,74 @@ class SalesView extends StatelessWidget {
                           // lines ------
                           Padding(padding: const EdgeInsets.all(20.0),child: Dash(color: Get.theme.dividerColor,height: 5, width: 12)),
                           // view 2
-                          Expanded(
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.only(bottom: 24, top: 24),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  const Text('Paga con:'),
-                                  const SizedBox(height: 12),
-                                  //  button : pago con efectivo
-                                  ElevatedButton.icon(style: ButtonStyle(elevation: MaterialStateProperty.all(controller.getTicket.payMode =='effective'? 5: 0)),
-                                    icon:const Icon(Icons.person_outline_sharp),
-                                    onPressed: controller.showDialogMount,
-                                    label: Text(controller.getValueReceivedTicket != 0.0? Publications.getFormatoPrecio(monto: controller.getValueReceivedTicket): 'Ingresar efectivo'),
-                                  ),
-                                  // button : pago con mercado pago
-                                  ElevatedButton.icon(
-                                    style: ButtonStyle(
-                                        elevation: MaterialStateProperty.all(
-                                            controller.getTicket.payMode ==
-                                                    'mercadopago'
-                                                ? 5
-                                                : 0)),
-                                    icon:
-                                        const Icon(Icons.check_circle_rounded),
-                                    onPressed: () => controller
-                                        .setPayModeTicket = 'mercadopago',
-                                    label: const Text('Mercado Pago'),
-                                  ),
-                                  //  button : pago con tarjeta de credito/debito
-                                  ElevatedButton.icon(
-                                    style: ButtonStyle(
-                                        elevation: MaterialStateProperty.all(
-                                            controller.getTicket.payMode ==
-                                                    'card'
-                                                ? 5
-                                                : 0)),
-                                    icon:
-                                        const Icon(Icons.credit_card_outlined),
-                                    onPressed: () =>
-                                        controller.setPayModeTicket = 'card',
-                                    label:
-                                        const Text('Tarjeta de Debito/Credito'),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  // text : cantidad de vuelto
-                                  controller.getValueReceivedTicket == 0 ||
-                                          controller.getTicket.payMode !=
-                                              'effective'
-                                      ? Container()
-                                      : RichText(
-                                          textAlign: TextAlign.center,
-                                          text: TextSpan(
-                                              text: 'Vuelto:  ',
-                                              style: TextStyle(
-                                                  color: Get.theme.textTheme
-                                                      .headline1?.color),
-                                              children: <TextSpan>[
-                                                TextSpan(
-                                                    text: controller
-                                                        .getValueReceived(),
-                                                    style: const TextStyle(
-                                                        fontSize: 30))
-                                              ]),
-                                        ),
-                                  // texto : texto que se va a mostrar por unica ves
-                                  controller.widgetTextFirstSale,
-                                ],
-                              ),
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(bottom: 24, top: 24),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                const Text('Paga con:'),
+                                const SizedBox(height: 12),
+                                //  button : pago con efectivo
+                                ElevatedButton.icon(style: ButtonStyle(elevation: MaterialStateProperty.all(controller.getTicket.payMode =='effective'? 5: 0)),
+                                  icon:const Icon(Icons.person_outline_sharp),
+                                  onPressed: controller.showDialogMount,
+                                  label: Text(controller.getValueReceivedTicket != 0.0? Publications.getFormatoPrecio(monto: controller.getValueReceivedTicket): 'Ingresar efectivo'),
+                                ),
+                                // button : pago con mercado pago
+                                ElevatedButton.icon(
+                                  style: ButtonStyle(
+                                      elevation: MaterialStateProperty.all(
+                                          controller.getTicket.payMode ==
+                                                  'mercadopago'
+                                              ? 5
+                                              : 0)),
+                                  icon:
+                                      const Icon(Icons.check_circle_rounded),
+                                  onPressed: () => controller
+                                      .setPayModeTicket = 'mercadopago',
+                                  label: const Text('Mercado Pago'),
+                                ),
+                                //  button : pago con tarjeta de credito/debito
+                                ElevatedButton.icon(
+                                  style: ButtonStyle(
+                                      elevation: MaterialStateProperty.all(
+                                          controller.getTicket.payMode ==
+                                                  'card'
+                                              ? 5
+                                              : 0)),
+                                  icon:
+                                      const Icon(Icons.credit_card_outlined),
+                                  onPressed: () =>
+                                      controller.setPayModeTicket = 'card',
+                                  label:
+                                      const Text('Tarjeta de Debito/Credito'),
+                                ),
+                                const SizedBox(height: 12),
+                                // text : cantidad de vuelto
+                                controller.getValueReceivedTicket == 0 ||
+                                        controller.getTicket.payMode !=
+                                            'effective'
+                                    ? Container()
+                                    : RichText(
+                                        textAlign: TextAlign.center,
+                                        text: TextSpan(
+                                            text: 'Vuelto:  ',
+                                            style: TextStyle(
+                                                color: Get.theme.textTheme
+                                                    .headline1?.color),
+                                            children: <TextSpan>[
+                                              TextSpan(
+                                                  text: controller
+                                                      .getValueReceived(),
+                                                  style: const TextStyle(
+                                                      fontSize: 30))
+                                            ]),
+                                      ),
+                                // texto : texto que se va a mostrar por unica ves
+                                controller.widgetTextFirstSale,
+                              ],
                             ),
                           ),
                         ],

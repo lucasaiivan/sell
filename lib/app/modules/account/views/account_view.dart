@@ -289,7 +289,7 @@ class AccountView extends GetView<AccountController> {
             // text : marca de tiempo de la ultima actualización del documento
             controller.newAccount?Container():Padding(
               padding: const EdgeInsets.only(top: 50),
-              child: Opacity(opacity: 0.5,child: Center(child: Text('Actualizado ${Publications.getFechaPublicacion(controller.profileAccount.creation.toDate(), Timestamp.now().toDate()).toLowerCase()}'))),
+              child: Opacity(opacity: 0.5,child: Center(child: Text('Te uniste ${Publications.getFechaPublicacion(controller.profileAccount.creation.toDate(), Timestamp.now().toDate()).toLowerCase()}'))),
             ),
             const SizedBox(height: 50),
             // text : informativo 
