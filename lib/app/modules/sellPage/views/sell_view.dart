@@ -237,38 +237,25 @@ class SalesView extends StatelessWidget {
       height: 125,
       child: Obx(() => ListView.builder(
             scrollDirection: Axis.horizontal,
-            itemCount: salesController.getRecentlySelectedProductsList.length +
-                (salesController.getRecentlySelectedProductsList.length > 5
-                    ? 0
-                    : 10),
+            itemCount: salesController.getRecentlySelectedProductsList.length + (salesController.getRecentlySelectedProductsList.length > 5? 0: 10),
             itemBuilder: (context, index) {
               if (index == 0) {
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ElasticIn(
-                        child: circleAvatarBSeachDefault(
-                            context: context, seach: true)),
-                    (index <
-                            salesController
-                                .getRecentlySelectedProductsList.length)
-                        ? circleAvatarProduct(
-                            productCatalogue: salesController
-                                .getRecentlySelectedProductsList[index])
-                        : ElasticIn(
-                            child: circleAvatarBSeachDefault(context: context)),
+                    ElasticIn(child: circleAvatarBSeachDefault(context: context, seach: true)),
+                    (index < salesController.getRecentlySelectedProductsList.length)
+                        ? circleAvatarProduct(productCatalogue: salesController.getRecentlySelectedProductsList[index])
+                        : ElasticIn(child: circleAvatarBSeachDefault(context: context)),
                   ],
                 );
               }
               // mostramos un número de elementos vacíos de los cuales el primero tendrá un icono 'add'
               if (index <
                   salesController.getRecentlySelectedProductsList.length) {
-                return circleAvatarProduct(
-                    productCatalogue:
-                        salesController.getRecentlySelectedProductsList[index]);
+                return circleAvatarProduct(productCatalogue:salesController.getRecentlySelectedProductsList[index]);
               } else {
-                return ElasticIn(
-                    child: circleAvatarBSeachDefault(context: context));
+                return ElasticIn(child: circleAvatarBSeachDefault(context: context));
               }
             },
           )),

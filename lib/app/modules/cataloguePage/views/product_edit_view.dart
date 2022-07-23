@@ -88,11 +88,11 @@ class ProductEdit extends StatelessWidget {
           Theme.of(contextPrincipal).iconTheme.copyWith(color: colorAccent),
       title: controller.getSaveIndicator
           ? Text(controller.getTextAppBar,style: TextStyle(fontSize: 18.0, color: colorAccent))
-          : Text(controller.getIsCatalogue ? 'Editar' : 'Nuevo',style: TextStyle(fontSize: 18.0, color: colorAccent)),
+          : Text(controller.itsInTheCatalogue ? 'Editar' : 'Nuevo',style: TextStyle(fontSize: 18.0, color: colorAccent)),
       actions: <Widget>[
         controller.getSaveIndicator
             ? Container()
-            : IconButton(icon: Icon(controller.getIsCatalogue ? Icons.check : Icons.add),onPressed: controller.save),
+            : IconButton(icon: Icon(controller.itsInTheCatalogue ? Icons.check : Icons.add),onPressed: controller.save),
       ],
       bottom: controller.getSaveIndicator
           ? ComponentApp.linearProgressBarApp()
@@ -330,7 +330,7 @@ class ProductEdit extends StatelessWidget {
           //space,
           controller.getSaveIndicator
               ? Container()
-              : controller.getIsCatalogue
+              : controller.itsInTheCatalogue
                   ? Container(
                       width: double.infinity,
                       padding: const EdgeInsets.only(bottom: 12, top: 40, left: 0, right: 0),

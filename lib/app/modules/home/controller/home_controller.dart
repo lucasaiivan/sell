@@ -14,26 +14,30 @@ import '../../../utils/widgets_utils.dart';
 
 class HomeController extends GetxController {
 
-  // ¿Se hizo la primera venta?
-  bool theFirstSaleWasMade=false;
-  void checkFfTheFirstSaleWasMade()async{
-    // si al leelo por primera ves no existe sabemos que es la primera vesz
-    theFirstSaleWasMade = GetStorage().read('theFirstSaleWasMade') ?? true;
-    // luego se salva el guarda el dato para posteriormente saber que no es la primera vez que se inicia sesion
-    await GetStorage().write('theFirstSaleWasMade', false);
-    // se actualiza la vista
+  // Guide user : Ventas
+  bool salesUserGuideVisibility=false;
+  void getSalesUserGuideVisibility(){
+    // obtenemos la visibilidad de la guía del usuario de ventas
+    salesUserGuideVisibility = GetStorage().read('salesUserGuideVisibility1') ?? true;
     update();
   }
+  void disableSalesUserGuide()async{
+    // Deshabilitar la guía del usuario de ventas
+    salesUserGuideVisibility=false;
+    await GetStorage().write('salesUserGuideVisibility1', salesUserGuideVisibility);
+  }
 
-  // ¿Se agrega un producto por primera vez?
-  bool aProductIsAddedForTheFirstTime=false;
-  void checkIfAProductIsAddedForTheFirstTime()async{
-    // si al leelo por primera ves no existe sabemos que es la primera vez
-    aProductIsAddedForTheFirstTime=GetStorage().read('aProductIsAddedForTheFirstTime') ?? true;
-    // luego se salva el guarda el dato para posteriormente saber que no es la primera vez que se inicia sesion
-    await GetStorage().write('aProductIsAddedForTheFirstTime', false);
-    // se actualiza la vista
+  // Guide user : Catalogue
+  bool catalogUserHuideVisibility=false;
+  void getTheVisibilityOfTheCatalogueUserGuide(){
+    // obtenemos la visibilidad de la guía del usuario del catálogo
+    catalogUserHuideVisibility=GetStorage().read('catalogUserHuideVisibility2') ?? true;
     update();
+  }
+  void disableCatalogUserGuide()async{
+    // Deshabilitar la guía del usuario del catálogo
+    catalogUserHuideVisibility=false;
+    await GetStorage().write('catalogUserHuideVisibility2', catalogUserHuideVisibility);
   }
 
   // value state : este valor valida si el usuario quiere que el código escaado quiere agregarlo a su cátalogue
@@ -114,16 +118,16 @@ class HomeController extends GetxController {
 
   @override
   void onInit() async {
+
     super.onInit();
-    checkFfTheFirstSaleWasMade();
-    checkIfAProductIsAddedForTheFirstTime();
+
+    getSalesUserGuideVisibility();
+    getTheVisibilityOfTheCatalogueUserGuide();
     // obtenemos por parametro los datos de la cuenta de atentificación
     Map map = Get.arguments as Map;
     // verificamos y obtenemos los datos pasados por parametro
     setUserAccountAuth = map['currentUser'];
-    map.containsKey('idAccount')
-        ? readAccountsData(idAccount: map['idAccount'])
-        : readAccountsData(idAccount: '');
+    map.containsKey('idAccount') ? readAccountsData(idAccount: map['idAccount']): readAccountsData(idAccount: '');
   }
 
   @override
@@ -188,6 +192,10 @@ class HomeController extends GetxController {
 
   void readAccountsData({required String idAccount}) {
     //default values
+    setCatalogueCategoryList = [];
+    setCatalogueCategoryList = [];
+    setCatalogueProducts = [];
+    setProductsOutstandingList = [];
     setProfileAccountSelected = ProfileAccountModel(creation: Timestamp.now());
     getProfileAccountSelected.id = idAccount;
 
@@ -379,17 +387,10 @@ class HomeController extends GetxController {
 
   // Cambiar de cuenta
   void accountChange({required String idAccount}) {
-    // default values of controllers
-    setCatalogueCategoryList = [];
-    setCatalogueCategoryList = [];
-    setCatalogueProducts = [];
-    setProductsOutstandingList = [];
     // save key/values Storage
     GetStorage().write('idAccount', idAccount);
-    Get.offAllNamed(Routes.HOME, arguments: {
-      'currentUser': getUserAccountAuth,
-      'idAccount': idAccount,
-    });
+    // navegar hacia otra pantalla
+    Get.offAllNamed(Routes.HOME, arguments: {'currentUser': getUserAccountAuth,'idAccount': idAccount});
   }
 
   // BottomSheet - Getx

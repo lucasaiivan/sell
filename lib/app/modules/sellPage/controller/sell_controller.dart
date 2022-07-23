@@ -101,9 +101,11 @@ class SalesController extends GetxController {
   // FIREBASE
 
   void registerTransaction() {
-    // generate id
-    var id = Publications.generateUid();
 
+    // Procederemos a guardar un documento con la transacción
+
+    // get values 
+    var id = Publications.generateUid(); // generate id
     List listIdsProducts = [];
 
     for (ProductCatalogue element in getListProductsSelested) {
@@ -112,8 +114,8 @@ class SalesController extends GetxController {
         'id': element.id,
         'quantity': element.quantity,
         'description': element.description,
-        'stock': element.stock,
-      });
+        'stock': element.stock}
+        );
     }
     //  set values
     getTicket.id = id;
@@ -393,8 +395,9 @@ class SalesController extends GetxController {
 
   void confirmedPurchase() {
 
-    // quita los textos de presentación
-    homeController.theFirstSaleWasMade=false;
+    // Deshabilitar la guía del usuario de las ventas
+    homeController.disableSalesUserGuide();
+
     // set firestore
     registerTransaction();
     // el usuario confirmo su venta
@@ -681,7 +684,7 @@ class SalesController extends GetxController {
     // widget : información de productos seleccionados que se va a mostrar al usuario por unica vez
 
     // comprobamos si es la primera ves que se inicia la aplicación
-    if(homeController.theFirstSaleWasMade){
+    if(homeController.salesUserGuideVisibility){
       return Column(
         children: const [
           Padding(
@@ -698,7 +701,7 @@ class SalesController extends GetxController {
     // widget : información de sugerencias de los productos que se va a mostrar al usuario por unica ves
 
     // comprobamos si es la primera ves que se inicia la aplicación
-    if(homeController.theFirstSaleWasMade){
+    if(homeController.salesUserGuideVisibility){
       return Column(
         children: const [
           Padding(
@@ -715,7 +718,7 @@ class SalesController extends GetxController {
     // widget : este texto se va a mostrar en la primera venta
 
     // comprobamos si es la primera ves que se inicia la aplicación
-    if(homeController.theFirstSaleWasMade){
+    if(homeController.salesUserGuideVisibility){
       return Column(
         crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.center,
         children: const [

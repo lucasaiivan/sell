@@ -96,7 +96,7 @@ class CataloguePage extends StatelessWidget {
     if (controller.getCataloProducts.isEmpty) {
 
       // mostramos las sugerencias de productos en el primer inicio de la aplicación
-      if(homeController.aProductIsAddedForTheFirstTime){
+      if(homeController.catalogUserHuideVisibility){
         return Center(child: controller.widgetSuggestionProduct);
       }
 
