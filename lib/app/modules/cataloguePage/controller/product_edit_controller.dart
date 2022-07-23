@@ -110,7 +110,7 @@ class ControllerProductsEdit extends GetxController {
 
   // parameter
   ProductCatalogue _product =
-      ProductCatalogue(upgrade: Timestamp.now(), creation: Timestamp.now());
+      ProductCatalogue(upgrade: Timestamp.now(), creation: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now());
   set setProduct(ProductCatalogue product) => _product = product;
   ProductCatalogue get getProduct => _product;
 
@@ -181,10 +181,10 @@ class ControllerProductsEdit extends GetxController {
     setAccountAuth = homeController.getIdAccountSelected != '';
 
     // se obtiene el parametro y decidimos si es una vista para editrar o un producto nuevo
-    setProduct = Get.arguments['product'] ?? ProductCatalogue(upgrade: Timestamp.now(), creation: Timestamp.now());
+    setProduct = Get.arguments['product'] ?? ProductCatalogue(documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now(),upgrade: Timestamp.now(), creation: Timestamp.now());
     setNewProduct = Get.arguments['new'] ?? false;
     // load data product
-    loadDataFormProduct();
+    
     if (getNewProduct == false) {
       // el documento existe
       isCatalogue();
@@ -402,6 +402,7 @@ class ControllerProductsEdit extends GetxController {
         //  set
         setProduct = getProduct.updateData(product: product);
         loadDataFormProduct();
+        
       }).catchError((error) {
         printError(info: error.toString());
       }).onError((error, stackTrace) {

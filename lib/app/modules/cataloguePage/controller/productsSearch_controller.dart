@@ -56,7 +56,7 @@ class ControllerProductsSearch extends GetxController {
 
   // product
   ProductCatalogue productSelect =
-      ProductCatalogue(upgrade: Timestamp.now(), creation: Timestamp.now());
+      ProductCatalogue(upgrade: Timestamp.now(), creation: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now());
 
   // list excel to json
   static List<Map<String, dynamic>> listExcelToJson = [];
@@ -239,59 +239,68 @@ class ControllerProductsSearch extends GetxController {
     update(['updateAll']);
   }
 
-  void openDialogListExcel() {
-    Widget widget = ListView.builder(
+  openDialogListExcel() {
+    // muestra una ventana emergente con la lista de productos para verificar
+    Widget widget = Scaffold(
+      appBar: AppBar(title: const Text('Productos de excel')),
+      body: ListView.builder(
       itemCount: getListExcelToJson.length,
       itemBuilder: (context, index) {
+        
         // values
-        final ProductCatalogue productValue = ProductCatalogue(creation: Timestamp.now(), upgrade: Timestamp.now());
+        final ProductCatalogue productValue = ProductCatalogue(documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now(),creation: Timestamp.now(), upgrade: Timestamp.now());
         // set values
         productValue.id = getListExcelToJson[index]['Código'];
         productValue.code = getListExcelToJson[index]['Código'];
         productValue.description = getListExcelToJson[index]['Producto'];
-        productValue.purchasePrice = double.tryParse(getListExcelToJson[index]
-                    ['P. Costo']
-                .toString()
-                .replaceAll('\$', '')
-                .replaceAll(',', '.')) ??
-            0.0;
+        productValue.purchasePrice = double.tryParse(getListExcelToJson[index]['P. Costo'].toString().replaceAll('\$', '').replaceAll(',', '.')) ??0.0;
         productValue.salePrice = double.tryParse(getListExcelToJson[index]
-                    ['P. Venta']
-                .toString()
-                .replaceAll('\$', '')
-                .replaceAll(',', '.')) ??
-            0.0;
+                    ['P. Venta'].toString().replaceAll('\$', '').replaceAll(',', '.')) ??0.0;
 
         return homeController.isCatalogue(id: productValue.code)
             ? Container()
-            : ListTile(
-                title: Text(
-                  productValue.description,
-                  maxLines: 2,
-                ),
-                subtitle: Text('${productValue.code} \$${productValue.salePrice.toInt()}'),
-                onTap: () {
-                  //  set
-                  productSelect = productValue;
-                  Get.back();
-                  textEditingController.text = productSelect.id;
-                  queryProduct(id: productSelect.id);
-                },
-              );
-      },
-    );
-    Get.dialog(
-      AlertDialog(
-        content: SizedBox(width: 500, height: double.infinity, child: widget),
-        actions: [
-          TextButton(
-            child: const Text("Close"),
-            onPressed: () => Get.back(),
+            :  ListTile(
+          contentPadding: const EdgeInsets.all(12),
+          title: Text(productValue.nameMark,maxLines: 1,overflow:TextOverflow.clip),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(productValue.description,maxLines:1,overflow:TextOverflow.clip,textAlign: TextAlign.start,),
+              Row(
+                children: [
+                  // text : code
+                  productValue.code!=''?Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)):Container(),
+                  productValue.code!=''? Text(productValue.code):Container(),
+                  // text : precio
+                  Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
+                  Text(Publications.getFormatoPrecio(monto: productValue.salePrice)),
+                ],
+              ),
+            ],
           ),
-        ],
-      ),
+          onTap: () {
+            //  set
+            productSelect = productValue;
+            Get.back();
+            textEditingController.text = productSelect.id;
+            queryProduct(id: productSelect.id);
+          },
+        );
+      },
+    ),
+    );
+    // muestre la hoja inferior modal de getx
+    Get.bottomSheet(
+      widget,
+      backgroundColor: Get.theme.scaffoldBackgroundColor,
+      enableDrag: true,
+      isDismissible: true,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20), topRight: Radius.circular(20))),
     );
   }
+
 
   // var
   final RxList<Product> _lisProductsVerified = <Product>[].obs;
@@ -322,6 +331,7 @@ class ControllerProductsSearch extends GetxController {
     });
   }
   openDialogListProductVerified({required List<Product> list}) {
+    // muestra una ventana emergente con la lista de productos para verificar
     Widget widget = Scaffold(
       appBar: AppBar(title: const Text('Productos sin verificar')),
       body: ListView.builder(

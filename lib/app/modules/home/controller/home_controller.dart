@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:sell/app/models/catalogo_model.dart';
 import 'package:sell/app/models/user_model.dart';
+import 'package:sell/app/modules/sellPage/controller/sell_controller.dart';
 import 'package:sell/app/services/database.dart';
 import '../../../routes/app_pages.dart';
 import '../../../utils/widgets_utils.dart';
@@ -56,7 +57,6 @@ class HomeController extends GetxController {
   List<Category> get getCatalogueCategoryList => _categoryList;
   set setCatalogueCategoryList(List<Category> value) {
     _categoryList.value = value;
-    update(['tab']);
   }
 
   // list products for catalogue
@@ -180,7 +180,7 @@ class HomeController extends GetxController {
   }
 
   ProductCatalogue getProductCatalogue({required String id}) {
-    ProductCatalogue product = ProductCatalogue(creation: Timestamp.now(), upgrade: Timestamp.now());
+    ProductCatalogue product = ProductCatalogue(creation: Timestamp.now(), upgrade: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now());
     for (var element in getCataloProducts) {
       if (element.id == id) {
         product = element;
@@ -194,7 +194,6 @@ class HomeController extends GetxController {
   void readAccountsData({required String idAccount}) {
 
     //default values
-    setCatalogueCategoryList = [];
     setCatalogueCategoryList = [];
     setCatalogueProducts = [];
     setProductsOutstandingList = [];
@@ -233,7 +232,6 @@ class HomeController extends GetxController {
 
   getTheBestSellingProducts({required String idAccount}) {
     // obtenemos los productos más vendidos
-    setProductsOutstandingList = [];
     // Firestore get
     Database.readSalesProduct(idAccount: idAccount).listen((value) {
 
@@ -243,6 +241,7 @@ class HomeController extends GetxController {
       for (var element in value.docs) {
         list.add(ProductCatalogue.fromMap(element.data()));
       }
+
 
       // filtramos los productos que esten marcados como favoritos
       List <ProductCatalogue> favoriteList = [];
@@ -269,6 +268,10 @@ class HomeController extends GetxController {
       }
       //  set values
       setProductsOutstandingList = finalList;
+      try{
+        SalesController salesController = Get.find();
+        salesController.update();
+      }catch(_){}
     });
   }
 

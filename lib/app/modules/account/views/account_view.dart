@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'package:animate_do/animate_do.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sell/app/modules/account/controller/account_controller.dart';
+import '../../../utils/fuctions.dart';
 import '../../../utils/widgets_utils.dart';
 
 class AccountView extends GetView<AccountController> {
@@ -42,12 +44,15 @@ class AccountView extends GetView<AccountController> {
                           // button  : actualizart imagen
                           controller.getSavingIndicator
                               ? Container()
-                              : TextButton(
-                                  onPressed: () {
-                                    if (controller.getSavingIndicator == false) {_showModalBottomSheetCambiarImagen(context: buildContext);}
-                                  },
-                                  child: const Text("actualizar imagen")
-                                ),
+                              : Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: TextButton(
+                                    onPressed: () {
+                                      if (controller.getSavingIndicator == false) {_showModalBottomSheetCambiarImagen(context: buildContext);}
+                                    },
+                                    child: const Text("actualizar imagen")
+                                  ),
+                              ),
                           // TextFuield views
                           widgetFormEditText(context: buildContext),
                         ],
@@ -280,6 +285,11 @@ class AccountView extends GetView<AccountController> {
               controller: TextEditingController(
                   text: controller.profileAccount.address),
               textInputAction: TextInputAction.next,
+            ),
+            // text : marca de tiempo de la ultima actualización del documento
+            controller.newAccount?Container():Padding(
+              padding: const EdgeInsets.only(top: 50),
+              child: Opacity(opacity: 0.5,child: Center(child: Text('Actualizado ${Publications.getFechaPublicacion(controller.profileAccount.creation.toDate(), Timestamp.now().toDate()).toLowerCase()}'))),
             ),
             const SizedBox(height: 50),
             // text : informativo 

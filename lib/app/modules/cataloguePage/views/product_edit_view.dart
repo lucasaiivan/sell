@@ -327,11 +327,15 @@ class ProductEdit extends StatelessWidget {
                     ),
                   ],
                 ),
-          //space,
-          controller.getSaveIndicator
-              ? Container()
-              : controller.itsInTheCatalogue
-                  ? Container(
+          // text : marca de tiempo de la ultima actualización del documento
+          controller.getNewProduct?Container():Padding(
+            padding: const EdgeInsets.only(top: 30),
+            //child: Text('Actualizado ${}'),
+            child: Opacity(opacity: 0.5,child: Center(child: Text('Actualizado ${Publications.getFechaPublicacion(controller.getProduct.upgrade.toDate(), Timestamp.now().toDate()).toLowerCase()}'))),
+          ),
+          // button : elminar el documento
+          controller.getSaveIndicator? Container(): 
+            controller.itsInTheCatalogue? Container(
                       width: double.infinity,
                       padding: const EdgeInsets.only(bottom: 12, top: 40, left: 0, right: 0),
                       child: button(padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),colorAccent: Colors.white,colorButton: Colors.red.shade400,icon: const Icon(Icons.delete,color: Colors.white),text: 'Eliminar de mi catálogo', onPressed: controller.showDialogDelete),
@@ -342,9 +346,7 @@ class ProductEdit extends StatelessWidget {
           
           //TODO: eliminar para desarrrollo
           /* OPCIONES PARA DESARROLLADOR - ELIMINAR ESTE CÓDIGO PARA PRODUCCION */
-          controller.getNewProduct
-              ? Container()
-              : Column(
+          Column(
                   children: [
                     const SizedBox(height: 20.0),
                     Row(
@@ -398,10 +400,10 @@ class ProductEdit extends StatelessWidget {
                             },
                             colorAccent: Colors.white,
                             colorButton: controller.getEditModerator? Colors.green: Colors.orange,
-                            text: controller.getEditModerator? 'Actualizar documento': "Editar documento",
+                            text: controller.getEditModerator? controller.getNewProduct?'Crear documento':'Actualizar documento': "Editar documento",
                           ),
                     const SizedBox(height: 20.0),
-                    controller.getSaveIndicator
+                    controller.getSaveIndicator || controller.getNewProduct || !controller.getEditModerator
                         ? Container()
                         : button(
                             padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
@@ -411,11 +413,16 @@ class ProductEdit extends StatelessWidget {
                             colorButton: Colors.red,
                             text: "Eliminar documento",
                           ),
+                    // text : marca de tiempo de la ultima actualización del documento
+                    controller.getNewProduct?Container():Padding(
+                      padding: const EdgeInsets.only(top: 20),
+                      child: Opacity(opacity: 0.5,child: Center(child: Text('Creación ${Publications.getFechaPublicacion(controller.getProduct.documentCreation.toDate(), Timestamp.now().toDate()).toLowerCase()}'))),
+                    ),
                     const SizedBox(height: 50.0),
                   ],
                   // fin widget debug
-                ),
-                    ]             ,
+                )
+          ]             ,
       ),
     );
   }

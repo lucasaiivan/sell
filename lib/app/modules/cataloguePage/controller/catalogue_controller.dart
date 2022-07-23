@@ -102,7 +102,7 @@ class CataloguePageController extends GetxController
   void toProductNew({required String id}) {
     //values default
     ProductCatalogue productCatalogue = ProductCatalogue(
-        id: id, code: id, creation: Timestamp.now(), upgrade: Timestamp.now());
+        id: id, code: id, creation: Timestamp.now(), upgrade: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now());
     // navega hacia una nueva vista para crear un nuevo producto
     Get.toNamed(Routes.EDITPRODUCT,
         arguments: {'new': true, 'product': productCatalogue});
