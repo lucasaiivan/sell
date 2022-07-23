@@ -127,6 +127,7 @@ class HomeController extends GetxController {
     Map map = Get.arguments as Map;
     // verificamos y obtenemos los datos pasados por parametro
     setUserAccountAuth = map['currentUser'];
+    // obtenemos el id de la cuenta seleccionada si es que existe
     map.containsKey('idAccount') ? readAccountsData(idAccount: map['idAccount']): readAccountsData(idAccount: '');
   }
 
@@ -191,6 +192,7 @@ class HomeController extends GetxController {
   // QUERIES FIRESTORE
 
   void readAccountsData({required String idAccount}) {
+
     //default values
     setCatalogueCategoryList = [];
     setCatalogueCategoryList = [];
@@ -200,30 +202,20 @@ class HomeController extends GetxController {
     getProfileAccountSelected.id = idAccount;
 
     // obtenemos las cuentas asociada a este email
-    readUserAccountsList(email: getUserAccountAuth.email ?? 'null');
+    readUserAccountsList(email: getUserAccountAuth.email ?? '');
     // obtenemos los datos de la cuenta
     if (idAccount != '') {
-      Database.readProfileAccountModelFuture(getProfileAccountSelected.id)
-          .then((value) {
-        //get
+      Database.readProfileAccountModelFuture(idAccount).then((value) {
+        // ¿El documento existe?
         if (value.exists) {
-          setProfileAccountSelected =
-              ProfileAccountModel.fromDocumentSnapshot(documentSnapshot: value);
-          //  agregamos los datos del perfil de la cuenta en la lista para mostrar al usuario
-          /* if (profileAccount.id != '') {
-            //addManagedAccount(profileData: profileAccount);
-          } */
+          //get profile account
+          setProfileAccountSelected =  ProfileAccountModel.fromDocumentSnapshot(documentSnapshot: value);
           // load
-
-          readDataAdminUser(
-              email: getUserAccountAuth.email ?? 'null', idAccount: idAccount);
+          readDataAdminUser(email: getUserAccountAuth.email ?? '', idAccount: idAccount);
           readProductsCatalogue(idAccount: idAccount);
           readAdminsUsers(idAccount: idAccount);
           readListCategoryListFuture(idAccount: idAccount);
         }
-      }).catchError((error) {
-        print('########################home readManagedAccountsData: ' +
-            error.toString());
       });
     }
   }
@@ -239,13 +231,15 @@ class HomeController extends GetxController {
     });
   }
 
-  loadProductsOutstanding({required String idAccount}) {
+  getTheBestSellingProducts({required String idAccount}) {
     // obtenemos los productos más vendidos
     setProductsOutstandingList = [];
     // Firestore get
     Database.readSalesProduct(idAccount: idAccount).listen((value) {
+
+      // values 
       List<ProductCatalogue> list = [];
-      //  get
+      //  obtenemos todos los productos ordenas con más ventas
       for (var element in value.docs) {
         list.add(ProductCatalogue.fromMap(element.data()));
       }
@@ -257,17 +251,19 @@ class HomeController extends GetxController {
           favoriteList.add(element);
         }
       }
+      // filtramos los productos que no sean favoritos
       List <ProductCatalogue> filterList = [];
       for (ProductCatalogue element in list) {
         if(element.favorite== false){
           filterList.add(element);
         }
       }
-      // contruimos una nueva lista con los producto ordenados
+      // obtenemos una nueva lista con los productos favoritos primeros ordenados por los que tienen más ventas
       List <ProductCatalogue> finalList = [];
       for (ProductCatalogue element in favoriteList) {
         finalList.add(element);
       }
+      // luego obtenemos los demas productos ordenados por los que tienen más ventas
       for (ProductCatalogue element in filterList) {
         finalList.add(element);
       }
@@ -279,17 +275,19 @@ class HomeController extends GetxController {
   void readProductsCatalogue({required String idAccount}) {
     // obtenemos los obj(productos) del catalogo de la cuenta del negocio
     Database.readProductsCatalogueStream(id: idAccount).listen((value) {
+
+      //  values
       List<ProductCatalogue> list = [];
 
       if (value.docs.isNotEmpty) {
-        //  get
         for (var element in value.docs) {
           list.add(ProductCatalogue.fromMap(element.data()));
         }
       }
-      //  set values
-      loadProductsOutstanding(idAccount: idAccount);
+      //  obtenemos los productos más vendidos
+      getTheBestSellingProducts(idAccount: idAccount);
       setCatalogueProducts = list;
+
     }).onError((error) {
       // error
       setCatalogueProducts = [];
