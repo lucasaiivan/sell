@@ -3,7 +3,10 @@ import 'package:get/get.dart';
 import 'package:sell/app/modules/splash/controllers/splash_controller.dart';
 
 class SplashInit extends GetView<SplashController> {
+  const SplashInit({super.key});
+
   @override
+  // ignore: prefer_const_constructors
   Widget build(BuildContext context) => LoadingInitView();
 }
 
@@ -11,6 +14,7 @@ class LoadingInitView extends StatelessWidget {
   const LoadingInitView({Key? key}) : super(key: key);
 
   @override
+  // ignore: avoid_renaming_method_parameters
   Widget build(BuildContext buildContext) {
 
     //  var 

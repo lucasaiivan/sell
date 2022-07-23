@@ -10,10 +10,8 @@ class Product {
   String image = ""; // URL imagen
   String description = ""; // Informacion
   String code = "";
-  Timestamp creation =
-      Timestamp.now(); // Marca de tiempo ( hora en que se creo el producto )
-  Timestamp upgrade =
-      Timestamp.now(); // Marca de tiempo ( hora en que se edito el producto )
+  Timestamp creation =Timestamp.now(); // Marca de tiempo ( hora en que se creo el producto )
+  Timestamp upgrade =Timestamp.now(); // Marca de tiempo ( hora en que se edito el producto )
 
   Product({
     this.id = "",
@@ -76,7 +74,7 @@ class Product {
   }
   ProductCatalogue convertProductCatalogue() {
     //  create value
-    ProductCatalogue productCatalogue =   ProductCatalogue(upgrade: Timestamp.now(), creation: Timestamp.now());
+    ProductCatalogue productCatalogue =   ProductCatalogue(upgrade: Timestamp.now(), creation: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now());
     //  set
     productCatalogue.id = id;
     productCatalogue.image = image;
@@ -107,10 +105,10 @@ class ProductCatalogue {
   String nameCategory = ""; // name category
   String subcategory = ""; // ID de la subcategoria del producto
   String nameSubcategory = ""; // name subcategory
-  Timestamp creation =
-      Timestamp.now(); // Marca de tiempo ( hora en que se creo el documento )
-  Timestamp upgrade = Timestamp
-      .now(); // Marca de tiempo ( hora en que se actualizaron los datos )
+  Timestamp creation =Timestamp.now(); // Marca de tiempo ( hora en que se creo el documento  )
+  Timestamp upgrade = Timestamp.now(); // Marca de tiempo ( hora en que se actualizo el documento )
+  Timestamp documentCreation =Timestamp.now(); // Marca de tiempo ( hora en que se creo el producto publico )
+  Timestamp documentUpgrade =Timestamp.now();// Marca de tiempo ( hora en que se actualizo el producto publico )
   bool verified = false; // estado de verificación por un moderador
   int quantityStock = 0;
   int sales = 0;
@@ -141,6 +139,8 @@ class ProductCatalogue {
     this.alertStock = 5,
     required this.creation,
     required this.upgrade,
+    required this.documentCreation,
+    required this.documentUpgrade,
 
     // value account
     this.sales = 0,
@@ -158,19 +158,12 @@ class ProductCatalogue {
     return ProductCatalogue(
       // Valores del producto
       id: data['id'] ?? '',
-      verified: data.containsKey('verified')
-          ? data['verified']
-          : data['verificado'] ?? false,
+      verified: data.containsKey('verified')? data['verified']: data['verificado'] ?? false,
       outstanding:  data['outstanding'] ?? false,
-      favorite: data.containsKey('favorite')
-          ? data['favorite']
-          : data['favorito'] ?? false,
-      idMark:
-          data.containsKey('idMark') ? data['idMark'] : data['id_marca'] ?? '',
+      favorite: data.containsKey('favorite')? data['favorite']: data['favorito'] ?? false,
+      idMark:data.containsKey('idMark') ? data['idMark'] : data['id_marca'] ?? '',
       nameMark: data['nameMark'] ?? '',
-      image: data.containsKey('image')
-          ? data['image']
-          : data['urlimagen'] ?? 'https://default',
+      image: data.containsKey('image')? data['image']: data['urlimagen'] ?? 'https://default',
       description: data.containsKey('description')
           ? data['description']
           : data['descripcion'] ?? '',
@@ -187,12 +180,10 @@ class ProductCatalogue {
       nameSubcategory: data.containsKey('nameSubcategory')
           ? data['nameSubcategory']
           : data['subcategoriaName'] ?? '',
-      upgrade: data.containsKey('upgrade')
-          ? data['upgrade']
-          : data['timestamp_actualizacion'] ?? Timestamp.now(),
-      creation: data.containsKey('creation')
-          ? data['creation']
-          : data['timestamp_creation'] ?? Timestamp.now(),
+      upgrade: data.containsKey('upgrade')? data['upgrade']: data['timestamp_actualizacion'] ?? Timestamp.now(),
+      creation: data.containsKey('creation')? data['creation']: data['timestamp_creation'] ?? Timestamp.now(),
+      documentCreation: data['documentCreation'] ?? Timestamp.now(),
+      documentUpgrade:  data['documentUpgrade'] ?? Timestamp.now(),
       // valores de la cuenta
       salePrice: data.containsKey('salePrice')
           ? data['salePrice']
@@ -230,6 +221,8 @@ class ProductCatalogue {
         "purchasePrice": purchasePrice,
         "creation": creation,
         "upgrade": upgrade,
+        "documentCreation": documentCreation,
+        "documentUpgrade": documentUpgrade,
         "currencySign": currencySign,
         "quantity": quantity,
         "stock": stock,
@@ -249,9 +242,6 @@ class ProductCatalogue {
     productoDefault.nameMark =  nameMark;
     productoDefault.description =  description;
     productoDefault.code = code;
-    productoDefault.upgrade =  upgrade;
-    productoDefault.creation =  creation;
-
     return productoDefault;
   }
 
@@ -265,8 +255,8 @@ class ProductCatalogue {
     nameMark = product.nameMark;
     description = product.description;
     code = product.code;
-    upgrade = product.upgrade;
-    creation = product.creation;
+    documentCreation = product.upgrade;
+    documentUpgrade = product.creation;
     return this;
   }
 }

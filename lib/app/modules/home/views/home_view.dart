@@ -31,10 +31,7 @@ class HomeView extends GetView<HomeController> {
     if (controller.getProfileAccountSelected.id == ''){return viewDefault();}
 
     return Obx(() {
-      
-      return WillPopScope(
-        onWillPop: ()=>controller.onBackPressed(context: context),
-        child: getView(index: controller.getIndexPage));
+      return WillPopScope(onWillPop: ()=>controller.onBackPressed(context: context),child: getView(index: controller.getIndexPage));
     });
   }
 }

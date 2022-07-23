@@ -373,7 +373,7 @@ class SalesController extends GetxController {
 
     if (valuePrice != '') {
       if (double.parse(valuePrice) != 0) {
-        addProduct(product: ProductCatalogue(id: id,description: valueDescription,salePrice: double.parse(textEditingControllerAddFlashPrice.text),creation: Timestamp.now(),upgrade: Timestamp.now()));
+        addProduct(product: ProductCatalogue(id: id,description: valueDescription,salePrice: double.parse(textEditingControllerAddFlashPrice.text),creation: Timestamp.now(),upgrade: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now()));
         textEditingControllerAddFlashPrice.text = '';
         update();
         Get.back();

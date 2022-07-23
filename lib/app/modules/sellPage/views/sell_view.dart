@@ -62,7 +62,7 @@ class SalesView extends StatelessWidget {
       headerSliverBuilder: (context, innerBoxIsScrolled) {
         return [
           // atentos a cualquier cambio que surja en los datos de la lista de marcas
-          SliverList(delegate: SliverChildListDelegate([controller.widgetProductSuggestionInfo, widgeSeach(controller: controller)]))
+          SliverList(delegate: SliverChildListDelegate([controller.widgetProductSuggestionInfo, widgeSuggestedProducts(controller1: controller)]))
         ];
       },
       body: Column(
@@ -228,29 +228,31 @@ class SalesView extends StatelessWidget {
 
   // WIDGETS COMPONENTS
 
-  Widget widgeSeach({required SalesController controller}) {
+  Widget widgeSuggestedProducts({required SalesController controller1}) {
+
+    HomeController controller  = Get.find();
 
     return SizedBox(
       width: double.infinity,
       height: 125,
       child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            itemCount: controller.getRecentlySelectedProductsList.length + (controller.getRecentlySelectedProductsList.length > 5? 0: 10),
+            itemCount: controller.getProductsOutstandingList.length + (controller.getProductsOutstandingList.length > 5? 0: 10),
             itemBuilder: (context, index) {
               if (index == 0) {
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     ElasticIn(child: circleAvatarBSeachDefault(context: context, seach: true)),
-                    (index < controller.getRecentlySelectedProductsList.length)
-                        ? circleAvatarProduct(productCatalogue: controller.getRecentlySelectedProductsList[index])
+                    (index < controller.getProductsOutstandingList.length)
+                        ? circleAvatarProduct(productCatalogue: controller.getProductsOutstandingList[index])
                         : ElasticIn(child: circleAvatarBSeachDefault(context: context)),
                   ],
                 );
               }
               // mostramos un número de elementos vacíos de los cuales el primero tendrá un icono 'add'
-              if (index < controller.getRecentlySelectedProductsList.length) {
-                return circleAvatarProduct(productCatalogue:controller.getRecentlySelectedProductsList[index]);
+              if (index < controller.getProductsOutstandingList.length) {
+                return circleAvatarProduct(productCatalogue:controller.getProductsOutstandingList[index]);
               } else {
                 return ElasticIn(child: circleAvatarBSeachDefault(context: context));
               }
