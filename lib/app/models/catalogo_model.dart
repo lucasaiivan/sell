@@ -255,8 +255,8 @@ class ProductCatalogue {
     nameMark = product.nameMark;
     description = product.description;
     code = product.code;
-    documentCreation = product.upgrade;
-    documentUpgrade = product.creation;
+    documentCreation = product.creation;
+    documentUpgrade = product.upgrade;
     return this;
   }
 }

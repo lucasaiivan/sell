@@ -589,8 +589,8 @@ class SalesController extends GetxController {
             children: [
               Padding(
                 padding: const EdgeInsets.only(bottom: 20, left: 12, right: 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                child: Wrap(
+                  //mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     TextButton(
                         onPressed: getCountPriceTotal() > 100
@@ -632,6 +632,7 @@ class SalesController extends GetxController {
                               },
                         child:
                             const Text('1000', style: TextStyle(fontSize: 24))),
+                            
                   ],
                 ),
               ),

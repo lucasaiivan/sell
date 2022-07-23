@@ -97,8 +97,7 @@ class SalesView extends StatelessWidget {
         opacity: controller.getTicketView ? 1 : 0,
         duration: Duration(milliseconds: controller.getTicketView ? 1500 : 100),
         child: Padding(
-          padding:
-              const EdgeInsets.only(bottom: 2, top: 12, right: 5, left: 24),
+          padding:const EdgeInsets.only(bottom: 2, top: 12, right: 5, left: 24),
           child: Material(
             borderRadius: const BorderRadius.all(Radius.circular(12)),
             color: Get.theme.brightness == Brightness.dark
@@ -109,28 +108,14 @@ class SalesView extends StatelessWidget {
               child: Center(
                 child: controller.getStateConfirmPurchase
                     ? widgetConfirmedPurchase()
-                    : Column(
-                        mainAxisSize: MainAxisSize.min,
+                    : ListView(
                         children: [
                           const SizedBox(height: 20),
-                          const Text('Ticket',
-                              textAlign: TextAlign.start,
-                              style: TextStyle(
-                                  fontSize: 30, fontWeight: FontWeight.bold)),
-                          Text(
-                              '${controller.getListProductsSelestedLength} items'),
-                          Text(
-                              'Total: ${Publications.getFormatoPrecio(monto: controller.getCountPriceTotal())}',
-                              style: const TextStyle(
-                                  fontSize: 24, fontWeight: FontWeight.bold)),
+                          const Text('Ticket',textAlign: TextAlign.center,style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+                          Text('${controller.getListProductsSelestedLength} items',textAlign: TextAlign.center),
+                          Text('Total: ${Publications.getFormatoPrecio(monto: controller.getCountPriceTotal())}',textAlign: TextAlign.center, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                           // lines ------
-                          Padding(
-                            padding: const EdgeInsets.all(20.0),
-                            child: Dash(
-                                color: Get.theme.dividerColor,
-                                height: 5,
-                                width: 12),
-                          ),
+                          Padding(padding: const EdgeInsets.all(20.0),child: Dash(color: Get.theme.dividerColor,height: 5, width: 12)),
                           // view 2
                           Expanded(
                             child: Padding(
@@ -143,22 +128,10 @@ class SalesView extends StatelessWidget {
                                   const Text('Paga con:'),
                                   const SizedBox(height: 12),
                                   //  button : pago con efectivo
-                                  ElevatedButton.icon(
-                                    style: ButtonStyle(
-                                        elevation: MaterialStateProperty.all(
-                                            controller.getTicket.payMode ==
-                                                    'effective'
-                                                ? 5
-                                                : 0)),
-                                    icon:
-                                        const Icon(Icons.person_outline_sharp),
+                                  ElevatedButton.icon(style: ButtonStyle(elevation: MaterialStateProperty.all(controller.getTicket.payMode =='effective'? 5: 0)),
+                                    icon:const Icon(Icons.person_outline_sharp),
                                     onPressed: controller.showDialogMount,
-                                    label: Text(
-                                        controller.getValueReceivedTicket != 0.0
-                                            ? Publications.getFormatoPrecio(
-                                                monto: controller
-                                                    .getValueReceivedTicket)
-                                            : 'Ingresar efectivo'),
+                                    label: Text(controller.getValueReceivedTicket != 0.0? Publications.getFormatoPrecio(monto: controller.getValueReceivedTicket): 'Ingresar efectivo'),
                                   ),
                                   // button : pago con mercado pago
                                   ElevatedButton.icon(

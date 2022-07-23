@@ -19,26 +19,26 @@ class HomeController extends GetxController {
   bool salesUserGuideVisibility=false;
   void getSalesUserGuideVisibility(){
     // obtenemos la visibilidad de la guía del usuario de ventas
-    salesUserGuideVisibility = GetStorage().read('salesUserGuideVisibility1') ?? true;
+    salesUserGuideVisibility = GetStorage().read('salesUserGuideVisibility') ?? true;
     update();
   }
   void disableSalesUserGuide()async{
     // Deshabilitar la guía del usuario de ventas
     salesUserGuideVisibility=false;
-    await GetStorage().write('salesUserGuideVisibility1', salesUserGuideVisibility);
+    await GetStorage().write('salesUserGuideVisibility', salesUserGuideVisibility);
   }
 
   // Guide user : Catalogue
   bool catalogUserHuideVisibility=false;
   void getTheVisibilityOfTheCatalogueUserGuide(){
     // obtenemos la visibilidad de la guía del usuario del catálogo
-    catalogUserHuideVisibility=GetStorage().read('catalogUserHuideVisibility2') ?? true;
+    catalogUserHuideVisibility=GetStorage().read('catalogUserHuideVisibility') ?? true;
     update();
   }
   void disableCatalogUserGuide()async{
     // Deshabilitar la guía del usuario del catálogo
     catalogUserHuideVisibility=false;
-    await GetStorage().write('catalogUserHuideVisibility2', catalogUserHuideVisibility);
+    await GetStorage().write('catalogUserHuideVisibility', catalogUserHuideVisibility);
   }
 
   // value state : este valor valida si el usuario quiere que el código escaado quiere agregarlo a su cátalogue

@@ -190,6 +190,8 @@ class ControllerProductsEdit extends GetxController {
       isCatalogue();
       getDataProduct(id: getProduct.id);
       
+    }else{
+      loadDataFormProduct();
     }
 
     super.onInit();
