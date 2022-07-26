@@ -572,7 +572,7 @@ class ControllerProductsEdit extends GetxController {
   }
 
   showModalSelectMarca() {
-    Widget widget = WidgetSelectMark();
+    Widget widget = const WidgetSelectMark();
     // muestre la hoja inferior modal de getx
     Get.bottomSheet(
       widget,
@@ -702,7 +702,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         title: const Text('Marcas'),
         actions: [
           // TODO : delete icon 'add new mark for release'
-          IconButton(onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},icon: const Icon(Icons.add)),
+          //IconButton(onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},icon: const Icon(Icons.add)),
           IconButton(icon: const Icon(Icons.search),onPressed: () {Get.back();showSeachMarks();})
         ],
       ),
@@ -843,14 +843,14 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         suggestion: const Center(child: Text('ej. Miller')),
         failure: const Center(child: Text('No se encontro :(')),
         filter: (product) => [product.name,product.description],
-        builder: (mark) => Column(children: <Widget>[listTile(marcaSelect: mark),const Divider(endIndent: 12.0, indent: 12.0, height: 0)]),
+        builder: (mark) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[listTile(marcaSelect: mark),const Divider(height: 0)]),
       ),
     );
   }
 
   Widget listTile({required Mark marcaSelect, bool icon = true}) {
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       trailing: !icon? null: ImageApp.circleImage(texto: marcaSelect.name, url: marcaSelect.image, size: 50.0),
       dense: true,
       title: Text(marcaSelect.name,overflow: TextOverflow.ellipsis),

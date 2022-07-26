@@ -189,7 +189,7 @@ class ProductEdit extends StatelessWidget {
             controller: controller.controllerTextEditDescripcion,
           ),
           //TODO: eliminar para desarrrollo
-          TextButton(
+          /* TextButton(
               onPressed: () async {
                 String clave = controller.controllerTextEditDescripcion.text;
                 Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
@@ -202,7 +202,7 @@ class ProductEdit extends StatelessWidget {
                 Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
                 if (await canLaunchUrl(uri)) { await launchUrl(uri,mode: LaunchMode.externalApplication);} else {throw 'Could not launch $uri';}
               },
-              child: const Text('Buscar en código Google')),
+              child: const Text('Buscar en código Google')), */
           space,
           // textfield 'seleccionar marca'
           textfielButton(
@@ -342,7 +342,7 @@ class ProductEdit extends StatelessWidget {
           
           //TODO: eliminar para desarrrollo
           /* OPCIONES PARA DESARROLLADOR - ELIMINAR ESTE CÓDIGO PARA PRODUCCION */
-          widgetForModerator,
+          //widgetForModerator,
           ]             ,
       ),
     );
@@ -716,15 +716,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
                         children: [
                           getWidgetOptionOther(),
                           const Divider(endIndent: 12.0, indent: 12.0, height: 0),
-                          controllerProductsEdit.getUltimateSelectionMark.id ==
-                                      '' ||
-                                  controllerProductsEdit
-                                          .getUltimateSelectionMark.id ==
-                                      'other'
-                              ? Container()
-                              : listTile(
-                                  marcaSelect: controllerProductsEdit
-                                      .getUltimateSelectionMark),
+                          controllerProductsEdit.getUltimateSelectionMark.id =='' ||controllerProductsEdit.getUltimateSelectionMark.id =='other'? Container(): listTile(marcaSelect: controllerProductsEdit.getUltimateSelectionMark),
                           const Divider(endIndent: 12.0, indent: 12.0, height: 0),
                           listTile(marcaSelect: marcaSelect),
                           const Divider(endIndent: 12.0, indent: 12.0, height: 0),
@@ -818,8 +810,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
     return Column(
       children: <Widget>[
         Padding(
-          padding:
-              const EdgeInsets.only(bottom: 12, left: 12, right: 12, top: 12),
+          padding: const EdgeInsets.only(bottom: 12, left: 12, right: 12, top: 12),
           child: Row(
             children: [
               const Expanded(child: Text('Marcas', style: TextStyle(fontSize: 18))),
@@ -827,10 +818,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
               IconButton(
                   onPressed: () {
                     Get.back();
-                    Get.to(() => CreateMark(
-                        mark: Mark(
-                            upgrade: Timestamp.now(),
-                            creation: Timestamp.now())));
+                    Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));
                   },
                   icon: const Icon(Icons.add)),
               IconButton(
