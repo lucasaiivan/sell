@@ -54,7 +54,7 @@ class SalesView extends StatelessWidget {
     );
   }
 
-  Widget body({required SalesController controller}) {
+  Widget body(  {required SalesController controller} ) {
     return NestedScrollView(
       /* le permite crear una lista de elementos que se desplazarían hasta que el cuerpo alcanzara la parte superior */
       floatHeaderSlivers: true,
@@ -66,6 +66,7 @@ class SalesView extends StatelessWidget {
         ];
       },
       body: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           controller.widgetSelectedProductsInformation,
           Expanded(
@@ -118,12 +119,13 @@ class SalesView extends StatelessWidget {
                           Padding(padding: const EdgeInsets.all(20.0),child: Dash(color: Get.theme.dividerColor,height: 5, width: 12)),
                           // view 2
                           Padding(
-                            padding:
-                                const EdgeInsets.only(bottom: 24, top: 24),
+                            padding:const EdgeInsets.only(bottom: 24, top: 24),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
+                                // texto : texto que se va a mostrar por unica ves
+                                controller.widgetTextFirstSale,
                                 const Text('Paga con:'),
                                 const SizedBox(height: 12),
                                 //  button : pago con efectivo
@@ -134,56 +136,32 @@ class SalesView extends StatelessWidget {
                                 ),
                                 // button : pago con mercado pago
                                 ElevatedButton.icon(
-                                  style: ButtonStyle(
-                                      elevation: MaterialStateProperty.all(
-                                          controller.getTicket.payMode ==
-                                                  'mercadopago'
-                                              ? 5
-                                              : 0)),
-                                  icon:
-                                      const Icon(Icons.check_circle_rounded),
-                                  onPressed: () => controller
-                                      .setPayModeTicket = 'mercadopago',
+                                  style: ButtonStyle(elevation: MaterialStateProperty.all(controller.getTicket.payMode == 'mercadopago'? 5: 0)),
+                                  icon:const Icon(Icons.check_circle_rounded),
+                                  onPressed: () => controller.setPayModeTicket = 'mercadopago',
                                   label: const Text('Mercado Pago'),
                                 ),
                                 //  button : pago con tarjeta de credito/debito
                                 ElevatedButton.icon(
-                                  style: ButtonStyle(
-                                      elevation: MaterialStateProperty.all(
-                                          controller.getTicket.payMode ==
-                                                  'card'
-                                              ? 5
-                                              : 0)),
-                                  icon:
-                                      const Icon(Icons.credit_card_outlined),
-                                  onPressed: () =>
-                                      controller.setPayModeTicket = 'card',
-                                  label:
-                                      const Text('Tarjeta de Debito/Credito'),
+                                  style: ButtonStyle(elevation: MaterialStateProperty.all(controller.getTicket.payMode =='card'? 5 : 0)),
+                                  icon:const Icon(Icons.credit_card_outlined),
+                                  onPressed: () =>controller.setPayModeTicket = 'card',
+                                  label:const Text('Tarjeta de Debito/Credito'),
                                 ),
                                 const SizedBox(height: 12),
                                 // text : cantidad de vuelto
-                                controller.getValueReceivedTicket == 0 ||
-                                        controller.getTicket.payMode !=
-                                            'effective'
+                                controller.getValueReceivedTicket == 0 ||controller.getTicket.payMode !='effective'
                                     ? Container()
                                     : RichText(
                                         textAlign: TextAlign.center,
                                         text: TextSpan(
                                             text: 'Vuelto:  ',
-                                            style: TextStyle(
-                                                color: Get.theme.textTheme
-                                                    .headline1?.color),
+                                            style: TextStyle(color: Get.theme.textTheme.headline1?.color),
                                             children: <TextSpan>[
-                                              TextSpan(
-                                                  text: controller
-                                                      .getValueReceived(),
-                                                  style: const TextStyle(
-                                                      fontSize: 30))
+                                              TextSpan(text: controller.getValueReceived(),style: const TextStyle(fontSize: 30))
                                             ]),
                                       ),
-                                // texto : texto que se va a mostrar por unica ves
-                                controller.widgetTextFirstSale,
+                                
                               ],
                             ),
                           ),

@@ -208,7 +208,7 @@ class AccountView extends GetView<AccountController> {
             const Divider(color: Colors.transparent, thickness: 1),
             // textfiel: signo de moneda
             InkWell(
-              onTap: () => _bottomPickerSelectCurreny(list: ["ARG\$"], context: context),
+              onTap: () => _bottomPickerSelectCurrency(list: controller.coinsList, context: context),
               child: TextField(
                 minLines: 1,
                 maxLines: 5,
@@ -293,7 +293,7 @@ class AccountView extends GetView<AccountController> {
             ),
             const SizedBox(height: 50),
             // text : informativo 
-            controller.newAccount?Column(
+            controller.newAccount?controller.getSavingIndicator?Container():Column(
               children: [
                 widgetText(text: 'listo! eso es todo! 💪'),
                 TextButton(onPressed:controller.saveAccount, child: const Text('Guardar')),
@@ -359,7 +359,7 @@ class AccountView extends GetView<AccountController> {
         });
   }
 
-  void _bottomPickerSelectCurreny(
+  void _bottomPickerSelectCurrency(
       {required List list, required BuildContext context}) async {
     //  Muestra una hoja inferior de diseño de material modal
     showModalBottomSheet(

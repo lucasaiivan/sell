@@ -123,9 +123,7 @@ class _ProductoItemState extends State<ProductoItem> {
   @override
   Widget build(BuildContext context) {
     //  values
-    final String alertStockText = widget.producto.stock
-        ? (widget.producto.quantityStock == 0 ? 'Sin stock' : '')
-        : '';
+    final String alertStockText = widget.producto.stock ? (widget.producto.quantityStock >=0 ? widget.producto.quantityStock<=widget.producto.alertStock?'Stock bajo':'' : 'Sin stock'): '';
 
     // aparición animada
     return ElasticIn(

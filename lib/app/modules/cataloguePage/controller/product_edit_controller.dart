@@ -109,8 +109,7 @@ class ControllerProductsEdit extends GetxController {
   bool get getEditModerator => _editModerator;
 
   // parameter
-  ProductCatalogue _product =
-      ProductCatalogue(upgrade: Timestamp.now(), creation: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now());
+  ProductCatalogue _product = ProductCatalogue(upgrade: Timestamp.now(), creation: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now());
   set setProduct(ProductCatalogue product) => _product = product;
   ProductCatalogue get getProduct => _product;
 
@@ -118,14 +117,11 @@ class ControllerProductsEdit extends GetxController {
   TextEditingController controllerTextEditDescripcion = TextEditingController();
   TextEditingController controllerTextEditQuantityStock = TextEditingController();
   TextEditingController controllerTextEditAlertStock = TextEditingController();
-  MoneyMaskedTextController controllerTextEditPrecioVenta =
-      MoneyMaskedTextController();
-  MoneyMaskedTextController controllerTextEditPrecioCompra =
-      MoneyMaskedTextController();
+  MoneyMaskedTextController controllerTextEditPrecioVenta = MoneyMaskedTextController();
+  MoneyMaskedTextController controllerTextEditPrecioCompra = MoneyMaskedTextController();
 
   // mark
-  Mark _markSelected =
-      Mark(upgrade: Timestamp.now(), creation: Timestamp.now());
+  Mark _markSelected = Mark(upgrade: Timestamp.now(), creation: Timestamp.now());
   set setMarkSelected(Mark value) {
     _markSelected = value;
     getProduct.idMark = value.id;
@@ -252,7 +248,7 @@ class ControllerProductsEdit extends GetxController {
 
               // set : marca de tiempo
               getProduct.upgrade = Timestamp.now();
-              // actualizar imagen
+              // actualización de la imagen de perfil de la cuetna
               if (getXFileImage.path != '') {
                 // image - Si el "path" es distinto '' quiere decir que ahi una nueva imagen para actualizar
                 // si es asi procede a guardar la imagen en la base de la app
@@ -338,6 +334,17 @@ class ControllerProductsEdit extends GetxController {
             
             // values 
             Product product = getProduct.convertProductoDefault();
+
+            // actualización de la imagen de perfil de la cuetna
+            if (getXFileImage.path != '') {
+              // image - Si el "path" es distinto '' quiere decir que ahi una nueva imagen para actualizar
+              // si es asi procede a guardar la imagen en la base de la app
+              Reference ref = Database.referenceStorageProductPublic(id: product.id);
+              UploadTask uploadTask = ref.putFile(File(getXFileImage.path));
+              await uploadTask;
+              // obtenemos la url de la imagen guardada
+              await ref.getDownloadURL().then((value) => product.image = value);
+            }
 
             // set firestore
             if(getNewProduct){
@@ -901,7 +908,7 @@ class _CreateMarkState extends State<CreateMark> {
   //var
   var uuid = const Uuid();
   bool newMark = false;
-  String title = 'Crear nueva marca';
+  String title = 'Nueva marca';
   bool load = false;
   TextStyle textStyle = const TextStyle(fontSize: 24.0);
   final ImagePicker _picker = ImagePicker();
@@ -910,7 +917,7 @@ class _CreateMarkState extends State<CreateMark> {
   @override
   void initState() {
     newMark = widget.mark.id == '';
-    title = newMark ? 'Crear nueva marca' : 'Editar';
+    title = newMark ? 'Nueva marca' : 'Editar';
     super.initState();
   }
 
@@ -933,67 +940,43 @@ class _CreateMarkState extends State<CreateMark> {
     return AppBar(
       backgroundColor: Get.theme.scaffoldBackgroundColor,
       elevation: 0,
-      title: Text(
-        title,
-        style: TextStyle(color: colorAccent),
-      ),
+      title: Text(title, style: TextStyle(color: colorAccent)),
       centerTitle: true,
       iconTheme: Get.theme.iconTheme.copyWith(color: colorAccent),
       actions: [
-        newMark
-            ? Container()
-            : IconButton(onPressed: delete, icon: const Icon(Icons.delete)),
-        load
-            ? Container()
-            : IconButton(
-                icon: const Icon(Icons.check),
-                onPressed: save,
-              ),
+        newMark || load ? Container(): IconButton(onPressed: delete, icon: const Icon(Icons.delete)),
+        load? Container() : IconButton(icon: const Icon(Icons.check),onPressed: save),
       ],
       bottom: load ? ComponentApp.linearProgressBarApp() : null,
     );
   }
 
   Widget body() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.center,
+
+    // widgets
+    Widget circleAvatarDefault = CircleAvatar(backgroundColor: Colors.grey.shade300,radius: 75.0);
+    
+    return ListView(
       children: [
         Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
             children: [
               xFile.path != ''
-                  ? CircleAvatar(
-                      backgroundImage: FileImage(File(xFile.path)),
-                      radius: 76,
-                    )
+                  ? CircleAvatar(backgroundImage: FileImage(File(xFile.path)),radius: 76,)
                   : CachedNetworkImage(
                       fit: BoxFit.cover,
                       imageUrl: widget.mark.image,
-                      placeholder: (context, url) => CircleAvatar(
-                        backgroundColor: Colors.grey.shade100,
-                        radius: 75.0,
-                      ),
-                      imageBuilder: (context, image) => CircleAvatar(
-                        backgroundImage: image,
-                        radius: 75.0,
-                      ),
-                      errorWidget: (context, url, error) => CircleAvatar(
-                        backgroundColor: Colors.grey.shade100,
-                        radius: 75.0,
-                      ),
+                      placeholder: (context, url) => circleAvatarDefault,
+                      imageBuilder: (context, image) => CircleAvatar(backgroundImage: image,radius: 75.0),
+                      errorWidget: (context, url, error) => circleAvatarDefault,
                     ),
-              load
-                  ? Container()
-                  : TextButton(
-                      onPressed: getLoadImageMark,
-                      child: const Text("Cambiar imagen")),
+              load ? Container(): TextButton(onPressed: getLoadImageMark,child: const Text("Cambiar imagen")),
             ],
           ),
         ),
         Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.all(20.0),
           child: TextField(
             enabled: !load,
             controller: TextEditingController(text: widget.mark.name),
@@ -1004,7 +987,7 @@ class _CreateMarkState extends State<CreateMark> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.all(20.0),
           child: TextField(
             enabled: !load,
             controller: TextEditingController(text: widget.mark.description),
@@ -1041,13 +1024,9 @@ class _CreateMarkState extends State<CreateMark> {
 
     if (widget.mark.id != '') {
       // delele archive storage
-      await Database.referenceStorageProductPublic(id: widget.mark.id)
-          .delete()
-          .catchError((_) => null);
+      await Database.referenceStorageProductPublic(id: widget.mark.id).delete().catchError((_) => null);
       // delete document firestore
-      await Database.refFirestoreMark()
-          .doc(widget.mark.id)
-          .delete()
+      await Database.refFirestoreMark().doc(widget.mark.id).delete()
           .then((value) {
         // eliminar el objeto de la lista manualmente para evitar hacer una consulta innecesaria
         controllerProductsEdit.getMarks.remove(widget.mark);
@@ -1064,8 +1043,10 @@ class _CreateMarkState extends State<CreateMark> {
 
     // set values
     widget.mark.verified = true;
-    if (widget.mark.id == '') {
+    if (newMark) {
+      // generate Id
       widget.mark.id = uuid.v1();
+      // en el caso que la ID siga siendo '' generar un ID con la marca del tiempo
       if (widget.mark.id == '') {widget.mark.id = DateTime.now().millisecondsSinceEpoch.toString();}
     }
     if (widget.mark.name != '') {
@@ -1078,30 +1059,36 @@ class _CreateMarkState extends State<CreateMark> {
         // cargamos la imagen a storage
         await uploadTask;
         // obtenemos la url de la imagen guardada
-        await ref.getDownloadURL().then((value) async {
-              // set
-              widget.mark.image = value;
-              // mark save
-              await Database.refFirestoreMark().doc(widget.mark.id).set(widget.mark.toJson()).whenComplete(() {
-                controllerProductsEdit.setUltimateSelectionMark = widget.mark;
-                controllerProductsEdit.setMarkSelected = widget.mark;
-                // agregar el obj manualmente para evitar consulta a la db  innecesaria
-                controllerProductsEdit.getMarks.add(widget.mark);
-                Get.back();
-              });
-            })
-            .onError((error, stackTrace) {})
-            .catchError((_) {});
-      } else {
-        // mark save
+        await ref.getDownloadURL().then((value) => widget.mark.image = value);
+      } 
+      
+      // mark save
+      if( newMark ){
+        // creamos un docuemnto nuevo
         await Database.refFirestoreMark().doc(widget.mark.id).set(widget.mark.toJson()).whenComplete(() {
+
+          // set values 
           controllerProductsEdit.setUltimateSelectionMark = widget.mark;
           controllerProductsEdit.setMarkSelected = widget.mark;
           // agregar el obj manualmente para evitar consulta a la db  innecesaria
           controllerProductsEdit.getMarks.add(widget.mark);
           Get.back();
         });
+      }else{
+        // actualizamos un documento existente
+        await Database.refFirestoreMark().doc(widget.mark.id).update(widget.mark.toJson()).whenComplete(() {
+
+          // set values
+          controllerProductsEdit.setUltimateSelectionMark = widget.mark;
+          controllerProductsEdit.setMarkSelected = widget.mark;
+          // eliminamos la marca de la lista
+          controllerProductsEdit.getMarks.removeWhere((element) => (element.id == widget.mark.id));
+          // agregamos la nueva marca actualizada a la lista
+          controllerProductsEdit.getMarks.add(widget.mark);
+          Get.back();
+        });
       }
+
     } else {
       Get.snackbar('', 'Debes escribir un nombre de la marca');
     }

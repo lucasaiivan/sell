@@ -204,21 +204,18 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
         const SizedBox(height: 12.0),
                         FadeInRight(
                           child: button(
-                            icon: Icon(
-                                controller.getListExcelToJson.isEmpty
-                                    ? Icons.file_present_sharp
-                                    : Icons.view_list_sharp,
+                            icon: Icon(controller.getListExcelToJson.isEmpty? Icons.file_present_sharp: Icons.view_list_sharp,
                                 color: controller.getButtonData.colorText),
                             onPressed: () {
-                              if (controller.getListExcelToJson.isEmpty) {
-                                controller.convert();
+                              if (controller.productsToExelList.isEmpty) {
+                                controller.selectedExcel();
                               } else {
                                 controller.openDialogListExcel();
                               }
                             },
-                            text: controller.getListExcelToJson.isEmpty
+                            text: controller.productsToExelList.isEmpty
                                 ? "Cargar Archivo Excel de productos"
-                                : 'ver lista de excel',
+                                : '${controller.productsToExelList.length} productos para agregar',
                             colorAccent: controller.getButtonData.colorText,
                             colorButton: controller.getButtonData.colorButton,
                           ),
@@ -226,11 +223,7 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                         const SizedBox(height: 12.0),
                         FadeInRight(
                           child: button(
-                            icon: Icon(
-                                controller.getListProductsVerified.isEmpty
-                                    ? Icons.change_circle_outlined
-                                    : Icons.verified,
-                                color: controller.getButtonData.colorText),
+                            icon: Icon(controller.getListProductsVerified.isEmpty? Icons.change_circle_outlined: Icons.verified,color: controller.getButtonData.colorText),
                             onPressed: () {
                               if (controller.getListProductsVerified.isEmpty) {
                                 controller.readProduct();
