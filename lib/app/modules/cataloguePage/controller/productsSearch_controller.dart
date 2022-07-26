@@ -58,9 +58,30 @@ class ControllerProductsSearch extends GetxController {
   ProductCatalogue productSelect = ProductCatalogue(upgrade: Timestamp.now(), creation: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now());
 
   // list excel to json
+   List<ProductCatalogue> productsToExelList = [];
   static List<Map<String, dynamic>> listExcelToJson = [];
-  set setListExcelToJson(List<Map<String, dynamic>> value) =>
-      listExcelToJson = value;
+  void filterListExcelToJson({required List<Map<String, dynamic>> value}) async{
+
+    for (var element in value) {
+      // set values
+      ProductCatalogue productCatalogue = ProductCatalogue(creation: Timestamp.now(),upgrade: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now());
+        productCatalogue.id = element['Código'];
+        productCatalogue.code = element['Código'];
+        productCatalogue.description = element['Producto'];
+        productCatalogue.purchasePrice = double.tryParse(element['P. Costo'].toString().replaceAll('\$', '').replaceAll(',', '.')) ??0.0;
+        productCatalogue.salePrice = double.tryParse(element['P. Venta'].toString().replaceAll('\$', '').replaceAll(',', '.')) ??0.0;
+      if(productCatalogue.id==''){break;}
+      Database.readProductPublicFuture(id: productCatalogue.id).then((value) {
+        if(value.exists){
+          // no se hace nada
+        }else{
+          productsToExelList.add(productCatalogue);
+          update(['updateAll']);
+        }
+      });
+    }
+    //listExcelToJson = value;
+  }
   List<Map<String, dynamic>> get getListExcelToJson => listExcelToJson;
 
   // result text
@@ -193,9 +214,10 @@ class ControllerProductsSearch extends GetxController {
   }
 
   // TODO : eliminar para release
-  convert() async {
-    FilePickerResult? file = await FilePicker.platform.pickFiles(
-        type: FileType.custom, allowedExtensions: ['xlsx', 'csv', 'xls']);
+  selectedExcel() async {
+    
+    FilePickerResult? file = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['xlsx', 'csv', 'xls']);
+    
     if (file != null && file.files.isNotEmpty) {
       var bytes = File(file.files.first.path!).readAsBytesSync();
       var excel = Excel.decodeBytes(bytes);
@@ -216,9 +238,11 @@ class ControllerProductsSearch extends GetxController {
               // definimos cuantas columnas queremos recorrer
               for (var key in keys) {
                 tk = key.value;
-                temp[tk] = (row[j].runtimeType == String)
-                    ? "${"\u201C" + row[j].value}\u201D"
-                    : row[j].value;
+                if ((row[j].runtimeType == String)) {
+                  temp[tk] = "\u201C${row[j].value}\u201D";
+                } else {
+                  temp[tk] = row[j].value;
+                }
                 // las columnas que quiero obtener
                 if (j == 3) break;
                 j++;
@@ -231,40 +255,35 @@ class ControllerProductsSearch extends GetxController {
         }
       }
 
-      setListExcelToJson = json;
+      filterListExcelToJson(value: json);
     } else {
-      setListExcelToJson = [];
+      productsToExelList = [];
+      update();
     }
-    update(['updateAll']);
   }
 
   openDialogListExcel() {
     // muestra una ventana emergente con la lista de productos para verificar
     Widget widget = Scaffold(
-      appBar: AppBar(title: const Text('Productos de excel')),
+      appBar: AppBar(title: Text('Productos de excel (${productsToExelList.length})')),
       body: ListView.builder(
-      itemCount: getListExcelToJson.length,
+      itemCount: productsToExelList.length,
       itemBuilder: (context, index) {
         
         // values
-        final ProductCatalogue productValue = ProductCatalogue(documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now(),creation: Timestamp.now(), upgrade: Timestamp.now());
+        ProductCatalogue productValue = ProductCatalogue(documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now(),creation: Timestamp.now(), upgrade: Timestamp.now());
         // set values
-        productValue.id = getListExcelToJson[index]['Código'];
-        productValue.code = getListExcelToJson[index]['Código'];
-        productValue.description = getListExcelToJson[index]['Producto'];
-        productValue.purchasePrice = double.tryParse(getListExcelToJson[index]['P. Costo'].toString().replaceAll('\$', '').replaceAll(',', '.')) ??0.0;
-        productValue.salePrice = double.tryParse(getListExcelToJson[index]['P. Venta'].toString().replaceAll('\$', '').replaceAll(',', '.')) ??0.0;
+        productValue = productsToExelList[index];
 
         return homeController.isCatalogue(id: productValue.code)
             ? Container()
-            :  ListTile(
+            :  Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
           contentPadding: const EdgeInsets.all(12),
-          title: Text(productValue.nameMark,maxLines: 1,overflow:TextOverflow.clip),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Text(productValue.description,maxLines:1,overflow:TextOverflow.clip,textAlign: TextAlign.start,),
-              Row(
+          title: Text(productValue.description,maxLines: 1,overflow:TextOverflow.clip),
+          subtitle: Row(
                 children: [
                   // text : code
                   productValue.code!=''?Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)):Container(),
@@ -273,17 +292,18 @@ class ControllerProductsSearch extends GetxController {
                   Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
                   Text(Publications.getFormatoPrecio(monto: productValue.salePrice)),
                 ],
-              ),
-            ],
           ),
           onTap: () {
-            //  set
-            productSelect = productValue;
-            Get.back();
-            textEditingController.text = productSelect.id;
-            queryProduct(id: productSelect.id);
+                //  set
+                productSelect = productValue;
+                Get.back();
+                textEditingController.text = productSelect.id;
+                queryProduct(id: productSelect.id);
           },
-        );
+        ),
+        const Divider(height: 0),
+              ],
+            );
       },
     ),
     );
@@ -338,29 +358,36 @@ class ControllerProductsSearch extends GetxController {
         // values
         final Product productValue = list[index];
 
-        return ListTile(
-          contentPadding: const EdgeInsets.all(12),
-          title: Text(productValue.nameMark,maxLines: 1,overflow:TextOverflow.clip),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Text(productValue.description,maxLines:1,overflow:TextOverflow.clip,textAlign: TextAlign.start,),
-              Row(
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              contentPadding: const EdgeInsets.all(12),
+              title: Text(productValue.nameMark,maxLines: 1,overflow:TextOverflow.clip),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  // text : code
-                  productValue.code!=''?Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)):Container(),
-                  productValue.code!=''? Text(productValue.code):Container(),
-                  // text : marca de tiempo
-                  Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
-                  Text(Publications.getFechaPublicacion(productValue.creation.toDate(), Timestamp.now().toDate())),
+                  Text(productValue.description,maxLines:1,overflow:TextOverflow.clip,textAlign: TextAlign.start,),
+                  Row(
+                    children: [
+                      // text : code
+                      productValue.code!=''?Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)):Container(),
+                      productValue.code!=''? Text(productValue.code):Container(),
+                      // text : marca de tiempo
+                      Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
+                      Text(Publications.getFechaPublicacion(productValue.creation.toDate(), Timestamp.now().toDate())),
+                    ],
+                  ),
                 ],
               ),
-            ],
-          ),
-          onTap: () {
-            Get.back();
-            Get.toNamed(Routes.EDITPRODUCT,arguments: {'product': productValue.convertProductCatalogue()});
-          },
+              onTap: () {
+                Get.back();
+                Get.toNamed(Routes.EDITPRODUCT,arguments: {'product': productValue.convertProductCatalogue()});
+              },
+            ),
+            const Divider(height: 0),
+          ],
         );
       },
     ),

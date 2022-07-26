@@ -266,7 +266,7 @@ class ProductEdit extends StatelessWidget {
                     // control stock
                     AnimatedContainer(
                       duration: const Duration(milliseconds: 500),
-                      color: controller.getProduct.stock?Colors.black12:Colors.transparent,
+                      color: controller.getProduct.stock?Colors.blue.withOpacity(0.07):Colors.transparent,
                       child: Column(
                         children: [
                           CheckboxListTile(
@@ -283,44 +283,40 @@ class ProductEdit extends StatelessWidget {
                           ),
                           controller.getProduct.stock ? space : Container(),
                           controller.getProduct.stock
-                              ? ElasticIn(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                                    child: TextField(
-                                      enabled: !controller.getSaveIndicator,
-                                      keyboardType: TextInputType.number,
-                                      onChanged: (value) =>
-                                          controller.getProduct.quantityStock =
-                                              int.parse(controller
-                                                  .controllerTextEditQuantityStock
-                                                  .text),
-                                      decoration: const InputDecoration(
-                                          border: OutlineInputBorder(),
-                                          labelText: "Stock"),
-                                      textInputAction: TextInputAction.done,
-                                      //style: textStyle,
-                                      controller:
-                                          controller.controllerTextEditQuantityStock,
-                                    ),
-                                  ),
-                                )
+                              ? Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                                child: TextField(
+                                  enabled: !controller.getSaveIndicator,
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (value) =>
+                                      controller.getProduct.quantityStock =
+                                          int.parse(controller
+                                              .controllerTextEditQuantityStock
+                                              .text),
+                                  decoration: const InputDecoration(
+                                      border: OutlineInputBorder(),
+                                      labelText: "Stock"),
+                                  textInputAction: TextInputAction.done,
+                                  //style: textStyle,
+                                  controller:
+                                      controller.controllerTextEditQuantityStock,
+                                ),
+                              )
                               : Container(),
                           controller.getProduct.stock ? space : Container(),
                           controller.getProduct.stock
-                              ? ElasticIn(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
-                                    child: TextField(
-                                      enabled: !controller.getSaveIndicator,
-                                      keyboardType: TextInputType.number,
-                                      onChanged: (value) =>controller.getProduct.alertStock = int.parse(controller.controllerTextEditAlertStock.text),
-                                      decoration: const InputDecoration(border: OutlineInputBorder(),labelText: "Alerta de stock"),
-                                      textInputAction: TextInputAction.done,
-                                      //style: textStyle,
-                                      controller: controller.controllerTextEditAlertStock,
-                                    ),
-                                  ),
-                                )
+                              ? Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
+                                child: TextField(
+                                  enabled: !controller.getSaveIndicator,
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (value) =>controller.getProduct.alertStock = int.parse(controller.controllerTextEditAlertStock.text),
+                                  decoration: const InputDecoration(border: OutlineInputBorder(),labelText: "Alerta de stock"),
+                                  textInputAction: TextInputAction.done,
+                                  //style: textStyle,
+                                  controller: controller.controllerTextEditAlertStock,
+                                ),
+                              )
                               : Container(),
                         ],
                       ),
@@ -328,7 +324,7 @@ class ProductEdit extends StatelessWidget {
                   ],
                 ),
           // text : marca de tiempo de la ultima actualización del documento
-          controller.getNewProduct?Container():Padding(
+          controller.getNewProduct || !controller.itsInTheCatalogue ? Container() :  Padding(
             padding: const EdgeInsets.only(top: 30),
             //child: Text('Actualizado ${}'),
             child: Opacity(opacity: 0.5,child: Center(child: Text('Actualizado ${Publications.getFechaPublicacion(controller.getProduct.upgrade.toDate(), Timestamp.now().toDate()).toLowerCase()}'))),

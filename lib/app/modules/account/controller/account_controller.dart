@@ -39,6 +39,7 @@ class AccountController extends GetxController {
       controllerTextEditSignoMoneda.value = value;
 
   // values
+  final List<String> coinsList = ["AR\$"];
   final RxList<String> _listCities = [
     'Buenos Aires	',
     'Catamarca',

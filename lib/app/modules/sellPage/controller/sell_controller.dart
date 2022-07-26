@@ -703,13 +703,16 @@ class SalesController extends GetxController {
 
     // comprobamos si es la primera ves que se inicia la aplicación
     if(homeController.salesUserGuideVisibility){
-      return Column(
-        children: const [
-          Padding(
-            padding: EdgeInsets.all(20.0),
-            child: Opacity(opacity: 0.8,child: Text('Aquí vamos a sugerirte algunos productos 😉',textAlign: TextAlign.end,style: TextStyle(fontSize: 20))),
-          ),
-        ],
+      return Opacity(
+        opacity: 0.8,
+        child: Column(
+          children: const [
+            Padding(
+              padding: EdgeInsets.all(20.0),
+              child: Text('Aquí vamos a sugerirte algunos productos 😉',textAlign: TextAlign.end,style: TextStyle(fontSize: 20)),
+            ),
+          ],
+        ),
       );
       }
     // si no es la primera ves que se inicica la aplicación devuelve una vistra vacia
@@ -720,14 +723,17 @@ class SalesController extends GetxController {
 
     // comprobamos si es la primera ves que se inicia la aplicación
     if(homeController.salesUserGuideVisibility){
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          Padding(
-            padding: EdgeInsets.only(top: 50,left: 12,right: 12,bottom: 20),
-            child: Opacity(opacity: 0.8,child: Text('¡Elige el método de pago y listo\n😁\nregistra tu primera venta!',textAlign: TextAlign.center,style: TextStyle(fontSize: 20))),
-          ),
-        ],
+      return Opacity(
+        opacity: 0.6,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Padding(
+              padding: EdgeInsets.only(top: 50,left: 12,right: 12,bottom: 20),
+              child: Text('¡Elige el método de pago y listo\n😁\nregistra tu primera venta!',textAlign: TextAlign.center,style: TextStyle(fontSize: 20)),
+            ),
+          ],
+        ),
       );
       }
     // si no es la primera ves que se inicica la aplicación devuelve una vistra vacia

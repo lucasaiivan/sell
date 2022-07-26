@@ -70,10 +70,7 @@ class CataloguePage extends StatelessWidget {
               controller: controller.tabController,
               labelColor: Get.theme.textTheme.bodyText1?.color,
               tabs: [
-                Tab(
-                    text: controller.getCataloProducts.isEmpty
-                        ? "Productos"
-                        : "${controller.getCataloProducts.length} productos"),
+                Tab(text: controller.getCataloProducts.isEmpty? "Productos": "${controller.getCataloProducts.length} productos"),
                 const Tab(text: "Cátegorias"),
               ]),
         ),
@@ -200,8 +197,7 @@ class CataloguePage extends StatelessWidget {
     final CataloguePageController cataloguePageController = Get.find();
     // values
     Color tileColor = item.stock? (item.quantityStock <= item.alertStock? Colors.red.withOpacity(0.3): item.favorite?Colors.amber.withOpacity(0.1):Colors.transparent): item.favorite?Colors.amber.withOpacity(0.1):Colors.transparent;
-    String alertStockText =
-        item.stock ? (item.quantityStock == 0 ? 'Sin stock' : '') : '';
+    String alertStockText = item.stock ? (item.quantityStock == 0 ? 'Sin stock' : '') : '';
 
     return ElasticIn(
       child: Column(
