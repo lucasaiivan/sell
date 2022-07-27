@@ -77,9 +77,9 @@ class HomeController extends GetxController {
   addToListProductSelecteds({required ProductCatalogue item}) {_productsOutstandingList.add(item);}
 
   //  authentication account profile
-  late User _userAccountAuth;
-  User get getUserAccountAuth => _userAccountAuth;
-  set setUserAccountAuth(User user) => _userAccountAuth = user;
+  late User _userFirebaseAuth;
+  User get getUserAuth => _userFirebaseAuth;
+  set setUserAuth(User user) => _userFirebaseAuth = user;
 
   //  profile Admin User
   UserModel _adminUser = UserModel();
@@ -126,7 +126,7 @@ class HomeController extends GetxController {
     // obtenemos por parametro los datos de la cuenta de atentificación
     Map map = Get.arguments as Map;
     // verificamos y obtenemos los datos pasados por parametro
-    setUserAccountAuth = map['currentUser'];
+    setUserAuth = map['currentUser'];
     // obtenemos el id de la cuenta seleccionada si es que existe
     map.containsKey('idAccount') ? readAccountsData(idAccount: map['idAccount']): readAccountsData(idAccount: '');
   }
@@ -201,7 +201,7 @@ class HomeController extends GetxController {
     getProfileAccountSelected.id = idAccount;
 
     // obtenemos las cuentas asociada a este email
-    readUserAccountsList(email: getUserAccountAuth.email ?? '');
+    readUserAccountsList(email: getUserAuth.email ?? '');
     // obtenemos los datos de la cuenta
     if (idAccount != '') {
       Database.readProfileAccountModelFuture(idAccount).then((value) {
@@ -210,7 +210,7 @@ class HomeController extends GetxController {
           //get profile account
           setProfileAccountSelected =  ProfileAccountModel.fromDocumentSnapshot(documentSnapshot: value);
           // load
-          readDataAdminUser(email: getUserAccountAuth.email ?? '', idAccount: idAccount);
+          readDataAdminUser(email: getUserAuth.email ?? '', idAccount: idAccount);
           readProductsCatalogue(idAccount: idAccount);
           readAdminsUsers(idAccount: idAccount);
           readListCategoryListFuture(idAccount: idAccount);
@@ -343,18 +343,14 @@ class HomeController extends GetxController {
 
   Future<void> categoryDelete({required String idCategory}) async => await Database.refFirestoreCategory(idAccount: getProfileAccountSelected.id).doc(idCategory).delete();
   Future<void> categoryUpdate({required Category categoria}) async {
+
+    // refactorizamos el nombre de la cátegoria
+    String name = categoria.name.substring(0, 1).toUpperCase() + categoria.name.substring(1);
+    categoria.name=name;
     // ref
-    var documentReferencer =
-        Database.refFirestoreCategory(idAccount: getProfileAccountSelected.id)
-            .doc(categoria.id);
+    var documentReferencer = Database.refFirestoreCategory(idAccount: getProfileAccountSelected.id).doc(categoria.id);
     // Actualizamos los datos
-    documentReferencer
-        .set(Map<String, dynamic>.from(categoria.toJson()),
-            SetOptions(merge: true))
-        .whenComplete(() {
-      print("######################## FIREBASE updateAccount whenComplete");
-    }).catchError((e) => print(
-            "######################## FIREBASE updateAccount catchError: $e"));
+    documentReferencer.set(Map<String, dynamic>.from(categoria.toJson()),SetOptions(merge: true));
   }
 
   void addProductToCatalogue({required ProductCatalogue product}) async {
@@ -391,7 +387,7 @@ class HomeController extends GetxController {
     // save key/values Storage
     GetStorage().write('idAccount', idAccount);
     // navegar hacia otra pantalla
-    Get.offAllNamed(Routes.HOME, arguments: {'currentUser': getUserAccountAuth,'idAccount': idAccount});
+    Get.offAllNamed(Routes.HOME, arguments: {'currentUser': getUserAuth,'idAccount': idAccount});
   }
 
   // BottomSheet - Getx

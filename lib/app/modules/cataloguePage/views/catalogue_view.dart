@@ -39,10 +39,9 @@ class CataloguePage extends StatelessWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       title: Text(controller.getTextTitleAppBar),
       actions: [
-      
-        IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: (() => controller.seach(context: context))),
+        // iconButton : buscar un producto del cátalogo
+        IconButton(icon: const Icon(Icons.search),onPressed: (() => controller.seach(context: context))),
+        // buttons : filter list
         PopupMenuButton(
             icon: const Icon(Icons.filter_list),
             onSelected: (selectedValue) {
@@ -65,12 +64,19 @@ class CataloguePage extends StatelessWidget {
     return Column(
       children: <Widget>[
         Container(
+          color: Get.theme.scaffoldBackgroundColor,
           constraints: const BoxConstraints.expand(height: 50),
           child: TabBar(
               controller: controller.tabController,
               labelColor: Get.theme.textTheme.bodyText1?.color,
               tabs: [
-                Tab(text: controller.getCataloProducts.isEmpty? "Productos": "${controller.getCataloProducts.length} productos"),
+                Tab(child: Row(children: [
+                  const Text("Productos"),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 5                                                                                                                                                                                                                ),
+                    child: CircleAvatar(radius: 14,backgroundColor: Colors.blue, child: Text(controller.getCataloProducts.length.toString(),style:const TextStyle(color: Colors.white,fontSize:12),)),
+                  ),
+                ],)),
                 const Tab(text: "Cátegorias"),
               ]),
         ),
@@ -135,6 +141,7 @@ class CataloguePage extends StatelessWidget {
         shrinkWrap: true,
         itemCount: controller.getCatalogueCategoryList.length,
         itemBuilder: (BuildContext context, int index) {
+          
           //get
           Category categoria = controller.getCatalogueCategoryList[index];
           MaterialColor color = Utils.getRandomColor();
@@ -144,22 +151,14 @@ class CataloguePage extends StatelessWidget {
                   children: <Widget>[
                     controller.getCatalogueCategoryList.isNotEmpty
                         ? ListTile(
-                            contentPadding: const EdgeInsets.symmetric(
-                                vertical: 12.0, horizontal: 12.0),
-                            leading: CircleAvatar(
-                              backgroundColor: color.withOpacity(0.1),
-                              radius: 24.0,
-                              child: Icon(Icons.all_inclusive, color: color),
-                            ),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
+                            leading: CircleAvatar(backgroundColor: color.withOpacity(0.1),radius: 24.0,child: Icon(Icons.all_inclusive, color: color) ),
                             dense: true,
-                            title: Text("Mostrar todos",
-                                style: Get.theme.textTheme.bodyText1),
+                            title: Text("Mostrar todos",style: Get.theme.textTheme.bodyText1),
                             onTap: () {
-                              cataloguePageController.setSelectedCategory =
-                                  Category(name: 'Cátalogo');
+                              cataloguePageController.setSelectedCategory =Category(name: 'Cátalogo');
                               // desplaza la vista a la lista de los productos
-                              cataloguePageController.tabController
-                                  .animateTo(0);
+                              cataloguePageController.tabController.animateTo(0);
                             },
                           )
                         : Container(),
@@ -257,8 +256,7 @@ class CataloguePage extends StatelessWidget {
     final CataloguePageController controller = Get.find();
 
     //  values
-    String title = categoria.name.substring(0, 1).toUpperCase() +
-        categoria.name.substring(1);
+    String title = categoria.name.substring(0, 1).toUpperCase() + categoria.name.substring(1);
 
     return ListTile(
       contentPadding: const EdgeInsets.all(12),
@@ -340,22 +338,15 @@ class CataloguePage extends StatelessWidget {
             child: TextField(
               controller: textEditingController,
               autofocus: true,
-              decoration: const InputDecoration(
-                  labelText: 'Categoria', hintText: 'Ej. golosinas'),
+              decoration: const InputDecoration( labelText: 'Categoria', hintText: 'Ej. golosinas'),
             ),
           )
         ],
       ),
       actions: <Widget>[
+        TextButton(child: const Text('CANCEL'),onPressed: () {Get.back();}),
         TextButton(
-            child: const Text('CANCEL'),
-            onPressed: () {
-              Get.back();
-            }),
-        TextButton(
-            child: loadSave == false
-                ? Text(newProduct ? 'GUARDAR' : "ACTUALIZAR")
-                : const CircularProgressIndicator(),
+            child: loadSave == false? Text(newProduct ? 'GUARDAR' : "ACTUALIZAR"): const CircularProgressIndicator(),
             onPressed: () async {
               if (textEditingController.text != '') {
                 // set
@@ -363,10 +354,7 @@ class CataloguePage extends StatelessWidget {
                 loadSave = true;
                 controller.update();
                 // save
-                await controller
-                    .categoryUpdate(categoria: categoria)
-                    .whenComplete(() => Get.back())
-                    .catchError((error, stackTrace) {
+                await controller.categoryUpdate(categoria: categoria).whenComplete(() => Get.back()).catchError((error, stackTrace) {
                   loadSave = false;
                   controller.update();
                 });

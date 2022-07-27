@@ -632,12 +632,11 @@ class _SelectCategoryState extends State<SelectCategory> {
           contentPadding: const EdgeInsets.all(16.0),
           content:  Row(
             children: <Widget>[
-               Expanded(
+              Expanded(
                 child:  TextField(
                   controller: textEditingController,
                   autofocus: true,
-                  decoration: const InputDecoration(
-                      labelText: 'Categoria', hintText: 'Ej. golosinas'),
+                  decoration: const InputDecoration( labelText: 'Categoria', hintText: 'Ej. golosinas'),
                 ),
               )
             ],

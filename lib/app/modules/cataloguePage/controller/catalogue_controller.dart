@@ -112,24 +112,16 @@ class CataloguePageController extends GetxController
     Get.toNamed(Routes.SEACH_PRODUCT, arguments: {'id': ''});
   }
 
-  Future<void> categoryDelete({required String idCategory}) async =>
-      await Database.refFirestoreCategory(
-              idAccount: homeController.getProfileAccountSelected.id)
-          .doc(idCategory)
-          .delete();
+  Future<void> categoryDelete({required String idCategory}) async => await Database.refFirestoreCategory(idAccount: homeController.getProfileAccountSelected.id).doc(idCategory).delete();
   Future<void> categoryUpdate({required Category categoria}) async {
-    // ref
-    var documentReferencer = Database.refFirestoreCategory(
-            idAccount: homeController.getProfileAccountSelected.id)
-        .doc(categoria.id);
-    // Actualizamos los datos
-    documentReferencer
-        .set(Map<String, dynamic>.from(categoria.toJson()),
-            SetOptions(merge: true))
-        .whenComplete(() {
-      print("######################## FIREBASE updateAccount whenComplete");
-    }).catchError((e) => print(
-            "######################## FIREBASE updateAccount catchError: $e"));
+
+    // refactorizamos el nombre de la cátegoria
+    String name = categoria.name.substring(0, 1).toUpperCase() + categoria.name.substring(1);
+    categoria.name=name;
+    // firestore : reference
+    var documentReferencer = Database.refFirestoreCategory(idAccount: homeController.getProfileAccountSelected.id).doc(categoria.id);
+    // firestore : Actualizamos los datos
+    documentReferencer.set(Map<String, dynamic>.from(categoria.toJson()),SetOptions(merge: true));
   }
 
   // navigator
