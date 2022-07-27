@@ -17,20 +17,17 @@ class SalesController extends GetxController {
   // others controllers
   final HomeController homeController = Get.find();
   late AnimationController floatingActionButtonAnimateController;
+  late AnimationController newProductSelectedAnimationController;
+
+  void animateAdd({bool itemListAnimated=true }){
+    try{
+      if(itemListAnimated){newProductSelectedAnimationController.repeat();}
+    }catch(_){}
+    floatingActionButtonAnimateController.repeat();
+  }
 
   // productos seleccionados recientemente
   List<ProductCatalogue> get getRecentlySelectedProductsList => homeController.getProductsOutstandingList;
-  registerSelections({required ProductCatalogue productCatalogue}) {
-    bool repeat = false;
-    // seach
-    for (ProductCatalogue item in getRecentlySelectedProductsList) {if (item.id == productCatalogue.id) {repeat = true; } }
-    // add
-    // ignore: dead_code
-    if (repeat == false) {
-      productCatalogue.creation = Timestamp.now();
-      homeController.addToListProductSelecteds(item: productCatalogue);
-    }
-  }
 
   // efecto de sonido para escaner
   void playSoundScan() async {AudioCache cache = AudioCache();cache.play("soundBip.mp3");}
@@ -41,6 +38,7 @@ class SalesController extends GetxController {
   final TextEditingController textEditingControllerTicketMount =TextEditingController();
 
   // list : lista de productos seleccionados por el usaurio para la venta
+  
   List get getListProductsSelested => homeController.listProductsSelected;
   set setListProductsSelected(List value) => homeController.listProductsSelected = value;
   void addProduct({required ProductCatalogue product}) {
@@ -238,6 +236,7 @@ class SalesController extends GetxController {
       ),
     );
   }
+  
 
   void selectedProduct({required ProductCatalogue item}) {
     // agregamos un nuevo producto a la venta
@@ -253,7 +252,7 @@ class SalesController extends GetxController {
           product.quantity++;
           coincidence = true;
           update();
-          floatingActionButtonAnimateController.repeat;
+          animateAdd(itemListAnimated: false);
         }
       }
       // si no hay coincidencia
@@ -272,7 +271,7 @@ class SalesController extends GetxController {
         product.quantity++;
         coincidence = true;
         update();
-        floatingActionButtonAnimateController.repeat();
+        animateAdd();
       }
     }
     // si no hay coincidencia verificamos si esta en el cátalogo de productos de la cuenta
@@ -290,7 +289,7 @@ class SalesController extends GetxController {
         coincidence = true;
         addProduct(product: product);
         update();
-        floatingActionButtonAnimateController.repeat();
+        animateAdd();
       }
     }
     // si el producto no se encuentra en el cátalogo de la cuenta se va consultar en la base de datos de productos publicos
@@ -355,6 +354,8 @@ class SalesController extends GetxController {
   }
 
   void selectedItem({required String id}) {
+
+    // seleccionamos el producto 
     for (ProductCatalogue element in getListProductsSelested) {
       if (element.id == id) {
         element.select = true;
@@ -481,7 +482,7 @@ class SalesController extends GetxController {
                           homeController.addProductToCatalogue(product: productCatalogue);
                         }
                         update();
-                        floatingActionButtonAnimateController.repeat();
+                        animateAdd();
                         Get.back();
                       } else {Get.snackbar('🙁 algo salio mal', 'Inserte un precio valido');}
                     } else {Get.snackbar('🙁 algo salio mal', 'Inserte un precio valido');}

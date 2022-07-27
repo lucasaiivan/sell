@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sell/app/models/catalogo_model.dart';
@@ -76,8 +77,10 @@ class SalesView extends StatelessWidget {
               itemCount: controller.getListProductsSelested.length + 15,
               itemBuilder: (context, index) {
                 // mostramos un número de elementos vacíos de los cuales el primero tendrá un icono 'add'
-                if (index < controller.getListProductsSelested.length) {
-                  return ProductoItem(producto: controller.getListProductsSelested[index]);
+                List list = controller.getListProductsSelested.reversed.toList();
+                if (index < list.length) {
+                  if(index == 0 ){return ZoomIn(controller: (p0) => controller.newProductSelectedAnimationController=p0,child: ProductoItem(producto:list[index]));}
+                  return ProductoItem(producto:list[index]);
                 } else {
                   return ElasticIn(child: Card(elevation: 0, color: Colors.grey.withOpacity(0.1)));
                 }
