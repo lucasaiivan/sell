@@ -131,8 +131,7 @@ class _ProductoItemState extends State<ProductoItem> {
       child: Card(
         color: Colors.white,
         elevation: 2,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
         clipBehavior: Clip.antiAlias,
         child: Stack(
           children: [
@@ -148,13 +147,7 @@ class _ProductoItemState extends State<ProductoItem> {
                         child: Center(
                             child: Padding(
                           padding: const EdgeInsets.all(2.0),
-                          child: Text(
-                            alertStockText,
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold),
-                          ),
+                          child: Text(alertStockText,style: const TextStyle(color: Colors.white,fontSize: 10,fontWeight: FontWeight.bold)),
                         )),
                       ),
                 Expanded(child: contentImage()),
@@ -167,12 +160,13 @@ class _ProductoItemState extends State<ProductoItem> {
                 color: Colors.transparent,
                 child: InkWell(
                   mouseCursor: MouseCursor.uncontrolled,
-                  onTap: () =>
-                      salesController.selectedItem(id: widget.producto.id),
+                  onTap: () => salesController.selectedItem(id: widget.producto.id),
                   onLongPress: () {},
                 ),
               ),
             ),
+            // color selected
+            widget.producto.select ?Positioned.fill(child: Container(color: Colors.black26,)):Container(),
             // button delete
             widget.producto.select
                 ? Align(
@@ -246,7 +240,7 @@ class _ProductoItemState extends State<ProductoItem> {
             // button  deselect
             widget.producto.select
                 ? Align(
-                    alignment: Alignment.bottomCenter,
+                    alignment: Alignment.center,
                     child: IconButton(
                         onPressed: () {
                           setState(() {
@@ -255,7 +249,7 @@ class _ProductoItemState extends State<ProductoItem> {
                         },
                         icon: const Icon(
                           Icons.close,
-                          color: Colors.grey,
+                          color: Colors.white,
                         )))
                 : Container(),
           ],
@@ -345,7 +339,7 @@ Widget drawerApp() {
   return GetBuilder<HomeController>(
     builder: (homeController) {
       // values
-      String email = homeController.getUserAccountAuth.email ?? 'null';
+      String email = homeController.getUserAuth.email ?? 'null';
 
       return Drawer(
         child: Column(

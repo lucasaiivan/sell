@@ -106,7 +106,7 @@ class AccountController extends GetxController {
   @override
   void onInit() async {
     // obtenemos los datos del controlador principal
-    verifyAccount(idAccount: homeController.getUserAccountAuth.uid);
+    verifyAccount(idAccount: homeController.getUserAuth.uid);
 
     super.onInit();
   }
@@ -149,7 +149,7 @@ class AccountController extends GetxController {
 
           // comprobar existencia de creacion de cuenta
           if (newAccount) {
-            profileAccount.id = homeController.getUserAccountAuth.uid;
+            profileAccount.id = homeController.getUserAuth.uid;
           }
           // si se cargo una nueva imagen procede a guardar la imagen en Storage
           if (getImageUpdate) {
@@ -194,7 +194,7 @@ class AccountController extends GetxController {
 
     // vales
     UserModel user = UserModel(
-        email: homeController.getUserAccountAuth.email ?? 'null',
+        email: homeController.getUserAuth.email ?? 'null',
         superAdmin: true);
     //...
     if (data['id'] != '') {

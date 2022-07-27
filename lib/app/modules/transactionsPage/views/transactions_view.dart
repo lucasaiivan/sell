@@ -73,22 +73,17 @@ class TransactionsView extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
+                padding:const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Text(transactionsController.getFilterText,
-                        style: const TextStyle(
-                            fontSize: 24, fontWeight: FontWeight.w900)),
+                    Text(transactionsController.getFilterText,style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
                     Text(transactionsController.getInfoPriceTotal(),textAlign: TextAlign.start,style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w200)),
                   ],
                 ),
               ),
-              tileItem(
-                  ticketModel:
-                      transactionsController.getTransactionsList[index]),
+              tileItem( ticketModel: transactionsController.getTransactionsList[index]),
               const Divider(height: 0),
             ],
           );
@@ -96,8 +91,7 @@ class TransactionsView extends StatelessWidget {
 
         return Column(
           children: [
-            tileItem(
-                ticketModel: transactionsController.getTransactionsList[index]),
+            tileItem(ticketModel: transactionsController.getTransactionsList[index]),
             const Divider(height: 0),
           ],
         );
@@ -107,50 +101,39 @@ class TransactionsView extends StatelessWidget {
 
   // WIDGETS COMPONENTS
   Widget tileItem({required TicketModel ticketModel}) {
+    
     // controllers
     final TransactionsController transactionsController = Get.find();
 
     // values
-    String payMode =
-        transactionsController.getPayModeFormat(idMode: ticketModel.payMode);
+    String payMode =transactionsController.getPayModeFormat(idMode: ticketModel.payMode);
 
     return ElasticIn(
       child: ListTile(
         contentPadding: const EdgeInsets.all(12),
-        onLongPress: () =>
-            transactionsController.deleteSale(ticketModel: ticketModel),
-        title: Text(
-            Publications.getFechaPublicacion(
-                ticketModel.creation.toDate(), Timestamp.now().toDate()),
-            style: const TextStyle(fontWeight: FontWeight.w400)),
+        onLongPress: () =>  transactionsController.deleteSale(ticketModel: ticketModel),
+        title: Text(Publications.getFechaPublicacion(ticketModel.creation.toDate(), Timestamp.now().toDate()),style: const TextStyle(fontWeight: FontWeight.w400)),
         subtitle: Padding(
           padding: const EdgeInsets.only(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(Publications.getFechaPublicacionFormating(
-                  dateTime: ticketModel.creation.toDate())),
+              // text : fecha de publicación
+              Text(Publications.getFechaPublicacionFormating(dateTime: ticketModel.creation.toDate())),
               Row(
                 children: [
+                  // text : modo de pago
                   Text('Pago con: $payMode'),
-                  Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 5),
-                      child: Icon(Icons.circle,
-                          size: 8, color: Get.theme.dividerColor)),
+                  // text : cantidad de productos vendidos
+                  Padding(padding: const EdgeInsets.symmetric(horizontal: 5), child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
                   Text('${ticketModel.getLengh()} items'),
                 ],
               ),
-              ticketModel.valueReceived == 0
-                  ? Container()
-                  : Text(
-                      'Vuelto: ${Publications.getFormatoPrecio(monto: ticketModel.valueReceived - ticketModel.priceTotal)}',
-                      style: const TextStyle(fontWeight: FontWeight.w300)),
+              ticketModel.valueReceived == 0? Container(): Text('Vuelto: ${Publications.getFormatoPrecio(monto: ticketModel.valueReceived - ticketModel.priceTotal)}',style: const TextStyle(fontWeight: FontWeight.w300)),
             ],
           ),
         ),
-        trailing: Text(
-            Publications.getFormatoPrecio(monto: ticketModel.priceTotal),
-            style: const TextStyle(fontWeight: FontWeight.w300)),
+        trailing: Text(Publications.getFormatoPrecio(monto: ticketModel.priceTotal),style: const TextStyle(fontWeight: FontWeight.bold)),
       ),
     );
   }

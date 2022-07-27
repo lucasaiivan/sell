@@ -13,8 +13,10 @@ import 'package:sell/app/utils/fuctions.dart';
 import 'package:sell/app/utils/widgets_utils.dart';
 
 class SalesController extends GetxController {
+
   // others controllers
   final HomeController homeController = Get.find();
+  late AnimationController floatingActionButtonAnimateController;
 
   // productos seleccionados recientemente
   List<ProductCatalogue> get getRecentlySelectedProductsList => homeController.getProductsOutstandingList;
@@ -119,7 +121,7 @@ class SalesController extends GetxController {
     }
     //  set values
     getTicket.id = id;
-    getTicket.seller = homeController.getIdAccountSelected;
+    getTicket.seller = homeController.getUserAuth.email!;
     getTicket.cashRegister = '1';
     getTicket.listPoduct = listIdsProducts;
     getTicket.priceTotal = getCountPriceTotal();
@@ -251,6 +253,7 @@ class SalesController extends GetxController {
           product.quantity++;
           coincidence = true;
           update();
+          floatingActionButtonAnimateController.repeat;
         }
       }
       // si no hay coincidencia
@@ -265,9 +268,11 @@ class SalesController extends GetxController {
     bool coincidence = false;
     for (ProductCatalogue product in getListProductsSelested) {
       if (product.id == id) {
+        // este producto esta selccionado
         product.quantity++;
         coincidence = true;
         update();
+        floatingActionButtonAnimateController.repeat();
       }
     }
     // si no hay coincidencia verificamos si esta en el cátalogo de productos de la cuenta
@@ -285,6 +290,7 @@ class SalesController extends GetxController {
         coincidence = true;
         addProduct(product: product);
         update();
+        floatingActionButtonAnimateController.repeat();
       }
     }
     // si el producto no se encuentra en el cátalogo de la cuenta se va consultar en la base de datos de productos publicos
@@ -314,8 +320,11 @@ class SalesController extends GetxController {
     // consulta el código existe en la base de datos de productos publicos
     if (id != '') {
       // query
-      Database.readProductPublicFuture(id: id).then((value) {
+      Database.readProductPublicFuture(id: id).then((value) { 
+
+        // show dialog
         showDialogAddProductNew(productCatalogue: ProductCatalogue.fromMap(value.data() as Map));
+      
       }).onError((error, stackTrace) {
         // error o no existe en la db
         showDialogQuickSale();
@@ -468,8 +477,11 @@ class SalesController extends GetxController {
                       if (valuePrice != 0.0) {
                         productCatalogue.salePrice = valuePrice;
                         addProduct(product: productCatalogue);
-                        if (homeController.checkAddProductToCatalogue) {homeController.addProductToCatalogue(product: productCatalogue);}
+                        if (homeController.checkAddProductToCatalogue) {
+                          homeController.addProductToCatalogue(product: productCatalogue);
+                        }
                         update();
+                        floatingActionButtonAnimateController.repeat();
                         Get.back();
                       } else {Get.snackbar('🙁 algo salio mal', 'Inserte un precio valido');}
                     } else {Get.snackbar('🙁 algo salio mal', 'Inserte un precio valido');}
@@ -623,16 +635,36 @@ class SalesController extends GetxController {
                         child:
                             const Text('500', style: TextStyle(fontSize: 24))),
                     TextButton(
-                        onPressed: getCountPriceTotal() > 1000
-                            ? null
+                        onPressed: getCountPriceTotal() > 1000 
+                          ? null
                             : () {
                                 setPayModeTicket = 'effective';
                                 setValueReceivedTicket = 1000;
                                 Get.back();
                               },
-                        child:
-                            const Text('1000', style: TextStyle(fontSize: 24))),
-                            
+                        child:const Text('1000', style: TextStyle(fontSize: 24))
+                    ),
+                    TextButton(
+                        onPressed: getCountPriceTotal() > 1500 
+                          ? null
+                            : () {
+                                setPayModeTicket = 'effective';
+                                setValueReceivedTicket = 1500;
+                                Get.back();
+                              },
+                        child:const Text('1500', style: TextStyle(fontSize: 24))
+                    ),
+                    TextButton(
+                        onPressed: getCountPriceTotal() > 2000 
+                          ? null
+                            : () {
+                                setPayModeTicket = 'effective';
+                                setValueReceivedTicket = 2000;
+                                Get.back();
+                              },
+                        child:const Text('2000', style: TextStyle(fontSize: 24))
+                    ),
+
                   ],
                 ),
               ),

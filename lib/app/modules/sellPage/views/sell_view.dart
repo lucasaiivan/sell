@@ -101,9 +101,7 @@ class SalesView extends StatelessWidget {
           padding:const EdgeInsets.only(bottom: 2, top: 12, right: 5, left: 24),
           child: Material(
             borderRadius: const BorderRadius.all(Radius.circular(12)),
-            color: Get.theme.brightness == Brightness.dark
-                ? Colors.white10
-                : Colors.white,
+            color: Get.theme.brightness == Brightness.dark? Colors.white10: Colors.white,
             child: Drawer(
               backgroundColor: Colors.transparent,
               child: Center(
@@ -126,25 +124,25 @@ class SalesView extends StatelessWidget {
                               children: [
                                 // texto : texto que se va a mostrar por unica ves
                                 controller.widgetTextFirstSale,
-                                const Text('Paga con:'),
+                                const Text('El cliente paga con:'),
                                 const SizedBox(height: 12),
                                 //  button : pago con efectivo
                                 ElevatedButton.icon(style: ButtonStyle(elevation: MaterialStateProperty.all(controller.getTicket.payMode =='effective'? 5: 0)),
-                                  icon:const Icon(Icons.person_outline_sharp),
+                                  icon: Container(),
                                   onPressed: controller.showDialogMount,
-                                  label: Text(controller.getValueReceivedTicket != 0.0? Publications.getFormatoPrecio(monto: controller.getValueReceivedTicket): 'Ingresar efectivo'),
+                                  label: Text(controller.getValueReceivedTicket != 0.0? Publications.getFormatoPrecio(monto: controller.getValueReceivedTicket): 'Efectivo'),
                                 ),
                                 // button : pago con mercado pago
                                 ElevatedButton.icon(
                                   style: ButtonStyle(elevation: MaterialStateProperty.all(controller.getTicket.payMode == 'mercadopago'? 5: 0)),
-                                  icon:const Icon(Icons.check_circle_rounded),
+                                  icon: controller.getTicket.payMode != 'mercadopago'?Container():const Icon(Icons.check_circle_rounded),
                                   onPressed: () => controller.setPayModeTicket = 'mercadopago',
                                   label: const Text('Mercado Pago'),
                                 ),
                                 //  button : pago con tarjeta de credito/debito
                                 ElevatedButton.icon(
                                   style: ButtonStyle(elevation: MaterialStateProperty.all(controller.getTicket.payMode =='card'? 5 : 0)),
-                                  icon:const Icon(Icons.credit_card_outlined),
+                                  icon: controller.getTicket.payMode != 'card'?Container(): const Icon(Icons.credit_card_outlined),
                                   onPressed: () =>controller.setPayModeTicket = 'card',
                                   label:const Text('Tarjeta de Debito/Credito'),
                                 ),
@@ -422,6 +420,9 @@ class SalesView extends StatelessWidget {
   }
 
   Widget floatingActionButton({required SalesController controller}) {
+
+    Widget imageBarCode = Image.asset('assets/scanbarcode.png',color: Colors.white,);
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -441,22 +442,18 @@ class SalesView extends StatelessWidget {
         FloatingActionButton(
             backgroundColor: Colors.blue,
             onPressed: controller.scanBarcodeNormal,
-            child: const Icon(
-              Icons.qr_code_scanner_rounded,
-              color: Colors.white,
+            child: SizedBox(
+              width: 30,height: 30,
+              child: imageBarCode,
             )),
         const SizedBox(width: 8),
-        FloatingActionButton.extended(
-            onPressed: controller.getListProductsSelested.isEmpty
-                ? null
-                : () {
-                    controller.setTicketView = true;
-                    controller.setValueReceivedTicket = 0.0;
-                  },
-            backgroundColor:
-                controller.getListProductsSelested.isEmpty ? Colors.grey : null,
-            label: Text(
-                'Cobrar ${controller.getListProductsSelested.isEmpty ? '' : Publications.getFormatoPrecio(monto: controller.getCountPriceTotal())}')),
+        ElasticIn(
+          controller: (p0) => controller.floatingActionButtonAnimateController=p0,
+          child: FloatingActionButton.extended(
+              onPressed: controller.getListProductsSelested.isEmpty? null: () {controller.setTicketView = true;controller.setValueReceivedTicket = 0.0;},
+              backgroundColor:controller.getListProductsSelested.isEmpty ? Colors.grey : null,
+              label: Text( 'Cobrar ${controller.getListProductsSelested.isEmpty ? '' : Publications.getFormatoPrecio(monto: controller.getCountPriceTotal())}')),
+        ),
       ],
     );
   }
