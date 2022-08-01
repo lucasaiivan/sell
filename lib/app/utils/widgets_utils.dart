@@ -4,9 +4,7 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -17,7 +15,6 @@ import 'package:sell/app/modules/splash/controllers/splash_controller.dart';
 import 'package:sell/app/utils/dynamicTheme_lb.dart';
 import 'package:sell/app/utils/fuctions.dart';
 import 'package:url_launcher/url_launcher.dart';
-
 import '../models/user_model.dart';
 import '../modules/cataloguePage/controller/catalogue_controller.dart';
 import '../routes/app_pages.dart';
@@ -25,7 +22,7 @@ import '../routes/app_pages.dart';
 class WidgetButtonListTile extends StatelessWidget {
   final HomeController controller = Get.find<HomeController>();
 
-  WidgetButtonListTile();
+  WidgetButtonListTile({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -34,8 +31,7 @@ class WidgetButtonListTile extends StatelessWidget {
 
   Widget buttonListTileCrearCuenta() {
     return ListTile(
-      contentPadding:
-          const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15.0),
+      contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15.0),
       leading: const Icon(Icons.add),
       dense: true,
       title: const Text("Crear mi perfil", style: TextStyle(fontSize: 16.0)),
@@ -46,11 +42,10 @@ class WidgetButtonListTile extends StatelessWidget {
     );
   }
 
-  Widget buttonListTileItemCuenta(
-      {required ProfileAccountModel perfilNegocio}) {
-    if (perfilNegocio.id == '') {
-      return Container();
-    }
+  Widget buttonListTileItemCuenta({required ProfileAccountModel perfilNegocio}) {
+
+    if (perfilNegocio.id == '') { return Container(); }
+    
     return Column(
       children: <Widget>[
         ListTile(
@@ -342,6 +337,7 @@ Widget drawerApp() {
         child: Column(
           children: [
             const SizedBox(height: 50),
+            //  avatar de la cuenta
             ListTile(
               leading: Container(
                 padding: const EdgeInsets.all(0.0),
@@ -361,6 +357,7 @@ Widget drawerApp() {
                 homeController.showModalBottomSheetSelectAccount();
               },
             ),
+            // others items
             Expanded(
               child: ListView(
                 children: [
@@ -401,8 +398,7 @@ Widget drawerApp() {
               title: const Text('Dejanos tu opinión 😃'),
               subtitle: const Text('Nos intereza saber lo que piensas'),
               onTap: () async {
-                Uri uri = Uri.parse(
-                    'https://play.google.com/store/apps/details?id=com.logicabooleana.commer.producto');
+                Uri uri = Uri.parse( 'https://play.google.com/store/apps/details?id=com.logicabooleana.commer.producto');
                 if (await canLaunchUrl(uri)) {
                   await launchUrl(uri,mode: LaunchMode.externalApplication);
                 } else {
@@ -412,10 +408,10 @@ Widget drawerApp() {
             ), */
             ListTile(
               contentPadding: const EdgeInsets.symmetric(vertical: 12,horizontal: 12),
-              tileColor: Colors.grey.withOpacity(0.1),
-              leading: const Icon(Icons.whatsapp_rounded),
-              title: const Text('Dejanos tu opinión 😃'),
-              subtitle: const Text('Nos intereza saber lo que piensas'),
+              tileColor: Colors.blue.withOpacity(0.1),
+              leading: const Icon(Icons.whatsapp_rounded,color: Colors.green),
+              title: const Text('Escribenos tu opinión 😃'),
+              subtitle: const Text('Tu opinión o sugerencia es importante'),
               onTap: () async{
                 
                 // abre la app de mensajeria
@@ -423,8 +419,11 @@ Widget drawerApp() {
                 String phoneNumber = '541134862939';
                 String description = "hola, estoy probando la App!";
                 whatsAppUrl ='https://wa.me/+$phoneNumber?text=${Uri.parse(description)}';
-                if (await canLaunch(whatsAppUrl)) {
-                  await launch(whatsAppUrl);
+                Uri uri = Uri.parse( whatsAppUrl);
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri,mode: LaunchMode.externalApplication);
+                } else {
+                  throw 'Could not launch $uri';
                 }
 
               },

@@ -742,7 +742,7 @@ class SalesController extends GetxController {
           children: const [
             Padding(
               padding: EdgeInsets.all(20.0),
-              child: Text('Aquí vamos a sugerirte algunos productos 😉',textAlign: TextAlign.end,style: TextStyle(fontSize: 20)),
+              child: Text('Aquí vamos a sugerirte algunos productos de tu catálogo 😉',textAlign: TextAlign.end,style: TextStyle(fontSize: 20)),
             ),
           ],
         ),
