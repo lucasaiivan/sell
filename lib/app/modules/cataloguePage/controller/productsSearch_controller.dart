@@ -99,9 +99,9 @@ class ControllerProductsSearch extends GetxController {
 
   // TextEditingController
   TextEditingController textEditingController =  TextEditingController(text: '');
-  set setTextEditingController(TextEditingController editingController) =>
-      textEditingController = editingController;
+  set setTextEditingController(TextEditingController editingController) => textEditingController = editingController;
   TextEditingController get getTextEditingController => textEditingController;
+  
 
   // color component textfield
   ButtonData _buttonData =
