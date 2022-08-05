@@ -55,7 +55,7 @@ dependencies:
   get_storage: ^2.0.3
   # others
   path: ^1.8.2  # Una completa biblioteca de manipulación de rutas multiplataforma para Dart.
-  url_launcher: ^6.1.2
+  url_launcher: ^6.1.5
   font_awesome_flutter: ^10.1.0
   animate_do: ^2.0.0 # Un paquete de animación inspirado en Animate.css , construido usando solo animaciones de Flutter, sin paquetes adicionales.
   intl: ^0.17.0

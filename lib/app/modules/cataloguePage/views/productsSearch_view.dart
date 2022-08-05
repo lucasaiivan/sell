@@ -133,11 +133,7 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                                   text: "Buscar",
                                   colorAccent:
                                       controller.getButtonData.colorText,
-                                  colorButton: controller.textEditingController
-                                              .value.text ==
-                                          ''
-                                      ? Get.theme.disabledColor.withOpacity(0.1)
-                                      : controller.getButtonData.colorButton,
+                                  colorButton: controller.getButtonData.colorButton,
                                 ),
                               )
                             : Container(),
