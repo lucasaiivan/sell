@@ -232,7 +232,7 @@ class SalesView extends StatelessWidget {
                   children: [
                     GestureDetector(
                       onTap: () {
-                        salesController.seach(context: context);
+                        salesController.showSeach(context: context);
                       },
                       child: Column(
                         children: <Widget>[
