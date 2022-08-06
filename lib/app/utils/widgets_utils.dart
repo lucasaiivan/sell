@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -376,9 +377,10 @@ Widget drawerApp() {
                 ],
               ),
             ),
-            /* ListTile(
+            ListTile(
               leading: const Icon(Icons.launch_rounded),
-              title: const Text('Producto App'),
+              title: const Text('Mi catálogo'),
+              subtitle: const Text('App'),
               onTap: () async {
                 
                 // values
@@ -391,7 +393,7 @@ Widget drawerApp() {
                 }
               },
             ),
-            ListTile(
+            /* ListTile(
               contentPadding: const EdgeInsets.symmetric(vertical: 12,horizontal: 12),
               tileColor: Colors.grey.withOpacity(0.1),
               leading: const Icon(Icons.thumbs_up_down_outlined),

@@ -140,7 +140,7 @@ class SalesController extends GetxController {
 
   // FUCTIONS
 
-  void seach({required BuildContext context}) {
+  void showSeach({required BuildContext context}) {
     // Busca entre los productos de mi catálogo
 
     // var
