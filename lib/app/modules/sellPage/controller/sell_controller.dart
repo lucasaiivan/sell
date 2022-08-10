@@ -577,21 +577,16 @@ class SalesController extends GetxController {
           child: TextButton(
               onPressed: () {
                 //var
-                double valueReceived =
-                    textEditingControllerTicketMount.text == ''
-                        ? 0.0
-                        : double.parse(textEditingControllerTicketMount.text);
+                double valueReceived = textEditingControllerTicketMount.text == '' ? 0.0 : double.parse(textEditingControllerTicketMount.text);
                 // condition : verificar si el usaurio ingreso un monto valido y que sea mayor al monto total del ticket
                 if (valueReceived >= getCountPriceTotal() &&
                     textEditingControllerTicketMount.text != '') {
-                  setValueReceivedTicket = valueReceived;
-                  textEditingControllerTicketMount.text = '';
-                  setPayModeTicket = 'effective';
-                  Get.back();
+                      setValueReceivedTicket = valueReceived;
+                      textEditingControllerTicketMount.text = '';
+                      setPayModeTicket = 'effective';
+                      Get.back();
                 } else {
-                  showMessageAlertApp(
-                      title: '😔',
-                      message: 'Tiene que ingresar un monto valido');
+                  showMessageAlertApp( title: '😔', message: 'Tiene que ingresar un monto valido');
                 }
               },
               child: const Text('aceptar')),

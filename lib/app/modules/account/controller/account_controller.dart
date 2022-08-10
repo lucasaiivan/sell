@@ -94,11 +94,7 @@ class AccountController extends GetxController {
   XFile get getxFile => _xFile;
   set setxFile(XFile value) => _xFile = value;
   void setImageSource({required ImageSource imageSource}) async {
-    setxFile = (await _picker.pickImage(
-        source: imageSource,
-        maxWidth: 720.0,
-        maxHeight: 720.0,
-        imageQuality: 55))!;
+    setxFile = (await _picker.pickImage(source: imageSource,maxWidth: 720.0,maxHeight: 720.0,imageQuality: 55))!;
     setImageUpdate = true;
     update(['image']);
   }
