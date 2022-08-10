@@ -183,7 +183,7 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                               )
                             : Container(),
                         // TODO: delete release
-                        //widgetForModerator,
+                        widgetForModerator,
                       ],
                     ),
                   ),

@@ -189,7 +189,7 @@ class ProductEdit extends StatelessWidget {
             controller: controller.controllerTextEditDescripcion,
           ),
           //TODO: eliminar para desarrrollo
-          /* TextButton(
+          TextButton(
               onPressed: () async {
                 String clave = controller.controllerTextEditDescripcion.text;
                 Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
@@ -202,7 +202,7 @@ class ProductEdit extends StatelessWidget {
                 Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
                 if (await canLaunchUrl(uri)) { await launchUrl(uri,mode: LaunchMode.externalApplication);} else {throw 'Could not launch $uri';}
               },
-              child: const Text('Buscar en código Google')), */
+              child: const Text('Buscar en código Google')),
           space,
           // textfield 'seleccionar marca'
           textfielButton(
@@ -342,7 +342,7 @@ class ProductEdit extends StatelessWidget {
           
           //TODO: eliminar para desarrrollo
           /* OPCIONES PARA DESARROLLADOR - ELIMINAR ESTE CÓDIGO PARA PRODUCCION */
-          //widgetForModerator,
+          widgetForModerator,
           ]             ,
       ),
     );
