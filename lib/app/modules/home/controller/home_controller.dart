@@ -442,6 +442,59 @@ class HomeController extends GetxController {
               topLeft: Radius.circular(20), topRight: Radius.circular(20))),
     );
   }
+  void showModalBottomSheetSubcription(){
+
+    // value 
+    const dynamic side = BorderSide(color: Colors.transparent);
+
+    // muestre la hoja inferior modal de getx
+    Get.bottomSheet(
+      Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.start,mainAxisSize: MainAxisSize.max,
+            children: [
+              Expanded(
+                child: ListView(
+                  children: const [
+                    Text('PRO',textAlign: TextAlign.center,style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold,)),
+                    Opacity(opacity: 0.7,child: Text('Funcionalidades especiales para profesionalizar tu negocio',textAlign: TextAlign.center,style: TextStyle())),
+                    Padding(
+                      padding: EdgeInsets.all(20.0),
+                      child: Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text('US\$5,99 al mes',textAlign: TextAlign.center,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                    Chip(side: side,avatar: Icon(Icons.check),label: Text('Control de inventario')),
+                    Chip(side: side,avatar:  Icon(Icons.check),label: Text('Informes y estadísticas')),
+                    Chip(side: side,avatar: Icon(Icons.check),label: Text('Multi Usuarios')),
+                    Chip(side: side,avatar: Icon(Icons.check),label: Text('Sin publicidad')),
+                  ],
+                ),
+              ),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: (){},
+                  style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.blue)), 
+                  icon: const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text('Subcribirme',style: TextStyle(fontSize: 24,color: Colors.white)),
+                  ),
+                  label: const Icon(Icons.arrow_forward_rounded,color: Colors.white,),
+                ),
+              )
+            ],
+        ) ),
+      ),
+      backgroundColor: Get.theme.scaffoldBackgroundColor,
+      enableDrag: true,
+      isDismissible: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
+    );
+  }
 
   
 }

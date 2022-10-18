@@ -374,6 +374,16 @@ Widget drawerApp() {
                       leading: const Icon(Icons.apps_rounded),
                       title: const Text('Catálogo'),
                       onTap: () => homeController.setIndexPage = 2),
+                  ListTile(
+                      leading: const Icon(Icons.add_moderator_outlined),
+                      title: Row(
+                        children: const [
+                          Text('Multi Usuario'),
+                          SizedBox(width: 12),
+                          LogoPro(),
+                        ],
+                      ),
+                      onTap: () => homeController.showModalBottomSheetSubcription()),
                 ],
               ),
             ),
@@ -411,7 +421,7 @@ Widget drawerApp() {
             ListTile(
               contentPadding: const EdgeInsets.symmetric(vertical: 12,horizontal: 12),
               tileColor: Colors.blue.withOpacity(0.1),
-              leading: const Icon(Icons.whatsapp_rounded,color: Colors.green),
+              leading: const Icon(Icons.messenger_outline_sharp,color: Colors.green),
               title: const Text('Escribenos tu opinión 😃'),
               subtitle: const Text('Tu opinión o sugerencia es importante'),
               onTap: () async{
@@ -738,6 +748,30 @@ class WidgetSuggestionProduct extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+
+class LogoPro extends StatelessWidget {
+  const LogoPro({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+
+    // others controllers
+    final HomeController homeController = Get.find();
+    
+    // value
+    Color accentColor = Theme.of(context).brightness==Brightness.dark?Colors.white70:Colors.black87;
+
+    return homeController.getProfileAccountSelected.subscribed ? Container(): InkWell(
+      onTap: homeController.showModalBottomSheetSubcription,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 2),
+        decoration: BoxDecoration(border: Border.all(color: accentColor)),
+        child: Text('PRO',style: TextStyle(fontSize: 12,color:accentColor))
+      ),
     );
   }
 }

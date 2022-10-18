@@ -147,16 +147,6 @@ class ControllerProductsEdit extends GetxController {
 
   Category get getCategory => _category;
 
-  //  subcategory
-  Category _subcategory = Category();
-  set setSubcategory(Category value) {
-    _subcategory = value;
-    getProduct.subcategory = value.id;
-    getProduct.nameSubcategory = value.name;
-    update(['updateAll']);
-  }
-
-  Category get getSubcategory => _subcategory;
 
   // imagen
   final ImagePicker _picker = ImagePicker();
@@ -205,10 +195,18 @@ class ControllerProductsEdit extends GetxController {
     super.onClose();
   }
 
+  // get 
+  bool get isSubscribed => homeController.getProfileAccountSelected.subscribed;
+
   // FUNCTIONES
   set setStock(bool value) {
-    getProduct.stock = value;
-    update(['updateAll']);
+    if( homeController.getProfileAccountSelected.subscribed == false ){
+      homeController.showModalBottomSheetSubcription();
+    }else{
+      getProduct.stock = value;
+      update(['updateAll']);
+    }
+    
   }
   set setFavorite(bool value) {
     getProduct.favorite = value;
@@ -455,23 +453,13 @@ class ControllerProductsEdit extends GetxController {
             idCategory: getProduct.category)
         .then((value) {
       setCategory = Category.fromDocumentSnapshot(documentSnapshot: value);
-      if (getProduct.subcategory != '') readSubcategory();
     }).onError((error, stackTrace) {
       setCategory = Category(id: '0000', name: '');
-      setSubcategory = Category(id: '0000', name: '');
     }).catchError((_) {
       setCategory = Category(id: '0000', name: '');
-      setSubcategory = Category(id: '0000', name: '');
     });
   }
 
-  void readSubcategory() {
-    getCategory.subcategories.forEach((key, value) {
-      if (key == getProduct.subcategory) {
-        setSubcategory = Category(id: key, name: value.toString());
-      }
-    });
-  }
 
   // read imput image
   void getLoadImageGalery() {

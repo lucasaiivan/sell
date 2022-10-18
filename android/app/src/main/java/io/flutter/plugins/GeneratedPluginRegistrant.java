@@ -18,7 +18,7 @@ public final class GeneratedPluginRegistrant {
     try {
       flutterEngine.getPlugins().add(new xyz.luan.audioplayers.AudioplayersPlugin());
     } catch(Exception e) {
-      Log.e(TAG, "Error registering plugin audioplayers, xyz.luan.audioplayers.AudioplayersPlugin", e);
+      Log.e(TAG, "Error registering plugin audioplayers_android, xyz.luan.audioplayers.AudioplayersPlugin", e);
     }
     try {
       flutterEngine.getPlugins().add(new io.flutter.plugins.firebase.firestore.FlutterFirebaseFirestorePlugin());
@@ -56,9 +56,9 @@ public final class GeneratedPluginRegistrant {
       Log.e(TAG, "Error registering plugin firebase_crashlytics, io.flutter.plugins.firebase.crashlytics.FlutterFirebaseCrashlyticsPlugin", e);
     }
     try {
-      flutterEngine.getPlugins().add(new io.flutter.plugins.firebasedynamiclinks.FirebaseDynamicLinksPlugin());
+      flutterEngine.getPlugins().add(new io.flutter.plugins.firebase.dynamiclinks.FlutterFirebaseDynamicLinksPlugin());
     } catch(Exception e) {
-      Log.e(TAG, "Error registering plugin firebase_dynamic_links, io.flutter.plugins.firebasedynamiclinks.FirebaseDynamicLinksPlugin", e);
+      Log.e(TAG, "Error registering plugin firebase_dynamic_links, io.flutter.plugins.firebase.dynamiclinks.FlutterFirebaseDynamicLinksPlugin", e);
     }
     try {
       flutterEngine.getPlugins().add(new io.flutter.plugins.firebase.storage.FlutterFirebaseStoragePlugin());

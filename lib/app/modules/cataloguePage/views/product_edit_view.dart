@@ -273,38 +273,37 @@ class ProductEdit extends StatelessWidget {
                             enabled: controller.getSaveIndicator ? false : true,
                             checkColor: Colors.white,
                             activeColor: Colors.blue,
-                            value: controller.getProduct.stock,
-                            title: const Text('Control de stock'),
+                            value: controller.getProduct.stock?controller.isSubscribed:false,
+                            title: Row(
+                              children: const [
+                                Text('Control de stock'),
+                                SizedBox(width: 12),
+                                LogoPro(),
+                              ],
+                            ),
                             onChanged: (value) {
                               if (!controller.getSaveIndicator) {
                                 controller.setStock = value ?? false;
                               }
                             },
                           ),
-                          controller.getProduct.stock ? space : Container(),
-                          controller.getProduct.stock
+                          controller.getProduct.stock && controller.isSubscribed ? space : Container(),
+                          controller.getProduct.stock && controller.isSubscribed
                               ? Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 12),
                                 child: TextField(
                                   enabled: !controller.getSaveIndicator,
                                   keyboardType: TextInputType.number,
-                                  onChanged: (value) =>
-                                      controller.getProduct.quantityStock =
-                                          int.parse(controller
-                                              .controllerTextEditQuantityStock
-                                              .text),
-                                  decoration: const InputDecoration(
-                                      border: OutlineInputBorder(),
-                                      labelText: "Stock"),
+                                  onChanged: (value) => controller.getProduct.quantityStock =int.parse(controller.controllerTextEditQuantityStock .text),
+                                  decoration: const InputDecoration( border: OutlineInputBorder(), labelText: "Stock"),
                                   textInputAction: TextInputAction.done,
                                   //style: textStyle,
-                                  controller:
-                                      controller.controllerTextEditQuantityStock,
+                                  controller: controller.controllerTextEditQuantityStock,
                                 ),
                               )
                               : Container(),
-                          controller.getProduct.stock ? space : Container(),
-                          controller.getProduct.stock
+                          controller.getProduct.stock && controller.isSubscribed ? space : Container(),
+                          controller.getProduct.stock && controller.isSubscribed
                               ? Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
                                 child: TextField(
@@ -548,7 +547,6 @@ class _SelectCategoryState extends State<SelectCategory> {
                       title: Text(categoria.name.substring(0, 1).toUpperCase() + categoria.name.substring(1)),
                       onTap: () {
                         controllerProductsEdit.setCategory = categoria;
-                        controllerProductsEdit.setSubcategory = Category();
                         Get.back();
                       },
                       trailing: popupMenuItemCategoria(categoria: categoria),
