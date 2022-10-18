@@ -21,6 +21,8 @@ import '../modules/cataloguePage/controller/catalogue_controller.dart';
 import '../routes/app_pages.dart';
 
 class WidgetButtonListTile extends StatelessWidget {
+
+  // controllers
   final HomeController controller = Get.find<HomeController>();
 
   WidgetButtonListTile({super.key});
@@ -335,129 +337,164 @@ Widget drawerApp() {
       String email = homeController.getUserAuth.email ?? 'null';
 
       return Drawer(
-        child: Column(
-          children: [
-            const SizedBox(height: 50),
-            //  avatar de la cuenta
-            ListTile(
-              leading: Container(
-                padding: const EdgeInsets.all(0.0),
-                child: homeController.getProfileAccountSelected.image == ''
-                    ? CircleAvatar(backgroundColor: Get.theme.dividerColor)
-                    : CachedNetworkImage(
-                        imageUrl:homeController.getProfileAccountSelected.image,
-                        placeholder: (context, url) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
-                        imageBuilder: (context, image) => CircleAvatar(backgroundImage: image),
-                        errorWidget: (context, url, error) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
-                      ),
-              ),
-              title: Text(homeController.getIdAccountSelected == ''? 'Seleccionar una cuenta': homeController.getProfileAccountSelected.name,maxLines: 1,overflow: TextOverflow.ellipsis),
-              subtitle: homeController.getIdAccountSelected == ''? null: Text(homeController.getProfileAdminUser.superAdmin? 'Administrador': 'Usuario estandar'),
-              trailing: const Icon(Icons.arrow_right_rounded),
-              onTap: () {
-                homeController.showModalBottomSheetSelectAccount();
-              },
-            ),
-            // others items
-            Expanded(
-              child: ListView(
-                children: [
-                  ListTile(
-                      leading: const Icon(Icons.attach_money_rounded),
-                      title: const Text('Vender'),
-                      onTap: () => homeController.setIndexPage = 0),
-                  ListTile(
-                      leading: const Icon(Icons.check),
-                      title: const Text('Transacciones'),
-                      onTap: () => homeController.setIndexPage = 1),
-                  ListTile(
-                      leading: const Icon(Icons.apps_rounded),
-                      title: const Text('Catálogo'),
-                      onTap: () => homeController.setIndexPage = 2),
-                  ListTile(
-                      leading: const Icon(Icons.add_moderator_outlined),
-                      title: Row(
-                        children: const [
-                          Text('Multi Usuario'),
-                          SizedBox(width: 12),
-                          LogoPro(),
-                        ],
-                      ),
-                      onTap: () => homeController.showModalBottomSheetSubcription()),
-                ],
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.launch_rounded),
-              title: const Text('Mi catálogo'),
-              subtitle: const Text('App'),
-              onTap: () async {
-                
-                // values
-                Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.logicabooleana.commer.producto');
-                // primero probamos si podemos abrir la app de lo contrario redireccionara para la tienda de aplicaciones
-                try{
-                  await LaunchApp.openApp(androidPackageName: 'com.logicabooleana.commer.producto');
-                }catch(_){
-                  if (await canLaunchUrl(uri)) { await launchUrl(uri,mode: LaunchMode.externalApplication);} else {throw 'Could not launch $uri';}
-                }
-              },
-            ),
-            /* ListTile(
-              contentPadding: const EdgeInsets.symmetric(vertical: 12,horizontal: 12),
-              tileColor: Colors.grey.withOpacity(0.1),
-              leading: const Icon(Icons.thumbs_up_down_outlined),
-              title: const Text('Dejanos tu opinión 😃'),
-              subtitle: const Text('Nos intereza saber lo que piensas'),
-              onTap: () async {
-                Uri uri = Uri.parse( 'https://play.google.com/store/apps/details?id=com.logicabooleana.commer.producto');
-                if (await canLaunchUrl(uri)) {
-                  await launchUrl(uri,mode: LaunchMode.externalApplication);
-                } else {
-                  throw 'Could not launch $uri';
-                }
-              },
-            ), */
-            ListTile(
-              contentPadding: const EdgeInsets.symmetric(vertical: 12,horizontal: 12),
-              tileColor: Colors.blue.withOpacity(0.1),
-              leading: const Icon(Icons.messenger_outline_sharp,color: Colors.green),
-              title: const Text('Escribenos tu opinión 😃'),
-              subtitle: const Text('Tu opinión o sugerencia es importante'),
-              onTap: () async{
-                
-                // abre la app de mensajeria
-                String whatsAppUrl = "";
-                String phoneNumber = '541134862939';
-                String description = "hola, estoy probando la App!";
-                whatsAppUrl ='https://wa.me/+$phoneNumber?text=${Uri.parse(description)}';
-                Uri uri = Uri.parse( whatsAppUrl);
-                if (await canLaunchUrl(uri)) {
-                  await launchUrl(uri,mode: LaunchMode.externalApplication);
-                } else {
-                  throw 'Could not launch $uri';
-                }
-
-              },
-            ),
-            const ListTile(
-              leading: Icon(Icons.color_lens_outlined),
-              title: Text('Cambiar tema'),
-              onTap: ThemeService.switchTheme,
-            ),
-            ListTile(
-              // ignore: prefer_const_constructors
-              leading: Icon(Icons.close),
-              title: const Text('Cerrar sesión'),
-              subtitle:
-                  Text(email, maxLines: 1, overflow: TextOverflow.ellipsis),
-              onTap: showDialogCerrarSesion,
-            ),
-          ],
-        ),
+        child: WidgetDrawer(email: email),
       );
     },
   );
+}
+
+class WidgetDrawer extends StatelessWidget {
+  const WidgetDrawer({
+    super.key,
+    required this.email,
+  });
+
+  final String email;
+  
+
+  @override
+  Widget build(BuildContext context) {
+
+    // controllers
+    final HomeController homeController = Get.find<HomeController>();
+
+
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 50),
+        //  avatar de la cuenta
+        ListTile(
+          leading: Container(
+            padding: const EdgeInsets.all(0.0),
+            child: homeController.getProfileAccountSelected.image == ''
+                ? CircleAvatar(backgroundColor: Get.theme.dividerColor)
+                : CachedNetworkImage(
+                    imageUrl:homeController.getProfileAccountSelected.image,
+                    placeholder: (context, url) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
+                    imageBuilder: (context, image) => Padding(
+                    padding: const EdgeInsets.all(2.0),
+                    child: CircleAvatar(backgroundImage: image),
+                    ),
+                    errorWidget: (context, url, error) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
+                  ),
+          ),
+          title: Text(homeController.getIdAccountSelected == ''? 'Seleccionar una cuenta': homeController.getProfileAccountSelected.name,maxLines: 1,overflow: TextOverflow.ellipsis),
+          subtitle: homeController.getIdAccountSelected == ''? null: Text(homeController.getProfileAdminUser.superAdmin? 'Administrador': 'Usuario estandar'),
+          trailing: const Icon(Icons.arrow_right_rounded),
+          onTap: () {
+            homeController.showModalBottomSheetSelectAccount();
+          },
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: TextButton(onPressed:(){
+            Get.back(); // cierra drawer
+            homeController.showModalBottomSheetSubcription();
+          }, child: Text(homeController.getProfileAccountSelected.subscribed?'Suscríbete a la versión PRO':'Obtén la versión PRO')),
+        ),
+        // others items
+        Expanded(
+          child: ListView(
+            children: [
+              ListTile(
+                  leading: const Icon(Icons.attach_money_rounded),
+                  title: const Text('Vender'),
+                  onTap: () => homeController.setIndexPage = 0),
+              ListTile(
+                  leading: const Icon(Icons.check),
+                  title: const Text('Transacciones'),
+                  onTap: () => homeController.setIndexPage = 1),
+              ListTile(
+                  leading: const Icon(Icons.apps_rounded),
+                  title: const Text('Catálogo'),
+                  onTap: () => homeController.setIndexPage = 2),
+              ListTile(
+                  leading: const Icon(Icons.add_moderator_outlined),
+                  title: Row(
+                    children: const [
+                      Text('Multi Usuario'),
+                      SizedBox(width: 12),
+                      LogoPro(),
+                    ],
+                  ),
+                  onTap: () {
+                    Get.back(); // cierra drawer
+                    homeController.showModalBottomSheetSubcription();
+                  }),
+            ],
+          ),
+        ),
+        ListTile(
+          leading: const Icon(Icons.launch_rounded),
+          title: const Text('Mi catálogo'),
+          subtitle: const Text('App'),
+          onTap: () async {
+            
+            // values
+            Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.logicabooleana.commer.producto');
+            // primero probamos si podemos abrir la app de lo contrario redireccionara para la tienda de aplicaciones
+            try{
+              await LaunchApp.openApp(androidPackageName: 'com.logicabooleana.commer.producto');
+            }catch(_){
+              if (await canLaunchUrl(uri)) { await launchUrl(uri,mode: LaunchMode.externalApplication);} else {throw 'Could not launch $uri';}
+            }
+          },
+        ),
+        /* ListTile(
+          contentPadding: const EdgeInsets.symmetric(vertical: 12,horizontal: 12),
+          tileColor: Colors.grey.withOpacity(0.1),
+          leading: const Icon(Icons.thumbs_up_down_outlined),
+          title: const Text('Dejanos tu opinión 😃'),
+          subtitle: const Text('Nos intereza saber lo que piensas'),
+          onTap: () async {
+            Uri uri = Uri.parse( 'https://play.google.com/store/apps/details?id=com.logicabooleana.commer.producto');
+            if (await canLaunchUrl(uri)) {
+              await launchUrl(uri,mode: LaunchMode.externalApplication);
+            } else {
+              throw 'Could not launch $uri';
+            }
+          },
+        ), */
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(vertical: 12,horizontal: 12),
+          tileColor: Colors.blue.withOpacity(0.1),
+          leading: const Icon(Icons.messenger_outline_sharp,color: Colors.green),
+          title: const Text('Escribenos tu opinión 😃'),
+          subtitle: const Text('Tu opinión o sugerencia es importante'),
+          onTap: () async{
+            
+            // abre la app de mensajeria
+            String whatsAppUrl = "";
+            String phoneNumber = '541134862939';
+            String description = "hola, estoy probando la App!";
+            whatsAppUrl ='https://wa.me/+$phoneNumber?text=${Uri.parse(description)}';
+            Uri uri = Uri.parse( whatsAppUrl);
+            if (await canLaunchUrl(uri)) {
+              await launchUrl(uri,mode: LaunchMode.externalApplication);
+            } else {
+              throw 'Could not launch $uri';
+            }
+
+          },
+        ),
+        const ListTile(
+          leading: Icon(Icons.color_lens_outlined),
+          title: Text('Cambiar tema'),
+          onTap: ThemeService.switchTheme,
+        ),
+        ListTile(
+          // ignore: prefer_const_constructors
+          leading: Icon(Icons.close),
+          title: const Text('Cerrar sesión'),
+          subtitle:
+              Text(email, maxLines: 1, overflow: TextOverflow.ellipsis),
+          onTap: showDialogCerrarSesion,
+        ),
+      ],
+    );
+  }
 }
 
 Widget viewDefault() {

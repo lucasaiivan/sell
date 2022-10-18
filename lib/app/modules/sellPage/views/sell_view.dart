@@ -418,11 +418,7 @@ class SalesView extends StatelessWidget {
                     placeholder: (context, url) => CircleAvatar(
                         radius: radius,
                         backgroundColor: Get.theme.dividerColor,
-                        child: Text(
-                            Publications.getFormatoPrecio(
-                                monto: productCatalogue.salePrice),
-                            style: TextStyle(
-                                color: Get.textTheme.bodyText1?.color))),
+                        child: Text(Publications.getFormatoPrecio(monto: productCatalogue.salePrice),style: TextStyle(color: Get.textTheme.bodyText1?.color))),
                     imageBuilder: (context, image) => CircleAvatar(
                       radius: radius,
                       backgroundColor: borderCicleColor,

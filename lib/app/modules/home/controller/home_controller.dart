@@ -449,46 +449,7 @@ class HomeController extends GetxController {
 
     // muestre la hoja inferior modal de getx
     Get.bottomSheet(
-      Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Center(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.start,mainAxisSize: MainAxisSize.max,
-            children: [
-              Expanded(
-                child: ListView(
-                  children: const [
-                    Text('PRO',textAlign: TextAlign.center,style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold,)),
-                    Opacity(opacity: 0.7,child: Text('Funcionalidades especiales para profesionalizar tu negocio',textAlign: TextAlign.center,style: TextStyle())),
-                    Padding(
-                      padding: EdgeInsets.all(20.0),
-                      child: Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text('US\$5,99 al mes',textAlign: TextAlign.center,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold)),
-                      ),
-                    ),
-                    Chip(side: side,avatar: Icon(Icons.check),label: Text('Control de inventario')),
-                    Chip(side: side,avatar:  Icon(Icons.check),label: Text('Informes y estadísticas')),
-                    Chip(side: side,avatar: Icon(Icons.check),label: Text('Multi Usuarios')),
-                    Chip(side: side,avatar: Icon(Icons.check),label: Text('Sin publicidad')),
-                  ],
-                ),
-              ),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: (){},
-                  style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.blue)), 
-                  icon: const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text('Subcribirme',style: TextStyle(fontSize: 24,color: Colors.white)),
-                  ),
-                  label: const Icon(Icons.arrow_forward_rounded,color: Colors.white,),
-                ),
-              )
-            ],
-        ) ),
-      ),
+      WidgetBottomSheet(),
       backgroundColor: Get.theme.scaffoldBackgroundColor,
       enableDrag: true,
       isDismissible: true,
@@ -497,4 +458,74 @@ class HomeController extends GetxController {
   }
 
   
+}
+
+
+class WidgetBottomSheet extends StatefulWidget {
+  WidgetBottomSheet({Key? key}) : super(key: key);
+
+  @override
+  State<WidgetBottomSheet> createState() => _WidgetBottomSheetState();
+}
+
+class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
+
+  // others controllers
+  final HomeController homeController = Get.find();
+
+
+  @override
+  Widget build(BuildContext context) {
+
+    // value 
+    BorderSide side = const BorderSide(color: Colors.transparent);
+
+    return Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.start,mainAxisSize: MainAxisSize.max,
+            children: [
+              Expanded(
+                child: ListView(
+                  children: [
+                    const Text('PRO',textAlign: TextAlign.center,style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold,)),
+                    const Opacity(opacity: 0.7,child: Text('Funcionalidades especiales para profesionalizar tu negocio',textAlign: TextAlign.center,style: TextStyle())),
+                    const Padding(
+                      padding: EdgeInsets.all(20.0),
+                      child: Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text('US\$5,99 al mes',textAlign: TextAlign.center,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                    const Divider(thickness: 0.2),
+                    Chip(side: side,avatar: const Icon(Icons.check),label: const Text('Control de inventario')),
+                    Chip(side: side,avatar:  const Icon(Icons.check),label: const Text('Informes y estadísticas')),
+                    Chip(side: side,avatar: const Icon(Icons.check),label: const Text('Multi Usuarios')),
+                    Chip(side: side,avatar: const Icon(Icons.check),label: const Text('Sin publicidad')),
+                  ],
+                ),
+              ),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: (){
+                    // actualizamos la subcripción de la cuenta
+                    setState(() {
+                      homeController.getProfileAccountSelected.subscribed = !homeController.getProfileAccountSelected.subscribed;
+                    });
+                    if(homeController.getProfileAccountSelected.subscribed){Get.back();}
+                  },
+                  style: ButtonStyle(backgroundColor: MaterialStateProperty.all(homeController.getProfileAccountSelected.subscribed?Colors.grey:Colors.blue)), 
+                  icon: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(homeController.getProfileAccountSelected.subscribed?'Desuscribirme':'Subcribirme',style: const TextStyle(fontSize: 24,color: Colors.white)),
+                  ),
+                  label: Icon(homeController.getProfileAccountSelected.subscribed?Icons.close:Icons.arrow_forward_rounded,color: Colors.white,),
+                ),
+              )
+            ],
+        ) ),
+      );
+  }
 }
