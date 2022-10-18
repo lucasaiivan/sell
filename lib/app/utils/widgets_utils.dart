@@ -392,7 +392,7 @@ class WidgetDrawer extends StatelessWidget {
           child: TextButton(onPressed:(){
             Get.back(); // cierra drawer
             homeController.showModalBottomSheetSubcription();
-          }, child: Text(homeController.getProfileAccountSelected.subscribed?'Suscríbete a la versión PRO':'Obtén la versión PRO')),
+          }, child: Text(homeController.getProfileAccountSelected.subscribed?'Premium':'Obten la versión Premium')),
         ),
         // others items
         Expanded(
@@ -413,15 +413,15 @@ class WidgetDrawer extends StatelessWidget {
               ListTile(
                   leading: const Icon(Icons.add_moderator_outlined),
                   title: Row(
-                    children: const [
-                      Text('Multi Usuario'),
-                      SizedBox(width: 12),
-                      LogoPro(),
+                    children: [
+                      const Text('Multi Usuario'),
+                      const SizedBox(width: 12),
+                      LogoPremium(),
                     ],
                   ),
                   onTap: () {
                     Get.back(); // cierra drawer
-                    homeController.showModalBottomSheetSubcription();
+                    homeController.showModalBottomSheetSubcription(id: 'multiuser');
                   }),
             ],
           ),
@@ -790,8 +790,10 @@ class WidgetSuggestionProduct extends StatelessWidget {
 }
 
 
-class LogoPro extends StatelessWidget {
-  const LogoPro({Key? key}) : super(key: key);
+class LogoPremium extends StatelessWidget {
+
+  late Color accentColor;
+  LogoPremium({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -800,14 +802,14 @@ class LogoPro extends StatelessWidget {
     final HomeController homeController = Get.find();
     
     // value
-    Color accentColor = Theme.of(context).brightness==Brightness.dark?Colors.white70:Colors.black87;
+    accentColor = Theme.of(context).brightness==Brightness.dark?Colors.white70:Colors.black87;
 
     return homeController.getProfileAccountSelected.subscribed ? Container(): InkWell(
-      onTap: homeController.showModalBottomSheetSubcription,
+      onTap: () => homeController.showModalBottomSheetSubcription(),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 2),
         decoration: BoxDecoration(border: Border.all(color: accentColor)),
-        child: Text('PRO',style: TextStyle(fontSize: 12,color:accentColor))
+        child: Text('PREMIUM',style: TextStyle(fontSize: 12,color:accentColor))
       ),
     );
   }

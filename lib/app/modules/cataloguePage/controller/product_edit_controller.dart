@@ -201,7 +201,7 @@ class ControllerProductsEdit extends GetxController {
   // FUNCTIONES
   set setStock(bool value) {
     if( homeController.getProfileAccountSelected.subscribed == false ){
-      homeController.showModalBottomSheetSubcription();
+      homeController.showModalBottomSheetSubcription(id: 'stock');
     }else{
       getProduct.stock = value;
       update(['updateAll']);

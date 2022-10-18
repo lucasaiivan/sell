@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -442,14 +441,12 @@ class HomeController extends GetxController {
               topLeft: Radius.circular(20), topRight: Radius.circular(20))),
     );
   }
-  void showModalBottomSheetSubcription(){
+  void showModalBottomSheetSubcription({String id='premium'}){ 
 
-    // value 
-    const dynamic side = BorderSide(color: Colors.transparent);
 
     // muestre la hoja inferior modal de getx
     Get.bottomSheet(
-      WidgetBottomSheet(),
+      WidgetBottomSheet(id:id),
       backgroundColor: Get.theme.scaffoldBackgroundColor,
       enableDrag: true,
       isDismissible: true,
@@ -462,7 +459,9 @@ class HomeController extends GetxController {
 
 
 class WidgetBottomSheet extends StatefulWidget {
-  WidgetBottomSheet({Key? key}) : super(key: key);
+
+  late String id;
+  WidgetBottomSheet({Key? key,required this.id}) : super(key: key);
 
   @override
   State<WidgetBottomSheet> createState() => _WidgetBottomSheetState();
@@ -472,10 +471,41 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
 
   // others controllers
   final HomeController homeController = Get.find();
+  String title = '';
+  String description = '';
+
+  // functions
+  void setData({required String id}){
+    switch(id){
+      case 'premium':
+        title = '' ;
+        description ='Funcionalidades especiales para profesionalizar tu negocio';
+        break;
+      case 'stock':
+        title = 'Control de Inventario' ;
+        description ='Maneje el stock de sus productos, disfruta además de otras características especiales';
+        break;
+      case 'analytic':
+        title = 'Informes y Estadísticas' ;
+        description ='Obtenga datos sobre el rendimiento de sus transacciones y otras estadísticas importantes';
+        break;
+      case 'multiuser':
+        title = 'Multiusuario' ;
+        description ='Permita que más personas gestionen esta cuenta y con permisos personalizados. Además también tenes otras características';
+        break;
+      default:
+        title = '' ;
+        description ='Funcionalidades especiales para profesionalizar tu negocio';
+        break;
+    }
+  }
 
 
   @override
   Widget build(BuildContext context) {
+
+    // values 
+    setData(id: widget.id);
 
     // value 
     BorderSide side = const BorderSide(color: Colors.transparent);
@@ -489,23 +519,38 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
               Expanded(
                 child: ListView(
                   children: [
-                    const Text('PRO',textAlign: TextAlign.center,style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold,)),
-                    const Opacity(opacity: 0.7,child: Text('Funcionalidades especiales para profesionalizar tu negocio',textAlign: TextAlign.center,style: TextStyle())),
-                    const Padding(
-                      padding: EdgeInsets.all(20.0),
-                      child: Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text('US\$5,99 al mes',textAlign: TextAlign.center,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold)),
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(title,textAlign: TextAlign.center,style: const TextStyle(fontSize: 25,fontWeight: FontWeight.bold)),
+                        const SizedBox(width: 12),
+                        LogoPremium(),
+                        //const Icon(Icons.workspace_premium_outlined,size: 30,color: Colors.amber),
+                      ],
                     ),
-                    const Divider(thickness: 0.2),
-                    Chip(side: side,avatar: const Icon(Icons.check),label: const Text('Control de inventario')),
-                    Chip(side: side,avatar:  const Icon(Icons.check),label: const Text('Informes y estadísticas')),
-                    Chip(side: side,avatar: const Icon(Icons.check),label: const Text('Multi Usuarios')),
-                    Chip(side: side,avatar: const Icon(Icons.check),label: const Text('Sin publicidad')),
+                    const SizedBox(height: 12),
+                    Opacity(opacity: 0.7,child: Text(description,textAlign: TextAlign.center )),
+                    const SizedBox(height: 12),
+                    const Text.rich(
+                      TextSpan(
+                          children: [
+                              TextSpan(text: 'US,99',style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold)),
+                              TextSpan(text: ' al mes',style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold)),
+                          ],
+                      ),textAlign: TextAlign.center,
+                      textDirection: TextDirection.rtl,
+                    ), 
+                    const SizedBox(height: 12),
+                    const Text('Más características',textAlign: TextAlign.center,),
+                    const SizedBox(height: 12),
+                    Chip(backgroundColor: Colors.grey.shade900.withOpacity(0.5),side: side,avatar: const Icon(Icons.check),label: const Text('Control de inventario')),
+                    Chip(backgroundColor: Colors.grey.shade900.withOpacity(0.5),side: side,avatar: const Icon(Icons.check),label: const Text('Multi Usuarios')),
+                    Chip(backgroundColor: Colors.grey.shade900.withOpacity(0.5),side: side,avatar:  const Icon(Icons.check),label: const Text('Informes y estadísticas')),
+                    Chip(backgroundColor: Colors.grey.shade900.withOpacity(0.5),side: side,avatar: const Icon(Icons.check),label: const Text('Sin publicidad')),
                   ],
                 ),
               ),
+              const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(

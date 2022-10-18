@@ -275,10 +275,10 @@ class ProductEdit extends StatelessWidget {
                             activeColor: Colors.blue,
                             value: controller.getProduct.stock?controller.isSubscribed:false,
                             title: Row(
-                              children: const [
-                                Text('Control de stock'),
-                                SizedBox(width: 12),
-                                LogoPro(),
+                              children: [
+                                const Text('Control de stock'),
+                                const SizedBox(width: 12),
+                                LogoPremium(),
                               ],
                             ),
                             onChanged: (value) {
