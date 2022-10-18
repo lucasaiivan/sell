@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sell/app/models/catalogo_model.dart';
@@ -63,7 +62,7 @@ class SalesView extends StatelessWidget {
       headerSliverBuilder: (context, innerBoxIsScrolled) {
         return [
           // atentos a cualquier cambio que surja en los datos de la lista de marcas
-          SliverList(delegate: SliverChildListDelegate([controller.widgetProductSuggestionInfo, widgeSuggestedProducts(controller1: controller)]))
+          SliverList(delegate: SliverChildListDelegate([controller.widgetProductSuggestionInfo, widgeSuggestedProducts(context: context,controller1: controller)]))
         ];
       },
       body: Column(
@@ -93,6 +92,10 @@ class SalesView extends StatelessWidget {
   }
 
   Widget drawerTicket({required SalesController controller}) {
+
+    // values 
+    const EdgeInsets  padding = EdgeInsets.symmetric(horizontal: 20,vertical: 2);
+
     return AnimatedContainer(
       width: controller.getTicketView ? Get.size.width : 0,
       curve: Curves.fastOutSlowIn,
@@ -103,19 +106,94 @@ class SalesView extends StatelessWidget {
         child: Padding(
           padding:const EdgeInsets.only(bottom: 2, top: 12, right: 5, left: 24),
           child: Material(
-            borderRadius: const BorderRadius.all(Radius.circular(12)),
+            borderRadius: const BorderRadius.all(Radius.circular(20)),
             color: Get.theme.brightness == Brightness.dark? Colors.white10: Colors.white,
             child: Drawer(
+              elevation: 0,
               backgroundColor: Colors.transparent,
               child: Center(
                 child: controller.getStateConfirmPurchase
                     ? widgetConfirmedPurchase()
                     : ListView(
+                      shrinkWrap: false,
                         children: [
                           const SizedBox(height: 20),
                           const Text('Ticket',textAlign: TextAlign.center,style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
-                          Text('${controller.getListProductsSelestedLength} items',textAlign: TextAlign.center),
-                          Text('Total: ${Publications.getFormatoPrecio(monto: controller.getCountPriceTotal())}',textAlign: TextAlign.center, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                          Material(
+                            color: Colors.blueGrey.withOpacity(0.1),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(homeController.getProfileAccountSelected.name,textAlign: TextAlign.center,style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                            )),
+                          const SizedBox(height: 25),
+                          // text : cantidad de elementos 'productos' seleccionados
+                          Padding(
+                            padding: padding,
+                            child: Row(
+                              children: [
+                                const Text('Productos:'),
+                                const Spacer(),
+                                Text(controller.getListProductsSelestedLength.toString()),
+                              ],
+                            ),
+                          ),
+                          // text : medio de pago
+                          Padding(
+                            padding: padding,
+                            child: Row(
+                              children: [
+                                const Text('Medio:'),
+                                const Spacer(),
+                                Text(controller.getTicket.getPayMode),
+                              ],
+                            ),
+                          ),
+                          // text : el monto total de la transacción
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 12,left: 20,right: 20,top: 12),
+                            child: Row(
+                              children: [
+                                const Text('Total',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w900)),
+                                const Spacer(),
+                                Text(Publications.getFormatoPrecio(monto: controller.getCountPriceTotal()),style: const TextStyle(fontSize: 24,fontWeight: FontWeight.w900)),
+                              ],
+                            ),
+                          ),
+                          // text : paga con 
+                          controller.getValueReceivedTicket == 0 ||controller.getTicket.payMode !='effective'
+                            ? Container()
+                            :Padding(
+                              padding: padding,
+                              child: Row(
+                                children: [
+                                  const Text('Pago con:'),
+                                  const Spacer(),
+                                  Text(controller.getValueReceived()),
+                                ],
+                              ),
+                          ),
+                          // text : vuelto 
+                          controller.getValueReceivedTicket == 0 ||controller.getTicket.payMode !='effective'
+                            ? Container()
+                            :Padding(
+                              padding: padding,
+                              child: Row(
+                                children: [
+                                  const Text('Vuelto:'),
+                                  const Spacer(),
+                                  Material(
+                                    elevation: 0,
+                                    color: Colors.green.shade300,
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 1),
+                                      child: Text(controller.getValueChange(),style: const TextStyle(color: Colors.white,fontSize: 16),),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                          ),
+                          const SizedBox(height: 25),
                           // lines ------
                           Padding(padding: const EdgeInsets.all(20.0),child: Dash(color: Get.theme.dividerColor,height: 5, width: 12)),
                           // view 2
@@ -127,42 +205,43 @@ class SalesView extends StatelessWidget {
                               children: [
                                 // texto : texto que se va a mostrar por unica ves
                                 controller.widgetTextFirstSale,
-                                const Text('El cliente paga con:'),
+                                const Text('El cliente paga con:',style:TextStyle(fontWeight: FontWeight.bold)),
                                 const SizedBox(height: 12),
-                                //  button : pago con efectivo
-                                ElevatedButton.icon(style: ButtonStyle(elevation: MaterialStateProperty.all(controller.getTicket.payMode =='effective'? 5: 0)),
-                                  icon: Container(),
-                                  onPressed: controller.showDialogMount,
-                                  label: Text(controller.getValueReceivedTicket != 0.0? Publications.getFormatoPrecio(monto: controller.getValueReceivedTicket): 'Efectivo'),
-                                ),
-                                // button : pago con mercado pago
-                                ElevatedButton.icon(
-                                  style: ButtonStyle(elevation: MaterialStateProperty.all(controller.getTicket.payMode == 'mercadopago'? 5: 0)),
-                                  icon: controller.getTicket.payMode != 'mercadopago'?Container():const Icon(Icons.check_circle_rounded),
-                                  onPressed: () => controller.setPayModeTicket = 'mercadopago',
-                                  label: const Text('Mercado Pago'),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    //  button : pago con efectivo
+                                    ElevatedButton.icon(
+                                      style: ButtonStyle(elevation: MaterialStateProperty.all(controller.getTicket.payMode =='effective'? 5: 0)),
+                                      icon: controller.getTicket.payMode != 'effective'?Container():const Icon(Icons.money_rounded),
+                                      onPressed: controller.showDialogMount,
+                                      label: Text(controller.getValueReceivedTicket != 0.0? Publications.getFormatoPrecio(monto: controller.getValueReceivedTicket): 'Efectivo'),
+                                    ),
+                                    // button : pago con mercado pago
+                                    ElevatedButton.icon(
+                                      style: ButtonStyle(elevation: MaterialStateProperty.all(controller.getTicket.payMode == 'mercadopago'? 5: 0)),
+                                      icon: controller.getTicket.payMode != 'mercadopago'?Container():const Icon(Icons.check_circle_rounded),
+                                      onPressed: () {
+                                        controller.setPayModeTicket = 'mercadopago';
+                                        // default value
+                                        controller.setValueReceivedTicket=0.0;
+                                      },
+                                      label: const Text('Mercado Pago'),
+                                    ),
+                                  ],
                                 ),
                                 //  button : pago con tarjeta de credito/debito
                                 ElevatedButton.icon(
                                   style: ButtonStyle(elevation: MaterialStateProperty.all(controller.getTicket.payMode =='card'? 5 : 0)),
                                   icon: controller.getTicket.payMode != 'card'?Container(): const Icon(Icons.credit_card_outlined),
-                                  onPressed: () =>controller.setPayModeTicket = 'card',
+                                  onPressed: (){
+                                    controller.setPayModeTicket = 'card';
+                                    // default values
+                                    controller.setValueReceivedTicket=0.0;
+                                  },
                                   label:const Text('Tarjeta de Debito/Credito'),
                                 ),
                                 const SizedBox(height: 12),
-                                // text : cantidad de vuelto
-                                controller.getValueReceivedTicket == 0 ||controller.getTicket.payMode !='effective'
-                                    ? Container()
-                                    : RichText(
-                                        textAlign: TextAlign.center,
-                                        text: TextSpan(
-                                            text: 'Vuelto:  ',
-                                            style: TextStyle(color: Get.theme.textTheme.headline1?.color),
-                                            children: <TextSpan>[
-                                              TextSpan(text: controller.getValueReceived(),style: const TextStyle(fontSize: 30))
-                                            ]),
-                                      ),
-                                
                               ],
                             ),
                           ),
@@ -178,36 +257,53 @@ class SalesView extends StatelessWidget {
 
   // WIDGETS COMPONENTS
 
-  Widget widgeSuggestedProducts({required SalesController controller1}) {
+  Widget widgeSuggestedProducts({required SalesController controller1,required BuildContext context}) {
 
+    // controllers
     HomeController controller  = Get.find();
 
-    return SizedBox(
-      width: double.infinity,
-      height: 125,
-      child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: controller.getProductsOutstandingList.length + (controller.getProductsOutstandingList.length > 5? 0: 10),
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ElasticIn(child: circleAvatarBSeachDefault(context: context, seach: true)),
-                    (index < controller.getProductsOutstandingList.length)
-                        ? circleAvatarProduct(productCatalogue: controller.getProductsOutstandingList[index])
-                        : ElasticIn(child: circleAvatarBSeachDefault(context: context)),
-                  ],
-                );
-              }
-              // mostramos un número de elementos vacíos de los cuales el primero tendrá un icono 'add'
-              if (index < controller.getProductsOutstandingList.length) {
-                return circleAvatarProduct(productCatalogue:controller.getProductsOutstandingList[index]);
-              } else {
-                return ElasticIn(child: circleAvatarBSeachDefault(context: context));
-              }
-            },
+    // values
+    const double height = 120;
+
+    return Stack(
+      children: [
+        SizedBox(
+          height: height,
+          width: double.infinity,
+          child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: controller.getProductsOutstandingList.length + (controller.getProductsOutstandingList.length > 5? 0: 10),
+                itemBuilder: (context, index) {
+
+                  // values 
+                  Widget widget = circleAvatarProduct(productCatalogue:controller.getProductsOutstandingList[index]);
+                  
+                  if(index == 0){ return Row(crossAxisAlignment: CrossAxisAlignment.start,children: [const SizedBox(width: 95.0,height: height),widget]);}
+                  return circleAvatarProduct(productCatalogue:controller.getProductsOutstandingList[index]);
+                },
+              ),
+        ),
+        SizedBox(
+          width: 110.0,height: height,
+          child: Container(
+            decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.centerRight,
+            end: Alignment.centerLeft,
+            colors: <Color>[
+              Theme.of(context).scaffoldBackgroundColor.withOpacity(0.0),
+              Theme.of(context).scaffoldBackgroundColor,
+              Theme.of(context).scaffoldBackgroundColor,
+              Theme.of(context).scaffoldBackgroundColor,
+              Theme.of(context).scaffoldBackgroundColor,
+            ], 
+            tileMode: TileMode.mirror,
           ),
+        ),
+          ),
+        ),
+        circleAvatarBSeachDefault(context: context, seach: true)
+      ],
     );
   }
 
@@ -372,48 +468,28 @@ class SalesView extends StatelessWidget {
   }
 
   Widget widgetConfirmedPurchase() {
-    // controller
-    final SalesController controller = Get.find();
-    // var
-    TextStyle styleText = const TextStyle(fontSize: 18);
+    //----------------------//
+    // Slpach view : hecho! //
+    //----------------------//
+
+    // values 
+    const Color accentColor = Colors.white;
+    Color? background = Colors.green[400];
+
+
     return Theme(
       data: ThemeData(brightness: Brightness.dark),
       child: ElasticIn(
         child: Material(
           borderRadius: const BorderRadius.all(Radius.circular(12)),
-          color: Colors.green[400],
+          color: background,
           child: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              // ignore: prefer_const_literals_to_create_immutables
-              children: [
-                // icon
-                const Icon(
-                  Icons.check_rounded,
-                  size: 120,
-                  color: Colors.white,
-                ),
-                const Text('Hecho',
-                    style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white)),
-                const SizedBox(height: 100),
-                Text(
-                    style: styleText,
-                    'Monto total: ${Publications.getFormatoPrecio(monto: controller.getCountPriceTotal())}'),
-                const SizedBox(height: 12),
-                controller.getValueReceivedTicket == 0
-                    ? Container()
-                    : Text(
-                        style: styleText,
-                        'Pago con: ${Publications.getFormatoPrecio(monto: (controller.getValueReceivedTicket))}'),
-                const SizedBox(height: 12),
-                controller.getValueReceivedTicket == 0
-                    ? Container()
-                    : Text(
-                        style: styleText,
-                        'Vuelto: ${Publications.getFormatoPrecio(monto: (controller.getValueReceivedTicket - controller.getCountPriceTotal()))}'),
+              children: const [
+                Icon(Icons.check_rounded,size: 200,color:accentColor),
+                SizedBox(height:25),
+                Text('Hecho',style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold,color: accentColor)),
               ],
             ),
           ),

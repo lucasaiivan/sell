@@ -30,7 +30,7 @@ class SalesController extends GetxController {
   List<ProductCatalogue> get getRecentlySelectedProductsList => homeController.getProductsOutstandingList;
 
   // efecto de sonido para escaner
-  void playSoundScan() async {AudioCache cache = AudioCache();cache.play("soundBip.mp3");}
+  void playSoundScan() async {AudioCache cache = AudioCache();cache.load("soundBip.mp3");}
 
   // text field controllers
   final TextEditingController textEditingControllerAddFlashPrice = TextEditingController();
@@ -87,9 +87,9 @@ class SalesController extends GetxController {
   // mount  ticket
   final RxDouble _valueReceivedTicket = 0.0.obs;
   double get getValueReceivedTicket => _valueReceivedTicket.value;
-  set setValueReceivedTicket(double value) {
-    _valueReceivedTicket.value = value;
-  }
+  set setValueReceivedTicket(double value) {_valueReceivedTicket.value = value; }
+
+
   @override
   void onClose() {
     textEditingControllerAddFlashDescription.dispose();
@@ -395,12 +395,16 @@ class SalesController extends GetxController {
     }
   }
 
-  String getValueReceived() {
-    if (getValueReceivedTicket == 0.0) {
-      return Publications.getFormatoPrecio(monto: 0);
-    }
+  String getValueChange() {
+
+    // text format : devuelte un texto formateado del monto del cambio que tiene que recibir el cliente
+    if (getValueReceivedTicket == 0.0) {return Publications.getFormatoPrecio(monto: 0);}
     double result = getValueReceivedTicket - getCountPriceTotal();
     return Publications.getFormatoPrecio(monto: result);
+  }
+  String getValueReceived() {
+    // text format : devuelte un texto formateado del monto que el vendedor recibio
+    return Publications.getFormatoPrecio(monto: getValueReceivedTicket);
   }
 
   void confirmedPurchase() {

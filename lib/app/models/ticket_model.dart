@@ -4,7 +4,7 @@ class TicketModel {
   String id = '';
   String seller = ''; // nombre del vendedor
   String cashRegister = ''; // nombre o numero de caja que se efectuo la venta
-  String payMode = 'efective';
+  String payMode = 'effective'; // efective (Efectivo) - mercadopago (Mercado Pago) - card (Tarjeta De Crédito/Débito)
   double priceTotal = 0.0;
   double valueReceived = 0.0;
   List<dynamic> listPoduct = [];
@@ -29,6 +29,14 @@ class TicketModel {
     return count;
   }
 
+  // format : formateo de texto 
+  String get getPayMode{
+    if(payMode == 'effective') return 'Efectivo';
+    if(payMode == 'mercadopago') return 'Mercado Pago';
+    if(payMode == 'card') return 'Tarjeta De Crédito/Débito';
+    return 'Sin Especificar';
+  }
+
   Map<String, dynamic> toJson() => {
         "id": id,
         "payMode": payMode,
@@ -51,8 +59,7 @@ class TicketModel {
       creation: data['creation'],
     );
   }
-  TicketModel.fromDocumentSnapshot(
-      {required DocumentSnapshot documentSnapshot}) {
+  TicketModel.fromDocumentSnapshot({required DocumentSnapshot documentSnapshot}) {
     Map data = documentSnapshot.data() as Map;
 
     id = data['id'] ?? '';

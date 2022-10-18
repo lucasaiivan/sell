@@ -52,6 +52,7 @@ class ProfileAccountModel {
   String currencySign = "\$";
 
   // account info
+  bool subscribed = false;
   bool blockingAccount = false;
   String blockingMessage = "";
   bool verifiedAccount = false; // Cuenta verificada
@@ -69,6 +70,7 @@ class ProfileAccountModel {
     // location
     // data user creation
     this.id = "",
+    this.subscribed=false,
     this.username = '',
     this.image = "",
     this.name = "",
@@ -88,8 +90,8 @@ class ProfileAccountModel {
   ProfileAccountModel.fromMap(Map data) {
     id = data['id'];
     username = data['username'];
-    image =
-        data.containsKey('image') ? data['image'] : data['imagen_perfil'] ?? '';
+    subscribed = data['subscribed']??false;
+    image =data.containsKey('image') ? data['image'] : data['imagen_perfil'] ?? '';
     name = data.containsKey('name') ? data['name'] : data['nombre_negocio'];
     description = data.containsKey('description')
         ? data['description']
@@ -120,6 +122,7 @@ class ProfileAccountModel {
   }
   Map<String, dynamic> toJson() => {
         "id": id,
+        "subscribed": subscribed,
         "username": username,
         "image": image,
         "name": name,
@@ -143,10 +146,10 @@ class ProfileAccountModel {
 
     //  set
     creation = data["creation"];
+    subscribed = data.containsKey('subscribed') ? data['subscribed'] : false;
     id = data.containsKey('id') ? data['id'] : documentSnapshot.id;
     username = data["username"] ?? '';
-    image =
-        data.containsKey('image') ? data['image'] : data["imagen_perfil"] ?? '';
+    image = data.containsKey('image') ? data['image'] : data["imagen_perfil"] ?? '';
     name = data.containsKey('name')
         ? data['name']
         : data["nombre_negocio"] ?? 'null';
