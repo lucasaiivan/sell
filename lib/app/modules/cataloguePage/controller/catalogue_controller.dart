@@ -168,17 +168,27 @@ class CataloguePageController extends GetxController
                     maxLines: 2,
                     overflow: TextOverflow.clip,
                   ),
-                  Row(
+                  Wrap(
                   children: [
-                    // text : favorite
-                    product.favorite?Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)):Container(),
-                    product.favorite? const Text('Favorito'):Container(),
-                    //  text : alert stock
-                    product.favorite && alertStockText != ''? Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)):Container(),
-                    alertStockText == '' ? Container() : Text(alertStockText),
-                    // text : cantidad de ventas
-                    product.sales == 0? Container(): Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
-                    product.sales == 0? Container(): Text('${product.sales} ${product.sales == 1 ? 'venta' : 'ventas'}'),
+                    Text(Publications.getFormatoPrecio(monto: product.salePrice),style: const TextStyle(fontWeight:FontWeight.bold )),
+                    const SizedBox(width: 5),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.circle,size: 8, color: Get.theme.dividerColor),
+                        const SizedBox(width: 5),
+                        Text(Publications.getFechaPublicacion(product.upgrade.toDate(), Timestamp.now().toDate())),
+                        const SizedBox(width: 5),
+                      ],
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        product.sales == 0? Container(): Icon(Icons.circle,size: 8, color: Get.theme.dividerColor),
+                        product.sales == 0? Container():const SizedBox(width: 5),
+                        product.sales == 0? Container(): Text('${product.sales} ${product.sales == 1 ? 'venta' : 'ventas'}'),
+                      ],
+                    ),
                   ],
                 ), 
                 ],
@@ -190,7 +200,7 @@ class CataloguePageController extends GetxController
                 toProductEdit(productCatalogue: product);
               },
             ),
-            const Divider(height: 0),
+            const Divider(height: 0,thickness: 2),
           ],
         );
         },
