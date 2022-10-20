@@ -218,13 +218,27 @@ class CataloguePage extends StatelessWidget {
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                Wrap(
                   children: [
                     Text(Publications.getFormatoPrecio(monto: item.salePrice),style: const TextStyle(fontWeight:FontWeight.bold )),
-                    Padding(padding: const EdgeInsets.symmetric(horizontal: 3),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
-                    Text(Publications.getFechaPublicacion(item.upgrade.toDate(), Timestamp.now().toDate())),
-                    item.sales == 0? Container(): Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
-                    item.sales == 0? Container(): Text('${item.sales} ${item.sales == 1 ? 'venta' : 'ventas'}'),
+                    const SizedBox(width: 5),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.circle,size: 8, color: Get.theme.dividerColor),
+                        const SizedBox(width: 5),
+                        Text(Publications.getFechaPublicacion(item.upgrade.toDate(), Timestamp.now().toDate())),
+                        const SizedBox(width: 5),
+                      ],
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        item.sales == 0? Container(): Icon(Icons.circle,size: 8, color: Get.theme.dividerColor),
+                        item.sales == 0? Container():const SizedBox(width: 5),
+                        item.sales == 0? Container(): Text('${item.sales} ${item.sales == 1 ? 'venta' : 'ventas'}'),
+                      ],
+                    ),
                   ],
                 ),
                 Row(
