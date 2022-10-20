@@ -1,6 +1,10 @@
+import 'dart:ui';
+
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:sell/app/modules/home/controller/home_controller.dart';
 import 'package:sell/app/utils/fuctions.dart';
 import 'package:sell/app/utils/widgets_utils.dart';
 
@@ -29,6 +33,7 @@ class TransactionsView extends StatelessWidget {
 
   // WIDGETS VIEWS
   PreferredSizeWidget appbar({required BuildContext context}) {
+
     // others controllers
     final TransactionsController transactionsController = Get.find();
 
@@ -72,7 +77,7 @@ class TransactionsView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Padding(
+              /* Padding(
                 padding:const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -82,9 +87,10 @@ class TransactionsView extends StatelessWidget {
                     Text(transactionsController.getInfoPriceTotal(),textAlign: TextAlign.start,style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w200)),
                   ],
                 ),
-              ),
+              ), */
+              CarruselCardsAnalytic(),
               tileItem( ticketModel: transactionsController.getTransactionsList[index]),
-              const Divider(height: 0),
+              const Divider(thickness: 0.1),
             ],
           );
         }
@@ -92,7 +98,7 @@ class TransactionsView extends StatelessWidget {
         return Column(
           children: [
             tileItem(ticketModel: transactionsController.getTransactionsList[index]),
-            const Divider(height: 0),
+            const Divider(thickness: 0.1),
           ],
         );
       },
@@ -100,6 +106,7 @@ class TransactionsView extends StatelessWidget {
   }
 
   // WIDGETS COMPONENTS
+
   Widget tileItem({required TicketModel ticketModel}) {
     
     // controllers
@@ -135,6 +142,216 @@ class TransactionsView extends StatelessWidget {
         ),
         trailing: Text(Publications.getFormatoPrecio(monto: ticketModel.priceTotal),style: const TextStyle(fontWeight: FontWeight.bold)),
       ),
+    );
+  }
+}
+
+
+/* CLASS VIEWS */
+// ignore: must_be_immutable
+class CarruselCardsAnalytic extends StatefulWidget {
+
+  const CarruselCardsAnalytic({Key? key}): super(key: key);
+
+  @override
+  State<CarruselCardsAnalytic> createState() => _CarruselCardsAnalyticState();
+}
+
+class _CarruselCardsAnalyticState extends State<CarruselCardsAnalytic> {
+
+
+  // var 
+  int currentSlide=0;
+
+  @override
+  Widget build(BuildContext context) {
+
+    // values 
+    List<Widget> widgetsList = [cardAnalyticSales,cardAnalyticProducts,cardAnalyticOthers];
+    int lengh = widgetsList.length;
+
+    return CarouselSlider.builder(
+      options: CarouselOptions(onPageChanged: (index, reason) => setState(()=> currentSlide=index),viewportFraction: 0.85,enableInfiniteScroll: lengh == 1 ? false : true,autoPlay: lengh == 1 ? false : true,aspectRatio: 2.0,enlargeCenterPage: true,enlargeStrategy: CenterPageEnlargeStrategy.height),
+      //options: CarouselOptions(enableInfiniteScroll: lista.length == 1 ? false : true,autoPlay: lista.length == 1 ? false : true,aspectRatio: 2.0,enlargeCenterPage: true,enlargeStrategy: CenterPageEnlargeStrategy.scale),
+      itemCount: lengh,
+      itemBuilder: (context, index, realIndex) {
+        // AnimatedOpacity : Versión animada de Opacity que cambia automáticamente la opacidad del niño durante un período determinado cada vez que cambia la opacidad dada
+        return widgetsList[index];
+
+      },
+    );
+  }
+
+  Widget get cardAnalyticSales{
+
+    // card : estadisticas de las transacciones
+
+    // others controllers
+    final TransactionsController transactionsController = Get.find();
+
+    // values
+    const Icon iconCategory = Icon(Icons.monetization_on_outlined);
+    const String textCategory = 'Ventas';
+    String text0 = transactionsController.getFilterText;
+    String text1 = transactionsController.getInfoPriceTotal();
+
+    return Card(
+      color: Colors.blue.withOpacity(0.1),
+      elevation: 0,
+      child: Padding(
+        padding:const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            // text : información de la cátegoria
+            Opacity(
+              opacity: 0.5,
+              child: Row(
+                children:const [
+                  iconCategory,
+                  SizedBox(width:5),
+                  Text(textCategory),
+                ],
+              ),
+            ),
+            const Spacer(),
+            // text : fecha del filtro
+            Opacity(opacity:0.5,child: Text(text0,style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900))),
+            // text : valor
+            Text(text1,textAlign: TextAlign.start,style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w200)),
+          ],
+        ),
+      )
+    );
+  }
+  Widget get cardAnalyticProducts{
+
+    // card : estadisticas de las transacciones
+
+    // others controllers
+    final TransactionsController transactionsController = Get.find();
+    final HomeController homeController = Get.find();
+
+    // values
+    const Icon iconCategory = Icon(Icons.analytics_outlined);
+    const String textCategory = 'Productos más vendidos';
+    String text0 = transactionsController.getFilterText;
+    Widget wProducts = Row(
+      children: const [
+        CircleAvatar(radius: 12,backgroundColor: Colors.grey,),
+        CircleAvatar(radius: 12,backgroundColor: Colors.grey,),
+        CircleAvatar(radius: 12,backgroundColor: Colors.grey,),
+      ],
+    );
+
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      color: Colors.blue.withOpacity(0.1),
+      elevation: 0,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // datos
+          Container(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const Spacer(),
+                // text : fecha del filtro
+                Opacity(opacity:0.5,child: Text(text0,style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900))),
+                // widget : productos más vendidos
+                wProducts,
+              ],
+            ),
+          ), 
+          // Premium
+          homeController.getProfileAccountSelected.subscribed?Container():Center(
+            child: ClipRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                child: InkWell(
+                  onTap: (){ homeController.showModalBottomSheetSubcription(id: 'analytic'); },
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: double.infinity,
+                    child: Center(child: LogoPremium(personalize: true,accentColor: Colors.amber,id:'analytic')),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // text : información de la cátegoria
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(children: [Opacity(opacity: 0.5,child: Row(children:const [iconCategory,SizedBox(width:5),Text(textCategory)])),const Spacer()]),
+          ),
+                  
+        ],
+      )
+    );
+  }
+  Widget get cardAnalyticOthers{
+
+    // card : estadisticas de las transacciones
+
+    // others controllers
+    final TransactionsController transactionsController = Get.find();
+    final HomeController homeController = Get.find();
+
+    // values
+    const Icon iconCategory = Icon(Icons.bar_chart_rounded);
+    const String textCategory = 'Otras estadisticas relevantes';
+    String text0 = transactionsController.getFilterText;
+    String text1 = transactionsController.getFilterText;
+
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      color: Colors.blue.withOpacity(0.1),
+      elevation: 0,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const Spacer(),
+                // text : fecha del filtro
+                Opacity(opacity:0.5,child: Text(text0,style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900))),
+                // widget : productos más vendidos
+                Text(text1),
+              ],
+            ),
+          ), 
+          // Premium
+          homeController.getProfileAccountSelected.subscribed?Container():Center(
+            child: ClipRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                child: InkWell(
+                  onTap: (){ homeController.showModalBottomSheetSubcription(id: 'analytic'); },
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: double.infinity,
+                    child: Center(child: LogoPremium(personalize: true,accentColor: Colors.amber,id:'analytic')),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // text : información de la cátegoria
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(children: [Opacity(opacity: 0.5,child: Row(children:const [iconCategory,SizedBox(width:5),Text(textCategory)])),const Spacer()]),
+          ),
+                  
+        ],
+      )
     );
   }
 }

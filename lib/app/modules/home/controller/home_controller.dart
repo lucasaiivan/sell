@@ -14,6 +14,11 @@ import '../../../utils/widgets_utils.dart';
 
 class HomeController extends GetxController {
 
+  // buildContext : obtenemos el context para mostrar Sheet ( la hoja inferior )
+  late BuildContext _buildContext;
+  set  setBuildContext(BuildContext context) => _buildContext=context;
+  BuildContext get getBuildContext =>_buildContext; 
+
   // Guide user : Ventas
   bool salesUserGuideVisibility=false;
   void getSalesUserGuideVisibility(){
@@ -441,17 +446,17 @@ class HomeController extends GetxController {
               topLeft: Radius.circular(20), topRight: Radius.circular(20))),
     );
   }
-  void showModalBottomSheetSubcription({String id='premium'}){ 
+  void showModalBottomSheetSubcription({String id='premium'}){  
 
-
-    // muestre la hoja inferior modal de getx
+    // bottomSheet : muestre la hoja inferior modal de getx
     Get.bottomSheet(
-      WidgetBottomSheet(id:id),
+      SizedBox(height: 600,child: WidgetBottomSheet(id:id)),
       backgroundColor: Get.theme.scaffoldBackgroundColor,
+      isScrollControlled: true,
       enableDrag: true,
       isDismissible: true,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
-    );
+    ); 
   }
 
   
@@ -471,6 +476,10 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
 
   // others controllers
   final HomeController homeController = Get.find();
+
+  // values
+  late double sizePremiumLogo = 16.0;
+  Widget icon = Container();
   String title = '';
   String description = '';
 
@@ -480,22 +489,32 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
       case 'premium':
         title = '' ;
         description ='Funcionalidades especiales para profesionalizar tu negocio';
+        icon =  Container();
+        sizePremiumLogo=20;
         break;
       case 'stock':
         title = 'Control de Inventario' ;
         description ='Maneje el stock de sus productos, disfruta además de otras características especiales';
+        icon = const Padding(padding: EdgeInsets.only(right: 5),child: Icon(Icons.inventory_rounded));
+        sizePremiumLogo=12;
         break;
       case 'analytic':
         title = 'Informes y Estadísticas' ;
         description ='Obtenga datos sobre el rendimiento de sus transacciones y otras estadísticas importantes';
+        icon = const Padding(padding: EdgeInsets.only(right: 5),child: Icon(Icons.analytics_outlined));
+        sizePremiumLogo=12;
         break;
       case 'multiuser':
         title = 'Multiusuario' ;
         description ='Permita que más personas gestionen esta cuenta y con permisos personalizados. Además también tenes otras características';
+        icon = const Padding(padding: EdgeInsets.only(right: 5),child: Icon(Icons.people_outline));
+        sizePremiumLogo=12;
         break;
       default:
         title = '' ;
         description ='Funcionalidades especiales para profesionalizar tu negocio';
+        icon =  Container();
+        sizePremiumLogo=20;
         break;
     }
   }
@@ -512,65 +531,69 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
 
     return Padding(
         padding: const EdgeInsets.all(20.0),
-        child: Center(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.start,mainAxisSize: MainAxisSize.max,
-            children: [
-              Expanded(
-                child: ListView(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(title,textAlign: TextAlign.center,style: const TextStyle(fontSize: 25,fontWeight: FontWeight.bold)),
-                        const SizedBox(width: 12),
-                        LogoPremium(),
-                        //const Icon(Icons.workspace_premium_outlined,size: 30,color: Colors.amber),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Opacity(opacity: 0.7,child: Text(description,textAlign: TextAlign.center )),
-                    const SizedBox(height: 12),
-                    const Text.rich(
-                      TextSpan(
-                          children: [
-                              TextSpan(text: 'US,99',style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold)),
-                              TextSpan(text: ' al mes',style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold)),
-                          ],
-                      ),textAlign: TextAlign.center,
-                      textDirection: TextDirection.rtl,
-                    ), 
-                    const SizedBox(height: 12),
-                    const Text('Más características',textAlign: TextAlign.center,),
-                    const SizedBox(height: 12),
-                    Chip(backgroundColor: Colors.grey.shade900.withOpacity(0.5),side: side,avatar: const Icon(Icons.check),label: const Text('Control de inventario')),
-                    Chip(backgroundColor: Colors.grey.shade900.withOpacity(0.5),side: side,avatar: const Icon(Icons.check),label: const Text('Multi Usuarios')),
-                    Chip(backgroundColor: Colors.grey.shade900.withOpacity(0.5),side: side,avatar:  const Icon(Icons.check),label: const Text('Informes y estadísticas')),
-                    Chip(backgroundColor: Colors.grey.shade900.withOpacity(0.5),side: side,avatar: const Icon(Icons.check),label: const Text('Sin publicidad')),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: (){
-                    // actualizamos la subcripción de la cuenta
-                    setState(() {
-                      homeController.getProfileAccountSelected.subscribed = !homeController.getProfileAccountSelected.subscribed;
-                    });
-                    if(homeController.getProfileAccountSelected.subscribed){Get.back();}
-                  },
-                  style: ButtonStyle(backgroundColor: MaterialStateProperty.all(homeController.getProfileAccountSelected.subscribed?Colors.grey:Colors.blue)), 
-                  icon: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(homeController.getProfileAccountSelected.subscribed?'Desuscribirme':'Subcribirme',style: const TextStyle(fontSize: 24,color: Colors.white)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.start,mainAxisSize: MainAxisSize.max,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,alignment: WrapAlignment.center,
+                    //mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      icon,
+                      Text(title,textAlign: TextAlign.center,style: const TextStyle(fontSize: 25,fontWeight: FontWeight.bold)),
+                      const SizedBox(width: 12),
+                      LogoPremium(personalize: true,accentColor: Colors.amber.shade600,size: sizePremiumLogo,visible: true,),
+                      //const Icon(Icons.workspace_premium_outlined,size: 30,color: Colors.amber),
+                    ],
                   ),
-                  label: Icon(homeController.getProfileAccountSelected.subscribed?Icons.close:Icons.arrow_forward_rounded,color: Colors.white,),
+                  const SizedBox(height: 12),
+                  Opacity(opacity: 0.7,child: Text(description,textAlign: TextAlign.center )),
+                  const SizedBox(height: 12),
+                  const Text('Más características',textAlign: TextAlign.center,),
+                  const SizedBox(height: 12),
+                  Chip(backgroundColor: Colors.transparent,side: side,avatar: const Icon(Icons.check),label: const Text('Control de inventario')),
+                  Chip(backgroundColor: Colors.transparent,side: side,avatar: const Icon(Icons.check),label: const Text('Multi Usuarios')),
+                  Chip(backgroundColor: Colors.transparent,side: side,avatar:  const Icon(Icons.check),label: const Text('Informes y estadísticas')),
+                  Chip(backgroundColor: Colors.transparent,side: side,avatar: const Icon(Icons.check),label: const Text('Sin publicidad')),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            // button : adquirir premium
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: (){
+                  // actualizamos la subcripción de la cuenta
+                  setState(() {
+                    homeController.getProfileAccountSelected.subscribed = !homeController.getProfileAccountSelected.subscribed;
+                  });
+                  if(homeController.getProfileAccountSelected.subscribed){Get.back();}
+                },
+                style: ButtonStyle(backgroundColor: MaterialStateProperty.all(homeController.getProfileAccountSelected.subscribed?Colors.grey:Colors.blue)), 
+                icon: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(homeController.getProfileAccountSelected.subscribed?'Desuscribirme':'Subcribirme',style: const TextStyle(fontSize: 24,color: Colors.white)),
                 ),
-              )
-            ],
-        ) ),
+                label: Icon(homeController.getProfileAccountSelected.subscribed?Icons.close:Icons.arrow_forward_rounded,color: Colors.white,),
+              ),
+            ),
+            // text : precio de la versión Premium
+            const SizedBox(height: 12),
+            const Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(text: 'US \$6,99',style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold)),
+                  TextSpan(text: ' al mes',style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold)),
+                ],
+              ),textAlign: TextAlign.center,
+              textDirection: TextDirection.rtl,
+            ), 
+          ],
+        ),
       );
   }
 }

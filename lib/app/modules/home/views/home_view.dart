@@ -29,6 +29,7 @@ class HomeView extends GetView<HomeController> {
   Widget build(BuildContext context) {
 
     if (controller.getProfileAccountSelected.id == ''){return viewDefault();}
+    controller.setBuildContext=context;
 
     return Obx(() {
       return WillPopScope(

@@ -15,6 +15,8 @@ import '../../../utils/widgets_utils.dart';
 import '../../home/controller/home_controller.dart';
 
 class ControllerProductsEdit extends GetxController {
+
+
   // others controllers
   final HomeController homeController = Get.find();
 
