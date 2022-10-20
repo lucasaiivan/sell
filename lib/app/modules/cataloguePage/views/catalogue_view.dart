@@ -115,7 +115,16 @@ class CataloguePage extends StatelessWidget {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  controller.viewStockAlert,
+                  homeController.getProfileAccountSelected.subscribed?controller.viewStockAlert:Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        TextButton(onPressed:()=>homeController.showModalBottomSheetSubcription(id: 'stock'), child: const  Text('Control del inventario')),
+                        LogoPremium(personalize: true,accentColor: Colors.amber),
+                      ],
+                    ),
+                  ),
                   listTileProduct(item: controller.getCataloProducts[index]),
                 ],
               );
@@ -245,7 +254,7 @@ class CataloguePage extends StatelessWidget {
                   )
                 : null,
           ),
-          const Divider(height: 0),
+          const Divider(thickness: 0.2,height: 0),
         ],
       ),
     );

@@ -389,10 +389,10 @@ class WidgetDrawer extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: TextButton(onPressed:(){
+          child: homeController.getProfileAccountSelected.subscribed?LogoPremium(visible: true,):TextButton(onPressed:(){
             Get.back(); // cierra drawer
             homeController.showModalBottomSheetSubcription();
-          }, child: Text(homeController.getProfileAccountSelected.subscribed?'Premium':'Obten la versión Premium')),
+          }, child: const Text('Obten la versión Premium')),
         ),
         // others items
         Expanded(
@@ -792,8 +792,13 @@ class WidgetSuggestionProduct extends StatelessWidget {
 
 class LogoPremium extends StatelessWidget {
 
+  late bool visible;
+  late double size;
   late Color accentColor;
-  LogoPremium({Key? key}) : super(key: key);
+  late final bool personalize;
+  late String id;
+
+  LogoPremium({Key? key,this.personalize=false,this.accentColor=Colors.blue,this.size=12,this.visible=false,this.id='premium'}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -802,15 +807,21 @@ class LogoPremium extends StatelessWidget {
     final HomeController homeController = Get.find();
     
     // value
-    accentColor = Theme.of(context).brightness==Brightness.dark?Colors.white70:Colors.black87;
+    if( personalize  == false ){ 
+      // valores por defecto
+      accentColor = Theme.of(context).brightness==Brightness.dark?Colors.white70:Colors.black87; 
+    }
 
-    return homeController.getProfileAccountSelected.subscribed ? Container(): InkWell(
-      onTap: () => homeController.showModalBottomSheetSubcription(),
+    // visibility
+    bool visibility = visible || (homeController.getProfileAccountSelected.subscribed ==false);
+
+    return visibility ? InkWell(
+      onTap: () => homeController.showModalBottomSheetSubcription(id:id ),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 2),
         decoration: BoxDecoration(border: Border.all(color: accentColor)),
-        child: Text('PREMIUM',style: TextStyle(fontSize: 12,color:accentColor))
+        child: Text('PREMIUM',style: TextStyle(fontSize: size,color:accentColor))
       ),
-    );
+    ):Container();
   }
 }

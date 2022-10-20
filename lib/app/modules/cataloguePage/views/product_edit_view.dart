@@ -278,7 +278,7 @@ class ProductEdit extends StatelessWidget {
                               children: [
                                 const Text('Control de stock'),
                                 const SizedBox(width: 12),
-                                LogoPremium(),
+                                LogoPremium(personalize: true,accentColor: Colors.amber.shade600),
                               ],
                             ),
                             onChanged: (value) {

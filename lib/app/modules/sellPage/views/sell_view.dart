@@ -327,9 +327,7 @@ class SalesView extends StatelessWidget {
                 child: Column(
                   children: [
                     GestureDetector(
-                      onTap: () {
-                        salesController.showSeach(context: context);
-                      },
+                      onTap: () => salesController.showSeach(context: context),
                       child: Column(
                         children: <Widget>[
                           CircleAvatar(
@@ -391,13 +389,8 @@ class SalesView extends StatelessWidget {
     double spaceImageText = 10;
 
     // alert control stock
-    bool stateAlertStock =
-        productCatalogue.stock ? productCatalogue.quantityStock < 5 : false;
-    Color borderCicleColor = stateAlertStock
-        ? Colors.red
-        : productCatalogue.favorite
-            ? Colors.amber
-            : Get.theme.dividerColor;
+    bool stateAlertStock = productCatalogue.stock && homeController.getProfileAccountSelected.subscribed ? productCatalogue.quantityStock < 5 : false;
+    Color borderCicleColor = stateAlertStock? Colors.red: productCatalogue.favorite? Colors.amber: Get.theme.dividerColor;
 
     return ElasticIn(
       child: Container(
