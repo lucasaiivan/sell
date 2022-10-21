@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sell/app/models/catalogo_model.dart';
@@ -272,14 +273,14 @@ class SalesView extends StatelessWidget {
           width: double.infinity,
           child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: controller.getProductsOutstandingList.length + (controller.getProductsOutstandingList.length > 5? 0: 10),
+                itemCount: controller.getProductsOutstandingList.length + 7,
                 itemBuilder: (context, index) {
 
                   // values 
-                  Widget widget = circleAvatarProduct(productCatalogue:controller.getProductsOutstandingList[index]);
+                  Widget widget = index <= (controller.getProductsOutstandingList.length-1)? circleAvatarProduct(productCatalogue:controller.getProductsOutstandingList[index]):circleAvatarProduct(productCatalogue: ProductCatalogue(creation: Timestamp.now(), upgrade: Timestamp.now(), documentCreation: Timestamp.now(), documentUpgrade: Timestamp.now()));
                   
                   if(index == 0){ return Row(crossAxisAlignment: CrossAxisAlignment.start,children: [const SizedBox(width: 95.0,height: height),widget]);}
-                  return circleAvatarProduct(productCatalogue:controller.getProductsOutstandingList[index]);
+                  return widget;
                 },
               ),
         ),
@@ -385,6 +386,7 @@ class SalesView extends StatelessWidget {
     final SalesController salesController = Get.find();
 
     // values
+    bool defaultValues = productCatalogue.id == '';
     double radius = 35.0;
     double spaceImageText = 10;
 
@@ -401,7 +403,9 @@ class SalesView extends StatelessWidget {
           children: [
             GestureDetector(
               onTap: () {
-                salesController.selectedProduct(item: productCatalogue);
+                if( defaultValues == false ){
+                  salesController.selectedProduct(item: productCatalogue);
+                }
               },
               child: Column(
                 children: <Widget>[
@@ -411,7 +415,7 @@ class SalesView extends StatelessWidget {
                     placeholder: (context, url) => CircleAvatar(
                         radius: radius,
                         backgroundColor: Get.theme.dividerColor,
-                        child: Text(Publications.getFormatoPrecio(monto: productCatalogue.salePrice),style: TextStyle(color: Get.textTheme.bodyText1?.color))),
+                        child: defaultValues?Container():Text(Publications.getFormatoPrecio(monto: productCatalogue.salePrice),style: TextStyle(color: Get.textTheme.bodyText1?.color))),
                     imageBuilder: (context, image) => CircleAvatar(
                       radius: radius,
                       backgroundColor: borderCicleColor,
@@ -421,28 +425,20 @@ class SalesView extends StatelessWidget {
                         child: CircleAvatar(
                             radius: radius - 5,
                             backgroundColor: Get.theme.scaffoldBackgroundColor,
-                            child: CircleAvatar(
-                                radius: radius, backgroundImage: image)),
+                            child:defaultValues?Container(): CircleAvatar(radius: radius, backgroundImage: image)),
                       ),
                     ),
                     errorWidget: (context, url, error) => CircleAvatar(
                       radius: radius,
                       backgroundColor: Get.theme.dividerColor,
-                      child: Text(
-                          Publications.getFormatoPrecio(
-                              monto: productCatalogue.salePrice),
-                          style:
-                              TextStyle(color: Get.textTheme.bodyText1?.color)),
+                      child: defaultValues?Container(): Text(Publications.getFormatoPrecio(monto: productCatalogue.salePrice),style:TextStyle(color: Get.textTheme.bodyMedium?.color)),
                     ),
                   ),
-                  SizedBox(
-                    height: spaceImageText,
-                  ),
+                  SizedBox(height: spaceImageText),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 5),
-                    child: Text(productCatalogue.description,
-                        style: const TextStyle(
-                            fontSize: 12, fontWeight: FontWeight.normal),
+                    child:defaultValues?Container(): Text(productCatalogue.description,
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
                         overflow: TextOverflow.fade,
                         maxLines: 1,
                         softWrap: false),
