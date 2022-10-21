@@ -88,7 +88,7 @@ class ProductEdit extends StatelessWidget {
           Theme.of(contextPrincipal).iconTheme.copyWith(color: colorAccent),
       title: controller.getSaveIndicator
           ? Text(controller.getTextAppBar,style: TextStyle(fontSize: 18.0, color: colorAccent))
-          : Text(controller.itsInTheCatalogue ? 'Editar' : 'Nuevo',style: TextStyle(fontSize: 18.0, color: colorAccent)),
+          : Text(controller.itsInTheCatalogue ? 'Editar' :'Agregar a mi cátalogo',style: TextStyle(fontSize: 18.0, color: colorAccent)),
       actions: <Widget>[
         controller.getSaveIndicator
             ? Container()
@@ -179,12 +179,11 @@ class ProductEdit extends StatelessWidget {
             maxLines: 5,
             keyboardType: TextInputType.multiline,
             onChanged: (value) => controller.getProduct.description = value,
-            decoration: InputDecoration(
-                disabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: controller.getProduct.description == ''?Colors.grey:Get.theme.scaffoldBackgroundColor),
-                ),
-                border: const OutlineInputBorder(),
-                labelText: "Descripción del producto"),
+            decoration: const InputDecoration(
+                filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
+                disabledBorder: InputBorder.none,
+                labelText: "Descripción del producto", 
+              ),
             textInputAction: TextInputAction.done,
             controller: controller.controllerTextEditDescripcion,
           ),
@@ -206,9 +205,9 @@ class ProductEdit extends StatelessWidget {
           space,
           // textfield 'seleccionar marca'
           textfielButton(
-            borderSideColor: controller.getMarkSelected.id == ''?Colors.grey:controller.getNewProduct?Colors.grey:Get.theme.scaffoldBackgroundColor,
+            stateEdit: controller.getSaveIndicator? false: controller.getEditModerator || controller.getNewProduct,
             textValue: controller.getMarkSelected.name,
-            labelText: controller.getMarkSelected.id == ''? 'seleccionar una marca': 'Marca',
+            labelText: controller.getMarkSelected.id == ''? 'Seleccionar una marca': 'Marca',
             onTap: controller.getNewProduct || controller.getEditModerator? controller.showModalSelectMarca : () {}
           ),
           !controller.getAccountAuth ? Container() : space,
@@ -229,8 +228,10 @@ class ProductEdit extends StatelessWidget {
                               .getProduct.purchasePrice =
                           controller.controllerTextEditPrecioCompra.numberValue,
                       decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: "Precio de compra"),
+                        filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
+                        disabledBorder: InputBorder.none,
+                        labelText: "Precio de compra", 
+                      ),
                       textInputAction: TextInputAction.next,
                       //style: textStyle,
                       controller: controller.controllerTextEditPrecioCompra,
@@ -240,11 +241,12 @@ class ProductEdit extends StatelessWidget {
                       enabled: !controller.getSaveIndicator,
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
-                      onChanged: (value) => controller.getProduct.salePrice =
-                          controller.controllerTextEditPrecioVenta.numberValue,
+                      onChanged: (value) => controller.getProduct.salePrice =controller.controllerTextEditPrecioVenta.numberValue,
                       decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: "Precio de venta"),
+                        filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
+                        disabledBorder: InputBorder.none,
+                        labelText: "Precio de venta", 
+                      ),
                       textInputAction: TextInputAction.done,
                       //style: textStyle,
                       controller: controller.controllerTextEditPrecioVenta,
@@ -295,7 +297,11 @@ class ProductEdit extends StatelessWidget {
                                   enabled: !controller.getSaveIndicator,
                                   keyboardType: TextInputType.number,
                                   onChanged: (value) => controller.getProduct.quantityStock =int.parse(controller.controllerTextEditQuantityStock .text),
-                                  decoration: const InputDecoration( border: OutlineInputBorder(), labelText: "Stock"),
+                                  decoration: const InputDecoration(
+                                    filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
+                                    disabledBorder: InputBorder.none,
+                                    labelText: "Stock", 
+                                  ),
                                   textInputAction: TextInputAction.done,
                                   //style: textStyle,
                                   controller: controller.controllerTextEditQuantityStock,
@@ -310,7 +316,11 @@ class ProductEdit extends StatelessWidget {
                                   enabled: !controller.getSaveIndicator,
                                   keyboardType: TextInputType.number,
                                   onChanged: (value) =>controller.getProduct.alertStock = int.parse(controller.controllerTextEditAlertStock.text),
-                                  decoration: const InputDecoration(border: OutlineInputBorder(),labelText: "Alerta de stock"),
+                                  decoration: const InputDecoration(
+                                    filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
+                                    disabledBorder: InputBorder.none,
+                                    labelText: "Alerta de stock", 
+                                  ),
                                   textInputAction: TextInputAction.done,
                                   //style: textStyle,
                                   controller: controller.controllerTextEditAlertStock,
@@ -427,23 +437,22 @@ Widget get widgetForModerator{
                   // fin widget debug
                 );
 }
-  Widget textfielButton(
-      {required String labelText,
-      String textValue = '',
-      Color borderSideColor=Colors.grey,
-      required Function() onTap}) {
+  Widget textfielButton({required String labelText,String textValue = '',required Function() onTap,bool stateEdit = true}) {
+
+    // value
+    Color borderColor = Get.isDarkMode?Colors.white70:Colors.black87;
+
     return InkWell(
       borderRadius: BorderRadius.circular(5),
-      onTap: onTap,
+      onTap: stateEdit?onTap:null,
       child: TextField(
         enabled: false,
         controller: TextEditingController(text: textValue),
-        decoration: InputDecoration(
-            disabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: borderSideColor.withOpacity(0.3)),
-            ),
-            border: const OutlineInputBorder(),
-            labelText: labelText),
+        decoration: InputDecoration( 
+          floatingLabelStyle: TextStyle(color: borderColor),
+          disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: stateEdit?borderColor:Colors.transparent)),
+          border: const OutlineInputBorder(),
+          labelText: labelText),
       ),
     );
   }
