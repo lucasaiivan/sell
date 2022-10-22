@@ -160,7 +160,7 @@ class ProductEdit extends StatelessWidget {
               ? Opacity(
                   opacity: 0.8,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 5),
+                    padding: const EdgeInsets.symmetric(horizontal: 0,vertical: 5),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -176,6 +176,7 @@ class ProductEdit extends StatelessWidget {
           space,
           // textField
           TextField(
+            
             enabled: controller.getSaveIndicator? false: controller.getEditModerator || controller.getNewProduct,
             minLines: 1,
             maxLines: 5,
@@ -203,7 +204,7 @@ class ProductEdit extends StatelessWidget {
                 Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
                 if (await canLaunchUrl(uri)) { await launchUrl(uri,mode: LaunchMode.externalApplication);} else {throw 'Could not launch $uri';}
               },
-              child: const Text('Buscar en código Google')),
+              child: const Text('Buscar en código Google')), 
           space,
           // textfield 'seleccionar marca'
           textfielButton(
@@ -462,8 +463,9 @@ Widget get widgetForModerator{
         controller: TextEditingController(text: textValue),
         decoration: InputDecoration( 
           floatingLabelStyle: TextStyle(color: borderColor),
-          disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: stateEdit?borderColor:Colors.transparent)),
-          border: const OutlineInputBorder(),
+          filled: true,
+          fillColor:stateEdit?null:Colors.transparent ,
+          disabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: stateEdit?borderColor:Colors.transparent)),
           labelText: labelText),
       ),
     );
@@ -573,7 +575,7 @@ class _SelectCategoryState extends State<SelectCategory> {
                       },
                       trailing: popupMenuItemCategoria(categoria: categoria),
                     ),
-                    const Divider(endIndent: 12.0, indent: 12.0, height: 0.0),
+                    const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
                   ],
                 );
         },
@@ -734,18 +736,18 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
                       return Column(
                         children: [
                           getWidgetOptionOther(),
-                          const Divider(endIndent: 12.0, indent: 12.0, height: 0),
+                          const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
                           controllerProductsEdit.getUltimateSelectionMark.id =='' ||controllerProductsEdit.getUltimateSelectionMark.id =='other'? Container(): listTile(marcaSelect: controllerProductsEdit.getUltimateSelectionMark),
-                          const Divider(endIndent: 12.0, indent: 12.0, height: 0),
+                          const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
                           listTile(marcaSelect: marcaSelect),
-                          const Divider(endIndent: 12.0, indent: 12.0, height: 0),
+                          const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
                         ],
                       );
                     }
                     return Column(
                       children: <Widget>[
                         listTile(marcaSelect: marcaSelect),
-                        const Divider(endIndent: 12.0, indent: 12.0, height: 0),
+                        const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
                       ],
                     );
                   },

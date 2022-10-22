@@ -692,7 +692,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
                   return Column(
                     children: [
                       getWidgetOptionOther(),
-                      const Divider(endIndent: 12.0, indent: 12.0, height: 0),
+                      const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
                       controllerProductsEdit.getUltimateSelectionMark.id ==
                                   '' ||
                               controllerProductsEdit
@@ -702,18 +702,16 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
                           : listTile(
                               marcaSelect: controllerProductsEdit
                                   .getUltimateSelectionMark),
-                      const Divider(
-                          endIndent: 12.0, indent: 12.0, height: 0),
+                      const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
                       listTile(marcaSelect: marcaSelect),
-                      const Divider(
-                          endIndent: 12.0, indent: 12.0, height: 0),
+                      const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
                     ],
                   );
                 }
                 return Column(
                   children: <Widget>[
                     listTile(marcaSelect: marcaSelect),
-                    const Divider(endIndent: 12.0, indent: 12.0, height: 0),
+                    const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
                   ],
                 );
               },
