@@ -150,7 +150,7 @@ class CataloguePageController extends GetxController
         builder: (product) {
 
           // values
-          Color tileColor = product.stock? (product.quantityStock <= product.alertStock? Colors.red.withOpacity(0.5): product.favorite?Colors.amber.withOpacity(0.3):Colors.transparent) : product.favorite?Colors.amber.withOpacity(0.3):Colors.transparent;
+          Color tileColor = product.stock? (product.quantityStock <= product.alertStock && homeController.getProfileAccountSelected.subscribed ? Colors.red.withOpacity(0.5): product.favorite?Colors.amber.withOpacity(0.3):Colors.transparent) : product.favorite?Colors.amber.withOpacity(0.3):Colors.transparent;
           String alertStockText =product.stock ? (product.quantityStock == 0 ? 'Sin stock' : '${product.quantityStock} en stock') : '';
 
           return Column(
@@ -193,14 +193,13 @@ class CataloguePageController extends GetxController
                 ), 
                 ],
               ),
-              trailing:
-                  Text(Publications.getFormatoPrecio(monto: product.salePrice),),
+              trailing: Text(Publications.getFormatoPrecio(monto: product.salePrice),),
               onTap: () {
                 Get.back();
                 toProductEdit(productCatalogue: product);
               },
             ),
-            const Divider(height: 0,thickness: 2),
+            const Divider(height: 0,thickness: 0.5),
           ],
         );
         },

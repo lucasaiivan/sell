@@ -31,6 +31,7 @@ class CataloguePage extends StatelessWidget {
 
   // WIDGETS VIEWS
   PreferredSizeWidget appbar({required BuildContext context}) {
+
     // controllers
     final CataloguePageController controller = Get.find();
 
@@ -201,10 +202,13 @@ class CataloguePage extends StatelessWidget {
   }
 
   Widget listTileProduct({required ProductCatalogue item}) {
+
     //  controller
     final CataloguePageController cataloguePageController = Get.find();
+    final HomeController homeController = Get.find();
+    
     // values
-    Color tileColor = item.stock? (item.quantityStock <= item.alertStock? Colors.red.withOpacity(0.3): item.favorite?Colors.amber.withOpacity(0.1):Colors.transparent): item.favorite?Colors.amber.withOpacity(0.1):Colors.transparent;
+    Color tileColor = item.stock? (item.quantityStock <= item.alertStock && homeController.getProfileAccountSelected.subscribed? Colors.red.withOpacity(0.3): item.favorite?Colors.amber.withOpacity(0.1):Colors.transparent): item.favorite?Colors.amber.withOpacity(0.1):Colors.transparent;
     String alertStockText = item.stock ? (item.quantityStock == 0 ? 'Sin stock' : '') : '';
 
     return ElasticIn(

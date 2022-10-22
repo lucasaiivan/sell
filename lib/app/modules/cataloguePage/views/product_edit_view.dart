@@ -45,7 +45,7 @@ class ProductEdit extends StatelessWidget {
               final connected = connectivity != ConnectivityResult.none;
 
               if (!connected) {
-                Color? colorAccent = Get.theme.textTheme.bodyText1!.color;
+                Color? colorAccent = Get.theme.textTheme.bodyMedium!.color;
                 return Scaffold(
                   appBar: AppBar(
                     elevation: 0.0,
@@ -79,7 +79,9 @@ class ProductEdit extends StatelessWidget {
 
   // WIDGETS VIEWS
   PreferredSizeWidget appBar({required BuildContext contextPrincipal}) {
-    Color? colorAccent = Get.theme.textTheme.bodyText1!.color;
+
+    // value
+    Color? colorAccent = Get.theme.textTheme.bodyMedium!.color;
 
     return AppBar(
       elevation: 0.0,
@@ -158,7 +160,7 @@ class ProductEdit extends StatelessWidget {
               ? Opacity(
                   opacity: 0.8,
                   child: Padding(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 5),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -171,8 +173,8 @@ class ProductEdit extends StatelessWidget {
                   ),
                 )
               : Container(),
-
           space,
+          // textField
           TextField(
             enabled: controller.getSaveIndicator? false: controller.getEditModerator || controller.getNewProduct,
             minLines: 1,
@@ -265,7 +267,7 @@ class ProductEdit extends StatelessWidget {
                       },
                     ),
                     space,
-                    // control stock
+                    // view : control stock
                     AnimatedContainer(
                       duration: const Duration(milliseconds: 500),
                       color: controller.getProduct.stock?Colors.blue.withOpacity(0.07):Colors.transparent,
@@ -319,7 +321,7 @@ class ProductEdit extends StatelessWidget {
                                   decoration: const InputDecoration(
                                     filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
                                     disabledBorder: InputBorder.none,
-                                    labelText: "Alerta de stock", 
+                                    labelText: "Alerta de stock (opcional)", 
                                   ),
                                   textInputAction: TextInputAction.done,
                                   //style: textStyle,
@@ -329,6 +331,16 @@ class ProductEdit extends StatelessWidget {
                               : Container(),
                         ],
                       ),
+                    ),
+                    // button : guardar
+                    const SizedBox(height:50),
+                    button(
+                      disable:controller.getSaveIndicator,
+                      onPressed: controller.save,
+                      icon: Container(),
+                      colorButton: Colors.blue,padding:const EdgeInsets.all(0),
+                      colorAccent: Colors.white,
+                      text: controller.itsInTheCatalogue?'Actualizar':'Agregar a mi cátalogo',
                     ),
                   ],
                 ),
@@ -459,6 +471,7 @@ Widget get widgetForModerator{
 
   Widget button(
       {double width = double.infinity,
+      bool disable = false,
       required Widget icon,
       String text = '',
       required dynamic onPressed,
@@ -472,7 +485,7 @@ Widget get widgetForModerator{
       child: SizedBox(
         width: width,
         child: ElevatedButton.icon(
-          onPressed: onPressed,
+          onPressed: disable?null:onPressed,
           style: ElevatedButton.styleFrom(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5)),

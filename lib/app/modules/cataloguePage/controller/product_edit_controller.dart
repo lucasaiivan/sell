@@ -20,29 +20,12 @@ class ControllerProductsEdit extends GetxController {
   // others controllers
   final HomeController homeController = Get.find();
 
-  //  category selected
-  Rx<Category> _categorySelect = Category().obs;
-  Category get getCategorySelect => _categorySelect.value;
-  set setCategorySelect(Category value) {
-    // set
-    _categorySelect.value = value;
-    update();
-  }
-
-  Future<void> categoryDelete({required String idCategory}) async =>
-      await Database.refFirestoreCategory(
-              idAccount: homeController.getProfileAccountSelected.id)
-          .doc(idCategory)
-          .delete();
+  Future<void> categoryDelete({required String idCategory}) async => await Database.refFirestoreCategory(idAccount: homeController.getProfileAccountSelected.id).doc(idCategory).delete();
   Future<void> categoryUpdate({required Category categoria}) async {
     // ref
-    var documentReferencer = Database.refFirestoreCategory(
-            idAccount: homeController.getProfileAccountSelected.id)
-        .doc(categoria.id);
+    var documentReferencer = Database.refFirestoreCategory(idAccount: homeController.getProfileAccountSelected.id).doc(categoria.id);
     // Actualizamos los datos
-    documentReferencer
-        .set(Map<String, dynamic>.from(categoria.toJson()),
-            SetOptions(merge: true))
+    documentReferencer.set(Map<String, dynamic>.from(categoria.toJson()),SetOptions(merge: true))
         .whenComplete(() {
       print("######################## FIREBASE updateAccount whenComplete");
     }).catchError((e) => print(
