@@ -176,8 +176,7 @@ class ControllerProductsSearch extends GetxController {
     setproductDoesNotExist = false;
     setButtonData(colorButton: Get.theme.primaryColor, colorText: Colors.white);
     setColorFondo = Get.theme.scaffoldBackgroundColor;
-    setColorTextField =
-        Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
+    setColorTextField = Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
     update(['updateAll']);
   }
 

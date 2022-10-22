@@ -164,7 +164,7 @@ class CataloguePage extends StatelessWidget {
                             contentPadding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
                             leading: CircleAvatar(backgroundColor: color.withOpacity(0.1),radius: 24.0,child: Icon(Icons.all_inclusive, color: color) ),
                             dense: true,
-                            title: Text("Mostrar todos",style: Get.theme.textTheme.bodyText1),
+                            title: Text("Mostrar todos",style: Get.theme.textTheme.bodyMedium),
                             onTap: () {
                               cataloguePageController.setSelectedCategory =Category(name: 'Cátalogo');
                               // desplaza la vista a la lista de los productos
@@ -172,15 +172,15 @@ class CataloguePage extends StatelessWidget {
                             },
                           )
                         : Container(),
-                    const Divider(endIndent: 0.0, indent: 0.0, height: 0.0),
+                    const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
                     listTileCategoryItem(categoria: categoria),
-                    const Divider(endIndent: 0.0, indent: 0.0, height: 0.0),
+                    const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
                   ],
                 )
               : Column(
                   children: <Widget>[
                     listTileCategoryItem(categoria: categoria),
-                    const Divider(endIndent: 0.0, indent: 0.0, height: 0.0),
+                    const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
                   ],
                 );
         },
@@ -272,7 +272,7 @@ class CataloguePage extends StatelessWidget {
                   )
                 : null,
           ),
-          const Divider(thickness: 0.2,height: 0),
+          const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
         ],
       ),
     );
