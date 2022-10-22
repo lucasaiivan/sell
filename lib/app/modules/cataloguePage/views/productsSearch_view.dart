@@ -86,8 +86,8 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                       children: [
                         textFieldCodeBar(),
                         const SizedBox(height: 50.0),
-                        // button : copiar de porta papeles ( opcion para moderador)
-                        //controller.getStateSearch? FadeInRight(child: copyTextModeratorButton): Container(),
+                        // TODO : button : copiar de porta papeles ( opcion para moderador)
+                        controller.getStateSearch? FadeInRight(child: copyTextModeratorButton): Container(),
                         const SizedBox(height: 12.0),
                         !controller.getStateSearch
                             ? FadeInRight(
@@ -168,7 +168,7 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                               )
                             : Container(),
                         // TODO: delete release
-                        //widgetForModerator,
+                        widgetForModerator,
                       ],
                     ),
                   ),
