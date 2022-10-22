@@ -84,36 +84,10 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                     padding: const EdgeInsets.all(20.0),
                     child: Column(
                       children: [
-                        textField(),
+                        textFieldCodeBar(),
                         const SizedBox(height: 50.0),
-                        !controller.getStateSearch
-                            ? FadeInRight(
-                                child: button(
-                                  icon: Icon(Icons.copy,color: controller.getButtonData.colorText),
-                                  onPressed: () {
-                                    // obtenemos los datos de porta papeles del dispositivo
-                                    FlutterClipboard.paste().then((value) {
-                                      // verificamos que sea numero valido
-                                      if (controller.verifyIsNumber(
-                                          value: value)) {
-                                        controller.textEditingController.text =
-                                            value;
-                                        controller.queryProduct(id: value);
-                                      } else {
-                                        Get.snackbar('no se pudo copiar 👎',
-                                            'solo puedes ingresar un código valido que contengan números',
-                                            margin: const EdgeInsets.all(12));
-                                      }
-                                    });
-                                  },
-                                  text: "Pegar de porta papeles",
-                                  colorAccent:
-                                      controller.getButtonData.colorText,
-                                  colorButton:
-                                      controller.getButtonData.colorButton,
-                                ),
-                              )
-                            : Container(),
+                        // button : copiar de porta papeles ( opcion para moderador)
+                        //controller.getStateSearch? FadeInRight(child: copyTextModeratorButton): Container(),
                         const SizedBox(height: 12.0),
                         !controller.getStateSearch
                             ? FadeInRight(
@@ -154,13 +128,24 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                             ? Padding(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 0, vertical: 30),
-                                child: Text(
+                                child: RichText(
+                                  textAlign: TextAlign.center,
+                                  text: const TextSpan(
+                                      style: TextStyle(color: Colors.white,fontSize: 18),
+                                      children: <TextSpan>[
+                                        TextSpan(text: 'El producto aún no existe\n', style: TextStyle(fontSize: 24)),
+                                        TextSpan(text: 'Ayúdenos a registrar nuevos productos para que esta aplicación sea aún más útil para la comunidad ', style: TextStyle(color: Colors.white70)),
+                                      ],
+                                  ),
+                                ),
+                                
+                                /*  Text(
                                   "El producto aún no existe 🙁, ayúdenos a registrar nuevos productos para que esta aplicación sea aún más útil para la comunidad",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       fontSize: 20.0,
                                       color: controller.getColorTextField),
-                                ),
+                                ), */
                               )
                             : Container(),
                         controller.getproductDoesNotExist
@@ -168,7 +153,7 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                                 child: button(
                                   fontSize: 16,
                                   padding: 16,
-                                  icon: const Text('💪'),
+                                  icon: Icon(Icons.add,color: controller.getButtonData.colorText,),
                                   onPressed: () {
                                     controller.toProductNew(
                                         id: controller
@@ -183,7 +168,7 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                               )
                             : Container(),
                         // TODO: delete release
-                        widgetForModerator,
+                        //widgetForModerator,
                       ],
                     ),
                   ),
@@ -194,6 +179,32 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
   }
 
   /* WIDGETS COMPONENT */
+  Widget get copyTextModeratorButton {
+    return button(
+                                  icon: Icon(Icons.copy,color: controller.getButtonData.colorText),
+                                  onPressed: () {
+                                    // obtenemos los datos de porta papeles del dispositivo
+                                    FlutterClipboard.paste().then((value) {
+                                      // verificamos que sea numero valido
+                                      if (controller.verifyIsNumber(
+                                          value: value)) {
+                                        controller.textEditingController.text =
+                                            value;
+                                        controller.queryProduct(id: value);
+                                      } else {
+                                        Get.snackbar('no se pudo copiar 👎',
+                                            'solo puedes ingresar un código valido que contengan números',
+                                            margin: const EdgeInsets.all(12));
+                                      }
+                                    });
+                                  },
+                                  text: "Pegar de porta papeles",
+                                  colorAccent:
+                                      controller.getButtonData.colorText,
+                                  colorButton:
+                                      controller.getButtonData.colorButton,
+                                );
+  }
   Widget get widgetForModerator{
     return Column(
       children: [
@@ -264,15 +275,14 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
     );
   }
 
-  Widget textField() {
-
-    
+  Widget textFieldCodeBar() {
 
     return TextField(
               controller: controller.textEditingController,
               keyboardType: const TextInputType.numberWithOptions(decimal: false),
               inputFormatters: [FilteringTextInputFormatter.allow(RegExp('[1234567890]'))],
               decoration: InputDecoration(
+                fillColor: controller.getColorFondo,
                   suffixIcon: controller.textEditingController.value.text == ""?null:IconButton(onPressed: ()=>controller.clean(),icon: Icon(Icons.clear, color: controller.getColorTextField)),
                   filled: true,
                   hintText: 'ej. 77565440001743',
