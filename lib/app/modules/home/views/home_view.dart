@@ -4,6 +4,7 @@ import 'package:sell/app/modules/sellPage/views/sell_view.dart';
 import 'package:sell/app/modules/cataloguePage/views/catalogue_view.dart';
 import 'package:sell/app/modules/transactionsPage/views/transactions_view.dart';
 import '../../../utils/widgets_utils.dart';
+import '../../multiuser/views/multiuser_view.dart';
 import '../controller/home_controller.dart';
 
 class HomeView extends GetView<HomeController> {
@@ -19,6 +20,8 @@ class HomeView extends GetView<HomeController> {
         return TransactionsView();
       case 2:
         return CataloguePage();
+      case 3:
+        return MultiUser();
       default:
         return SalesView();
     }
