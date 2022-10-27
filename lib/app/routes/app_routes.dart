@@ -8,6 +8,7 @@ abstract class Routes {
   static const EDITPRODUCT = _Paths.EDITPRODUCT;
   static const SEACH_PRODUCT = _Paths.SEACH_PRODUCT;
   static const ACCOUNT = _Paths.ACCOUNT;
+  static const MULTIUSER = _Paths.MULTIUSER;
 }
 
 abstract class _Paths {
@@ -17,4 +18,5 @@ abstract class _Paths {
   static const EDITPRODUCT = '/editProduct';
   static const SEACH_PRODUCT = '/seachProduct';
   static const ACCOUNT = '/account';
+  static const MULTIUSER = '/multiuser';
 }

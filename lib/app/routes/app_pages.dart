@@ -11,6 +11,8 @@ import '../modules/auth/views/login_view.dart';
 import '../modules/cataloguePage/bindings/catalogue_binding.dart';
 import '../modules/cataloguePage/views/product_edit_view.dart';
 import '../modules/cataloguePage/views/productsSearch_view.dart';
+import '../modules/multiuser/bindings/multiuser_binding.dart';
+import '../modules/multiuser/views/multiuser_view.dart';
 part 'app_routes.dart';
 
 class AppPages {
@@ -54,6 +56,11 @@ class AppPages {
       name: Routes.SEACH_PRODUCT,
       page: () => ProductsSearch(),
       binding: ProductsSarchBinding(),
+    ),
+    GetPage(
+      name: Routes.MULTIUSER,
+      page: () => MultiUser(),
+      binding: MultiUserBinding(),
     ),
   ];
 }

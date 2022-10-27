@@ -420,8 +420,13 @@ class WidgetDrawer extends StatelessWidget {
                     ],
                   ),
                   onTap: () {
-                    Get.back(); // cierra drawer
-                    homeController.showModalBottomSheetSubcription(id: 'multiuser');
+                    if( homeController.getProfileAccountSelected.subscribed ){
+                      homeController.setIndexPage = 3;
+                    }else{
+                      Get.back(); // cierra drawer
+                      homeController.showModalBottomSheetSubcription(id: 'multiuser');
+                    }
+                    
                   }),
             ],
           ),
