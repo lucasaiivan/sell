@@ -52,7 +52,7 @@ class MultiUserController extends GetxController {
   }
   void deleteItem({required UserModel user}) {
     Widget widget = AlertDialog(
-      title: const Text('¿Seguro que quieres eliminar esta venta?',textAlign: TextAlign.center),
+      title: const Text('¿Seguro que quieres eliminar este usuario?',textAlign: TextAlign.center),
       content: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -105,7 +105,7 @@ class _AddAlertDialogState extends State<AddAlertDialog> {
   Widget build(BuildContext context) {
 
     return AlertDialog(
-      title: const Text('Crea un usuario',textAlign: TextAlign.center),
+      title: const Text('Nuevo usuario',textAlign: TextAlign.center),
 
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -115,7 +115,7 @@ class _AddAlertDialogState extends State<AddAlertDialog> {
             decoration: const InputDecoration(hintText: "Email"),
           ),
           const Padding(
-            padding: EdgeInsets.only(top: 20),
+            padding: EdgeInsets.only(top:40),
             child: Text('Permisos del usuario'),
           ),
           CheckboxListTile(title:const Text('Administrador'),value: admin, onChanged: (value){setState(() {

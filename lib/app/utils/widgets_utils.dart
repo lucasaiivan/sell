@@ -448,21 +448,6 @@ class WidgetDrawer extends StatelessWidget {
             }
           },
         ),
-        /* ListTile(
-          contentPadding: const EdgeInsets.symmetric(vertical: 12,horizontal: 12),
-          tileColor: Colors.grey.withOpacity(0.1),
-          leading: const Icon(Icons.thumbs_up_down_outlined),
-          title: const Text('Dejanos tu opinión 😃'),
-          subtitle: const Text('Nos intereza saber lo que piensas'),
-          onTap: () async {
-            Uri uri = Uri.parse( 'https://play.google.com/store/apps/details?id=com.logicabooleana.commer.producto');
-            if (await canLaunchUrl(uri)) {
-              await launchUrl(uri,mode: LaunchMode.externalApplication);
-            } else {
-              throw 'Could not launch $uri';
-            }
-          },
-        ), */
         ListTile(
           contentPadding: const EdgeInsets.symmetric(vertical: 12,horizontal: 12),
           tileColor: Colors.blue.withOpacity(0.1),
