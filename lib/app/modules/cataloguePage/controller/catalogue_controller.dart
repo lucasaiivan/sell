@@ -5,13 +5,11 @@ import 'package:search_page/search_page.dart';
 import 'package:sell/app/models/catalogo_model.dart';
 import 'package:sell/app/modules/home/controller/home_controller.dart';
 import 'package:sell/app/services/database.dart';
-import 'package:sell/app/utils/widgets_utils.dart';
-
 import '../../../routes/app_pages.dart';
 import '../../../utils/fuctions.dart';
 
-class CataloguePageController extends GetxController
-    with GetSingleTickerProviderStateMixin {
+class CataloguePageController extends GetxController with GetSingleTickerProviderStateMixin {
+  
   // others controllers
   final HomeController homeController = Get.find();
   late TabController tabController;

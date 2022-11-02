@@ -321,8 +321,7 @@ class HomeController extends GetxController {
     Database.readFutureAdminUser(idAccount: idAccount, email: email)
         .then((value) {
       if (value.exists) {
-        setProfileAdminUser =
-            UserModel.fromDocumentSnapshot(documentSnapshot: value);
+        setProfileAdminUser = UserModel.fromDocumentSnapshot(documentSnapshot: value);
       }
     });
   }
@@ -333,11 +332,8 @@ class HomeController extends GetxController {
       //  get
       for (var element in value.docs) {
         if (element.get('id') != '') {
-          Database.readProfileAccountModelFuture(element.get('id'))
-              .then((value) {
-            ProfileAccountModel profileAccountModel =
-                ProfileAccountModel.fromDocumentSnapshot(
-                    documentSnapshot: value);
+          Database.readProfileAccountModelFuture(element.get('id')).then((value) {
+            ProfileAccountModel profileAccountModel = ProfileAccountModel.fromDocumentSnapshot(documentSnapshot: value);
             addManagedAccountsList = profileAccountModel;
           });
         }

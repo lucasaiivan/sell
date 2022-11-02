@@ -69,7 +69,7 @@ class CataloguePage extends StatelessWidget {
           constraints: const BoxConstraints.expand(height: 50),
           child: TabBar(
               controller: controller.tabController,
-              labelColor: Get.theme.textTheme.bodyText1?.color,
+              labelColor: Get.theme.textTheme.bodyMedium?.color,
               tabs: [
                 Tab(child: Row(children: [
                   const Text("Productos"),
@@ -208,14 +208,14 @@ class CataloguePage extends StatelessWidget {
     final HomeController homeController = Get.find();
     
     // values
-    Color tileColor = item.stock? (item.quantityStock <= item.alertStock && homeController.getProfileAccountSelected.subscribed? Colors.red.withOpacity(0.3): item.favorite?Colors.amber.withOpacity(0.1):Colors.transparent): item.favorite?Colors.amber.withOpacity(0.1):Colors.transparent;
+    Color tileColor = item.stock? (item.quantityStock <= item.alertStock && homeController.getProfileAccountSelected.subscribed? Colors.red: item.favorite?Colors.amber:Colors.transparent): item.favorite?Colors.amber:Colors.transparent;
     String alertStockText = item.stock ? (item.quantityStock == 0 ? 'Sin stock' : '') : '';
 
     return ElasticIn(
       child: Column(
         children: [
           ListTile(
-            tileColor: tileColor,
+            //tileColor: tileColor,
             contentPadding: const EdgeInsets.all(12),
             onTap: () => cataloguePageController.toProductEdit(productCatalogue: item),
             title: Text(item.description, maxLines: 1),
@@ -256,9 +256,9 @@ class CataloguePage extends StatelessWidget {
             ),
             leading: CachedNetworkImage(
               imageUrl: item.image,
-              placeholder: (context, url) =>CircleAvatar(backgroundColor: Get.theme.dividerColor),
-              imageBuilder: (context, image) => CircleAvatar(backgroundImage: image),
-              errorWidget: (context, url, error) =>CircleAvatar(backgroundColor: Get.theme.dividerColor),
+              placeholder: (context, url) => CircleAvatar(backgroundColor: tileColor,child: Padding(padding: const EdgeInsets.all(1.0),child: CircleAvatar(backgroundColor: Get.theme.scaffoldBackgroundColor,child: Padding(padding: const EdgeInsets.all(1.0),child: CircleAvatar(backgroundColor: Get.theme.dividerColor))))),
+              imageBuilder: (context, image) => CircleAvatar(backgroundColor: tileColor,child: Padding(padding: const EdgeInsets.all(1.0),child: CircleAvatar(backgroundColor: Get.theme.scaffoldBackgroundColor,child: Padding(padding: const EdgeInsets.all(1.0),child: CircleAvatar(backgroundImage: image))))),
+              errorWidget: (context, url, error) => CircleAvatar(backgroundColor: tileColor,child: Padding(padding: const EdgeInsets.all(1.0),child: CircleAvatar(backgroundColor: Get.theme.scaffoldBackgroundColor,child: Padding(padding: const EdgeInsets.all(1.0),child: CircleAvatar(backgroundColor: Get.theme.dividerColor))))),
             ),
             trailing: item.stock
                 ? Material(

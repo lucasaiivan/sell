@@ -357,6 +357,7 @@ class WidgetDrawer extends StatelessWidget {
 
     // controllers
     final HomeController homeController = Get.find<HomeController>();
+     bool superAdmin = homeController.getProfileAdminUser.superAdmin;
 
 
 
@@ -381,7 +382,7 @@ class WidgetDrawer extends StatelessWidget {
                   ),
           ),
           title: Text(homeController.getIdAccountSelected == ''? 'Seleccionar una cuenta': homeController.getProfileAccountSelected.name,maxLines: 1,overflow: TextOverflow.ellipsis),
-          subtitle: homeController.getIdAccountSelected == ''? null: Text(homeController.getProfileAdminUser.superAdmin? 'Administrador': 'Usuario estandar'),
+          subtitle: homeController.getIdAccountSelected == ''? null: Text( superAdmin? 'Administrador': 'Usuario estandar'),
           trailing: const Icon(Icons.arrow_right_rounded),
           onTap: () {
             homeController.showModalBottomSheetSelectAccount();
@@ -410,7 +411,7 @@ class WidgetDrawer extends StatelessWidget {
                   leading: const Icon(Icons.apps_rounded),
                   title: const Text('Catálogo'),
                   onTap: () => homeController.setIndexPage = 2),
-              ListTile(
+              superAdmin?ListTile(
                   leading: const Icon(Icons.add_moderator_outlined),
                   title: Row(
                     children: [
@@ -427,7 +428,7 @@ class WidgetDrawer extends StatelessWidget {
                       homeController.showModalBottomSheetSubcription(id: 'multiuser');
                     }
                     
-                  }),
+                  }):Container(),
             ],
           ),
         ),

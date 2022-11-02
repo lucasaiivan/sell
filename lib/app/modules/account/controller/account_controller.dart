@@ -191,17 +191,15 @@ class AccountController extends GetxController {
     // vales
     UserModel user = UserModel(
         email: homeController.getUserAuth.email ?? 'null',
-        superAdmin: true);
+        superAdmin: true,
+        admin: true,
+      );
     //...
     if (data['id'] != '') {
       // referencias
       var documentReferencer = Database.refFirestoreAccount().doc(data['id']);
-      var refFirestoreUserAccountsList =
-          Database.refFirestoreUserAccountsList(email: user.email)
-              .doc(data['id']);
-      var refFirestoreAccountsUsersList =
-          Database.refFirestoreAccountsUsersList(idAccount: data['id'])
-              .doc(user.email);
+      var refFirestoreUserAccountsList = Database.refFirestoreUserAccountsList(email: user.email).doc(data['id']);
+      var refFirestoreAccountsUsersList = Database.refFirestoreAccountsUsersList(idAccount: data['id']) .doc(user.email);
 
       // se crea un nuevo documento
       await documentReferencer.set(data).whenComplete(() {
