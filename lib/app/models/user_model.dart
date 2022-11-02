@@ -3,29 +3,29 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class UserModel {
   UserModel({
     this.superAdmin = false,
+    this.admin = false,
     this.email = '',
   });
 
   bool superAdmin = false;
+  bool admin = false;
   String email = '';
 
   factory UserModel.fromDocument(DocumentSnapshot doc) {
     Map data = doc.data() as Map;
     return UserModel(
-      superAdmin: doc["superAdmin"] ?? false,
+      superAdmin: data.containsKey("superAdmin") ? doc["superAdmin"] : false,
+      admin: data.containsKey("admin") ? doc["admin"] : false,
       email: data.containsKey("email") ? doc["email"] : '',
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        "superAdmin": superAdmin,
-        "email": email,
-      };
+  Map<String, dynamic> toJson() => {"superAdmin": superAdmin,"email": email};
 
   factory UserModel.fromMap(Map data) {
     return UserModel(
-      // Valores del producto
-      superAdmin: data['isuperAdmind'] ?? false,
+      superAdmin: data['superAdmin'] ?? false,
+      admin: data['admin'] ?? false,
       email: data['email'] ?? '',
     );
   }
@@ -36,6 +36,7 @@ class UserModel {
 
     //  set
     superAdmin = data['superAdmin'] ?? false;
+    admin = data['admin'] ?? false;
     email = data["email"] ?? '';
   }
 }
