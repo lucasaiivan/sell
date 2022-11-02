@@ -19,6 +19,7 @@ class MultiUserController extends GetxController {
   final HomeController homeController = Get.find();
   late final Timer _periodicTimer;
 
+
   // usuarios que administran la cuenta
   final RxList<UserModel> usersAdminsList = <UserModel>[].obs;
   List<UserModel> get getUsersList => usersAdminsList.value;

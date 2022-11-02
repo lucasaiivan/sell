@@ -61,7 +61,7 @@ class LoadingInitView extends StatelessWidget {
     // controllers
     final MultiUserController controller = Get.find();
 
-    if(controller.getUsersList.isEmpty ){ return const Center(child: Text('Vacio'));}
+    if(controller.getUsersList.isEmpty ){ return const  Center(child: CircularProgressIndicator());}
 
     return ListView.builder(
       itemCount: controller.getUsersList.length,
