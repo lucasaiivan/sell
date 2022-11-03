@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'app/modules/splash/bindings/splash_binding.dart';
-import 'app/routes/app_pages.dart';
-import 'app/utils/dynamicTheme_lb.dart';
+import 'app/core/routes/app_pages.dart';
+import 'app/presentation/splash/bindings/splash_binding.dart';
+import 'app/core/utils/dynamicTheme_lb.dart';
 
 Future<void> main() async {
   // Evita errores causados ​​por la actualización de flutter. 
