@@ -318,8 +318,7 @@ class HomeController extends GetxController {
 
   void readDataAdminUser({required String idAccount, required String email}) {
     // obtenemos los datos del usuario administrador
-    Database.readFutureAdminUser(idAccount: idAccount, email: email)
-        .then((value) {
+    Database.readFutureAdminUser(idAccount: idAccount, email: email).then((value) {
       if (value.exists) {
         setProfileAdminUser = UserModel.fromDocumentSnapshot(documentSnapshot: value);
       }
