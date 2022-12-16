@@ -7,7 +7,7 @@ class TicketModel {
   String payMode = 'effective'; // efective (Efectivo) - mercadopago (Mercado Pago) - card (Tarjeta De Crédito/Débito)
   double priceTotal = 0.0;
   double valueReceived = 0.0;
-  List<dynamic> listPoduct = [];
+  List<dynamic> listPoduct= [];
   late Timestamp
       creation; // Marca de tiempo ( hora en que se reporto el producto )
 

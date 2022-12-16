@@ -117,9 +117,28 @@ class TransactionsController extends GetxController {
           list.add(TicketModel.fromMap(element.data()));
         }
         //  set
+        withMoreSales(list: list);
         setTransactionsList = list;
       });
     }
+  }
+  void withMoreSales({ required List<TicketModel> list }){
+
+    // TODO : desarrollar
+
+    // var
+    Map<String,int> listValue = {};
+    for (TicketModel ticket in list) {
+      for (var product in ticket.listPoduct) {
+        if( listValue.containsKey(product.id)){
+          listValue[product.id] = listValue[product.id]??0 + product['quantity'] as int;
+        }else{
+          listValue[product.id] =1;
+        }
+      }
+    }
+    print('print : #############################################                ${listValue}');
+
   }
 
   void readTransactionsYesterday() {
@@ -149,6 +168,7 @@ class TransactionsController extends GetxController {
           list.add(TicketModel.fromMap(element.data()));
         }
         //  set
+        withMoreSales(list: list);
         setTransactionsList = list;
       });
     }
