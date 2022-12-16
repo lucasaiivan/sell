@@ -71,7 +71,7 @@ class ProfileAccountModel {
     // location
     // data user creation
     this.id = "",
-    this.subscribed=false,
+    this.subscribed=true, // subcripción
     this.username = '',
     this.image = "",
     this.name = "",
@@ -91,7 +91,7 @@ class ProfileAccountModel {
   ProfileAccountModel.fromMap(Map data) {
     id = data['id'];
     username = data['username'];
-    subscribed = data['subscribed']??false;
+    subscribed = true;// data['subscribed']??false;
     image =data.containsKey('image') ? data['image'] : data['imagen_perfil'] ?? '';
     name = data.containsKey('name') ? data['name'] : data['nombre_negocio'];
     description = data.containsKey('description')
@@ -123,7 +123,7 @@ class ProfileAccountModel {
   }
   Map<String, dynamic> toJson() => {
         "id": id,
-        "subscribed": subscribed,
+        // "subscribed": subscribed,
         "username": username,
         "image": image,
         "name": name,
@@ -140,14 +140,13 @@ class ProfileAccountModel {
         "address": address,
       };
 
-  ProfileAccountModel.fromDocumentSnapshot(
-      {required DocumentSnapshot documentSnapshot}) {
+  ProfileAccountModel.fromDocumentSnapshot( {required DocumentSnapshot documentSnapshot}) {
     // get
     Map data = documentSnapshot.data() as Map;
 
     //  set
     creation = data["creation"];
-    subscribed = data.containsKey('subscribed') ? data['subscribed'] : false;
+    subscribed = true;//data.containsKey('subscribed') ? data['subscribed'] : false;
     id = data.containsKey('id') ? data['id'] : documentSnapshot.id;
     username = data["username"] ?? '';
     image = data.containsKey('image') ? data['image'] : data["imagen_perfil"] ?? '';

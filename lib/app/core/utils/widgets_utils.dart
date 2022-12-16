@@ -333,9 +333,7 @@ Widget drawerApp() {
       // values
       String email = homeController.getUserAuth.email ?? 'null';
 
-      return Drawer(
-        child: WidgetDrawer(email: email),
-      );
+      return Drawer(child: WidgetDrawer(email: email));
     },
   );
 }
@@ -387,11 +385,20 @@ class WidgetDrawer extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: TextButton(onPressed:(){
+            Get.back(); // cierra drawer
+            homeController.showModalBottomSheetSubcription();
+          }, child: const Text('Las opciones Premiun estan dispobilbles')),
+        ),
+        /* Esta version de la app las funciones PREMIUM son gratis
+
+         Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: homeController.getProfileAccountSelected.subscribed?LogoPremium(visible: true,):TextButton(onPressed:(){
             Get.back(); // cierra drawer
             homeController.showModalBottomSheetSubcription();
           }, child: const Text('Obten la versión Premium')),
-        ),
+        ), */
         // others items
         Expanded(
           child: ListView(
@@ -803,13 +810,13 @@ class LogoPremium extends StatelessWidget {
     // visibility
     bool visibility = visible || (homeController.getProfileAccountSelected.subscribed ==false);
 
-    return visibility ? InkWell(
+    return InkWell(
       onTap: () => homeController.showModalBottomSheetSubcription(id:id ),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 2),
         decoration: BoxDecoration(border: Border.all(color: accentColor)),
         child: Text('PREMIUM',style: TextStyle(fontSize: size,color:accentColor))
       ),
-    ):Container();
+    );
   }
 }

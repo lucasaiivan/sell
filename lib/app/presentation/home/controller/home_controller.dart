@@ -561,23 +561,28 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: (){
+                onPressed: null,/*  (){
                   // actualizamos la subcripción de la cuenta
                   setState(() {
                     homeController.getProfileAccountSelected.subscribed = !homeController.getProfileAccountSelected.subscribed;
                   });
                   if(homeController.getProfileAccountSelected.subscribed){Get.back();}
-                },
-                style: ButtonStyle(backgroundColor: MaterialStateProperty.all(homeController.getProfileAccountSelected.subscribed?Colors.grey:Colors.blue)), 
-                icon: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(homeController.getProfileAccountSelected.subscribed?'Desuscribirme':'Subcribirme',style: const TextStyle(fontSize: 24,color: Colors.white)),
+                },  */
+                //  style: ButtonStyle(backgroundColor: MaterialStateProperty.all(homeController.getProfileAccountSelected.subscribed?Colors.grey:Colors.blue)),
+                style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.grey.withOpacity(0.1))),
+                icon: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  // text : homeController.getProfileAccountSelected.subscribed?'Desuscribirme':'Subcribirme'
+                  child: Text('Subcribirme',style: TextStyle(fontSize: 24,color: Colors.white)),
                 ),
-                label: Icon(homeController.getProfileAccountSelected.subscribed?Icons.close:Icons.arrow_forward_rounded,color: Colors.white,),
+                // icon : homeController.getProfileAccountSelected.subscribed?Icons.close:Icons.arrow_forward_rounded
+                label: const Icon(Icons.arrow_forward_rounded,color: Colors.white,),
               ),
             ),
             // text : precio de la versión Premium
-            const SizedBox(height: 12),
+            const SizedBox(height: 50),
+            /* disponible para cuando las subcripciones esten desarrolladas
+
             const Text.rich(
               TextSpan(
                 children: [
@@ -586,7 +591,7 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
                 ],
               ),textAlign: TextAlign.center,
               textDirection: TextDirection.rtl,
-            ), 
+            ), */
           ],
         ),
       );

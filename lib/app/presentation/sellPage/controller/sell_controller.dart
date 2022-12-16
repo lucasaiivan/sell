@@ -109,7 +109,7 @@ class SalesController extends GetxController {
     List listIdsProducts = [];
 
     for (ProductCatalogue element in getListProductsSelested) {
-      // generamos una nueva lista con los id de los productos seleccionas
+      // generamos una nueva lista con los id de los productos seleccionados
       listIdsProducts.add({
         'id': element.id,
         'quantity': element.quantity,
@@ -566,8 +566,12 @@ class SalesController extends GetxController {
         ));
   }
 
-  void showDialogMount() {
-    // dialog show
+  void selectedIncomeCash() {
+
+    // Dialog view : Cantidad del total del ingreso abonado
+
+    setPayModeTicket = 'effective'; // se
+
     Get.defaultDialog(
         title: 'Con cuanto abona',
         titlePadding: const EdgeInsets.all(20),
