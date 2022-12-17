@@ -8,8 +8,7 @@ class TicketModel {
   double priceTotal = 0.0;
   double valueReceived = 0.0;
   List<dynamic> listPoduct= [];
-  late Timestamp
-      creation; // Marca de tiempo ( hora en que se reporto el producto )
+  late Timestamp creation; // Marca de tiempo ( hora en que se reporto el producto )
 
   TicketModel({
     this.id = "",
@@ -67,7 +66,7 @@ class TicketModel {
     seller = data['seller'] ?? '';
     cashRegister = data['cashRegister'] ?? '';
     priceTotal = data['priceTotal'];
-    listPoduct = data['listPoduct'];
+    listPoduct = data['listPoduct'] ??[];
     creation = data['creation'];
   }
 }

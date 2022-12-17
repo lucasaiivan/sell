@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -220,12 +221,25 @@ class _CarruselCardsAnalyticState extends State<CarruselCardsAnalytic> {
     const Icon iconCategory = Icon(Icons.analytics_outlined);
     const String textCategory = 'Productos más vendidos';
     String text0 = transactionsController.getFilterText;
-    Widget wProducts = Row(
-      children: const [
-        CircleAvatar(radius: 12,backgroundColor: Colors.grey,),
-        CircleAvatar(radius: 12,backgroundColor: Colors.grey,),
-        CircleAvatar(radius: 12,backgroundColor: Colors.grey,),
-      ],
+    Widget wProducts = SizedBox(
+      height: 50,width: double.infinity,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: transactionsController.getMostSelledProducts.length,shrinkWrap: true,
+        itemBuilder: (context, index) {
+          return CachedNetworkImage(
+            imageUrl:transactionsController.getMostSelledProducts[index].image,
+            placeholder: (context, url) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
+            imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Stack(
+              alignment: Alignment.bottomLeft,
+              children: [
+                CircleAvatar(radius: 24 ,backgroundImage: image),
+                CircleAvatar(radius: 10 ,backgroundColor: Colors.white,child: Text(transactionsController.getMostSelledProducts[index].quantity.toString(),style:const TextStyle(fontSize: 8,color:Colors.blue))),
+              ],
+            )),
+            errorWidget: (context, url, error) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
+          );
+      },),
     );
 
     return Card(
