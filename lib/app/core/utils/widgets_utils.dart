@@ -369,10 +369,7 @@ class WidgetDrawer extends StatelessWidget {
                 : CachedNetworkImage(
                     imageUrl:homeController.getProfileAccountSelected.image,
                     placeholder: (context, url) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
-                    imageBuilder: (context, image) => Padding(
-                    padding: const EdgeInsets.all(2.0),
-                    child: CircleAvatar(backgroundImage: image),
-                    ),
+                    imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: CircleAvatar(backgroundImage: image)),
                     errorWidget: (context, url, error) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
                   ),
           ),

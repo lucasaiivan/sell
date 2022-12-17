@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
+import 'package:sell/app/domain/entities/catalogo_model.dart';
 
 import '../../../domain/entities/ticket_model.dart';
 import '../../home/controller/home_controller.dart';
 
 class TransactionsController extends GetxController {
+
   // others controllers
   final HomeController homeController = Get.find();
 
@@ -20,14 +22,20 @@ class TransactionsController extends GetxController {
   List<TicketModel> _listTransactions = [];
   List<TicketModel> get getTransactionsList => _listTransactions;
   set setTransactionsList(List<TicketModel> value) {
+    withMoreSales(list: value);
     _listTransactions = value;
     update();
   }
 
-  // var
+  // var : ticket
   final RxBool _ticketView = false.obs;
   bool get getTicketView => _ticketView.value;
   set setTicketView(bool value) => _ticketView.value = value;
+
+  // var : lista de productos más vendidos
+  List<ProductCatalogue> _mostSelledProducts = [];
+  List<ProductCatalogue> get getMostSelledProducts => _mostSelledProducts;
+  set setMostSelledProducts(List<ProductCatalogue> value) => _mostSelledProducts = value;
 
   @override
   void onInit() async {
@@ -123,21 +131,53 @@ class TransactionsController extends GetxController {
     }
   }
   void withMoreSales({ required List<TicketModel> list }){
-
-    // TODO : desarrollar
+    // CARD : PRODUCTOS MÁS VENDIDOS //
+    // aqui se actualiza la tarjeta de productos más vendidos
+    // obtenemos los primeros 3 productos más vendidos de los tickers que se obtiene por parametro 'list'
 
     // var
     Map<String,int> listValue = {};
+
+    // recorremos todos los tickers que se filtraron
     for (TicketModel ticket in list) {
-      for (var product in ticket.listPoduct) {
-        if( listValue.containsKey(product.id)){
-          listValue[product.id] = listValue[product.id]??0 + product['quantity'] as int;
+      // recorremos los productos de cada tocket
+      for (Map product in ticket.listPoduct) {
+
+        // var
+        String id = product['id'];
+
+        if( ! listValue.containsKey(id) ){
+          // si ya existe el producto
+          listValue[id] = listValue[id]??0  + (product['quantity'] as int); // sumamos los productos que se repiten
         }else{
-          listValue[product.id] =1;
+          // si no existe el producto, lo creamos
+          listValue[id] =1;
         }
       }
     }
-    print('print : #############################################                ${listValue}');
+
+    // ordenar los productos en forma descendente
+    Map<String,int> sortMap = Map.fromEntries( listValue.entries.toList()..sort((a, b)=> b.value.compareTo(a.value)) );
+    // y por ultimo obtenemos los 3 treprimeros productos
+    Map<String,int> featuredProducts = {}; // limit 3 items
+    int count = 0;
+    for( final product in sortMap.entries){
+      count++;
+      featuredProducts[product.key] = product.value; // add
+      if( count == 5){ break;}
+    }
+    // obtenemos los datos de los productos seleccionados
+    List<ProductCatalogue> listProducts = [];
+    for( var elment in featuredProducts.entries){
+      for ( ProductCatalogue element in homeController.getCataloProducts) {
+        if( elment.key == element.id ){ 
+            element.quantity =  elment.value ; 
+            listProducts.add(element); break; 
+          }
+      }
+    }
+    // actualizamos lista para mostrar al usuario
+    setMostSelledProducts = listProducts;
 
   }
 
@@ -168,7 +208,6 @@ class TransactionsController extends GetxController {
           list.add(TicketModel.fromMap(element.data()));
         }
         //  set
-        withMoreSales(list: list);
         setTransactionsList = list;
       });
     }
