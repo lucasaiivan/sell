@@ -32,10 +32,15 @@ class TransactionsController extends GetxController {
   bool get getTicketView => _ticketView.value;
   set setTicketView(bool value) => _ticketView.value = value;
 
-  // var : lista de productos más vendidos
+  // var : lista de productos más vendidos por cantidad
   List<ProductCatalogue> _mostSelledProducts = [];
   List<ProductCatalogue> get getMostSelledProducts => _mostSelledProducts;
   set setMostSelledProducts(List<ProductCatalogue> value) => _mostSelledProducts = value;
+
+  // var : productos más vendidpos por precio
+  List<ProductCatalogue> _bestSellingProductsByAmount = [];
+  List<ProductCatalogue> get getBestSellingProductsByAmount => _bestSellingProductsByAmount;
+  set setBestSellingProductsByAmount(List<ProductCatalogue> value) => _bestSellingProductsByAmount = value;
 
   @override
   void onInit() async {
@@ -136,7 +141,7 @@ class TransactionsController extends GetxController {
     // obtenemos los primeros 3 productos más vendidos de los tickers que se obtiene por parametro 'list'
 
     // var
-    Map<String,int> listValue = {};
+    Map<String,Map> productsList = {};
 
     // recorremos todos los tickers que se filtraron
     for (TicketModel ticket in list) {
@@ -146,27 +151,27 @@ class TransactionsController extends GetxController {
         // var
         String id = product['id'];
 
-        if( ! listValue.containsKey(id) ){
+        if( ! productsList.containsKey(id) ){
           // si ya existe el producto
-          listValue[id] = listValue[id]??0  + (product['quantity'] as int); // sumamos los productos que se repiten
+          productsList[id] = {'quantity':productsList[id]??0+ (product['quantity'] as int),'salePrice':product['salePrice']??0.0}; // sumamos los productos que se repiten
         }else{
           // si no existe el producto, lo creamos
-          listValue[id] =1;
+          productsList[id] ={'quantity':1,'salePrice':product['salePrice']??0.0};
         }
       }
     }
 
     // ordenar los productos en forma descendente
-    Map<String,int> sortMap = Map.fromEntries( listValue.entries.toList()..sort((a, b)=> b.value.compareTo(a.value)) );
+    Map<String,Map> sortMap = Map.fromEntries( (productsList.entries.toList()..sort((a, b)=> b.value['quantity'].compareTo(a.value['quantity']))) );
     // y por ultimo obtenemos los 3 treprimeros productos
     Map<String,int> featuredProducts = {}; // limit 3 items
     int count = 0;
     for( final product in sortMap.entries){
       count++;
-      featuredProducts[product.key] = product.value; // add
+      featuredProducts[product.key] = product.value['quantity']; // add
       if( count == 5){ break;}
     }
-    // obtenemos los datos de los productos seleccionados
+    // obtenemos los productos más vendidos por cantidad
     List<ProductCatalogue> listProducts = [];
     for( var elment in featuredProducts.entries){
       for ( ProductCatalogue element in homeController.getCataloProducts) {
@@ -179,6 +184,28 @@ class TransactionsController extends GetxController {
     // actualizamos lista para mostrar al usuario
     setMostSelledProducts = listProducts;
 
+    // obtenemos los productos más vendidos por el precio
+    List<Map> listNew=[];
+    productsList.forEach((key, value) { 
+      listNew.add({'id':key,'quantity':value['quantity']??0,'priceTotal':(value['salePrice']??0.0*value['quantity']??0)});
+    });
+    listNew = listNew..sort((a, b) => b['priceTotal'].compareTo(a['priceTotal']) ); // ordenamiento
+    List<ProductCatalogue> listProductBySales = [];
+    int count2 = 0;
+    for (var data in listNew) {
+      for ( ProductCatalogue element in homeController.getCataloProducts) {
+        if( data['id'] == element.id ){ 
+            element.quantity =  data['quantity']; 
+            element.salePrice =data['priceTotal']; 
+            listProductBySales.add(element); 
+            count2++;
+            break; 
+          }
+      }
+      if( count2 == 3){ break;}
+     }
+    // actualizamos lista para mostrar al usuario
+    setBestSellingProductsByAmount = listProductBySales;
   }
 
   void readTransactionsYesterday() {
@@ -302,6 +329,55 @@ class TransactionsController extends GetxController {
   }
 
   // FUCTIONS
+  int readTotalProducts(){
+    // leemos la cantidad total de procutos
+
+    int value  = 0;
+    // recorremos la lista de productos que se vendieron
+    for (TicketModel ticket in getTransactionsList) {
+      for (Map product in ticket.listPoduct) {
+        value=value + (product['quantity'] as int);
+      }
+    }
+    return value;
+  }
+  String readTotalEarnings(){
+    // leemos el total de las ganancias
+
+    double value  = 0;
+    double totalSaleValue = 0.0;
+    double fullValueAtCost  = 0.0;
+    String currencySymbol = '\$';
+
+    // recorremos la lista de productos que se vendieron
+    for (TicketModel ticket in getTransactionsList) {
+      currencySymbol= ticket.currencySymbol;
+      for (Map product in ticket.listPoduct) {
+        totalSaleValue+= product['salePrice']??0.0 * product['quantity']??0.0;
+        fullValueAtCost+= product['purchasePrice']??0.0 * product['quantity']??0.0;
+      }
+    }
+    value = totalSaleValue - fullValueAtCost; // obtenemos el total de las ganancias
+
+    return value==0.0?  '':Publications.getFormatoPrecio(monto:value,moneda: currencySymbol);
+  }
+  String readEarnings({required TicketModel ticket }){
+    // leemos ganancias
+
+    double value  = 0;
+    double totalSaleValue = 0.0;
+    double fullValueAtCost  = 0.0;
+    String currencySymbol = ticket.currencySymbol;
+
+    // recorremos la lista de productos que se vendieron
+    for (Map product in ticket.listPoduct) {
+        totalSaleValue+= product['salePrice']??0.0 * product['quantity']??0.0;
+        fullValueAtCost+= product['purchasePrice']??0.0 * product['quantity']??0.0;
+    }
+    value = totalSaleValue - fullValueAtCost; // obtenemos el total de las ganancias
+
+    return value==0.0?  '':Publications.getFormatoPrecio(monto:value,moneda: currencySymbol);
+  }
   String getInfoPriceTotal() {
     double total = 0.0;
 
@@ -309,21 +385,22 @@ class TransactionsController extends GetxController {
       total += ticket.priceTotal;
     }
 
-    return '${Publications.getFormatoPrecio(monto: total)} de ${getTransactionsList.length} ventas';
+    return Publications.getFormatoPrecio(monto: total);
   }
 
-  String getPayModeFormat({required idMode}) {
+  Map getPayMode({required idMode}) {
     switch (idMode) {
       case 'effective':
-        return 'Efectivo';
+        return {'name':'Efectivo','color':Colors.green};
       case 'mercadopago':
-        return 'Mercado Pago';
+        return {'name':'Mercado Pago','color':Colors.blue};
       case 'card':
-        return 'Tarjeta Credito/Debito';
+        return {'name':'Tarjeta Credito/Debito','color':Colors.orange};
       default:
-        return 'Sin esprecificar';
+        return {'name':'Sin esprecificar','color':Colors.grey};
     }
   }
+
 
   void deleteSale({required TicketModel ticketModel}) {
     Widget widget = AlertDialog(

@@ -11,12 +11,20 @@ import '../../../domain/entities/ticket_model.dart';
 import '../../../core/utils/dynamicTheme_lb.dart';
 import '../controller/transactions_controller.dart';
 
+// ignore: must_be_immutable
 class TransactionsView extends StatelessWidget {
   // ignore: prefer_const_constructors_in_immutables
   TransactionsView({Key? key}) : super(key: key);
 
+  // var 
+  bool darkTheme=false;
+
   @override
   Widget build(BuildContext context) {
+
+    // get
+    darkTheme = Get.isDarkMode;
+
     return GetBuilder<TransactionsController>(
       init: TransactionsController(),
       initState: (_) {},
@@ -74,9 +82,9 @@ class TransactionsView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              const CarruselCardsAnalytic(),
+              CarruselCardsAnalytic(),
               tileItem( ticketModel: transactionsController.getTransactionsList[index]),
-              const Divider(thickness: 0.1),
+              Divider(thickness: 0.1,color: darkTheme ?Colors.white70:Colors.black87,height: 0),
             ],
           );
         }
@@ -84,7 +92,7 @@ class TransactionsView extends StatelessWidget {
         return Column(
           children: [
             tileItem(ticketModel: transactionsController.getTransactionsList[index]),
-            const Divider(thickness: 0.1),
+            Divider(thickness: 0.1,color: darkTheme ?Colors.white70:Colors.black87,height: 0),
           ],
         );
       },
@@ -99,30 +107,64 @@ class TransactionsView extends StatelessWidget {
     final TransactionsController transactionsController = Get.find();
 
     // values
-    String payMode =transactionsController.getPayModeFormat(idMode: ticketModel.payMode);
+    Map payMode =transactionsController.getPayMode(idMode: ticketModel.payMode);
+    String revenue = transactionsController.readEarnings(ticket: ticketModel);
 
     return ElasticIn(
       child: ListTile(
         contentPadding: const EdgeInsets.all(12),
         onLongPress: () =>  transactionsController.deleteSale(ticketModel: ticketModel),
-        title: Text('Pago con: $payMode',style: const TextStyle(fontWeight: FontWeight.w400)),
+        title: Row(
+          children: [
+            Text('Pago con:  ',style: TextStyle(fontWeight: FontWeight.w400,color: Get.theme.textTheme.bodyMedium?.color )),
+            Material(
+              color: (payMode['color'] as Color) .withOpacity(0.1),
+              clipBehavior: Clip.antiAlias,
+              borderRadius: const BorderRadius.all(Radius.circular(12)),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal:10,vertical:0),
+                child: Text(payMode['name'],style: TextStyle(fontWeight: FontWeight.w600,color: (payMode['color'] as Color) .withOpacity(0.7)  )),
+              )),
+          ],
+        ),
+        // title: Text('Pago con: ${payMode['name']}',style: TextStyle(fontWeight: FontWeight.w400,color: payMode['color'] )),
         subtitle: Padding(
           padding: const EdgeInsets.only(),
-          child: Wrap(crossAxisAlignment: WrapCrossAlignment.center,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // text : fecha de publicación
-              Text(Publications.getFechaPublicacionFormating(dateTime: ticketModel.creation.toDate())),
-              Padding(padding: const EdgeInsets.symmetric(horizontal: 5), child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
-              Text('${ticketModel.getLengh()} items'),
-              ticketModel.valueReceived == 0? Container(): Text('Vuelto: ${Publications.getFormatoPrecio(monto: ticketModel.valueReceived - ticketModel.priceTotal)}',style: const TextStyle(fontWeight: FontWeight.w300)),
+              Text(ticketModel.seller.split('@')[0],style: const TextStyle(fontSize: 14)),
+              Wrap(crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  // text : fecha de publicación
+                  Text(Publications.getFechaPublicacionFormating(dateTime: ticketModel.creation.toDate()),style: const TextStyle(fontSize:12)),
+                  //  text : cantidad de productos
+                  Padding(padding: const EdgeInsets.symmetric(horizontal: 5), child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
+                  Text('${ticketModel.getLengh()} items'),
+                  // text : valor del vuelto
+                  ticketModel.valueReceived == 0? Container(): Row(
+                    children: [
+                      Padding(padding: const EdgeInsets.symmetric(horizontal: 5), child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
+                      Text('Vuelto: ${Publications.getFormatoPrecio(monto: ticketModel.valueReceived - ticketModel.priceTotal)}',style: const TextStyle(fontWeight: FontWeight.w300)),
+                    ],
+                  ),
+                ],
+              ),
             ],
           ),
         ),
         trailing: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
+          crossAxisAlignment:CrossAxisAlignment.end,mainAxisSize: MainAxisSize.max,
           children: [
-            Text(Publications.getFormatoPrecio(monto: ticketModel.priceTotal),style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 18)),
-            Text(Publications.getFechaPublicacion(ticketModel.creation.toDate(), Timestamp.now().toDate()),style: const TextStyle(fontWeight: FontWeight.w400,fontSize: 12))
+            //  text : precio totol del ticket
+            Text(Publications.getFormatoPrecio(monto: ticketModel.priceTotal),style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 16)),
+            //  text : ganancias
+            revenue==''?  const Material():Padding(
+              padding: const EdgeInsets.symmetric(horizontal:10,vertical:0),
+              child: Text( '+$revenue' ,style: TextStyle(fontWeight: FontWeight.w600,fontSize: 9,color: Colors.green.withOpacity(0.9)  )),
+            ),
+            //  text : fecha formateada 
+            Text(Publications.getFechaPublicacion(ticketModel.creation.toDate(), Timestamp.now().toDate()),style: const TextStyle(fontWeight: FontWeight.w400,fontSize: 10))
           ],
         ),
       ),
@@ -135,7 +177,7 @@ class TransactionsView extends StatelessWidget {
 // ignore: must_be_immutable
 class CarruselCardsAnalytic extends StatefulWidget {
 
-  const CarruselCardsAnalytic({Key? key}): super(key: key);
+  CarruselCardsAnalytic({Key? key}): super(key: key);
 
   @override
   State<CarruselCardsAnalytic> createState() => _CarruselCardsAnalyticState();
@@ -155,7 +197,7 @@ class _CarruselCardsAnalyticState extends State<CarruselCardsAnalytic> {
     int lengh = widgetsList.length;
 
     return CarouselSlider.builder(
-      options: CarouselOptions(onPageChanged: (index, reason) => setState(()=> currentSlide=index),viewportFraction: 0.85,enableInfiniteScroll: lengh == 1 ? false : true,autoPlay: lengh == 1 ? false : true,aspectRatio: 2.0,enlargeCenterPage: true,enlargeStrategy: CenterPageEnlargeStrategy.height),
+      options: CarouselOptions(onPageChanged: (index, reason) => setState(()=> currentSlide=index),viewportFraction: 0.80,enableInfiniteScroll: lengh == 1 ? false : true,autoPlay: lengh == 1 ? false : false,aspectRatio: 2.0,enlargeCenterPage: true,enlargeStrategy: CenterPageEnlargeStrategy.height),
       //options: CarouselOptions(enableInfiniteScroll: lista.length == 1 ? false : true,autoPlay: lista.length == 1 ? false : true,aspectRatio: 2.0,enlargeCenterPage: true,enlargeStrategy: CenterPageEnlargeStrategy.scale),
       itemCount: lengh,
       itemBuilder: (context, index, realIndex) {
@@ -175,15 +217,16 @@ class _CarruselCardsAnalyticState extends State<CarruselCardsAnalytic> {
 
     // values
     const Icon iconCategory = Icon(Icons.monetization_on_outlined);
-    const String textCategory = 'Ventas';
-    String text0 = transactionsController.getFilterText;
-    String text1 = transactionsController.getInfoPriceTotal();
+    const String textCategory = 'Volumen de ventas';
+    String textFilter = transactionsController.getFilterText;
+    String priceTotal = transactionsController.getInfoPriceTotal();
+    String revenue  = transactionsController.readTotalEarnings();
 
     return Card(
       color: Colors.blue.withOpacity(0.1),
       elevation: 0,
       child: Padding(
-        padding:const EdgeInsets.all(20),
+        padding:const EdgeInsets.symmetric(horizontal: 12,vertical: 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
@@ -200,10 +243,34 @@ class _CarruselCardsAnalyticState extends State<CarruselCardsAnalytic> {
               ),
             ),
             const Spacer(),
+            // text
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                // text : ganancias
+                Column(
+                  children: [
+                    const Opacity(opacity:0.4,child: Text('Ganancias',style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900))),
+                    Text(revenue,style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w200)),
+                  ],
+                ),
+                // text : numero de ventas
+                Padding(
+                  padding: const EdgeInsets.only(left:20),
+                  child: Column(
+                    children: [
+                      const Opacity(opacity:0.4,child: Text('Ventas',style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900))),
+                      Text(transactionsController.getTransactionsList.length.toString(),style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w200)),
+                    ],
+                  ),
+                ),
+              ],
+              
+            ),
             // text : fecha del filtro
-            Opacity(opacity:0.5,child: Text(text0,style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900))),
-            // text : valor
-            Text(text1,textAlign: TextAlign.start,style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w200)),
+            Opacity(opacity:0.5,child: Text(textFilter,style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900))),
+            // text : monto total de las ventas del filtro
+            Text(priceTotal,textAlign: TextAlign.start,style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w500)),
           ],
         ),
       )
@@ -220,12 +287,12 @@ class _CarruselCardsAnalyticState extends State<CarruselCardsAnalytic> {
     // values
     const Icon iconCategory = Icon(Icons.analytics_outlined);
     const String textCategory = 'Productos más vendidos';
-    String text0 = transactionsController.getFilterText;
     Widget wProducts = SizedBox(
       height: 50,width: double.infinity,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: transactionsController.getMostSelledProducts.length,shrinkWrap: true,
+        itemCount: transactionsController.getMostSelledProducts.length,
+        shrinkWrap: true,
         itemBuilder: (context, index) {
           return CachedNetworkImage(
             imageUrl:transactionsController.getMostSelledProducts[index].image,
@@ -233,8 +300,30 @@ class _CarruselCardsAnalyticState extends State<CarruselCardsAnalytic> {
             imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Stack(
               alignment: Alignment.bottomLeft,
               children: [
-                CircleAvatar(radius: 24 ,backgroundImage: image),
+                CircleAvatar(radius: 20 ,backgroundImage: image),
                 CircleAvatar(radius: 10 ,backgroundColor: Colors.white,child: Text(transactionsController.getMostSelledProducts[index].quantity.toString(),style:const TextStyle(fontSize: 8,color:Colors.blue))),
+              ],
+            )),
+            errorWidget: (context, url, error) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
+          );
+      },),
+    );
+    // productos con mayor volumen
+    Widget wProductsSales = SizedBox(
+      height: 30,width: 200,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: transactionsController.getBestSellingProductsByAmount.length,
+        shrinkWrap: true,
+        itemBuilder: (context, index) {
+          return CachedNetworkImage(
+            imageUrl:transactionsController.getBestSellingProductsByAmount[index].image,
+            placeholder: (context, url) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
+            imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Stack(
+              alignment: Alignment.bottomLeft,
+              children: [
+                CircleAvatar(radius: 15 ,backgroundImage: image),
+                CircleAvatar(radius: 8 ,backgroundColor: Colors.white,child: Text(transactionsController.getBestSellingProductsByAmount[index].quantity.toString(),style:const TextStyle(fontSize: 8,color:Colors.blue))),
               ],
             )),
             errorWidget: (context, url, error) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
@@ -251,14 +340,37 @@ class _CarruselCardsAnalyticState extends State<CarruselCardsAnalytic> {
         children: [
           // datos
           Container(
-            padding: const EdgeInsets.all(20),
+            padding:const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 const Spacer(),
+                // text
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,mainAxisSize: MainAxisSize.max,
+                  children: [
+                    // text : ganancias
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Opacity(opacity:0.4,child: Text('Total',style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900))),
+                        Text(Publications.getFormatAmount(value:transactionsController.readTotalProducts()),style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w200)),
+                      ],
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Opacity(opacity:0.4,child: Text('Con mayor monto',style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900))),
+                        wProductsSales,
+                      ],
+                    )
+                  ],
+                  
+                ),
                 // text : fecha del filtro
-                Opacity(opacity:0.5,child: Text(text0,style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900))),
+                const Opacity(opacity:0.5,child: Text('Más vendidos',style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900))),
                 // widget : productos más vendidos
                 wProducts,
               ],
@@ -283,7 +395,10 @@ class _CarruselCardsAnalyticState extends State<CarruselCardsAnalytic> {
           // text : información de la cátegoria
           Padding(
             padding: const EdgeInsets.all(12),
-            child: Column(children: [Opacity(opacity: 0.5,child: Row(children:const [iconCategory,SizedBox(width:5),Text(textCategory)])),const Spacer()]),
+            child: Column(children: 
+            [
+              Opacity(opacity: 0.5,child: Row(children:const [iconCategory,SizedBox(width:5),Text(textCategory)])),
+              const Spacer()]),
           ),
                   
         ],

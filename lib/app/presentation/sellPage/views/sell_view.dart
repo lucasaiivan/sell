@@ -220,7 +220,10 @@ class SalesView extends StatelessWidget {
                                     ElevatedButton.icon(
                                       style: ButtonStyle(elevation: MaterialStateProperty.all(controller.getTicket.payMode =='effective'? 5: 0)),
                                       icon: controller.getTicket.payMode != 'effective'?Container():const Icon(Icons.money_rounded),
-                                      onPressed: controller.selectedIncomeCash,
+                                      onPressed: (){
+                                        controller.setPayModeTicket = 'effective'; // se
+                                        controller.dialogSelectedIncomeCash;
+                                      },
                                       label: Text(controller.getValueReceivedTicket != 0.0? Publications.getFormatoPrecio(monto: controller.getValueReceivedTicket): 'Efectivo'),
                                     ),
                                     // button : pago con mercado pago
