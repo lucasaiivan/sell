@@ -65,11 +65,11 @@ class SalesController extends GetxController {
   }
 
   // ticket
-  TicketModel _ticket = TicketModel(creation: Timestamp.now(), listPoduct: []);
-  TicketModel get getTicket => _ticket;
-  set setTicket(TicketModel value) => _ticket = value;
+  TicketModel ticket = TicketModel(creation: Timestamp.now(), listPoduct: []);
+  TicketModel get getTicket => ticket;
+  set setTicket(TicketModel value) => ticket = value;
   set setPayModeTicket(String value) {
-    _ticket.payMode = value;
+    ticket.payMode = value;
     update();
   }
 
@@ -114,7 +114,9 @@ class SalesController extends GetxController {
         'id': element.id,
         'quantity': element.quantity,
         'description': element.description,
-        'stock': element.stock}
+        'salePrice':element.salePrice,
+        'purchasePrice':element.purchasePrice,
+        }
         );
     }
     //  set values
@@ -566,11 +568,9 @@ class SalesController extends GetxController {
         ));
   }
 
-  void selectedIncomeCash() {
+  void dialogSelectedIncomeCash() {
 
     // Dialog view : Cantidad del total del ingreso abonado
-
-    setPayModeTicket = 'effective'; // se
 
     Get.defaultDialog(
         title: 'Con cuanto abona',
@@ -692,23 +692,17 @@ class SalesController extends GetxController {
                   textInputAction: TextInputAction.done,
                   onSubmitted: (value) {
                     //var
-                    double valueReceived = textEditingControllerTicketMount
-                                .text ==
-                            ''
+                    double valueReceived = textEditingControllerTicketMount.text ==''
                         ? 0.0
                         : double.parse(textEditingControllerTicketMount.text);
                     // condition : verificar si el usaurio ingreso un monto valido y que sea mayor al monto total del ticket
-                    if (valueReceived >= getCountPriceTotal() &&
-                        textEditingControllerTicketMount.text != '') {
-                      setValueReceivedTicket =
-                          double.parse(textEditingControllerTicketMount.text);
+                    if (valueReceived >= getCountPriceTotal() && textEditingControllerTicketMount.text != '') {
+                      setValueReceivedTicket = double.parse(textEditingControllerTicketMount.text);
                       textEditingControllerTicketMount.text = '';
                       setPayModeTicket = 'effective';
                       Get.back();
                     } else {
-                      showMessageAlertApp(
-                          title: '😔',
-                          message: 'Tiene que ingresar un monto valido');
+                      showMessageAlertApp( title: '😔', message: 'Tiene que ingresar un monto valido');
                     }
                   },
                 ),
