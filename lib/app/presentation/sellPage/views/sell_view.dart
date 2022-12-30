@@ -222,7 +222,7 @@ class SalesView extends StatelessWidget {
                                       icon: controller.getTicket.payMode != 'effective'?Container():const Icon(Icons.money_rounded),
                                       onPressed: (){
                                         controller.setPayModeTicket = 'effective'; // se
-                                        controller.dialogSelectedIncomeCash;
+                                        controller.dialogSelectedIncomeCash();
                                       },
                                       label: Text(controller.getValueReceivedTicket != 0.0? Publications.getFormatoPrecio(monto: controller.getValueReceivedTicket): 'Efectivo'),
                                     ),
