@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -13,6 +15,11 @@ class TransactionsController extends GetxController {
   // others controllers
   final HomeController homeController = Get.find();
 
+  // producto con más ganancias
+  List<ProductCatalogue> bestSellingProductList = [];
+  List<ProductCatalogue> get getBestSellingProductList => bestSellingProductList;
+  set setBestSellingProductList(List<ProductCatalogue> value) => bestSellingProductList = value;
+
   // text filter
   String _filterText = '';
   String get getFilterText => _filterText;
@@ -24,6 +31,7 @@ class TransactionsController extends GetxController {
   set setTransactionsList(List<TicketModel> value) {
     withMoreSales(list: value);
     _listTransactions = value;
+    readProductWithMoreEarnings();
     update();
   }
 
@@ -83,8 +91,7 @@ class TransactionsController extends GetxController {
 
     // a la marca de tiempo actual le descontamos dias
     DateTime getTime = Timestamp.now().toDate();
-    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(
-        DateTime(getTime.year, 1, 1, 0).millisecondsSinceEpoch);
+    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(DateTime(getTime.year, 1, 1, 0).millisecondsSinceEpoch);
     // marca de tiempo actual
     Timestamp timeEnd = Timestamp.now();
 
@@ -110,10 +117,7 @@ class TransactionsController extends GetxController {
     // obtenemos los documentos creados en el día
 
     // a la marca de tiempo actual le descontamos las horas del día
-    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(Timestamp.now()
-        .toDate()
-        .subtract(Duration(hours: Timestamp.now().toDate().hour))
-        .millisecondsSinceEpoch);
+    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(Timestamp.now().toDate().subtract(Duration(hours: Timestamp.now().toDate().hour)).millisecondsSinceEpoch);
     // marca de tiempo actual
     Timestamp timeEnd = Timestamp.now();
 
@@ -148,15 +152,12 @@ class TransactionsController extends GetxController {
       // recorremos los productos de cada tocket
       for (Map product in ticket.listPoduct) {
 
-        // var
-        String id = product['id'];
-
-        if( ! productsList.containsKey(id) ){
+        if( ! productsList.containsKey(product['id']) ){
           // si ya existe el producto
-          productsList[id] = {'quantity':productsList[id]??0+ (product['quantity'] as int),'salePrice':product['salePrice']??0.0}; // sumamos los productos que se repiten
+          productsList[product['id']] = {'quantity':productsList[product['id']]??0  + product['quantity'],'salePrice':product['salePrice']}; // sumamos los productos que se repiten
         }else{
           // si no existe el producto, lo creamos
-          productsList[id] ={'quantity':1,'salePrice':product['salePrice']??0.0};
+          productsList[product['id']] ={'quantity':1,'salePrice':product['salePrice']};
         }
       }
     }
@@ -328,7 +329,67 @@ class TransactionsController extends GetxController {
     }
   }
 
-  // FUCTIONS
+  void readProductWithMoreEarnings(){
+    //  devuelve el producto que se obtubo más ganancias
+
+    // var
+    ProductCatalogue product = ProductCatalogue(creation: Timestamp.now(), upgrade: Timestamp.now(), documentCreation: Timestamp.now(), documentUpgrade: Timestamp.now());
+    Map<String,double> productsList  = {}; // en esta lista almacenamos las ganancias de los productos
+
+    // recorremos la lista de tickets y obtenemos la ganancias de los productos que se vendieron
+    for (TicketModel ticket in getTransactionsList) {
+      for (Map itenm in ticket.listPoduct) {
+
+        ProductCatalogue product = ProductCatalogue.fromMap(itenm);
+
+        // obtenemos la ganancia 
+        double revenueValue =product.salePrice - product.purchasePrice;
+       
+        // comprobamos si existe el producto en la nueva lista 
+        if( productsList.containsKey(product.id) ){
+          productsList[product.id] = productsList[product.id]! + revenueValue;
+        }else{
+          // es un producto nuevo //
+          // asignamos el nuevo valor que es la ganancia del producto
+          productsList[product.id] = revenueValue ;
+        }
+      } 
+    } 
+    // ordenamiento
+    //productsList = productsList.entries.toList()..sort((a, b) => b['priceTotal'].compareTo(a['priceTotal']) );
+    // ordenar los productos en forma descendente
+    var sortedByKeyMap = Map.fromEntries( productsList.entries.toList()..sort((e1, e2) => e2.value.compareTo(e1.value)));
+
+    // nuevos valores
+    // obtenemos la ganancia
+    int count = 0;
+    List newValuesList = [];
+    if( sortedByKeyMap.isNotEmpty){
+      for (var element in sortedByKeyMap.entries) { 
+        newValuesList.add(element);
+        count++;
+        if( count==3) break;
+      }
+    }
+    // obtenemos los datos del producto
+    List<ProductCatalogue> newList = [];
+    for ( var data in newValuesList) {
+      for (ProductCatalogue element in homeController.getCataloProducts) { 
+        if(element.id == data.key ){
+          // asignamos las ganancias acumuladas de este producto 
+          element.revenue = data.value;
+          // add
+          newList.add(element);
+          break;
+        }
+      }
+    } 
+    
+    setBestSellingProductList =  newList;
+  }
+
+   // FUCTIONS
+
   int readTotalProducts(){
     // leemos la cantidad total de procutos
 

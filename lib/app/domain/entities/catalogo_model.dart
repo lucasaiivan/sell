@@ -117,9 +117,11 @@ class ProductCatalogue {
   double salePrice = 0.0;
   double purchasePrice = 0.0;
   String currencySign = "\$"; // signo de la moneda
+
   // var optional
   bool select = false;
   int quantity = 0;
+  double revenue = 0.0;
 
   ProductCatalogue({
     // Valores del producto

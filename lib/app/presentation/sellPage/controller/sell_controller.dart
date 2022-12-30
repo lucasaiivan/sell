@@ -108,16 +108,9 @@ class SalesController extends GetxController {
     var id = Publications.generateUid(); // generate id
     List listIdsProducts = [];
 
-    for (ProductCatalogue element in getListProductsSelested) {
+    for (var element in getListProductsSelested) {
       // generamos una nueva lista con los id de los productos seleccionados
-      listIdsProducts.add({
-        'id': element.id,
-        'quantity': element.quantity,
-        'description': element.description,
-        'salePrice':element.salePrice,
-        'purchasePrice':element.purchasePrice,
-        }
-        );
+      listIdsProducts.add(element.toJson());
     }
     //  set values
     getTicket.id = id;
@@ -129,13 +122,17 @@ class SalesController extends GetxController {
     getTicket.creation = Timestamp.now();
     // set firestore : guarda la transacción
     Database.refFirestoretransactions(idAccount: homeController.getIdAccountSelected).doc(getTicket.id).set(getTicket.toJson());
-    for (var element in listIdsProducts) {
+    for (Map element in listIdsProducts) {
+
+      // obtenemos el objeto
+      ProductCatalogue product = ProductCatalogue.fromMap(element);
+
       // set firestore : hace un incremento en el valor sales'ventas'  del producto
-      Database.dbProductStockSalesIncrement(idAccount: homeController.getIdAccountSelected,idProduct: element['id'],quantity: element['quantity'] ?? 1);
+      Database.dbProductStockSalesIncrement(idAccount: homeController.getIdAccountSelected,idProduct: product.id,quantity: product.quantity );
       // set firestore : hace un descremento en el valor 'stock' del producto
-      if (element['stock'] ?? false) {
+      if (product.stock) {
         // set firestore : hace un descremento en el valor 'stock'
-        Database.dbProductStockDecrement(idAccount: homeController.getIdAccountSelected,idProduct: element['id'],quantity: element['quantity'] ?? 1,);
+        Database.dbProductStockDecrement(idAccount: homeController.getIdAccountSelected,idProduct: product.id,quantity: product.quantity);
       }
     }
   }
@@ -571,7 +568,6 @@ class SalesController extends GetxController {
   void dialogSelectedIncomeCash() {
 
     // Dialog view : Cantidad del total del ingreso abonado
-
     Get.defaultDialog(
         title: 'Con cuanto abona',
         titlePadding: const EdgeInsets.all(20),

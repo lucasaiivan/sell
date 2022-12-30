@@ -193,11 +193,18 @@ class _CarruselCardsAnalyticState extends State<CarruselCardsAnalytic> {
   Widget build(BuildContext context) {
 
     // values 
-    List<Widget> widgetsList = [cardAnalyticSales,cardAnalyticProducts,cardAnalyticOthers];
+    List<Widget> widgetsList = [cardAnalyticSales,cardAnalyticProducts];
     int lengh = widgetsList.length;
 
     return CarouselSlider.builder(
-      options: CarouselOptions(onPageChanged: (index, reason) => setState(()=> currentSlide=index),viewportFraction: 0.80,enableInfiniteScroll: lengh == 1 ? false : true,autoPlay: lengh == 1 ? false : false,aspectRatio: 2.0,enlargeCenterPage: true,enlargeStrategy: CenterPageEnlargeStrategy.height),
+      options: CarouselOptions(
+        onPageChanged: (index, reason) => setState(()=> currentSlide=index),
+        viewportFraction: 0.80,
+        enableInfiniteScroll: lengh == 1 ? false : true,
+        autoPlay: lengh == 1 ? false : false,height: 400,
+        //aspectRatio: 1.5,
+        enlargeCenterPage: true,
+        enlargeStrategy: CenterPageEnlargeStrategy.height),
       //options: CarouselOptions(enableInfiniteScroll: lista.length == 1 ? false : true,autoPlay: lista.length == 1 ? false : true,aspectRatio: 2.0,enlargeCenterPage: true,enlargeStrategy: CenterPageEnlargeStrategy.scale),
       itemCount: lengh,
       itemBuilder: (context, index, realIndex) {
@@ -216,7 +223,7 @@ class _CarruselCardsAnalyticState extends State<CarruselCardsAnalytic> {
     final TransactionsController transactionsController = Get.find();
 
     // values
-    const Icon iconCategory = Icon(Icons.monetization_on_outlined);
+    const Icon iconCategory = Icon(Icons.monetization_on_outlined,color: Colors.green,);
     const String textCategory = 'Volumen de ventas';
     String textFilter = transactionsController.getFilterText;
     String priceTotal = transactionsController.getInfoPriceTotal();
@@ -232,16 +239,7 @@ class _CarruselCardsAnalyticState extends State<CarruselCardsAnalytic> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             // text : información de la cátegoria
-            Opacity(
-              opacity: 0.5,
-              child: Row(
-                children:const [
-                  iconCategory,
-                  SizedBox(width:5),
-                  Text(textCategory),
-                ],
-              ),
-            ),
+            Opacity(opacity: 0.8,child: Row(children: [const Text(textCategory,style: TextStyle(fontSize: 16,fontWeight: FontWeight.w600)),const Spacer(),CircleAvatar(backgroundColor: iconCategory.color!.withOpacity(0.5),child: iconCategory,)])),
             const Spacer(),
             // text
             Row(
@@ -285,8 +283,8 @@ class _CarruselCardsAnalyticState extends State<CarruselCardsAnalytic> {
     final HomeController homeController = Get.find();
 
     // values
-    const Icon iconCategory = Icon(Icons.analytics_outlined);
-    const String textCategory = 'Productos más vendidos';
+    const Icon iconCategory = Icon(Icons.analytics_outlined,color: Colors.orange,);
+    const String textCategory = 'Productos';
     Widget wProducts = SizedBox(
       height: 50,width: double.infinity,
       child: ListView.builder(
@@ -308,9 +306,9 @@ class _CarruselCardsAnalyticState extends State<CarruselCardsAnalytic> {
           );
       },),
     );
-    // productos con mayor volumen
+    // widget : los productos de mayor monto
     Widget wProductsSales = SizedBox(
-      height: 30,width: 200,
+      height: 30,width: 100,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: transactionsController.getBestSellingProductsByAmount.length,
@@ -330,6 +328,44 @@ class _CarruselCardsAnalyticState extends State<CarruselCardsAnalytic> {
           );
       },),
     );
+    // widget : productos de mayor ganancia
+    Widget wProductsRevenue = SizedBox(
+      height: 100,width: double.infinity,
+      child: ListView.builder(
+        scrollDirection: Axis.vertical,
+        itemCount: transactionsController.getBestSellingProductList.length,
+        shrinkWrap: true,
+        itemBuilder: (context, index) {
+          return SizedBox(
+            width: 50,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                CachedNetworkImage(
+                  imageUrl:transactionsController.getBestSellingProductList[index].image,
+                  placeholder: (context, url) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                  imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Stack(
+                    alignment: Alignment.bottomLeft,
+                    children: [
+                      CircleAvatar(radius: 15 ,backgroundImage: image),
+                      CircleAvatar(radius: 8 ,backgroundColor: Colors.white,child: Text(transactionsController.getBestSellingProductsByAmount[index].quantity.toString(),style:const TextStyle(fontSize: 8,color:Colors.blue))),
+                    ],
+                  )),
+                  errorWidget: (context, url, error) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                ),
+                //  text  : marca del producto
+                Padding(
+                  padding: const EdgeInsets.only(left: 5),
+                  child: Text(transactionsController.getBestSellingProductList[index].nameMark,overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:12)),
+                ),
+                const Spacer(),
+                // text : ganancias del producto
+                Text('+${Publications.getFormatoPrecio(monto: transactionsController.getBestSellingProductList[index].revenue)}',style: TextStyle(fontSize: 12,color:Colors.green.shade400)),
+              ],
+            ),
+          );
+      },),
+    );
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -346,29 +382,31 @@ class _CarruselCardsAnalyticState extends State<CarruselCardsAnalytic> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 const Spacer(),
-                // text
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.start,mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // text : ganancias
+                    // text : total de los productros vendidos
+                    Text(Publications.getFormatAmount(value:transactionsController.readTotalProducts()),style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w400)),
+                    const Spacer(),
                     Column(
                       mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Opacity(opacity:0.4,child: Text('Total',style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900))),
-                        Text(Publications.getFormatAmount(value:transactionsController.readTotalProducts()),style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w200)),
-                      ],
-                    ),
-                    const SizedBox(width: 12),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Opacity(opacity:0.4,child: Text('Con mayor monto',style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900))),
+                        const Opacity(opacity:0.4,child: Text('De mayor monto',overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900))),
+                        const SizedBox(height:5),
                         wProductsSales,
                       ],
-                    )
+                    ),
                   ],
-                  
                 ),
+                const SizedBox(height: 12),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Opacity(opacity:0.4,child: Text('De mayor ganancia',overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900))),
+                    wProductsRevenue,
+                  ],
+                ),
+                const SizedBox(height: 12),
                 // text : fecha del filtro
                 const Opacity(opacity:0.5,child: Text('Más vendidos',style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900))),
                 // widget : productos más vendidos
@@ -397,7 +435,7 @@ class _CarruselCardsAnalyticState extends State<CarruselCardsAnalytic> {
             padding: const EdgeInsets.all(12),
             child: Column(children: 
             [
-              Opacity(opacity: 0.5,child: Row(children:const [iconCategory,SizedBox(width:5),Text(textCategory)])),
+              Opacity(opacity: 0.8,child: Row(children: [const Text(textCategory,style: TextStyle(fontSize: 16,fontWeight: FontWeight.w600),),const Spacer(),CircleAvatar(backgroundColor: iconCategory.color!.withOpacity(0.5),child: iconCategory,)])),
               const Spacer()]),
           ),
                   
