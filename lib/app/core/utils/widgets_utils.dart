@@ -471,9 +471,9 @@ class WidgetDrawer extends StatelessWidget {
 
           },
         ),
-        const ListTile(
-          leading: Icon(Icons.color_lens_outlined),
-          title: Text('Cambiar tema'),
+        ListTile(
+          leading: const Icon(Icons.color_lens_outlined),
+          title: Text(Theme.of(context).brightness==Brightness.dark?'Tema claro':'Tema oscuro'),
           onTap: ThemeService.switchTheme,
         ),
         ListTile(
