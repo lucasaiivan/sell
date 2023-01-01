@@ -154,9 +154,9 @@ class SalesView extends StatelessWidget {
                             padding: const EdgeInsets.only(bottom: 12,left: 20,right: 20,top: 12),
                             child: Row(
                               children: [
-                                const Text('Total',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w900)),
+                                const Text('Total',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w900,color: Colors.blue)),
                                 const Spacer(),
-                                Text(Publications.getFormatoPrecio(monto: controller.getCountPriceTotal()),style: const TextStyle(fontSize: 24,fontWeight: FontWeight.w900)),
+                                Text(Publications.getFormatoPrecio(monto: controller.getCountPriceTotal()),style: const TextStyle(color: Colors.blue,fontSize: 24,fontWeight: FontWeight.w900)),
                               ],
                             ),
                           ),
@@ -188,7 +188,12 @@ class SalesView extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(8.0),
                                     child: Padding(
                                       padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 1),
-                                      child: Text(controller.getValueChange(),style: const TextStyle(color: Colors.white,fontSize: 16),),
+                                      child: Row(
+                                        children: [
+                                          const Text('Dar vuelto ',style:TextStyle(color: Colors.white)),
+                                          Text(controller.getValueChange(),style: const TextStyle(color: Colors.white,fontSize: 16),),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -215,7 +220,10 @@ class SalesView extends StatelessWidget {
                                     ElevatedButton.icon(
                                       style: ButtonStyle(elevation: MaterialStateProperty.all(controller.getTicket.payMode =='effective'? 5: 0)),
                                       icon: controller.getTicket.payMode != 'effective'?Container():const Icon(Icons.money_rounded),
-                                      onPressed: controller.showDialogMount,
+                                      onPressed: (){
+                                        controller.setPayModeTicket = 'effective'; // se
+                                        controller.dialogSelectedIncomeCash();
+                                      },
                                       label: Text(controller.getValueReceivedTicket != 0.0? Publications.getFormatoPrecio(monto: controller.getValueReceivedTicket): 'Efectivo'),
                                     ),
                                     // button : pago con mercado pago

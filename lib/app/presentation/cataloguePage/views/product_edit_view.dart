@@ -21,7 +21,10 @@ import '../controller/product_edit_controller.dart';
 class ProductEdit extends StatelessWidget {
   ProductEdit({Key? key}) : super(key: key);
 
+  // controllers
   final ControllerProductsEdit controller = Get.find();
+  // var
+  Color colorLoading = Colors.blue;
   final Widget space = const SizedBox(
     height: 16.0,
     width: 16.0,
@@ -29,6 +32,10 @@ class ProductEdit extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    // get : obtenemos los valores
+    colorLoading = Get.theme.primaryColor;
+
     // GetBuilder - refresh all the views
     return GetBuilder<ControllerProductsEdit>(
       id: 'updateAll',
@@ -81,23 +88,23 @@ class ProductEdit extends StatelessWidget {
   PreferredSizeWidget appBar({required BuildContext contextPrincipal}) {
 
     // value
-    Color? colorAccent = Get.theme.textTheme.bodyMedium!.color;
+    Color? colorText = Get.theme.textTheme.bodyMedium!.color;
 
     return AppBar(
       elevation: 0.0,
       backgroundColor: Get.theme.scaffoldBackgroundColor,
       iconTheme:
-          Theme.of(contextPrincipal).iconTheme.copyWith(color: colorAccent),
+          Theme.of(contextPrincipal).iconTheme.copyWith(color: colorText),
       title: controller.getSaveIndicator
-          ? Text(controller.getTextAppBar,style: TextStyle(fontSize: 18.0, color: colorAccent))
-          : Text(controller.itsInTheCatalogue ? 'Editar' :'Agregar a mi cátalogo',style: TextStyle(fontSize: 18.0, color: colorAccent)),
+          ? Text(controller.getTextAppBar,style: TextStyle(fontSize: 18.0, color: colorText))
+          : Text(controller.itsInTheCatalogue ? 'Editar' :'Agregar a mi cátalogo',style: TextStyle(fontSize: 18.0, color: colorText)),
       actions: <Widget>[
         controller.getSaveIndicator
             ? Container()
             : IconButton(icon: Icon(controller.itsInTheCatalogue ? Icons.check : Icons.add),onPressed: controller.save),
       ],
       bottom: controller.getSaveIndicator
-          ? ComponentApp.linearProgressBarApp()
+          ? ComponentApp.linearProgressBarApp(color: colorLoading)
           : null,
     );
   }
@@ -105,11 +112,16 @@ class ProductEdit extends StatelessWidget {
   Widget scaffold({required BuildContext context}) {
     return Scaffold(
       appBar: appBar(contextPrincipal: context),
-      body: ListView(
-        scrollDirection: Axis.vertical,
+      body: Stack(
         children: [
-          widgetsImagen(),
-          widgetFormEditText(),
+          ListView(
+            scrollDirection: Axis.vertical,
+            children: [
+              widgetsImagen(),
+              widgetFormEditText(),
+            ],
+          ),
+          controller.getSaveIndicator?Expanded(child: Container(color: colorLoading.withOpacity(0.3))):Container()
         ],
       ),
     );
@@ -333,29 +345,31 @@ class ProductEdit extends StatelessWidget {
                         ],
                       ),
                     ),
+                    // text : marca de tiempo de la ultima actualización del documento
+                    controller.getNewProduct || !controller.itsInTheCatalogue ? Container() :  Padding(
+                      padding: const EdgeInsets.only(top: 50),
+                      //child: Text('Actualizado ${}'),
+                      child: Opacity(opacity: 0.5,child: Center(child: Text('Actualizado ${Publications.getFechaPublicacion(controller.getProduct.upgrade.toDate(), Timestamp.now().toDate()).toLowerCase()}'))),
+                    ),
                     // button : guardar
                     const SizedBox(height:50),
                     button(
                       disable:controller.getSaveIndicator,
                       onPressed: controller.save,
                       icon: Container(),
-                      colorButton: Colors.blue,padding:const EdgeInsets.all(0),
+                      colorButton: Colors.blue,
+                      padding:const EdgeInsets.all(0),
                       colorAccent: Colors.white,
                       text: controller.itsInTheCatalogue?'Actualizar':'Agregar a mi cátalogo',
                     ),
                   ],
                 ),
-          // text : marca de tiempo de la ultima actualización del documento
-          controller.getNewProduct || !controller.itsInTheCatalogue ? Container() :  Padding(
-            padding: const EdgeInsets.only(top: 30),
-            //child: Text('Actualizado ${}'),
-            child: Opacity(opacity: 0.5,child: Center(child: Text('Actualizado ${Publications.getFechaPublicacion(controller.getProduct.upgrade.toDate(), Timestamp.now().toDate()).toLowerCase()}'))),
-          ),
+
           // button : elminar el documento
           controller.getSaveIndicator? Container(): 
             controller.itsInTheCatalogue? Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.only(bottom: 12, top: 40, left: 0, right: 0),
+                      padding: const EdgeInsets.only(bottom: 12, top: 20, left: 0, right: 0),
                       child: button(padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),colorAccent: Colors.white,colorButton: Colors.red.shade400,icon: const Icon(Icons.delete,color: Colors.white),text: 'Eliminar de mi catálogo', onPressed: controller.showDialogDelete),
                     )
                   : Container(),
@@ -373,82 +387,87 @@ class ProductEdit extends StatelessWidget {
   /* WIDGETS COMPONENT */
 Widget get widgetForModerator{
   // TODO : delete release
-  return Column(
-                  children: [
-                    const SizedBox(height: 20.0),
-                    Row(
-                      children: const [
-                        Expanded(child: Divider(height: 3.0,endIndent: 12.0,indent: 12.0,thickness: 2)),
-                        Text("OPCIONES PARA MODERADOR"),
-                        Expanded(child: Divider(thickness: 2,height: 3.0, endIndent: 12.0,indent: 12.0))
+  return Card(
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 8),
+      child: Column(
+                      children: [
+                        const SizedBox(height: 20.0),
+                        Row(
+                          children: const [
+                            Expanded(child: Divider(height: 3.0,endIndent: 12.0,indent: 12.0,thickness: 2)),
+                            Text("OPCIONES PARA MODERADOR"),
+                            Expanded(child: Divider(thickness: 2,height: 3.0, endIndent: 12.0,indent: 12.0))
+                          ],
+                        ),
+                        SizedBox(height: !controller.getSaveIndicator ? 20.0 : 0.0),
+                        CheckboxListTile(
+                          enabled: controller.getEditModerator ? controller.getSaveIndicator? false: true: false,
+                          checkColor: Colors.white,
+                          activeColor: Colors.blue,
+                          value: controller.getProduct.outstanding,
+                          title: const Text('Detacado'),
+                          onChanged: (value) {
+                            if (!controller.getSaveIndicator) {
+                              controller.setOutstanding(value: value ?? false);
+                            }
+                          },
+                        ),
+                        SizedBox(height: !controller.getSaveIndicator ? 20.0 : 0.0),
+                        CheckboxListTile(
+                          enabled: controller.getEditModerator
+                              ? controller.getSaveIndicator
+                                  ? false
+                                  : true
+                              : false,
+                          checkColor: Colors.white,
+                          activeColor: Colors.blue,
+                          value: controller.getProduct.verified,
+                          title: const Text('Verificado'),
+                          onChanged: (value) {
+                            if (controller.getEditModerator) {
+                              if (!controller.getSaveIndicator) {
+                                controller.setCheckVerified(value: value ?? false);
+                              }
+                            }
+                          },
+                        ),
+                        SizedBox(height: !controller.getSaveIndicator ? 20.0 : 0.0),
+                        controller.getSaveIndicator
+                            ? Container()
+                            : button(
+                                padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
+                                icon:const Icon(Icons.security, color: Colors.white),
+                                onPressed: () {
+                                  if (controller.getEditModerator) {controller.saveProductPublic();}
+                                  controller.setEditModerator = !controller.getEditModerator;
+                                },
+                                colorAccent: Colors.white,
+                                colorButton: controller.getEditModerator? Colors.green: Colors.orange,
+                                text: controller.getEditModerator? controller.getNewProduct?'Crear documento':'Actualizar documento': "Editar documento",
+                              ),
+                        const SizedBox(height: 20.0),
+                        controller.getSaveIndicator || controller.getNewProduct || !controller.getEditModerator
+                            ? Container()
+                            : button(
+                                padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
+                                icon:const Icon(Icons.security, color: Colors.white),
+                                onPressed: controller.showDialogDeleteOPTDeveloper,
+                                colorAccent: Colors.white,
+                                colorButton: Colors.red,
+                                text: "Eliminar documento",
+                              ),
+                        // text : marca de tiempo de la ultima actualización del documento
+                        controller.getNewProduct?Container():Padding(
+                          padding: const EdgeInsets.only(top: 20),
+                          child: Opacity(opacity: 0.5,child: Center(child: Text('Creación ${Publications.getFechaPublicacion(controller.getProduct.documentCreation.toDate(), Timestamp.now().toDate()).toLowerCase()}'))),
+                        ),
+                        const SizedBox(height: 50.0),
                       ],
+                      // fin widget debug
                     ),
-                    SizedBox(height: !controller.getSaveIndicator ? 20.0 : 0.0),
-                    CheckboxListTile(
-                      enabled: controller.getEditModerator ? controller.getSaveIndicator? false: true: false,
-                      checkColor: Colors.white,
-                      activeColor: Colors.blue,
-                      value: controller.getProduct.outstanding,
-                      title: const Text('Detacado'),
-                      onChanged: (value) {
-                        if (!controller.getSaveIndicator) {
-                          controller.setOutstanding(value: value ?? false);
-                        }
-                      },
-                    ),
-                    SizedBox(height: !controller.getSaveIndicator ? 20.0 : 0.0),
-                    CheckboxListTile(
-                      enabled: controller.getEditModerator
-                          ? controller.getSaveIndicator
-                              ? false
-                              : true
-                          : false,
-                      checkColor: Colors.white,
-                      activeColor: Colors.blue,
-                      value: controller.getProduct.verified,
-                      title: const Text('Verificado'),
-                      onChanged: (value) {
-                        if (controller.getEditModerator) {
-                          if (!controller.getSaveIndicator) {
-                            controller.setCheckVerified(value: value ?? false);
-                          }
-                        }
-                      },
-                    ),
-                    SizedBox(height: !controller.getSaveIndicator ? 20.0 : 0.0),
-                    controller.getSaveIndicator
-                        ? Container()
-                        : button(
-                            padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
-                            icon:const Icon(Icons.security, color: Colors.white),
-                            onPressed: () {
-                              if (controller.getEditModerator) {controller.saveProductPublic();}
-                              controller.setEditModerator = !controller.getEditModerator;
-                            },
-                            colorAccent: Colors.white,
-                            colorButton: controller.getEditModerator? Colors.green: Colors.orange,
-                            text: controller.getEditModerator? controller.getNewProduct?'Crear documento':'Actualizar documento': "Editar documento",
-                          ),
-                    const SizedBox(height: 20.0),
-                    controller.getSaveIndicator || controller.getNewProduct || !controller.getEditModerator
-                        ? Container()
-                        : button(
-                            padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
-                            icon:const Icon(Icons.security, color: Colors.white),
-                            onPressed: controller.showDialogDeleteOPTDeveloper,
-                            colorAccent: Colors.white,
-                            colorButton: Colors.red,
-                            text: "Eliminar documento",
-                          ),
-                    // text : marca de tiempo de la ultima actualización del documento
-                    controller.getNewProduct?Container():Padding(
-                      padding: const EdgeInsets.only(top: 20),
-                      child: Opacity(opacity: 0.5,child: Center(child: Text('Creación ${Publications.getFechaPublicacion(controller.getProduct.documentCreation.toDate(), Timestamp.now().toDate()).toLowerCase()}'))),
-                    ),
-                    const SizedBox(height: 50.0),
-                  ],
-                  // fin widget debug
-                );
+    ),
+  );
 }
   Widget textfielButton({required String labelText,String textValue = '',required Function() onTap,bool stateEdit = true}) {
 
@@ -489,10 +508,9 @@ Widget get widgetForModerator{
         child: ElevatedButton.icon(
           onPressed: disable?null:onPressed,
           style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5)),
-              padding: const EdgeInsets.all(12.0),
-              primary: colorButton,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+              padding: const EdgeInsets.all(16.0),
+              backgroundColor: colorButton,
               textStyle: TextStyle(color: colorAccent)),
           icon: icon,
           label: Text(text, style: TextStyle(color: colorAccent)),
@@ -691,7 +709,7 @@ class _SelectCategoryState extends State<SelectCategory> {
 
 // select mark
 class WidgetSelectMark extends StatefulWidget {
-  WidgetSelectMark({Key? key}) : super(key: key);
+  const WidgetSelectMark({Key? key}) : super(key: key);
 
   @override
   _WidgetSelectMarkState createState() => _WidgetSelectMarkState();
