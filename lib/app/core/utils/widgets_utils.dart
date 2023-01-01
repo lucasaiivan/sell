@@ -333,9 +333,7 @@ Widget drawerApp() {
       // values
       String email = homeController.getUserAuth.email ?? 'null';
 
-      return Drawer(
-        child: WidgetDrawer(email: email),
-      );
+      return Drawer(child: WidgetDrawer(email: email));
     },
   );
 }
@@ -371,10 +369,7 @@ class WidgetDrawer extends StatelessWidget {
                 : CachedNetworkImage(
                     imageUrl:homeController.getProfileAccountSelected.image,
                     placeholder: (context, url) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
-                    imageBuilder: (context, image) => Padding(
-                    padding: const EdgeInsets.all(2.0),
-                    child: CircleAvatar(backgroundImage: image),
-                    ),
+                    imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: CircleAvatar(backgroundImage: image)),
                     errorWidget: (context, url, error) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
                   ),
           ),
@@ -387,11 +382,20 @@ class WidgetDrawer extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: TextButton(onPressed:(){
+            Get.back(); // cierra drawer
+            homeController.showModalBottomSheetSubcription();
+          }, child: const Text('Las opciones Premiun estan dispobilbles')),
+        ),
+        /* Esta version de la app las funciones PREMIUM son gratis
+
+         Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: homeController.getProfileAccountSelected.subscribed?LogoPremium(visible: true,):TextButton(onPressed:(){
             Get.back(); // cierra drawer
             homeController.showModalBottomSheetSubcription();
           }, child: const Text('Obten la versión Premium')),
-        ),
+        ), */
         // others items
         Expanded(
           child: ListView(
@@ -467,9 +471,9 @@ class WidgetDrawer extends StatelessWidget {
 
           },
         ),
-        const ListTile(
-          leading: Icon(Icons.color_lens_outlined),
-          title: Text('Cambiar tema'),
+        ListTile(
+          leading: const Icon(Icons.color_lens_outlined),
+          title: Text(Theme.of(context).brightness==Brightness.dark?'Tema claro':'Tema oscuro'),
           onTap: ThemeService.switchTheme,
         ),
         ListTile(
@@ -803,13 +807,13 @@ class LogoPremium extends StatelessWidget {
     // visibility
     bool visibility = visible || (homeController.getProfileAccountSelected.subscribed ==false);
 
-    return visibility ? InkWell(
+    return InkWell(
       onTap: () => homeController.showModalBottomSheetSubcription(id:id ),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 2),
         decoration: BoxDecoration(border: Border.all(color: accentColor)),
         child: Text('PREMIUM',style: TextStyle(fontSize: size,color:accentColor))
       ),
-    ):Container();
+    );
   }
 }

@@ -10,12 +10,14 @@ class Publications {
 
   static String generateUid() => DateFormat('ddMMyyyyHHmmss').format(Timestamp.now().toDate()).toString();
   // obtiene un double y devuelve un monto formateado
-  static String getFormatoPrecio(
-      {String moneda = "\$", required double monto}) {
+  static String getFormatoPrecio( {String moneda = "\$", required double monto}) {
     int decimalDigits = 0;
     int entero = monto.toInt();
-    if ((monto - entero) == 0.0) decimalDigits = 0;
-    else decimalDigits = 2;
+    if ((monto - entero) == 0.0) {
+      decimalDigits = 0;
+    } else {
+      decimalDigits = 2;
+    }
     // Formatter
     var saf = NumberFormat.currency(
         locale: 'es_AR',
@@ -24,6 +26,24 @@ class Publications {
         decimalDigits: decimalDigits);
 
     return saf.format(monto);
+  }
+  static String getFormatAmount({required int value}){
+    String price = value.toString();
+    String priceInText ='';
+    int counter = 0;
+    for(int i = (price.length - 1);  i >= 0; i--){
+        counter++;
+        String str = price[i];
+        if((counter % 3) != 0 && i !=0){
+          priceInText = "$str$priceInText";
+        }else if(i == 0 ){
+          priceInText = "$str$priceInText";
+        
+        }else{
+          priceInText = ".$str$priceInText";
+        }
+    }
+    return priceInText.trim();
   }
 
   // Recibe la fecha y la decha actual para devolver hace cuanto tiempo se publico

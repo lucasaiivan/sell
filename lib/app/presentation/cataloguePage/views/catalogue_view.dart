@@ -75,7 +75,7 @@ class CataloguePage extends StatelessWidget {
                   const Text("Productos"),
                   Padding(
                     padding: const EdgeInsets.only(left: 5                                                                                                                                                                                                                ),
-                    child: CircleAvatar(radius: 14,backgroundColor: Colors.blue, child: Text(controller.getCataloProducts.length.toString(),style:const TextStyle(color: Colors.white,fontSize:12),)),
+                    child: CircleAvatar(radius: 14,backgroundColor: Colors.blue.withOpacity(0.3), child: Text(controller.getCataloProducts.length.toString(),style:const TextStyle(color: Colors.white,fontSize:12),)),
                   ),
                 ],)),
                 const Tab(text: "Cátegorias"),
