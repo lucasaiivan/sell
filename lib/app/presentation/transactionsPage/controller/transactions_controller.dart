@@ -82,10 +82,47 @@ class TransactionsController extends GetxController {
         readTransactionsThisYear();
         setFilterText = 'Este año';
         break;
+      case 'el año pasado':
+        readLastYearTransactions();
+        setFilterText = 'El año pasado';
+        break;
+        // 
     }
   }
 
   // FIREBASE
+
+  void readLastYearTransactions() {
+    //obtenemos los documentos creados el año pasado
+
+    // a la marca de tiempo actual le descontamos dias
+    DateTime getTime = Timestamp.now().toDate();
+    //Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(DateTime(getTime.year, 1, 1, 0).millisecondsSinceEpoch);
+    
+    //  a la marca de tiempo actual le descontamos dias del mes
+    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(
+        DateTime(getTime.year-1, 0, 0, 0).millisecondsSinceEpoch);
+    // marca de tiempo actual
+    Timestamp timeEnd = Timestamp.fromMillisecondsSinceEpoch(
+        DateTime(getTime.year, 0, 0, 0).millisecondsSinceEpoch);
+
+    // obtenemos los obj(productos) del catalogo de la cuenta del negocio
+    if (homeController.getProfileAccountSelected.id != '') {
+      Database.readTransactionsFilterTimeStream(
+        idAccount: homeController.getProfileAccountSelected.id,
+        timeStart: timeStart,
+        timeEnd: timeEnd,
+      ).listen((value) {
+        List<TicketModel> list = [];
+        //  get
+        for (var element in value.docs) {
+          list.add(TicketModel.fromMap(element.data()));
+        }
+        //  set
+        setTransactionsList = list;
+      });
+    }
+  }
   void readTransactionsThisYear() {
     //obtenemos los documentos creados este año
 
@@ -333,7 +370,6 @@ class TransactionsController extends GetxController {
     //  devuelve el producto que se obtubo más ganancias
 
     // var
-    ProductCatalogue product = ProductCatalogue(creation: Timestamp.now(), upgrade: Timestamp.now(), documentCreation: Timestamp.now(), documentUpgrade: Timestamp.now());
     Map<String,double> productsList  = {}; // en esta lista almacenamos las ganancias de los productos
 
     // recorremos la lista de tickets y obtenemos la ganancias de los productos que se vendieron
@@ -344,7 +380,7 @@ class TransactionsController extends GetxController {
 
         // obtenemos la ganancia 
         double revenueValue =product.salePrice - product.purchasePrice;
-       
+
         // comprobamos si existe el producto en la nueva lista 
         if( productsList.containsKey(product.id) ){
           productsList[product.id] = productsList[product.id]! + revenueValue;
@@ -391,7 +427,7 @@ class TransactionsController extends GetxController {
    // FUCTIONS
 
   int readTotalProducts(){
-    // leemos la cantidad total de procutos
+    // leemos la cantidad total de prodictos
 
     int value  = 0;
     // recorremos la lista de productos que se vendieron
@@ -413,33 +449,47 @@ class TransactionsController extends GetxController {
     // recorremos la lista de productos que se vendieron
     for (TicketModel ticket in getTransactionsList) {
       currencySymbol= ticket.currencySymbol;
-      for (Map product in ticket.listPoduct) {
-        totalSaleValue+= product['salePrice']??0.0 * product['quantity']??0.0;
-        fullValueAtCost+= product['purchasePrice']??0.0 * product['quantity']??0.0;
+      for (Map item in ticket.listPoduct) {
+
+        // var
+        ProductCatalogue product = ProductCatalogue.fromMap(item);
+
+        totalSaleValue+= product.salePrice * product.quantity;
+        fullValueAtCost+= product.purchasePrice * product.quantity;
       }
     }
     value = totalSaleValue - fullValueAtCost; // obtenemos el total de las ganancias
 
-    return value==0.0?  '':Publications.getFormatoPrecio(monto:value,moneda: currencySymbol);
+    return value==0.0?  '':'+${Publications.getFormatoPrecio(monto:value,moneda: currencySymbol)}';
   }
   String readEarnings({required TicketModel ticket }){
     // leemos ganancias
 
+    // var
     double value  = 0;
     double totalSaleValue = 0.0;
     double fullValueAtCost  = 0.0;
     String currencySymbol = ticket.currencySymbol;
 
     // recorremos la lista de productos que se vendieron
-    for (Map product in ticket.listPoduct) {
-        totalSaleValue+= product['salePrice']??0.0 * product['quantity']??0.0;
-        fullValueAtCost+= product['purchasePrice']??0.0 * product['quantity']??0.0;
+    for (Map item in ticket.listPoduct) {
+
+      // var
+      ProductCatalogue product = ProductCatalogue.fromMap(item);
+
+      // get : precio de venta
+      totalSaleValue+= product.salePrice  * product.quantity;
+      //  get : precio de compra
+      fullValueAtCost+= product.purchasePrice * product.quantity;
     }
+    // obtenemos el resultado final
     value = totalSaleValue - fullValueAtCost; // obtenemos el total de las ganancias
 
-    return value==0.0?  '':Publications.getFormatoPrecio(monto:value,moneda: currencySymbol);
+    return value  ==  0.0 ?  '':Publications.getFormatoPrecio(monto:value,moneda: currencySymbol);
   }
   String getInfoPriceTotal() {
+
+    //  var
     double total = 0.0;
 
     for (TicketModel ticket in getTransactionsList) {
