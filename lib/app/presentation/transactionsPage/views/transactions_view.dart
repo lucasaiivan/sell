@@ -220,9 +220,11 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
     String textFilter = '';
     String priceTotal = '';
     String revenue  = '';
+  
 
   @override
   Widget build(BuildContext context) {
+
 
     // get values
     isDark = Theme.of(context).brightness == Brightness.dark;
@@ -273,13 +275,26 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
                             Row(
                               children: [
                                 // text : monto total de las ventas del filtro
-                                Text(priceTotal,textAlign: TextAlign.start,style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w500)),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Opacity(opacity: 0.9,child:  Text(transactionsController.getFilterText,style:const TextStyle(fontSize: 10))),
+                                    Text(priceTotal,textAlign: TextAlign.start,style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w500)),
+                                    const Opacity(opacity: 0.7,child:  Text('Total',style:TextStyle(fontSize: 10)))
+                                  ],
+                                ),
                                 const Spacer(),
-                                Text(revenue,style: const TextStyle(color: Colors.green,fontWeight: FontWeight.w900,fontSize: 16)),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(revenue,style: const TextStyle(color: Colors.green,fontWeight: FontWeight.w900,fontSize: 24)),
+                                    Opacity(opacity: 0.7,child:  Text(revenue==''?'':'Cantidad ganada',style:const TextStyle(fontSize: 10,color: Colors.green)))
+                                  ],
+                                ),
                               ],
                             ),
                           ],
-                        )),
+                        ))
                     
                   ],
                 ),
@@ -423,7 +438,7 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
                     alignment: Alignment.bottomLeft,
                     children: [
                       CircleAvatar(radius: 15 ,backgroundImage: image),
-                      CircleAvatar(radius: 8 ,backgroundColor: Colors.white,child: Text(transactionsController.getBestSellingProductsByAmount[index].quantity.toString(),style:const TextStyle(fontSize: 8,color:Colors.blue))),
+                      CircleAvatar(radius: 8 ,backgroundColor: Colors.white,child: Text(transactionsController.getBestSellingProductList[index].quantity.toString(),style:const TextStyle(fontSize: 8,color:Colors.blue))),
                     ],
                   )),
                   errorWidget: (context, url, error) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
@@ -435,7 +450,7 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
                 ),
                 const Spacer(),
                 // text : ganancias del producto
-                Text('+${Publications.getFormatoPrecio(monto: transactionsController.getBestSellingProductList[index].revenue)}',style: TextStyle(fontSize: 12,color:Colors.green.shade400)),
+                Text('+${Publications.getFormatoPrecio(monto: transactionsController.getBestSellingProductList[index].revenue )}',style: TextStyle(fontSize: 12,color:Colors.green.shade400)),
               ],
             ),
           );
@@ -483,9 +498,67 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
                                   const SizedBox(height: 12),
                                   Row(
                                     children: [
-                                      // text : total de los productros vendidos
-                                      Text(Publications.getFormatAmount(value:transactionsController.readTotalProducts()),style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w400)),
+                                      // widget : total de los productros vendidos
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(Publications.getFormatAmount(value:transactionsController.readTotalProducts()),style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w400)),
+                                          const Opacity(opacity: 0.7,child:  Text('Total',style:TextStyle(fontSize: 10)))
+                                        ],
+                                      ),
                                       const Spacer(),
+                                      Column(
+                                        children: [
+                                          Row(
+                                            children: [
+                                              CachedNetworkImage(
+                                                imageUrl:transactionsController.getBestSellingProductList[0].image,
+                                                placeholder: (context, url) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                                                imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Stack(
+                                                  alignment: Alignment.bottomLeft,
+                                                  children: [
+                                                    CircleAvatar(radius: 15 ,backgroundImage: image),
+                                                    CircleAvatar(radius: 8 ,backgroundColor: Colors.white,child: Text(transactionsController.getBestSellingProductsByAmount[0].quantity.toString(),style:const TextStyle(fontSize: 8,color:Colors.blue))),
+                                                  ],
+                                                )),
+                                                errorWidget: (context, url, error) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                                              ),
+                                              //  text  : marca del producto
+                                              Padding(
+                                                padding: const EdgeInsets.only(left: 5),
+                                                child: Text(transactionsController.getBestSellingProductList[0].nameMark,overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:12)),
+                                              ),
+                                            ],
+                                          ),
+                                          const Opacity(opacity: 0.8,child: Text('mayor ganancias',style:TextStyle(fontSize: 10))),
+                                        ],
+                                      ),
+                                      // widget : producto más vendido
+                                      /*Row(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        CachedNetworkImage(
+                                          imageUrl:'www',//transactionsController.getBestSellingProductList[index].image,
+                                          placeholder: (context, url) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                                          imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Stack(
+                                            alignment: Alignment.bottomLeft,
+                                            children: [
+                                              CircleAvatar(radius: 15 ,backgroundImage: image),
+                                              CircleAvatar(radius: 8 ,backgroundColor: Colors.white,child: Text(transactionsController.getBestSellingProductsByAmount[0].quantity.toString(),style:const TextStyle(fontSize: 8,color:Colors.blue))),
+                                            ],
+                                          )),
+                                          errorWidget: (context, url, error) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                                        ),
+                                        //  text  : marca del producto
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 5),
+                                          child: Text(transactionsController.getBestSellingProductList[0].nameMark,overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:12)),
+                                        ),
+                                        const Spacer(),
+                                        // text : ganancias del producto
+                                        Text('+${Publications.getFormatoPrecio(monto: transactionsController.getBestSellingProductList[0].revenue)}',style: TextStyle(fontSize: 12,color:Colors.green.shade400)),
+                                      ],
+                                    )*/
                                     ],
                                   ),
                                 ],

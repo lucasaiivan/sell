@@ -187,14 +187,20 @@ class TransactionsController extends GetxController {
     // recorremos todos los tickers que se filtraron
     for (TicketModel ticket in list) {
       // recorremos los productos de cada tocket
-      for (Map product in ticket.listPoduct) {
+      for ( Map item in ticket.listPoduct ) {
 
-        if( ! productsList.containsKey(product['id']) ){
+        // get 
+        ProductCatalogue product = ProductCatalogue.fromMap(item);
+
+        if( ! productsList.containsKey(product.id) ){
           // si ya existe el producto
-          productsList[product['id']] = {'quantity':productsList[product['id']]??0  + product['quantity'],'salePrice':product['salePrice']}; // sumamos los productos que se repiten
+  
+          //productsList.update(product.id, (value) => value.update('quantity', (value) => value + product.quantity));
+          //productsList.update(product.id, (value) => value.update('salePrice', (value) => value + product.salePrice));
+          productsList[product.id] = { 'quantity': productsList[product.id]??0.0 + product.quantity , 'salePrice':product.salePrice}; // sumamos los productos que se repiten
         }else{
           // si no existe el producto, lo creamos
-          productsList[product['id']] ={'quantity':1,'salePrice':product['salePrice']};
+          productsList[product.id] ={'quantity':1,'salePrice':product.salePrice};
         }
       }
     }
@@ -204,9 +210,9 @@ class TransactionsController extends GetxController {
     // y por ultimo obtenemos los 3 treprimeros productos
     Map<String,int> featuredProducts = {}; // limit 3 items
     int count = 0;
-    for( final product in sortMap.entries){
+    for( final item in sortMap.entries){
       count++;
-      featuredProducts[product.key] = product.value['quantity']; // add
+      featuredProducts[item.key] = item.value['quantity'].toInt(); // add
       if( count == 5){ break;}
     }
     // obtenemos los productos más vendidos por cantidad
@@ -225,12 +231,13 @@ class TransactionsController extends GetxController {
     // obtenemos los productos más vendidos por el precio
     List<Map> listNew=[];
     productsList.forEach((key, value) { 
-      listNew.add({'id':key,'quantity':value['quantity']??0,'priceTotal':(value['salePrice']??0.0*value['quantity']??0)});
+      listNew.add({'id':key,'quantity':value['quantity'],'priceTotal':(value['salePrice']*value['quantity']??0)});
     });
     listNew = listNew..sort((a, b) => b['priceTotal'].compareTo(a['priceTotal']) ); // ordenamiento
     List<ProductCatalogue> listProductBySales = [];
     int count2 = 0;
     for (var data in listNew) {
+      
       for ( ProductCatalogue element in homeController.getCataloProducts) {
         if( data['id'] == element.id ){ 
             element.quantity =  data['quantity']; 
@@ -382,8 +389,8 @@ class TransactionsController extends GetxController {
         double revenueValue =product.salePrice - product.purchasePrice;
 
         // comprobamos si existe el producto en la nueva lista 
-        if( productsList.containsKey(product.id) ){
-          productsList[product.id] = productsList[product.id]! + revenueValue;
+        if( productsList.containsKey(product.id) ){ 
+          productsList.update(product.id, (value) => value + revenueValue);
         }else{
           // es un producto nuevo //
           // asignamos el nuevo valor que es la ganancia del producto
@@ -427,7 +434,7 @@ class TransactionsController extends GetxController {
    // FUCTIONS
 
   int readTotalProducts(){
-    // leemos la cantidad total de prodictos
+    // leemos la cantidad total de productos
 
     int value  = 0;
     // recorremos la lista de productos que se vendieron
@@ -458,7 +465,7 @@ class TransactionsController extends GetxController {
         fullValueAtCost+= product.purchasePrice * product.quantity;
       }
     }
-    value = totalSaleValue - fullValueAtCost; // obtenemos el total de las ganancias
+    value = totalSaleValue-fullValueAtCost; // obtenemos el total de las ganancias
 
     return value==0.0?  '':'+${Publications.getFormatoPrecio(monto:value,moneda: currencySymbol)}';
   }
