@@ -207,14 +207,14 @@ class ProductEdit extends StatelessWidget {
               onPressed: () async {
                 String clave = controller.controllerTextEditDescripcion.text;
                 Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
-                if (await canLaunchUrl(uri)) { await launchUrl(uri,mode: LaunchMode.externalApplication);} else {throw 'Could not launch $uri';}
+                await launchUrl(uri,mode: LaunchMode.externalApplication);
               },
               child: const Text('Buscar descripción en Google')),
           TextButton(
               onPressed: () async {
                 String clave = controller.getProduct.code;
                 Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
-                if (await canLaunchUrl(uri)) { await launchUrl(uri,mode: LaunchMode.externalApplication);} else {throw 'Could not launch $uri';}
+                await launchUrl(uri,mode: LaunchMode.externalApplication);
               },
               child: const Text('Buscar en código Google')), 
           space,
@@ -391,8 +391,8 @@ Widget get widgetForModerator{
     child: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 8),
       child: Column(
+        mainAxisSize: MainAxisSize.max,
                       children: [
-                        const SizedBox(height: 20.0),
                         Row(
                           children: const [
                             Expanded(child: Divider(height: 3.0,endIndent: 12.0,indent: 12.0,thickness: 2)),
@@ -400,6 +400,7 @@ Widget get widgetForModerator{
                             Expanded(child: Divider(thickness: 2,height: 3.0, endIndent: 12.0,indent: 12.0))
                           ],
                         ),
+                        const SizedBox(height: 20.0),
                         SizedBox(height: !controller.getSaveIndicator ? 20.0 : 0.0),
                         CheckboxListTile(
                           enabled: controller.getEditModerator ? controller.getSaveIndicator? false: true: false,
