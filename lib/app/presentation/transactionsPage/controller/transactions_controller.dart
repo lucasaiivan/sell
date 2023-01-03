@@ -182,67 +182,68 @@ class TransactionsController extends GetxController {
     // obtenemos los primeros 3 productos más vendidos de los tickers que se obtiene por parametro 'list'
 
     // var
-    Map<String,Map> productsList = {};
+    Map<String,ProductCatalogue> productsList = {}; // en esta lista almacenamos las ganancias de los productos
 
     // recorremos todos los tickers que se filtraron
     for (TicketModel ticket in list) {
-      // recorremos los productos de cada tocket
+      // recorremos los productos de cada ticket
       for ( Map item in ticket.listPoduct ) {
 
         // get 
-        ProductCatalogue product = ProductCatalogue.fromMap(item);
+        final ProductCatalogue productNew = ProductCatalogue.fromMap(item); 
+         
+        productsList.forEach((key, value) {
+          if(productNew.id ==  key){
+              productNew.quantity = productNew.quantity + value.quantity ;
+              productNew.revenue = value.revenue + ((productNew.salePrice - productNew.purchasePrice ) * productNew.quantity) ;
+          }
+        });
 
-        if( ! productsList.containsKey(product.id) ){
-          // si ya existe el producto
-  
-          //productsList.update(product.id, (value) => value.update('quantity', (value) => value + product.quantity));
-          //productsList.update(product.id, (value) => value.update('salePrice', (value) => value + product.salePrice));
-          productsList[product.id] = { 'quantity': productsList[product.id]??0.0 + product.quantity , 'salePrice':product.salePrice}; // sumamos los productos que se repiten
-        }else{
-          // si no existe el producto, lo creamos
-          productsList[product.id] ={'quantity':1,'salePrice':product.salePrice};
-        }
+        productsList[productNew.id] = productNew;
       }
     }
-
-    // ordenar los productos en forma descendente
-    Map<String,Map> sortMap = Map.fromEntries( (productsList.entries.toList()..sort((a, b)=> b.value['quantity'].compareTo(a.value['quantity']))) );
+    //
+    // get  : los productos más vendidos en forma descendente los que tiene más cantidad
+    //
+    Map<String,ProductCatalogue> sortMap = Map.fromEntries( (productsList.entries.toList()..sort((a, b)=> b.value.quantity.compareTo(a.value.quantity))) );
     // y por ultimo obtenemos los 3 treprimeros productos
-    Map<String,int> featuredProducts = {}; // limit 3 items
+    Map<String,ProductCatalogue> featuredProducts = {}; // limit 3 items
     int count = 0;
     for( final item in sortMap.entries){
       count++;
-      featuredProducts[item.key] = item.value['quantity'].toInt(); // add
+      featuredProducts[item.key] = item.value; // add
       if( count == 5){ break;}
     }
-    // obtenemos los productos más vendidos por cantidad
     List<ProductCatalogue> listProducts = [];
-    for( var elment in featuredProducts.entries){
-      for ( ProductCatalogue element in homeController.getCataloProducts) {
-        if( elment.key == element.id ){ 
-            element.quantity =  elment.value ; 
-            listProducts.add(element); break; 
-          }
-      }
+    for (var element in featuredProducts.entries) {
+      listProducts.add(element.value);
     }
     // actualizamos lista para mostrar al usuario
     setMostSelledProducts = listProducts;
 
-    // obtenemos los productos más vendidos por el precio
-    List<Map> listNew=[];
+    //
+    // get  : obtenemos los productos más vendidos por el precio de venta más alto
+    //
+    List<ProductCatalogue> listNew=[];
     productsList.forEach((key, value) { 
-      listNew.add({'id':key,'quantity':value['quantity'],'priceTotal':(value['salePrice']*value['quantity']??0)});
+      value.id = key;
+      value.quantity = value.quantity;
+      value.priceTotal = value.salePrice*value.quantity; 
+
+      listNew.add(value);
     });
-    listNew = listNew..sort((a, b) => b['priceTotal'].compareTo(a['priceTotal']) ); // ordenamiento
+    listNew = listNew..sort((a, b) => b.priceTotal.compareTo(a.priceTotal) ); // ordenamiento
     List<ProductCatalogue> listProductBySales = [];
     int count2 = 0;
     for (var data in listNew) {
       
-      for ( ProductCatalogue element in homeController.getCataloProducts) {
-        if( data['id'] == element.id ){ 
-            element.quantity =  data['quantity']; 
-            element.salePrice =data['priceTotal']; 
-            listProductBySales.add(element); 
+      for ( final ProductCatalogue element in homeController.getCataloProducts) {
+
+        final ProductCatalogue item = element;
+        if( data.id== item.id ){ 
+            item.quantity =  data.quantity; 
+            item.salePrice =data.priceTotal; 
+            listProductBySales.add(item); 
             count2++;
             break; 
           }
@@ -374,61 +375,57 @@ class TransactionsController extends GetxController {
   }
 
   void readProductWithMoreEarnings(){
+
+    //
     //  devuelve el producto que se obtubo más ganancias
+    //
 
     // var
-    Map<String,double> productsList  = {}; // en esta lista almacenamos las ganancias de los productos
+    Map<String,ProductCatalogue> productsList = {}; // en esta lista almacenamos las ganancias de los productos
 
-    // recorremos la lista de tickets y obtenemos la ganancias de los productos que se vendieron
+    // recorremos todos los tickers que se filtraron
     for (TicketModel ticket in getTransactionsList) {
-      for (Map itenm in ticket.listPoduct) {
+      // recorremos los productos de cada ticket
+      for ( Map item in ticket.listPoduct ) {
 
-        ProductCatalogue product = ProductCatalogue.fromMap(itenm);
+        // get 
+        final ProductCatalogue productNew = ProductCatalogue.fromMap(item); 
+        bool update=false;
+         
+        productsList.forEach((key, value) {
+          if(productNew.id ==  key){
+            update= true;
+              
+              productNew.revenue = value.revenue + ((productNew.salePrice - productNew.purchasePrice ) * productNew.quantity) ;
+              productNew.quantity = productNew.quantity + value.quantity ;
+          }
+        });
 
-        // obtenemos la ganancia 
-        double revenueValue =product.salePrice - product.purchasePrice;
-
-        // comprobamos si existe el producto en la nueva lista 
-        if( productsList.containsKey(product.id) ){ 
-          productsList.update(product.id, (value) => value + revenueValue);
-        }else{
-          // es un producto nuevo //
-          // asignamos el nuevo valor que es la ganancia del producto
-          productsList[product.id] = revenueValue ;
+        if(update==false){
+          productNew.revenue +=  ((productNew.salePrice - productNew.purchasePrice ) * productNew.quantity) ;
         }
-      } 
-    } 
+
+        productsList[productNew.id] = productNew;
+      }
+    }
     // ordenamiento
-    //productsList = productsList.entries.toList()..sort((a, b) => b['priceTotal'].compareTo(a['priceTotal']) );
+    //--productsList = productsList.entries.toList()..sort((a, b) => b['priceTotal'].compareTo(a['priceTotal']) );
     // ordenar los productos en forma descendente
-    var sortedByKeyMap = Map.fromEntries( productsList.entries.toList()..sort((e1, e2) => e2.value.compareTo(e1.value)));
+    var sortedByKeyMap = Map.fromEntries( productsList.entries.toList()..sort((e1, e2) => e2.value.revenue.compareTo(e1.value.revenue)));
 
     // nuevos valores
     // obtenemos la ganancia
     int count = 0;
-    List newValuesList = [];
+    List<ProductCatalogue> newValuesList = [];
     if( sortedByKeyMap.isNotEmpty){
       for (var element in sortedByKeyMap.entries) { 
-        newValuesList.add(element);
+        newValuesList.add(element.value);
         count++;
         if( count==3) break;
       }
-    }
-    // obtenemos los datos del producto
-    List<ProductCatalogue> newList = [];
-    for ( var data in newValuesList) {
-      for (ProductCatalogue element in homeController.getCataloProducts) { 
-        if(element.id == data.key ){
-          // asignamos las ganancias acumuladas de este producto 
-          element.revenue = data.value;
-          // add
-          newList.add(element);
-          break;
-        }
-      }
     } 
     
-    setBestSellingProductList =  newList;
+    setBestSellingProductList =  newValuesList;
   }
 
    // FUCTIONS
@@ -459,7 +456,7 @@ class TransactionsController extends GetxController {
       for (Map item in ticket.listPoduct) {
 
         // var
-        ProductCatalogue product = ProductCatalogue.fromMap(item);
+        final ProductCatalogue product = ProductCatalogue.fromMap(item);
 
         totalSaleValue+= product.salePrice * product.quantity;
         fullValueAtCost+= product.purchasePrice * product.quantity;

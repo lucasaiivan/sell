@@ -122,6 +122,7 @@ class ProductCatalogue {
   bool select = false;
   int quantity = 0;
   double revenue = 0.0;
+  double priceTotal = 0;
 
   ProductCatalogue({
     // Valores del producto
@@ -139,6 +140,7 @@ class ProductCatalogue {
     this.stock = false,
     this.quantityStock = 0,
     this.alertStock = 5,
+    this.revenue =0.0,
     required this.creation,
     required this.upgrade,
     required this.documentCreation,
@@ -202,6 +204,7 @@ class ProductCatalogue {
       select: false,
       stock: data['stock'] ?? false,
       alertStock: data['alertStock'] ?? 5,
+      revenue: data['revenue'] ?? 0.0,
     );
   }
 
