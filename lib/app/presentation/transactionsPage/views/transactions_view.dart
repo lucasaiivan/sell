@@ -336,7 +336,7 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
                 firstChild: const Text('', style: TextStyle(fontSize: 0)),
                 secondChild: Card(
                   elevation: 0,
-                  color: isDark?Colors.blue.shade400.withOpacity(0.5): Colors.blueGrey.withOpacity(0.1),
+                  color: isDark?Colors.blue.shade400.withOpacity(0.2): Colors.blueGrey.withOpacity(0.2),
                   margin: const EdgeInsets.all(0),
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),
@@ -414,51 +414,69 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
     revenue  = transactionsController.readTotalEarnings();
 
     // values
-    Widget wProducts = SizedBox(
-      height: 50,width: double.infinity,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: transactionsController.getMostSelledProducts.length,
-        shrinkWrap: true,
-        itemBuilder: (context, index) {
-          return CachedNetworkImage(
-            imageUrl:transactionsController.getMostSelledProducts[index].image,
-            placeholder: (context, url) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
-            imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Stack(
-              alignment: Alignment.centerLeft,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 5),
-                  child: CircleAvatar(radius: index==0?30:20 ,backgroundImage: image),
-                ),
-                CircleAvatar(radius: index==0?12:10 ,backgroundColor: Colors.white,child: Text(transactionsController.getMostSelledProducts[index].quantity.toString(),style:const TextStyle(fontSize: 10,color:Colors.blue))),
-              ],
-            )),
-            errorWidget: (context, url, error) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
-          );
-      },),
+    Widget wProducts = transactionsController.getMostSelledProducts.isEmpty?Container(): Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: Column(
+        children: [
+          // text : fecha del filtro
+          const Opacity(opacity:0.5,child: Text('Más vendidos',style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900))),
+          SizedBox(
+            height: 50,width: double.infinity,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: transactionsController.getMostSelledProducts.length,
+              shrinkWrap: true,
+              itemBuilder: (context, index) {
+                return CachedNetworkImage(
+                  imageUrl:transactionsController.getMostSelledProducts[index].image,
+                  placeholder: (context, url) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
+                  imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Stack(
+                    alignment: Alignment.centerLeft,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 5),
+                        child: CircleAvatar(radius: index==0?30:20 ,backgroundImage: image),
+                      ),
+                      CircleAvatar(radius: index==0?12:10 ,backgroundColor: Colors.white,child: Text(transactionsController.getMostSelledProducts[index].quantity.toString(),style:const TextStyle(fontSize: 10,color:Colors.blue))),
+                    ],
+                  )),
+                  errorWidget: (context, url, error) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
+                );
+            },),
+          ),
+        ],
+      ),
     );
     // widget : los productos de mayor monto
-    Widget wProductsSales = SizedBox(
-      height: 30,width: 100,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: transactionsController.getBestSellingProductsByAmount.length,
-        shrinkWrap: true,
-        itemBuilder: (context, index) {
-          return CachedNetworkImage(
-            imageUrl:transactionsController.getBestSellingProductsByAmount[index].image,
-            placeholder: (context, url) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
-            imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Stack(
-              alignment: Alignment.bottomLeft,
-              children: [
-                CircleAvatar(radius: 15 ,backgroundImage: image),
-                CircleAvatar(radius: 8 ,backgroundColor: Colors.white,child: Text(transactionsController.getBestSellingProductsByAmount[index].quantity.toString(),style:const TextStyle(fontSize: 8,color:Colors.blue))),
-              ],
-            )),
-            errorWidget: (context, url, error) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
-          );
-      },),
+    Widget wProductsSales = transactionsController.getBestSellingProductsByAmount.isEmpty?Container(): Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          const Opacity(opacity:0.4,child: Text('De mayor monto',overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900))),
+          const SizedBox(height:5),
+          SizedBox(
+            height: 30,width: 100,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: transactionsController.getBestSellingProductsByAmount.length,
+              shrinkWrap: true,
+              itemBuilder: (context, index) {
+                return CachedNetworkImage(
+                  imageUrl:transactionsController.getBestSellingProductsByAmount[index].image,
+                  placeholder: (context, url) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
+                  imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Stack(
+                    alignment: Alignment.bottomLeft,
+                    children: [
+                      CircleAvatar(radius: 15 ,backgroundImage: image),
+                      CircleAvatar(radius: 8 ,backgroundColor: Colors.white,child: Text(transactionsController.getBestSellingProductsByAmount[index].quantity.toString(),style:const TextStyle(fontSize: 8,color:Colors.blue))),
+                    ],
+                  )),
+                  errorWidget: (context, url, error) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
+                );
+            },),
+          ),
+        ],
+      ),
     );
     
 
@@ -512,7 +530,7 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
                                         ],
                                       ),
                                       const Spacer(),
-                                      Column(
+                                      transactionsController.getBestSellingProductList.isEmpty?Container():transactionsController.getBestSellingProductList[0].image==''?Container():Column(
                                         children: [
                                           Row(
                                             children: [
@@ -552,25 +570,17 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
                       firstChild: const Text('', style: TextStyle(fontSize: 0)),
                       secondChild: Card(
                         elevation: 0,
-                        color: isDark?Colors.blue.shade400.withOpacity(0.5): Colors.blueGrey.withOpacity(0.1),
+                        color: isDark?Colors.blue.shade400.withOpacity(0.2): Colors.blueGrey.withOpacity(0.2),
                         margin: const EdgeInsets.all(0),
                         child: Padding(
-                          padding: const EdgeInsets.all(12.0),
+                          padding: const EdgeInsets.all(0.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Opacity(opacity:0.4,child: Text('De mayor monto',overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900))),
-                                  const SizedBox(height:5),
-                                  wProductsSales,
-                                ],
-                              ), 
-                                // text : fecha del filtro
-                                const Opacity(opacity:0.5,child: Text('Más vendidos',style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900))),
-                                // widget : productos más vendidos
-                                wProducts,
+                              //  widget  : productos más vendido por el valor
+                              wProductsSales, 
+                              // widget : más vendidos
+                              wProducts,
                             ],
                           ),
                         ),

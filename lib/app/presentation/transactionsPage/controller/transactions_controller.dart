@@ -194,6 +194,7 @@ class TransactionsController extends GetxController {
          
         productsList.forEach((key, value) {
           if(productNew.id ==  key){
+              
               productNew.quantity = productNew.quantity + value.quantity ;
               productNew.revenue = value.revenue + ((productNew.salePrice - productNew.purchasePrice ) * productNew.quantity) ;
           }
@@ -210,6 +211,7 @@ class TransactionsController extends GetxController {
     Map<String,ProductCatalogue> featuredProducts = {}; // limit 3 items
     int count = 0;
     for( final item in sortMap.entries){
+      
       count++;
       featuredProducts[item.key] = item.value; // add
       if( count == 5){ break;}
