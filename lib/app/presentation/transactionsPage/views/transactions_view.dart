@@ -233,34 +233,42 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
     revenue  = transactionsController.readTotalEarnings();
 
     // widget : productos de mayor ganancia
-    Widget wProductsRevenue = SizedBox(
-      height:transactionsController.getBestSellingProductList.isEmpty?0:220,width: double.infinity,
-      child: ListView.builder(
-        scrollDirection: Axis.vertical,
-        itemCount: transactionsController.getBestSellingProductList.length,
-        shrinkWrap: true,
-        itemBuilder: (context, index) {
-          return ListTile(
-            leading: CachedNetworkImage(
-                  imageUrl:transactionsController.getBestSellingProductList[index].image,
-                  placeholder: (context, url) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
-                  imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Stack(
-                    alignment: Alignment.centerLeft,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 5),
-                        child: CircleAvatar(backgroundImage: image),
-                      ),
-                      CircleAvatar(radius: 8 ,backgroundColor: Colors.white,child: Text(transactionsController.getBestSellingProductList[index].quantity.toString(),style:const TextStyle(fontSize: 8,color:Colors.blue))),
-                    ],
-                  )),
-                  errorWidget: (context, url, error) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
-                ),
-            title: Text(transactionsController.getBestSellingProductList[index].nameMark,overflow:TextOverflow.ellipsis,style:const TextStyle()),
-            subtitle: Text(transactionsController.getBestSellingProductList[index].description,overflow:TextOverflow.ellipsis,style:const TextStyle( )),
-            trailing:Text('+${Publications.getFormatoPrecio(monto: transactionsController.getBestSellingProductList[index].revenue )}',style: TextStyle(fontSize: 12,color:Colors.green.shade400)),
-          ); 
-      },),
+    Widget wProductsRevenue = transactionsController.getBestSellingProductList.isEmpty?Container():Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Divider(),
+        const Text('De mayor ganancia',overflow: TextOverflow.ellipsis,style: TextStyle()),
+        const SizedBox(height:12),
+        SizedBox( //220
+          height:transactionsController.getBestSellingProductList.isEmpty?0:transactionsController.getBestSellingProductList.length==1?80:transactionsController.getBestSellingProductList.length==2?145:220,width: double.infinity,
+          child: ListView.builder(
+            scrollDirection: Axis.vertical,
+            itemCount: transactionsController.getBestSellingProductList.length,
+            shrinkWrap: true,
+            itemBuilder: (context, index) {
+              return ListTile(
+                leading: CachedNetworkImage(
+                      imageUrl:transactionsController.getBestSellingProductList[index].image,
+                      placeholder: (context, url) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                      imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Stack(
+                        alignment: Alignment.centerLeft,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(left: 5),
+                            child: CircleAvatar(backgroundImage: image),
+                          ),
+                          CircleAvatar(radius: 8 ,backgroundColor: Colors.white,child: Text(transactionsController.getBestSellingProductList[index].quantity.toString(),style:const TextStyle(fontSize: 8,color:Colors.blue))),
+                        ],
+                      )),
+                      errorWidget: (context, url, error) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                    ),
+                title: Text(transactionsController.getBestSellingProductList[index].nameMark,overflow:TextOverflow.ellipsis,style:const TextStyle()),
+                subtitle: Text(transactionsController.getBestSellingProductList[index].description,overflow:TextOverflow.ellipsis,style:const TextStyle( )),
+                trailing:Text('+${Publications.getFormatoPrecio(monto: transactionsController.getBestSellingProductList[index].revenue )}',style: TextStyle(fontSize: 12,color:Colors.green.shade400)),
+              ); 
+          },),
+        ),
+      ],
     );
 
     return InkWell(
@@ -348,18 +356,9 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
                             const Spacer(),
                             Text(transactionsController.getTransactionsList.length.toString(),style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w200)),
                           ],
-                        ),
-                        const Divider(),
-                        // view : productos con mayor gananciaa
-                        const SizedBox(height:0),
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text('De mayor ganancia',overflow: TextOverflow.ellipsis,style: TextStyle()),
-                                    const SizedBox(height:12),
-                                    wProductsRevenue,
-                                  ],
-                                ),
+                        ), 
+                        // view : productos con mayor ganancia
+                        wProductsRevenue,
                       ],
                     ),
                   ),
@@ -417,6 +416,7 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
     Widget wProducts = transactionsController.getMostSelledProducts.isEmpty?Container(): Padding(
       padding: const EdgeInsets.all(12.0),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // text : fecha del filtro
           const Opacity(opacity:0.5,child: Text('Más vendidos',style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900))),
