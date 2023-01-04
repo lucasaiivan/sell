@@ -218,7 +218,9 @@ class TransactionsController extends GetxController {
     }
     List<ProductCatalogue> listProducts = [];
     for (var element in featuredProducts.entries) {
-      listProducts.add(element.value);
+      if(element.value.code !=  ''){
+        listProducts.add(element.value);
+      }
     }
     // actualizamos lista para mostrar al usuario
     setMostSelledProducts = listProducts;
@@ -421,9 +423,13 @@ class TransactionsController extends GetxController {
     List<ProductCatalogue> newValuesList = [];
     if( sortedByKeyMap.isNotEmpty){
       for (var element in sortedByKeyMap.entries) { 
-        newValuesList.add(element.value);
-        count++;
-        if( count==3) break;
+        // condition  : evaluamos que sea un producto valido
+        if( element.value.code  != '' ){
+          newValuesList.add(element.value);
+          count++;
+          if( count==3) break;
+        }
+        
       }
     } 
     
