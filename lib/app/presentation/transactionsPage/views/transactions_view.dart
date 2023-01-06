@@ -15,9 +15,13 @@ class TransactionsView extends StatelessWidget {
 
   // var 
   bool darkTheme=false;
+  late BuildContext buildContext;
 
   @override
   Widget build(BuildContext context) {
+
+    // set 
+    buildContext = context;
 
     // get
     darkTheme = Get.isDarkMode;
@@ -129,62 +133,94 @@ class TransactionsView extends StatelessWidget {
     Map payMode =transactionsController.getPayMode(idMode: ticketModel.payMode);
     String revenue = transactionsController.readEarnings(ticket: ticketModel);
 
+    // widgets
+    Widget widget = AlertDialog(
+      title: const Text('¿Seguro que quieres eliminar esta venta?',textAlign: TextAlign.center),
+      content: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+        TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: const Text('Cancelar')),
+        TextButton(
+            onPressed: () {
+              transactionsController.deleteTicket(ticketModel: ticketModel);
+              Get.back();
+            },
+            child: const Text('si, eliminar')),
+      ]),
+    );
+
     return ElasticIn(
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(12),
-        onLongPress: () =>  transactionsController.deleteSale(ticketModel: ticketModel),
-        title: Row(
-          children: [
-            Text('Pago con:  ',style: TextStyle(fontWeight: FontWeight.w400,color: Get.theme.textTheme.bodyMedium?.color )),
-            Material(
-              color: (payMode['color'] as Color) .withOpacity(0.1),
-              clipBehavior: Clip.antiAlias,
-              borderRadius: const BorderRadius.all(Radius.circular(12)),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal:10,vertical:0),
-                child: Text(payMode['name'],style: TextStyle(fontWeight: FontWeight.w600,color: (payMode['color'] as Color) .withOpacity(0.7)  )),
-              )),
-          ],
-        ),
-        // title: Text('Pago con: ${payMode['name']}',style: TextStyle(fontWeight: FontWeight.w400,color: payMode['color'] )),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      child: Dismissible(
+        key:  UniqueKey(),
+        background: AnimatedContainer(duration: const Duration(milliseconds: 5000),color: Colors.black12),
+        confirmDismiss: (DismissDirection direction) async {
+          return await showDialog(
+            context: buildContext,
+            builder: (BuildContext context) {
+              return widget;
+            },
+          );
+        },
+        child: ListTile(
+          contentPadding: const EdgeInsets.all(12),
+          onLongPress: () =>  transactionsController.deleteSale(ticketModel: ticketModel),
+          title: Row(
             children: [
-              Text(ticketModel.seller.split('@')[0],style: const TextStyle(fontSize: 14)),
-              Wrap(crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  // text : fecha de publicación
-                  Text(Publications.getFechaPublicacionFormating(dateTime: ticketModel.creation.toDate()),style: const TextStyle(fontSize:12)),
-                  //  text : cantidad de productos
-                  Padding(padding: const EdgeInsets.symmetric(horizontal: 5), child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
-                  Text('${ticketModel.getLengh()} items'),
-                  // text : valor del vuelto
-                  ticketModel.valueReceived == 0? Container(): Row(
-                    children: [
-                      Padding(padding: const EdgeInsets.symmetric(horizontal: 5), child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
-                      Text('Vuelto: ${Publications.getFormatoPrecio(monto: ticketModel.valueReceived - ticketModel.priceTotal)}',style: const TextStyle(fontWeight: FontWeight.w300)),
-                    ],
-                  ),
-                ],
-              ),
+              Text('Pago con:  ',style: TextStyle(fontWeight: FontWeight.w400,color: Get.theme.textTheme.bodyMedium?.color )),
+              Material(
+                color: (payMode['color'] as Color) .withOpacity(0.1),
+                clipBehavior: Clip.antiAlias,
+                borderRadius: const BorderRadius.all(Radius.circular(12)),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal:10,vertical:0),
+                  child: Text(payMode['name'],style: TextStyle(fontWeight: FontWeight.w600,color: (payMode['color'] as Color) .withOpacity(0.7)  )),
+                )),
             ],
           ),
-        ),
-        trailing: Column(
-          crossAxisAlignment:CrossAxisAlignment.end,mainAxisSize: MainAxisSize.max,
-          children: [
-            //  text : precio totol del ticket
-            Text(Publications.getFormatoPrecio(monto: ticketModel.priceTotal),style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 16)),
-            //  text : ganancias
-            revenue==''?  Container():Padding(
-              padding: const EdgeInsets.symmetric(horizontal:10,vertical:0),
-              child: Text(revenue,style: TextStyle(fontWeight: FontWeight.w600,fontSize: 9,color: Colors.green.withOpacity(0.9)  )),
+          // title: Text('Pago con: ${payMode['name']}',style: TextStyle(fontWeight: FontWeight.w400,color: payMode['color'] )),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(ticketModel.seller.split('@')[0],style: const TextStyle(fontSize: 14)),
+                Wrap(crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    // text : fecha de publicación
+                    Text(Publications.getFechaPublicacionFormating(dateTime: ticketModel.creation.toDate()),style: const TextStyle(fontSize:12)),
+                    //  text : cantidad de productos
+                    Padding(padding: const EdgeInsets.symmetric(horizontal: 5), child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
+                    Text('${ticketModel.getLengh()} items'),
+                    // text : valor del vuelto
+                    ticketModel.valueReceived == 0? Container(): Row(
+                      children: [
+                        Padding(padding: const EdgeInsets.symmetric(horizontal: 5), child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
+                        Text('Vuelto: ${Publications.getFormatoPrecio(monto: ticketModel.valueReceived - ticketModel.priceTotal)}',style: const TextStyle(fontWeight: FontWeight.w300)),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
             ),
-            //  text : fecha formateada 
-            Text(Publications.getFechaPublicacion(ticketModel.creation.toDate(), Timestamp.now().toDate()),style: const TextStyle(fontWeight: FontWeight.w400,fontSize: 10))
-          ],
+          ),
+          trailing: Column(
+            crossAxisAlignment:CrossAxisAlignment.end,mainAxisSize: MainAxisSize.max,
+            children: [
+              //  text : precio totol del ticket
+              Text(Publications.getFormatoPrecio(monto: ticketModel.priceTotal),style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 16)),
+              //  text : ganancias
+              revenue==''?  Container():Padding(
+                padding: const EdgeInsets.symmetric(horizontal:10,vertical:0),
+                child: Text(revenue,style: TextStyle(fontWeight: FontWeight.w600,fontSize: 9,color: Colors.green.withOpacity(0.9)  )),
+              ),
+              //  text : fecha formateada 
+              Text(Publications.getFechaPublicacion(ticketModel.creation.toDate(), Timestamp.now().toDate()),style: const TextStyle(fontWeight: FontWeight.w400,fontSize: 10))
+            ],
+          ),
         ),
       ),
     );
@@ -238,6 +274,7 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Divider(),
+        const SizedBox(height: 12),
         const Text('De mayor ganancia',overflow: TextOverflow.ellipsis,style: TextStyle()),
         const SizedBox(height:12),
         SizedBox( //220
@@ -265,7 +302,7 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
                     ),
                 title: Text(transactionsController.getBestSellingProductList[index].nameMark,overflow:TextOverflow.ellipsis,style:const TextStyle()),
                 subtitle: Text(transactionsController.getBestSellingProductList[index].description,overflow:TextOverflow.ellipsis,style:const TextStyle( )),
-                trailing:Text('+${Publications.getFormatoPrecio(monto: transactionsController.getBestSellingProductList[index].revenue )}',style: TextStyle(color:Colors.green.shade400,fontWeight: FontWeight.bold)),
+                trailing:Text('+${Publications.getFormatoPrecio(monto: transactionsController.getBestSellingProductList[index].revenue )}',style: TextStyle(color:Colors.green.shade400,fontWeight: FontWeight.w900,fontSize: 18)),
               ); 
           },),
         ),
@@ -289,7 +326,7 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Card(
               elevation: 0,
-              color: isExpanded?Colors.transparent:Colors.black87,
+              color: isExpanded?Colors.grey.shade800.withOpacity(0.9):Colors.transparent,
               margin: const EdgeInsets.all(0),
               shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(bottomLeft:Radius.circular(12),bottomRight: Radius.circular(12),topLeft: Radius.circular(12),topRight: Radius.circular(12))),
               child: Column(
@@ -297,7 +334,7 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
                 children: [
                   Card(
                     margin: const EdgeInsets.all(0),
-                    elevation:isExpanded?0:8,
+                    elevation:isExpanded?8:0,
                     color: colorCard,
                     clipBehavior: Clip.antiAlias,
                     shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(bottomLeft:Radius.circular(12),bottomRight: Radius.circular(12),topLeft: Radius.circular(12),topRight: Radius.circular(12))),
@@ -363,19 +400,22 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
                       padding: const EdgeInsets.all(12.0),
                       child: Column(
                         children: [
-                          Row(
-                            children: [
-                              const Text('Ventas'),
-                              const Spacer(),
-                              Text(transactionsController.getTransactionsList.length.toString(),style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w200)),
-                            ],
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            child: Row(
+                              children: [
+                                const Text('Ventas'),
+                                const Spacer(),
+                                Text(transactionsController.getTransactionsList.length.toString(),style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w200)),
+                              ],
+                            ),
                           ), 
                           // view : productos con mayor ganancia
                           wProductsRevenue,
                         ],
                       ),
-                    ),//Column(children: widget.list),
-                    crossFadeState: isExpanded ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+                    ),
+                    crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
                     duration: const Duration(milliseconds: 1200),
                     reverseDuration: Duration.zero,
                     sizeCurve: Curves.fastLinearToSlowEaseIn,
@@ -514,14 +554,14 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Card(
                 elevation: isExpanded?0:0,
-                color: isExpanded?Colors.transparent:Colors.black87,
+                color: isExpanded?Colors.grey.shade800.withOpacity(0.9):Colors.transparent,
                 margin: const EdgeInsets.all(0),
                 shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(bottomLeft:Radius.circular(12),bottomRight: Radius.circular(12),topLeft: Radius.circular(12),topRight: Radius.circular(12))),
                     child: Column(
                       children: [
                         Card(
                       margin: const EdgeInsets.all(0),
-                      elevation:isExpanded?0:8,
+                      elevation:isExpanded?8:0,
                       color: colorCard,
                       clipBehavior: Clip.antiAlias,
                       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(bottomLeft:Radius.circular(12),bottomRight: Radius.circular(12),topLeft: Radius.circular(12),topRight: Radius.circular(12))),
@@ -613,7 +653,7 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
                                 ],
                               ),
                             ),
-                            crossFadeState: isExpanded ? CrossFadeState.showFirst: CrossFadeState.showSecond,
+                            crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
                             duration: const Duration(milliseconds: 1200),
                             reverseDuration: Duration.zero,
                             sizeCurve: Curves.fastLinearToSlowEaseIn,
