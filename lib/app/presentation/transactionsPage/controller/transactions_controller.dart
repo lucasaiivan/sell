@@ -1,4 +1,3 @@
-import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -524,7 +523,12 @@ class TransactionsController extends GetxController {
     }
   }
 
-
+  void deleteTicket({required TicketModel ticketModel}){
+    Database.refFirestoretransactions(
+                      idAccount: homeController.getIdAccountSelected)
+                  .doc(ticketModel.id)
+                  .delete();
+  }
   void deleteSale({required TicketModel ticketModel}) {
     Widget widget = AlertDialog(
       title: const Text('¿Seguro que quieres eliminar esta venta?',textAlign: TextAlign.center),
