@@ -198,13 +198,13 @@ class ProductCatalogue {
       currencySign: data.containsKey('currencySign')
           ? data['currencySign']
           : data['signo_moneda'] ?? '',
-      quantity: data['quantity'] ?? 1,
+      quantity: data.containsKey('quantity') ? data['quantity'] : 1,
       quantityStock: data['quantityStock'] ?? 0,
-      sales: data['sales'] ?? 0,
+      sales: data.containsKey('sales')? data['sales'] : 0,
       select: false,
       stock: data['stock'] ?? false,
-      alertStock: data['alertStock'] ?? 5,
-      revenue: data['revenue'] ?? 0.0,
+      alertStock: data.containsKey('alertStock')?data['alertStock'] : 5,
+      revenue: data.containsKey('revenue')?data['revenue'] : 0.0,
     );
   }
 

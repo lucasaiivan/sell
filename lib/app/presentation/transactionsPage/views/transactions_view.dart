@@ -97,6 +97,7 @@ class TransactionsView extends StatelessWidget {
     }
 
     return ListView.builder(
+      
       itemCount: transactionsController.getTransactionsList.length,
       itemBuilder: (context, index) {
         if (index == 0) {
@@ -151,7 +152,7 @@ class TransactionsView extends StatelessWidget {
             },
             child: const Text('si, eliminar')),
       ]),
-    );
+    ); 
 
     return ElasticIn(
       child: Dismissible(
@@ -170,7 +171,7 @@ class TransactionsView extends StatelessWidget {
           onLongPress: () =>  transactionsController.deleteSale(ticketModel: ticketModel),
           title: Row(
             children: [
-              Text('Pago con:  ',style: TextStyle(fontWeight: FontWeight.w400,color: Get.theme.textTheme.bodyMedium?.color )),
+              Text('Pago con:  ',style: TextStyle(fontWeight: FontWeight.w300,color: Get.theme.textTheme.bodyMedium?.color )),
               Material(
                 color: (payMode['color'] as Color) .withOpacity(0.1),
                 clipBehavior: Clip.antiAlias,
@@ -181,13 +182,18 @@ class TransactionsView extends StatelessWidget {
                 )),
             ],
           ),
-          // title: Text('Pago con: ${payMode['name']}',style: TextStyle(fontWeight: FontWeight.w400,color: payMode['color'] )),
           subtitle: Padding(
             padding: const EdgeInsets.only(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(ticketModel.seller.split('@')[0],style: const TextStyle(fontSize: 14)),
+                Row(
+                  children: [
+                    Text(ticketModel.seller.split('@')[0],style: const TextStyle(fontSize: 14,overflow: TextOverflow.ellipsis)),
+                    Padding(padding: const EdgeInsets.symmetric(horizontal: 5), child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
+                    Text('caja ${ticketModel.cashRegister}'),
+                  ],
+                ),
                 Wrap(crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     // text : fecha de publicación
@@ -213,10 +219,7 @@ class TransactionsView extends StatelessWidget {
               //  text : precio totol del ticket
               Text(Publications.getFormatoPrecio(monto: ticketModel.priceTotal),style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 16)),
               //  text : ganancias
-              revenue==''?  Container():Padding(
-                padding: const EdgeInsets.symmetric(horizontal:10,vertical:0),
-                child: Text(revenue,style: TextStyle(fontWeight: FontWeight.w600,fontSize: 9,color: Colors.green.withOpacity(0.9)  )),
-              ),
+              Text(revenue,style: TextStyle(fontWeight: FontWeight.w900,fontSize: 12,color: Colors.green.withOpacity(0.9)  )),
               //  text : fecha formateada 
               Text(Publications.getFechaPublicacion(ticketModel.creation.toDate(), Timestamp.now().toDate()),style: const TextStyle(fontWeight: FontWeight.w400,fontSize: 10))
             ],
@@ -275,7 +278,7 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
       children: [
         const Divider(),
         const SizedBox(height: 12),
-        const Text('De mayor ganancia',overflow: TextOverflow.ellipsis,style: TextStyle()),
+        const Text('De mayor ganancia',overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 16)),
         const SizedBox(height:12),
         SizedBox( //220
           height:transactionsController.getBestSellingProductList.isEmpty?0:transactionsController.getBestSellingProductList.length==1?80:transactionsController.getBestSellingProductList.length==2?145:220,width: double.infinity,
@@ -302,7 +305,31 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
                     ),
                 title: Text(transactionsController.getBestSellingProductList[index].nameMark,overflow:TextOverflow.ellipsis,style:const TextStyle()),
                 subtitle: Text(transactionsController.getBestSellingProductList[index].description,overflow:TextOverflow.ellipsis,style:const TextStyle( )),
-                trailing:Text('+${Publications.getFormatoPrecio(monto: transactionsController.getBestSellingProductList[index].revenue )}',style: TextStyle(color:Colors.green.shade400,fontWeight: FontWeight.w900,fontSize: 18)),
+                trailing:Text('+${Publications.getFormatoPrecio(monto: transactionsController.getBestSellingProductList[index].revenue )}',style: TextStyle(overflow:TextOverflow.ellipsis ,color:Colors.green.shade400,fontWeight: FontWeight.w900,fontSize: 18)),
+              ); 
+          },),
+        ),
+      ],
+    );
+    // widget : modo de pago y su monto total
+    Widget widgetAlyticsMeansOfPayment = transactionsController.getAnalyticsMeansOfPayment.isEmpty?Container():Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Divider(),
+        const SizedBox(height: 12),
+        const Text('Medios de pago',overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 16)),
+        const SizedBox(height:12),
+        SizedBox( //220
+          height:transactionsController.getAnalyticsMeansOfPayment.isEmpty?0:transactionsController.getAnalyticsMeansOfPayment.length==1?50:transactionsController.getAnalyticsMeansOfPayment.length==2?100:175,width: double.infinity,
+          child: ListView.builder(
+            scrollDirection: Axis.vertical,
+            itemCount: transactionsController.getAnalyticsMeansOfPayment.length,
+            shrinkWrap: true,
+            itemBuilder: (context, index) {
+              return ListTile(
+                title: Text(transactionsController.getAnalyticsMeansOfPayment.keys.elementAt(index),overflow:TextOverflow.ellipsis,style:const TextStyle()),
+                //subtitle: Text(transactionsController.getAnalyticsMeansOfPayment[index].description,overflow:TextOverflow.ellipsis,style:const TextStyle( )),
+                trailing:Text(Publications.getFormatoPrecio(monto: transactionsController.getAnalyticsMeansOfPayment.values.elementAt(index) ),style: const TextStyle(overflow:TextOverflow.ellipsis,fontWeight: FontWeight.w900,fontSize: 18)),
               ); 
           },),
         ),
@@ -325,94 +352,94 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Card(
+              clipBehavior: Clip.antiAlias,
               elevation: 0,
-              color: isExpanded?Colors.grey.shade800.withOpacity(0.9):Colors.transparent,
+              color: colorCard,
               margin: const EdgeInsets.all(0),
               shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(bottomLeft:Radius.circular(12),bottomRight: Radius.circular(12),topLeft: Radius.circular(12),topRight: Radius.circular(12))),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Card(
-                    margin: const EdgeInsets.all(0),
-                    elevation:isExpanded?8:0,
-                    color: colorCard,
-                    clipBehavior: Clip.antiAlias,
-                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(bottomLeft:Radius.circular(12),bottomRight: Radius.circular(12),topLeft: Radius.circular(12),topRight: Radius.circular(12))),
-                    child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          
-                          // titulo
-                          Flexible(
-                              fit: FlexFit.tight,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(textCategory,maxLines: isExpanded ? 1 : 2,overflow: TextOverflow.ellipsis, textAlign: TextAlign.start,textDirection: TextDirection.ltr, style: const TextStyle(fontSize: 24)),
-                                      // icon : muestra si la tarjeta esta expandida o no
-                                      Icon(isExpanded? Icons.keyboard_arrow_down: Icons.keyboard_arrow_up,size: 27),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Row(
-                                    children: [
-                                      // text : monto total de las ventas del filtro
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Opacity(opacity: 0.9,child:  Text(transactionsController.getFilterText,style:const TextStyle(fontSize: 10))),
-                                          Text(priceTotal,textAlign: TextAlign.start,style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w500)),
-                                          const Opacity(opacity: 0.7,child:  Text('Total',style:TextStyle(fontSize: 10)))
-                                        ],
-                                      ),
-                                      const Spacer(),
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.end,
-                                        children: [
-                                          Opacity(opacity: 0.7,child:  Text(revenue==''?'':'Cantidad ganada',style:const TextStyle(fontSize: 10))),
-                                          Padding(
-                                            padding: const EdgeInsets.only(bottom:3),
-                                            child: Padding(
-                                              padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 1),
-                                              child: Text(revenue,style: const TextStyle(fontWeight: FontWeight.w900,fontSize: 24)),
-                                            ),
+
+                  // view : volumen de ventas
+                  Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Flexible(
+                            fit: FlexFit.tight,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // text : titulo
+                                Row(
+                                  children: [
+                                    Text(textCategory,maxLines: isExpanded ? 1 : 2,overflow: TextOverflow.ellipsis, textAlign: TextAlign.start,textDirection: TextDirection.ltr, style: const TextStyle(fontSize: 24)),
+                                    // icon : muestra si la tarjeta esta expandida o no
+                                    Icon(isExpanded? Icons.keyboard_arrow_down: Icons.keyboard_arrow_up,size: 27),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                // text : analiticas
+                                Row(
+                                  children: [
+                                    // text : monto total de las ventas del filtro
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Opacity(opacity: 0.9,child:  Text(transactionsController.getFilterText,style:const TextStyle(fontSize: 10))),
+                                        Text(priceTotal,textAlign: TextAlign.start,style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w500)),
+                                        const Opacity(opacity: 0.7,child:  Text('Total',style:TextStyle(fontSize: 10)))
+                                      ],
+                                    ),
+                                    const Spacer(),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      children: [
+                                        Opacity(opacity: 0.7,child:  Text(revenue==''?'':'Cantidad ganada',style:const TextStyle(fontSize: 10))),
+                                        Padding(
+                                          padding: const EdgeInsets.only(bottom:3),
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 1),
+                                            child: Text(revenue,style: const TextStyle(fontWeight: FontWeight.w900,fontSize: 24)),
                                           ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ))
-                          
-                        ],
-                      ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ))
+                        
+                      ],
                     ),
                   ),
-                  // view : expandible
-                  //isExpanded ? const SizedBox() : const SizedBox(height: 20),
+                  // view : expandible de volumen de ventas
                   AnimatedCrossFade(
                     firstChild: const Text('', style: TextStyle(fontSize: 0)),
-                    secondChild: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: Row(
-                              children: [
-                                const Text('Ventas'),
-                                const Spacer(),
-                                Text(transactionsController.getTransactionsList.length.toString(),style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w200)),
-                              ],
-                            ),
-                          ), 
-                          // view : productos con mayor ganancia
-                          wProductsRevenue,
-                        ],
+                    secondChild: Material(
+                      color: Colors.black12,
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Column(
+                          children: [ 
+                            //  view  : cantidad total de ventas
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              child: Row(
+                                children: [
+                                  const Text('Ventas'),
+                                  const Spacer(),
+                                  Text(transactionsController.getTransactionsList.length.toString(),style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
+                                ],
+                              ),
+                            ), 
+                            // view : productos con mayor ganancia
+                            wProductsRevenue,
+                            widgetAlyticsMeansOfPayment,
+                          ],
+                        ),
                       ),
                     ),
                     crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
@@ -470,6 +497,62 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
 
 
     // values
+    Widget viewSales = Flexible(
+                                fit: FlexFit.tight,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(textCategory,maxLines: isExpanded ? 1 : 2,overflow: TextOverflow.ellipsis, textAlign: TextAlign.start,textDirection: TextDirection.ltr, style:const TextStyle( fontSize: 24)),
+                                        // icon : muestra si la tarjeta esta expandida o no
+                                        Icon(isExpanded? Icons.keyboard_arrow_down: Icons.keyboard_arrow_up,size: 27),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Row(
+                                      children: [
+                                        // widget : total de los productros vendidos
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(Publications.getFormatAmount(value:transactionsController.readTotalProducts()),style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w400)),
+                                            const Opacity(opacity: 0.7,child:  Text('Total',style:TextStyle(fontSize: 10)))
+                                          ],
+                                        ),
+                                        const Spacer(),
+                                        transactionsController.getBestSellingProductList.isEmpty?Container():transactionsController.getBestSellingProductList[0].image==''?Container():Column(
+                                          children: [
+                                            Row(
+                                              children: [
+                                                CachedNetworkImage(
+                                                  imageUrl:  transactionsController.getBestSellingProductList[0].image,
+                                                  placeholder: (context, url) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                                                  imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Stack(
+                                                    alignment: Alignment.bottomLeft,
+                                                    children: [
+                                                      CircleAvatar(radius: 15 ,backgroundImage: image),
+                                                      CircleAvatar(radius: 8 ,backgroundColor: Colors.white,child: Text(transactionsController.getBestSellingProductList[0].quantity.toString(),style:const TextStyle(fontSize: 8,color:Colors.blue))),
+                                                    ],
+                                                  )),
+                                                  errorWidget: (context, url, error) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                                                ),
+                                                //  text  : marca del producto
+                                                Padding(
+                                                  padding: const EdgeInsets.only(left: 5),
+                                                  child: Text(transactionsController.getBestSellingProductList[0].nameMark,overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:12)),
+                                                ),
+                                              ],
+                                            ),
+                                            const Opacity(opacity: 0.8,child: Text('mayor ganancias',style:TextStyle(fontSize: 10))),
+                                          ],
+                                        ),
+                                        
+                                      ],
+                                    ),
+                                  ],
+                                )
+                                );
     Widget wProducts = transactionsController.getMostSelledProducts.isEmpty?Container(): Padding(
       padding: const EdgeInsets.all(12.0),
       child: Column(
@@ -535,8 +618,6 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
         ],
       ),
     );
-    
-
     return Theme(
       data: ThemeData.dark(),
       child: InkWell(
@@ -553,114 +634,97 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Card(
-                elevation: isExpanded?0:0,
-                color: isExpanded?Colors.grey.shade800.withOpacity(0.9):Colors.transparent,
-                margin: const EdgeInsets.all(0),
-                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(bottomLeft:Radius.circular(12),bottomRight: Radius.circular(12),topLeft: Radius.circular(12),topRight: Radius.circular(12))),
+                    color: colorCard,
+                    clipBehavior: Clip.antiAlias,
+                    elevation: isExpanded?8:0, 
+                    margin: const EdgeInsets.all(0),
+                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(bottomLeft:Radius.circular(12),bottomRight: Radius.circular(12),topLeft: Radius.circular(12),topRight: Radius.circular(12))),
                     child: Column(
-                      children: [
-                        Card(
-                      margin: const EdgeInsets.all(0),
-                      elevation:isExpanded?8:0,
-                      color: colorCard,
-                      clipBehavior: Clip.antiAlias,
-                      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(bottomLeft:Radius.circular(12),bottomRight: Radius.circular(12),topLeft: Radius.circular(12),topRight: Radius.circular(12))),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(20.0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Flexible(
+                                fit: FlexFit.tight,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    
-                                    // titulo
-                                    Flexible(
-                                        fit: FlexFit.tight,
-                                        child: Column(
+                                    Row(
+                                      children: [
+                                        Text(textCategory,maxLines: isExpanded ? 1 : 2,overflow: TextOverflow.ellipsis, textAlign: TextAlign.start,textDirection: TextDirection.ltr, style:const TextStyle( fontSize: 24)),
+                                        // icon : muestra si la tarjeta esta expandida o no
+                                        Icon(isExpanded? Icons.keyboard_arrow_down: Icons.keyboard_arrow_up,size: 27),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Row(
+                                      children: [
+                                        // widget : total de los productros vendidos
+                                        Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(Publications.getFormatAmount(value:transactionsController.readTotalProducts()),style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w400)),
+                                            const Opacity(opacity: 0.7,child:  Text('Total',style:TextStyle(fontSize: 10)))
+                                          ],
+                                        ),
+                                        const Spacer(),
+                                        transactionsController.getBestSellingProductList.isEmpty?Container():transactionsController.getBestSellingProductList[0].image==''?Container():Column(
                                           children: [
                                             Row(
                                               children: [
-                                                Text(textCategory,maxLines: isExpanded ? 1 : 2,overflow: TextOverflow.ellipsis, textAlign: TextAlign.start,textDirection: TextDirection.ltr, style:const TextStyle( fontSize: 24)),
-                                                // icon : muestra si la tarjeta esta expandida o no
-                                                Icon(isExpanded? Icons.keyboard_arrow_down: Icons.keyboard_arrow_up,size: 27),
+                                                CachedNetworkImage(
+                                                  imageUrl:  transactionsController.getBestSellingProductList[0].image,
+                                                  placeholder: (context, url) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                                                  imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Stack(
+                                                    alignment: Alignment.bottomLeft,
+                                                    children: [
+                                                      CircleAvatar(radius: 15 ,backgroundImage: image),
+                                                      CircleAvatar(radius: 8 ,backgroundColor: Colors.white,child: Text(transactionsController.getBestSellingProductList[0].quantity.toString(),style:const TextStyle(fontSize: 8,color:Colors.blue))),
+                                                    ],
+                                                  )),
+                                                  errorWidget: (context, url, error) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                                                ),
+                                                //  text  : marca del producto
+                                                Padding(
+                                                  padding: const EdgeInsets.only(left: 5),
+                                                  child: Text(transactionsController.getBestSellingProductList[0].nameMark,overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:12)),
+                                                ),
                                               ],
                                             ),
-                                            const SizedBox(height: 12),
-                                            Row(
-                                              children: [
-                                                // widget : total de los productros vendidos
-                                                Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(Publications.getFormatAmount(value:transactionsController.readTotalProducts()),style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w400)),
-                                                    const Opacity(opacity: 0.7,child:  Text('Total',style:TextStyle(fontSize: 10)))
-                                                  ],
-                                                ),
-                                                const Spacer(),
-                                                transactionsController.getBestSellingProductList.isEmpty?Container():transactionsController.getBestSellingProductList[0].image==''?Container():Column(
-                                                  children: [
-                                                    Row(
-                                                      children: [
-                                                        CachedNetworkImage(
-                                                          imageUrl:  transactionsController.getBestSellingProductList[0].image,
-                                                          placeholder: (context, url) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
-                                                          imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Stack(
-                                                            alignment: Alignment.bottomLeft,
-                                                            children: [
-                                                              CircleAvatar(radius: 15 ,backgroundImage: image),
-                                                              CircleAvatar(radius: 8 ,backgroundColor: Colors.white,child: Text(transactionsController.getBestSellingProductList[0].quantity.toString(),style:const TextStyle(fontSize: 8,color:Colors.blue))),
-                                                            ],
-                                                          )),
-                                                          errorWidget: (context, url, error) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
-                                                        ),
-                                                        //  text  : marca del producto
-                                                        Padding(
-                                                          padding: const EdgeInsets.only(left: 5),
-                                                          child: Text(transactionsController.getBestSellingProductList[0].nameMark,overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:12)),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    const Opacity(opacity: 0.8,child: Text('mayor ganancias',style:TextStyle(fontSize: 10))),
-                                                  ],
-                                                ),
-                                                
-                                              ],
-                                            ),
+                                            const Opacity(opacity: 0.8,child: Text('mayor ganancias',style:TextStyle(fontSize: 10))),
                                           ],
-                                        )),
-                                    
+                                        ),
+                                        
+                                      ],
+                                    ),
                                   ],
+                                )
                                 ),
-                              ), 
-                              
-                              
-                        ],
+                            ),
+                          AnimatedCrossFade(
+                                firstChild: const Text('', style: TextStyle(fontSize: 0)),
+                                secondChild: Material(
+                                  color: Colors.black12,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        //  widget  : productos más vendido por el valor
+                                        wProductsSales, 
+                                        // widget : más vendidos
+                                        wProducts,
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                                duration: const Duration(milliseconds: 1200),
+                                reverseDuration: Duration.zero,
+                                sizeCurve: Curves.fastLinearToSlowEaseIn,
+                              ),
+                          ],
                         ),
                       ),
-                      AnimatedCrossFade(
-                            firstChild: const Text('', style: TextStyle(fontSize: 0)),
-                            secondChild: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  //  widget  : productos más vendido por el valor
-                                  wProductsSales, 
-                                  // widget : más vendidos
-                                  wProducts,
-                                ],
-                              ),
-                            ),
-                            crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-                            duration: const Duration(milliseconds: 1200),
-                            reverseDuration: Duration.zero,
-                            sizeCurve: Curves.fastLinearToSlowEaseIn,
-                          ),
-                      ],
-                    ),
-                  ),
                 ),
         ),
       ),

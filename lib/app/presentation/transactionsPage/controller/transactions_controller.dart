@@ -14,6 +14,14 @@ class TransactionsController extends GetxController {
   // others controllers
   final HomeController homeController = Get.find();
 
+  //obtenemos los modos de pago y sus respecvtivas ganancias
+
+    // obtenemos los modos de pagos y sus respectivas ganancias
+    // description : efective (Efectivo) - mercadopago (Mercado Pago) - card (Tarjeta De Crédito/Débito)
+    Map<String,double> analyticsMeansOfPaymentMap = {}; 
+    Map<String,double> get getAnalyticsMeansOfPayment => analyticsMeansOfPaymentMap;
+    set setAnalyticsMeansOfPayment(Map<String,double> value) => analyticsMeansOfPaymentMap = value;
+
   // producto con más ganancias
   List<ProductCatalogue> bestSellingProductList = [];
   List<ProductCatalogue> get getBestSellingProductList => bestSellingProductList;
@@ -31,6 +39,7 @@ class TransactionsController extends GetxController {
     withMoreSales(list: value);
     _listTransactions = value;
     readProductWithMoreEarnings();
+    readAnalyticsMeansOfPayment();
     update();
   }
 
@@ -434,7 +443,25 @@ class TransactionsController extends GetxController {
     
     setBestSellingProductList =  newValuesList;
   }
+  void readAnalyticsMeansOfPayment( ){
+    //obtenemos los modos de pago y sus respecvtivas ganancias
+    setAnalyticsMeansOfPayment = {};
 
+    for (var element in getTransactionsList) {
+      switch (element.payMode) {
+        case 'effective':
+          getAnalyticsMeansOfPayment.containsKey('Efectivo')?getAnalyticsMeansOfPayment['Efectivo']=(getAnalyticsMeansOfPayment['Efectivo'] as double) +element.priceTotal : getAnalyticsMeansOfPayment['Efectivo']=element.priceTotal;
+          break;
+        case 'mercadopago':
+          getAnalyticsMeansOfPayment.containsKey('Mercado Pago')?getAnalyticsMeansOfPayment['Mercado Pago']= (getAnalyticsMeansOfPayment['Mercado Pago'] as double) + element.priceTotal : getAnalyticsMeansOfPayment['Mercado Pago']= element.priceTotal;
+          break;
+        case 'card':
+          getAnalyticsMeansOfPayment.containsKey('Tarjeta De Crédito/Débito')?getAnalyticsMeansOfPayment['Tarjeta De Crédito/Débito']=(getAnalyticsMeansOfPayment['Tarjeta De Crédito/Débito'] as double) +element.priceTotal : getAnalyticsMeansOfPayment['Tarjeta De Crédito/Débito']=element.priceTotal;
+          break;
+        default:
+      }
+      }
+    }
    // FUCTIONS
 
   int readTotalProducts(){
