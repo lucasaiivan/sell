@@ -16,11 +16,16 @@ class TransactionsController extends GetxController {
 
   //obtenemos los modos de pago y sus respecvtivas ganancias
 
-    // obtenemos los modos de pagos y sus respectivas ganancias
-    // description : efective (Efectivo) - mercadopago (Mercado Pago) - card (Tarjeta De Crédito/Débito)
-    Map<String,double> analyticsMeansOfPaymentMap = {}; 
-    Map<String,double> get getAnalyticsMeansOfPayment => analyticsMeansOfPaymentMap;
-    set setAnalyticsMeansOfPayment(Map<String,double> value) => analyticsMeansOfPaymentMap = value;
+  // obtenemos los modos de pagos y sus respectivas ganancias
+  // description : efective (Efectivo) - mercadopago (Mercado Pago) - card (Tarjeta De Crédito/Débito)
+  Map<String,double> analyticsMeansOfPaymentMap = {}; 
+  Map<String,double> get getAnalyticsMeansOfPayment => analyticsMeansOfPaymentMap;
+  set setAnalyticsMeansOfPayment(Map<String,double> value) => analyticsMeansOfPaymentMap = value;
+
+  // obtenemos los montos de cada caja
+    Map<String,double> cashAnalysisMap = {}; 
+    Map<String,double> get getCashAnalysisMap => cashAnalysisMap;
+    set setCashAnalysisMap(Map<String,double> value) => cashAnalysisMap = value;
 
   // producto con más ganancias
   List<ProductCatalogue> bestSellingProductList = [];
@@ -40,6 +45,7 @@ class TransactionsController extends GetxController {
     _listTransactions = value;
     readProductWithMoreEarnings();
     readAnalyticsMeansOfPayment();
+    readCashAnalysis();
     update();
   }
 
@@ -459,8 +465,39 @@ class TransactionsController extends GetxController {
           getAnalyticsMeansOfPayment.containsKey('Tarjeta De Crédito/Débito')?getAnalyticsMeansOfPayment['Tarjeta De Crédito/Débito']=(getAnalyticsMeansOfPayment['Tarjeta De Crédito/Débito'] as double) +element.priceTotal : getAnalyticsMeansOfPayment['Tarjeta De Crédito/Débito']=element.priceTotal;
           break;
         default:
+          getAnalyticsMeansOfPayment.containsKey('Sin especificar')?getAnalyticsMeansOfPayment['Sin especificar']=(getAnalyticsMeansOfPayment['Sin especificar'] as double) +element.priceTotal : getAnalyticsMeansOfPayment['Sin especificar']=element.priceTotal;
+          break;
       }
       }
+    }
+    void readCashAnalysis( ){
+    //obtenemos el monto de cada caja
+    setCashAnalysisMap = {};
+
+    for (var element in getTransactionsList) {
+      switch (element.cashRegister) {
+        case '1':
+          getCashAnalysisMap.containsKey('1')?getCashAnalysisMap['1']=(getCashAnalysisMap['1'] as double) +element.priceTotal : getCashAnalysisMap['1']=element.priceTotal;
+          break;
+        case '2':
+          getCashAnalysisMap.containsKey('2')?getCashAnalysisMap['2']= (getCashAnalysisMap['2'] as double) + element.priceTotal : getCashAnalysisMap['2']= element.priceTotal;
+          break;
+        case '3':
+          getCashAnalysisMap.containsKey('3')?getCashAnalysisMap['3']=(getCashAnalysisMap['3'] as double) +element.priceTotal : getCashAnalysisMap['3']=element.priceTotal;
+          break;
+        case '4':
+          getCashAnalysisMap.containsKey('4')?getCashAnalysisMap['4']=(getCashAnalysisMap['4'] as double) +element.priceTotal : getCashAnalysisMap['4']=element.priceTotal;
+          break;
+        case '5':
+          getCashAnalysisMap.containsKey('5')?getCashAnalysisMap['5']=(getCashAnalysisMap['5'] as double) +element.priceTotal : getCashAnalysisMap['5']=element.priceTotal;
+          break;
+        default:
+          getCashAnalysisMap.containsKey('1')?getCashAnalysisMap['1']=(getCashAnalysisMap['1'] as double) +element.priceTotal : getCashAnalysisMap['1']=element.priceTotal;
+          break;
+      }
+      }
+      // ordenar los productos en forma descendente
+    setCashAnalysisMap = Map.fromEntries( getCashAnalysisMap.entries.toList()..sort((e1, e2) => e1.key.compareTo(e2.key)));
     }
    // FUCTIONS
 

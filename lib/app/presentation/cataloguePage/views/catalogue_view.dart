@@ -226,6 +226,8 @@ class CataloguePage extends StatelessWidget {
                   children: [
                     Text(Publications.getFormatoPrecio(monto: item.salePrice),style: const TextStyle(fontWeight:FontWeight.bold )),
                     const SizedBox(width: 5),
+                    Text(item.sProcentaje,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w500)),
+                    SizedBox(width: item.sProcentaje==''?0:5),
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
