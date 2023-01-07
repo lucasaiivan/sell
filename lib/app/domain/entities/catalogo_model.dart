@@ -264,6 +264,20 @@ class ProductCatalogue {
     documentUpgrade = product.upgrade;
     return this;
   }
+  
+  // Fuction
+  String get sProcentaje{
+    double porcentaje = 0.0;
+    double ganancia = 0.0;
+    if (salePrice != 0.0 && purchasePrice !=0.0) {
+      ganancia = salePrice - purchasePrice;
+
+    porcentaje = ganancia / purchasePrice * 100;
+    return "%${porcentaje.round()}";
+    }
+    return'';
+  }
+
 }
 
 class Price {

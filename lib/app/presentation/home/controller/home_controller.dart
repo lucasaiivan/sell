@@ -19,6 +19,11 @@ class HomeController extends GetxController {
   set  setBuildContext(BuildContext context) => _buildContext=context;
   BuildContext get getBuildContext =>_buildContext; 
 
+  // brillo de la pantalla 
+  bool isDarkMode = false;
+  set setDarkMode (bool value) => isDarkMode = value;
+  bool get getIsDarkMode => isDarkMode;
+
   // Guide user : Ventas
   bool salesUserGuideVisibility=false;
   void getSalesUserGuideVisibility(){
@@ -123,8 +128,7 @@ class HomeController extends GetxController {
   @override
   void onInit() async {
 
-    super.onInit();
-
+    super.onInit(); 
     getSalesUserGuideVisibility();
     getTheVisibilityOfTheCatalogueUserGuide();
     // obtenemos por parametro los datos de la cuenta de atentificación
