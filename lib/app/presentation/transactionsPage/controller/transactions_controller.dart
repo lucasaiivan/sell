@@ -574,17 +574,13 @@ class TransactionsController extends GetxController {
     return Publications.getFormatoPrecio(monto: total);
   }
 
-  Map getPayMode({required idMode}) {
-    switch (idMode) {
-      case 'effective':
-        return {'name':'Efectivo','color':Colors.green};
-      case 'mercadopago':
-        return {'name':'Mercado Pago','color':Colors.blue};
-      case 'card':
-        return {'name':'Tarjeta Credito/Debito','color':Colors.orange};
-      default:
-        return {'name':'Sin esprecificar','color':Colors.grey};
-    }
+  Map getPayMode({required String idMode}) {
+
+    if( idMode=='effective' || idMode ==  'Efectivo') return {'name':'Efectivo','color':Colors.green};
+    if( idMode=='mercadopago' || idMode ==  'Mercado Pago') return {'name':'Mercado Pago','color':Colors.blue};
+    if( idMode=='card' || idMode ==  'Tarjeta De Crédito/Débito') return {'name':'Tarjeta Credito/Debito','color':Colors.orange};
+    return {'name':'Sin esprecificar','color':Colors.grey};
+
   }
 
   void deleteTicket({required TicketModel ticketModel}){
@@ -617,4 +613,5 @@ class TransactionsController extends GetxController {
     );
     Get.dialog(widget);
   }
+ 
 }
