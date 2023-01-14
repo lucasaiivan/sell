@@ -185,19 +185,21 @@ class SalesController extends GetxController {
             ListTile(
               contentPadding:const EdgeInsets.symmetric(horizontal: 20,vertical: 12),
               tileColor: tileColor,
-              title: Text(product.nameMark),
+              title: Text(product.description),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Text(
-                    product.description,
+                    product.nameMark,
                     maxLines: 1,
-                    overflow: TextOverflow.clip,
+                    overflow: TextOverflow.clip, 
+                    style: const TextStyle(color: Colors.blue),
                   ),
                   
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.start,
+                    direction: Axis.horizontal,
                     children: <Widget>[
                       // text : code
                         Row(
@@ -215,12 +217,7 @@ class SalesController extends GetxController {
                             const Text('Favorito'),
                           ],
                         ):Container(),
-                    ],
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                        //  text : alert stock
+                      //  text : alert stock
                         alertStockText != ''?Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
