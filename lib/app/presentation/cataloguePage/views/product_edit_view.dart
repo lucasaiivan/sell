@@ -116,6 +116,7 @@ class ProductEdit extends StatelessWidget {
         children: [
           ListView(
             scrollDirection: Axis.vertical,
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             children: [
               widgetsImagen(),
               widgetFormEditText(),
