@@ -97,11 +97,11 @@ class ProductEdit extends StatelessWidget {
           Theme.of(contextPrincipal).iconTheme.copyWith(color: colorText),
       title: controller.getSaveIndicator
           ? Text(controller.getTextAppBar,style: TextStyle(fontSize: 18.0, color: colorText))
-          : Text(controller.itsInTheCatalogue ? 'Editar' :'Agregar a mi cátalogo',style: TextStyle(fontSize: 18.0, color: colorText)),
+          : Text(controller.itsInTheCatalogue ? 'Editar' :'Nuevo',style: TextStyle(fontSize: 18.0, color: colorText)),
       actions: <Widget>[
         controller.getSaveIndicator
             ? Container()
-            : IconButton(icon: Icon(controller.itsInTheCatalogue ? Icons.check : Icons.add),onPressed: controller.save),
+            : TextButton.icon(onPressed: () => controller.save(), icon: Icon(controller.itsInTheCatalogue ? Icons.check : Icons.add), label: Text(controller.itsInTheCatalogue?'Actualizar':'Agregar a mi cátalogo')),
       ],
       bottom: controller.getSaveIndicator
           ? ComponentApp.linearProgressBarApp(color: colorLoading)
