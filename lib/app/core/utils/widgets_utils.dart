@@ -760,10 +760,13 @@ class LogoPremium extends StatelessWidget {
 
     return InkWell(
       onTap: () => homeController.showModalBottomSheetSubcription(id:id ),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 2),
-        decoration: BoxDecoration(border: Border.all(color: accentColor)),
-        child: Text('PREMIUM',style: TextStyle(fontSize: size,color:accentColor))
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 2),
+          decoration: BoxDecoration(border: Border.all(color: accentColor)),
+          child: Text('PREMIUM',style: TextStyle(fontSize: size,color:accentColor))
+        ),
       ),
     );
   }

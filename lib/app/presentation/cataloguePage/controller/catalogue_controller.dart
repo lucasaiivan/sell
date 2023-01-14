@@ -156,15 +156,16 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
             ListTile(
               contentPadding:const EdgeInsets.symmetric(horizontal: 20,vertical: 12),
               tileColor: tileColor,
-              title: Text(product.nameMark),
+              title: Text(product.description),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Text(
-                    product.description,
+                    product.nameMark,
                     maxLines: 2,
                     overflow: TextOverflow.clip,
+                    style: const TextStyle(color: Colors.blue),
                   ),
                   Wrap(
                   children: [

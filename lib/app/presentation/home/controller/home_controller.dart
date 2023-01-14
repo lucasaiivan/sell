@@ -11,6 +11,7 @@ import '../../../core/routes/app_pages.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../domain/entities/user_model.dart';
 import '../../../core/utils/widgets_utils.dart';
+import '../../splash/controllers/splash_controller.dart';
 
 class HomeController extends GetxController {
 
@@ -216,7 +217,7 @@ void showDialogCerrarSesion() {
       TextButton(
           child: const Text('si'),
           onPressed: () async {
-
+            CustomFullScreenDialog.showDialog();
             // default values
             homeController.setProfileAccountSelected=ProfileAccountModel(creation: Timestamp.now());
             homeController.setProfileAdminUser = UserModel ();
@@ -230,6 +231,7 @@ void showDialogCerrarSesion() {
             final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
             Future.delayed(const Duration(seconds: 2)).then((_) {
               firebaseAuth.signOut().then((value) async {
+                CustomFullScreenDialog.cancelDialog();
               });
             });
           }),
