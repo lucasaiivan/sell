@@ -1,4 +1,5 @@
 import 'package:audioplayers/audioplayers.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -185,6 +186,18 @@ class SalesController extends GetxController {
             ListTile(
               contentPadding:const EdgeInsets.symmetric(horizontal: 20,vertical: 12),
               tileColor: tileColor,
+              leading: CachedNetworkImage(
+                    imageUrl: product.image,
+                    placeholder: (context, url) => CircleAvatar(
+                        backgroundColor: Get.theme.dividerColor,
+                        child: Text(Publications.getFormatoPrecio(monto: product.salePrice),style: TextStyle(color: Get.textTheme.bodyText1?.color))),
+                    imageBuilder: (context, image) => CircleAvatar(
+                        backgroundColor: Get.theme.scaffoldBackgroundColor,
+                        backgroundImage: image),
+                    errorWidget: (context, url, error) => CircleAvatar(
+                      backgroundColor: Get.theme.dividerColor,
+                    ),
+                  ),
               title: Text(product.description),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

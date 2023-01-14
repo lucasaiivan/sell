@@ -219,6 +219,7 @@ class CataloguePage extends StatelessWidget {
             contentPadding: const EdgeInsets.all(12),
             onTap: () => cataloguePageController.toProductEdit(productCatalogue: item),
             title: Text(item.description, maxLines: 1),
+            
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
