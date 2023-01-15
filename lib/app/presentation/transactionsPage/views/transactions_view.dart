@@ -766,7 +766,7 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
                                                   alignment: Alignment.bottomLeft,
                                                   children: [
                                                     CircleAvatar(radius: 15 ,backgroundImage: image),
-                                                    CircleAvatar(radius: 8 ,backgroundColor: Colors.white,child: Text(transactionsController.getBestSellingProductList[0].quantity.toString(),style:const TextStyle(fontSize: 8,color:Colors.blue))),
+                                                    CircleAvatar(radius: 8 ,backgroundColor: Colors.white,child: Text(transactionsController.getMostSelledProducts[0].quantity.toString(),style:const TextStyle(fontSize: 8,color:Colors.blue))),
                                                   ],
                                                 )),
                                                 errorWidget: (context, url, error) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),

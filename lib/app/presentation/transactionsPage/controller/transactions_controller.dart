@@ -414,7 +414,7 @@ class TransactionsController extends GetxController {
           if(productNew.id ==  key){
             update= true;
               
-              productNew.revenue = value.revenue + ((productNew.salePrice - productNew.purchasePrice ) * productNew.quantity) ;
+              productNew.revenue =  value.revenue + ((productNew.salePrice - productNew.purchasePrice ) * productNew.quantity) ;
               productNew.quantity = productNew.quantity + value.quantity ;
           }
         });
@@ -423,7 +423,14 @@ class TransactionsController extends GetxController {
           productNew.revenue +=  ((productNew.salePrice - productNew.purchasePrice ) * productNew.quantity) ;
         }
 
-        productsList[productNew.id] = productNew;
+        // si el precio de compra es '0' no se va a tener en cuenta la ganancia de ese producto
+        if( productNew.purchasePrice == 0 ){
+          productNew.revenue = 0.0;
+        }else{
+          productsList[productNew.id] = productNew;
+        }
+
+        
       }
     }
     // ordenamiento
@@ -529,8 +536,10 @@ class TransactionsController extends GetxController {
         // var
         final ProductCatalogue product = ProductCatalogue.fromMap(item);
 
-        totalSaleValue+= product.salePrice * product.quantity;
-        fullValueAtCost+= product.purchasePrice * product.quantity;
+        if( product.purchasePrice != 0 ){
+          totalSaleValue+= product.salePrice * product.quantity;
+          fullValueAtCost+= product.purchasePrice * product.quantity;
+        }
       }
     }
     value = totalSaleValue-fullValueAtCost; // obtenemos el total de las ganancias
@@ -555,10 +564,13 @@ class TransactionsController extends GetxController {
       // get : precio de venta
       totalSaleValue+= product.salePrice  * product.quantity;
       //  get : precio de compra
-      fullValueAtCost+= product.purchasePrice * product.quantity;
+      if( product.purchasePrice != 0.0){ fullValueAtCost+= product.purchasePrice * product.quantity;}
+    
     }
     // obtenemos el resultado final
-    value = totalSaleValue - fullValueAtCost; // obtenemos el total de las ganancias
+    if( fullValueAtCost != 0 ){ 
+      value = totalSaleValue - fullValueAtCost; // obtenemos el total de las ganancias
+    }
 
     return value  ==  0.0 ?  '':Publications.getFormatoPrecio(monto:value,moneda: currencySymbol);
   }
