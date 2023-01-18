@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -136,7 +137,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     
 
     showSearch(
-      context: context,
+      context: context, 
       delegate: SearchPage<ProductCatalogue>(
         items: homeController.getCataloProducts,
         searchLabel: 'Buscar',
@@ -149,22 +150,35 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
 
           // values
           Color tileColor = product.stock? (product.quantityStock <= product.alertStock && homeController.getProfileAccountSelected.subscribed ? Colors.red.withOpacity(0.5): product.favorite?Colors.amber.withOpacity(0.3):Colors.transparent) : product.favorite?Colors.amber.withOpacity(0.3):Colors.transparent;
-          String alertStockText =product.stock ? (product.quantityStock == 0 ? 'Sin stock' : '${product.quantityStock} en stock') : '';
+          // String alertStockText =product.stock ? (product.quantityStock == 0 ? 'Sin stock' : '${product.quantityStock} en stock') : '';
 
           return Column(
           children: [
             ListTile(
               contentPadding:const EdgeInsets.symmetric(horizontal: 20,vertical: 12),
               tileColor: tileColor,
-              title: Text(product.nameMark),
+              leading: CachedNetworkImage(
+                    imageUrl: product.image,
+                    placeholder: (context, url) => CircleAvatar(
+                        backgroundColor: Get.theme.dividerColor,
+                        child: Text(Publications.getFormatoPrecio(monto: product.salePrice),style: TextStyle(color: Get.textTheme.bodyText1?.color))),
+                    imageBuilder: (context, image) => CircleAvatar(
+                        backgroundColor: Get.theme.scaffoldBackgroundColor,
+                        backgroundImage: image),
+                    errorWidget: (context, url, error) => CircleAvatar(
+                      backgroundColor: Get.theme.dividerColor,
+                    ),
+                  ),
+              title: Text(product.description),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Text(
-                    product.description,
+                    product.nameMark,
                     maxLines: 2,
                     overflow: TextOverflow.clip,
+                    style: const TextStyle(color: Colors.blue),
                   ),
                   Wrap(
                   children: [

@@ -54,6 +54,13 @@
             {
               "client_id": "232181553323-eilihkps148nu7dp45cole4mlr7pkf1d.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "232181553323-2e6e220l433k2k68g346rtimv8do615u.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.logicabooleana.sell"
+              }
             }
           ]
         }
@@ -68,6 +75,14 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "232181553323-7ub25j2htvjuamfk2o4ugnrsf1dlb5d4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.logicabooleana.sell",
+            "certificate_hash": "362754dc45d99c716caf710380299d87f34b5ebc"
+          }
+        },
         {
           "client_id": "232181553323-rnjqe7tlcdt66vpcb0ud7c9fi5pgk6fi.apps.googleusercontent.com",
           "client_type": 1,
@@ -92,6 +107,13 @@
             {
               "client_id": "232181553323-eilihkps148nu7dp45cole4mlr7pkf1d.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "232181553323-2e6e220l433k2k68g346rtimv8do615u.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.logicabooleana.sell"
+              }
             }
           ]
         }

@@ -73,7 +73,7 @@ class CataloguePage extends StatelessWidget {
               tabs: [
                 Tab(child: Row(children: [
                   const Text("Productos"),
-                  Padding(
+                  controller.getCataloProducts.isEmpty?Container():Padding(
                     padding: const EdgeInsets.only(left: 5                                                                                                                                                                                                                ),
                     child: CircleAvatar(radius: 14,backgroundColor: Colors.blue.withOpacity(0.3), child: Text(controller.getCataloProducts.length.toString(),style:const TextStyle(color: Colors.white,fontSize:12),)),
                   ),
@@ -219,13 +219,24 @@ class CataloguePage extends StatelessWidget {
             contentPadding: const EdgeInsets.all(12),
             onTap: () => cataloguePageController.toProductEdit(productCatalogue: item),
             title: Text(item.description, maxLines: 1),
+            
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // text
+                Text(
+                    item.nameMark,
+                    maxLines: 2,
+                    overflow: TextOverflow.clip,
+                    style: const TextStyle(color: Colors.blue),
+                  ),
+                // text
                 Wrap(
                   children: [
                     Text(Publications.getFormatoPrecio(monto: item.salePrice),style: const TextStyle(fontWeight:FontWeight.bold )),
                     const SizedBox(width: 5),
+                    Text(item.sProcentaje,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w500)),
+                    SizedBox(width: item.sProcentaje==''?0:5),
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
