@@ -1,15 +1,15 @@
-import 'dart:ui';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:carousel_slider/carousel_slider.dart';
+import 'package:blur/blur.dart';
+import 'package:cached_network_image/cached_network_image.dart'; 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:sell/app/presentation/home/controller/home_controller.dart';
+import 'package:get/get.dart'; 
 import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:sell/app/core/utils/widgets_utils.dart';
 import '../../../domain/entities/ticket_model.dart';
 import '../../../core/utils/dynamicTheme_lb.dart';
+import '../../home/controller/home_controller.dart';
 import '../controller/transactions_controller.dart';
+import 'package:animate_do/animate_do.dart';
 
 // ignore: must_be_immutable
 class TransactionsView extends StatelessWidget {
@@ -18,9 +18,13 @@ class TransactionsView extends StatelessWidget {
 
   // var 
   bool darkTheme=false;
+  late BuildContext buildContext;
 
   @override
   Widget build(BuildContext context) {
+
+    // set 
+    buildContext = context;
 
     // get
     darkTheme = Get.isDarkMode;
@@ -29,7 +33,7 @@ class TransactionsView extends StatelessWidget {
       init: TransactionsController(),
       initState: (_) {},
       builder: (_) {
-        return Scaffold(
+        return Scaffold( 
           appBar: appbar(context: context),
           drawer: drawerApp(),
           body: body(context: context),
@@ -49,9 +53,22 @@ class TransactionsView extends StatelessWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       title: const Text('Transacciones'),
       actions: [
-        Text(transactionsController.getFilterText),
+        
         PopupMenuButton(
-            icon: const Icon(Icons.filter_list),
+            icon: Material(
+              color: darkTheme?Colors.white70:Colors.black87,
+              borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Row(
+                  children: [
+                    Text(transactionsController.getFilterText,style:TextStyle(color: darkTheme?Colors.black:Colors.white,fontWeight: FontWeight.w700)),
+                    const SizedBox(width: 5),
+                    Icon(Icons.filter_list,color: darkTheme?Colors.black:Colors.white),
+                  ],
+                ),
+              ),
+            ),
             onSelected: (selectedValue) {
               transactionsController.filterList(key: selectedValue);
             },
@@ -61,6 +78,7 @@ class TransactionsView extends StatelessWidget {
                   const PopupMenuItem(value: 'este mes', child: Text('Este mes')),
                   const PopupMenuItem(value: 'el mes pasado', child: Text('El mes pasado')),
                   const PopupMenuItem(value: 'este año', child: Text('Este año')),
+                  const PopupMenuItem(value: 'el año pasado', child: Text('El año pasado')),
                 ])
       ],
     );
@@ -76,6 +94,7 @@ class TransactionsView extends StatelessWidget {
     }
 
     return ListView.builder(
+      
       itemCount: transactionsController.getTransactionsList.length,
       itemBuilder: (context, index) {
         if (index == 0) {
@@ -112,404 +131,696 @@ class TransactionsView extends StatelessWidget {
     Map payMode =transactionsController.getPayMode(idMode: ticketModel.payMode);
     String revenue = transactionsController.readEarnings(ticket: ticketModel);
 
+    // widgets
+    Widget widget = AlertDialog(
+      title: const Text('¿Seguro que quieres eliminar esta venta?',textAlign: TextAlign.center),
+      content: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+        TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: const Text('Cancelar')),
+        TextButton(
+            onPressed: () {
+              transactionsController.deleteTicket(ticketModel: ticketModel);
+              Get.back();
+            },
+            child: const Text('si, eliminar')),
+      ]),
+    ); 
+
     return ElasticIn(
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(12),
-        onLongPress: () =>  transactionsController.deleteSale(ticketModel: ticketModel),
-        title: Row(
-          children: [
-            Text('Pago con:  ',style: TextStyle(fontWeight: FontWeight.w400,color: Get.theme.textTheme.bodyMedium?.color )),
-            Material(
-              color: (payMode['color'] as Color) .withOpacity(0.1),
-              clipBehavior: Clip.antiAlias,
-              borderRadius: const BorderRadius.all(Radius.circular(12)),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal:10,vertical:0),
-                child: Text(payMode['name'],style: TextStyle(fontWeight: FontWeight.w600,color: (payMode['color'] as Color) .withOpacity(0.7)  )),
-              )),
-          ],
-        ),
-        // title: Text('Pago con: ${payMode['name']}',style: TextStyle(fontWeight: FontWeight.w400,color: payMode['color'] )),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      child: Dismissible(
+        key:  UniqueKey(),
+        background: AnimatedContainer(duration: const Duration(milliseconds: 5000),color: Colors.black12),
+        confirmDismiss: (DismissDirection direction) async {
+          return await showDialog(
+            context: buildContext,
+            builder: (BuildContext context) {
+              return widget;
+            },
+          );
+        },
+        child: ListTile(
+          contentPadding: const EdgeInsets.all(12),
+          onLongPress: () =>  transactionsController.deleteSale(ticketModel: ticketModel),
+          title: Row(
             children: [
-              Text(ticketModel.seller.split('@')[0],style: const TextStyle(fontSize: 14)),
-              Wrap(crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  // text : fecha de publicación
-                  Text(Publications.getFechaPublicacionFormating(dateTime: ticketModel.creation.toDate()),style: const TextStyle(fontSize:12)),
-                  //  text : cantidad de productos
-                  Padding(padding: const EdgeInsets.symmetric(horizontal: 5), child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
-                  Text('${ticketModel.getLengh()} items'),
-                  // text : valor del vuelto
-                  ticketModel.valueReceived == 0? Container(): Row(
-                    children: [
-                      Padding(padding: const EdgeInsets.symmetric(horizontal: 5), child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
-                      Text('Vuelto: ${Publications.getFormatoPrecio(monto: ticketModel.valueReceived - ticketModel.priceTotal)}',style: const TextStyle(fontWeight: FontWeight.w300)),
-                    ],
-                  ),
-                ],
-              ),
+              Text('Pago con:  ',style: TextStyle(fontWeight: FontWeight.w300,color: Get.theme.textTheme.bodyMedium?.color )),
+              Material(
+                color: (payMode['color'] as Color) .withOpacity(0.1),
+                clipBehavior: Clip.antiAlias,
+                borderRadius: const BorderRadius.all(Radius.circular(12)),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal:10,vertical:0),
+                  child: Text(payMode['name'],style: TextStyle(fontWeight: FontWeight.w600,color: (payMode['color'] as Color) .withOpacity(0.7)  )),
+                )),
             ],
           ),
-        ),
-        trailing: Column(
-          crossAxisAlignment:CrossAxisAlignment.end,mainAxisSize: MainAxisSize.max,
-          children: [
-            //  text : precio totol del ticket
-            Text(Publications.getFormatoPrecio(monto: ticketModel.priceTotal),style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 16)),
-            //  text : ganancias
-            revenue==''?  const Material():Padding(
-              padding: const EdgeInsets.symmetric(horizontal:10,vertical:0),
-              child: Text( '+$revenue' ,style: TextStyle(fontWeight: FontWeight.w600,fontSize: 9,color: Colors.green.withOpacity(0.9)  )),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // primera fila
+                Row(
+                  children: [
+                    Text(ticketModel.seller.split('@')[0],style: const TextStyle(fontSize: 14,overflow: TextOverflow.ellipsis,fontWeight: FontWeight.w400)),
+                    Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
+                    Text('caja ${ticketModel.cashRegister}',style:const TextStyle(fontWeight: FontWeight.w400)),
+                  ],
+                ),
+                // segunda fila
+                Opacity(
+                  opacity: 0.8,
+                  child: Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      // text : fecha de publicación
+                      Text(Publications.getFechaPublicacionFormating(dateTime: ticketModel.creation.toDate()),style: const TextStyle(fontSize:12)),
+                      //  text : cantidad de items ( productos )
+                      Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
+                      Text('${ticketModel.getLengh()} items'),
+                      // text : valor del vuelto
+                      ticketModel.valueReceived == 0? Container(): Row(
+                        children: [
+                          Padding(padding: const EdgeInsets.symmetric(horizontal:3), child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
+                          Text('Vuelto: ${Publications.getFormatoPrecio(monto: ticketModel.valueReceived - ticketModel.priceTotal)}',style: const TextStyle(fontWeight: FontWeight.w300)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            //  text : fecha formateada 
-            Text(Publications.getFechaPublicacion(ticketModel.creation.toDate(), Timestamp.now().toDate()),style: const TextStyle(fontWeight: FontWeight.w400,fontSize: 10))
-          ],
+          ),
+          trailing: Column(
+            crossAxisAlignment:CrossAxisAlignment.end,mainAxisSize: MainAxisSize.max,
+            children: [
+              //  text : precio totol del ticket
+              Text(Publications.getFormatoPrecio(monto: ticketModel.priceTotal),style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 16)),
+              //  text : ganancias
+              Text(revenue,style: TextStyle(fontWeight: FontWeight.w900,fontSize: 12,color: Colors.green.withOpacity(0.9)  )),
+              //  text : fecha de publicación 
+              Opacity(opacity: 0.8,child: Text(Publications.getFechaPublicacion(ticketModel.creation.toDate(), Timestamp.now().toDate()),style: const TextStyle(fontWeight: FontWeight.w400,fontSize: 10)))
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-
+//////////////////
 /* CLASS VIEWS */
-// ignore: must_be_immutable
-class CarruselCardsAnalytic extends StatefulWidget {
+/////////////////
+
+
+class WidgetAnalyticSalesTileExpanded extends StatefulWidget {
 
   // ignore: prefer_const_constructors_in_immutables
-  CarruselCardsAnalytic({Key? key}): super(key: key);
-
+  WidgetAnalyticSalesTileExpanded({super.key,});
+  // muestra un item con contenedor expandible
   @override
-  State<CarruselCardsAnalytic> createState() => _CarruselCardsAnalyticState();
+  // ignore: library_private_types_in_public_api
+  _WidgetAnalyticSalesTileExpandedState createState() => _WidgetAnalyticSalesTileExpandedState();
 }
 
-class _CarruselCardsAnalyticState extends State<CarruselCardsAnalytic> {
+class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTileExpanded> {
+  
+  // card : estadisticas de las transacciones
 
+    // others controllers
+    final TransactionsController transactionsController = Get.find();
+    final HomeController homeController = Get.find<HomeController>();
 
-  // var 
-  int currentSlide=0;
+    // valueS
+    bool isDark = false;
+    bool isExpanded = false;
+    Icon iconCategory = const Icon(Icons.monetization_on_outlined,color: Colors.green,);
+    String textCategory = 'Volumen de ventas';
+    String textFilter = '';
+    String priceTotal = '';
+    String revenue  = '';
+    late ThemeData themeData;
+    double elevation = 0.0;
+  
 
   @override
   Widget build(BuildContext context) {
 
-    // values 
-    List<Widget> widgetsList = [WidgetAnalyticSalesTileExpanded(),cardAnalyticProducts];
-    int lengh = widgetsList.length;
 
-    return CarouselSlider.builder(
-      options: CarouselOptions(
-        onPageChanged: (index, reason) => setState(()=> currentSlide=index),
-        viewportFraction: 0.80,
-        enableInfiniteScroll: lengh == 1 ? false : true,
-        autoPlay: lengh == 1 ? false : false,
-        //aspectRatio: 1.5,
-        enlargeCenterPage: true,
-        enlargeStrategy: CenterPageEnlargeStrategy.height),
-      //options: CarouselOptions(enableInfiniteScroll: lista.length == 1 ? false : true,autoPlay: lista.length == 1 ? false : true,aspectRatio: 2.0,enlargeCenterPage: true,enlargeStrategy: CenterPageEnlargeStrategy.scale),
-      itemCount: lengh,
-      itemBuilder: (context, index, realIndex) {
-        // AnimatedOpacity : Versión animada de Opacity que cambia automáticamente la opacidad del niño durante un período determinado cada vez que cambia la opacidad dada
-        return widgetsList[index];
+    // get values
+    isDark = Theme.of(context).brightness == Brightness.dark;
+    textFilter = transactionsController.getFilterText;
+    priceTotal = transactionsController.getInfoPriceTotal();
+    revenue  = transactionsController.readTotalEarnings();
+    Color? colorCard = isDark? Colors.blue.withOpacity(0.1) : isExpanded?Colors.white:Colors.blue[800]; // color te la tarjeta expandible
+    themeData = isDark?ThemeData.dark():isExpanded?ThemeData.light():ThemeData.dark();
+    elevation = isDark?isExpanded?0:0:isExpanded?8:0;
 
-      },
+    // widget : productos de mayor ganancia
+    Widget wProductsRevenue = transactionsController.getBestSellingProductList.isEmpty?Container():Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [ 
+        const Padding(
+          padding: EdgeInsets.all(20.0),
+          child:Opacity(opacity: 0.7,child: Text('De mayor ganancia',overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold))),
+        ),
+        Material(
+          elevation: 0,
+          color: Colors.transparent,
+          clipBehavior: Clip.antiAlias,
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // content
+              Blur(
+                colorOpacity: 0,
+                blur: homeController.getProfileAccountSelected.subscribed?0:2.5,
+                blurColor: Colors.transparent,
+                child: ListView.builder(
+                  physics: const  NeverScrollableScrollPhysics(),
+                  scrollDirection: Axis.vertical,
+                  itemCount: transactionsController.getBestSellingProductList.length,
+                  shrinkWrap: true,
+                  itemBuilder: (context, index) {
+                    return Column(
+                      children: [
+                        ListTile(
+                          leading: CachedNetworkImage(
+                                imageUrl:transactionsController.getBestSellingProductList[index].image,
+                                placeholder: (context, url) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                                imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Stack(
+                                  alignment: Alignment.centerLeft,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 5),
+                                      child: CircleAvatar(backgroundImage: image),
+                                    ),
+                                    CircleAvatar(radius: 10 ,backgroundColor: Colors.white,child: Text(transactionsController.getBestSellingProductList[index].quantity.toString(),style:const TextStyle(fontSize: 10,color:Colors.blue,fontWeight: FontWeight.bold))),
+                                  ],
+                                )),
+                                errorWidget: (context, url, error) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                              ),
+                          title: Text(transactionsController.getBestSellingProductList[index].nameMark,overflow:TextOverflow.ellipsis,style:const TextStyle()),
+                          subtitle: Text(transactionsController.getBestSellingProductList[index].description,overflow:TextOverflow.ellipsis,style:const TextStyle( )),
+                          trailing:Text('+${Publications.getFormatoPrecio(monto: transactionsController.getBestSellingProductList[index].revenue )}',style: TextStyle(overflow:TextOverflow.ellipsis ,color:Colors.green.shade700,fontWeight: FontWeight.w900 )),
+                        ),
+                        const Divider(endIndent:20,height: 0,indent:20),
+                      ],
+                    ); 
+                },),
+              ),
+              // text
+              Center(child: homeController.getProfileAccountSelected.subscribed?Container(): LogoPremium(personalize: true,accentColor: Colors.amber.shade600)),
+            ],
+          ),
+        ),
+      ],
     );
-  }
-
-  Widget get cardAnalyticSales{
-
-    // card : estadisticas de las transacciones
-
-    // others controllers
-    final TransactionsController transactionsController = Get.find();
-
-    // values
-    const Icon iconCategory = Icon(Icons.monetization_on_outlined,color: Colors.green,);
-    const String textCategory = 'Volumen de ventas';
-    String textFilter = transactionsController.getFilterText;
-    String priceTotal = transactionsController.getInfoPriceTotal();
-    String revenue  = transactionsController.readTotalEarnings();
-
-    return Card(
-      color: Colors.blue.withOpacity(0.1),
-      elevation: 0,
-      child: Padding(
-        padding:const EdgeInsets.symmetric(horizontal: 12,vertical: 8),
-        child: Column(
+    // widget : modo de pago y su monto total
+    Widget widgetAlyticsMeansOfPayment = transactionsController.getAnalyticsMeansOfPayment.isEmpty?Container():Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [  
+        const Padding(
+          padding: EdgeInsets.all(20.0),
+          child:Opacity(opacity: 0.7,child: Text('Medios de pago',overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold))),
+        ),
+       Material(
+          elevation: 0,
+          color: Colors.transparent,
+          clipBehavior: Clip.antiAlias,
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // content
+              Blur(
+                colorOpacity: 0,
+                blur: homeController.getProfileAccountSelected.subscribed?0:2.5,
+                blurColor: Colors.transparent,
+               child: ListView.builder(
+                  physics: const  NeverScrollableScrollPhysics(),
+                  scrollDirection: Axis.vertical,
+                  itemCount: transactionsController.getAnalyticsMeansOfPayment.length,
+                  shrinkWrap: true,
+                  itemBuilder: (context, index) {
+       
+                    // var
+                    String value =transactionsController.getAnalyticsMeansOfPayment.keys.elementAt(index) ;
+                    Color color = transactionsController.getPayMode(idMode: value)['color'];
+       
+                    return Column(
+                      children: [
+                        ListTile(
+                          dense: true,
+                          title:Text(transactionsController.getPayMode(idMode: value)['name'],style: TextStyle(fontSize: 16,fontWeight: FontWeight.w800,color: color.withOpacity(0.7)  )),
+                          trailing:Opacity(opacity: 0.75,child: Text(Publications.getFormatoPrecio(monto: transactionsController.getAnalyticsMeansOfPayment.values.elementAt(index) ),style: const TextStyle(overflow:TextOverflow.ellipsis,fontWeight: FontWeight.w900))),
+                        ),
+                        transactionsController.getAnalyticsMeansOfPayment.length!=index+1?const Divider(endIndent:20,height: 0,indent:20):Container(),
+                      ],
+                    ); 
+                },),
+             ),
+             // text
+              Center(child: homeController.getProfileAccountSelected.subscribed?Container(): LogoPremium(personalize: true,accentColor: Colors.amber.shade600)),
+           ],
+         ),
+       ),
+      ],
+    );
+    // view : monto de cada caja
+    Widget cashAnalysisWidget = transactionsController.getCashAnalysisMap.isEmpty?Container():Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            // text : información de la cátegoria
-            Opacity(opacity: 0.8,child: Row(children: [const Text(textCategory,style: TextStyle(fontSize: 16,fontWeight: FontWeight.w600)),const Spacer(),CircleAvatar(backgroundColor: iconCategory.color!.withOpacity(0.5),child: iconCategory,)])),
-            const Spacer(),
-            // text
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                // text : ganancias
-                Column(
-                  children: [
-                    const Opacity(opacity:0.4,child: Text('Ganancias',style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900))),
-                    Text(revenue,style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w200)),
-                  ],
-                ),
-                // text : numero de ventas
-                Padding(
-                  padding: const EdgeInsets.only(left:20),
-                  child: Column(
-                    children: [
-                      const Opacity(opacity:0.4,child: Text('Ventas',style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900))),
-                      Text(transactionsController.getTransactionsList.length.toString(),style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w200)),
-                    ],
-                  ),
-                ),
-              ],
-              
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20,vertical: 20),
+              child: Opacity(opacity: 0.7,child: Text('Saldo en caja',overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold))),
             ),
-            // text : fecha del filtro
-            Opacity(opacity:0.5,child: Text(textFilter,style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900))),
-            // text : monto total de las ventas del filtro
-            Text(priceTotal,textAlign: TextAlign.start,style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w500)),
+            ListView.builder(
+              physics: const  NeverScrollableScrollPhysics(),
+              scrollDirection: Axis.vertical,
+              itemCount: transactionsController.getCashAnalysisMap.length,
+              shrinkWrap: true,
+              itemBuilder: (context, index) { 
+                return Column(
+                  children: [
+                    ListTile(
+                      title: Text('Caja ${transactionsController.getCashAnalysisMap.keys.elementAt(index)}',overflow:TextOverflow.ellipsis ),
+                      //subtitle: Text(transactionsController.getAnalyticsMeansOfPayment[index].description,overflow:TextOverflow.ellipsis,style:const TextStyle( )),
+                      trailing:Opacity(opacity: 0.75,child: Text(Publications.getFormatoPrecio(monto: transactionsController.getCashAnalysisMap.values.elementAt(index) ),style: const TextStyle(overflow:TextOverflow.ellipsis,fontWeight: FontWeight.w900 ))),
+                    ),
+                    transactionsController.getCashAnalysisMap.length!=index+1?const Divider(endIndent:20,height: 0,indent:20):Container(),
+                  ],
+                ); 
+            },),
           ],
         ),
-      )
-    );
-  }
-  Widget get cardAnalyticProducts{
-
-    // card : estadisticas de las transacciones
-
-    // others controllers
-    final TransactionsController transactionsController = Get.find();
-    final HomeController homeController = Get.find();
-
-    // values
-    const Icon iconCategory = Icon(Icons.analytics_outlined,color: Colors.orange,);
-    const String textCategory = 'Productos';
-    Widget wProducts = SizedBox(
-      height: 50,width: double.infinity,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: transactionsController.getMostSelledProducts.length,
-        shrinkWrap: true,
-        itemBuilder: (context, index) {
-          return CachedNetworkImage(
-            imageUrl:transactionsController.getMostSelledProducts[index].image,
-            placeholder: (context, url) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
-            imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Stack(
-              alignment: Alignment.bottomLeft,
-              children: [
-                CircleAvatar(radius: 20 ,backgroundImage: image),
-                CircleAvatar(radius: 10 ,backgroundColor: Colors.white,child: Text(transactionsController.getMostSelledProducts[index].quantity.toString(),style:const TextStyle(fontSize: 8,color:Colors.blue))),
-              ],
-            )),
-            errorWidget: (context, url, error) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
-          );
-      },),
-    );
-    // widget : los productos de mayor monto
-    Widget wProductsSales = SizedBox(
-      height: 30,width: 100,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: transactionsController.getBestSellingProductsByAmount.length,
-        shrinkWrap: true,
-        itemBuilder: (context, index) {
-          return CachedNetworkImage(
-            imageUrl:transactionsController.getBestSellingProductsByAmount[index].image,
-            placeholder: (context, url) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
-            imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Stack(
-              alignment: Alignment.bottomLeft,
-              children: [
-                CircleAvatar(radius: 15 ,backgroundImage: image),
-                CircleAvatar(radius: 8 ,backgroundColor: Colors.white,child: Text(transactionsController.getBestSellingProductsByAmount[index].quantity.toString(),style:const TextStyle(fontSize: 8,color:Colors.blue))),
-              ],
-            )),
-            errorWidget: (context, url, error) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
-          );
-      },),
-    );
-    // widget : productos de mayor ganancia
-    Widget wProductsRevenue = SizedBox(
-      height: 100,width: double.infinity,
-      child: ListView.builder(
-        scrollDirection: Axis.vertical,
-        itemCount: transactionsController.getBestSellingProductList.length,
-        shrinkWrap: true,
-        itemBuilder: (context, index) {
-          return SizedBox(
-            width: 50,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                CachedNetworkImage(
-                  imageUrl:transactionsController.getBestSellingProductList[index].image,
-                  placeholder: (context, url) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
-                  imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Stack(
-                    alignment: Alignment.bottomLeft,
-                    children: [
-                      CircleAvatar(radius: 15 ,backgroundImage: image),
-                      CircleAvatar(radius: 8 ,backgroundColor: Colors.white,child: Text(transactionsController.getBestSellingProductsByAmount[index].quantity.toString(),style:const TextStyle(fontSize: 8,color:Colors.blue))),
-                    ],
-                  )),
-                  errorWidget: (context, url, error) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
-                ),
-                //  text  : marca del producto
-                Padding(
-                  padding: const EdgeInsets.only(left: 5),
-                  child: Text(transactionsController.getBestSellingProductList[index].nameMark,overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:12)),
-                ),
-                const Spacer(),
-                // text : ganancias del producto
-                Text('+${Publications.getFormatoPrecio(monto: transactionsController.getBestSellingProductList[index].revenue)}',style: TextStyle(fontSize: 12,color:Colors.green.shade400)),
-              ],
-            ),
-          );
-      },),
+      ],
     );
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      color: Colors.blue.withOpacity(0.1),
-      elevation: 0,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          // datos
-          Container(
-            padding:const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                const Spacer(),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // text : total de los productros vendidos
-                    Text(Publications.getFormatAmount(value:transactionsController.readTotalProducts()),style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w400)),
-                    const Spacer(),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.start,
+    return InkWell(
+      highlightColor: Colors.transparent,
+      splashColor: Colors.transparent,
+      onTap: () {
+        isExpanded = !isExpanded;
+        transactionsController.update();
+      },
+      child: Theme(
+        data: themeData,
+        child: AnimatedContainer(
+          curve: !isExpanded ? const ElasticOutCurve(.9) : Curves.elasticOut,
+          duration: const Duration(milliseconds: 5000),
+          margin: EdgeInsets.symmetric(horizontal: isExpanded ? 8 : 2, vertical: 5),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Card(
+              clipBehavior: Clip.antiAlias,
+              elevation: elevation,
+              color: colorCard,
+              margin: const EdgeInsets.all(0),
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(bottomLeft:Radius.circular(12),bottomRight: Radius.circular(12),topLeft: Radius.circular(12),topRight: Radius.circular(12))),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+
+                  // view : volumen de ventas
+                  Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        const Opacity(opacity:0.4,child: Text('De mayor monto',overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900))),
-                        const SizedBox(height:5),
-                        wProductsSales,
+                        Flexible(
+                            fit: FlexFit.tight,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // text : titulo
+                                Row(
+                                  children: [
+                                    Text(textCategory,maxLines: isExpanded ? 1 : 2,overflow: TextOverflow.ellipsis, textAlign: TextAlign.start,textDirection: TextDirection.ltr, style: const TextStyle(fontSize: 24)),
+                                    // icon : muestra si la tarjeta esta expandida o no
+                                    Icon(isExpanded? Icons.keyboard_arrow_down: Icons.keyboard_arrow_up,size: 27),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                // text : analiticas
+                                Row(
+                                  children: [
+                                    // text : monto total de las ventas del filtro
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Opacity(opacity: 0.9,child:  Text(transactionsController.getFilterText,style:const TextStyle(fontSize: 10 ))),
+                                        Text(priceTotal,textAlign: TextAlign.start,style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w500)),
+                                        const Opacity(opacity: 0.7,child:  Text('Total',style:TextStyle(fontSize: 10))),
+                                      ],
+                                    ),
+                                    const Spacer(),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.only(bottom:3),
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 1),
+                                            child: Text(revenue,style: const TextStyle(fontWeight: FontWeight.w900,fontSize: 24)),
+                                          ),
+                                        ),
+                                        Opacity(opacity: 0.7,child:  Text(revenue==''?'':'Cantidad ganada',style:const TextStyle(fontSize: 10))),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ))
+                        
                       ],
                     ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Opacity(opacity:0.4,child: Text('De mayor ganancia',overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900))),
-                    wProductsRevenue,
-                  ],
-                ),
-                const SizedBox(height: 12),
-                // text : fecha del filtro
-                const Opacity(opacity:0.5,child: Text('Más vendidos',style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900))),
-                // widget : productos más vendidos
-                wProducts,
-              ],
-            ),
-          ), 
-          // Premium
-          homeController.getProfileAccountSelected.subscribed?Container():Center(
-            child: ClipRect(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-                child: InkWell(
-                  onTap: (){ homeController.showModalBottomSheetSubcription(id: 'analytic'); },
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: double.infinity,
-                    child: Center(child: LogoPremium(personalize: true,accentColor: Colors.amber,id:'analytic')),
                   ),
-                ),
+                  // view : expandible de volumen de ventas
+                  AnimatedCrossFade(
+                    firstChild: const Text('', style: TextStyle(fontSize: 0)),
+                    secondChild: Theme(
+                      data: isDark? ThemeData.dark():ThemeData.light(),
+                      child: Column(
+                        children: [ 
+                          //  view  : cantidad total de ventas
+                          Padding(
+                            padding: const EdgeInsets.only(left:20,right:20,top: 20),
+                            child: Row(
+                              children: [
+                                const Text('Ventas',overflow: TextOverflow.ellipsis),
+                                const Spacer(),
+                                Text(transactionsController.getTransactionsList.length.toString(),style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w300)),
+                              ],
+                            ),
+                          ),
+                          const Divider(endIndent:20,indent:20),
+                          // view : saldo total de cada caja
+                          cashAnalysisWidget,
+                          // view : productos con mayor ganancia
+                          wProductsRevenue,
+                          //  view : medios de pagos
+                          widgetAlyticsMeansOfPayment,
+                        ],
+                      ),
+                    ),
+                    crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                    duration: const Duration(milliseconds: 1200),
+                    reverseDuration: Duration.zero,
+                    sizeCurve: Curves.fastLinearToSlowEaseIn,
+                  ),
+                  
+                ],
               ),
             ),
           ),
-          // text : información de la cátegoria
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(children: 
-            [
-              Opacity(opacity: 0.8,child: Row(children: [const Text(textCategory,style: TextStyle(fontSize: 16,fontWeight: FontWeight.w600),),const Spacer(),CircleAvatar(backgroundColor: iconCategory.color!.withOpacity(0.5),child: iconCategory,)])),
-              const Spacer()]),
-          ),
-                  
-        ],
-      )
-    );
-  }
-  Widget get cardAnalyticOthers{
-
-    // card : estadisticas de las transacciones
-
-    // others controllers
-    final TransactionsController transactionsController = Get.find();
-    final HomeController homeController = Get.find();
-
-    // values
-    const Icon iconCategory = Icon(Icons.bar_chart_rounded);
-    const String textCategory = 'Otras estadisticas relevantes';
-    String text0 = transactionsController.getFilterText;
-    String text1 = transactionsController.getFilterText;
-
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      color: Colors.blue.withOpacity(0.1),
-      elevation: 0,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                const Spacer(),
-                // text : fecha del filtro
-                Opacity(opacity:0.5,child: Text(text0,style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900))),
-                // widget : productos más vendidos
-                Text(text1),
-              ],
-            ),
-          ), 
-          // Premium
-          homeController.getProfileAccountSelected.subscribed?Container():Center(
-            child: ClipRect(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-                child: InkWell(
-                  onTap: (){ homeController.showModalBottomSheetSubcription(id: 'analytic'); },
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: double.infinity,
-                    child: Center(child: LogoPremium(personalize: true,accentColor: Colors.amber,id:'analytic')),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          // text : información de la cátegoria
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(children: [Opacity(opacity: 0.5,child: Row(children:const [iconCategory,SizedBox(width:5),Text(textCategory)])),const Spacer()]),
-          ),
-                  
-        ],
-      )
+        ),
+      ),
     );
   }
 }
 
+class WidgetAnalyticProductsTileExpanded extends StatefulWidget {
 
+  // ignore: prefer_const_constructors_in_immutables
+  WidgetAnalyticProductsTileExpanded({super.key,});
+  // muestra un item con contenedor expandible
+  @override
+  // ignore: library_private_types_in_public_api
+  _WidgetAnalyticProductsTileExpandedState createState() => _WidgetAnalyticProductsTileExpandedState();
+}
+
+class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProductsTileExpanded> {
+  
+  // card : estadisticas de las transacciones
+
+    // others controllers
+    final TransactionsController transactionsController = Get.find();
+    final HomeController homeController = Get.find<HomeController>();
+
+    // valueS
+    Color colorCard = Colors.grey;
+    bool isDark = false;
+    bool isExpanded = false;
+    Icon iconCategory = const Icon(Icons.analytics_outlined,color: Colors.orange);
+    String textCategory = 'Productos';
+    String textFilter = '';
+    String priceTotal = '';
+    String revenue  = '';
+    late ThemeData themeData;
+    double elevation = 0.0 ;
+
+  @override
+  Widget build(BuildContext context) {
+
+    // get values
+    
+    isDark = Theme.of(context).brightness == Brightness.dark;
+    textFilter = transactionsController.getFilterText;
+    priceTotal = transactionsController.getInfoPriceTotal();
+    revenue  = transactionsController.readTotalEarnings();
+    Color? colorCard = isDark? Colors.blue.withOpacity(0.1) : isExpanded?Colors.white:Colors.teal[800];
+    themeData = isDark?ThemeData.dark():isExpanded?ThemeData.light():ThemeData.dark();
+    elevation = isDark?isExpanded?0:0:isExpanded?8:0;
+
+    // widget : mostramos los productos de mayor precio más vendidos
+    Widget higherPriedProductsWidget = transactionsController.getBestSellingProductsByAmount.isEmpty?Container():Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [ 
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20,vertical: 20),
+          child: Opacity(opacity: 0.7,child: Text('Más vendidos con el mayor monto',overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold))),
+        ),
+        Material(
+          elevation: 0,
+          color: Colors.transparent,
+          clipBehavior: Clip.antiAlias,
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // content
+              Blur(
+                colorOpacity: 0,
+                blur: homeController.getProfileAccountSelected.subscribed?0:2.5,
+                blurColor: Colors.transparent,
+                child: ListView.builder(
+                  physics: const  NeverScrollableScrollPhysics(),
+                  scrollDirection: Axis.vertical,
+                  itemCount: transactionsController.getBestSellingProductsByAmount.length,
+                  shrinkWrap: true,
+                  itemBuilder: (context, index) {
+                    return Column(
+                      children: [
+                        ListTile(
+                          leading: CachedNetworkImage(
+                                imageUrl:transactionsController.getBestSellingProductsByAmount[index].image,
+                                placeholder: (context, url) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                                imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Padding(
+                                  padding: const EdgeInsets.only(left: 5),
+                                  child: CircleAvatar(backgroundImage: image),
+                                )),
+                                errorWidget: (context, url, error) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                              ),
+                          title: Text(transactionsController.getBestSellingProductsByAmount[index].nameMark,overflow:TextOverflow.ellipsis,style:const TextStyle()),
+                          subtitle: Text(transactionsController.getBestSellingProductsByAmount[index].description,overflow:TextOverflow.ellipsis,style:const TextStyle( )),
+                          trailing: CircleAvatar( radius: 16,backgroundColor: Colors.blue.withOpacity(0.1),child: Text(transactionsController.getBestSellingProductsByAmount[index].quantity.toString(),style:const TextStyle(color:Colors.blue))),
+                        ),
+                        transactionsController.getBestSellingProductsByAmount.length!=index+1?const Divider(endIndent:20,height: 0,indent:20):Container(),
+                      ],
+                    ); 
+                },),
+              ),
+              // text
+              Center(child: homeController.getProfileAccountSelected.subscribed?Container(): LogoPremium(personalize: true,accentColor: Colors.amber.shade600)),
+            ],
+          ),
+        ),
+      ],
+    );
+    // widget : mostramos los productos más vendidos
+    Widget mostselledProductsWidget = transactionsController.getMostSelledProducts.isEmpty?Container():Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [ 
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20,vertical: 20),
+          child: Opacity(opacity: 0.7,child: Text('Más vendidos',overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold))),
+        ),
+        Material(
+          elevation: 0,
+          color: Colors.transparent,
+          clipBehavior: Clip.antiAlias,
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // content
+              Blur(
+                colorOpacity: 0,
+                blur: homeController.getProfileAccountSelected.subscribed?0:2.5,
+                blurColor: Colors.transparent,
+                child: ListView.builder(
+                  physics: const  NeverScrollableScrollPhysics(),
+                  scrollDirection: Axis.vertical,
+                  itemCount: transactionsController.getMostSelledProducts.length,
+                  shrinkWrap: true,
+                  itemBuilder: (context, index) {
+                    return Column(
+                      children: [
+                        ListTile(
+                          leading: CachedNetworkImage(
+                                imageUrl:transactionsController.getMostSelledProducts[index].image,
+                                placeholder: (context, url) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                                imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Padding(
+                                  padding: const EdgeInsets.only(left: 5),
+                                  child: CircleAvatar(backgroundImage: image),
+                                )),
+                                errorWidget: (context, url, error) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                              ),
+                          title: Text(transactionsController.getMostSelledProducts[index].nameMark,overflow:TextOverflow.ellipsis,style:const TextStyle()),
+                          subtitle: Text(transactionsController.getMostSelledProducts[index].description,overflow:TextOverflow.ellipsis,style:const TextStyle( )),
+                          trailing: CircleAvatar( radius: 16,backgroundColor: Colors.blue.withOpacity(0.1),child: Text(transactionsController.getMostSelledProducts[index].quantity.toString(),style:const TextStyle(color:Colors.blue))),
+                        ),
+                        transactionsController.getMostSelledProducts.length!=index+1?const Divider(endIndent:20,height: 0,indent:20):Container(),
+                      ],
+                    ); 
+                },),
+              ),
+              // text
+              Center(child: homeController.getProfileAccountSelected.subscribed?Container(): LogoPremium(personalize: true,accentColor: Colors.amber.shade600)),
+            ],
+          ),
+        ),
+      ],
+    );
+
+
+    return Theme(
+      data: themeData,
+      child: InkWell(
+        highlightColor: Colors.transparent,
+        splashColor: Colors.transparent,
+        onTap: () {
+          isExpanded = !isExpanded;
+          transactionsController.update();
+        },
+        child: AnimatedContainer(
+          curve: !isExpanded ? const ElasticOutCurve(.9) : Curves.elasticOut,
+          duration: const Duration(milliseconds: 1500),
+          margin: EdgeInsets.symmetric(horizontal: isExpanded ? 8 : 2, vertical: 5),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Card(
+                    color: colorCard,
+                    clipBehavior: Clip.antiAlias,
+                    elevation: elevation, 
+                    margin: const EdgeInsets.all(0),
+                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(bottomLeft:Radius.circular(12),bottomRight: Radius.circular(12),topLeft: Radius.circular(12),topRight: Radius.circular(12))),
+                    child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(textCategory,maxLines: isExpanded ? 1 : 2,overflow: TextOverflow.ellipsis, textAlign: TextAlign.start,textDirection: TextDirection.ltr, style:const TextStyle( fontSize: 24)),
+                                    // icon : muestra si la tarjeta esta expandida o no
+                                    Icon(isExpanded? Icons.keyboard_arrow_down: Icons.keyboard_arrow_up,size: 27),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                Row(
+                                  children: [
+                                    // widget : total de los productros vendidos
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [ 
+                                        Text(Publications.getFormatAmount(value:transactionsController.readTotalProducts()),style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w400)),
+                                        const Opacity(opacity: 0.7,child:  Text('Total',style:TextStyle(fontSize: 10)))
+                                      ],
+                                    ),
+                                    const Spacer(),
+                                    isExpanded?Container():transactionsController.getMostSelledProducts.isEmpty?Container():transactionsController.getMostSelledProducts[0].image==''?Container():FadeIn(
+                                      animate: true,
+                                      duration: const Duration(milliseconds: 2000),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              CachedNetworkImage(
+                                                imageUrl:  transactionsController.getMostSelledProducts[0].image,
+                                                placeholder: (context, url) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                                                imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Stack(
+                                                  alignment: Alignment.bottomLeft,
+                                                  children: [
+                                                    CircleAvatar(radius: 15 ,backgroundImage: image),
+                                                    CircleAvatar(radius: 8 ,backgroundColor: Colors.white,child: Text(transactionsController.getMostSelledProducts[0].quantity.toString(),style:const TextStyle(fontSize: 8,color:Colors.blue))),
+                                                  ],
+                                                )),
+                                                errorWidget: (context, url, error) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                                              ),
+                                              //  text  : marca del producto
+                                              Padding(
+                                                padding: const EdgeInsets.only(left: 5),
+                                                child: Text(transactionsController.getMostSelledProducts[0].nameMark,overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:12)),
+                                              ),
+                                            ],
+                                          ),
+                                          const Opacity(opacity: 0.8,child: Text('Más vendido',style:TextStyle(fontSize: 10))),
+                                        ],
+                                      ),
+                                    ),
+                                    
+                                  ],
+                                ),
+                              ],
+                            ),
+                            ),
+                          AnimatedCrossFade(
+                                firstChild: const Text('', style: TextStyle(fontSize: 0)),
+                                secondChild: Theme(
+                                  data: isDark? ThemeData.dark():ThemeData.light(),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      
+                                      // widget : más vendidos
+                                      mostselledProductsWidget,
+
+                                      //  widget  : productos más vendido por el valor
+                                      higherPriedProductsWidget, 
+
+                                    ],
+                                  ),
+                                ),
+                                crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                                duration: const Duration(milliseconds: 1200),
+                                reverseDuration: Duration.zero,
+                                sizeCurve: Curves.fastLinearToSlowEaseIn,
+                              ),
+                          ],
+                        ),
+                      ),
+                ),
+        ),
+      ),
+    );
+  }
+}
+
+/* 
 class WidgetAnalyticSalesTileExpanded extends StatefulWidget {
 
   // ignore: prefer_const_constructors_in_immutables
@@ -529,21 +840,146 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
 
     // valueS
     bool isDark = false;
-    bool isExpanded = true;
+    bool isExpanded = false;
     Icon iconCategory = const Icon(Icons.monetization_on_outlined,color: Colors.green,);
     String textCategory = 'Volumen de ventas';
     String textFilter = '';
     String priceTotal = '';
     String revenue  = '';
+  
 
   @override
   Widget build(BuildContext context) {
+
 
     // get values
     isDark = Theme.of(context).brightness == Brightness.dark;
     textFilter = transactionsController.getFilterText;
     priceTotal = transactionsController.getInfoPriceTotal();
     revenue  = transactionsController.readTotalEarnings();
+    Color? colorCard =  Colors.blue[800]; // color te la tarjeta expandible
+
+    // widget : productos de mayor ganancia
+    Widget wProductsRevenue = transactionsController.getBestSellingProductList.isEmpty?Container():Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [ 
+        const Padding(
+          padding: EdgeInsets.all(12.0),
+          child: Text('De mayor ganancia',overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold)),
+        ),
+        SizedBox( //220
+          child: ListView.builder(
+            physics: const  NeverScrollableScrollPhysics(),
+            scrollDirection: Axis.vertical,
+            itemCount: transactionsController.getBestSellingProductList.length,
+            shrinkWrap: true,
+            itemBuilder: (context, index) {
+              return Column(
+                children: [
+                  ListTile(
+                    leading: CachedNetworkImage(
+                          imageUrl:transactionsController.getBestSellingProductList[index].image,
+                          placeholder: (context, url) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                          imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Stack(
+                            alignment: Alignment.centerLeft,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(left: 5),
+                                child: CircleAvatar(backgroundImage: image),
+                              ),
+                              CircleAvatar(radius: 10 ,backgroundColor: Colors.white,child: Text(transactionsController.getBestSellingProductList[index].quantity.toString(),style:const TextStyle(fontSize: 10,color:Colors.blue,fontWeight: FontWeight.bold))),
+                            ],
+                          )),
+                          errorWidget: (context, url, error) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                        ),
+                    title: Text(transactionsController.getBestSellingProductList[index].nameMark,overflow:TextOverflow.ellipsis,style:const TextStyle()),
+                    subtitle: Text(transactionsController.getBestSellingProductList[index].description,overflow:TextOverflow.ellipsis,style:const TextStyle( )),
+                    trailing:Text('+${Publications.getFormatoPrecio(monto: transactionsController.getBestSellingProductList[index].revenue )}',style: TextStyle(overflow:TextOverflow.ellipsis ,color:Colors.green.shade400,fontWeight: FontWeight.w900,fontSize: 18)),
+                  ),
+                  const Divider(),
+                ],
+              ); 
+          },),
+        ),
+      ],
+    );
+    // widget : modo de pago y su monto total
+    Widget widgetAlyticsMeansOfPayment = transactionsController.getAnalyticsMeansOfPayment.isEmpty?Container():Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [ 
+        const Padding(
+          padding: EdgeInsets.all(12.0),
+          child: Text('Medios de pago',overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold)),
+        ),
+        SizedBox( //220
+          child: ListView.builder(
+            physics: const  NeverScrollableScrollPhysics(),
+            scrollDirection: Axis.vertical,
+            itemCount: transactionsController.getAnalyticsMeansOfPayment.length,
+            shrinkWrap: true,
+            itemBuilder: (context, index) {
+
+              String value =transactionsController.getAnalyticsMeansOfPayment.keys.elementAt(index) ;
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Material(
+                      clipBehavior: Clip.antiAlias,borderRadius: BorderRadius.circular(12),
+                      child: ListTile(
+                        tileColor: (transactionsController.getPayMode(idMode: value)['color'] as Color) .withOpacity(0.1),
+                        dense: true,
+                        title:Padding(
+                          padding: const EdgeInsets.symmetric(horizontal:10,vertical:5),
+                          child: Text(transactionsController.getPayMode(idMode: value)['name'],style: TextStyle(fontSize: 16,fontWeight: FontWeight.w800,color: (transactionsController.getPayMode(idMode: value)['color']as Color) .withOpacity(0.7)  )),
+                        ),
+                        trailing:Opacity(opacity: 0.75,child: Text(Publications.getFormatoPrecio(monto: transactionsController.getAnalyticsMeansOfPayment.values.elementAt(index) ),style: const TextStyle(overflow:TextOverflow.ellipsis,fontWeight: FontWeight.w900,fontSize: 18))),
+                      ),
+                    ),
+                  ),
+                ],
+              ); 
+          },),
+        ),
+      ],
+    );
+    // view : monto de cada caja
+    Widget cashAnalysisWidget = transactionsController.getCashAnalysisMap.isEmpty?Container():Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox( //220
+          //height:transactionsController.getCashAnalysisMap.isEmpty?0:transactionsController.getCashAnalysisMap.length==1?50:transactionsController.getCashAnalysisMap.length==2?100:175,width: double.infinity,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12,vertical: 20),
+                child: Text('saldo de caja',overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold)),
+              ),
+              ListView.builder(
+                physics: const  NeverScrollableScrollPhysics(),
+                scrollDirection: Axis.vertical,
+                itemCount: transactionsController.getCashAnalysisMap.length,
+                shrinkWrap: true,
+                itemBuilder: (context, index) { 
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Material(
+                      clipBehavior: Clip.antiAlias,borderRadius: BorderRadius.circular(12),
+                      child: ListTile(
+                        title: Text('Caja ${transactionsController.getCashAnalysisMap.keys.elementAt(index)}',overflow:TextOverflow.ellipsis,style:const TextStyle()),
+                        //subtitle: Text(transactionsController.getAnalyticsMeansOfPayment[index].description,overflow:TextOverflow.ellipsis,style:const TextStyle( )),
+                        trailing:Opacity(opacity: 0.75,child: Text(Publications.getFormatoPrecio(monto: transactionsController.getCashAnalysisMap.values.elementAt(index) ),style: const TextStyle(overflow:TextOverflow.ellipsis,fontWeight: FontWeight.w900,fontSize: 18))),
+                      ),
+                    ),
+                  ); 
+              },),
+            ],
+          ),
+        ),
+      ],
+    );
 
     return InkWell(
       highlightColor: Colors.transparent,
@@ -552,82 +988,122 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
         isExpanded = !isExpanded;
         transactionsController.update();
       },
-      child: AnimatedContainer(
-        curve: !isExpanded ? const ElasticOutCurve(.9) : Curves.elasticOut,
-        duration: const Duration(milliseconds: 1500),
-        margin:
-            EdgeInsets.symmetric(horizontal: isExpanded ? 8 : 2, vertical: 5),
-        child: Card(
-          elevation: isExpanded ? 0 : 0,
-          color: Colors.blue.withOpacity(0.1),
-          clipBehavior: Clip.antiAlias,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Theme(
+        data: ThemeData.dark(),
+        child: AnimatedContainer(
+          curve: !isExpanded ? const ElasticOutCurve(.9) : Curves.elasticOut,
+          duration: const Duration(milliseconds: 1500),
+          margin: EdgeInsets.symmetric(horizontal: isExpanded ? 8 : 2, vertical: 5),
           child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    
-                    // titulo
-                    Flexible(
-                        fit: FlexFit.tight,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Card(
+              clipBehavior: Clip.antiAlias,
+              elevation: 0,
+              color: colorCard,
+              margin: const EdgeInsets.all(0),
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(bottomLeft:Radius.circular(12),bottomRight: Radius.circular(12),topLeft: Radius.circular(12),topRight: Radius.circular(12))),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+
+                  // view : volumen de ventas
+                  Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Flexible(
+                            fit: FlexFit.tight,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // text : titulo
+                                Row(
+                                  children: [
+                                    Text(textCategory,maxLines: isExpanded ? 1 : 2,overflow: TextOverflow.ellipsis, textAlign: TextAlign.start,textDirection: TextDirection.ltr, style: const TextStyle(fontSize: 24)),
+                                    // icon : muestra si la tarjeta esta expandida o no
+                                    Icon(isExpanded? Icons.keyboard_arrow_down: Icons.keyboard_arrow_up,size: 27),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                // text : analiticas
+                                Row(
+                                  children: [
+                                    // text : monto total de las ventas del filtro
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Opacity(opacity: 0.9,child:  Text(transactionsController.getFilterText,style:const TextStyle(fontSize: 10))),
+                                        Text(priceTotal,textAlign: TextAlign.start,style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w500)),
+                                        const Opacity(opacity: 0.7,child:  Text('Total',style:TextStyle(fontSize: 10)))
+                                      ],
+                                    ),
+                                    const Spacer(),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      children: [
+                                        Opacity(opacity: 0.7,child:  Text(revenue==''?'':'Cantidad ganada',style:const TextStyle(fontSize: 10))),
+                                        Padding(
+                                          padding: const EdgeInsets.only(bottom:3),
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 1),
+                                            child: Text(revenue,style: const TextStyle(fontWeight: FontWeight.w900,fontSize: 24)),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ))
+                        
+                      ],
+                    ),
+                  ),
+                  // view : expandible de volumen de ventas
+                  AnimatedCrossFade(
+                    firstChild: const Text('', style: TextStyle(fontSize: 0)),
+                    secondChild: Theme(
+                      data: isDark? ThemeData.dark():ThemeData.light(),
+                      child: Material(
+                        elevation: 0,
+                        borderRadius: const BorderRadius.all(Radius.circular(12)),
+                        color: isDark? Colors.grey.shade900 : Colors.blueGrey.shade100,
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Text(textCategory,maxLines: isExpanded ? 1 : 2,overflow: TextOverflow.ellipsis, textAlign: TextAlign.start,textDirection: TextDirection.ltr, style: Theme.of(context).textTheme.titleLarge),
-                                // icon : muestra si la tarjeta esta expandida o no
-                                Icon(isExpanded? Icons.keyboard_arrow_down: Icons.keyboard_arrow_up,color: Theme.of(context).textTheme.titleLarge!.color,size: 27),
-                              ],
+                          children: [ 
+                            //  view  : cantidad total de ventas
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Material(
+                                clipBehavior: Clip.antiAlias,borderRadius: BorderRadius.circular(12),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(20.0),
+                                  child: Row(
+                                    children: [
+                                      const Text('Ventas',overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 16)),
+                                      const Spacer(),
+                                      Text(transactionsController.getTransactionsList.length.toString(),style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ),
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                // text : monto total de las ventas del filtro
-                                Text(priceTotal,textAlign: TextAlign.start,style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w500)),
-                                const Spacer(),
-                                Text('+$revenue',style: const TextStyle(color: Colors.green,fontWeight: FontWeight.w900,fontSize: 16)),
-                              ],
-                            ),
+                            cashAnalysisWidget,
+                            // view : productos con mayor ganancia
+                            wProductsRevenue,
+                            widgetAlyticsMeansOfPayment,
                           ],
-                        )),
-                    
-                  ],
-                ),
-                /* isExpanded ? const SizedBox() : const SizedBox(height: 20),
-                AnimatedCrossFade(
-                  firstChild: const Text('', style: TextStyle(fontSize: 0)),
-                  secondChild: Text('...Descripción...',
-                      textAlign: TextAlign.start,
-                      textDirection: TextDirection.ltr,
-                      style: Theme.of(context) .textTheme.titleMedium ),
-                  crossFadeState: isExpanded ? CrossFadeState.showFirst: CrossFadeState.showSecond,
-                  duration: const Duration(milliseconds: 1200),
-                  reverseDuration: Duration.zero,
-                  sizeCurve: Curves.fastLinearToSlowEaseIn,
-                ), */
-                isExpanded ? const SizedBox() : const SizedBox(height: 20),
-                AnimatedCrossFade(
-                  firstChild: const Text('', style: TextStyle(fontSize: 0)),
-                  secondChild: Row(
-                    children: [
-                      const Text('Ventas'),
-                      const Spacer(),
-                      Text(transactionsController.getTransactionsList.length.toString(),style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w200)),
-                    ],
-                  ),//Column(children: widget.list),
-                  crossFadeState: isExpanded
-                      ? CrossFadeState.showFirst
-                      : CrossFadeState.showSecond,
-                  duration: const Duration(milliseconds: 1200),
-                  reverseDuration: Duration.zero,
-                  sizeCurve: Curves.fastLinearToSlowEaseIn,
-                ),
-              ],
+                        ),
+                      ),
+                    ),
+                    crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                    duration: const Duration(milliseconds: 1200),
+                    reverseDuration: Duration.zero,
+                    sizeCurve: Curves.fastLinearToSlowEaseIn,
+                  ),
+                  
+                ],
+              ),
             ),
           ),
         ),
@@ -654,8 +1130,9 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
     final TransactionsController transactionsController = Get.find();
 
     // valueS
+    Color colorCard = Colors.grey;
     bool isDark = false;
-    bool isExpanded = true;
+    bool isExpanded = false;
     Icon iconCategory = const Icon(Icons.analytics_outlined,color: Colors.orange);
     String textCategory = 'Productos';
     String textFilter = '';
@@ -670,183 +1147,201 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
     textFilter = transactionsController.getFilterText;
     priceTotal = transactionsController.getInfoPriceTotal();
     revenue  = transactionsController.readTotalEarnings();
+    Color? colorCard = Colors.teal[800]; // color te la tarjeta expandible 
+    
+    // widget : mostramos los productos de mayor precio más vendidos
+    Widget higherPriedProductsWidget = transactionsController.getBestSellingProductsByAmount.isEmpty?Container():Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12,vertical: 20),
+          child: Text('Más vendidos con el mayor monto',overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold)),
+        ),
 
-    // values
-    Widget wProducts = SizedBox(
-      height: 50,width: double.infinity,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: transactionsController.getMostSelledProducts.length,
-        shrinkWrap: true,
-        itemBuilder: (context, index) {
-          return CachedNetworkImage(
-            imageUrl:transactionsController.getMostSelledProducts[index].image,
-            placeholder: (context, url) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
-            imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Stack(
-              alignment: Alignment.centerLeft,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 5),
-                  child: CircleAvatar(radius: index==0?30:20 ,backgroundImage: image),
+        SizedBox( //220
+          child: ListView.builder(
+            physics: const  NeverScrollableScrollPhysics(),
+            scrollDirection: Axis.vertical,
+            itemCount: transactionsController.getBestSellingProductsByAmount.length,
+            shrinkWrap: true,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Material(
+                  elevation: 0,clipBehavior: Clip.antiAlias,borderRadius: BorderRadius.circular(12),
+                  child: ListTile(
+                    leading: CachedNetworkImage(
+                          imageUrl:transactionsController.getBestSellingProductsByAmount[index].image,
+                          placeholder: (context, url) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                          imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Padding(
+                            padding: const EdgeInsets.only(left: 5),
+                            child: CircleAvatar(backgroundImage: image),
+                          )),
+                          errorWidget: (context, url, error) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                        ),
+                    title: Text(transactionsController.getBestSellingProductsByAmount[index].nameMark,overflow:TextOverflow.ellipsis,style:const TextStyle()),
+                    subtitle: Text(transactionsController.getBestSellingProductsByAmount[index].description,overflow:TextOverflow.ellipsis,style:const TextStyle( )),
+                    trailing: CircleAvatar( radius: 16,backgroundColor: Colors.blue.withOpacity(0.1),child: Text(transactionsController.getBestSellingProductsByAmount[index].quantity.toString(),style:const TextStyle(color:Colors.blue))),
+                  ),
                 ),
-                CircleAvatar(radius: index==0?12:10 ,backgroundColor: Colors.white,child: Text(transactionsController.getMostSelledProducts[index].quantity.toString(),style:const TextStyle(fontSize: 8,color:Colors.blue))),
-              ],
-            )),
-            errorWidget: (context, url, error) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
-          );
-      },),
+              ); 
+          },),
+        ),
+      ],
     );
-    // widget : los productos de mayor monto
-    Widget wProductsSales = SizedBox(
-      height: 30,width: 100,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: transactionsController.getBestSellingProductsByAmount.length,
-        shrinkWrap: true,
-        itemBuilder: (context, index) {
-          return CachedNetworkImage(
-            imageUrl:transactionsController.getBestSellingProductsByAmount[index].image,
-            placeholder: (context, url) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
-            imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Stack(
-              alignment: Alignment.bottomLeft,
-              children: [
-                CircleAvatar(radius: 15 ,backgroundImage: image),
-                CircleAvatar(radius: 8 ,backgroundColor: Colors.white,child: Text(transactionsController.getBestSellingProductsByAmount[index].quantity.toString(),style:const TextStyle(fontSize: 8,color:Colors.blue))),
-              ],
-            )),
-            errorWidget: (context, url, error) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
-          );
-      },),
-    );
-    // widget : productos de mayor ganancia
-    Widget wProductsRevenue = SizedBox(
-      height: 100,width: double.infinity,
-      child: ListView.builder(
-        scrollDirection: Axis.vertical,
-        itemCount: transactionsController.getBestSellingProductList.length,
-        shrinkWrap: true,
-        itemBuilder: (context, index) {
-          return SizedBox(
-            width: 50,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                CachedNetworkImage(
-                  imageUrl:transactionsController.getBestSellingProductList[index].image,
-                  placeholder: (context, url) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
-                  imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Stack(
-                    alignment: Alignment.bottomLeft,
-                    children: [
-                      CircleAvatar(radius: 15 ,backgroundImage: image),
-                      CircleAvatar(radius: 8 ,backgroundColor: Colors.white,child: Text(transactionsController.getBestSellingProductsByAmount[index].quantity.toString(),style:const TextStyle(fontSize: 8,color:Colors.blue))),
-                    ],
-                  )),
-                  errorWidget: (context, url, error) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+    // widget : mostramos los productos más vendidos
+    Widget mostselledProductsWidget = transactionsController.getMostSelledProducts.isEmpty?Container():Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12,vertical: 20),
+          child: Text('Más vendidos',overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold)),
+        ),
+        SizedBox( //220
+          child: ListView.builder(
+            physics: const  NeverScrollableScrollPhysics(),
+            scrollDirection: Axis.vertical,
+            itemCount: transactionsController.getMostSelledProducts.length,
+            shrinkWrap: true,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Material(
+                  elevation: 0,clipBehavior: Clip.antiAlias,borderRadius: BorderRadius.circular(12),
+                  child: ListTile(
+                    leading: CachedNetworkImage(
+                          imageUrl:transactionsController.getMostSelledProducts[index].image,
+                          placeholder: (context, url) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                          imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Padding(
+                            padding: const EdgeInsets.only(left: 5),
+                            child: CircleAvatar(backgroundImage: image),
+                          )),
+                          errorWidget: (context, url, error) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                        ),
+                    title: Text(transactionsController.getMostSelledProducts[index].nameMark,overflow:TextOverflow.ellipsis,style:const TextStyle()),
+                    subtitle: Text(transactionsController.getMostSelledProducts[index].description,overflow:TextOverflow.ellipsis,style:const TextStyle( )),
+                    trailing: CircleAvatar( radius: 16,backgroundColor: Colors.blue.withOpacity(0.1),child: Text(transactionsController.getMostSelledProducts[index].quantity.toString(),style:const TextStyle(color:Colors.blue))),
+                  ),
                 ),
-                //  text  : marca del producto
-                Padding(
-                  padding: const EdgeInsets.only(left: 5),
-                  child: Text(transactionsController.getBestSellingProductList[index].nameMark,overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:12)),
-                ),
-                const Spacer(),
-                // text : ganancias del producto
-                Text('+${Publications.getFormatoPrecio(monto: transactionsController.getBestSellingProductList[index].revenue)}',style: TextStyle(fontSize: 12,color:Colors.green.shade400)),
-              ],
-            ),
-          );
-      },),
+              ); 
+          },),
+        ),
+      ],
     );
 
-    return InkWell(
-      highlightColor: Colors.transparent,
-      splashColor: Colors.transparent,
-      onTap: () {
-        isExpanded = !isExpanded;
-        transactionsController.update();
-      },
-      child: AnimatedContainer(
-        curve: !isExpanded ? const ElasticOutCurve(.9) : Curves.elasticOut,
-        duration: const Duration(milliseconds: 1500),
-        margin: EdgeInsets.symmetric(horizontal: isExpanded ? 8 : 2, vertical: 5),
-              child: Card(
-                elevation: isExpanded ? 0 : 0,
-                color: Colors.blue.withOpacity(0.1),
-                clipBehavior: Clip.antiAlias,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+
+    return Theme(
+      data: ThemeData.dark(),
+      child: InkWell(
+        highlightColor: Colors.transparent,
+        splashColor: Colors.transparent,
+        onTap: () {
+          isExpanded = !isExpanded;
+          transactionsController.update();
+        },
+        child: AnimatedContainer(
+          curve: !isExpanded ? const ElasticOutCurve(.9) : Curves.elasticOut,
+          duration: const Duration(milliseconds: 1500),
+          margin: EdgeInsets.symmetric(horizontal: isExpanded ? 8 : 2, vertical: 5),
                 child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Card(
+                    color: colorCard,
+                    clipBehavior: Clip.antiAlias,
+                    elevation: isExpanded?0:0, 
+                    margin: const EdgeInsets.all(0),
+                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(bottomLeft:Radius.circular(12),bottomRight: Radius.circular(12),topLeft: Radius.circular(12),topRight: Radius.circular(12))),
+                    child: Column(
                         children: [
-                          
-                          // titulo
-                          Flexible(
-                              fit: FlexFit.tight,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(textCategory,maxLines: isExpanded ? 1 : 2,overflow: TextOverflow.ellipsis, textAlign: TextAlign.start,textDirection: TextDirection.ltr, style: Theme.of(context).textTheme.titleLarge),
-                                      // icon : muestra si la tarjeta esta expandida o no
-                                      Icon(isExpanded? Icons.keyboard_arrow_down: Icons.keyboard_arrow_up,color: Theme.of(context).textTheme.titleLarge!.color,size: 27),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Row(
-                                    children: [
-                                      // text : total de los productros vendidos
-                                      Text(Publications.getFormatAmount(value:transactionsController.readTotalProducts()),style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w400)),
-                                      const Spacer(),
-                                    ],
-                                  ),
-                                ],
-                              )),
-                          
-                        ],
-                      ),
-                      isExpanded ? const SizedBox() : const SizedBox(height: 20),
-                      AnimatedCrossFade(
-                        firstChild: const Text('', style: TextStyle(fontSize: 0)),
-                        secondChild: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.start,
+                          Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Opacity(opacity:0.4,child: Text('De mayor monto',overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900))),
-                                const SizedBox(height:5),
-                                wProductsSales,
+                                Row(
+                                  children: [
+                                    Text(textCategory,maxLines: isExpanded ? 1 : 2,overflow: TextOverflow.ellipsis, textAlign: TextAlign.start,textDirection: TextDirection.ltr, style:const TextStyle( fontSize: 24)),
+                                    // icon : muestra si la tarjeta esta expandida o no
+                                    Icon(isExpanded? Icons.keyboard_arrow_down: Icons.keyboard_arrow_up,size: 27),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                Row(
+                                  children: [
+                                    // widget : total de los productros vendidos
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(Publications.getFormatAmount(value:transactionsController.readTotalProducts()),style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w400)),
+                                        const Opacity(opacity: 0.7,child:  Text('Total',style:TextStyle(fontSize: 10)))
+                                      ],
+                                    ),
+                                    const Spacer(),
+                                    transactionsController.getBestSellingProductList.isEmpty?Container():transactionsController.getBestSellingProductList[0].image==''?Container():Column(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            CachedNetworkImage(
+                                              imageUrl:  transactionsController.getBestSellingProductList[0].image,
+                                              placeholder: (context, url) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                                              imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Stack(
+                                                alignment: Alignment.bottomLeft,
+                                                children: [
+                                                  CircleAvatar(radius: 15 ,backgroundImage: image),
+                                                  CircleAvatar(radius: 8 ,backgroundColor: Colors.white,child: Text(transactionsController.getBestSellingProductList[0].quantity.toString(),style:const TextStyle(fontSize: 8,color:Colors.blue))),
+                                                ],
+                                              )),
+                                              errorWidget: (context, url, error) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                                            ),
+                                            //  text  : marca del producto
+                                            Padding(
+                                              padding: const EdgeInsets.only(left: 5),
+                                              child: Text(transactionsController.getBestSellingProductList[0].nameMark,overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:12)),
+                                            ),
+                                          ],
+                                        ),
+                                        const Opacity(opacity: 0.8,child: Text('mayor ganancias',style:TextStyle(fontSize: 10))),
+                                      ],
+                                    ),
+                                    
+                                  ],
+                                ),
                               ],
                             ),
-                            const SizedBox(height: 12),
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Opacity(opacity:0.4,child: Text('De mayor ganancia',overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900))),
-                                  wProductsRevenue,
-                                ],
+                            ),
+                          AnimatedCrossFade(
+                                firstChild: const Text('', style: TextStyle(fontSize: 0)),
+                                secondChild: Theme(
+                                  data: isDark? ThemeData.dark():ThemeData.light(),
+                                  child: Material(
+                                    clipBehavior: Clip.antiAlias,borderRadius: BorderRadius.circular(12),
+                                    color: isDark? Colors.grey.shade900 : Colors.blueGrey.shade100,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 12,horizontal: 12),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          //  widget  : productos más vendido por el valor
+                                          higherPriedProductsWidget, 
+                                          // widget : más vendidos
+                                          mostselledProductsWidget,
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                                duration: const Duration(milliseconds: 1200),
+                                reverseDuration: Duration.zero,
+                                sizeCurve: Curves.fastLinearToSlowEaseIn,
                               ),
-                              // text : fecha del filtro
-                              const Opacity(opacity:0.5,child: Text('Más vendidos',style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900))),
-                              // widget : productos más vendidos
-                              wProducts,
                           ],
                         ),
-                        crossFadeState: isExpanded ? CrossFadeState.showFirst: CrossFadeState.showSecond,
-                        duration: const Duration(milliseconds: 1200),
-                        reverseDuration: Duration.zero,
-                        sizeCurve: Curves.fastLinearToSlowEaseIn,
                       ),
-                      
-              ],
-            ),
-          ),
+                ),
         ),
       ),
     );
   }
 }
+ */

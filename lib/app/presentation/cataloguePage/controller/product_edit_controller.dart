@@ -352,9 +352,17 @@ class ControllerProductsEdit extends GetxController {
   }
   void setProductPublicFirestore({required Product product})  {
     // esta función procede a guardar el documento de una colleción publica
-    //  get
-    product.idAccount = homeController.getProfileAccountSelected.id;
+    
+    //  set : id de la cuenta desde la cual se creo el producto
+    product.idAccount = homeController.getProfileAccountSelected.id; 
+    //  set : marca de tiempo que se creo el documenti por primera vez
+    if(getNewProduct) { product.creation = Timestamp.fromDate(DateTime.now()); } 
+    //  set : marca de tiempo que se actualizo el documenti
     product.upgrade = Timestamp.fromDate(DateTime.now());
+    //  set : id del usuario que creo el documentoi 
+    if(getNewProduct) { product.idUserCreation = homeController.getProfileAdminUser.email;}
+    //  set : id del usuario que actualizo el documento
+    product.idUserUpgrade = homeController.getProfileAdminUser.email;
 
     // set firestore - save product public
     if(getNewProduct){

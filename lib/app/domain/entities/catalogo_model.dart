@@ -2,20 +2,27 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Product {
   String id = "";
-  String idAccount = ''; // ID del negocios que actualizo el producto
-  bool verified = false; // estado de verificación  al un moderador
-  bool outstanding = false; // producto destacado
   String idMark = ""; // ID de la marca por defecto esta vacia
   String nameMark = '';
-  String image = ""; // URL imagen
   String description = ""; // Informacion
+  String image = ""; // URL imagen
   String code = "";
+
+  bool outstanding = false; // producto destacado
+  bool verified = false; // estado de verificación  al un moderador
   Timestamp creation =Timestamp.now(); // Marca de tiempo ( hora en que se creo el producto )
   Timestamp upgrade =Timestamp.now(); // Marca de tiempo ( hora en que se edito el producto )
 
+  // datos del usuario y cuenta 
+  String idAccount = ''; // ID del negocios que actualizo el documento
+  String idUserCreation =''; // id del usuario que creo el documento
+  String idUserUpgrade = '' ;
+
   Product({
     this.id = "",
+    this.idUserCreation = '',
     this.idAccount = '',
+    this.idUserUpgrade = '',
     this.verified = false,
     this.outstanding = false,
     this.idMark = "",
@@ -30,6 +37,8 @@ class Product {
   Map<String, dynamic> toJson() => {
         "id": id,
         'idAccount': idAccount,
+        'idUserCreation': idUserCreation,
+        'idUserUpgrade': idUserUpgrade,
         "verified": verified,
         "outstanding": outstanding,
         "idMark": idMark,
@@ -45,6 +54,8 @@ class Product {
     return Product(
       id: data['id'] ?? '',
       idAccount: data.containsKey('idAccount')? data['idAccount']: data['id_negocio'] ?? '',
+      idUserCreation: data['idUserCreation'] ?? '',
+      idUserUpgrade: data['idUserUpgrade'] ?? '',
       verified: data.containsKey('verified')? data['verified']: data['verificado'] ?? false,
       outstanding: data['outstanding'] ?? false,
       idMark:data.containsKey('idMark') ? data['idMark'] : data['id_marca'] ?? '',
@@ -62,6 +73,8 @@ class Product {
     // set
     id = data['id'] ?? '';
     idAccount = data.containsKey('idAccount')? data['idAccount']: data['id_negocio'] ?? '';
+    idUserCreation = data['idUserCreation'] ?? '';
+    idUserUpgrade = data['idUserUpgrade'] ?? '';
     verified = data.containsKey('verified')? data['verified']: data['verificado'] ?? false;
     outstanding = data['outstanding'] ?? false;
     idMark =data.containsKey('idMark') ? data['idMark'] : data['id_marca'] ?? '';
@@ -85,7 +98,7 @@ class Product {
     productCatalogue.description = description;
     productCatalogue.code = code;
     productCatalogue.upgrade = upgrade;
-    productCatalogue.creation = creation;
+    productCatalogue.creation = creation; 
 
     return productCatalogue;
   }
@@ -122,6 +135,7 @@ class ProductCatalogue {
   bool select = false;
   int quantity = 0;
   double revenue = 0.0;
+  double priceTotal = 0;
 
   ProductCatalogue({
     // Valores del producto
@@ -139,6 +153,7 @@ class ProductCatalogue {
     this.stock = false,
     this.quantityStock = 0,
     this.alertStock = 5,
+    this.revenue =0.0,
     required this.creation,
     required this.upgrade,
     required this.documentCreation,
@@ -196,12 +211,13 @@ class ProductCatalogue {
       currencySign: data.containsKey('currencySign')
           ? data['currencySign']
           : data['signo_moneda'] ?? '',
-      quantity: data['quantity'] ?? 1,
+      quantity: data.containsKey('quantity') ? data['quantity'] : 1,
       quantityStock: data['quantityStock'] ?? 0,
-      sales: data['sales'] ?? 0,
+      sales: data.containsKey('sales')? data['sales'] : 0,
       select: false,
       stock: data['stock'] ?? false,
-      alertStock: data['alertStock'] ?? 5,
+      alertStock: data.containsKey('alertStock')?data['alertStock'] : 5,
+      revenue: data.containsKey('revenue')?data['revenue'] : 0.0,
     );
   }
 
@@ -261,6 +277,20 @@ class ProductCatalogue {
     documentUpgrade = product.upgrade;
     return this;
   }
+  
+  // Fuction
+  String get sProcentaje{
+    double porcentaje = 0.0;
+    double ganancia = 0.0;
+    if (salePrice != 0.0 && purchasePrice !=0.0) {
+      ganancia = salePrice - purchasePrice;
+
+    porcentaje = ganancia / purchasePrice * 100;
+    return "%${porcentaje.round()}";
+    }
+    return'';
+  }
+
 }
 
 class Price {

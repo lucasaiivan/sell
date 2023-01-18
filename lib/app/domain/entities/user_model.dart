@@ -146,7 +146,8 @@ class ProfileAccountModel {
 
     //  set
     creation = data["creation"];
-    subscribed = true;//data.containsKey('subscribed') ? data['subscribed'] : false;
+    // TODO: variable que se tiene que evaluar en cada inicio de la app
+    subscribed = true; //data.containsKey('subscribed') ? data['subscribed'] : false;
     id = data.containsKey('id') ? data['id'] : documentSnapshot.id;
     username = data["username"] ?? '';
     image = data.containsKey('image') ? data['image'] : data["imagen_perfil"] ?? '';

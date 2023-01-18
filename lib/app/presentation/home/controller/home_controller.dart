@@ -11,6 +11,7 @@ import '../../../core/routes/app_pages.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../domain/entities/user_model.dart';
 import '../../../core/utils/widgets_utils.dart';
+import '../../splash/controllers/splash_controller.dart';
 
 class HomeController extends GetxController {
 
@@ -18,6 +19,11 @@ class HomeController extends GetxController {
   late BuildContext _buildContext;
   set  setBuildContext(BuildContext context) => _buildContext=context;
   BuildContext get getBuildContext =>_buildContext; 
+
+  // brillo de la pantalla 
+  bool isDarkMode = false;
+  set setDarkMode (bool value) => isDarkMode = value;
+  bool get getIsDarkMode => isDarkMode;
 
   // Guide user : Ventas
   bool salesUserGuideVisibility=false;
@@ -123,8 +129,7 @@ class HomeController extends GetxController {
   @override
   void onInit() async {
 
-    super.onInit();
-
+    super.onInit(); 
     getSalesUserGuideVisibility();
     getTheVisibilityOfTheCatalogueUserGuide();
     // obtenemos por parametro los datos de la cuenta de atentificación
@@ -139,6 +144,7 @@ class HomeController extends GetxController {
   void onClose() {}
 
   // FUNCTIONS
+  
   Future<bool> onBackPressed({required BuildContext context})async{
 
     // si el usuario no se encuentra en el index 0, va a devolver la vista al index 0
@@ -192,6 +198,50 @@ class HomeController extends GetxController {
     }
     return product;
   }
+
+  // cerrar sesión
+void showDialogCerrarSesion() {
+  // others controllers
+  final HomeController homeController = Get.find();
+
+  Widget widget = AlertDialog(
+    title: const Text("Cerrar sesión"),
+    content: const Text("¿Estás seguro de que quieres cerrar la sesión?"),
+    actions: <Widget>[
+      // usually buttons at the bottom of the dialog
+      TextButton(
+          onPressed: () {
+            Get.back();
+          },
+          child: const Text('cancelar')),
+      TextButton(
+          child: const Text('si'),
+          onPressed: () async {
+            CustomFullScreenDialog.showDialog();
+            // default values
+            homeController.setProfileAccountSelected=ProfileAccountModel(creation: Timestamp.now());
+            homeController.setProfileAdminUser = UserModel ();
+            homeController.setCatalogueCategoryList = [];
+            homeController.setCatalogueCategoryList = [];
+            homeController.setCatalogueProducts = [];
+            homeController.setProductsOutstandingList = [];
+            // save key/values Storage
+            GetStorage().write('idAccount', '');
+            // instancias de FirebaseAuth para proceder a cerrar sesión
+            final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+            Future.delayed(const Duration(seconds: 2)).then((_) {
+              firebaseAuth.signOut().then((value) async {
+                CustomFullScreenDialog.cancelDialog();
+              });
+            });
+          }),
+    ],
+  );
+
+  Get.dialog(
+    widget,
+  );
+}
 
   // QUERIES FIRESTORE
 
@@ -395,27 +445,29 @@ class HomeController extends GetxController {
     Widget widget = getManagedAccountsList.isEmpty
         ? WidgetButtonListTile().buttonListTileCrearCuenta()
         : ListView.builder(
-            padding: const EdgeInsets.symmetric(vertical: 15.0),
+            padding: const EdgeInsets.symmetric(),
             shrinkWrap: true,
             itemCount: getManagedAccountsList.length,
             itemBuilder: (BuildContext context, int index) {
-              return WidgetButtonListTile().buttonListTileItemCuenta(perfilNegocio: getManagedAccountsList[index]);
+              return Column(
+                children: [
+                  WidgetButtonListTile().buttonListTileItemCuenta(perfilNegocio: getManagedAccountsList[index]),
+                  const Divider(endIndent: 0,indent: 0,height: 0,thickness: 0.2),
+                ],
+              );
             },
           );
 
     Widget buttonEditAccount = getManagedAccountsList.isEmpty
         ? Container()
         : getProfileAdminUser.superAdmin
-            ? Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: TextButton(
-                  child: const Text('Editar perfil'),
-                  onPressed: () {
-                    Get.back();
-                    Get.toNamed(Routes.ACCOUNT);
-                  },
-                ),
-              )
+            ? ListTile(
+              title: const Text('Editar',style: TextStyle(color: Colors.blue),),
+              onTap: () {
+                Get.back();
+                Get.toNamed(Routes.ACCOUNT);
+              },
+            )
             : getIdAccountSelected == ''
                 ? Container()
                 : const Padding(
@@ -428,9 +480,18 @@ class HomeController extends GetxController {
     Get.bottomSheet(
       Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
         children: [
           widget,
           buttonEditAccount,
+          const Divider(endIndent: 0,indent: 0,height: 0),
+          // cerrar sesion
+          ListTile(
+          title: const Text('Cerrar sesión'),
+          subtitle: Text(getUserAuth.email.toString(), maxLines: 1, overflow: TextOverflow.ellipsis),
+          trailing:  const Icon(Icons.close),
+          onTap: showDialogCerrarSesion,
+        ),
         ],
       ),
       backgroundColor: Get.theme.scaffoldBackgroundColor,

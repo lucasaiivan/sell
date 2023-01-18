@@ -33,6 +33,7 @@ class AccountView extends GetView<AccountController> {
                   )
                 : ListView(
                     padding: const EdgeInsets.all(12.0),
+                    keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                     children: [
                       Column(
                         children: <Widget>[

@@ -49,7 +49,7 @@ class WidgetButtonListTile extends StatelessWidget {
     return Column(
       children: <Widget>[
         ListTile(
-          contentPadding:const EdgeInsets.symmetric(vertical: 5, horizontal: 12),
+          contentPadding:const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
           leading: ClipRRect(
             borderRadius: BorderRadius.circular(10000.0),
             child: perfilNegocio.image != '' || perfilNegocio.image.isNotEmpty
@@ -476,14 +476,7 @@ class WidgetDrawer extends StatelessWidget {
           title: Text(Theme.of(context).brightness==Brightness.dark?'Tema claro':'Tema oscuro'),
           onTap: ThemeService.switchTheme,
         ),
-        ListTile(
-          // ignore: prefer_const_constructors
-          leading: Icon(Icons.close),
-          title: const Text('Cerrar sesión'),
-          subtitle:
-              Text(email, maxLines: 1, overflow: TextOverflow.ellipsis),
-          onTap: showDialogCerrarSesion,
-        ),
+      const SizedBox(height: 20)
       ],
     );
   }
@@ -520,9 +513,9 @@ Widget viewDefault() {
       Column(
         children: [
           Expanded(child: Container()),
-          const Padding(
-            padding: EdgeInsets.all(20.0),
-            child: TextButton(onPressed: showDialogCerrarSesion, child: Text('Cerrar sesión')),
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: TextButton(onPressed: homeController.showDialogCerrarSesion, child: const Text('Cerrar sesión')),
           ),
         ],
       ),
@@ -530,49 +523,7 @@ Widget viewDefault() {
   )));
 }
 
-// cerrar sesión
-void showDialogCerrarSesion() {
-  // others controllers
-  final HomeController homeController = Get.find();
 
-  Widget widget = AlertDialog(
-    title: const Text("Cerrar sesión"),
-    content: const Text("¿Estás seguro de que quieres cerrar la sesión?"),
-    actions: <Widget>[
-      // usually buttons at the bottom of the dialog
-      TextButton(
-          onPressed: () {
-            Get.back();
-          },
-          child: const Text('cancelar')),
-      TextButton(
-          child: const Text('si'),
-          onPressed: () async {
-            CustomFullScreenDialog.showDialog();
-            // default values
-            homeController.setProfileAccountSelected=ProfileAccountModel(creation: Timestamp.now());
-            homeController.setProfileAdminUser = UserModel ();
-            homeController.setCatalogueCategoryList = [];
-            homeController.setCatalogueCategoryList = [];
-            homeController.setCatalogueProducts = [];
-            homeController.setProductsOutstandingList = [];
-            // save key/values Storage
-            GetStorage().write('idAccount', '');
-            // instancias de FirebaseAuth para proceder a cerrar sesión
-            final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
-            Future.delayed(const Duration(seconds: 2)).then((_) {
-              firebaseAuth.signOut().then((value) async {
-                CustomFullScreenDialog.cancelDialog();
-              });
-            });
-          }),
-    ],
-  );
-
-  Get.dialog(
-    widget,
-  );
-}
 
 // notification
 void showMessageAlertApp({required String title, required String message}) {
@@ -809,10 +760,13 @@ class LogoPremium extends StatelessWidget {
 
     return InkWell(
       onTap: () => homeController.showModalBottomSheetSubcription(id:id ),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 2),
-        decoration: BoxDecoration(border: Border.all(color: accentColor)),
-        child: Text('PREMIUM',style: TextStyle(fontSize: size,color:accentColor))
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 2),
+          decoration: BoxDecoration(border: Border.all(color: accentColor)),
+          child: Text('PREMIUM',style: TextStyle(fontSize: size,color:accentColor))
+        ),
       ),
     );
   }
