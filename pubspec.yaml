@@ -76,6 +76,7 @@ dependencies:
   external_app_launcher: ^3.0.0 #Un complemento de Flutter que te ayuda a abrir otra aplicación desde tu aplicación. El paquete le solicita cuatro parámetros, de los cuales dos son obligatorios.
   carousel_slider: ^4.1.1 # Un widget deslizante de carrusel
   email_validator: ^2.1.17
+  blur: ^3.0.0
 
 
 flutter_icons:

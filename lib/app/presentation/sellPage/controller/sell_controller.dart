@@ -1,9 +1,11 @@
 import 'package:audioplayers/audioplayers.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:search_page/search_page.dart';
 import 'package:sell/app/presentation/home/controller/home_controller.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart';
@@ -38,7 +40,6 @@ class SalesController extends GetxController {
   final TextEditingController textEditingControllerTicketMount =TextEditingController();
 
   // list : lista de productos seleccionados por el usaurio para la venta
-  
   List get getListProductsSelested => homeController.listProductsSelected;
   set setListProductsSelected(List value) => homeController.listProductsSelected = value;
   void addProduct({required ProductCatalogue product}) {
@@ -62,6 +63,18 @@ class SalesController extends GetxController {
       count += element.quantity;
     }
     return count;
+  }
+
+  // cash Register Number : obtenemos la caja seleccionada por el usuario en el dispositivo que es actualmente utilizada
+  int cashRegisterNumber=1;
+  void getCashRegisterNumber(){
+    cashRegisterNumber = GetStorage().read('cashRegisterNumber') ?? 1; 
+  }
+  void setCashRegisterNumber({required int number})async{
+    cashRegisterNumber=number;
+    await GetStorage().write('cashRegisterNumber', number);
+    update();
+    
   }
 
   // ticket
@@ -91,6 +104,12 @@ class SalesController extends GetxController {
 
 
   @override
+  void onInit() async {
+    super.onInit(); 
+    getCashRegisterNumber();
+
+  }
+  @override
   void onClose() {
     textEditingControllerAddFlashDescription.dispose();
     textEditingControllerAddFlashPrice.dispose();
@@ -113,9 +132,9 @@ class SalesController extends GetxController {
       listIdsProducts.add(element.toJson());
     }
     //  set values
+    getTicket.cashRegister = cashRegisterNumber.toString();
     getTicket.id = id;
     getTicket.seller = homeController.getUserAuth.email!;
-    getTicket.cashRegister = '1';
     getTicket.listPoduct = listIdsProducts;
     getTicket.priceTotal = getCountPriceTotal();
     getTicket.valueReceived = getValueReceivedTicket;
@@ -167,19 +186,33 @@ class SalesController extends GetxController {
             ListTile(
               contentPadding:const EdgeInsets.symmetric(horizontal: 20,vertical: 12),
               tileColor: tileColor,
-              title: Text(product.nameMark),
+              leading: CachedNetworkImage(
+                    imageUrl: product.image,
+                    placeholder: (context, url) => CircleAvatar(
+                        backgroundColor: Get.theme.dividerColor,
+                        child: Text(Publications.getFormatoPrecio(monto: product.salePrice),style: TextStyle(color: Get.textTheme.bodyText1?.color))),
+                    imageBuilder: (context, image) => CircleAvatar(
+                        backgroundColor: Get.theme.scaffoldBackgroundColor,
+                        backgroundImage: image),
+                    errorWidget: (context, url, error) => CircleAvatar(
+                      backgroundColor: Get.theme.dividerColor,
+                    ),
+                  ),
+              title: Text(product.description),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Text(
-                    product.description,
+                    product.nameMark,
                     maxLines: 1,
-                    overflow: TextOverflow.clip,
+                    overflow: TextOverflow.clip, 
+                    style: const TextStyle(color: Colors.blue),
                   ),
                   
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.start,
+                    direction: Axis.horizontal,
                     children: <Widget>[
                       // text : code
                         Row(
@@ -197,12 +230,7 @@ class SalesController extends GetxController {
                             const Text('Favorito'),
                           ],
                         ):Container(),
-                    ],
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                        //  text : alert stock
+                      //  text : alert stock
                         alertStockText != ''?Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [

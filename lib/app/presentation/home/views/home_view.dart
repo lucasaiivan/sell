@@ -31,8 +31,10 @@ class HomeView extends GetView<HomeController> {
   @override
   Widget build(BuildContext context) {
 
+    // set
     if (controller.getProfileAccountSelected.id == ''){return viewDefault();}
     controller.setBuildContext=context;
+    controller.setDarkMode = Theme.of(context).brightness==Brightness.dark;
 
     return Obx(() {
       return WillPopScope(
