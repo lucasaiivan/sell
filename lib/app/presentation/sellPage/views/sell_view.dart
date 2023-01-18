@@ -21,6 +21,8 @@ class SalesView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    // set 
     buildContext = context;
 
     return GetBuilder<SalesController>(
@@ -50,7 +52,7 @@ class SalesView extends StatelessWidget {
       actions: [
         controller.getListProductsSelestedLength != 0
             ? TextButton.icon(icon: const Icon(Icons.clear_rounded),label: const Text('Descartar Ticket'),onPressed: controller.dialogCleanTicketAlert)
-            : Container(),
+            : cashRegisterNumberPopupMenuButton(),
       ],
     );
   }
@@ -265,7 +267,37 @@ class SalesView extends StatelessWidget {
   }
 
   // WIDGETS COMPONENTS
+  Widget cashRegisterNumberPopupMenuButton(){
 
+    // controllers
+    final SalesController salesController = Get.find();
+
+    return PopupMenuButton(
+                icon: Material(
+                  color: homeController.getIsDarkMode?Colors.white:Colors.black,
+                  borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8,vertical:1),
+                    child: Row(
+                      children: [
+                        Text('Caja ${salesController.cashRegisterNumber}',style:TextStyle(color: homeController.getIsDarkMode?Colors.black:Colors.white)),
+                        const SizedBox(width: 5),
+                        Icon(Icons.keyboard_arrow_down_rounded,color: homeController.getIsDarkMode?Colors.black:Colors.white),
+                      ],
+                    ),
+                  ),
+                ),
+                onSelected: (selectedValue) {
+                  salesController.setCashRegisterNumber(number: selectedValue);
+                },
+                itemBuilder: (BuildContext ctx) => [
+                      const PopupMenuItem(value: 1, child: Text('Caja 1')),
+                      const PopupMenuItem(value: 2, child: Text('Caja 2')),
+                      const PopupMenuItem(value: 3, child: Text('Caja 3')),
+                      const PopupMenuItem(value: 4, child: Text('Caja 4')),
+                      const PopupMenuItem(value: 5, child: Text('Caja 5')),
+                    ]);
+  }
   Widget widgeSuggestedProducts({required SalesController controller1,required BuildContext context}) {
 
     // controllers
@@ -281,7 +313,7 @@ class SalesView extends StatelessWidget {
           width: double.infinity,
           child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: controller.getProductsOutstandingList.length + 7,
+                itemCount: controller.getProductsOutstandingList.length ,
                 itemBuilder: (context, index) {
 
                   // values 
