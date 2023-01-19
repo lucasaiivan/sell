@@ -122,7 +122,7 @@ class ProductEdit extends StatelessWidget {
               widgetFormEditText(),
             ],
           ),
-          controller.getSaveIndicator?Expanded(child: Container(color: colorLoading.withOpacity(0.3))):Container()
+          controller.getSaveIndicator?Expanded(child: Container(color: Colors.black12.withOpacity(0.3))):Container()
         ],
       ),
     );
@@ -210,14 +210,14 @@ class ProductEdit extends StatelessWidget {
                 Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
                 await launchUrl(uri,mode: LaunchMode.externalApplication);
               },
-              child: const Text('Buscar descripción en Google')),
+              child: const Text('Buscar descripción en Google (moderador)')),
           TextButton(
               onPressed: () async {
                 String clave = controller.getProduct.code;
                 Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
                 await launchUrl(uri,mode: LaunchMode.externalApplication);
               },
-              child: const Text('Buscar en código Google')), 
+              child: const Text('Buscar en código Google (moderador)')), 
           space,
           // textfield 'seleccionar marca'
           textfielButton(
@@ -246,7 +246,7 @@ class ProductEdit extends StatelessWidget {
                       decoration: const InputDecoration(
                         filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
                         disabledBorder: InputBorder.none,
-                        labelText: "Precio de compra", 
+                        labelText: "Precio de compra (completa para ver las ganacia)", 
                       ),
                       textInputAction: TextInputAction.next,
                       //style: textStyle,
@@ -261,7 +261,7 @@ class ProductEdit extends StatelessWidget {
                       decoration: const InputDecoration(
                         filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
                         disabledBorder: InputBorder.none,
-                        labelText: "Precio de venta", 
+                        labelText: "Precio de venta al público", 
                       ),
                       textInputAction: TextInputAction.done,
                       //style: textStyle,
@@ -486,11 +486,11 @@ Widget get widgetForModerator{
         enabled: false,
         controller: TextEditingController(text: textValue),
         decoration: InputDecoration( 
-          floatingLabelStyle: TextStyle(color: borderColor),
           filled: true,
           fillColor:stateEdit?null:Colors.transparent ,
-          disabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: stateEdit?borderColor:Colors.transparent)),
-          labelText: labelText),
+          disabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: stateEdit?borderColor:Colors.transparent,)),
+          labelText: labelText,
+          ),
       ),
     );
   }

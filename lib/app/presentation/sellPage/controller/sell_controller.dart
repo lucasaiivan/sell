@@ -238,14 +238,6 @@ class SalesController extends GetxController {
                             Text(alertStockText),
                           ],
                         ):Container(),
-                        // text : cantidad de ventas
-                        product.sales == 0? Container():Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
-                            Text('${product.sales} ${product.sales == 1 ? 'venta' : 'ventas'}'),
-                          ],
-                        ),
                     ],
                   ),
 
