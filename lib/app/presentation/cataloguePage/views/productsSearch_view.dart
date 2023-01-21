@@ -165,7 +165,7 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                                         id: controller
                                             .textEditingController.text);
                                   },
-                                  text: "Agregar nuevo producto",
+                                  text: "Crear producto",
                                   colorAccent:
                                       controller.getButtonData.colorText,
                                   colorButton:

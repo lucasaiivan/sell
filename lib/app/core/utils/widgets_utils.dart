@@ -1,14 +1,12 @@
 
+import 'dart:io';
+import 'package:avatar_view/avatar_view.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:sell/app/presentation/home/controller/home_controller.dart';
 import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart';
-import 'package:sell/app/presentation/splash/controllers/splash_controller.dart';
 import 'package:sell/app/core/utils/dynamicTheme_lb.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -111,7 +109,6 @@ class ProductoItem extends StatefulWidget {
   @override
   State<ProductoItem> createState() => _ProductoItemState();
 }
-
 class _ProductoItemState extends State<ProductoItem> {
   // controllers
   SalesController salesController = Get.find<SalesController>();
@@ -600,41 +597,6 @@ class ComponentApp {
   }
 }
 
-class ImageApp {
-  static Widget circleImage(
-      {required String url, required String texto, double size = 85.0}) {
-    //values
-    MaterialColor color = Utils.getRandomColor();
-    if (texto == '') texto = 'Image';
-
-    Widget imageDefault = CircleAvatar(
-      backgroundColor: color.withOpacity(0.1),
-      radius: size,
-      child: Text(texto.substring(0, 1),
-          style: TextStyle(
-            fontSize: size / 2,
-            color: color,
-            fontWeight: FontWeight.bold,
-          )),
-    );
-
-    return SizedBox(
-      width: size,
-      height: size,
-      child: url == "" || url == "default"
-          ? imageDefault
-          : CachedNetworkImage(
-              imageUrl: url,
-              placeholder: (context, url) => imageDefault,
-              imageBuilder: (context, image) => CircleAvatar(
-                backgroundImage: image,
-                radius: size,
-              ),
-              errorWidget: (context, url, error) => imageDefault,
-            ),
-    );
-  }
-}
 
 class WidgetSuggestionProduct extends StatelessWidget {
   //values
@@ -767,6 +729,47 @@ class LogoPremium extends StatelessWidget {
           decoration: BoxDecoration(border: Border.all(color: accentColor)),
           child: Text('PREMIUM',style: TextStyle(fontSize: size,color:accentColor))
         ),
+      ),
+    );
+  }
+}
+
+class AvatarApp extends StatelessWidget {
+  late bool favorite;
+  late String url;
+  late double size;
+  late double radius;
+  late String description;
+  late String path;
+  final VoidCallback?  onTap;
+  AvatarApp({Key? key,this.favorite=false,this.url='',this.size=50,this.radius=12,this.description='',this.path='', this.onTap }) : super(key: key);
+
+  // avatar que se va usar en toda la app, especialemnte en los 'ListTile'
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,height: size,
+      child: path =='' ? AvatarView(
+        onTap: onTap,
+        radius: radius,
+        borderWidth: favorite?2:0,
+        borderColor: favorite?Colors.yellow.shade700:Colors.transparent,
+        avatarType: AvatarType.RECTANGLE,
+        backgroundColor: Colors.black.withOpacity(0.2),
+        imagePath: url,
+        placeHolder: Container(color: Colors.black.withOpacity(0.1)),
+        errorWidget: Container(
+            color: Colors.black.withOpacity(0.1),
+            child: description!=''? Text(description.substring(0,1)) : const Icon(Icons.error_outline, size: 25),
+        ),
+      ) : Card(
+        elevation: 0,
+        clipBehavior: Clip.antiAlias,
+        child: AspectRatio(
+          aspectRatio: 1 / 1,
+          child: Image.file(File(path), fit: BoxFit.cover),
+    ),
       ),
     );
   }

@@ -54,6 +54,7 @@ dependencies:
   sqflite: ^2.0.2+1
   get_storage: ^2.0.3
   # others
+  avatar_view: ^1.0.1
   path: ^1.8.2  # Una completa biblioteca de manipulación de rutas multiplataforma para Dart.
   url_launcher: ^6.1.5
   font_awesome_flutter: ^10.1.0
