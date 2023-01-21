@@ -131,7 +131,7 @@ class ProductEdit extends StatelessWidget {
   Widget widgetsImagen() {
     return Container(
       padding: const EdgeInsets.all(24.0),
-      color: Colors.grey.withOpacity(0.1),
+      color: Colors.grey.withOpacity(0.05),
       width: double.infinity,
       height: Get.size.height * 0.25,
       child: Row(
@@ -187,6 +187,14 @@ class ProductEdit extends StatelessWidget {
                 )
               : Container(),
           space,
+          // textfield 'seleccionar marca'
+          textfielButton(
+              stateEdit: controller.getSaveIndicator? false: controller.getEditModerator || controller.getNewProduct,
+              textValue: controller.getMarkSelected.name,
+              labelText: controller.getMarkSelected.id == ''? 'Seleccionar una marca': 'Marca',
+              onTap: controller.getNewProduct || controller.getEditModerator? controller.showModalSelectMarca : () {}
+          ),
+          !controller.getAccountAuth ? Container() : space,
           // textField
           TextField(
             
@@ -219,14 +227,6 @@ class ProductEdit extends StatelessWidget {
               },
               child: const Text('Buscar en código Google (moderador)')), 
           space,
-          // textfield 'seleccionar marca'
-          textfielButton(
-            stateEdit: controller.getSaveIndicator? false: controller.getEditModerator || controller.getNewProduct,
-            textValue: controller.getMarkSelected.name,
-            labelText: controller.getMarkSelected.id == ''? 'Seleccionar una marca': 'Marca',
-            onTap: controller.getNewProduct || controller.getEditModerator? controller.showModalSelectMarca : () {}
-          ),
-          !controller.getAccountAuth ? Container() : space,
           // textfield : seleccionar cátegoria
           !controller.getAccountAuth? Container(): textfielButton(textValue: controller.getCategory.id == ''? '': controller.getCategory.name,labelText: controller.getCategory.id == ''? 'Seleccionar categoría': 'Categoría',onTap: controller.getSaveIndicator? () {}: SelectCategory.show,),
           space,
@@ -238,11 +238,8 @@ class ProductEdit extends StatelessWidget {
                     space,
                     TextField(
                       enabled: !controller.getSaveIndicator,
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                      onChanged: (value) => controller
-                              .getProduct.purchasePrice =
-                          controller.controllerTextEditPrecioCompra.numberValue,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      onChanged: (value) => controller.getProduct.purchasePrice = controller.controllerTextEditPrecioCompra.numberValue,
                       decoration: const InputDecoration(
                         filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
                         disabledBorder: InputBorder.none,
@@ -268,7 +265,9 @@ class ProductEdit extends StatelessWidget {
                       controller: controller.controllerTextEditPrecioVenta,
                     ),
                     space,
+                    space,
                     CheckboxListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 0,vertical: 0),
                       enabled: controller.getSaveIndicator ? false : true,
                       checkColor: Colors.white,
                       activeColor: Colors.amber,
@@ -288,6 +287,7 @@ class ProductEdit extends StatelessWidget {
                       child: Column(
                         children: [
                           CheckboxListTile(
+                            contentPadding: EdgeInsets.symmetric(horizontal: controller.getProduct.stock?12:0,vertical: 12),
                             enabled: controller.getSaveIndicator ? false : true,
                             checkColor: Colors.white,
                             activeColor: Colors.blue,
@@ -308,7 +308,7 @@ class ProductEdit extends StatelessWidget {
                           controller.getProduct.stock && controller.isSubscribed ? space : Container(),
                           controller.getProduct.stock && controller.isSubscribed
                               ? Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                                padding: const EdgeInsets.symmetric(horizontal: 12,),
                                 child: TextField(
                                   enabled: !controller.getSaveIndicator,
                                   keyboardType: TextInputType.number,
@@ -904,10 +904,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
   Widget listTile({required Mark marcaSelect, bool icon = true}) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      trailing: !icon
-          ? null
-          : ImageApp.circleImage(
-              texto: marcaSelect.name, url: marcaSelect.image, size: 50.0),
+      trailing: !icon ? null : AvatarApp(url: marcaSelect.image,size: 50,description:marcaSelect.name),
       dense: true,
       title: Text(marcaSelect.name,
           overflow: TextOverflow.ellipsis,

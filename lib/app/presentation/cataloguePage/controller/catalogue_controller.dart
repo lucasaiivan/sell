@@ -1,3 +1,4 @@
+import 'package:avatar_view/avatar_view.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import 'package:search_page/search_page.dart';
 import 'package:sell/app/presentation/home/controller/home_controller.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart';
 import '../../../core/routes/app_pages.dart';
+import '../../../core/utils/widgets_utils.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../core/utils/fuctions.dart';
 
@@ -157,18 +159,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
             ListTile(
               contentPadding:const EdgeInsets.symmetric(horizontal: 20,vertical: 12),
               tileColor: tileColor,
-              leading: CachedNetworkImage(
-                    imageUrl: product.image,
-                    placeholder: (context, url) => CircleAvatar(
-                        backgroundColor: Get.theme.dividerColor,
-                        child: Text(Publications.getFormatoPrecio(monto: product.salePrice),style: TextStyle(color: Get.textTheme.bodyText1?.color))),
-                    imageBuilder: (context, image) => CircleAvatar(
-                        backgroundColor: Get.theme.scaffoldBackgroundColor,
-                        backgroundImage: image),
-                    errorWidget: (context, url, error) => CircleAvatar(
-                      backgroundColor: Get.theme.dividerColor,
-                    ),
-                  ),
+              leading: AvatarApp(url: product.image,size: 50,favorite:product.favorite),
               title: Text(product.description),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
