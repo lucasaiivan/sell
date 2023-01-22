@@ -90,38 +90,44 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                         controller.getStateSearch? FadeInRight(child: copyTextModeratorButton): Container(),
                         const SizedBox(height: 12.0),
                         !controller.getStateSearch
-                            ? FadeInRight(
-                                child: button(
-                                  icon: Icon(Icons.search,
-                                      color:
-                                          controller.getButtonData.colorText),
-                                  onPressed: () =>
-                                      controller.textEditingController.text ==
-                                              ''
-                                          ? null
-                                          : controller.queryProduct(
-                                              id: controller
-                                                  .textEditingController
-                                                  .value
-                                                  .text),
-                                  text: "Buscar",
-                                  colorAccent:
-                                      controller.getButtonData.colorText,
-                                  colorButton: controller.getButtonData.colorButton,
+                            ? Padding(
+                              padding: EdgeInsets.symmetric(horizontal: controller.getproductDoesNotExist?12:0),
+                              child: FadeInRight(
+                                  child: button(
+                                    icon: Icon(Icons.search,
+                                        color:
+                                            controller.getButtonData.colorText),
+                                    onPressed: () =>
+                                        controller.textEditingController.text ==
+                                                ''
+                                            ? null
+                                            : controller.queryProduct(
+                                                id: controller
+                                                    .textEditingController
+                                                    .value
+                                                    .text),
+                                    text: "Buscar",
+                                    colorAccent:
+                                        controller.getButtonData.colorText,
+                                    colorButton: controller.getButtonData.colorButton,
+                                  ),
                                 ),
-                              )
+                            )
                             : Container(),
                         const SizedBox(height: 12.0),
                         !controller.getStateSearch
-                            ? FadeInRight(
-                                child: button(
-                                  icon: Icon(Icons.qr_code_scanner_sharp,color: controller.getButtonData.colorText,),
-                                  onPressed: scanBarcodeNormal,
-                                  text: "Escanear código",
-                                  colorAccent:controller.getButtonData.colorText,
-                                  colorButton:controller.getButtonData.colorButton,
+                            ? Padding(
+                              padding: EdgeInsets.symmetric(horizontal: controller.getproductDoesNotExist?12:0),
+                              child: FadeInRight(
+                                  child: button(
+                                    icon: Icon(Icons.qr_code_scanner_sharp,color: controller.getButtonData.colorText,),
+                                    onPressed: scanBarcodeNormal,
+                                    text: "Escanear código",
+                                    colorAccent:controller.getButtonData.colorText,
+                                    colorButton:controller.getButtonData.colorButton,
+                                  ),
                                 ),
-                              )
+                            )
                             : Container(),
                         const SizedBox(height: 12.0),
                         controller.getproductDoesNotExist
@@ -159,7 +165,7 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                                         id: controller
                                             .textEditingController.text);
                                   },
-                                  text: "Agregar nuevo producto",
+                                  text: "Crear producto",
                                   colorAccent:
                                       controller.getButtonData.colorText,
                                   colorButton:
@@ -168,7 +174,10 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                               )
                             : Container(),
                         // TODO: delete release
-                        widgetForModerator,
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: controller.getproductDoesNotExist?12:0,vertical: 12),
+                          child: widgetForModerator,
+                        ),
                       ],
                     ),
                   ),

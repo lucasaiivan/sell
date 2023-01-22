@@ -122,7 +122,7 @@ class ProductEdit extends StatelessWidget {
               widgetFormEditText(),
             ],
           ),
-          controller.getSaveIndicator?Expanded(child: Container(color: colorLoading.withOpacity(0.3))):Container()
+          controller.getSaveIndicator?Expanded(child: Container(color: Colors.black12.withOpacity(0.3))):Container()
         ],
       ),
     );
@@ -131,7 +131,7 @@ class ProductEdit extends StatelessWidget {
   Widget widgetsImagen() {
     return Container(
       padding: const EdgeInsets.all(24.0),
-      color: Colors.grey.withOpacity(0.1),
+      color: Colors.grey.withOpacity(0.05),
       width: double.infinity,
       height: Get.size.height * 0.25,
       child: Row(
@@ -187,6 +187,14 @@ class ProductEdit extends StatelessWidget {
                 )
               : Container(),
           space,
+          // textfield 'seleccionar marca'
+          textfielButton(
+              stateEdit: controller.getSaveIndicator? false: controller.getEditModerator || controller.getNewProduct,
+              textValue: controller.getMarkSelected.name,
+              labelText: controller.getMarkSelected.id == ''? 'Seleccionar una marca': 'Marca',
+              onTap: controller.getNewProduct || controller.getEditModerator? controller.showModalSelectMarca : () {}
+          ),
+          !controller.getAccountAuth ? Container() : space,
           // textField
           TextField(
             
@@ -210,23 +218,15 @@ class ProductEdit extends StatelessWidget {
                 Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
                 await launchUrl(uri,mode: LaunchMode.externalApplication);
               },
-              child: const Text('Buscar descripción en Google')),
+              child: const Text('Buscar descripción en Google (moderador)')),
           TextButton(
               onPressed: () async {
                 String clave = controller.getProduct.code;
                 Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
                 await launchUrl(uri,mode: LaunchMode.externalApplication);
               },
-              child: const Text('Buscar en código Google')), 
+              child: const Text('Buscar en código Google (moderador)')), 
           space,
-          // textfield 'seleccionar marca'
-          textfielButton(
-            stateEdit: controller.getSaveIndicator? false: controller.getEditModerator || controller.getNewProduct,
-            textValue: controller.getMarkSelected.name,
-            labelText: controller.getMarkSelected.id == ''? 'Seleccionar una marca': 'Marca',
-            onTap: controller.getNewProduct || controller.getEditModerator? controller.showModalSelectMarca : () {}
-          ),
-          !controller.getAccountAuth ? Container() : space,
           // textfield : seleccionar cátegoria
           !controller.getAccountAuth? Container(): textfielButton(textValue: controller.getCategory.id == ''? '': controller.getCategory.name,labelText: controller.getCategory.id == ''? 'Seleccionar categoría': 'Categoría',onTap: controller.getSaveIndicator? () {}: SelectCategory.show,),
           space,
@@ -238,15 +238,12 @@ class ProductEdit extends StatelessWidget {
                     space,
                     TextField(
                       enabled: !controller.getSaveIndicator,
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                      onChanged: (value) => controller
-                              .getProduct.purchasePrice =
-                          controller.controllerTextEditPrecioCompra.numberValue,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      onChanged: (value) => controller.getProduct.purchasePrice = controller.controllerTextEditPrecioCompra.numberValue,
                       decoration: const InputDecoration(
                         filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
                         disabledBorder: InputBorder.none,
-                        labelText: "Precio de compra", 
+                        labelText: "Precio de compra (completa para ver las ganacia)", 
                       ),
                       textInputAction: TextInputAction.next,
                       //style: textStyle,
@@ -261,14 +258,16 @@ class ProductEdit extends StatelessWidget {
                       decoration: const InputDecoration(
                         filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
                         disabledBorder: InputBorder.none,
-                        labelText: "Precio de venta", 
+                        labelText: "Precio de venta al público", 
                       ),
                       textInputAction: TextInputAction.done,
                       //style: textStyle,
                       controller: controller.controllerTextEditPrecioVenta,
                     ),
                     space,
+                    space,
                     CheckboxListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 0,vertical: 0),
                       enabled: controller.getSaveIndicator ? false : true,
                       checkColor: Colors.white,
                       activeColor: Colors.amber,
@@ -288,6 +287,7 @@ class ProductEdit extends StatelessWidget {
                       child: Column(
                         children: [
                           CheckboxListTile(
+                            contentPadding: EdgeInsets.symmetric(horizontal: controller.getProduct.stock?12:0,vertical: 12),
                             enabled: controller.getSaveIndicator ? false : true,
                             checkColor: Colors.white,
                             activeColor: Colors.blue,
@@ -308,7 +308,7 @@ class ProductEdit extends StatelessWidget {
                           controller.getProduct.stock && controller.isSubscribed ? space : Container(),
                           controller.getProduct.stock && controller.isSubscribed
                               ? Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                                padding: const EdgeInsets.symmetric(horizontal: 12,),
                                 child: TextField(
                                   enabled: !controller.getSaveIndicator,
                                   keyboardType: TextInputType.number,
@@ -486,11 +486,11 @@ Widget get widgetForModerator{
         enabled: false,
         controller: TextEditingController(text: textValue),
         decoration: InputDecoration( 
-          floatingLabelStyle: TextStyle(color: borderColor),
           filled: true,
           fillColor:stateEdit?null:Colors.transparent ,
-          disabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: stateEdit?borderColor:Colors.transparent)),
-          labelText: labelText),
+          disabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: stateEdit?borderColor:Colors.transparent,)),
+          labelText: labelText,
+          ),
       ),
     );
   }
@@ -904,10 +904,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
   Widget listTile({required Mark marcaSelect, bool icon = true}) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      trailing: !icon
-          ? null
-          : ImageApp.circleImage(
-              texto: marcaSelect.name, url: marcaSelect.image, size: 50.0),
+      trailing: !icon ? null : AvatarApp(url: marcaSelect.image,size: 50,description:marcaSelect.name),
       dense: true,
       title: Text(marcaSelect.name,
           overflow: TextOverflow.ellipsis,

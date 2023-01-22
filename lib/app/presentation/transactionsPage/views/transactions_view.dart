@@ -123,6 +123,7 @@ class TransactionsView extends StatelessWidget {
   // WIDGETS COMPONENTS
 
   Widget tileItem({required TicketModel ticketModel}) {
+  //  description  : Este 'ListTile' muestra información de cada transacción
     
     // controllers
     final TransactionsController transactionsController = Get.find();
@@ -130,6 +131,7 @@ class TransactionsView extends StatelessWidget {
     // values
     Map payMode =transactionsController.getPayMode(idMode: ticketModel.payMode);
     String revenue = transactionsController.readEarnings(ticket: ticketModel);
+    Color primaryTextColor  = Get.isDarkMode?Colors.white:Colors.black;
 
     // widgets
     Widget widget = AlertDialog(
@@ -168,11 +170,11 @@ class TransactionsView extends StatelessWidget {
           onLongPress: () =>  transactionsController.deleteSale(ticketModel: ticketModel),
           title: Row(
             children: [
-              Text('Pago con:  ',style: TextStyle(fontWeight: FontWeight.w300,color: Get.theme.textTheme.bodyMedium?.color )),
+              Text('Pago con ',style: TextStyle(color: primaryTextColor,fontWeight: FontWeight.w600)),
               Material(
                 color: (payMode['color'] as Color) .withOpacity(0.1),
                 clipBehavior: Clip.antiAlias,
-                borderRadius: const BorderRadius.all(Radius.circular(12)),
+                borderRadius: const BorderRadius.all(Radius.circular(6)),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal:10,vertical:0),
                   child: Text(payMode['name'],style: TextStyle(fontWeight: FontWeight.w600,color: (payMode['color'] as Color) .withOpacity(0.7)  )),
@@ -187,9 +189,9 @@ class TransactionsView extends StatelessWidget {
                 // primera fila
                 Row(
                   children: [
-                    Text(ticketModel.seller.split('@')[0],style: const TextStyle(fontSize: 14,overflow: TextOverflow.ellipsis,fontWeight: FontWeight.w400)),
-                    Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
-                    Text('caja ${ticketModel.cashRegister}',style:const TextStyle(fontWeight: FontWeight.w400)),
+                    Text('caja ${ticketModel.cashRegister}',style: TextStyle(fontWeight: FontWeight.w600,color: primaryTextColor)),
+                    Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child: Icon(Icons.circle,size: 8, color:  primaryTextColor.withOpacity(0.5))),
+                    Text(ticketModel.seller.split('@')[0],style: TextStyle(color: primaryTextColor,fontSize: 14,overflow: TextOverflow.ellipsis,fontWeight: FontWeight.w600)),
                   ],
                 ),
                 // segunda fila
@@ -199,15 +201,15 @@ class TransactionsView extends StatelessWidget {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       // text : fecha de publicación
-                      Text(Publications.getFechaPublicacionFormating(dateTime: ticketModel.creation.toDate()),style: const TextStyle(fontSize:12)),
+                      Text(Publications.getFechaPublicacionFormating(dateTime: ticketModel.creation.toDate()),style: TextStyle(fontSize:12,color: primaryTextColor.withOpacity(0.5))),
                       //  text : cantidad de items ( productos )
-                      Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
-                      Text('${ticketModel.getLengh()} items'),
+                      Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child: Icon(Icons.circle,size: 8, color: primaryTextColor.withOpacity(0.3))),
+                      Text('${ticketModel.getLengh()} items',style: TextStyle(color: primaryTextColor.withOpacity(0.5))),
                       // text : valor del vuelto
                       ticketModel.valueReceived == 0? Container(): Row(
                         children: [
-                          Padding(padding: const EdgeInsets.symmetric(horizontal:3), child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
-                          Text('Vuelto: ${Publications.getFormatoPrecio(monto: ticketModel.valueReceived - ticketModel.priceTotal)}',style: const TextStyle(fontWeight: FontWeight.w300)),
+                          Padding(padding: const EdgeInsets.symmetric(horizontal:3), child: Icon(Icons.circle,size: 8, color: primaryTextColor.withOpacity(0.3) )),
+                          Text('Vuelto: ${Publications.getFormatoPrecio(monto: ticketModel.valueReceived - ticketModel.priceTotal)}',style: TextStyle(color: primaryTextColor.withOpacity(0.5),fontWeight: FontWeight.w300)),
                         ],
                       ),
                     ],
@@ -217,14 +219,14 @@ class TransactionsView extends StatelessWidget {
             ),
           ),
           trailing: Column(
-            crossAxisAlignment:CrossAxisAlignment.end,mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment:CrossAxisAlignment.end,mainAxisSize: MainAxisSize.min,
             children: [
               //  text : precio totol del ticket
-              Text(Publications.getFormatoPrecio(monto: ticketModel.priceTotal),style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 16)),
+              Text(Publications.getFormatoPrecio(monto: ticketModel.priceTotal),style: TextStyle(fontWeight: FontWeight.bold,fontSize: 14,color: primaryTextColor)),
               //  text : ganancias
               Text(revenue,style: TextStyle(fontWeight: FontWeight.w900,fontSize: 12,color: Colors.green.withOpacity(0.9)  )),
               //  text : fecha de publicación 
-              Opacity(opacity: 0.8,child: Text(Publications.getFechaPublicacion(ticketModel.creation.toDate(), Timestamp.now().toDate()),style: const TextStyle(fontWeight: FontWeight.w400,fontSize: 10)))
+              Opacity(opacity: 0.8,child: Text(Publications.getFechaPublicacion(ticketModel.creation.toDate(), Timestamp.now().toDate()),style: TextStyle(color: primaryTextColor.withOpacity(0.5),fontWeight: FontWeight.w400,fontSize:8)))
             ],
           ),
         ),
@@ -473,6 +475,7 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
                                 const SizedBox(height: 12),
                                 // text : analiticas
                                 Row(
+                                  
                                   children: [
                                     // text : monto total de las ventas del filtro
                                     Column(
@@ -484,15 +487,14 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
                                       ],
                                     ),
                                     const Spacer(),
+                                    // text : ganancias
                                     Column(
-                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      crossAxisAlignment: CrossAxisAlignment.end, 
                                       children: [
+                                        const Text(''),
                                         Padding(
-                                          padding: const EdgeInsets.only(bottom:3),
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 1),
-                                            child: Text(revenue,style: const TextStyle(fontWeight: FontWeight.w900,fontSize: 24)),
-                                          ),
+                                          padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 1),
+                                          child: Text(revenue,style: const TextStyle(fontWeight: FontWeight.w900,fontSize: 24)),
                                         ),
                                         Opacity(opacity: 0.7,child:  Text(revenue==''?'':'Cantidad ganada',style:const TextStyle(fontSize: 10))),
                                       ],
