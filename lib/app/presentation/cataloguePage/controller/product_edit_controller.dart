@@ -20,6 +20,7 @@ class ControllerProductsEdit extends GetxController {
   // others controllers
   final HomeController homeController = Get.find();
 
+
   Future<void> categoryDelete({required String idCategory}) async => await Database.refFirestoreCategory(idAccount: homeController.getProfileAccountSelected.id).doc(idCategory).delete();
   Future<void> categoryUpdate({required Category categoria}) async {
     // ref
@@ -484,36 +485,45 @@ class ControllerProductsEdit extends GetxController {
   }
 
   Widget loadImage() {
+
     // devuelve la imagen del product
     if (getXFileImage.path != '') {
       // el usuario cargo un nueva imagen externa
-      return AspectRatio(
-        aspectRatio: 1 / 1,
-        child: Image.file(File(getXFileImage.path), fit: BoxFit.cover),
-      );
+      return AvatarApp(path: getXFileImage.path ,size: 125,onTap: getNewProduct || getEditModerator? showModalBottomSheetCambiarImagen : null );
     } else {
       // se visualiza la imagen del producto
-      return AspectRatio(
-        aspectRatio: 1 / 1,
-        child: getProduct.image == ''
-            ? Container(color: Colors.grey.withOpacity(0.2))
-            : CachedNetworkImage(
-                fit: BoxFit.cover,
-                imageUrl: getProduct.image,
-                placeholder: (context, url) => Container(
-                  color: Colors.grey.withOpacity(0.3),
-                  child: const Center(
-                      child: Icon(Icons.cloud, color: Colors.white)),
-                ),
-                imageBuilder: (context, image) => Image(image: image),
-                errorWidget: (context, url, error) => Container(
-                  color: Colors.grey.withOpacity(0.3),
-                  child: const Center(
-                      child: Icon(Icons.error, color: Colors.white)),
-                ),
-              ),
-      );
+      return AvatarApp(url: getProduct.image ,size: 125,onTap: getNewProduct || getEditModerator? showModalBottomSheetCambiarImagen : null );
     }
+  }
+
+  void showModalBottomSheetCambiarImagen() {
+    Widget widget =   Wrap(
+      children: <Widget>[
+        ListTile(
+            leading: const Icon(Icons.camera),
+            title: const Text('Capturar una imagen'),
+            onTap: () {
+              Get.back;
+              getLoadImageCamera;
+            }),
+        ListTile(
+          leading: const Icon(Icons.image),
+          title: const Text('Seleccionar desde la galería de fotos'),
+          onTap: () {
+            Get.back;
+            getLoadImageGalery();
+          },
+        ),
+      ],
+    );
+    // muestre la hoja inferior modal de getx
+    Get.bottomSheet(
+      widget,
+      backgroundColor: Get.theme.scaffoldBackgroundColor,
+      enableDrag: true,
+      isDismissible: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
+    );
   }
 
   void showDialogDelete() {
@@ -828,7 +838,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
   Widget listTile({required Mark marcaSelect, bool icon = true}) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      trailing: !icon? null: ImageApp.circleImage(texto: marcaSelect.name, url: marcaSelect.image, size: 50.0),
+      trailing:!icon? null  : AvatarApp(url: marcaSelect.image,size: 50,description:marcaSelect.name),
       dense: true,
       title: Text(marcaSelect.name,overflow: TextOverflow.ellipsis),
       subtitle: marcaSelect.description == ''

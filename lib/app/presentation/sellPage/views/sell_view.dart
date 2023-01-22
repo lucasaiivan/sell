@@ -348,8 +348,7 @@ class SalesView extends StatelessWidget {
     );
   }
 
-  Widget circleAvatarBSeachDefault(
-      {bool seach = false, required BuildContext context}) {
+  Widget circleAvatarBSeachDefault({bool seach = false, required BuildContext context}) {
     // controller
     final SalesController salesController = Get.find();
 
@@ -473,7 +472,7 @@ class SalesView extends StatelessWidget {
                       backgroundColor: Get.theme.dividerColor,
                       child: defaultValues?Container(): Text(Publications.getFormatoPrecio(monto: productCatalogue.salePrice),style:TextStyle(color: Get.textTheme.bodyMedium?.color)),
                     ),
-                  ),
+                  ), 
                   SizedBox(height: spaceImageText),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 5),
