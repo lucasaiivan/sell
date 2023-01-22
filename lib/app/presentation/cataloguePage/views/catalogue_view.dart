@@ -1,4 +1,4 @@
-import 'package:cached_network_image/cached_network_image.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -265,12 +265,7 @@ class CataloguePage extends StatelessWidget {
                 ),
               ],
             ),
-            leading: CachedNetworkImage(
-              imageUrl: item.image,
-              placeholder: (context, url) => CircleAvatar(backgroundColor: tileColor,child: Padding(padding: const EdgeInsets.all(1.0),child: CircleAvatar(backgroundColor: Get.theme.scaffoldBackgroundColor,child: Padding(padding: const EdgeInsets.all(1.0),child: CircleAvatar(backgroundColor: Get.theme.dividerColor))))),
-              imageBuilder: (context, image) => CircleAvatar(backgroundColor: tileColor,child: Padding(padding: const EdgeInsets.all(1.0),child: CircleAvatar(backgroundColor: Get.theme.scaffoldBackgroundColor,child: Padding(padding: const EdgeInsets.all(1.0),child: CircleAvatar(backgroundImage: image))))),
-              errorWidget: (context, url, error) => CircleAvatar(backgroundColor: tileColor,child: Padding(padding: const EdgeInsets.all(1.0),child: CircleAvatar(backgroundColor: Get.theme.scaffoldBackgroundColor,child: Padding(padding: const EdgeInsets.all(1.0),child: CircleAvatar(backgroundColor: Get.theme.dividerColor))))),
-            ),
+            leading: AvatarApp(url: item.image,size: 50,favorite: item.favorite), 
             trailing: item.stock
                 ? Material(
                     color: Get.theme.dividerColor,
@@ -299,7 +294,7 @@ class CataloguePage extends StatelessWidget {
     return ListTile(
       contentPadding: const EdgeInsets.all(12),
       dense: true,
-      title: Text(title, style: Get.theme.textTheme.bodyText1),
+      title: Text(title, style: Get.theme.textTheme.labelMedium),
       onTap: () {
         controller.setSelectedCategory = categoria;
         controller.tabController.animateTo(0);

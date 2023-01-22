@@ -168,7 +168,7 @@ class TransactionsController extends GetxController {
     // obtenemos los documentos creados en el día
 
     // a la marca de tiempo actual le descontamos las horas del día
-    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(Timestamp.now().toDate().subtract(Duration(hours: Timestamp.now().toDate().hour)).millisecondsSinceEpoch);
+    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(Timestamp.now().toDate().subtract( Duration(hours: Timestamp.now().toDate().hour,minutes: Timestamp.now().toDate().minute ) ).millisecondsSinceEpoch);
     // marca de tiempo actual
     Timestamp timeEnd = Timestamp.now();
 
@@ -572,7 +572,7 @@ class TransactionsController extends GetxController {
       value = totalSaleValue - fullValueAtCost; // obtenemos el total de las ganancias
     }
 
-    return value  ==  0.0 ?  '':Publications.getFormatoPrecio(monto:value,moneda: currencySymbol);
+    return value  ==  0.0 ?  '':'+${Publications.getFormatoPrecio(monto:value,moneda: currencySymbol)}';
   }
   String getInfoPriceTotal() {
 

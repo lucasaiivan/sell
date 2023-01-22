@@ -186,18 +186,7 @@ class SalesController extends GetxController {
             ListTile(
               contentPadding:const EdgeInsets.symmetric(horizontal: 20,vertical: 12),
               tileColor: tileColor,
-              leading: CachedNetworkImage(
-                    imageUrl: product.image,
-                    placeholder: (context, url) => CircleAvatar(
-                        backgroundColor: Get.theme.dividerColor,
-                        child: Text(Publications.getFormatoPrecio(monto: product.salePrice),style: TextStyle(color: Get.textTheme.bodyText1?.color))),
-                    imageBuilder: (context, image) => CircleAvatar(
-                        backgroundColor: Get.theme.scaffoldBackgroundColor,
-                        backgroundImage: image),
-                    errorWidget: (context, url, error) => CircleAvatar(
-                      backgroundColor: Get.theme.dividerColor,
-                    ),
-                  ),
+              leading: AvatarApp(url: product.image,size: 50,favorite:product.favorite),
               title: Text(product.description),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -238,14 +227,6 @@ class SalesController extends GetxController {
                             Text(alertStockText),
                           ],
                         ):Container(),
-                        // text : cantidad de ventas
-                        product.sales == 0? Container():Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
-                            Text('${product.sales} ${product.sales == 1 ? 'venta' : 'ventas'}'),
-                          ],
-                        ),
                     ],
                   ),
 
