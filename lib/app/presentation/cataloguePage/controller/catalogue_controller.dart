@@ -134,8 +134,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     // Busca entre los productos de mi catálogo
 
     // var
-    Color colorAccent =
-        Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
+    Color colorAccent = Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
     
 
     showSearch(
@@ -148,6 +147,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
         suggestion: const Center(child: Text('ej. alfajor')),
         failure: const Center(child: Text('No se encontro en tu cátalogo:(')),
         filter: (product) => [product.description, product.nameMark],
+        
         builder: (product) {
 
           // values
