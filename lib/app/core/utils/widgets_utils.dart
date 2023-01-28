@@ -32,7 +32,7 @@ class WidgetButtonListTile extends StatelessWidget {
       contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15.0),
       leading: const Icon(Icons.add),
       dense: true,
-      title: const Text("Crear mi perfil", style: TextStyle(fontSize: 16.0)),
+      title: const Text("Crear mi perfil de mi negocio", style: TextStyle(fontSize: 16.0)),
       onTap: () {
         Get.back();
         Get.toNamed(Routes.ACCOUNT);
@@ -41,6 +41,9 @@ class WidgetButtonListTile extends StatelessWidget {
   }
 
   Widget buttonListTileItemCuenta({required ProfileAccountModel perfilNegocio}) {
+
+    // others controllers
+    final HomeController homeController = Get.find();
 
     if (perfilNegocio.id == '') { return Container(); }
     
@@ -75,16 +78,31 @@ class WidgetButtonListTile extends StatelessWidget {
           ),
           dense: true,
           title: Text(perfilNegocio.name),
-          trailing: Radio(
+          subtitle: Text( homeController.getProfileAccountSelected.id != perfilNegocio.id ? ''  :  homeController.getProfileAdminUser.superAdmin && homeController.getProfileAccountSelected.id == perfilNegocio.id?'':'Tienes que ser administrador para editar esta cuenta'  ),
+          trailing: homeController.getProfileAdminUser.superAdmin && homeController.getProfileAccountSelected.id == perfilNegocio.id ? TextButton(onPressed: (){
+              Get.back();
+              Get.toNamed(Routes.ACCOUNT);
+          }, child: const Text('Editar')): Radio(
             activeColor: Colors.blue,
             value: controller.isSelected(id: perfilNegocio.id) ? 0 : 1,
             groupValue: 0,
             onChanged: (val) {
-              controller.accountChange(idAccount: perfilNegocio.id);
+              if(homeController.getProfileAdminUser.superAdmin && homeController.getProfileAccountSelected.id == perfilNegocio.id){
+                Get.back();
+                Get.toNamed(Routes.ACCOUNT);
+              }else{
+                controller.accountChange(idAccount: perfilNegocio.id);
+              }
+              
             },
           ),
           onTap: () {
-            controller.accountChange(idAccount: perfilNegocio.id);
+            if(homeController.getProfileAdminUser.superAdmin && homeController.getProfileAccountSelected.id == perfilNegocio.id){
+                Get.back();
+                Get.toNamed(Routes.ACCOUNT);
+              }else{
+                controller.accountChange(idAccount: perfilNegocio.id);
+              }
           },
         ),
       ],
@@ -480,9 +498,10 @@ class WidgetDrawer extends StatelessWidget {
 }
 
 Widget viewDefault() {
-  // vista por defecto que se le muestra al usuario para que seleccione un cuenta
 
-  // others controllers
+  // description  : vista por defecto que se le muestra al usuario para que seleccione un cuenta
+
+  // controllers
   final HomeController homeController = Get.find();
 
   return Material(
