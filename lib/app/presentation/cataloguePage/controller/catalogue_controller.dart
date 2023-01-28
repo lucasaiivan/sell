@@ -1,5 +1,4 @@
-import 'package:avatar_view/avatar_view.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -16,6 +15,22 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
   // others controllers
   final HomeController homeController = Get.find();
   late TabController tabController;
+
+  // color del texto de disponibilidad
+   Color? getStockColor( {required ProductCatalogue productCatalogue}){
+
+    // var 
+    Color? color = Get.theme.listTileTheme.textColor;
+
+    // disponibilidad baja
+    if( productCatalogue.stock){
+      if( productCatalogue.quantityStock <= productCatalogue.alertStock ){
+        color = Colors.red;
+      }
+    }
+
+    return color;
+  }
 
   // text titleBar
   Category _selectedCategory = Category(name: 'Cátalogo');
@@ -134,8 +149,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     // Busca entre los productos de mi catálogo
 
     // var
-    Color colorAccent =
-        Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
+    Color colorAccent = Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
     
 
     showSearch(
@@ -148,6 +162,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
         suggestion: const Center(child: Text('ej. alfajor')),
         failure: const Center(child: Text('No se encontro en tu cátalogo:(')),
         filter: (product) => [product.description, product.nameMark],
+        
         builder: (product) {
 
           // values
@@ -165,11 +180,21 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Text(
-                    product.nameMark,
-                    maxLines: 2,
-                    overflow: TextOverflow.clip,
-                    style: const TextStyle(color: Colors.blue),
+                  Row(
+                    children: [
+                      Text(
+                        '${product.nameMark} ',
+                        maxLines: 2,
+                        overflow: TextOverflow.clip,
+                        style: const TextStyle(color: Colors.blue),
+                      ),
+                      product.favorite?Text(
+                        'favorito',
+                        maxLines: 2,
+                        overflow: TextOverflow.clip,
+                        style: TextStyle(color: Colors.yellow.shade800),
+                      ):Container(),
+                    ],
                   ),
                   Wrap(
                   children: [
@@ -190,8 +215,19 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
                         product.sales == 0? Container(): Icon(Icons.circle,size: 8, color: Get.theme.dividerColor),
                         product.sales == 0? Container():const SizedBox(width: 5),
                         product.sales == 0? Container(): Text('${product.sales} ${product.sales == 1 ? 'venta' : 'ventas'}'),
+                        product.sales == 0 ? Container():const SizedBox(width: 5),
                       ],
                     ),
+                    // text : stock
+                    product.stock
+                      ?Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          product.stock == false ? Container(): Icon(Icons.circle,size: 8, color: Get.theme.dividerColor),
+                          product.stock == false ? Container():const SizedBox(width: 5),
+                          Text('stock ${product.quantityStock.toString()}',style: TextStyle(color: getStockColor(productCatalogue: product))), 
+                        ],
+                      ):Container(),
                   ],
                 ), 
                 ],
@@ -202,7 +238,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
                 toProductEdit(productCatalogue: product);
               },
             ),
-            const Divider(height: 0,thickness: 0.5),
+            const Divider(height: 0,thickness: 0.2),
           ],
         );
         },
