@@ -122,7 +122,7 @@ class ProductEdit extends StatelessWidget {
               widgetFormEditText(),
             ],
           ),
-          controller.getSaveIndicator?Expanded(child: Container(color: Colors.black12.withOpacity(0.3))):Container()
+          controller.getSaveIndicator?Container(color: Colors.black12.withOpacity(0.3)):Container()
         ],
       ),
     );
