@@ -503,14 +503,14 @@ class ControllerProductsEdit extends GetxController {
             leading: const Icon(Icons.camera),
             title: const Text('Capturar una imagen'),
             onTap: () {
-              Get.back;
+              Get.back();
               getLoadImageCamera;
             }),
         ListTile(
           leading: const Icon(Icons.image),
           title: const Text('Seleccionar desde la galería de fotos'),
           onTap: () {
-            Get.back;
+            Get.back();
             getLoadImageGalery();
           },
         ),
