@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -444,54 +445,47 @@ void showDialogCerrarSesion() {
     // muestra las cuentas en el que el usuario tiene accesos
     Widget widget = getManagedAccountsList.isEmpty
         ? WidgetButtonListTile().buttonListTileCrearCuenta()
-        : ListView.builder(
-            padding: const EdgeInsets.symmetric(),
-            shrinkWrap: true,
-            itemCount: getManagedAccountsList.length,
-            itemBuilder: (BuildContext context, int index) {
-              return Column(
-                children: [
-                  WidgetButtonListTile().buttonListTileItemCuenta(perfilNegocio: getManagedAccountsList[index]),
-                  const Divider(endIndent: 0,indent: 0,height: 0,thickness: 0.2),
-                ],
-              );
-            },
-          );
-
-    Widget buttonEditAccount = getManagedAccountsList.isEmpty
-        ? Container()
-        : getProfileAdminUser.superAdmin
-            ? ListTile(
-              title: const Text('Editar',style: TextStyle(color: Colors.blue),),
-              onTap: () {
-                Get.back();
-                Get.toNamed(Routes.ACCOUNT);
-              },
-            )
-            : getIdAccountSelected == ''
-                ? Container()
-                : const Padding(
-                    padding: EdgeInsets.all(20.0),
-                    child: Text(
-                        'Tienes que ser administrador para editar esta cuenta',
-                        textAlign: TextAlign.center),
+        : Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding:  EdgeInsets.only(bottom: 12,left: 12,right: 12,top: 20),
+              child: Text('Seleccione una cuentas'),
+            ),
+            ListView.builder(
+                padding: const EdgeInsets.symmetric(),
+                shrinkWrap: true,
+                itemCount: getManagedAccountsList.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Column(
+                    children: [
+                      WidgetButtonListTile().buttonListTileItemCuenta(perfilNegocio: getManagedAccountsList[index]),
+                      const Divider(endIndent: 0,indent: 0,height: 0,thickness: 0.2),
+                    ],
                   );
+                },
+              ),
+          ],
+        );
     // muestre la hoja inferior modal de getx
     Get.bottomSheet(
-      Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
+      ListView(
         children: [
-          widget,
-          buttonEditAccount,
-          const Divider(endIndent: 0,indent: 0,height: 0),
-          // cerrar sesion
-          ListTile(
-          title: const Text('Cerrar sesión'),
-          subtitle: Text(getUserAuth.email.toString(), maxLines: 1, overflow: TextOverflow.ellipsis),
-          trailing:  const Icon(Icons.close),
-          onTap: showDialogCerrarSesion,
-        ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              // cerrar sesion
+              ListTile(
+              title: const Text('Cerrar sesión'),
+              subtitle: Text(getUserAuth.email.toString(), maxLines: 1, overflow: TextOverflow.ellipsis),
+              trailing:  const Icon(Icons.close),
+              onTap: showDialogCerrarSesion,
+            ),
+            const Divider(endIndent: 0,indent: 0,height: 0),
+            widget,
+            ],
+          ),
         ],
       ),
       backgroundColor: Get.theme.scaffoldBackgroundColor,

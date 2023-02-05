@@ -266,16 +266,16 @@ class CataloguePage extends StatelessWidget {
               ],
             ),
             leading: AvatarApp(url: item.image,size: 50,favorite: item.favorite), 
+            // text : stock
             trailing: item.stock
-                ? Material(
-                    color: Get.theme.dividerColor,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30.0)),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(item.quantityStock.toString()),
-                    ),
-                  )
+                ? Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text('Stock',style: TextStyle(fontSize:10,color: cataloguePageController.getStockColor(productCatalogue: item))),
+                      Text(item.quantityStock.toString(),style: TextStyle(color: cataloguePageController.getStockColor(productCatalogue: item))),
+                    ],
+                  ),
+                )
                 : null,
           ),
           const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
