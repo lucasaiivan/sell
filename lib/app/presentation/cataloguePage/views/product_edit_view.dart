@@ -252,8 +252,7 @@ class ProductEdit extends StatelessWidget {
                     space,
                     TextField(
                       enabled: !controller.getSaveIndicator,
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       onChanged: (value) => controller.getProduct.salePrice =controller.controllerTextEditPrecioVenta.numberValue,
                       decoration: const InputDecoration(
                         filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
