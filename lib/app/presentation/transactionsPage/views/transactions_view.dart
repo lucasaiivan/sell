@@ -2,7 +2,8 @@ import 'package:blur/blur.dart';
 import 'package:cached_network_image/cached_network_image.dart'; 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart'; 
+import 'package:get/get.dart';
+import 'package:intl/intl.dart'; 
 import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:sell/app/core/utils/widgets_utils.dart';
 import '../../../domain/entities/ticket_model.dart';
@@ -168,6 +169,7 @@ class TransactionsView extends StatelessWidget {
         child: ListTile(
           contentPadding: const EdgeInsets.all(12),
           onLongPress: () =>  transactionsController.deleteSale(ticketModel: ticketModel),
+          onTap: () => showTransactionAlertDialog(buildContext,ticketModel.toJson()),
           title: Row(
             children: [
               Text('Pago con ',style: TextStyle(color: primaryTextColor,fontWeight: FontWeight.w600)),
@@ -238,8 +240,71 @@ class TransactionsView extends StatelessWidget {
 //////////////////
 /* CLASS VIEWS */
 /////////////////
+// dialog :  ticket
+void showTransactionAlertDialog(BuildContext context, Map<dynamic, dynamic> transactionData) {
+  String id = transactionData['id'];
+  String seller = transactionData['seller'];
+  String cashRegister = transactionData['cashRegister'];
+  String payMode = transactionData['payMode'];
+  double priceTotal = transactionData['priceTotal'];
+  double valueReceived = transactionData['valueReceived'];
+  String currencySymbol = transactionData['currencySymbol'];
+  List<dynamic> listProduct = transactionData['listPoduct'];
+  Timestamp creation = transactionData['creation'];
 
+  // controllers
+  final TransactionsController transactionsController = Get.find();
 
+  // Formatear marca de tiempo como fecha
+  var formatter = DateFormat("dd/MM/yyyy");
+  var formattedCreationDate = formatter.format(creation.toDate());
+
+  // var 
+  Map payModeMap =transactionsController.getPayMode(idMode: payMode);
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        contentPadding: const EdgeInsets.all(20),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              const Text("Información de transacción", style: TextStyle(fontSize: 20)),
+              const SizedBox(height: 10),
+              Text("ID: $id"),
+              Text("Vendedor: $seller"),
+              Text("Caja registradora: $cashRegister"),
+              Text("Modo de pago: ${ payModeMap['name'] }"),
+              Text("Precio total: $currencySymbol $priceTotal"),
+              Text("Valor recibido: $currencySymbol $valueReceived"),
+              Text("Cantidad de productos: ${listProduct.length}"),
+              Text("Fecha de creación: $formattedCreationDate"),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: Text("Eliminar",style: TextStyle(color: Colors.red.shade400),),
+            onPressed: () {
+              transactionsController.deleteTicket( ticketModel: TicketModel.fromMap(transactionData));
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: const Text("Cerrar"),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          
+        ],
+      );
+    },
+  );
+}
 class WidgetAnalyticSalesTileExpanded extends StatefulWidget {
 
   // ignore: prefer_const_constructors_in_immutables
@@ -467,7 +532,7 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
                                 // text : titulo
                                 Row(
                                   children: [
-                                    Text(textCategory,maxLines: isExpanded ? 1 : 2,overflow: TextOverflow.ellipsis, textAlign: TextAlign.start,textDirection: TextDirection.ltr, style: const TextStyle(fontSize: 24)),
+                                    Text(textCategory,maxLines: isExpanded ? 1 : 2,overflow: TextOverflow.ellipsis, textAlign: TextAlign.start, style: const TextStyle(fontSize: 24)),
                                     // icon : muestra si la tarjeta esta expandida o no
                                     Icon(isExpanded? Icons.keyboard_arrow_down: Icons.keyboard_arrow_up,size: 27),
                                   ],
@@ -475,15 +540,15 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
                                 const SizedBox(height: 12),
                                 // text : analiticas
                                 Row(
-                                  
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
                                     // text : monto total de las ventas del filtro
                                     Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Opacity(opacity: 0.9,child:  Text(transactionsController.getFilterText,style:const TextStyle(fontSize: 10 ))),
-                                        Text(priceTotal,textAlign: TextAlign.start,style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w500)),
-                                        const Opacity(opacity: 0.7,child:  Text('Total',style:TextStyle(fontSize: 10))),
+                                        Opacity(opacity: 0.9, child: Text(transactionsController.getFilterText, style: const TextStyle(fontSize: 10))),
+                                        Text(priceTotal, textAlign: TextAlign.start, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w500,overflow: TextOverflow.ellipsis)),
+                                        const Opacity(opacity: 0.7, child: Text('Total', style: TextStyle(fontSize: 10))),
                                       ],
                                     ),
                                     const Spacer(),
@@ -493,10 +558,10 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
                                       children: [
                                         const Text(''),
                                         Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 1),
-                                          child: Text(revenue,style: const TextStyle(fontWeight: FontWeight.w900,fontSize: 24)),
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+                                          child: Text(revenue, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 24,overflow: TextOverflow.ellipsis)),
                                         ),
-                                        Opacity(opacity: 0.7,child:  Text(revenue==''?'':'Cantidad ganada',style:const TextStyle(fontSize: 10))),
+                                        Opacity(opacity: 0.7, child: Text(revenue == '' ? '' : 'Cantidad ganada', style: const TextStyle(fontSize: 10))),
                                       ],
                                     ),
                                   ],
@@ -514,6 +579,16 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
                       data: isDark? ThemeData.dark():ThemeData.light(),
                       child: Column(
                         children: [ 
+                          // titulo : analiticas
+                          Padding(
+                            padding: const EdgeInsets.only(left:20,right:20,top: 20),
+                            child: Row(
+                              children: [
+                                const Text('Analíticas',style: TextStyle(fontSize: 24)),
+                                LogoPremium(size: 12),
+                              ],
+                            ),
+                          ),
                           //  view  : cantidad total de ventas
                           Padding(
                             padding: const EdgeInsets.only(left:20,right:20,top: 20),
@@ -528,6 +603,7 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
                           const Divider(endIndent:20,indent:20),
                           // view : saldo total de cada caja
                           cashAnalysisWidget,
+                          const Divider(endIndent:20,indent:20,height: 0),
                           // view : productos con mayor ganancia
                           wProductsRevenue,
                           //  view : medios de pagos
@@ -653,6 +729,16 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
     Widget mostselledProductsWidget = transactionsController.getMostSelledProducts.isEmpty?Container():Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [ 
+        // titulo : analiticas
+        Padding(
+          padding: const EdgeInsets.only(left:20,right:20,top: 20),
+          child: Row(
+            children: [
+              const Text('Analíticas',style: TextStyle(fontSize: 24)),
+              LogoPremium(size: 12),
+              ],
+              ),
+        ),  
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 20,vertical: 20),
           child: Opacity(opacity: 0.7,child: Text('Más vendidos',overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold))),
@@ -736,7 +822,7 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
                               children: [
                                 Row(
                                   children: [
-                                    Text(textCategory,maxLines: isExpanded ? 1 : 2,overflow: TextOverflow.ellipsis, textAlign: TextAlign.start,textDirection: TextDirection.ltr, style:const TextStyle( fontSize: 24)),
+                                    Text(textCategory,maxLines: isExpanded ? 1 : 2,overflow: TextOverflow.ellipsis, textAlign: TextAlign.start, style:const TextStyle( fontSize: 24)),
                                     // icon : muestra si la tarjeta esta expandida o no
                                     Icon(isExpanded? Icons.keyboard_arrow_down: Icons.keyboard_arrow_up,size: 27),
                                   ],
@@ -748,7 +834,7 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
                                     Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [ 
-                                        Text(Publications.getFormatAmount(value:transactionsController.readTotalProducts()),style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w400)),
+                                        Text(Publications.getFormatAmount(value:transactionsController.readTotalProducts()),style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w400)),
                                         const Opacity(opacity: 0.7,child:  Text('Total',style:TextStyle(fontSize: 10)))
                                       ],
                                     ),
