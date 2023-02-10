@@ -48,7 +48,7 @@ class SalesView extends StatelessWidget {
   // WIDGETS VIEWS
   PreferredSizeWidget appbar({required SalesController controller}) {
     return AppBar(
-      title: const Text('Vender'),
+      title: Text(controller.valueResponseChatGpt),
       actions: [
         controller.getListProductsSelestedLength != 0
             ? TextButton.icon(icon: const Icon(Icons.clear_rounded),label: const Text('Descartar Ticket'),onPressed: controller.dialogCleanTicketAlert)

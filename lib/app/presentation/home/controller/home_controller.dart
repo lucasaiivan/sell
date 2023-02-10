@@ -601,8 +601,8 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
                   ),
                   const SizedBox(height: 12),
                   Opacity(opacity: 0.7,child: Text(description,textAlign: TextAlign.center )),
-                  const SizedBox(height: 12),
-                  const Text('Más características',textAlign: TextAlign.center,),
+                  const SizedBox(height: 50),
+                  const Text('CARACTERÍSTICAS',textAlign: TextAlign.center,style: TextStyle(fontWeight: FontWeight.w200)),
                   const SizedBox(height: 12),
                   Chip(backgroundColor: Colors.transparent,side: side,avatar: const Icon(Icons.check),label: const Text('Control de inventario')),
                   Chip(backgroundColor: Colors.transparent,side: side,avatar: const Icon(Icons.check),label: const Text('Multi Usuarios')),
@@ -613,7 +613,7 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
             ),
             const SizedBox(height: 12),
             // button : adquirir premium
-            SizedBox(
+            /* SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: null,/*  (){
@@ -633,7 +633,7 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
                 // icon : homeController.getProfileAccountSelected.subscribed?Icons.close:Icons.arrow_forward_rounded
                 label: const Icon(Icons.arrow_forward_rounded,color: Colors.white,),
               ),
-            ),
+            ), */
             // text : precio de la versión Premium
             const SizedBox(height: 50),
             /* disponible para cuando las subcripciones esten desarrolladas
