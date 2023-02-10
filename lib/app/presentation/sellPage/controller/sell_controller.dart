@@ -1,5 +1,7 @@
+import 'dart:convert';
+
 import 'package:audioplayers/audioplayers.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,6 +17,9 @@ import '../../../domain/entities/catalogo_model.dart';
 import '../../../domain/entities/ticket_model.dart';
 
 class SalesController extends GetxController {
+
+
+  String valueResponseChatGpt = 'Vender'; 
 
   // others controllers
   final HomeController homeController = Get.find();
@@ -47,7 +52,7 @@ class SalesController extends GetxController {
     product.select = false;
     homeController.listProductsSelected.add(product);
   }
-
+  //  list : lista de productos seleccionados por el usaurio para la venta
   set removeProduct(String id) {
     List newList = [];
     for (ProductCatalogue product in homeController.listProductsSelected) {
@@ -56,7 +61,7 @@ class SalesController extends GetxController {
     setListProductsSelected = newList;
     update();
   }
-
+  //  list : lista de productos seleccionados por el usaurio para la venta
   int get getListProductsSelestedLength {
     int count = 0;
     for (ProductCatalogue element in getListProductsSelested) {
@@ -70,6 +75,7 @@ class SalesController extends GetxController {
   void getCashRegisterNumber(){
     cashRegisterNumber = GetStorage().read('cashRegisterNumber') ?? 1; 
   }
+  //  cash Register Number : obtenemos la caja seleccionada por el usuario en el dispositivo que es actualmente utilizada
   void setCashRegisterNumber({required int number})async{
     cashRegisterNumber=number;
     await GetStorage().write('cashRegisterNumber', number);
@@ -157,6 +163,8 @@ class SalesController extends GetxController {
   }
 
   // FUCTIONS
+
+
 
   void showSeach({required BuildContext context}) {
     // Busca entre los productos de mi catálogo

@@ -90,7 +90,7 @@ class AuthView extends GetView<LoginController> {
   /// WIDGETS COMPONENT
   Widget widgetCheckAcceptPrivacyAndUsePolicy() {
     TextStyle defaultStyle =
-        TextStyle(color: Get.theme.textTheme.bodyText1!.color);
+        TextStyle(color: Get.theme.textTheme.bodyLarge!.color);
     TextStyle linkStyle = const TextStyle(color: Colors.blue);
 
     RichText text = RichText(

@@ -101,7 +101,7 @@ class ProductEdit extends StatelessWidget {
       actions: <Widget>[
         controller.getSaveIndicator
             ? Container()
-            : TextButton.icon(onPressed: () => controller.save(), icon: Icon(controller.itsInTheCatalogue ? Icons.check : Icons.add), label: Text(controller.itsInTheCatalogue?'Actualizar':'Agregar a mi cátalogo')),
+            : controller.itsInTheCatalogue?TextButton.icon(onPressed: () => controller.save(), icon:const Icon( Icons.check ), label:const  Text('Actualizar')):Container(),
       ],
       bottom: controller.getSaveIndicator
           ? ComponentApp.linearProgressBarApp(color: colorLoading)
@@ -353,8 +353,26 @@ class ProductEdit extends StatelessWidget {
                     ),
                     // button : guardar
                     const SizedBox(height:50),
+                    // CheckboxListTile : consentimiento de usuario para crear un producto
+                    !controller.getNewProduct ? Container() :
+                    Container(
+                      margin:  const EdgeInsets.only(bottom: 20,top: 12),
+                      decoration: BoxDecoration(
+                        border: Border.all(width: 1.0, color: Colors.grey),
+                      ),
+                      child: CheckboxListTile(
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
+                        controlAffinity: ListTileControlAffinity.leading,
+                        title: const Text('Al crear un nuevo producto, entiendo que no seré el dueño ni podré editarlo una vez agregado a la base de datos también entiendo que los precios de venta de los productos serán de carácter publico',style: TextStyle(fontWeight: FontWeight.w300)),
+                        value: controller.getUserConsent,
+                        onChanged: (value) {
+                          controller.setUserConsent = value!;
+                        },
+                      ),
+                    ),
+                    //  button : guardar el producto
                     button(
-                      disable:controller.getSaveIndicator,
+                      disable:controller.getSaveIndicator == true || (controller.getNewProduct && !controller.getUserConsent)  ,
                       onPressed: controller.save,
                       icon: Container(),
                       colorButton: Colors.blue,
@@ -378,6 +396,7 @@ class ProductEdit extends StatelessWidget {
           
           //TODO: eliminar para desarrrollo
           /* OPCIONES PARA DESARROLLADOR - ELIMINAR ESTE CÓDIGO PARA PRODUCCION */
+          const SizedBox(height:50),
           widgetForModerator,
           ]             ,
       ),

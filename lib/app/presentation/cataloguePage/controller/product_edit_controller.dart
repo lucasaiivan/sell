@@ -33,6 +33,14 @@ class ControllerProductsEdit extends GetxController {
             "######################## FIREBASE updateAccount catchError: $e"));
   }
 
+  // concentimiento del usuario
+  bool _userConsent = false;
+  set setUserConsent(bool value) {
+    _userConsent = value;
+    update(['updateAll']);
+  }
+  bool get getUserConsent => _userConsent;
+
   // category list
   final RxList<Category> _categoryList = <Category>[].obs;
   List<Category> get getCatalogueCategoryList => _categoryList;

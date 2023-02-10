@@ -769,7 +769,7 @@ class LogoPremium extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 2),
           decoration: BoxDecoration(border: Border.all(color: accentColor)),
-          child: Text('Versión gratis',style: TextStyle(fontSize: size,color:accentColor),textAlign: TextAlign.center,overflow: TextOverflow.clip,)
+          child: Text('Gratis temporal',style: TextStyle(fontSize: size,color:accentColor),textAlign: TextAlign.center,overflow: TextOverflow.clip,)
         ),
       ),
     ),
