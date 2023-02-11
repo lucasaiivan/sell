@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:sell/app/presentation/home/controller/home_controller.dart';
 import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart';
 import 'package:sell/app/core/utils/dynamicTheme_lb.dart';
@@ -400,7 +401,27 @@ class WidgetDrawer extends StatelessWidget {
           child: TextButton(onPressed:(){
             Get.back(); // cierra drawer
             homeController.showModalBottomSheetSubcription();
-          }, child: const Text('Las opciones Premiun estan dispobilbles')),
+          }, child: RichText(
+      text: TextSpan(
+        style: DefaultTextStyle.of(context).style,
+        children: <TextSpan>[
+          const TextSpan(
+            text: 'Versión gratuita',
+            style: TextStyle(
+              color: Colors.blue,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          TextSpan(
+            text: ' Nuestro objetivo es hacer las cosas simples y eficientes para tu negocio',
+            style: TextStyle(
+              color: Colors.blue.withOpacity(0.6),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    )),
         ),
         /* Esta version de la app las funciones PREMIUM son gratis
 
@@ -433,7 +454,7 @@ class WidgetDrawer extends StatelessWidget {
                     children: [
                       const Text('Multi Usuario'),
                       const SizedBox(width: 12),
-                      LogoPremium(),
+                      SizedBox(width: 90,child: LogoPremium()),
                     ],
                   ),
                   onTap: () {
@@ -736,20 +757,25 @@ class LogoPremium extends StatelessWidget {
       accentColor = Theme.of(context).brightness==Brightness.dark?Colors.white70:Colors.black87; 
     }
 
-    // visibility
-    bool visibility = visible || (homeController.getProfileAccountSelected.subscribed ==false);
 
     return InkWell(
-      onTap: () => homeController.showModalBottomSheetSubcription(id:id ),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
+  onTap: () => homeController.showModalBottomSheetSubcription(id:id ),
+  child: Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: Opacity(
+      opacity: 0.3,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(2),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 2),
           decoration: BoxDecoration(border: Border.all(color: accentColor)),
-          child: Text('PREMIUM',style: TextStyle(fontSize: size,color:accentColor))
+          child: Text('Gratis temporal',style: TextStyle(fontSize: size,color:accentColor),textAlign: TextAlign.center,overflow: TextOverflow.clip,)
         ),
       ),
-    );
+    ),
+  ),
+);
+
   }
 }
 
@@ -767,6 +793,8 @@ class AvatarApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+ 
     return SizedBox(
       width: size,height: size,
       child: path =='' ? AvatarView(

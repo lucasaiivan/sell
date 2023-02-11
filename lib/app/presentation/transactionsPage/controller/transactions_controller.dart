@@ -544,7 +544,7 @@ class TransactionsController extends GetxController {
     }
     value = totalSaleValue-fullValueAtCost; // obtenemos el total de las ganancias
 
-    return value==0.0?  '':'+${Publications.getFormatoPrecio(monto:value,moneda: currencySymbol)}';
+    return value==0.0?  '':Publications.getFormatoPrecio(monto:value,moneda: currencySymbol);
   }
   String readEarnings({required TicketModel ticket }){
     // leemos ganancias

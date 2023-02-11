@@ -79,7 +79,7 @@ dependencies:
   email_validator: ^2.1.17
   blur: ^3.0.0
 
-
+  
 flutter_icons:
   android: true
   ios: false

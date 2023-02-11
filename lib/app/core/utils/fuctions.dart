@@ -10,23 +10,20 @@ class Publications {
 
   static String generateUid() => DateFormat('ddMMyyyyHHmmss').format(Timestamp.now().toDate()).toString();
   // obtiene un double y devuelve un monto formateado
-  static String getFormatoPrecio( {String moneda = "\$", required double monto}) {
-    int decimalDigits = 0;
-    int entero = monto.toInt();
-    if ((monto - entero) == 0.0) {
-      decimalDigits = 0;
-    } else {
-      decimalDigits = 2;
-    }
-    // Formatter
-    var saf = NumberFormat.currency(
-        locale: 'es_AR',
-        name: moneda,
-        customPattern: '\u00a4###,###,#00.00',
-        decimalDigits: decimalDigits);
+  static String getFormatoPrecio({String moneda = "\$", required double monto}) {
+    int decimalDigits = (monto % 1) == 0 ? 0 : 2;
 
-    return saf.format(monto);
+    var formatter = NumberFormat.currency(
+      locale: 'es_AR',
+      name: moneda,
+      customPattern: monto >= 0 ? '\u00a4###,###,##0.0' : '-\u00a4###,###,##0.0',
+      decimalDigits: decimalDigits,
+    );
+
+    return formatter.format(monto.abs());
   }
+
+
   static String getFormatAmount({required int value}){
     String price = value.toString();
     String priceInText ='';

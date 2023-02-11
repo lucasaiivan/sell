@@ -49,7 +49,7 @@ class TicketModel {
         "listPoduct": listPoduct,
         "creation": creation,
       };
-  factory TicketModel.fromMap(Map<String, dynamic> data) {
+  factory TicketModel.fromMap(Map<dynamic, dynamic> data) {
     return TicketModel(
       id: data['id'] ?? '',
       payMode: data['payMode'] ?? '',
