@@ -390,7 +390,8 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
     final HomeController homeController = Get.find<HomeController>();
 
     // valueS
-    bool isDark = false;
+    Color colorCard = Colors.blue.withOpacity(0.1);
+    bool darkMode = false;
     bool isExpanded = false;
     Icon iconCategory = const Icon(Icons.monetization_on_outlined,color: Colors.green,);
     String textCategory = 'Volumen de ventas';
@@ -406,13 +407,12 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
 
 
     // get values
-    isDark = Theme.of(context).brightness == Brightness.dark;
+    darkMode = Theme.of(context).brightness == Brightness.dark;
     textFilter = transactionsController.getFilterText;
     priceTotal = transactionsController.getInfoPriceTotal();
     revenue  = transactionsController.readTotalEarnings();
-    Color? colorCard = isDark? Colors.blue.withOpacity(0.1) : isExpanded?Colors.white:Colors.blue[800]; // color te la tarjeta expandible
-    themeData = isDark?ThemeData.dark():isExpanded?ThemeData.light():ThemeData.dark();
-    elevation = isDark?isExpanded?0:0:isExpanded?8:0;
+    colorCard = darkMode? Colors.blue.withOpacity(0.1) : isExpanded?Colors.black.withOpacity(0.1):Colors.black.withOpacity(0.9);
+    themeData = darkMode?ThemeData.dark():isExpanded?ThemeData.light():ThemeData.dark();
 
     // widget : productos de mayor ganancia
     Widget wProductsRevenue = transactionsController.getBestSellingProductList.isEmpty?Container():Column(
@@ -576,113 +576,117 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
             child: Card(
               clipBehavior: Clip.antiAlias,
               elevation: elevation,
-              color: colorCard,
+              color: Colors.transparent,
               margin: const EdgeInsets.all(0),
               shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(bottomLeft:Radius.circular(12),bottomRight: Radius.circular(12),topLeft: Radius.circular(12),topRight: Radius.circular(12))),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-
-                  // view : volumen de ventas
-                  Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Flexible(
-                            fit: FlexFit.tight,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // text : titulo
-                                Row(
-                                  children: [
-                                    Text(textCategory,maxLines: isExpanded ? 1 : 2,overflow: TextOverflow.ellipsis, textAlign: TextAlign.start, style: const TextStyle(fontSize: 24)),
-                                    // icon : muestra si la tarjeta esta expandida o no
-                                    Icon(isExpanded? Icons.keyboard_arrow_down: Icons.keyboard_arrow_up,size: 27),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                //  text : cantidad de ventas
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    // text : monto total de las ventas del filtro
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Opacity(opacity: 0.9, child: Text(transactionsController.getFilterText, style: const TextStyle(fontSize: 10))),
-                                        Text(priceTotal, textAlign: TextAlign.start, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w500,overflow: TextOverflow.ellipsis)),
-                                        const Opacity(opacity: 0.7, child: Text('Total', style: TextStyle(fontSize: 10))),
-                                      ],
-                                    ),
-                                    const Spacer(),
-                                    // text : ganancias
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.end, 
-                                      children: [
-                                        const Text(''),
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
-                                          child: Text(revenue, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 24,overflow: TextOverflow.ellipsis)),
-                                        ),
-                                        Opacity(opacity: 0.7, child: Text(revenue == '' ? '' : 'Cantidad ganada', style: const TextStyle(fontSize: 10))),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ))
-                        
-                      ],
-                    ),
-                  ),
-                  // view : expandible de volumen de ventas
-                  AnimatedCrossFade(
-                    firstChild: const Text('', style: TextStyle(fontSize: 0)),
-                    secondChild: Theme(
-                      data: isDark? ThemeData.dark():ThemeData.light(),
-                      child: Column(
-                        children: [ 
-                          //  view  : cantidad total de ventas
-                          Padding(
-                            padding: const EdgeInsets.only(left:20,right:20,top: 20),
-                            child: Row(
-                              children: [
-                                const Text('Ventas',overflow: TextOverflow.ellipsis),
-                                const Spacer(),
-                                Text(transactionsController.getTransactionsList.length.toString(),style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w300)),
-                              ],
-                            ),
-                          ),
-                          const Divider(endIndent:20,indent:20),
-                          // view : saldo total de cada caja
-                          cashAnalysisWidget,
-                          const Divider(endIndent:20,indent:20,height: 0),
-                          // text : titulo de Analíticas
-                          Padding(
-                            padding: const EdgeInsets.only(left:20,right:20,top: 20),
-                            child: Row(
-                              children: [
-                                const Text('Analíticas',style: TextStyle(fontSize: 30)),
-                                LogoPremium(size: 12),
-                              ],
-                            ),
-                          ),
-                          // view : productos con mayor ganancia
-                          wProductsRevenue,
-                          //  view : medios de pagos
-                          widgetAlyticsMeansOfPayment,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 500),
+                color: colorCard,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+              
+                    // view : volumen de ventas
+                    Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Flexible(
+                              fit: FlexFit.tight,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // text : titulo
+                                  Row(
+                                    children: [
+                                      Text(textCategory,maxLines: isExpanded ? 1 : 2,overflow: TextOverflow.ellipsis, textAlign: TextAlign.start, style: const TextStyle(fontSize: 24)),
+                                      // icon : muestra si la tarjeta esta expandida o no
+                                      Icon(isExpanded? Icons.keyboard_arrow_down: Icons.keyboard_arrow_up,size: 27),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  //  text : cantidad de ventas
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      // text : monto total de las ventas del filtro
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Opacity(opacity: 0.9, child: Text(transactionsController.getFilterText, style: const TextStyle(fontSize: 10))),
+                                          Text(priceTotal, textAlign: TextAlign.start, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w500,overflow: TextOverflow.ellipsis)),
+                                          const Opacity(opacity: 0.7, child: Text('Total', style: TextStyle(fontSize: 10))),
+                                        ],
+                                      ),
+                                      const Spacer(),
+                                      // text : ganancias
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.end, 
+                                        children: [
+                                          const Text(''),
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+                                            child: Text(revenue, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 24,overflow: TextOverflow.ellipsis)),
+                                          ),
+                                          Opacity(opacity: 0.7, child: Text(revenue == '' ? '' : 'Cantidad ganada', style: const TextStyle(fontSize: 10))),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ))
+                          
                         ],
                       ),
                     ),
-                    crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-                    duration: const Duration(milliseconds: 1200),
-                    reverseDuration: Duration.zero,
-                    sizeCurve: Curves.fastLinearToSlowEaseIn,
-                  ),
-                  
-                ],
+                    // view : expandible de volumen de ventas
+                    AnimatedCrossFade(
+                      firstChild: const Text('', style: TextStyle(fontSize: 0)),
+                      secondChild: Theme(
+                        data: darkMode? ThemeData.dark():ThemeData.light(),
+                        child: Column(
+                          children: [ 
+                            //  view  : cantidad total de ventas
+                            Padding(
+                              padding: const EdgeInsets.only(left:20,right:20,top: 20),
+                              child: Row(
+                                children: [
+                                  const Text('Ventas',overflow: TextOverflow.ellipsis),
+                                  const Spacer(),
+                                  Text(transactionsController.getTransactionsList.length.toString(),style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w300)),
+                                ],
+                              ),
+                            ),
+                            const Divider(endIndent:20,indent:20),
+                            // view : saldo total de cada caja
+                            cashAnalysisWidget,
+                            const Divider(endIndent:20,indent:20,height: 0),
+                            // text : titulo de Analíticas
+                            Padding(
+                              padding: const EdgeInsets.only(left:20,right:20,top: 20),
+                              child: Row(
+                                children: [
+                                  const Text('Analíticas',style: TextStyle(fontSize: 30)),
+                                  LogoPremium(size: 12),
+                                ],
+                              ),
+                            ),
+                            // view : productos con mayor ganancia
+                            wProductsRevenue,
+                            //  view : medios de pagos
+                            widgetAlyticsMeansOfPayment,
+                          ],
+                        ),
+                      ),
+                      crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                      duration: const Duration(milliseconds: 1200),
+                      reverseDuration: Duration.zero,
+                      sizeCurve: Curves.fastLinearToSlowEaseIn,
+                    ),
+                    
+                  ],
+                ),
               ),
             ),
           ),
@@ -712,7 +716,7 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
 
     // valueS
     Color colorCard = Colors.grey;
-    bool isDark = false;
+    bool darkMode = false;
     bool isExpanded = false;
     Icon iconCategory = const Icon(Icons.analytics_outlined,color: Colors.orange);
     String textCategory = 'Productos';
@@ -725,15 +729,13 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
   @override
   Widget build(BuildContext context) {
 
-    // get values
-    
-    isDark = Theme.of(context).brightness == Brightness.dark;
+    // get values 
+    darkMode = Theme.of(context).brightness == Brightness.dark;
     textFilter = transactionsController.getFilterText;
     priceTotal = transactionsController.getInfoPriceTotal();
     revenue  = transactionsController.readTotalEarnings();
-    Color? colorCard = isDark? Colors.blue.withOpacity(0.1) : isExpanded?Colors.white:Colors.teal[800];
-    themeData = isDark?ThemeData.dark():isExpanded?ThemeData.light():ThemeData.dark();
-    elevation = isDark?isExpanded?0:0:isExpanded?8:0;
+    colorCard = darkMode? Colors.blue.withOpacity(0.1) : isExpanded?Colors.black.withOpacity(0.1):Colors.black.withOpacity(0.9);
+    themeData = darkMode?ThemeData.dark():isExpanded?ThemeData.light():ThemeData.dark();
 
     // widget : productos con mayor ganancia
     Widget higherPriedProductsWidget = transactionsController.getBestSellingProductsByAmount.isEmpty?Container():Column(
@@ -874,97 +876,101 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Card(
-                    color: colorCard,
+                    color: Colors.transparent,
                     clipBehavior: Clip.antiAlias,
                     elevation: elevation, 
                     margin: const EdgeInsets.all(0),
                     shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(bottomLeft:Radius.circular(12),bottomRight: Radius.circular(12),topLeft: Radius.circular(12),topRight: Radius.circular(12))),
-                    child: Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(20.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(textCategory,maxLines: isExpanded ? 1 : 2,overflow: TextOverflow.ellipsis, textAlign: TextAlign.start, style:const TextStyle( fontSize: 24)),
-                                    // icon : muestra si la tarjeta esta expandida o no
-                                    Icon(isExpanded? Icons.keyboard_arrow_down: Icons.keyboard_arrow_up,size: 27),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    // widget : total de los productros vendidos
-                                    Column(
-                                      mainAxisSize:   MainAxisSize.min,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [ 
-                                        Text(Publications.getFormatAmount(value:transactionsController.readTotalProducts()),style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w400)),
-                                        const Opacity(opacity: 0.7,child:  Text('Total',style:TextStyle(fontSize: 10)))
-                                      ],
-                                    ),
-                                    const Spacer(),
-                                    isExpanded?Container():transactionsController.getMostSelledProducts.isEmpty?Container():transactionsController.getMostSelledProducts[0].image==''?Container():FadeIn(
-                                      animate: true,
-                                      duration: const Duration(milliseconds: 2000),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.end,
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Row(
-                                              children: [
-                                                CachedNetworkImage(
-                                                  imageUrl:  transactionsController.getMostSelledProducts[0].image,
-                                                  placeholder: (context, url) => Container(width: 30,height: 30,decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(4)),color: Get.theme.dividerColor)),
-                                                  imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Container(width: 30,height: 30,decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(4)),image: DecorationImage(image: image,fit: BoxFit.cover)))),
-                                                  errorWidget: (context, url, error) => Container(),
-                                                ),
-                                                //  text  : marca del producto
-                                                Padding(
-                                                  padding: const EdgeInsets.only(left: 5),
-                                                  child: Text(transactionsController.getMostSelledProducts[0].nameMark,overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:20)),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          const Opacity(opacity: 0.8,child: Text('Más vendido',style:TextStyle(fontSize: 10))),
-                                        ],
-                                      ),
-                                    ),
-                                    
-                                  ],
-                                ),
-                              ],
-                            ),
-                            ),
-                          AnimatedCrossFade(
-                                firstChild: const Text('', style: TextStyle(fontSize: 0)),
-                                secondChild: Theme(
-                                  data: isDark? ThemeData.dark():ThemeData.light(),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 500),
+                      color: colorCard,
+                      child: Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
                                     children: [
-                                      
-                                      // widget : más vendidos
-                                      mostselledProductsWidget,
-
-                                      //  widget  : productos más vendido por el valor
-                                      higherPriedProductsWidget, 
-
+                                      Text(textCategory,maxLines: isExpanded ? 1 : 2,overflow: TextOverflow.ellipsis, textAlign: TextAlign.start, style:const TextStyle( fontSize: 24)),
+                                      // icon : muestra si la tarjeta esta expandida o no
+                                      Icon(isExpanded? Icons.keyboard_arrow_down: Icons.keyboard_arrow_up,size: 27),
                                     ],
                                   ),
-                                ),
-                                crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-                                duration: const Duration(milliseconds: 1200),
-                                reverseDuration: Duration.zero,
-                                sizeCurve: Curves.fastLinearToSlowEaseIn,
+                                  const SizedBox(height: 12),
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      // widget : total de los productros vendidos
+                                      Column(
+                                        mainAxisSize:   MainAxisSize.min,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [ 
+                                          Text(Publications.getFormatAmount(value:transactionsController.readTotalProducts()),style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w400)),
+                                          const Opacity(opacity: 0.7,child:  Text('Total',style:TextStyle(fontSize: 10)))
+                                        ],
+                                      ),
+                                      const Spacer(),
+                                      isExpanded?Container():transactionsController.getMostSelledProducts.isEmpty?Container():transactionsController.getMostSelledProducts[0].image==''?Container():FadeIn(
+                                        animate: true,
+                                        duration: const Duration(milliseconds: 2000),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.end,
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: Row(
+                                                children: [
+                                                  CachedNetworkImage(
+                                                    imageUrl:  transactionsController.getMostSelledProducts[0].image,
+                                                    placeholder: (context, url) => Container(width: 30,height: 30,decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(4)),color: Get.theme.dividerColor)),
+                                                    imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Container(width: 30,height: 30,decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(4)),image: DecorationImage(image: image,fit: BoxFit.cover)))),
+                                                    errorWidget: (context, url, error) => Container(),
+                                                  ),
+                                                  //  text  : marca del producto
+                                                  Padding(
+                                                    padding: const EdgeInsets.only(left: 5),
+                                                    child: Text(transactionsController.getMostSelledProducts[0].nameMark,overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:20)),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            const Opacity(opacity: 0.8,child: Text('Más vendido',style:TextStyle(fontSize: 10))),
+                                          ],
+                                        ),
+                                      ),
+                                      
+                                    ],
+                                  ),
+                                ],
                               ),
-                          ],
-                        ),
+                              ),
+                            AnimatedCrossFade(
+                                  firstChild: const Text('', style: TextStyle(fontSize: 0)),
+                                  secondChild: Theme(
+                                    data: darkMode? ThemeData.dark():ThemeData.light(),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        
+                                        // widget : más vendidos
+                                        mostselledProductsWidget,
+                    
+                                        //  widget  : productos más vendido por el valor
+                                        higherPriedProductsWidget, 
+                    
+                                      ],
+                                    ),
+                                  ),
+                                  crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                                  duration: const Duration(milliseconds: 1200),
+                                  reverseDuration: Duration.zero,
+                                  sizeCurve: Curves.fastLinearToSlowEaseIn,
+                                ),
+                            ],
+                          ),
+                    ),
                       ),
                 ),
         ),
