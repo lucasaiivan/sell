@@ -33,6 +33,14 @@ class ControllerProductsEdit extends GetxController {
             "######################## FIREBASE updateAccount catchError: $e"));
   }
 
+  // concentimiento del usuario
+  bool _userConsent = false;
+  set setUserConsent(bool value) {
+    _userConsent = value;
+    update(['updateAll']);
+  }
+  bool get getUserConsent => _userConsent;
+
   // category list
   final RxList<Category> _categoryList = <Category>[].obs;
   List<Category> get getCatalogueCategoryList => _categoryList;
@@ -484,15 +492,15 @@ class ControllerProductsEdit extends GetxController {
     });
   }
 
-  Widget loadImage() {
+  Widget loadImage({double size = 120}) {
 
     // devuelve la imagen del product
     if (getXFileImage.path != '') {
       // el usuario cargo un nueva imagen externa
-      return AvatarApp(path: getXFileImage.path ,size: 125,onTap: getNewProduct || getEditModerator? showModalBottomSheetCambiarImagen : null );
+      return AvatarApp(path: getXFileImage.path ,size: size,onTap: getNewProduct || getEditModerator? showModalBottomSheetCambiarImagen : null );
     } else {
       // se visualiza la imagen del producto
-      return AvatarApp(url: getProduct.image ,size: 125,onTap: getNewProduct || getEditModerator? showModalBottomSheetCambiarImagen : null );
+      return AvatarApp(url: getProduct.image ,size: size,onTap: getNewProduct || getEditModerator? showModalBottomSheetCambiarImagen : null );
     }
   }
 
