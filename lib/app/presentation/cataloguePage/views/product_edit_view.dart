@@ -166,6 +166,7 @@ class ProductEdit extends StatelessWidget {
       ),
     );
   }
+  // view  : descripcion del producto en una tarjeta con un icono de verificacion,  codigo, descripcion y marca
   Widget widgetFormEdit0(){
     
     
@@ -243,6 +244,7 @@ class ProductEdit extends StatelessWidget {
       ),
     );
   }
+  //  view : descripcion del producto con formulario de edicion
   Widget widgetFormEdit1(){
     return  Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -281,7 +283,6 @@ class ProductEdit extends StatelessWidget {
                 !controller.getAccountAuth ? Container() : space,
                 // textField  : nombre del producto
                 TextField(
-                  
                   enabled: controller.getSaveIndicator? false: controller.getEditModerator || controller.getNewProduct,
                   minLines: 1,
                   maxLines: 5,
@@ -301,7 +302,7 @@ class ProductEdit extends StatelessWidget {
       ],
     );
   }
-
+  //  view : datos para el cátalogo con formulario de edicion
   Widget widgetFormEdit2() {
     return Container(
       padding: const EdgeInsets.all(12.0),
@@ -393,7 +394,7 @@ class ProductEdit extends StatelessWidget {
                               children: [
                                 const Text('Control de stock'),
                                 const SizedBox(width: 12),
-                                LogoPremium(personalize: true,accentColor: Colors.amber.shade600),
+                                LogoPremium(personalize: true),
                               ],
                             ),
                             onChanged: (value) {
@@ -468,6 +469,12 @@ class ProductEdit extends StatelessWidget {
                         },
                       ),
                     ),
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 500),
+                      height: controller.getUserConsent?null:0,
+                      padding: EdgeInsets.all(controller.getUserConsent?30.0:0),
+                      child: const Text('¡Gracias por hacer que esta aplicación sea aún más útil para más personas! 🚀'),
+                      ),
                     //  button : guardar el producto
                     button(
                       disable:controller.getSaveIndicator == true || (controller.getNewProduct && !controller.getUserConsent)  ,
@@ -603,7 +610,7 @@ Widget get widgetForModerator{
         controller: TextEditingController(text: textValue),
         decoration: InputDecoration( 
           contentPadding: contentPadding,
-          filled: true,
+          filled: false,
           fillColor:stateEdit?null:Colors.transparent ,
           disabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: stateEdit?borderColor:Colors.transparent,)),
           labelText: labelText,
