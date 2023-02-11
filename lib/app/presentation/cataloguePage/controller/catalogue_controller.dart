@@ -36,6 +36,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
   Category _selectedCategory = Category(name: 'Cátalogo');
   String get getTextTitleAppBar => _selectedCategory.name;
   Category get getSelectedCategory => _selectedCategory;
+  set setTitleAppBar(String value) => _selectedCategory.name = value;
   set setSelectedCategory(Category value) {
     _selectedCategory = value;
     catalogueCategoryFilter();
@@ -92,21 +93,25 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
       }else{
         switch(key){
           case '0': //  Mostrar productos con stock
+            setTitleAppBar = 'Stock';
             List<ProductCatalogue> listSFilter = [];
             for(ProductCatalogue item in homeController.getCataloProducts){if(item.stock)listSFilter.add(item);}
             for(ProductCatalogue item in listSFilter){list.add(item);}
             break;
           case '1': //  Mostrar productos favoritos
+            setTitleAppBar = 'Favoritos';
             List<ProductCatalogue> listSFilter = [];
             for(ProductCatalogue item in homeController.getCataloProducts){if(item.favorite)listSFilter.add(item);}
             for(ProductCatalogue item in listSFilter){list.add(item);}
             break;
           case '2': // Mostrar productos con stock bajos
+            setTitleAppBar = 'Stock Bajo';
             List<ProductCatalogue> listSFilter = [];
             for(ProductCatalogue item in homeController.getCataloProducts){if(item.stock){if(item.quantityStock<=item.alertStock){listSFilter.add(item);}}}
             for(ProductCatalogue item in listSFilter){list.add(item);}
             break;
           case '3': // Mostrar todos
+            setTitleAppBar = 'Cátalogo';
             list = homeController.getCataloProducts;
             break; 
         }
