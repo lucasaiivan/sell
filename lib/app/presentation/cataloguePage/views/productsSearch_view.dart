@@ -89,58 +89,67 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                         // TODO : button : copiar de porta papeles ( opcion para moderador)
                         controller.getStateSearch? FadeInRight(child: copyTextModeratorButton): Container(),
                         const SizedBox(height: 12.0),
-                        !controller.getStateSearch
-                            ? Padding(
-                              padding: EdgeInsets.symmetric(horizontal: controller.getproductDoesNotExist?12:0),
-                              child: FadeInRight(
-                                  child: button(
-                                    icon: Icon(Icons.search,
-                                        color:
-                                            controller.getButtonData.colorText),
-                                    onPressed: () =>
-                                        controller.textEditingController.text ==
-                                                ''
-                                            ? null
-                                            : controller.queryProduct(
-                                                id: controller
-                                                    .textEditingController
-                                                    .value
-                                                    .text),
-                                    text: "Buscar",
-                                    colorAccent:
-                                        controller.getButtonData.colorText,
-                                    colorButton: controller.getButtonData.colorButton,
-                                  ),
-                                ),
-                            )
-                            : Container(),
+                        Opacity(
+                          opacity: controller.getproductDoesNotExist ? 0.5 : 1.0,
+                          child: Column(
+                            children: [
+                              !controller.getStateSearch
+                                  ? Padding(
+                                    padding: EdgeInsets.symmetric(horizontal: controller.getproductDoesNotExist?12:0),
+                                    child: FadeInRight(
+                                        child: button(
+                                          icon: Icon(Icons.search,
+                                              color:
+                                                  controller.getButtonData.colorText),
+                                          onPressed: () =>
+                                              controller.textEditingController.text ==
+                                                      ''
+                                                  ? null
+                                                  : controller.queryProduct(
+                                                      id: controller
+                                                          .textEditingController
+                                                          .value
+                                                          .text),
+                                          text: "Buscar",
+                                          colorAccent:
+                                              controller.getButtonData.colorText,
+                                          colorButton: controller.getButtonData.colorButton,
+                                        ),
+                                      ),
+                                  )
+                                  : Container(),
+                              const SizedBox(height: 12.0),
+                              // button : escanear codigo de barra
+                              !controller.getStateSearch
+                                  ? Padding(
+                                    padding: EdgeInsets.symmetric(horizontal: controller.getproductDoesNotExist?12:0),
+                                    child: FadeInRight(
+                                        child: button(
+                                          icon: const ImageIconScanWidget(size: 30,),
+                                          onPressed: scanBarcodeNormal,
+                                          text: "Escanear código",
+                                          colorAccent:controller.getButtonData.colorText,
+                                          colorButton:controller.getButtonData.colorButton,
+                                        ),
+                                      ),
+                                  )
+                                  : Container(),
+                            ],
+                          ),
+                        ),
                         const SizedBox(height: 12.0),
-                        !controller.getStateSearch
-                            ? Padding(
-                              padding: EdgeInsets.symmetric(horizontal: controller.getproductDoesNotExist?12:0),
-                              child: FadeInRight(
-                                  child: button(
-                                    icon: Icon(Icons.qr_code_scanner_sharp,color: controller.getButtonData.colorText,),
-                                    onPressed: scanBarcodeNormal,
-                                    text: "Escanear código",
-                                    colorAccent:controller.getButtonData.colorText,
-                                    colorButton:controller.getButtonData.colorButton,
-                                  ),
-                                ),
-                            )
-                            : Container(),
-                        const SizedBox(height: 12.0),
+                        // text : el producto no existe
                         controller.getproductDoesNotExist
                             ? Padding(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 0, vertical: 30),
+                                    horizontal: 30, vertical: 30),
                                 child: RichText(
                                   textAlign: TextAlign.center,
                                   text: const TextSpan(
                                       style: TextStyle(color: Colors.white,fontSize: 18),
                                       children: <TextSpan>[
                                         TextSpan(text: 'El producto aún no existe\n', style: TextStyle(fontSize: 24)),
-                                        TextSpan(text: 'Ayúdenos a registrar nuevos productos para que esta aplicación sea aún más útil para la comunidad ', style: TextStyle(color: Colors.white70)),
+                                        TextSpan(text: 'Ayúdenos a registrar nuevos productos para que esta aplicación sea aún más útil para más personsa 🌍 ', style: TextStyle(color: Colors.white70)),
                                       ],
                                   ),
                                 ),
@@ -154,6 +163,7 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                                 ), */
                               )
                             : Container(),
+                            //  button : crear producto
                         controller.getproductDoesNotExist
                             ? FadeInRight(
                                 child: button(
@@ -173,11 +183,6 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                                 ),
                               )
                             : Container(),
-                        // TODO: delete release
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: controller.getproductDoesNotExist?12:0,vertical: 12),
-                          child: widgetForModerator,
-                        ),
                       ],
                     ),
                   ),
@@ -213,48 +218,6 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                                   colorButton:
                                       controller.getButtonData.colorButton,
                                 );
-  }
-  Widget get widgetForModerator{
-    return Column(
-      children: [
-        const SizedBox(height: 12.0),
-                        FadeInRight(
-                          child: button(
-                            icon: Icon(controller.getListExcelToJson.isEmpty? Icons.file_present_sharp: Icons.view_list_sharp,
-                                color: controller.getButtonData.colorText),
-                            onPressed: () {
-                              if (controller.productsToExelList.isEmpty) {
-                                controller.selectedExcel();
-                              } else {
-                                controller.openDialogListExcel();
-                              }
-                            },
-                            text: controller.productsToExelList.isEmpty
-                                ? "Cargar Archivo Excel de productos"
-                                : '${controller.productsToExelList.length} productos para agregar',
-                            colorAccent: controller.getButtonData.colorText,
-                            colorButton: controller.getButtonData.colorButton,
-                          ),
-                        ),
-                        const SizedBox(height: 12.0),
-                        FadeInRight(
-                          child: button(
-                            icon: Icon(controller.getListProductsVerified.isEmpty? Icons.change_circle_outlined: Icons.verified,color: controller.getButtonData.colorText),
-                            onPressed: () {
-                              if (controller.getListProductsVerified.isEmpty) {
-                                controller.readProduct();
-                              } else {
-                                controller.openDialogListProductVerified(list: controller.getListProductsVerified);
-                              }
-                            },
-                            text: controller.getListProductsVerified.isEmpty? "Cargar productos para verificar": '${controller.getListProductsVerified.length} productos para verificar',
-                            colorAccent: controller.getButtonData.colorText,
-                            colorButton: controller.getButtonData.colorButton,
-                          ),
-                        ),
-                        const SizedBox(width: 50.0, height: 50.0), 
-      ],
-    );
   }
   Widget button(
       {required Widget icon,
@@ -328,8 +291,7 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
             Padding(
               padding: const EdgeInsets.only(left: 0),
               child: InkWell(
-                onTap: () => controller.toProductView(
-                    porduct: list[0].convertProductCatalogue()),
+                onTap: () => controller.toProductView(porduct: list[0].convertProductCatalogue()),
                 borderRadius: BorderRadius.circular(50),
                 child: Padding(
                   padding: const EdgeInsets.all(5.0),

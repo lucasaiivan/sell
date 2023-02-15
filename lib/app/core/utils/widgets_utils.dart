@@ -1,20 +1,78 @@
 
 import 'dart:io';
+
 import 'package:avatar_view/avatar_view.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:sell/app/presentation/home/controller/home_controller.dart';
-import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import 'package:sell/app/core/utils/dynamicTheme_lb.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
-import 'package:url_launcher/url_launcher.dart';
-import '../routes/app_pages.dart';
+import 'package:sell/app/presentation/home/controller/home_controller.dart';
+import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart';
+
 import '../../domain/entities/catalogo_model.dart';
 import '../../domain/entities/user_model.dart';
 import '../../presentation/cataloguePage/controller/catalogue_controller.dart';
+import '../routes/app_pages.dart';
+
+/// Un widget que muestra una imagen
+///
+/// Este widget se puede utilizar en cualquier lugar donde se necesite mostrar una imagen del scan. El tamaño de la imagen se puede especificar utilizando la propiedad [size].
+class ImageBarWidget extends StatelessWidget {
+  /// Tamaño deseado y color deseado.
+  final double size;
+  late Color color;
+
+  /// Crea un widget de una imagen de Scan.
+  ///
+  /// [size] es el tamaño deseado de la imagen en píxeles.
+  ImageBarWidget({
+    Key? key,
+    required this.size,
+    this.color=Colors.black,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // get 
+    color = Theme.of(context).brightness==Brightness.dark ? Colors.white : Colors.black;
+    
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Image.asset('assets/productoLogo.png',color: color),
+    );
+  }
+}
+
+/// Un widget que muestra un icono de escaneo de código de barras.
+///
+/// Este widget se puede utilizar en cualquier lugar donde se necesite mostrar un icono de escaneo de código de barras. El tamaño del icono se puede especificar utilizando la propiedad [size].
+class ImageIconScanWidget extends StatelessWidget {
+  /// Tamaño deseado del icono.
+  final double size;
+
+  /// Crea un widget de icono de escaneo de código de barras.
+  ///
+  /// [size] es el tamaño deseado del icono en píxeles.
+  const ImageIconScanWidget({
+    Key? key,
+    required this.size,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Image.asset('assets/scanbarcode.png',color: Colors.white),
+    );
+  }
+}
 
 class WidgetButtonListTile extends StatelessWidget {
 
