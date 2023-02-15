@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:carousel_slider/carousel_controller.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,18 @@ import '../../../core/utils/widgets_utils.dart';
 import '../../home/controller/home_controller.dart';
 
 class ControllerProductsEdit extends GetxController {
+
+
+  // controller : carousel de componentes para que el usuario complete los campos necesarios para crear un nuevo producto nuevo
+  CarouselController carouselController = CarouselController();
+  // var : logic  para que el usuario complete los campos necesarios para crear un nuevo producto nuevo
+  int currentSlide = 0 ;
+  bool formComplete = false;
+  bool checkValidateForm = false;
+  bool enabledButton = false;
+  // var : TextFormField
+  final descriptionTextFormFieldfocus = FocusNode(); 
+  final formKey = GlobalKey<FormState>(); // Crear una clave global que identifique de forma única el widget de formulario y permite la validación del formulario.
 
 
   // others controllers
@@ -59,13 +72,11 @@ class ControllerProductsEdit extends GetxController {
   bool get getStateConnect => connected;
 
   // ultimate selection mark
-  static Mark _ultimateSelectionMark =
-      Mark(upgrade: Timestamp.now(), creation: Timestamp.now());
+  static Mark _ultimateSelectionMark = Mark(upgrade: Timestamp.now(), creation: Timestamp.now());
   set setUltimateSelectionMark(Mark value) => _ultimateSelectionMark = value;
   Mark get getUltimateSelectionMark => _ultimateSelectionMark;
 
-  static Mark _ultimateSelectionMark2 =
-      Mark(upgrade: Timestamp.now(), creation: Timestamp.now());
+  static Mark _ultimateSelectionMark2 = Mark(upgrade: Timestamp.now(), creation: Timestamp.now());
   set setUltimateSelectionMark2(Mark value) => _ultimateSelectionMark2 = value;
   Mark get getUltimateSelectionMark2 => _ultimateSelectionMark2;
 
@@ -109,6 +120,7 @@ class ControllerProductsEdit extends GetxController {
 
   // TextEditingController
   TextEditingController controllerTextEditDescripcion = TextEditingController();
+  TextEditingController controllerTextEditMark = TextEditingController();
   TextEditingController controllerTextEditQuantityStock = TextEditingController();
   TextEditingController controllerTextEditAlertStock = TextEditingController();
   MoneyMaskedTextController controllerTextEditPrecioVenta = MoneyMaskedTextController();
@@ -117,6 +129,7 @@ class ControllerProductsEdit extends GetxController {
   // mark
   Mark _markSelected = Mark(upgrade: Timestamp.now(), creation: Timestamp.now());
   set setMarkSelected(Mark value) {
+    controllerTextEditMark.text = value.name;
     _markSelected = value;
     getProduct.idMark = value.id;
     getProduct.nameMark = value.name;
@@ -161,15 +174,18 @@ class ControllerProductsEdit extends GetxController {
     setAccountAuth = homeController.getIdAccountSelected != '';
 
     // se obtiene el parametro y decidimos si es una vista para editrar o un producto nuevo
-    setProduct = Get.arguments['product'] ?? ProductCatalogue(documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now(),upgrade: Timestamp.now(), creation: Timestamp.now());
     setNewProduct = Get.arguments['new'] ?? false;
+    // obtenemos el producto por parametro
+    ProductCatalogue productFinal = Get.arguments['product'] ?? ProductCatalogue(documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now(),upgrade: Timestamp.now(), creation: Timestamp.now());
+    //  si es un producto nuevo se le asigna solo el codigo del producto
+    if(getNewProduct){productFinal = ProductCatalogue(documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now(),upgrade: Timestamp.now(), creation: Timestamp.now()).copyWith(code:productFinal.code );}
+    //  finalmente  asigna el producto
+    setProduct = productFinal;
     // load data product
-    
     if (getNewProduct == false) {
       // el documento existe
       isCatalogue();
       getDataProduct(id: getProduct.id);
-      
     }else{
       loadDataFormProduct();
     }
@@ -463,18 +479,17 @@ class ControllerProductsEdit extends GetxController {
   }
 
 
-  // read imput image
+  // read XFile image
   void getLoadImageGalery() {
-    _picker
-        .pickImage(
+    _picker.pickImage(
       source: ImageSource.gallery,
       maxWidth: 720.0,
       maxHeight: 720.0,
       imageQuality: 55,
-    )
-        .then((value) {
+    ).then((value) {
       setXFileImage = value!;
-      update(['updateAll']);
+      update(['updateAll']);  //  actualizamos la vista
+      next(); //  siguiente componente
     });
   }
 
@@ -488,9 +503,98 @@ class ControllerProductsEdit extends GetxController {
     )
         .then((value) {
       setXFileImage = value!;
-      update(['updateAll']);
+      update(['updateAll']);  //  actualizamos la vista
+      next(); //  siguiente componente
     });
   }
+
+  //-------------------------------------------------//
+  //- FUNCTIONS LOGIC VIEW CREATE NEW PRODUCT START -//
+  //-------------------------------------------------//
+  void checkValidatorFroms({required bool check}){
+    // function : validamos el formulario
+
+    // button onClick
+    if(check){
+      formKey.currentState!.validate();
+    }
+    // onchange texfieldFrom
+    if(check = false & checkValidateForm){
+      formKey.currentState!.validate();
+    }
+    // comprobamos si los datos estan completos
+    enabledButton = getProduct.isComplete;
+
+    // set values 
+    checkValidateForm = check;
+  }
+  void saveProductNewForm() async {
+    // function : procedemos a verificar el formulario y simular el salvado de los datos con una animacion
+    
+    if(getProduct.isComplete){
+       // Validar devuelve verdadero si el formulario es válido o falso en caso contrario.
+      checkValidateForm=true;
+      // validate : Si el formulario es válido,
+      if (formKey.currentState!.validate()) { 
+        // view : animated
+        formComplete = true; 
+        
+        // actualizamos el estado de las vistas
+        update(['updateAll']); 
+      }
+    }else{ 
+      //  view : snackbar
+      Get.snackbar('Complete el formulario', 'Algunos campos requieren ser completados',snackPosition: SnackPosition.BOTTOM,snackStyle: SnackStyle.FLOATING,);
+    }
+  }
+   double get getProgressForm{
+    // value : progreso del formulario
+    double progress = 0.0;
+    // estado de progreso
+    switch(currentSlide){
+      case 0:progress = 0.33; break;
+      case 1:progress = 0.66; break;
+      case 2:progress = 1.0; break;
+      default:progress;
+    } 
+    return progress;
+  }
+  
+  void previousPage(){
+    carouselController.animateToPage(currentSlide-1);
+  }
+  void next(){
+    // function : verificamos que el campor actual este completo para pasar al siguiente campo y complertar el formulario
+
+    // value 
+    bool next = true;
+    // imagen : este campo no es obligatorio 
+    if(currentSlide == 0  ){next=true; }
+    //  descripción : este campo es obligatorio
+    if(currentSlide == 1 && getProduct.description == ''){
+      Get.snackbar('Debes ingresar una descripción', 'Este campo no puede dejarse vacio',snackPosition: SnackPosition.TOP,snackStyle: SnackStyle.FLOATING,);
+      next=false;
+    }
+    //  marca : este campo es obligatorio
+    if(currentSlide == 2 && getProduct.nameMark == ''){
+      Get.snackbar('Debes elegir la marca el producto', 'Este campo no puede dejarse vacio',snackPosition: SnackPosition.TOP,snackStyle: SnackStyle.FLOATING,);
+      next=false;
+    } 
+    // carrousel textfield : pasa a la siquiente vista si es posible
+    if(next){carouselController.nextPage();} 
+
+    // el formulario esta completo
+    if(currentSlide == 2){save();}
+
+    // actualizamos el estado de las vistas
+    update(['updateAll']);
+  }
+  //-------------------------------------------------//
+  //- FUNCTIONS LOGIC VIEW CREATE NEW PRODUCT FINAL -//
+  //-------------------------------------------------//
+
+
+  // WIDGETS
 
   Widget loadImage({double size = 120}) {
 

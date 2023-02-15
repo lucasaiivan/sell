@@ -8,6 +8,7 @@ import 'package:flutter_offline/flutter_offline.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:search_page/search_page.dart';
+import 'package:sell/app/presentation/cataloguePage/views/card_create_form.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
@@ -48,44 +49,46 @@ class ProductEdit extends StatelessWidget {
       init: ControllerProductsEdit(),
       initState: (_) {},
       builder: (_) {
-        return OfflineBuilder(
-            child: Container(),
-            connectivityBuilder: (
-              BuildContext context,
-              ConnectivityResult connectivity,
-              Widget child,
-            ) {
-              final connected = connectivity != ConnectivityResult.none;
-
-              if (!connected) {
-                Color? colorAccent = Get.theme.textTheme.bodyMedium!.color;
-                return Scaffold(
-                  appBar: AppBar(
-                    elevation: 0.0,
-                    backgroundColor: Get.theme.scaffoldBackgroundColor,
-                    iconTheme: Theme.of(context)
-                        .iconTheme
-                        .copyWith(color: colorAccent),
-                    title: controller.getSaveIndicator
-                        ? Text(controller.getTextAppBar,style: TextStyle(fontSize: 18.0, color: colorAccent))
-                        : Text('Espere por favor...',style: TextStyle(fontSize: 18.0, color: colorAccent)),
-                  ),
-                  body: Center(
-                      child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Padding(
-                        padding: EdgeInsets.all(12.0),
-                        child: Icon(Icons.wifi_off_rounded),
-                      ),
-                      Text('No hay internet'),
-                    ],
-                  )),
-                );
-              }
-
-              return scaffold(context: context);
-            });
+        return Material(
+          child: _.getNewProduct && !_.formComplete? CardCreateForm(): OfflineBuilder(
+              child: Container(),
+              connectivityBuilder: (
+                BuildContext context,
+                ConnectivityResult connectivity,
+                Widget child,
+              ) {
+                final connected = connectivity != ConnectivityResult.none;
+        
+                if (!connected) {
+                  Color? colorAccent = Get.theme.textTheme.bodyMedium!.color;
+                  return Scaffold(
+                    appBar: AppBar(
+                      elevation: 0.0,
+                      backgroundColor: Get.theme.scaffoldBackgroundColor,
+                      iconTheme: Theme.of(context)
+                          .iconTheme
+                          .copyWith(color: colorAccent),
+                      title: controller.getSaveIndicator
+                          ? Text(controller.getTextAppBar,style: TextStyle(fontSize: 18.0, color: colorAccent))
+                          : Text('Espere por favor...',style: TextStyle(fontSize: 18.0, color: colorAccent)),
+                    ),
+                    body: Center(
+                        child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Padding(
+                          padding: EdgeInsets.all(12.0),
+                          child: Icon(Icons.wifi_off_rounded),
+                        ),
+                        Text('No hay internet'),
+                      ],
+                    )),
+                  );
+                }
+        
+                return scaffold(context: context);
+              }),
+        );
       },
     );
   }
@@ -124,7 +127,7 @@ class ProductEdit extends StatelessWidget {
             scrollDirection: Axis.vertical,
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             children: [
-              controller.getNewProduct?widgetFormEdit1():widgetFormEdit0(),
+              widgetFormEdit0(),
               widgetFormEdit2(),
             ],
           ),
