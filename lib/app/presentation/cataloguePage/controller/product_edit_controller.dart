@@ -32,6 +32,8 @@ class ControllerProductsEdit extends GetxController {
   bool enabledButton = false;
   // var : TextFormField
   final descriptionTextFormFieldfocus = FocusNode(); 
+  final purchasePriceTextFormFieldfocus = FocusNode(); 
+  final salePriceTextFormFieldfocus = FocusNode(); 
   final formKey = GlobalKey<FormState>(); // Crear una clave global que identifique de forma única el widget de formulario y permite la validación del formulario.
 
 
@@ -126,6 +128,7 @@ class ControllerProductsEdit extends GetxController {
   // TextEditingController
   TextEditingController controllerTextEditDescripcion = TextEditingController();
   TextEditingController controllerTextEditMark = TextEditingController();
+  TextEditingController controllerTextEditCategory = TextEditingController();
   TextEditingController controllerTextEditQuantityStock = TextEditingController();
   TextEditingController controllerTextEditAlertStock = TextEditingController();
   MoneyMaskedTextController controllerTextEditPrecioVenta = MoneyMaskedTextController();
@@ -154,6 +157,7 @@ class ControllerProductsEdit extends GetxController {
     _category = value;
     getProduct.category = value.id;
     getProduct.nameCategory = value.name;
+    controllerTextEditCategory.text = value.name;
     update(['updateAll']);
   }
 
@@ -559,9 +563,15 @@ class ControllerProductsEdit extends GetxController {
     double progress = 0.0;
     // estado de progreso
     switch(currentSlide){
-      case 0:progress = 0.33; break;
-      case 1:progress = 0.66; break;
-      case 2:progress = 1.0; break;
+      case 0:progress = 0.11; break;
+      case 1:progress = 0.22; break;
+      case 2:progress = 0.33; break;
+      case 3:progress = 0.44; break;
+      case 4:progress = 0.55; break;
+      case 5:progress = 0.66; break;
+      case 6:progress = 0.77; break;
+      case 7:progress = 0.88; break;
+      case 8:progress = 1.0; break;
       default:progress;
     } 
     return progress;
@@ -575,7 +585,8 @@ class ControllerProductsEdit extends GetxController {
 
     // value 
     bool next = true;
-    // imagen : este campo no es obligatorio 
+    //
+    // imagen : este campo es opcional 
     if(currentSlide == 0  ){next=true; }
     //  descripción : este campo es obligatorio
     if(currentSlide == 1 && getProduct.description == ''){
@@ -587,11 +598,36 @@ class ControllerProductsEdit extends GetxController {
       Get.snackbar('Debes elegir la marca el producto', 'Este campo no puede dejarse vacio',snackPosition: SnackPosition.TOP,snackStyle: SnackStyle.FLOATING,);
       next=false;
     } 
+
+    // category : este campo es opcional
+    //... currentSlide : 3
+
+    // precio de compra : este campo es opcional
+    //... currentSlide : 4
+
+    // precio de venta al publico: este campo es obligatorio
+    if(currentSlide == 5 && getProduct.salePrice == 0){
+      Get.snackbar('Debes ingresar el precio de venta al publico', 'Este campo no puede dejarse vacio',snackPosition: SnackPosition.TOP,snackStyle: SnackStyle.FLOATING,);
+      next=false;
+    }
+    
+    // favorito : este campo es opcional
+    //... currentSlide : 6
+
+    // control de stock : este campo es opcional
+    //... currentSlide : 7
+
+    // concentimientos del usuario : este campo es obligatorio para crear un producto nuevo
+    if(currentSlide == 8 && getUserConsent == false){
+      Get.snackbar('Debes aceptar los terminos y condiciones', 'Este campo no puede dejarse vacio',snackPosition: SnackPosition.TOP,snackStyle: SnackStyle.FLOATING,);
+      next=false;
+    }
+
     // carrousel textfield : pasa a la siquiente vista si es posible
     if(next){carouselController.nextPage();} 
 
     // el formulario esta completo
-    if(currentSlide == 2){save();}
+    if(currentSlide == 8 && getUserConsent){save();}
 
     // actualizamos el estado de las vistas
     update(['updateAll']);
@@ -1201,3 +1237,6 @@ class _CreateMarkState extends State<CreateMark> {
   }
 
 }
+
+
+
