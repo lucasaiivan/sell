@@ -837,7 +837,7 @@ class LogoPremium extends StatelessWidget {
   }
 }
 
-class AvatarApp extends StatelessWidget {
+class ImageAvatarApp extends StatelessWidget {
   late bool favorite;
   late String url;
   late double size;
@@ -845,7 +845,7 @@ class AvatarApp extends StatelessWidget {
   late String description;
   late String path;
   final VoidCallback?  onTap;
-  AvatarApp({Key? key,this.favorite=false,this.url='',this.size=50,this.radius=12,this.description='',this.path='', this.onTap }) : super(key: key);
+  ImageAvatarApp({Key? key,this.favorite=false,this.url='',this.size=50,this.radius=12,this.description='',this.path='', this.onTap }) : super(key: key);
 
   // avatar que se va usar en toda la app, especialemnte en los 'ListTile'
 
@@ -863,11 +863,8 @@ class AvatarApp extends StatelessWidget {
         avatarType: AvatarType.RECTANGLE,
         backgroundColor: Colors.black.withOpacity(0.2),
         imagePath: url,
-        placeHolder: Container(color: Colors.black.withOpacity(0.1)),
-        errorWidget: Container(
-            color: Colors.black.withOpacity(0.1),
-            child: description!=''? Text(description.substring(0,1)) : const Icon(Icons.error_outline, size: 25),
-        ),
+        placeHolder: Container(color: Colors.black.withOpacity(0.1),child:const Icon(Icons.image, size: 25),),
+        errorWidget: Container(color: Colors.black.withOpacity(0.1),child:const Icon(Icons.image, size: 25),),
       ) : Card(
         elevation: 0,
         clipBehavior: Clip.antiAlias,

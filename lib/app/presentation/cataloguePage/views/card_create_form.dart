@@ -6,8 +6,6 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-
-import '../../../core/utils/widgets_utils.dart';
 import '../controller/product_edit_controller.dart';
 
 
@@ -25,14 +23,6 @@ class _CardCreateFormState extends State<CardCreateForm> {
 
 // controllers
   ControllerProductsEdit  controller = Get.find();
-
-  // var
-  Color cardProductDetailColor = Colors.grey.withOpacity(0.2);
-  Color colorLoading = Colors.blue;
-  bool darkMode = false;
-  // var : estilo
-  Color colorPrimary = Colors.grey;
-  Color colorSecundary = Colors.grey;
  
 
   
@@ -49,19 +39,17 @@ class _CardCreateFormState extends State<CardCreateForm> {
   Widget build(BuildContext context) {
 
     // set : obtenemos los nuevos valores 
-    darkMode = Theme.of(context).brightness == Brightness.dark;
+    controller.darkMode = Theme.of(context).brightness == Brightness.dark;
+    controller.cardProductDetailColor = controller.darkMode ?controller.formEditing?Colors.blueGrey.withOpacity(0.2):Colors.blueGrey.withOpacity(0.1) : controller.formEditing?Colors.brown.shade100.withOpacity(0.6):Colors.brown.shade100.withOpacity(0.2);
 
     // SystemUiOverlayStyle : Especifica una preferencia para el estilo de la barra de estado del sistema
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
       // Theme : definismos estilos
       child: Theme(
-        data: Theme.of(context).copyWith(
-          primaryColor: colorPrimary, 
-          // style : estilo del button
-          elevatedButtonTheme: ElevatedButtonThemeData(style: ButtonStyle(backgroundColor: MaterialStateProperty.all(colorSecundary),shadowColor: MaterialStateProperty.all(colorSecundary))),
+        data: Theme.of(context).copyWith( 
           // style : estilo del AppBar
-          appBarTheme: AppBarTheme(elevation: 0,color: Colors.transparent ,systemOverlayStyle: darkMode?SystemUiOverlayStyle.light:SystemUiOverlayStyle.light,iconTheme: IconThemeData(color: darkMode?Colors.white:Colors.white),titleTextStyle: TextStyle(color: darkMode?Colors.white:Colors.white))),
+          appBarTheme: AppBarTheme(elevation: 0,color: Colors.transparent ,systemOverlayStyle: controller.darkMode?SystemUiOverlayStyle.light:SystemUiOverlayStyle.light,iconTheme: IconThemeData(color: controller.darkMode?Colors.white:Colors.white),titleTextStyle: TextStyle(color: controller.darkMode?Colors.white:Colors.white))),
         child: Scaffold(body: body(context: context)),
       ),
     );
@@ -70,10 +58,10 @@ class _CardCreateFormState extends State<CardCreateForm> {
   PreferredSizeWidget get appbar{
 
     // values
-    Color colorAccent = darkMode?Colors.white:Colors.black;
+    Color colorAccent = controller.darkMode?Colors.white:Colors.black;
 
     return AppBar(
-      systemOverlayStyle: darkMode?SystemUiOverlayStyle.light:SystemUiOverlayStyle.dark,
+      systemOverlayStyle: controller.darkMode?SystemUiOverlayStyle.light:SystemUiOverlayStyle.dark,
       iconTheme: IconThemeData(color: colorAccent),
       title: Text('Nuevo Producto',style:TextStyle(fontSize: 18,fontWeight: FontWeight.w300,color: colorAccent)),
       
@@ -86,7 +74,8 @@ class _CardCreateFormState extends State<CardCreateForm> {
     // Este widget es útil cuando tiene un solo cuadro que normalmente será completamente visible, por ejemplo,la aparición del teclado del sistema, pero debe asegurarse de que se pueda desplazar si el contenedor se vuelve demasiado pequeño en un eje (la dirección de desplazamiento )
     return Column(
       children: [
-        Expanded(
+        Flexible(
+          flex: 1,fit: FlexFit.tight,
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             scrollDirection: Axis.vertical,
@@ -102,7 +91,7 @@ class _CardCreateFormState extends State<CardCreateForm> {
                       // view : progress indicator
                       LinearProgressIndicator(backgroundColor: Colors.grey.withOpacity(0.5),valueColor: const AlwaysStoppedAnimation(Colors.blue),minHeight: 2,value: controller.getProgressForm),
                       // view : tarjeta animada
-                      Padding(padding: const EdgeInsets.all(20.0),child: cardFront),
+                      cardFront,
                       // formTexts
                       textFieldCarrousel(),
                     ],
@@ -132,7 +121,7 @@ class _CardCreateFormState extends State<CardCreateForm> {
     );
   }
   // COMPONENTS WIDGETS
-  Widget textTitleAndDescription({required String title,required String description}){
+  Widget textTitleAndDescription({required String title,required String description,bool highlightValue = false}){
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SizedBox(
@@ -140,10 +129,12 @@ class _CardCreateFormState extends State<CardCreateForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,mainAxisSize: MainAxisSize.max,mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Text(title,textAlign: TextAlign.start,style: const TextStyle(fontSize: 12,fontWeight: FontWeight.w500)),
+            Opacity(opacity: 0.6,child: Text(title,textAlign: TextAlign.start,style: const TextStyle(fontSize: 12,fontWeight: FontWeight.w400))),
             const SizedBox(height: 5),
             AnimatedContainer(
-              color: description.isEmpty?Colors.transparent:Colors.grey.withOpacity(0.2),
+              width: double.infinity, 
+              padding: const EdgeInsets.symmetric(horizontal:5,vertical:0),
+              color: highlightValue?Colors.grey.withOpacity(0.15):null,
               duration: const Duration(milliseconds: 500),
               curve: Curves.easeIn,
               child: Text(description,style: const TextStyle(fontSize: 14,fontWeight: FontWeight.w300))),
@@ -215,7 +206,7 @@ class _CardCreateFormState extends State<CardCreateForm> {
       padding: const EdgeInsets.all(8.0),
       child: TextButton(
         onPressed: () => controller.showModalBottomSheetCambiarImagen(),
-        child: const Text('Agregar imagen',style: TextStyle(color: Colors.blue)),
+        child: const Text('Actualizar imagen',style: TextStyle(color: Colors.blue)),
       ),
     );
   }
@@ -235,9 +226,8 @@ class _CardCreateFormState extends State<CardCreateForm> {
             ],
             decoration: const InputDecoration(border: UnderlineInputBorder(),labelText: 'Descripción del producto'),
             onChanged: (value) {
-              controller.getProduct.description=value;
-              colorPrimary = value==''?Colors.grey: Colors.deepPurple;
-              colorSecundary = value==''?Colors.grey:Colors.purple;
+              controller.formEditing = true;
+              controller.getProduct.description=value; 
               setState((){});
             },
             // validator: validamos el texto que el usuario ha ingresado.
@@ -262,6 +252,7 @@ class _CardCreateFormState extends State<CardCreateForm> {
               maxLength: 20, 
               keyboardType: TextInputType.name,
               decoration: const InputDecoration(border: UnderlineInputBorder(),labelText: 'Marca'),  
+              onChanged: (value) => controller.formEditing = true,
               // validator: validamos el texto que el usuario ha ingresado.
               validator: (value) {
                 if (value == null || value.isEmpty) { return 'Por favor, seleccione una marca'; }
@@ -276,13 +267,14 @@ class _CardCreateFormState extends State<CardCreateForm> {
 
 
     return AnimatedContainer(
+      margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 24.0),
         duration: const Duration(milliseconds: 500),
-        decoration: BoxDecoration(color: cardProductDetailColor,
+        decoration: BoxDecoration(color: controller.cardProductDetailColor,
         borderRadius: BorderRadius.circular(12.0)),
         padding: const EdgeInsets.all(24.0),
         child: Column(
           mainAxisSize: MainAxisSize.max,
-
+    
           children: [
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -297,24 +289,10 @@ class _CardCreateFormState extends State<CardCreateForm> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,mainAxisSize: MainAxisSize.max,
                         children: [
-                          controller.getProduct.code != ""
-                              ? Opacity(
-                                  opacity: 0.8,
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      // icon : verificacion del producto
-                                      controller.getProduct.verified?const Icon(Icons.verified_rounded,color: Colors.blue, size: 20): ImageBarWidget(size: 24),
-                                      const SizedBox(width: 2),
-                                      // text : codigo del producto
-                                      Text(controller.getProduct.code,style: const TextStyle(fontSize: 14,fontWeight: FontWeight.w600)),
-                                    ],
-                                  ),
-                                )
-                              : Container(),
+                          //  text : codigo del producto
+                          textTitleAndDescription(title: 'Código del producto',description: controller.getProduct.code,highlightValue: false),
                           //  text : marca del producto
-                          textTitleAndDescription(title: 'Marca',description: controller.getProduct.nameMark),
+                          textTitleAndDescription(title: 'Marca',description: controller.getProduct.nameMark,highlightValue: true),
                         ],
                       ),
                   ),
@@ -322,7 +300,7 @@ class _CardCreateFormState extends State<CardCreateForm> {
               ],
             ),
             //  text : marca del producto
-            textTitleAndDescription(title: 'Descripción del producto',description: controller.getProduct.description),
+            textTitleAndDescription(title: 'Descripción del producto',description: controller.getProduct.description,highlightValue: true),
           ], 
         ),
       ); 

@@ -25,10 +25,8 @@ class ProductEdit extends StatelessWidget {
   // controllers
   final ControllerProductsEdit controller = Get.find();
 
-  // var
-  Color cardProductDetailColor = Colors.grey.withOpacity(0.05);
-  Color colorLoading = Colors.blue;
-  bool darkMode = false;
+  // var 
+  Color colorLoading = Colors.blue; 
   final Widget space = const SizedBox(
     height: 12.0,
     width: 12.0,
@@ -39,8 +37,8 @@ class ProductEdit extends StatelessWidget {
 
     // get : obtenemos los valores
     colorLoading = Get.theme.primaryColor;
-    darkMode = Get.isDarkMode;
-    cardProductDetailColor = darkMode ? Colors.grey.withOpacity(0.06) : Colors.brown.shade100.withOpacity(0.6);
+    controller.darkMode = Get.isDarkMode;
+    controller.cardProductDetailColor = controller.darkMode ? Colors.blueGrey.withOpacity(0.2) : Colors.brown.shade100.withOpacity(0.6);
 
 
     // GetBuilder - refresh all the views
@@ -50,44 +48,47 @@ class ProductEdit extends StatelessWidget {
       initState: (_) {},
       builder: (_) {
         return Material(
-          child: _.getNewProduct && !_.formComplete? CardCreateForm(): OfflineBuilder(
-              child: Container(),
-              connectivityBuilder: (
-                BuildContext context,
-                ConnectivityResult connectivity,
-                Widget child,
-              ) {
-                final connected = connectivity != ConnectivityResult.none;
-        
-                if (!connected) {
-                  Color? colorAccent = Get.theme.textTheme.bodyMedium!.color;
-                  return Scaffold(
-                    appBar: AppBar(
-                      elevation: 0.0,
-                      backgroundColor: Get.theme.scaffoldBackgroundColor,
-                      iconTheme: Theme.of(context)
-                          .iconTheme
-                          .copyWith(color: colorAccent),
-                      title: controller.getSaveIndicator
-                          ? Text(controller.getTextAppBar,style: TextStyle(fontSize: 18.0, color: colorAccent))
-                          : Text('Espere por favor...',style: TextStyle(fontSize: 18.0, color: colorAccent)),
-                    ),
-                    body: Center(
-                        child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Padding(
-                          padding: EdgeInsets.all(12.0),
-                          child: Icon(Icons.wifi_off_rounded),
-                        ),
-                        Text('No hay internet'),
-                      ],
-                    )),
-                  );
-                }
-        
-                return scaffold(context: context);
-              }),
+          child: AnimatedSwitcher(
+          duration: const  Duration(milliseconds: 100),
+            child: _.getNewProduct && !_.formComplete? CardCreateForm(): OfflineBuilder(
+                child: Container(),
+                connectivityBuilder: (
+                  BuildContext context,
+                  ConnectivityResult connectivity,
+                  Widget child,
+                ) {
+                  final connected = connectivity != ConnectivityResult.none;
+                  
+                  if (!connected) {
+                    Color? colorAccent = Get.theme.textTheme.bodyMedium!.color;
+                    return Scaffold(
+                      appBar: AppBar(
+                        elevation: 0.0,
+                        backgroundColor: Get.theme.scaffoldBackgroundColor,
+                        iconTheme: Theme.of(context)
+                            .iconTheme
+                            .copyWith(color: colorAccent),
+                        title: controller.getSaveIndicator
+                            ? Text(controller.getTextAppBar,style: TextStyle(fontSize: 18.0, color: colorAccent))
+                            : Text('Espere por favor...',style: TextStyle(fontSize: 18.0, color: colorAccent)),
+                      ),
+                      body: Center(
+                          child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Padding(
+                            padding: EdgeInsets.all(12.0),
+                            child: Icon(Icons.wifi_off_rounded),
+                          ),
+                          Text('No hay internet'),
+                        ],
+                      )),
+                    );
+                  }
+                  
+                  return scaffold(context: context);
+                }),
+          ),
         );
       },
     );
@@ -106,7 +107,7 @@ class ProductEdit extends StatelessWidget {
           Theme.of(contextPrincipal).iconTheme.copyWith(color: colorText),
       title: controller.getSaveIndicator
           ? Text(controller.getTextAppBar,style: TextStyle(fontSize: 18.0, color: colorText))
-          : Text(controller.itsInTheCatalogue ? 'Editar' :'Nuevo',style: TextStyle(fontSize: 18.0, color: colorText)),
+          : Text(controller.itsInTheCatalogue ? 'Editar' :'Nuevo producto',style: TextStyle(fontSize: 18.0, color: colorText)),
       actions: <Widget>[
         controller.getSaveIndicator
             ? Container()
@@ -174,11 +175,12 @@ class ProductEdit extends StatelessWidget {
     
     
     // view : descripcion del producto
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+    return FadeIn(
+      duration:   const Duration(milliseconds: 700),
       child: AnimatedContainer(
+        margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 24.0),
         duration: const Duration(milliseconds: 500),
-        decoration: BoxDecoration(color: cardProductDetailColor,borderRadius: BorderRadius.circular(12.0)),
+        decoration: BoxDecoration(color: controller.cardProductDetailColor,borderRadius: BorderRadius.circular(12.0)),
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
@@ -1031,7 +1033,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
   Widget listTile({required Mark marcaSelect, bool icon = true}) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      trailing: !icon ? null : AvatarApp(url: marcaSelect.image,size: 50,description:marcaSelect.name),
+      trailing: !icon ? null : ImageAvatarApp(url: marcaSelect.image,size: 50,description:marcaSelect.name),
       dense: true,
       title: Text(marcaSelect.name,
           overflow: TextOverflow.ellipsis,
