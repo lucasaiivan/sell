@@ -17,11 +17,16 @@ import '../../home/controller/home_controller.dart';
 
 class ControllerProductsEdit extends GetxController {
 
+  // var style
+  Color cardProductDetailColor = Colors.grey.withOpacity(0.2);
+  bool darkMode = false;
+
 
   // controller : carousel de componentes para que el usuario complete los campos necesarios para crear un nuevo producto nuevo
   CarouselController carouselController = CarouselController();
   // var : logic  para que el usuario complete los campos necesarios para crear un nuevo producto nuevo
   int currentSlide = 0 ;
+  bool formEditing = false;
   bool formComplete = false;
   bool checkValidateForm = false;
   bool enabledButton = false;
@@ -488,6 +493,7 @@ class ControllerProductsEdit extends GetxController {
       imageQuality: 55,
     ).then((value) {
       setXFileImage = value!;
+      formEditing = true;
       update(['updateAll']);  //  actualizamos la vista
       next(); //  siguiente componente
     });
@@ -501,7 +507,8 @@ class ControllerProductsEdit extends GetxController {
       maxHeight: 720.0,
       imageQuality: 55,
     )
-        .then((value) {
+    .then((value) {
+      formEditing = true;
       setXFileImage = value!;
       update(['updateAll']);  //  actualizamos la vista
       next(); //  siguiente componente
@@ -601,10 +608,10 @@ class ControllerProductsEdit extends GetxController {
     // devuelve la imagen del product
     if (getXFileImage.path != '') {
       // el usuario cargo un nueva imagen externa
-      return AvatarApp(path: getXFileImage.path ,size: size,onTap: getNewProduct || getEditModerator? showModalBottomSheetCambiarImagen : null );
+      return ImageAvatarApp(path: getXFileImage.path ,size: size,onTap: getNewProduct || getEditModerator? showModalBottomSheetCambiarImagen : null );
     } else {
       // se visualiza la imagen del producto
-      return AvatarApp(url: getProduct.image ,size: size,onTap: getNewProduct || getEditModerator? showModalBottomSheetCambiarImagen : null );
+      return ImageAvatarApp(url: getProduct.image ,size: size,onTap: getNewProduct || getEditModerator? showModalBottomSheetCambiarImagen : null );
     }
   }
 
@@ -950,7 +957,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
   Widget listTile({required Mark marcaSelect, bool icon = true}) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      trailing:!icon? null  : AvatarApp(url: marcaSelect.image,size: 50,description:marcaSelect.name),
+      trailing:!icon? null  : ImageAvatarApp(url: marcaSelect.image,size: 50,description:marcaSelect.name),
       dense: true,
       title: Text(marcaSelect.name,overflow: TextOverflow.ellipsis),
       subtitle: marcaSelect.description == ''

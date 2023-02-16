@@ -265,7 +265,7 @@ class CataloguePage extends StatelessWidget {
                 ),
               ],
             ),
-            leading: AvatarApp(url: item.image,size: 50,favorite: item.favorite), 
+            leading: ImageAvatarApp(url: item.image,size: 50,favorite: item.favorite), 
             // text : stock
             trailing: item.stock
                 ? Expanded(

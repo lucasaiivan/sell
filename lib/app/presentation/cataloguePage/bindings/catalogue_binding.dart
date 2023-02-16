@@ -26,3 +26,10 @@ class ProductsSarchBinding extends Bindings {
     Get.put<ControllerProductsSearch>(ControllerProductsSearch());
   }
 }
+
+class ProductsFormCreateBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.put<ControllerProductsEdit>(ControllerProductsEdit());
+  }
+}
