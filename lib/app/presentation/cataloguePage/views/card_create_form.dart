@@ -6,7 +6,9 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:sell/app/presentation/cataloguePage/views/product_edit_view.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/utils/widgets_utils.dart';
 import '../controller/product_edit_controller.dart';
 
@@ -42,7 +44,7 @@ class _CardCreateFormState extends State<CardCreateForm> {
 
     // set : obtenemos los nuevos valores 
     controller.darkMode = Theme.of(context).brightness == Brightness.dark;
-    controller.cardProductDetailColor = controller.darkMode ?controller.formEditing?Colors.blueGrey.withOpacity(0.2):Colors.blueGrey.withOpacity(0.1) : controller.formEditing?Colors.brown.shade100.withOpacity(0.6):Colors.brown.shade100.withOpacity(0.2);
+    controller.cardProductDetailColor = controller.darkMode ?controller.formEditing?Colors.blueGrey.withOpacity(0.2):Colors.blueGrey.withOpacity(0.1) : controller.formEditing?Colors.grey.shade300:Colors.grey.shade200;
 
     // SystemUiOverlayStyle : Especifica una preferencia para el estilo de la barra de estado del sistema
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -65,8 +67,7 @@ class _CardCreateFormState extends State<CardCreateForm> {
     return AppBar(
       systemOverlayStyle: controller.darkMode?SystemUiOverlayStyle.light:SystemUiOverlayStyle.dark,
       iconTheme: IconThemeData(color: colorAccent),
-      title: Text('Nuevo Producto',style:TextStyle(fontSize: 18,fontWeight: FontWeight.w300,color: colorAccent)),
-      
+      title: Text(controller.getTextAppBar,style: TextStyle(  color: colorAccent,fontSize: 18 )),
     );
   }
   Widget body({required BuildContext context}){
@@ -83,19 +84,32 @@ class _CardCreateFormState extends State<CardCreateForm> {
             scrollDirection: Axis.vertical,
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             // Form : Crea un contenedor para campos de formulario
-            child: Form(
-              key: controller.formKey, // identifique de forma única el widget de formulario
-              child: Column(
-                children: [
-                  appbar,
-                  // view : progress indicator
-                  LinearProgressIndicator(backgroundColor: Colors.grey.withOpacity(0.5),valueColor: const AlwaysStoppedAnimation(Colors.blue),minHeight: 2,value: controller.getProgressForm),
-                  // view : tarjeta animada
-                  cardFront,
-                  // formTexts
-                  textFieldCarrousel(),
-                ],
-              ),
+            child: Column(
+              children: [
+                appbar,
+                controller.getSaveIndicator?ComponentApp.linearProgressBarApp(color: controller.colorLoading):lineProgressIndicator,
+                // view : tarjeta animada
+                cardFront,
+                AnimatedContainer(
+                  width: double.infinity,
+                  duration: const Duration(milliseconds: 500),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Wrap(
+                    spacing: 5.0, // establece el espacio negativo para compactar horizontalmente  
+                    alignment:  WrapAlignment.center,
+                    children: [
+                      controller.controllerTextEditCategory.text==''?Container():ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: 100),child: Chip(label: Text(controller.controllerTextEditCategory.text))),
+                      controller.controllerTextEditPrecioCompra.numberValue==0.0?Container():Chip(label: Text(Publications.getFormatoPrecio(monto: controller.controllerTextEditPrecioCompra.numberValue))),
+                      controller.controllerTextEditPrecioVenta.numberValue==0.0?Container():Chip(label: Text(Publications.getFormatoPrecio(monto: controller.controllerTextEditPrecioVenta.numberValue))),
+                      controller.getProduct.favorite? const Chip(label: Text('Favorito')):Container(),
+                      controller.getProduct.stock?const Chip(label: Text('Controi de Stock')):Container(),
+                    ],
+                  ),
+                ),
+                // formTexts
+                controller.getSaveIndicator? Container():textFieldCarrousel(),
+              ],
             ),
           ),
         ),
@@ -103,15 +117,15 @@ class _CardCreateFormState extends State<CardCreateForm> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // button : back
-             TextButton(
-              onPressed: controller.currentSlide==0?null:(){
+            TextButton(
+              onPressed: controller.getSaveIndicator?null:controller.currentSlide==0?null:(){
               controller.previousPage();
             }, child: Text('Anterior',style: TextStyle(color: controller.currentSlide==0?Colors.grey:null),)),
             // button : next o save
             Center(
               child: TextButton( 
-                onPressed: controller.currentSlide == 8?controller.controllerTextEditDescripcion.text!=''&&controller.controllerTextEditMark.text!='' && controller.getUserConsent ? controller.saveProductNewForm :null :() => controller.next(),
-                child: Text( controller.currentSlide == 8  ?'Finalizar':'Siguiente')),
+                onPressed: controller.getSaveIndicator?null:controller.currentSlide == 8?controller.controllerTextEditDescripcion.text!=''&&controller.controllerTextEditMark.text!='' && controller.getUserConsent ? controller.checkDataAndSave :null :() => controller.next(),
+                child: Text( controller.currentSlide == 8  ?'Publicar':'Siguiente')),
             ),
           ],
         )
@@ -119,6 +133,17 @@ class _CardCreateFormState extends State<CardCreateForm> {
     );
   }
   // COMPONENTS WIDGETS
+  PreferredSize get lineProgressIndicator{
+    return PreferredSize(
+  preferredSize: const Size.fromHeight(0.0),
+  child: LinearProgressIndicator(
+    backgroundColor: Colors.grey.withOpacity(0.5),
+    valueColor: const AlwaysStoppedAnimation(Colors.blue),
+    minHeight: 2,
+    value: controller.getProgressForm,
+  ),
+);
+  }
   Widget textTitleAndDescription({required String title,required String description,bool highlightValue = false}){
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -167,27 +192,28 @@ class _CardCreateFormState extends State<CardCreateForm> {
             scrollPhysics: const NeverScrollableScrollPhysics(), 
             onPageChanged: (index, reason) {
               controller.currentSlide = index;
-
+      
               switch(index){
                 case 0 : // seleccion de una imagen para el producto
-                  //...
+                  FocusScope.of(context).previousFocus(); // quita el foco 
                   break;
-                case 1 : // descripcion del producto
-                  controller.descriptionTextFormFieldfocus.requestFocus();
+                case 1 : // descripcion
+                  controller.descriptionTextFormFieldfocus.requestFocus(); // pide el foco
                   break;
-                case 2 :  // marca del producto
-                  FocusScope.of(context).unfocus();
+                case 2 :  // marca 
+                  FocusScope.of(context).previousFocus(); // quita el foco 
                   break; 
-                case 3 : // categoria del producto
-                  FocusScope.of(context).unfocus();
+                case 3 : // cátegoria
+                  FocusScope.of(context).previousFocus(); // quita el foco
                   break; 
                 case 4: // precio de compra
-                  controller.purchasePriceTextFormFieldfocus.requestFocus();
+                  controller.purchasePriceTextFormFieldfocus.requestFocus();  // pide el foco
                   break;
-                case 5: // precio de venta
-                  controller.salePriceTextFormFieldfocus.requestFocus();
+                case 5: // precio de venta al publico
+                  controller.salePriceTextFormFieldfocus.requestFocus();  //  pide el foco
                   break;
                 default: 
+                FocusScope.of(context).previousFocus(); // quita el foco
                   break;
               }
               setState(() {});
@@ -215,42 +241,72 @@ class _CardCreateFormState extends State<CardCreateForm> {
       ),
     );
   } 
+  // WIDGET : un boton para cargar una imagen
   Widget get textButtonAddImage{
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: TextButton(
-        onPressed: () => controller.showModalBottomSheetCambiarImagen(),
-        child: const Text('Actualizar imagen',style: TextStyle(color: Colors.blue)),
-      ),
+    return Column(
+      children: [
+        const Spacer(),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextButton(
+            onPressed: () => controller.showModalBottomSheetCambiarImagen(),
+            child: Text('Cargar foto',style: TextStyle(color: controller.colorButton,fontSize: 18,fontWeight: FontWeight.w400)),
+          ),
+        ),
+        const Spacer(),
+      ],
     );
   }
 // WIDGET : un textFormField para la descripción del producto
   Widget descriptionProductCardTextFormField({bool enabled = true}){
     // TextFormField : creamos una entrada númerico
-    return Padding(
+    return Column(
+      children: [
+        Padding(
           padding: const EdgeInsets.symmetric(horizontal:12, vertical: 6),
-          child: TextFormField( 
-            controller: controller.controllerTextEditDescripcion,
-            enabled: enabled ,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            focusNode: controller.descriptionTextFormFieldfocus,
-            maxLength: 50,
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\- .]'))
-            ],
-            decoration: const InputDecoration(border: UnderlineInputBorder(),labelText: 'Descripción del producto'),
-            onChanged: (value) {
-              controller.formEditing = true;
-              controller.getProduct.description=value; 
-              setState((){});
-            },
-            // validator: validamos el texto que el usuario ha ingresado.
-            validator: (value) {
-              if (value == null || value.isEmpty) { return 'Por favor, introduzca la descripción del producto'; }
-              return null;
-            },
+          child: Form(
+            key: controller.descriptionFormKey,
+            child: TextFormField( 
+              controller: controller.controllerTextEditDescripcion,
+              enabled: enabled ,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              focusNode: controller.descriptionTextFormFieldfocus,
+              maxLength: 60, // maximo de caracteres
+              minLines: 1,
+              maxLines:2, 
+              inputFormatters: [ FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\- .]'))],
+              decoration: const InputDecoration(border: UnderlineInputBorder(),labelText: 'Descripción del producto'),
+              onChanged: (value) {
+                controller.formEditing = true; // validamos que el usuario ha modificado el formulario
+                controller.getProduct.description=value;  //  actualizamos el valor de la descripcion del producto
+                setState((){});
+              },
+              // validator: validamos el texto que el usuario ha ingresado.
+              validator: (value) {
+                if (value == null || value.isEmpty) { return 'Por favor, introduzca la descripción del producto'; }
+                return null;
+              },
+            ),
           ),
-        );
+        ),
+        //TODO: eliminar para desarrrollo
+        TextButton(
+              onPressed: () async {
+                String clave = controller.controllerTextEditDescripcion.text;
+                Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
+                await launchUrl(uri,mode: LaunchMode.externalApplication);
+              },
+              child: const Text('Buscar descripción en Google (moderador)')),
+          TextButton(
+              onPressed: () async {
+                String clave = controller.getProduct.code;
+                Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
+                await launchUrl(uri,mode: LaunchMode.externalApplication);
+              },
+              child: const Text('Buscar en código Google (moderador)')), 
+
+      ],
+    );
   }
   //  WIDGETS: un textfielf para la seleccion de la marca
   Widget get markProductCardTextFormField{
@@ -259,21 +315,24 @@ class _CardCreateFormState extends State<CardCreateForm> {
           padding: const EdgeInsets.symmetric(horizontal:12, vertical: 6),
           child: GestureDetector(
             onTap: controller.showModalSelectMarca,
-            child: TextFormField( 
-              autofocus: false,
-              focusNode: null,
-              controller: controller.controllerTextEditMark,
-              enabled: false,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              maxLength: 20, 
-              keyboardType: TextInputType.name,
-              decoration: const InputDecoration(border: UnderlineInputBorder(),labelText: 'Marca'),  
-              onChanged: (value) => controller.formEditing = true,
-              // validator: validamos el texto que el usuario ha ingresado.
-              validator: (value) {
-                if (value == null || value.isEmpty) { return 'Por favor, seleccione una marca'; }
-                return null;
-              },
+            child: Form(
+              key: controller.markFormKey,
+              child: TextFormField( 
+                autofocus: false,
+                focusNode: null,
+                controller: controller.controllerTextEditMark,
+                enabled: false,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                maxLength: 20, 
+                keyboardType: TextInputType.name,
+                decoration: const InputDecoration(border: UnderlineInputBorder(),labelText: 'Marca'),  
+                onChanged: (value) => controller.formEditing = true, // validamos que el usuario ha modificado el formulario
+                // validator: validamos el texto que el usuario ha ingresado.
+                validator: (value) {
+                  if ( controller.controllerTextEditMark.text=='') { return 'Por favor, seleccione una marca'; }
+                  return null;
+                },
+              ),
             ),
           ),
         );
@@ -293,10 +352,10 @@ class _CardCreateFormState extends State<CardCreateForm> {
               maxLength: 20, 
               keyboardType: TextInputType.name,
               decoration: const InputDecoration(border: UnderlineInputBorder(),labelText: 'Cátegoria'),  
-              onChanged: (value) => controller.formEditing = true,
+              onChanged: (value) => controller.formEditing = true, // validamos que el usuario ha modificado el formulario
               // validator: validamos el texto que el usuario ha ingresado.
               validator: (value) {
-                if (value == null || value.isEmpty) { return 'Por favor, seleccione una cátegoria'; }
+                if (controller.controllerTextEditCategory.text=='') { return 'Por favor, seleccione una cátegoria'; }
                 return null;
               },
             ),
@@ -306,67 +365,80 @@ class _CardCreateFormState extends State<CardCreateForm> {
   // WIDGETS: un textfielf para el precio de compra del producto
   Widget get priceBuyProductCardTextFormField{
     return Padding(
-          padding: const EdgeInsets.symmetric(horizontal:12, vertical: 6),
-          child: TextFormField(
-            autofocus: true,
-            focusNode:controller.salePriceTextFormFieldfocus,
-            controller: controller.controllerTextEditPrecioCompra,
-            enabled: true,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            maxLength: 20, 
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(border: UnderlineInputBorder(),labelText: 'Precio de compra'),  
-            onChanged: (value){
-              controller.getProduct.purchasePrice = controller.controllerTextEditPrecioCompra.numberValue;
-              controller.formEditing = true;
-            },
-            // validator: validamos el texto que el usuario ha ingresado.
-            validator: (value) {
-              // if (value == null || value.isEmpty) { return 'Por favor, escriba un precio de compra'; }
-              return null;
-            },
-          ),
-        );
+      padding: const EdgeInsets.symmetric(horizontal:12, vertical: 6),
+      child: Form(
+        key: controller.purchasePriceFormKey,
+        child: TextFormField(
+          style: const TextStyle(fontSize: 18),
+          autofocus: true,
+          focusNode:controller.purchasePriceTextFormFieldfocus,
+          controller: controller.controllerTextEditPrecioCompra,
+          enabled: true,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          maxLength: 15, 
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: const InputDecoration(border: UnderlineInputBorder(),labelText: 'Precio de compra'),   
+          onChanged: (value){
+            controller.getProduct.purchasePrice = controller.controllerTextEditPrecioCompra.numberValue;
+            controller.formEditing = true;
+          },
+          // validator: validamos el texto que el usuario ha ingresado.
+          validator: (value) {
+            // if (value == null || value.isEmpty) { return 'Por favor, escriba un precio de compra'; }
+            return null;
+          },
+        ),
+      ),
+    );
   } 
   // WIDGETS: un textfielf para el precio de venta al publico
   Widget get priceSaleProductCardTextFormField{
     return Padding(
           padding: const EdgeInsets.symmetric(horizontal:12, vertical: 6),
-          child: TextFormField(
-            autofocus: true,
-            focusNode:controller.salePriceTextFormFieldfocus,
-            controller: controller.controllerTextEditPrecioVenta,
-            enabled: true,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            maxLength: 20, 
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(border: UnderlineInputBorder(),labelText: 'Precio de venta al públuco'),  
-            onChanged: (value){
-              controller.getProduct.salePrice = controller.controllerTextEditPrecioVenta.numberValue;
-              controller.formEditing = true;
-            },
-            // validator: validamos el texto que el usuario ha ingresado.
-            validator: (value) {
-              // if (value == null || value.isEmpty) { return 'Por favor, escriba un precio de venta'; }
-              return null;
-            },
+          child: Form(
+            key: controller.salePriceFormKey,
+            child: TextFormField(
+              style: const TextStyle(fontSize: 18),
+              autofocus: true,
+              focusNode:controller.salePriceTextFormFieldfocus,
+              controller: controller.controllerTextEditPrecioVenta,
+              enabled: true,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              maxLength: 15, 
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(border: UnderlineInputBorder(),labelText: 'Precio de venta al públuco'),  
+              onChanged: (value){
+                controller.getProduct.salePrice = controller.controllerTextEditPrecioVenta.numberValue;
+                controller.formEditing = true;
+              },
+              // validator: validamos el texto que el usuario ha ingresado.
+              validator: (value) {
+                if ( controller.controllerTextEditPrecioVenta.numberValue == 0.0) { return 'Por favor, escriba un precio de venta'; }
+                return null;
+              },
+            ),
           ),
         );
   }
   //  WIDGET : checkbox para seleccionar el producto como favorito
   Widget get favoriteProductCardCheckbox{
-    return CheckboxListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal:12, vertical: 12),
-      enabled: controller.getSaveIndicator ? false : true,
-      checkColor: Colors.white,
-      activeColor: Colors.amber,
-      value: controller.getProduct.favorite,
-      title: const Text('Favorito'),
-      onChanged: (value) {
-        if (!controller.getSaveIndicator) {
-          controller.setFavorite = value ?? false;
-        }
-      },
+
+    return Column(
+      children: [
+        CheckboxListTile(
+          secondary: const Icon(Icons.favorite_border),
+          contentPadding: const EdgeInsets.symmetric(horizontal:12, vertical: 12),
+          enabled: controller.getSaveIndicator ? false : true,
+          checkColor: Colors.white,
+          activeColor: Colors.amber,
+          value: controller.getProduct.favorite,
+          title: Text(controller.getProduct.favorite?'Quitar de favorito':'Agregar a favorito'),subtitle: const Text('Accede rápidamente a tus productos favoritos'),
+          onChanged: (value) {
+            if (!controller.getSaveIndicator) { controller.setFavorite = value ?? false; }
+          },
+        ),
+        const Spacer(),
+      ],
     );
   }
   // WIDGET : control de stock
@@ -378,82 +450,90 @@ class _CardCreateFormState extends State<CardCreateForm> {
     return AnimatedContainer(
       padding: const EdgeInsets.symmetric(horizontal:20, vertical: 0),
       width: double.infinity,
-                      duration: const Duration(milliseconds: 500),
-                      //color: controller.getProduct.stock?Colors.blue.withOpacity(0.07):Colors.transparent,
-                      child: Column(
-                        children: [
-                          CheckboxListTile(
-                            contentPadding: EdgeInsets.symmetric(horizontal: controller.getProduct.stock?12:0,vertical: 12),
-                            enabled: controller.getSaveIndicator ? false : true,
-                            checkColor: Colors.white,
-                            activeColor: Colors.blue,
-                            value: controller.getProduct.stock?controller.isSubscribed:false,
-                            title: Column(
-                              children: [
-                                const Text('Control de stock'),
-                                const SizedBox(height: 5),
-                                LogoPremium(personalize: true),
-                              ],
-                            ),
-                            onChanged: (value) {
-                              if (!controller.getSaveIndicator) {
-                                controller.setStock = value ?? false;
-                              }
-                            },
-                          ),
-                          controller.getProduct.stock && controller.isSubscribed ? space : Container(),
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 500),
-                            color: controller.getProduct.stock?Colors.blue.withOpacity(0.05):Colors.transparent,
-                            child: Column(
-                              children: [
-                                controller.getProduct.stock && controller.isSubscribed
-                                    ? Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 12,),
-                                      child: TextField(
-                                        enabled: !controller.getSaveIndicator,
-                                        keyboardType: TextInputType.number,
-                                        onChanged: (value) => controller.getProduct.quantityStock =int.parse(controller.controllerTextEditQuantityStock .text),
-                                        decoration: const InputDecoration(
-                                          filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
-                                          disabledBorder: InputBorder.none,
-                                          labelText: "Stock", 
-                                        ),
-                                        textInputAction: TextInputAction.done,
-                                        //style: textStyle,
-                                        controller: controller.controllerTextEditQuantityStock,
-                                      ),
-                                    )
-                                    : Container(),
-                                controller.getProduct.stock && controller.isSubscribed ? space : Container(),
-                                controller.getProduct.stock && controller.isSubscribed
-                                    ? Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
-                                      child: TextField(
-                                        enabled: !controller.getSaveIndicator,
-                                        keyboardType: TextInputType.number,
-                                        onChanged: (value) =>controller.getProduct.alertStock = int.parse(controller.controllerTextEditAlertStock.text),
-                                        decoration: const InputDecoration(
-                                          filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
-                                          disabledBorder: InputBorder.none,
-                                          labelText: "Alerta de stock (opcional)", 
-                                        ),
-                                        textInputAction: TextInputAction.done,
-                                        //style: textStyle,
-                                        controller: controller.controllerTextEditAlertStock,
-                                      ),
-                                    )
-                                    : Container(),
-                              ],
-                            ),
-                          ),
-                        ],
+      duration: const Duration(milliseconds: 500),
+      child: Column(
+      children: [
+        CheckboxListTile(
+          contentPadding: EdgeInsets.symmetric(horizontal: controller.getProduct.stock?12:0,vertical: 12),
+          enabled: controller.getSaveIndicator ? false : true,
+          checkColor: Colors.white,
+          activeColor: Colors.blue,
+          value: controller.getProduct.stock?controller.isSubscribed:false,
+          title: Text(controller.getProduct.stock?'Quitar control de stock':'Agregar control de stock'),
+          subtitle: const Text('Controlar el inventario de sus productos'),
+          onChanged: (value) {
+            if (!controller.getSaveIndicator) {
+              controller.setStock = value ?? false;
+            }
+          },
+        ),
+        LogoPremium(personalize: true),
+        controller.getProduct.stock && controller.isSubscribed ? space : Container(),
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 500),
+          //color: controller.getProduct.stock?Colors.blue.withOpacity(0.05):Colors.transparent,
+          decoration: BoxDecoration(
+            color: controller.getProduct.stock?Colors.blue.withOpacity(0.05):Colors.transparent,
+            borderRadius: BorderRadius.circular(5),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Column(
+            children: [
+              controller.getProduct.stock && controller.isSubscribed
+                  ? Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12,),
+                    child: Form(
+                      key: controller.quantityStockFormKey,
+                      child: TextFormField(
+                        enabled: !controller.getSaveIndicator,
+                        keyboardType: TextInputType.number,
+                        onChanged: (value) => controller.getProduct.quantityStock =int.parse(controller.controllerTextEditQuantityStock .text),
+                        decoration: const InputDecoration(
+                          filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
+                          disabledBorder: InputBorder.none,
+                          labelText: "Stock", 
+                        ),
+                        textInputAction: TextInputAction.done,
+                        //style: textStyle,
+                        controller: controller.controllerTextEditQuantityStock,
+                        // validator: validamos el texto que el usuario ha ingresado.
+                        validator: (value) {
+                          if ( int.parse(controller.controllerTextEditQuantityStock.text )== 0) { return 'Por favor, escriba una cantidad'; }
+                          return null;
+                        },
                       ),
-                    );
+                    ),
+                  )
+                  : Container(),
+              controller.getProduct.stock && controller.isSubscribed ? space : Container(),
+              controller.getProduct.stock && controller.isSubscribed
+                  ? Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
+                    child: TextField(
+                      enabled: !controller.getSaveIndicator,
+                      keyboardType: TextInputType.number,
+                      onChanged: (value) =>controller.getProduct.alertStock = int.parse(controller.controllerTextEditAlertStock.text),
+                      decoration: const InputDecoration(
+                        filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
+                        disabledBorder: InputBorder.none,
+                        labelText: "Alerta de stock (opcional)", 
+                      ),
+                      textInputAction: TextInputAction.done,
+                      //style: textStyle,
+                      controller: controller.controllerTextEditAlertStock,
+                    ),
+                  )
+                  : Container(),
+            ],
+          ),
+        ),
+      ],
+      ),
+      );
   }
   // WIDGET : concentimiento del usuario para crear el producto
   Widget get consentProductCardCheckbox{
-    return Column(
+    return ListView(
       children: [ 
         // CheckboxListTile : consentimiento de usuario para crear un producto
         !controller.getNewProduct ? Container() :
@@ -478,6 +558,7 @@ class _CardCreateFormState extends State<CardCreateForm> {
           padding: EdgeInsets.all(controller.getUserConsent?12.0:0),
           child: const Text('¡Gracias por hacer que esta aplicación sea aún más útil para más personas! 🚀'),
           ),
+          ProductEdit().widgetForModerator,
       ],
     );
   }
