@@ -1,17 +1,11 @@
-import 'dart:io';
+
 import 'package:animate_do/animate_do.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:search_page/search_page.dart';
 import 'package:sell/app/presentation/cataloguePage/views/card_create_form.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:uuid/uuid.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../data/datasource/database_cloud.dart';
 import '../../../core/utils/fuctions.dart';
@@ -26,7 +20,6 @@ class ProductEdit extends StatelessWidget {
   final ControllerProductsEdit controller = Get.find();
 
   // var 
-  Color colorLoading = Colors.blue; 
   final Widget space = const SizedBox(
     height: 12.0,
     width: 12.0,
@@ -36,7 +29,7 @@ class ProductEdit extends StatelessWidget {
   Widget build(BuildContext context) {
 
     // get : obtenemos los valores 
-    colorLoading = Get.theme.primaryColor;
+    controller.colorLoading = Get.theme.primaryColor;
     controller.darkMode = Get.isDarkMode;
     controller.cardProductDetailColor = controller.darkMode ? Colors.blueGrey.withOpacity(0.2) : Colors.brown.shade100.withOpacity(0.6);
 
@@ -50,7 +43,7 @@ class ProductEdit extends StatelessWidget {
         return Material(
           child: AnimatedSwitcher(
           duration: const  Duration(milliseconds: 100),
-            child: _.getNewProduct && !_.formComplete? CardCreateForm(): OfflineBuilder(
+            child: _.getNewProduct ? CardCreateForm(): OfflineBuilder(
                 child: Container(),
                 connectivityBuilder: (
                   BuildContext context,
@@ -68,9 +61,7 @@ class ProductEdit extends StatelessWidget {
                         iconTheme: Theme.of(context)
                             .iconTheme
                             .copyWith(color: colorAccent),
-                        title: controller.getSaveIndicator
-                            ? Text(controller.getTextAppBar,style: TextStyle(fontSize: 18.0, color: colorAccent))
-                            : Text('Espere por favor...',style: TextStyle(fontSize: 18.0, color: colorAccent)),
+                        title: Text(controller.getTextAppBar,style: TextStyle(  color: colorAccent,fontSize: 18 )),
                       ),
                       body: Center(
                           child: Column(
@@ -113,9 +104,7 @@ class ProductEdit extends StatelessWidget {
             ? Container()
             : controller.itsInTheCatalogue?TextButton.icon(onPressed: () => controller.save(), icon:const Icon( Icons.check ), label:const  Text('Actualizar')):Container(),
       ],
-      bottom: controller.getSaveIndicator
-          ? ComponentApp.linearProgressBarApp(color: colorLoading)
-          : null,
+      bottom: controller.getSaveIndicator?ComponentApp.linearProgressBarApp(color: controller.colorLoading):null,
     );
   }
 

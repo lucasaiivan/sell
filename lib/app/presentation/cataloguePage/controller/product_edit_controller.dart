@@ -18,6 +18,8 @@ import '../../home/controller/home_controller.dart';
 class ControllerProductsEdit extends GetxController {
 
   // var style
+  Color colorLoading = Colors.blue; 
+  final Color colorButton = Colors.blue;
   Color cardProductDetailColor = Colors.grey.withOpacity(0.2);
   bool darkMode = false;
 
@@ -27,15 +29,20 @@ class ControllerProductsEdit extends GetxController {
   // var : logic  para que el usuario complete los campos necesarios para crear un nuevo producto nuevo
   int currentSlide = 0 ;
   bool formEditing = false;
-  bool formComplete = false;
+  bool theFormIsComplete = false;
   bool checkValidateForm = false;
   bool enabledButton = false;
-  // var : TextFormField
+  // var : TextFormField formKey
+  final GlobalKey<FormState> descriptionFormKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> markFormKey = GlobalKey<FormState>(); 
+  final GlobalKey<FormState> purchasePriceFormKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> salePriceFormKey = GlobalKey<FormState>(); 
+  final GlobalKey<FormState> quantityStockFormKey = GlobalKey<FormState>(); 
+
+  // var : TextFormField focus
   final descriptionTextFormFieldfocus = FocusNode(); 
   final purchasePriceTextFormFieldfocus = FocusNode(); 
   final salePriceTextFormFieldfocus = FocusNode(); 
-  final formKey = GlobalKey<FormState>(); // Crear una clave global que identifique de forma única el widget de formulario y permite la validación del formulario.
-
 
   // others controllers
   final HomeController homeController = Get.find();
@@ -187,7 +194,7 @@ class ControllerProductsEdit extends GetxController {
     // obtenemos el producto por parametro
     ProductCatalogue productFinal = Get.arguments['product'] ?? ProductCatalogue(documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now(),upgrade: Timestamp.now(), creation: Timestamp.now());
     //  si es un producto nuevo se le asigna solo el codigo del producto
-    if(getNewProduct){productFinal = ProductCatalogue(documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now(),upgrade: Timestamp.now(), creation: Timestamp.now()).copyWith(code:productFinal.code );}
+    if(getNewProduct){productFinal = ProductCatalogue(documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now(),upgrade: Timestamp.now(), creation: Timestamp.now()).copyWith(id: productFinal.code,code:productFinal.code );}
     //  finalmente  asigna el producto
     setProduct = productFinal;
     // load data product
@@ -246,6 +253,7 @@ class ControllerProductsEdit extends GetxController {
     }
   }
 
+  //  fuction : comprobamos los datos necesarios para proceder publicar o actualizar el producto
   Future<void> save() async {
     if (getProduct.id != '') {
       if (getProduct.description != '') {
@@ -260,10 +268,10 @@ class ControllerProductsEdit extends GetxController {
               
               // update view
               setSaveIndicator = true;
-              setTextAppBar = 'Espere por favor...';
+              setTextAppBar = getNewProduct?'Publicando...':'Espere por favor...';
               updateAll();
 
-              // set : marca de tiempo
+              /* // set : marca de tiempo
               getProduct.upgrade = Timestamp.now();
               // actualización de la imagen de perfil de la cuetna
               if (getXFileImage.path != '') {
@@ -317,7 +325,7 @@ class ControllerProductsEdit extends GetxController {
                         await Future.delayed(const Duration(seconds: 3)).then((value) {setSaveIndicator = false; Get.back(); });
                     }).onError((error, stackTrace) => setSaveIndicator = false).catchError((_) => setSaveIndicator = false);
                   }
-                }
+                } */
             } else {
               Get.snackbar(
                   'Stock no valido 😐', 'debe proporcionar un cantidad');
@@ -334,7 +342,9 @@ class ControllerProductsEdit extends GetxController {
         Get.snackbar('No se puedo continuar 👎',
             'debes escribir una descripción del producto');
       }
-    }
+    }else{
+      Get.snackbar('No se puedo continuar 👎',
+            'se produjo un error');}
   }
 
   void saveProductPublic() async {
@@ -519,39 +529,20 @@ class ControllerProductsEdit extends GetxController {
     });
   }
 
-  //-------------------------------------------------//
-  //- FUNCTIONS LOGIC VIEW CREATE NEW PRODUCT START -//
-  //-------------------------------------------------//
-  void checkValidatorFroms({required bool check}){
-    // function : validamos el formulario
-
-    // button onClick
-    if(check){
-      formKey.currentState!.validate();
-    }
-    // onchange texfieldFrom
-    if(check = false & checkValidateForm){
-      formKey.currentState!.validate();
-    }
-    // comprobamos si los datos estan completos
-    enabledButton = getProduct.isComplete;
-
-    // set values 
-    checkValidateForm = check;
-  }
-  void saveProductNewForm() async {
+  //------------------------------------------------------//
+  //- FUNCTIONS LOGIC VIEW FORM CREATE NEW PRODUCT START -//
+  //------------------------------------------------------// 
+  void checkDataAndSave() async {
     // function : procedemos a verificar el formulario y simular el salvado de los datos con una animacion
     
     if(getProduct.isComplete){
        // Validar devuelve verdadero si el formulario es válido o falso en caso contrario.
       checkValidateForm=true;
-      // validate : Si el formulario es válido,
-      if (formKey.currentState!.validate()) { 
+      // validate :  validamos el formulario
+      if ( controllerTextEditDescripcion.text!='' && controllerTextEditMark.text!='' && controllerTextEditPrecioVenta.text!='' ) { 
         // view : animated
-        formComplete = true; 
-        
-        // actualizamos el estado de las vistas
-        update(['updateAll']); 
+        theFormIsComplete = true; //  set : el formulario esta completo
+        save(); // fuction : actualizamos el estado de las vistas
       }
     }else{ 
       //  view : snackbar
@@ -581,23 +572,17 @@ class ControllerProductsEdit extends GetxController {
     carouselController.animateToPage(currentSlide-1);
   }
   void next(){
-    // function : verificamos que el campor actual este completo para pasar al siguiente campo y complertar el formulario
+    // function : verificamos que el campo actual este completo para pasar al siguiente campo y complertar el formulario
 
     // value 
     bool next = true;
     //
     // imagen : este campo es opcional 
-    if(currentSlide == 0  ){next=true; }
+    if(currentSlide == 0  ) next=true;
     //  descripción : este campo es obligatorio
-    if(currentSlide == 1 && getProduct.description == ''){
-      Get.snackbar('Debes ingresar una descripción', 'Este campo no puede dejarse vacio',snackPosition: SnackPosition.TOP,snackStyle: SnackStyle.FLOATING,);
-      next=false;
-    }
+    if(currentSlide == 1 && descriptionFormKey.currentState!.validate()==false ) next=false;
     //  marca : este campo es obligatorio
-    if(currentSlide == 2 && getProduct.nameMark == ''){
-      Get.snackbar('Debes elegir la marca el producto', 'Este campo no puede dejarse vacio',snackPosition: SnackPosition.TOP,snackStyle: SnackStyle.FLOATING,);
-      next=false;
-    } 
+    if(currentSlide == 2 && markFormKey.currentState!.validate()==false ) next=false;
 
     // category : este campo es opcional
     //... currentSlide : 3
@@ -606,16 +591,16 @@ class ControllerProductsEdit extends GetxController {
     //... currentSlide : 4
 
     // precio de venta al publico: este campo es obligatorio
-    if(currentSlide == 5 && getProduct.salePrice == 0){
-      Get.snackbar('Debes ingresar el precio de venta al publico', 'Este campo no puede dejarse vacio',snackPosition: SnackPosition.TOP,snackStyle: SnackStyle.FLOATING,);
-      next=false;
-    }
+    if(currentSlide == 5 && salePriceFormKey.currentState!.validate()==false ) next=false;
     
     // favorito : este campo es opcional
     //... currentSlide : 6
 
     // control de stock : este campo es opcional
-    //... currentSlide : 7
+    if(currentSlide == 7 && getProduct.stock && quantityStockFormKey.currentState!.validate()==false ){
+      Get.snackbar('Debes aceptar los terminos y condiciones', 'Este campo no puede dejarse vacio',snackPosition: SnackPosition.TOP,snackStyle: SnackStyle.FLOATING,);
+      next=false;
+    }
 
     // concentimientos del usuario : este campo es obligatorio para crear un producto nuevo
     if(currentSlide == 8 && getUserConsent == false){
@@ -623,11 +608,11 @@ class ControllerProductsEdit extends GetxController {
       next=false;
     }
 
-    // carrousel textfield : pasa a la siquiente vista si es posible
+    //
+    if(currentSlide == 8){
+      }
+    // action : pasa a la siquiente vista si es posible
     if(next){carouselController.nextPage();} 
-
-    // el formulario esta completo
-    if(currentSlide == 8 && getUserConsent){save();}
 
     // actualizamos el estado de las vistas
     update(['updateAll']);
@@ -780,7 +765,7 @@ class ControllerProductsEdit extends GetxController {
           child: const Text("Si, actualizar"),
           onPressed: () {
             Get.back();
-            save();
+            save(); // save product
           },
         ),
       ],
