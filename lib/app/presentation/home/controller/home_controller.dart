@@ -22,9 +22,9 @@ class HomeController extends GetxController {
   BuildContext get getBuildContext =>_buildContext; 
 
   // brillo de la pantalla 
-  bool isDarkMode = false;
-  set setDarkMode (bool value) => isDarkMode = value;
-  bool get getIsDarkMode => isDarkMode;
+  bool _darkMode = false;
+  set setDarkMode (bool value) => _darkMode = value;
+  bool get getDarkMode => _darkMode;
 
   // Guide user : Ventas
   bool salesUserGuideVisibility=false;

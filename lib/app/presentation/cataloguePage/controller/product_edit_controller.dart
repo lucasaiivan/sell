@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:carousel_slider/carousel_controller.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +17,32 @@ import '../../home/controller/home_controller.dart';
 
 class ControllerProductsEdit extends GetxController {
 
+  // var style
+  Color colorLoading = Colors.blue; 
+  final Color colorButton = Colors.blue;
+  Color cardProductDetailColor = Colors.grey.withOpacity(0.2);
+  bool darkMode = false;
+
+
+  // controller : carousel de componentes para que el usuario complete los campos necesarios para crear un nuevo producto nuevo
+  CarouselController carouselController = CarouselController();
+  // var : logic  para que el usuario complete los campos necesarios para crear un nuevo producto nuevo
+  int currentSlide = 0 ;
+  bool formEditing = false;
+  bool theFormIsComplete = false;
+  bool checkValidateForm = false;
+  bool enabledButton = false;
+  // var : TextFormField formKey
+  final GlobalKey<FormState> descriptionFormKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> markFormKey = GlobalKey<FormState>(); 
+  final GlobalKey<FormState> purchasePriceFormKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> salePriceFormKey = GlobalKey<FormState>(); 
+  final GlobalKey<FormState> quantityStockFormKey = GlobalKey<FormState>(); 
+
+  // var : TextFormField focus
+  final descriptionTextFormFieldfocus = FocusNode(); 
+  final purchasePriceTextFormFieldfocus = FocusNode(); 
+  final salePriceTextFormFieldfocus = FocusNode(); 
 
   // others controllers
   final HomeController homeController = Get.find();
@@ -59,13 +86,11 @@ class ControllerProductsEdit extends GetxController {
   bool get getStateConnect => connected;
 
   // ultimate selection mark
-  static Mark _ultimateSelectionMark =
-      Mark(upgrade: Timestamp.now(), creation: Timestamp.now());
+  static Mark _ultimateSelectionMark = Mark(upgrade: Timestamp.now(), creation: Timestamp.now());
   set setUltimateSelectionMark(Mark value) => _ultimateSelectionMark = value;
   Mark get getUltimateSelectionMark => _ultimateSelectionMark;
 
-  static Mark _ultimateSelectionMark2 =
-      Mark(upgrade: Timestamp.now(), creation: Timestamp.now());
+  static Mark _ultimateSelectionMark2 = Mark(upgrade: Timestamp.now(), creation: Timestamp.now());
   set setUltimateSelectionMark2(Mark value) => _ultimateSelectionMark2 = value;
   Mark get getUltimateSelectionMark2 => _ultimateSelectionMark2;
 
@@ -109,6 +134,8 @@ class ControllerProductsEdit extends GetxController {
 
   // TextEditingController
   TextEditingController controllerTextEditDescripcion = TextEditingController();
+  TextEditingController controllerTextEditMark = TextEditingController();
+  TextEditingController controllerTextEditCategory = TextEditingController();
   TextEditingController controllerTextEditQuantityStock = TextEditingController();
   TextEditingController controllerTextEditAlertStock = TextEditingController();
   MoneyMaskedTextController controllerTextEditPrecioVenta = MoneyMaskedTextController();
@@ -117,6 +144,7 @@ class ControllerProductsEdit extends GetxController {
   // mark
   Mark _markSelected = Mark(upgrade: Timestamp.now(), creation: Timestamp.now());
   set setMarkSelected(Mark value) {
+    controllerTextEditMark.text = value.name;
     _markSelected = value;
     getProduct.idMark = value.id;
     getProduct.nameMark = value.name;
@@ -136,6 +164,7 @@ class ControllerProductsEdit extends GetxController {
     _category = value;
     getProduct.category = value.id;
     getProduct.nameCategory = value.name;
+    controllerTextEditCategory.text = value.name;
     update(['updateAll']);
   }
 
@@ -161,15 +190,18 @@ class ControllerProductsEdit extends GetxController {
     setAccountAuth = homeController.getIdAccountSelected != '';
 
     // se obtiene el parametro y decidimos si es una vista para editrar o un producto nuevo
-    setProduct = Get.arguments['product'] ?? ProductCatalogue(documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now(),upgrade: Timestamp.now(), creation: Timestamp.now());
     setNewProduct = Get.arguments['new'] ?? false;
+    // obtenemos el producto por parametro
+    ProductCatalogue productFinal = Get.arguments['product'] ?? ProductCatalogue(documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now(),upgrade: Timestamp.now(), creation: Timestamp.now());
+    //  si es un producto nuevo se le asigna solo el codigo del producto
+    if(getNewProduct){productFinal = ProductCatalogue(documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now(),upgrade: Timestamp.now(), creation: Timestamp.now()).copyWith(id: productFinal.code,code:productFinal.code );}
+    //  finalmente  asigna el producto
+    setProduct = productFinal;
     // load data product
-    
     if (getNewProduct == false) {
       // el documento existe
       isCatalogue();
       getDataProduct(id: getProduct.id);
-      
     }else{
       loadDataFormProduct();
     }
@@ -189,8 +221,9 @@ class ControllerProductsEdit extends GetxController {
     super.onClose();
   }
 
+  // TODO : la subcripción por defecto es true
   // get 
-  bool get isSubscribed => homeController.getProfileAccountSelected.subscribed;
+  bool get isSubscribed => true;//homeController.getProfileAccountSelected.subscribed;
 
   // FUNCTIONES
   set setStock(bool value) {
@@ -221,6 +254,7 @@ class ControllerProductsEdit extends GetxController {
     }
   }
 
+  //  fuction : comprobamos los datos necesarios para proceder publicar o actualizar el producto
   Future<void> save() async {
     if (getProduct.id != '') {
       if (getProduct.description != '') {
@@ -235,7 +269,7 @@ class ControllerProductsEdit extends GetxController {
               
               // update view
               setSaveIndicator = true;
-              setTextAppBar = 'Espere por favor...';
+              setTextAppBar = getNewProduct?'Publicando...':'Espere por favor...';
               updateAll();
 
               // set : marca de tiempo
@@ -309,7 +343,9 @@ class ControllerProductsEdit extends GetxController {
         Get.snackbar('No se puedo continuar 👎',
             'debes escribir una descripción del producto');
       }
-    }
+    }else{
+      Get.snackbar('No se puedo continuar 👎',
+            'se produjo un error');}
   }
 
   void saveProductPublic() async {
@@ -463,18 +499,18 @@ class ControllerProductsEdit extends GetxController {
   }
 
 
-  // read imput image
+  // read XFile image
   void getLoadImageGalery() {
-    _picker
-        .pickImage(
+    _picker.pickImage(
       source: ImageSource.gallery,
       maxWidth: 720.0,
       maxHeight: 720.0,
       imageQuality: 55,
-    )
-        .then((value) {
+    ).then((value) {
       setXFileImage = value!;
-      update(['updateAll']);
+      formEditing = true;
+      update(['updateAll']);  //  actualizamos la vista
+      next(); //  siguiente componente
     });
   }
 
@@ -486,21 +522,118 @@ class ControllerProductsEdit extends GetxController {
       maxHeight: 720.0,
       imageQuality: 55,
     )
-        .then((value) {
+    .then((value) {
+      formEditing = true;
       setXFileImage = value!;
-      update(['updateAll']);
+      update(['updateAll']);  //  actualizamos la vista
+      next(); //  siguiente componente
     });
   }
+
+  //------------------------------------------------------//
+  //- FUNCTIONS LOGIC VIEW FORM CREATE NEW PRODUCT START -//
+  //------------------------------------------------------// 
+  void checkDataAndSave() async {
+    // function : procedemos a verificar el formulario y simular el salvado de los datos con una animacion
+    
+    if(getProduct.isComplete){
+       // Validar devuelve verdadero si el formulario es válido o falso en caso contrario.
+      checkValidateForm=true;
+      // validate :  validamos el formulario
+      if ( controllerTextEditDescripcion.text!='' && controllerTextEditMark.text!='' && controllerTextEditPrecioVenta.text!='' ) { 
+        // view : animated
+        theFormIsComplete = true; //  set : el formulario esta completo
+        save(); // fuction : actualizamos el estado de las vistas
+      }
+    }else{ 
+      //  view : snackbar
+      Get.snackbar('Complete el formulario', 'Algunos campos requieren ser completados',snackPosition: SnackPosition.BOTTOM,snackStyle: SnackStyle.FLOATING,);
+    }
+  }
+   double get getProgressForm{
+    // value : progreso del formulario
+    double progress = 0.0;
+    // estado de progreso
+    switch(currentSlide){
+      case 0:progress = 0.11; break;
+      case 1:progress = 0.22; break;
+      case 2:progress = 0.33; break;
+      case 3:progress = 0.44; break;
+      case 4:progress = 0.55; break;
+      case 5:progress = 0.66; break;
+      case 6:progress = 0.77; break;
+      case 7:progress = 0.88; break;
+      case 8:progress = 1.0; break;
+      default:progress;
+    } 
+    return progress;
+  }
+  
+  void previousPage(){
+    carouselController.animateToPage(currentSlide-1);
+  }
+  void next(){
+    // function : verificamos que el campo actual este completo para pasar al siguiente campo y complertar el formulario
+
+    // value 
+    bool next = true;
+    //
+    // imagen : este campo es opcional 
+    if(currentSlide == 0  ) next=true;
+    //  descripción : este campo es obligatorio
+    if(currentSlide == 1 && descriptionFormKey.currentState!.validate()==false ) next=false;
+    //  marca : este campo es obligatorio
+    if(currentSlide == 2 && markFormKey.currentState!.validate()==false ) next=false;
+
+    // category : este campo es opcional
+    //... currentSlide : 3
+
+    // precio de compra : este campo es opcional
+    //... currentSlide : 4
+
+    // precio de venta al publico: este campo es obligatorio
+    if(currentSlide == 5 && salePriceFormKey.currentState!.validate()==false ) next=false;
+    
+    // favorito : este campo es opcional
+    //... currentSlide : 6
+
+    // control de stock : este campo es opcional
+    if(currentSlide == 7 && getProduct.stock && quantityStockFormKey.currentState!.validate()==false ){
+      Get.snackbar('Debes aceptar los terminos y condiciones', 'Este campo no puede dejarse vacio',snackPosition: SnackPosition.TOP,snackStyle: SnackStyle.FLOATING,);
+      next=false;
+    }
+
+    // concentimientos del usuario : este campo es obligatorio para crear un producto nuevo
+    if(currentSlide == 8 && getUserConsent == false){
+      Get.snackbar('Debes aceptar los terminos y condiciones', 'Este campo no puede dejarse vacio',snackPosition: SnackPosition.TOP,snackStyle: SnackStyle.FLOATING,);
+      next=false;
+    }
+
+    //
+    if(currentSlide == 8){
+      }
+    // action : pasa a la siquiente vista si es posible
+    if(next){carouselController.nextPage();} 
+
+    // actualizamos el estado de las vistas
+    update(['updateAll']);
+  }
+  //-------------------------------------------------//
+  //- FUNCTIONS LOGIC VIEW CREATE NEW PRODUCT FINAL -//
+  //-------------------------------------------------//
+
+
+  // WIDGETS
 
   Widget loadImage({double size = 120}) {
 
     // devuelve la imagen del product
     if (getXFileImage.path != '') {
       // el usuario cargo un nueva imagen externa
-      return AvatarApp(path: getXFileImage.path ,size: size,onTap: getNewProduct || getEditModerator? showModalBottomSheetCambiarImagen : null );
+      return ImageAvatarApp(path: getXFileImage.path ,size: size,onTap: getNewProduct || getEditModerator? showModalBottomSheetCambiarImagen : null );
     } else {
       // se visualiza la imagen del producto
-      return AvatarApp(url: getProduct.image ,size: size,onTap: getNewProduct || getEditModerator? showModalBottomSheetCambiarImagen : null );
+      return ImageAvatarApp(url: getProduct.image ,size: size,onTap: getNewProduct || getEditModerator? showModalBottomSheetCambiarImagen : null );
     }
   }
 
@@ -633,7 +766,7 @@ class ControllerProductsEdit extends GetxController {
           child: const Text("Si, actualizar"),
           onPressed: () {
             Get.back();
-            save();
+            save(); // save product
           },
         ),
       ],
@@ -846,7 +979,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
   Widget listTile({required Mark marcaSelect, bool icon = true}) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      trailing:!icon? null  : AvatarApp(url: marcaSelect.image,size: 50,description:marcaSelect.name),
+      trailing:!icon? null  : ImageAvatarApp(url: marcaSelect.image,size: 50,description:marcaSelect.name),
       dense: true,
       title: Text(marcaSelect.name,overflow: TextOverflow.ellipsis),
       subtitle: marcaSelect.description == ''
@@ -1090,3 +1223,6 @@ class _CreateMarkState extends State<CreateMark> {
   }
 
 }
+
+
+
