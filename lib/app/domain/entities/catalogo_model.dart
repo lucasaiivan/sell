@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+
 class Product {
   String id = "";
   String idMark = ""; // ID de la marca por defecto esta vacia
@@ -171,6 +172,66 @@ class ProductCatalogue {
     this.quantity = 1,
   });
 
+  ProductCatalogue copyWith({
+  String? id,
+  bool? verified,
+  bool? favorite,
+  bool? outstanding,
+  String? image,
+  String? description,
+  String? code,
+  String? category,
+  String? nameCategory,
+  String? subcategory,
+  String? nameSubcategory,
+  bool? stock,
+  int? quantityStock,
+  int? alertStock,
+  double? revenue,
+  Timestamp ? creation,
+  Timestamp ? upgrade,
+  Timestamp? documentCreation,
+  Timestamp? documentUpgrade,
+  int? sales,
+  double? salePrice,
+  double? purchasePrice,
+  String? currencySign,
+  String? idMark,
+  String? nameMark,
+  bool? select,
+  int? quantity,
+}) {
+  return ProductCatalogue(
+    id: id ?? this.id,
+    verified: verified ?? this.verified,
+    favorite: favorite ?? this.favorite,
+    outstanding: outstanding ?? this.outstanding,
+    image: image ?? this.image,
+    description: description ?? this.description,
+    code: code ?? this.code,
+    category: category ?? this.category,
+    nameCategory: nameCategory ?? this.nameCategory,
+    subcategory: subcategory ?? this.subcategory,
+    nameSubcategory: nameSubcategory ?? this.nameSubcategory,
+    stock: stock ?? this.stock,
+    quantityStock: quantityStock ?? this.quantityStock,
+    alertStock: alertStock ?? this.alertStock,
+    revenue: revenue ?? this.revenue,
+    creation: creation ?? this.creation,
+    upgrade: upgrade ?? this.upgrade,
+    documentCreation: documentCreation ?? this.documentCreation,
+    documentUpgrade: documentUpgrade ?? this.documentUpgrade,
+    sales: sales ?? this.sales,
+    salePrice: salePrice ?? this.salePrice,
+    purchasePrice: purchasePrice ?? this.purchasePrice,
+    currencySign: currencySign ?? this.currencySign,
+    idMark: idMark ?? this.idMark,
+    nameMark: nameMark ?? this.nameMark,
+    select: select ?? this.select,
+    quantity: quantity ?? this.quantity,
+  );
+}
+
   factory ProductCatalogue.fromMap(Map data) {
     return ProductCatalogue(
       // Valores del producto
@@ -290,6 +351,7 @@ class ProductCatalogue {
     }
     return'';
   }
+  get isComplete => description.isNotEmpty && nameMark.isNotEmpty ;
 
 }
 
