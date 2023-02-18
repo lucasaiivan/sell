@@ -202,41 +202,42 @@ class CataloguePage extends StatelessWidget {
   }
 
   Widget listTileProduct({required ProductCatalogue item}) {
+    // description : ListTile con detalles del producto
 
     //  controller
-    final CataloguePageController cataloguePageController = Get.find();
+    final CataloguePageController cataloguePageController = Get.find(); 
     final HomeController homeController = Get.find();
     
     // values
-    Color tileColor = item.stock? (item.quantityStock <= item.alertStock && homeController.getProfileAccountSelected.subscribed? Colors.red: item.favorite?Colors.amber:Colors.transparent): item.favorite?Colors.amber:Colors.transparent;
     String alertStockText = item.stock ? (item.quantityStock == 0 ? 'Sin stock' : '') : '';
 
     return ElasticIn(
       child: Column(
         children: [
           ListTile(
-            //tileColor: tileColor,
             contentPadding: const EdgeInsets.all(12),
-            onTap: () => cataloguePageController.toProductEdit(productCatalogue: item),
+            onTap: () => cataloguePageController.toProductEdit(productCatalogue: item), 
+            leading: ImageAvatarApp(url: item.image,size: 50,favorite: item.favorite),  // image : avatar del producto
             title: Text(item.description, maxLines: 1),
-            
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // text
+                // text : nombre de la marca
                 Text(
                     item.nameMark,
                     maxLines: 2,
                     overflow: TextOverflow.clip,
                     style: const TextStyle(color: Colors.blue),
-                  ),
-                // text
+                  ), 
                 Wrap(
                   children: [
-                    Text(Publications.getFormatoPrecio(monto: item.salePrice),style: const TextStyle(fontWeight:FontWeight.bold )),
+                    // text : precio de venta
+                    Text(Publications.getFormatoPrecio(monto: item.salePrice),style: TextStyle(fontWeight:FontWeight.w600,color: homeController.getDarkMode?Colors.white:Colors.black )),
                     const SizedBox(width: 5),
+                    // text : porcentaje de ganancia
                     Text(item.sProcentaje,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w500)),
                     SizedBox(width: item.sProcentaje==''?0:5),
+                    // text : fecha de la ultima actualización
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -246,6 +247,7 @@ class CataloguePage extends StatelessWidget {
                         const SizedBox(width: 5),
                       ],
                     ),
+                    // text : cantidad de ventas
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -256,6 +258,7 @@ class CataloguePage extends StatelessWidget {
                     ),
                   ],
                 ),
+                // text : favorito y control de stock
                 Row(
                   children: [
                     item.favorite? const Text('Favorito'):Container(),
@@ -265,7 +268,6 @@ class CataloguePage extends StatelessWidget {
                 ),
               ],
             ),
-            leading: ImageAvatarApp(url: item.image,size: 50,favorite: item.favorite), 
             // text : stock
             trailing: item.stock
                 ? Expanded(
@@ -278,7 +280,7 @@ class CataloguePage extends StatelessWidget {
                 )
                 : null,
           ),
-          const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
+          Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1,color: homeController.getDarkMode?Colors.white70:Colors.black54),
         ],
       ),
     );

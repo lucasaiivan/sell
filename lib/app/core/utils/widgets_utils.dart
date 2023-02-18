@@ -793,6 +793,7 @@ class WidgetSuggestionProduct extends StatelessWidget {
 }
 
 
+// ignore: must_be_immutable
 class LogoPremium extends StatelessWidget {
 
   late bool visible;
@@ -821,7 +822,7 @@ class LogoPremium extends StatelessWidget {
   child: Padding(
     padding: const EdgeInsets.all(8.0),
     child: Opacity(
-      opacity: 0.3,
+      opacity: 0.7,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(2),
         child: Container(

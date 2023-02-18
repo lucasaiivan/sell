@@ -54,7 +54,8 @@ class _CardCreateFormState extends State<CardCreateForm> {
         data: Theme.of(context).copyWith( 
           // style : estilo del AppBar
           appBarTheme: AppBarTheme(elevation: 0,color: Colors.transparent ,systemOverlayStyle: controller.darkMode?SystemUiOverlayStyle.light:SystemUiOverlayStyle.light,iconTheme: IconThemeData(color: controller.darkMode?Colors.white:Colors.white),titleTextStyle: TextStyle(color: controller.darkMode?Colors.white:Colors.white))),
-        child: Scaffold(body: body(context: context)),
+        child: Scaffold(
+          body: body(context: context),),
       ),
     );
   } 
@@ -98,12 +99,11 @@ class _CardCreateFormState extends State<CardCreateForm> {
                     spacing: 5.0, // establece el espacio negativo para compactar horizontalmente  
                     alignment:  WrapAlignment.center,
                     children: [
-                      controller.controllerTextEditCategory.text==''?Container():ConstrainedBox(
-      constraints: BoxConstraints(maxWidth: 100),child: Chip(label: Text(controller.controllerTextEditCategory.text))),
-                      controller.controllerTextEditPrecioCompra.numberValue==0.0?Container():Chip(label: Text(Publications.getFormatoPrecio(monto: controller.controllerTextEditPrecioCompra.numberValue))),
-                      controller.controllerTextEditPrecioVenta.numberValue==0.0?Container():Chip(label: Text(Publications.getFormatoPrecio(monto: controller.controllerTextEditPrecioVenta.numberValue))),
-                      controller.getProduct.favorite? const Chip(label: Text('Favorito')):Container(),
-                      controller.getProduct.stock?const Chip(label: Text('Controi de Stock')):Container(),
+                      controller.controllerTextEditCategory.text==''?Container():InputChip(onPressed: (){controller.carouselController.animateToPage(3, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text(controller.controllerTextEditCategory.text)),
+                      controller.controllerTextEditPrecioCompra.numberValue==0.0?Container():InputChip(onPressed: (){controller.carouselController.animateToPage(4, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text(Publications.getFormatoPrecio(monto: controller.controllerTextEditPrecioCompra.numberValue))),
+                      controller.controllerTextEditPrecioVenta.numberValue==0.0?Container():InputChip(onPressed: (){controller.carouselController.animateToPage(5, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text(Publications.getFormatoPrecio(monto: controller.controllerTextEditPrecioVenta.numberValue))),
+                      controller.getProduct.favorite? InputChip(onPressed: (){controller.carouselController.animateToPage(6, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text('Favorito')):Container(),
+                      controller.getProduct.stock? InputChip(onPressed: (){controller.carouselController.animateToPage(7, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text('Controi de Stock')):Container(),
                     ],
                   ),
                 ),
@@ -173,7 +173,7 @@ class _CardCreateFormState extends State<CardCreateForm> {
     // var
     List<Widget> listWidgetss = [
       textButtonAddImage,
-      descriptionProductCardTextFormField(), 
+      descriptionProductCardTextFormField, 
       markProductCardTextFormField,
       categoryCatalogueTextFormField,  
       priceBuyProductCardTextFormField,
@@ -183,8 +183,8 @@ class _CardCreateFormState extends State<CardCreateForm> {
       consentProductCardCheckbox,
       ];
 
-    return SizedBox( 
-      width: double.infinity,
+    return Padding(
+      padding: const EdgeInsets.only(top:12),
       child: CarouselSlider.builder(
         carouselController: controller.carouselController,
         options: CarouselOptions(  
@@ -226,11 +226,10 @@ class _CardCreateFormState extends State<CardCreateForm> {
             ),
             //options: CarouselOptions(enableInfiniteScroll: lista.length == 1 ? false : true,autoPlay: lista.length == 1 ? false : true,aspectRatio: 2.0,enlargeCenterPage: true,enlargeStrategy: CenterPageEnlargeStrategy.scale),
             itemCount: listWidgetss.length,
-            itemBuilder: (context, index, realIndex) {
-              //return cardPublicidad(context: context, item: lista[index]);
+            itemBuilder: (context, index, realIndex) { 
               // values
-              bool focusWidget = controller.currentSlide == index ? true : false;
-              // AnimatedOpacity : Versión animada de Opacity que cambia automáticamente la opacidad del niño durante un período determinado cada vez que cambia la opacidad dada
+              bool focusWidget = controller.currentSlide == index ? true : false; // si el foco esta en el widget actual
+              // AnimatedOpacity : anima el cambio de opacidad del widget segun el foco actual
               return AnimatedOpacity(
                 duration: const Duration(milliseconds: 800),
                 opacity: focusWidget ? 1.0 : 0.3,
@@ -258,7 +257,7 @@ class _CardCreateFormState extends State<CardCreateForm> {
     );
   }
 // WIDGET : un textFormField para la descripción del producto
-  Widget descriptionProductCardTextFormField({bool enabled = true}){
+  Widget get descriptionProductCardTextFormField{
     // TextFormField : creamos una entrada númerico
     return Column(
       children: [
@@ -268,13 +267,13 @@ class _CardCreateFormState extends State<CardCreateForm> {
             key: controller.descriptionFormKey,
             child: TextFormField( 
               controller: controller.controllerTextEditDescripcion,
-              enabled: enabled ,
+              enabled: true ,
               autovalidateMode: AutovalidateMode.onUserInteraction,
               focusNode: controller.descriptionTextFormFieldfocus,
-              maxLength: 60, // maximo de caracteres
+              maxLength: 100, // maximo de caracteres
               minLines: 1,
               maxLines:2, 
-              inputFormatters: [ FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\- .]'))],
+              inputFormatters: [ FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\- .]')),],
               decoration: const InputDecoration(border: UnderlineInputBorder(),labelText: 'Descripción del producto'),
               onChanged: (value) {
                 controller.formEditing = true; // validamos que el usuario ha modificado el formulario
@@ -426,7 +425,6 @@ class _CardCreateFormState extends State<CardCreateForm> {
     return Column(
       children: [
         CheckboxListTile(
-          secondary: const Icon(Icons.favorite_border),
           contentPadding: const EdgeInsets.symmetric(horizontal:12, vertical: 12),
           enabled: controller.getSaveIndicator ? false : true,
           checkColor: Colors.white,
@@ -468,46 +466,41 @@ class _CardCreateFormState extends State<CardCreateForm> {
           },
         ),
         LogoPremium(personalize: true),
-        controller.getProduct.stock && controller.isSubscribed ? space : Container(),
+        controller.getProduct.stock && controller.isSubscribed? space : Container(), 
         AnimatedContainer(
+          width: controller.getProduct.stock?null:0,
+          height: controller.getProduct.stock?null:0,
           duration: const Duration(milliseconds: 500),
-          //color: controller.getProduct.stock?Colors.blue.withOpacity(0.05):Colors.transparent,
-          decoration: BoxDecoration(
-            color: controller.getProduct.stock?Colors.blue.withOpacity(0.05):Colors.transparent,
-            borderRadius: BorderRadius.circular(5),
-          ),
+          decoration: BoxDecoration(border: Border.all(color: Get.theme.textTheme.bodyMedium!.color?? Colors.black12,width: 1,),),
           padding: const EdgeInsets.symmetric(vertical: 12),
           child: Column(
             children: [
-              controller.getProduct.stock && controller.isSubscribed
-                  ? Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12,),
-                    child: Form(
-                      key: controller.quantityStockFormKey,
-                      child: TextFormField(
-                        enabled: !controller.getSaveIndicator,
-                        keyboardType: TextInputType.number,
-                        onChanged: (value) => controller.getProduct.quantityStock =int.parse(controller.controllerTextEditQuantityStock .text),
-                        decoration: const InputDecoration(
-                          filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
-                          disabledBorder: InputBorder.none,
-                          labelText: "Stock", 
-                        ),
-                        textInputAction: TextInputAction.done,
-                        //style: textStyle,
-                        controller: controller.controllerTextEditQuantityStock,
-                        // validator: validamos el texto que el usuario ha ingresado.
-                        validator: (value) {
-                          if ( int.parse(controller.controllerTextEditQuantityStock.text )== 0) { return 'Por favor, escriba una cantidad'; }
-                          return null;
-                        },
-                      ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12,),
+                child: Form(
+                  key: controller.quantityStockFormKey,
+                  child: TextFormField(
+                    enabled: !controller.getSaveIndicator,
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) => controller.getProduct.quantityStock =int.parse(controller.controllerTextEditQuantityStock .text),
+                    decoration: const InputDecoration(
+                      filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
+                      disabledBorder: InputBorder.none,
+                      labelText: "Stock", 
                     ),
-                  )
-                  : Container(),
-              controller.getProduct.stock && controller.isSubscribed ? space : Container(),
-              controller.getProduct.stock && controller.isSubscribed
-                  ? Padding(
+                    textInputAction: TextInputAction.done,
+                    //style: textStyle,
+                    controller: controller.controllerTextEditQuantityStock,
+                    // validator: validamos el texto que el usuario ha ingresado.
+                    validator: (value) {
+                      if ( int.parse(controller.controllerTextEditQuantityStock.text )== 0) { return 'Por favor, escriba una cantidad'; }
+                      return null;
+                    },
+                  ),
+                ),
+              ),
+              space,
+              Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
                     child: TextField(
                       enabled: !controller.getSaveIndicator,
@@ -522,8 +515,7 @@ class _CardCreateFormState extends State<CardCreateForm> {
                       //style: textStyle,
                       controller: controller.controllerTextEditAlertStock,
                     ),
-                  )
-                  : Container(),
+                  ) ,
             ],
           ),
         ),

@@ -221,8 +221,9 @@ class ControllerProductsEdit extends GetxController {
     super.onClose();
   }
 
+  // TODO : la subcripción por defecto es true
   // get 
-  bool get isSubscribed => homeController.getProfileAccountSelected.subscribed;
+  bool get isSubscribed => true;//homeController.getProfileAccountSelected.subscribed;
 
   // FUNCTIONES
   set setStock(bool value) {
@@ -271,7 +272,7 @@ class ControllerProductsEdit extends GetxController {
               setTextAppBar = getNewProduct?'Publicando...':'Espere por favor...';
               updateAll();
 
-              /* // set : marca de tiempo
+              // set : marca de tiempo
               getProduct.upgrade = Timestamp.now();
               // actualización de la imagen de perfil de la cuetna
               if (getXFileImage.path != '') {
@@ -325,7 +326,7 @@ class ControllerProductsEdit extends GetxController {
                         await Future.delayed(const Duration(seconds: 3)).then((value) {setSaveIndicator = false; Get.back(); });
                     }).onError((error, stackTrace) => setSaveIndicator = false).catchError((_) => setSaveIndicator = false);
                   }
-                } */
+                }
             } else {
               Get.snackbar(
                   'Stock no valido 😐', 'debe proporcionar un cantidad');
