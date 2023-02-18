@@ -95,7 +95,7 @@ class CataloguePage extends StatelessWidget {
     // controllers
     final CataloguePageController controller = Get.find();
     final HomeController homeController = Get.find();
-
+ 
     // si el cátalogo esta vacio
     if (controller.getCataloProducts.isEmpty) {
 
@@ -136,9 +136,14 @@ class CataloguePage extends StatelessWidget {
   }
 
   Widget viewCategory() {
+
     // controllers
     final HomeController controller = Get.find();
     final CataloguePageController cataloguePageController = Get.find();
+    //var
+    double titleSize = 18;
+    Color dividerColor = controller.getDarkMode?Colors.white.withOpacity(0.5):Colors.black.withOpacity(0.5);
+    Widget divider = Divider(color: dividerColor,thickness: 0.2,height: 0,);
 
     if (controller.getCatalogueCategoryList.isEmpty) {
       return const Center(
@@ -153,18 +158,16 @@ class CataloguePage extends StatelessWidget {
         itemBuilder: (BuildContext context, int index) {
           
           //get
-          Category categoria = controller.getCatalogueCategoryList[index];
-          MaterialColor color = Utils.getRandomColor();
-
+          Category categoria = controller.getCatalogueCategoryList[index]; 
+      
           return index == 0
               ? Column(
                   children: <Widget>[
                     controller.getCatalogueCategoryList.isNotEmpty
                         ? ListTile(
                             contentPadding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
-                            leading: CircleAvatar(backgroundColor: color.withOpacity(0.1),radius: 24.0,child: Icon(Icons.all_inclusive, color: color) ),
                             dense: true,
-                            title: Text("Mostrar todos",style: Get.theme.textTheme.bodyMedium),
+                            title: Text("Mostrar todos",style: TextStyle(fontSize: titleSize,fontWeight: FontWeight.w400)),
                             onTap: () {
                               cataloguePageController.setSelectedCategory =Category(name: 'Cátalogo');
                               // desplaza la vista a la lista de los productos
@@ -172,15 +175,15 @@ class CataloguePage extends StatelessWidget {
                             },
                           )
                         : Container(),
-                    const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
+                    divider,
                     listTileCategoryItem(categoria: categoria),
-                    const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
+                    divider,
                   ],
                 )
               : Column(
                   children: <Widget>[
                     listTileCategoryItem(categoria: categoria),
-                    const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
+                    divider,
                   ],
                 );
         },
@@ -209,7 +212,11 @@ class CataloguePage extends StatelessWidget {
     final HomeController homeController = Get.find();
     
     // values
+    double titleSize = 18; 
     String alertStockText = item.stock ? (item.quantityStock == 0 ? 'Sin stock' : '') : '';
+    Color dividerColor = homeController.getDarkMode?Colors.white.withOpacity(0.5):Colors.black.withOpacity(0.5);
+    // widgets
+    Widget divider = Divider(color: dividerColor,thickness: 0.15,height: 0,);
 
     return ElasticIn(
       child: Column(
@@ -218,7 +225,7 @@ class CataloguePage extends StatelessWidget {
             contentPadding: const EdgeInsets.all(12),
             onTap: () => cataloguePageController.toProductEdit(productCatalogue: item), 
             leading: ImageAvatarApp(url: item.image,size: 50,favorite: item.favorite),  // image : avatar del producto
-            title: Text(item.description, maxLines: 1),
+            title: Text(item.description, maxLines: 1,style: TextStyle(fontSize: titleSize,fontWeight: FontWeight.w400)),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -280,7 +287,7 @@ class CataloguePage extends StatelessWidget {
                 )
                 : null,
           ),
-          Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1,color: homeController.getDarkMode?Colors.white70:Colors.black54),
+          divider,
         ],
       ),
     );
@@ -296,7 +303,7 @@ class CataloguePage extends StatelessWidget {
     return ListTile(
       contentPadding: const EdgeInsets.all(12),
       dense: true,
-      title: Text(title, style: Get.theme.textTheme.labelMedium),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w300,fontSize: 18)),
       onTap: () {
         controller.setSelectedCategory = categoria;
         controller.tabController.animateTo(0);
