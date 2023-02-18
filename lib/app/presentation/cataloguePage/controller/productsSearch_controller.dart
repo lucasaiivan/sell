@@ -1,10 +1,13 @@
 
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:excel/excel.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart'; 
 import 'package:sell/app/data/datasource/database_cloud.dart';
 import 'package:sell/app/core/utils/dynamicTheme_lb.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
@@ -198,7 +201,7 @@ class ControllerProductsSearch extends GetxController {
     Get.back();
      // TODO :  comrpobar si el producto esta en el cátalogo
      // ...
-    Get.toNamed(Routes.EDITPRODUCT, arguments: {'product': porduct});
+    Get.toNamed(Routes.EDITPRODUCT, arguments: {'product': porduct.copyWith()});
   }
 
   void toProductNew({required String id}) {
@@ -209,197 +212,6 @@ class ControllerProductsSearch extends GetxController {
     productSelect.code = id;
     // navega hacia una nueva vista para crear un nuevo producto
     Get.toNamed(Routes.EDITPRODUCT,arguments: {'new': true, 'product': productSelect});
-  }
-
-  // TODO : eliminar para release
-  selectedExcel() async {
-    
-    FilePickerResult? file = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['xlsx', 'csv', 'xls']);
-    
-    if (file != null && file.files.isNotEmpty) {
-      var bytes = File(file.files.first.path!).readAsBytesSync();
-      var excel = Excel.decodeBytes(bytes);
-      int i = 0;
-      List<dynamic> keys = <dynamic>[];
-      List<Map<String, dynamic>> json = <Map<String, dynamic>>[];
-      for (var table in excel.tables.keys) {
-        // leer las filas
-        for (var row in excel.tables[table]?.rows ?? []) {
-          try {
-            if (i == 0) {
-              keys = row; // columnas
-              i++;
-            } else {
-              Map<String, dynamic> temp = <String, dynamic>{};
-              int j = 0;
-              String tk = '';
-              // definimos cuantas columnas queremos recorrer
-              for (var key in keys) {
-                tk = key.value;
-                if ((row[j].runtimeType == String)) {
-                  temp[tk] = "\u201C${row[j].value}\u201D";
-                } else {
-                  temp[tk] = row[j].value;
-                }
-                // las columnas que quiero obtener
-                if (j == 3) break;
-                j++;
-              }
-              json.add(temp);
-            }
-          } catch (ex) {
-            printError(info: ex.toString());
-          }
-        }
-      }
-
-      filterListExcelToJson(value: json);
-    } else {
-      productsToExelList = [];
-      update();
-    }
-  }
-
-  openDialogListExcel() {
-    // muestra una ventana emergente con la lista de productos para verificar
-    Widget widget = Scaffold(
-      appBar: AppBar(title: Text('Productos de excel (${productsToExelList.length})')),
-      body: ListView.builder(
-      itemCount: productsToExelList.length,
-      itemBuilder: (context, index) {
-        
-        // values
-        ProductCatalogue productValue = ProductCatalogue(documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now(),creation: Timestamp.now(), upgrade: Timestamp.now());
-        // set values
-        productValue = productsToExelList[index];
-
-        return homeController.isCatalogue(id: productValue.code)
-            ? Container()
-            :  Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-          contentPadding: const EdgeInsets.all(12),
-          title: Text(productValue.description,maxLines: 1,overflow:TextOverflow.clip),
-          subtitle: Row(
-                children: [
-                  // text : code
-                  productValue.code!=''?Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)):Container(),
-                  productValue.code!=''? Text(productValue.code):Container(),
-                  // text : precio
-                  Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
-                  Text(Publications.getFormatoPrecio(monto: productValue.salePrice)),
-                ],
-          ),
-          onTap: () {
-                //  set
-                productSelect = productValue;
-                Get.back();
-                textEditingController.text = productSelect.id;
-                queryProduct(id: productSelect.id);
-          },
-        ),
-        const Divider(height: 0),
-              ],
-            );
-      },
-    ),
-    );
-    // muestre la hoja inferior modal de getx
-    Get.bottomSheet(
-      widget,
-      backgroundColor: Get.theme.scaffoldBackgroundColor,
-      enableDrag: true,
-      isDismissible: true,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20), topRight: Radius.circular(20))),
-    );
-  }
-
-
-  // var
-  final RxList<Product> _lisProductsVerified = <Product>[].obs;
-  List<Product> get getListProductsVerified {
-
-    for (var i = 0; i < _lisProductsVerified.length; i++) {
-
-      for (var j = 0; j < homeController.getCataloProducts.length; j++) {
-        if( _lisProductsVerified[i].id == homeController.getCataloProducts[j].id ){
-          if(homeController.getCataloProducts[j].verified){
-            _lisProductsVerified.removeAt(i);
-          }
-        }
-      }
-    }
-    return _lisProductsVerified;
-  }
-  set setListProductsVerified(List<Product> value) => _lisProductsVerified.value = value;
-
-  void readProduct() {
-    Database.readProductsVerifiedFuture().then((value) {
-      List<Product> list = [];
-      for (var element in value.docs) {
-        list.add(Product.fromMap(element.data()));
-      }
-      setListProductsVerified = list.cast<Product>();
-      update(['updateAll']);
-    });
-  }
-  openDialogListProductVerified({required List<Product> list}) {
-    // muestra una ventana emergente con la lista de productos para verificar
-    Widget widget = Scaffold(
-      appBar: AppBar(title: const Text('Productos sin verificar')),
-      body: ListView.builder(
-      itemCount: list.length,
-      itemBuilder: (context, index) {
-        // values
-        final Product productValue = list[index];
-
-
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              contentPadding: const EdgeInsets.all(12),
-              title: Text(productValue.nameMark,maxLines: 1,overflow:TextOverflow.clip),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text(productValue.description,maxLines:1,overflow:TextOverflow.clip,textAlign: TextAlign.start,),
-                  Row(
-                    children: [
-                      // text : code
-                      productValue.code!=''?Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)):Container(),
-                      productValue.code!=''? Text(productValue.code):Container(),
-                      // text : marca de tiempo
-                      Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
-                      Text(Publications.getFechaPublicacion(productValue.creation.toDate(), Timestamp.now().toDate())),
-                    ],
-                  ),
-                ],
-              ),
-              onTap: () {
-                Get.back();
-                Get.toNamed(Routes.EDITPRODUCT,arguments: {'product': productValue.convertProductCatalogue()});
-              },
-            ),
-            const Divider(height: 0),
-          ],
-        );
-      },
-    ),
-    );
-    // muestre la hoja inferior modal de getx
-    Get.bottomSheet(
-      widget,
-      backgroundColor: Get.theme.scaffoldBackgroundColor,
-      enableDrag: true,
-      isDismissible: true,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20), topRight: Radius.circular(20))),
-    );
   }
 }
 

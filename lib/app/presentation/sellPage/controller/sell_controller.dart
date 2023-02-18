@@ -194,7 +194,7 @@ class SalesController extends GetxController {
             ListTile(
               contentPadding:const EdgeInsets.symmetric(horizontal: 20,vertical: 12),
               tileColor: tileColor,
-              leading: AvatarApp(url: product.image,size: 50,favorite:product.favorite),
+              leading: ImageAvatarApp(url: product.image,size: 50,favorite:product.favorite),
               title: Text(product.description),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
