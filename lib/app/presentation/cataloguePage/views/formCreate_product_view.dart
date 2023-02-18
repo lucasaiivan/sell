@@ -15,14 +15,14 @@ import '../controller/product_edit_controller.dart';
 
 // view : tenemos una tarjeta de información del producto y debajo se muestra un carrusel con campos para agregar información del nuevo producto
 // description  : este formulario se encarga de crear un producto nuevo
-class CardCreateForm extends StatefulWidget {
-  const CardCreateForm({Key? key}) : super(key: key);
+class FormCreateProductView extends StatefulWidget {
+  const FormCreateProductView({Key? key}) : super(key: key);
 
   @override
-  State<CardCreateForm> createState() => _CardCreateFormState();
+  State<FormCreateProductView> createState() => _FormCreateProductViewState();
 }
 
-class _CardCreateFormState extends State<CardCreateForm> {
+class _FormCreateProductViewState extends State<FormCreateProductView> {
 
 
 // controllers
@@ -72,7 +72,10 @@ class _CardCreateFormState extends State<CardCreateForm> {
     );
   }
   Widget body({required BuildContext context}){
-    
+
+    // values
+    Color boderLineColor = Get.theme.textTheme.bodyMedium!.color ?? Colors.black;
+    RoundedRectangleBorder shape  = RoundedRectangleBorder(borderRadius: BorderRadius.circular(6),side: BorderSide(color:boderLineColor,style: BorderStyle.none),);
     
     // SingleChildScrollView : Un cuadro en el que se puede desplazar un solo widget
     // Este widget es útil cuando tiene un solo cuadro que normalmente será completamente visible, por ejemplo,la aparición del teclado del sistema, pero debe asegurarse de que se pueda desplazar si el contenedor se vuelve demasiado pequeño en un eje (la dirección de desplazamiento )
@@ -99,11 +102,11 @@ class _CardCreateFormState extends State<CardCreateForm> {
                     spacing: 5.0, // establece el espacio negativo para compactar horizontalmente  
                     alignment:  WrapAlignment.center,
                     children: [
-                      controller.controllerTextEditCategory.text==''?Container():InputChip(onPressed: (){controller.carouselController.animateToPage(3, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text(controller.controllerTextEditCategory.text)),
-                      controller.controllerTextEditPrecioCompra.numberValue==0.0?Container():InputChip(onPressed: (){controller.carouselController.animateToPage(4, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text(Publications.getFormatoPrecio(monto: controller.controllerTextEditPrecioCompra.numberValue))),
-                      controller.controllerTextEditPrecioVenta.numberValue==0.0?Container():InputChip(onPressed: (){controller.carouselController.animateToPage(5, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text(Publications.getFormatoPrecio(monto: controller.controllerTextEditPrecioVenta.numberValue))),
-                      controller.getProduct.favorite? InputChip(onPressed: (){controller.carouselController.animateToPage(6, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text('Favorito')):Container(),
-                      controller.getProduct.stock? InputChip(onPressed: (){controller.carouselController.animateToPage(7, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text('Controi de Stock')):Container(),
+                      controller.controllerTextEditCategory.text==''?Container():InputChip(shape:shape,checkmarkColor: Colors.red,surfaceTintColor: Colors.green,onPressed: (){controller.carouselController.animateToPage(3, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text(controller.controllerTextEditCategory.text)),
+                      controller.controllerTextEditPrecioCompra.numberValue==0.0?Container():InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(4, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text(Publications.getFormatoPrecio(monto: controller.controllerTextEditPrecioCompra.numberValue))),
+                      controller.controllerTextEditPrecioVenta.numberValue==0.0?Container():InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(5, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text(Publications.getFormatoPrecio(monto: controller.controllerTextEditPrecioVenta.numberValue))),
+                      controller.getProduct.favorite? InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(6, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label:const  Text('Favorito')):Container(),
+                      controller.getProduct.stock? InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(7, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: const Text('Controi de Stock')):Container(),
                     ],
                   ),
                 ),
@@ -336,8 +339,12 @@ class _CardCreateFormState extends State<CardCreateForm> {
           ),
         );
   } 
-  // WIDGETS: un textfielf para la seleccion de la categoria del catalogo que se le va a asignar al producto
+  // WIDGETS: un textfielf para la seleccion de la cátegoria del catalogo que se le va a asignar al producto
   Widget get categoryCatalogueTextFormField{
+
+    // var 
+    Color boderLineColor = Get.theme.textTheme.bodyMedium!.color ?? Colors.black;
+
     return Padding(
           padding: const EdgeInsets.symmetric(horizontal:12, vertical: 6),
           child: GestureDetector(
@@ -350,7 +357,12 @@ class _CardCreateFormState extends State<CardCreateForm> {
               autovalidateMode: AutovalidateMode.onUserInteraction,
               maxLength: 20, 
               keyboardType: TextInputType.name,
-              decoration: const InputDecoration(border: UnderlineInputBorder(),labelText: 'Cátegoria'),  
+              decoration: InputDecoration(
+                  labelText: controller.controllerTextEditCategory.text==''?'Seleccionar una cátegoria':'Cátegoria',
+                  border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
+                  disabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
+                ),  
               onChanged: (value) => controller.formEditing = true, // validamos que el usuario ha modificado el formulario
               // validator: validamos el texto que el usuario ha ingresado.
               validator: (value) {
