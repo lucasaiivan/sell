@@ -1,20 +1,78 @@
 
 import 'dart:io';
+
 import 'package:avatar_view/avatar_view.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:sell/app/presentation/home/controller/home_controller.dart';
-import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import 'package:sell/app/core/utils/dynamicTheme_lb.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
-import 'package:url_launcher/url_launcher.dart';
-import '../routes/app_pages.dart';
+import 'package:sell/app/presentation/home/controller/home_controller.dart';
+import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart';
+
 import '../../domain/entities/catalogo_model.dart';
 import '../../domain/entities/user_model.dart';
 import '../../presentation/cataloguePage/controller/catalogue_controller.dart';
+import '../routes/app_pages.dart';
+
+/// Un widget que muestra una imagen
+///
+/// Este widget se puede utilizar en cualquier lugar donde se necesite mostrar una imagen del scan. El tamaño de la imagen se puede especificar utilizando la propiedad [size].
+class ImageBarWidget extends StatelessWidget {
+  /// Tamaño deseado y color deseado.
+  final double size;
+  late Color color;
+
+  /// Crea un widget de una imagen de Scan.
+  ///
+  /// [size] es el tamaño deseado de la imagen en píxeles.
+  ImageBarWidget({
+    Key? key,
+    required this.size,
+    this.color=Colors.black,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // get 
+    color = Theme.of(context).brightness==Brightness.dark ? Colors.white : Colors.black;
+    
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Image.asset('assets/productoLogo.png',color: color),
+    );
+  }
+}
+
+/// Un widget que muestra un icono de escaneo de código de barras.
+///
+/// Este widget se puede utilizar en cualquier lugar donde se necesite mostrar un icono de escaneo de código de barras. El tamaño del icono se puede especificar utilizando la propiedad [size].
+class ImageIconScanWidget extends StatelessWidget {
+  /// Tamaño deseado del icono.
+  final double size;
+
+  /// Crea un widget de icono de escaneo de código de barras.
+  ///
+  /// [size] es el tamaño deseado del icono en píxeles.
+  const ImageIconScanWidget({
+    Key? key,
+    required this.size,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Image.asset('assets/scanbarcode.png',color: Colors.white),
+    );
+  }
+}
 
 class WidgetButtonListTile extends StatelessWidget {
 
@@ -735,6 +793,7 @@ class WidgetSuggestionProduct extends StatelessWidget {
 }
 
 
+// ignore: must_be_immutable
 class LogoPremium extends StatelessWidget {
 
   late bool visible;
@@ -763,7 +822,7 @@ class LogoPremium extends StatelessWidget {
   child: Padding(
     padding: const EdgeInsets.all(8.0),
     child: Opacity(
-      opacity: 0.3,
+      opacity: 0.7,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(2),
         child: Container(
@@ -779,7 +838,7 @@ class LogoPremium extends StatelessWidget {
   }
 }
 
-class AvatarApp extends StatelessWidget {
+class ImageAvatarApp extends StatelessWidget {
   late bool favorite;
   late String url;
   late double size;
@@ -787,7 +846,7 @@ class AvatarApp extends StatelessWidget {
   late String description;
   late String path;
   final VoidCallback?  onTap;
-  AvatarApp({Key? key,this.favorite=false,this.url='',this.size=50,this.radius=12,this.description='',this.path='', this.onTap }) : super(key: key);
+  ImageAvatarApp({Key? key,this.favorite=false,this.url='',this.size=50,this.radius=12,this.description='',this.path='', this.onTap }) : super(key: key);
 
   // avatar que se va usar en toda la app, especialemnte en los 'ListTile'
 
@@ -805,11 +864,8 @@ class AvatarApp extends StatelessWidget {
         avatarType: AvatarType.RECTANGLE,
         backgroundColor: Colors.black.withOpacity(0.2),
         imagePath: url,
-        placeHolder: Container(color: Colors.black.withOpacity(0.1)),
-        errorWidget: Container(
-            color: Colors.black.withOpacity(0.1),
-            child: description!=''? Text(description.substring(0,1)) : const Icon(Icons.error_outline, size: 25),
-        ),
+        placeHolder: Container(color: Colors.black.withOpacity(0.1),child:const Icon(Icons.image, size: 25),),
+        errorWidget: Container(color: Colors.black.withOpacity(0.1),child:const Icon(Icons.image, size: 25),),
       ) : Card(
         elevation: 0,
         clipBehavior: Clip.antiAlias,

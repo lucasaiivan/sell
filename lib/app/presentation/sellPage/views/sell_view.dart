@@ -275,15 +275,15 @@ class SalesView extends StatelessWidget {
 
     return PopupMenuButton(
                 icon: Material(
-                  color: homeController.getIsDarkMode?Colors.white:Colors.black,
+                  color: homeController.getDarkMode?Colors.white:Colors.black,
                   borderRadius: const BorderRadius.all(Radius.circular(12.0)),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8,vertical:1),
                     child: Row(
                       children: [
-                        Text('Caja ${salesController.cashRegisterNumber}',style:TextStyle(color: homeController.getIsDarkMode?Colors.black:Colors.white)),
+                        Text('Caja ${salesController.cashRegisterNumber}',style:TextStyle(color: homeController.getDarkMode?Colors.black:Colors.white)),
                         const SizedBox(width: 5),
-                        Icon(Icons.keyboard_arrow_down_rounded,color: homeController.getIsDarkMode?Colors.black:Colors.white),
+                        Icon(Icons.keyboard_arrow_down_rounded,color: homeController.getDarkMode?Colors.black:Colors.white),
                       ],
                     ),
                   ),

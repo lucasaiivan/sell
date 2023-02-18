@@ -1,18 +1,11 @@
-import 'dart:io';
+
 import 'package:animate_do/animate_do.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:search_page/search_page.dart';
-import 'package:shimmer/shimmer.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:uuid/uuid.dart';
-import '../../../domain/entities/catalogo_model.dart';
-import '../../../data/datasource/database_cloud.dart';
+import 'package:sell/app/presentation/cataloguePage/views/formCreate_product_view.dart'; 
+import '../../../domain/entities/catalogo_model.dart'; 
 import '../../../core/utils/fuctions.dart';
 import '../../../core/utils/widgets_utils.dart';
 import '../../home/controller/home_controller.dart';
@@ -24,22 +17,19 @@ class ProductEdit extends StatelessWidget {
   // controllers
   final ControllerProductsEdit controller = Get.find();
 
-  // var
-  Color cardProductDetailColor = Colors.grey.withOpacity(0.05);
-  Color colorLoading = Colors.blue;
-  bool darkMode = false;
+  // var 
   final Widget space = const SizedBox(
-    height: 12.0,
-    width: 12.0,
+    height: 16.0,
+    width: 16.0,
   );
 
   @override
   Widget build(BuildContext context) {
 
-    // get : obtenemos los valores
-    colorLoading = Get.theme.primaryColor;
-    darkMode = Get.isDarkMode;
-    cardProductDetailColor = darkMode ? Colors.grey.withOpacity(0.06) : Colors.brown.shade100.withOpacity(0.6);
+    // get : obtenemos los valores 
+    controller.colorLoading = Get.theme.primaryColor;
+    controller.darkMode = Get.isDarkMode;
+    controller.cardProductDetailColor = controller.darkMode ? Colors.blueGrey.withOpacity(0.2) : Colors.brown.shade100.withOpacity(0.6);
 
 
     // GetBuilder - refresh all the views
@@ -48,44 +38,47 @@ class ProductEdit extends StatelessWidget {
       init: ControllerProductsEdit(),
       initState: (_) {},
       builder: (_) {
-        return OfflineBuilder(
-            child: Container(),
-            connectivityBuilder: (
-              BuildContext context,
-              ConnectivityResult connectivity,
-              Widget child,
-            ) {
-              final connected = connectivity != ConnectivityResult.none;
-
-              if (!connected) {
-                Color? colorAccent = Get.theme.textTheme.bodyMedium!.color;
-                return Scaffold(
-                  appBar: AppBar(
-                    elevation: 0.0,
-                    backgroundColor: Get.theme.scaffoldBackgroundColor,
-                    iconTheme: Theme.of(context)
-                        .iconTheme
-                        .copyWith(color: colorAccent),
-                    title: controller.getSaveIndicator
-                        ? Text(controller.getTextAppBar,style: TextStyle(fontSize: 18.0, color: colorAccent))
-                        : Text('Espere por favor...',style: TextStyle(fontSize: 18.0, color: colorAccent)),
-                  ),
-                  body: Center(
-                      child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Padding(
-                        padding: EdgeInsets.all(12.0),
-                        child: Icon(Icons.wifi_off_rounded),
+        return Material(
+          child: AnimatedSwitcher(
+          duration: const  Duration(milliseconds: 100),
+            child: _.getNewProduct ? FormCreateProductView(): OfflineBuilder(
+                child: Container(),
+                connectivityBuilder: (
+                  BuildContext context,
+                  ConnectivityResult connectivity,
+                  Widget child,
+                ) {
+                  final connected = connectivity != ConnectivityResult.none;
+                  
+                  if (!connected) {
+                    Color? colorAccent = Get.theme.textTheme.bodyMedium!.color;
+                    return Scaffold(
+                      appBar: AppBar(
+                        elevation: 0.0,
+                        backgroundColor: Get.theme.scaffoldBackgroundColor,
+                        iconTheme: Theme.of(context)
+                            .iconTheme
+                            .copyWith(color: colorAccent),
+                        title: Text(controller.getTextAppBar,style: TextStyle(  color: colorAccent,fontSize: 18 )),
                       ),
-                      Text('No hay internet'),
-                    ],
-                  )),
-                );
-              }
-
-              return scaffold(context: context);
-            });
+                      body: Center(
+                          child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Padding(
+                            padding: EdgeInsets.all(12.0),
+                            child: Icon(Icons.wifi_off_rounded),
+                          ),
+                          Text('No hay internet'),
+                        ],
+                      )),
+                    );
+                  }
+                  
+                  return scaffold(context: context);
+                }),
+          ),
+        );
       },
     );
   }
@@ -103,15 +96,13 @@ class ProductEdit extends StatelessWidget {
           Theme.of(contextPrincipal).iconTheme.copyWith(color: colorText),
       title: controller.getSaveIndicator
           ? Text(controller.getTextAppBar,style: TextStyle(fontSize: 18.0, color: colorText))
-          : Text(controller.itsInTheCatalogue ? 'Editar' :'Nuevo',style: TextStyle(fontSize: 18.0, color: colorText)),
+          : Text(controller.itsInTheCatalogue ? 'Editar' :'Nuevo producto',style: TextStyle(fontSize: 18.0, color: colorText)),
       actions: <Widget>[
         controller.getSaveIndicator
             ? Container()
             : controller.itsInTheCatalogue?TextButton.icon(onPressed: () => controller.save(), icon:const Icon( Icons.check ), label:const  Text('Actualizar')):Container(),
       ],
-      bottom: controller.getSaveIndicator
-          ? ComponentApp.linearProgressBarApp(color: colorLoading)
-          : null,
+      bottom: controller.getSaveIndicator?ComponentApp.linearProgressBarApp(color: controller.colorLoading):null,
     );
   }
 
@@ -124,7 +115,7 @@ class ProductEdit extends StatelessWidget {
             scrollDirection: Axis.vertical,
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             children: [
-              controller.getNewProduct?widgetFormEdit1():widgetFormEdit0(),
+              widgetFormEdit0(),
               widgetFormEdit2(),
             ],
           ),
@@ -171,11 +162,12 @@ class ProductEdit extends StatelessWidget {
     
     
     // view : descripcion del producto
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+    return FadeIn(
+      duration:   const Duration(milliseconds: 700),
       child: AnimatedContainer(
+        margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 24.0),
         duration: const Duration(milliseconds: 500),
-        decoration: BoxDecoration(color: cardProductDetailColor,borderRadius: BorderRadius.circular(12.0)),
+        decoration: BoxDecoration(color: controller.cardProductDetailColor,borderRadius: BorderRadius.circular(12.0)),
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
@@ -303,14 +295,18 @@ class ProductEdit extends StatelessWidget {
     );
   }
   //  view : datos para el cátalogo con formulario de edicion
-  Widget widgetFormEdit2() {
+  Widget widgetFormEdit2(){
+
+    // var
+    Color boderLineColor = Get.theme.textTheme.bodyMedium!.color ?? Colors.black;
+
     return Container(
       padding: const EdgeInsets.all(12.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
 
-          //TODO: eliminar para desarrrollo
+          /* //TODO: eliminar para desarrrollo
           TextButton(
               onPressed: () async {
                 String clave = controller.controllerTextEditDescripcion.text;
@@ -325,89 +321,146 @@ class ProductEdit extends StatelessWidget {
                 await launchUrl(uri,mode: LaunchMode.externalApplication);
               },
               child: const Text('Buscar en código Google (moderador)')), 
-          space,
+          space, */
           // textfield : seleccionar cátegoria
-          !controller.getAccountAuth? Container(): textfielButton(textValue: controller.getCategory.id == ''? '': controller.getCategory.name,labelText: controller.getCategory.id == ''? 'Seleccionar categoría': 'Categoría',onTap: controller.getSaveIndicator? () {}: SelectCategory.show,),
+            !controller.getAccountAuth? Container(): GestureDetector(
+              onTap: SelectCategory.show,
+              child: TextFormField(
+                autofocus: false,
+                focusNode:null,
+                controller: controller.controllerTextEditCategory,
+                enabled: false,
+                autovalidateMode: AutovalidateMode.onUserInteraction, 
+                keyboardType: TextInputType.name,
+                decoration: InputDecoration(
+                  labelText: controller.controllerTextEditCategory.text==''?'Seleccionar una cátegoria':'Cátegoria',
+                  border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
+                  disabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
+                ),  
+                onChanged: (value) => controller.formEditing = true, // validamos que el usuario ha modificado el formulario
+                // validator: validamos el texto que el usuario ha ingresado.
+                validator: (value) {
+                  if (controller.controllerTextEditCategory.text=='') { return 'Por favor, seleccione una cátegoria'; }
+                  return null;
+                },
+              ),
+            ),
           space,
           // textfield prices
           !controller.getAccountAuth
               ? Container()
               : Column(
-                  children: [
-                    space,
-                    TextField(
-                      enabled: !controller.getSaveIndicator,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      onChanged: (value) => controller.getProduct.purchasePrice = controller.controllerTextEditPrecioCompra.numberValue,
-                      decoration: const InputDecoration(
-                        filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
-                        disabledBorder: InputBorder.none,
-                        labelText: "Precio de compra (completa para ver las ganacia)", 
+                  children: [ 
+                    Form(
+                      key: controller.purchasePriceFormKey,
+                      child: TextFormField(
+                        style: const TextStyle(fontSize: 18),
+                        autofocus: false,
+                        focusNode:controller.purchasePriceTextFormFieldfocus,
+                        controller: controller.controllerTextEditPrecioCompra,
+                        enabled: true,
+                        autovalidateMode: AutovalidateMode.onUserInteraction, 
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        decoration: InputDecoration( 
+                          labelText: 'Precio de compra',
+                          border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                          enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
+                          ),   
+                        onChanged: (value){
+                          controller.getProduct.purchasePrice = controller.controllerTextEditPrecioCompra.numberValue;
+                          controller.formEditing = true;
+                        },
+                        // validator: validamos el texto que el usuario ha ingresado.
+                        validator: (value) {
+                          // if (value == null || value.isEmpty) { return 'Por favor, escriba un precio de compra'; }
+                          return null;
+                        },
                       ),
-                      textInputAction: TextInputAction.next,
-                      //style: textStyle,
-                      controller: controller.controllerTextEditPrecioCompra,
                     ),
                     space,
-                    TextField(
-                      enabled: !controller.getSaveIndicator,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      onChanged: (value) => controller.getProduct.salePrice =controller.controllerTextEditPrecioVenta.numberValue,
-                      decoration: const InputDecoration(
-                        filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
-                        disabledBorder: InputBorder.none,
-                        labelText: "Precio de venta al público", 
+                    Form(
+                      key: controller.salePriceFormKey,
+                      child: TextFormField(
+                        style: const TextStyle(fontSize: 18),
+                        autofocus: false,
+                        focusNode:controller.salePriceTextFormFieldfocus,
+                        controller: controller.controllerTextEditPrecioVenta,
+                        enabled: true,
+                        autovalidateMode: AutovalidateMode.onUserInteraction, 
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        decoration: InputDecoration(
+                          labelText: 'Precio de venta al públuco',
+                          border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                          enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
+                        ),  
+                        onChanged: (value){
+                          controller.getProduct.salePrice = controller.controllerTextEditPrecioVenta.numberValue;
+                          controller.formEditing = true;
+                        },
+                        // validator: validamos el texto que el usuario ha ingresado.
+                        validator: (value) {
+                          if ( controller.controllerTextEditPrecioVenta.numberValue == 0.0) { return 'Por favor, escriba un precio de venta'; }
+                          return null;
+                        },
                       ),
-                      textInputAction: TextInputAction.done,
-                      //style: textStyle,
-                      controller: controller.controllerTextEditPrecioVenta,
-                    ),
+                    ), 
                     space,
-                    space,
-                    CheckboxListTile(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 0,vertical: 0),
-                      enabled: controller.getSaveIndicator ? false : true,
-                      checkColor: Colors.white,
-                      activeColor: Colors.amber,
-                      value: controller.getProduct.favorite,
-                      title: const Text('Favorito'),
-                      onChanged: (value) {
-                        if (!controller.getSaveIndicator) {
-                          controller.setFavorite = value ?? false;
-                        }
-                      },
-                    ),
-                    space,
-                    // view : control stock
+                    // view : control de stock
                     AnimatedContainer(
+                      width:double.infinity, 
                       duration: const Duration(milliseconds: 500),
-                      color: controller.getProduct.stock?Colors.blue.withOpacity(0.07):Colors.transparent,
+                      decoration: BoxDecoration(border: Border.all(color: Get.theme.textTheme.bodyMedium!.color?? Colors.black12,width: 0.1,),),
+                      child: CheckboxListTile(
+                        contentPadding: const EdgeInsets.symmetric(horizontal:12, vertical: 12),
+                        enabled: controller.getSaveIndicator ? false : true,
+                        checkColor: Colors.white,
+                        activeColor: Colors.amber,
+                        value: controller.getProduct.favorite,
+                        title: Text(controller.getProduct.favorite?'Quitar de favorito':'Agregar a favorito'),subtitle: controller.getProduct.favorite?null: const Text('Accede rápidamente a tus productos favoritos'),
+                        onChanged: (value) {
+                          if (!controller.getSaveIndicator) { controller.setFavorite = value ?? false; }
+                        },
+                      ),
+                    ),
+                    space,
+                    //
+                    // view : control stock
+                    //
+                    AnimatedContainer(
+                      width:double.infinity, 
+                      duration: const Duration(milliseconds: 500),
+                      decoration: BoxDecoration(border: Border.all(color: Get.theme.textTheme.bodyMedium!.color?? Colors.black12,width: 0.1,),),
                       child: Column(
-                        children: [
-                          CheckboxListTile(
-                            contentPadding: EdgeInsets.symmetric(horizontal: controller.getProduct.stock?12:0,vertical: 12),
-                            enabled: controller.getSaveIndicator ? false : true,
-                            checkColor: Colors.white,
-                            activeColor: Colors.blue,
-                            value: controller.getProduct.stock?controller.isSubscribed:false,
-                            title: Row(
-                              children: [
-                                const Text('Control de stock'),
-                                const SizedBox(width: 12),
-                                LogoPremium(personalize: true),
-                              ],
-                            ),
-                            onChanged: (value) {
-                              if (!controller.getSaveIndicator) {
-                                controller.setStock = value ?? false;
-                              }
-                            },
+                      children: [
+                        CheckboxListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal:12,vertical: 12),
+                          enabled: controller.getSaveIndicator ? false : true,
+                          checkColor: Colors.white,
+                          activeColor: Colors.blue,
+                          value: controller.getProduct.stock?controller.isSubscribed:false,
+                          title: Text(controller.getProduct.stock?'Quitar control de stock':'Agregar control de stock'),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              LogoPremium(personalize: true),
+                              controller.getProduct.stock?Container():const Text('Controlar el inventario de sus productos'),
+                            ],
                           ),
-                          controller.getProduct.stock && controller.isSubscribed ? space : Container(),
-                          controller.getProduct.stock && controller.isSubscribed
-                              ? Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 12,),
-                                child: TextField(
+                          onChanged: (value) {
+                            if (!controller.getSaveIndicator) {
+                              controller.setStock = value ?? false;
+                            }
+                          },
+                        ),  
+                        controller.getProduct.stock && controller.isSubscribed? space : Container(), 
+                        controller.getProduct.stock?Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12,),
+                              child: Form(
+                                key: controller.quantityStockFormKey,
+                                child: TextFormField(
                                   enabled: !controller.getSaveIndicator,
                                   keyboardType: TextInputType.number,
                                   onChanged: (value) => controller.getProduct.quantityStock =int.parse(controller.controllerTextEditQuantityStock .text),
@@ -419,31 +472,37 @@ class ProductEdit extends StatelessWidget {
                                   textInputAction: TextInputAction.done,
                                   //style: textStyle,
                                   controller: controller.controllerTextEditQuantityStock,
+                                  // validator: validamos el texto que el usuario ha ingresado.
+                                  validator: (value) {
+                                    if ( int.parse(controller.controllerTextEditQuantityStock.text )== 0) { return 'Por favor, escriba una cantidad'; }
+                                    return null;
+                                  },
                                 ),
-                              )
-                              : Container(),
-                          controller.getProduct.stock && controller.isSubscribed ? space : Container(),
-                          controller.getProduct.stock && controller.isSubscribed
-                              ? Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
-                                child: TextField(
-                                  enabled: !controller.getSaveIndicator,
-                                  keyboardType: TextInputType.number,
-                                  onChanged: (value) =>controller.getProduct.alertStock = int.parse(controller.controllerTextEditAlertStock.text),
-                                  decoration: const InputDecoration(
-                                    filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
-                                    disabledBorder: InputBorder.none,
-                                    labelText: "Alerta de stock (opcional)", 
+                              ),
+                            ),
+                            space,
+                            Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
+                                  child: TextField(
+                                    enabled: !controller.getSaveIndicator,
+                                    keyboardType: TextInputType.number,
+                                    onChanged: (value) =>controller.getProduct.alertStock = int.parse(controller.controllerTextEditAlertStock.text),
+                                    decoration: const InputDecoration(
+                                      filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
+                                      disabledBorder: InputBorder.none,
+                                      labelText: "Alerta de stock (opcional)", 
+                                    ),
+                                    textInputAction: TextInputAction.done,
+                                    //style: textStyle,
+                                    controller: controller.controllerTextEditAlertStock,
                                   ),
-                                  textInputAction: TextInputAction.done,
-                                  //style: textStyle,
-                                  controller: controller.controllerTextEditAlertStock,
-                                ),
-                              )
-                              : Container(),
-                        ],
+                                ) ,
+                          ],
+                        ):Container(),
+                      ],
                       ),
-                    ),
+                      ),
+
                     // text : marca de tiempo de la ultima actualización del documento
                     controller.getNewProduct || !controller.itsInTheCatalogue ? Container() :  Padding(
                       padding: const EdgeInsets.only(top: 50),
@@ -501,8 +560,8 @@ class ProductEdit extends StatelessWidget {
           
           //TODO: eliminar para desarrrollo
           /* OPCIONES PARA DESARROLLADOR - ELIMINAR ESTE CÓDIGO PARA PRODUCCION */
-          const SizedBox(height:50),
-          widgetForModerator,
+          //const SizedBox(height:50),
+          //widgetForModerator,
           ]             ,
       ),
     );
@@ -524,73 +583,73 @@ Widget get widgetForModerator{
             padding: const EdgeInsets.all(8.0),
             child: Column(
               mainAxisSize: MainAxisSize.max,
-                            children: [ 
-                              SizedBox(height: !controller.getSaveIndicator ? 20.0 : 0.0),
-                              CheckboxListTile(
-                                enabled: controller.getEditModerator ? controller.getSaveIndicator? false: true: false,
-                                checkColor: Colors.white,
-                                activeColor: Colors.blue,
-                                value: controller.getProduct.outstanding,
-                                title: const Text('Detacado'),
-                                onChanged: (value) {
-                                  if (!controller.getSaveIndicator) {
-                                    controller.setOutstanding(value: value ?? false);
-                                  }
-                                },
-                              ),
-                              SizedBox(height: !controller.getSaveIndicator ? 20.0 : 0.0),
-                              CheckboxListTile(
-                                enabled: controller.getEditModerator
-                                    ? controller.getSaveIndicator
-                                        ? false
-                                        : true
-                                    : false,
-                                checkColor: Colors.white,
-                                activeColor: Colors.blue,
-                                value: controller.getProduct.verified,
-                                title: const Text('Verificado'),
-                                onChanged: (value) {
-                                  if (controller.getEditModerator) {
-                                    if (!controller.getSaveIndicator) {
-                                      controller.setCheckVerified(value: value ?? false);
-                                    }
-                                  }
-                                },
-                              ),
-                              SizedBox(height: !controller.getSaveIndicator ? 20.0 : 0.0),
-                              controller.getSaveIndicator
-                                  ? Container()
-                                  : button(
-                                      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
-                                      icon:const Icon(Icons.security, color: Colors.white),
-                                      onPressed: () {
-                                        if (controller.getEditModerator) {controller.saveProductPublic();}
-                                        controller.setEditModerator = !controller.getEditModerator;
-                                      },
-                                      colorAccent: Colors.white,
-                                      colorButton: controller.getEditModerator? Colors.green: Colors.orange,
-                                      text: controller.getEditModerator? controller.getNewProduct?'Crear documento':'Actualizar documento': "Editar documento",
-                                    ),
-                              const SizedBox(height: 20.0),
-                              controller.getSaveIndicator || controller.getNewProduct || !controller.getEditModerator
-                                  ? Container()
-                                  : button(
-                                      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
-                                      icon:const Icon(Icons.security, color: Colors.white),
-                                      onPressed: controller.showDialogDeleteOPTDeveloper,
-                                      colorAccent: Colors.white,
-                                      colorButton: Colors.red,
-                                      text: "Eliminar documento",
-                                    ),
-                              // text : marca de tiempo de la ultima actualización del documento
-                              controller.getNewProduct?Container():Padding(
-                                padding: const EdgeInsets.only(top: 20),
-                                child: Opacity(opacity: 0.5,child: Center(child: Text('Creación ${Publications.getFechaPublicacion(controller.getProduct.documentCreation.toDate(), Timestamp.now().toDate()).toLowerCase()}'))),
-                              ), 
-                              const SizedBox(height: 30.0),
-                            ],
-                            // fin widget debug
-                          ),
+              children: [ 
+                SizedBox(height: !controller.getSaveIndicator ? 20.0 : 0.0),
+                CheckboxListTile(
+                  enabled: controller.getEditModerator ? controller.getSaveIndicator? false: true: false,
+                  checkColor: Colors.white,
+                  activeColor: Colors.blue,
+                  value: controller.getProduct.outstanding,
+                  title: const Text('Detacado'),
+                  onChanged: (value) {
+                    if (!controller.getSaveIndicator) {
+                      controller.setOutstanding(value: value ?? false);
+                    }
+                  },
+                ),
+                SizedBox(height: !controller.getSaveIndicator ? 20.0 : 0.0),
+                CheckboxListTile(
+                  enabled: controller.getEditModerator
+                      ? controller.getSaveIndicator
+                          ? false
+                          : true
+                      : false,
+                  checkColor: Colors.white,
+                  activeColor: Colors.blue,
+                  value: controller.getProduct.verified,
+                  title: const Text('Verificado'),
+                  onChanged: (value) {
+                    if (controller.getEditModerator) {
+                      if (!controller.getSaveIndicator) {
+                        controller.setCheckVerified(value: value ?? false);
+                      }
+                    }
+                  },
+                ),
+                SizedBox(height: !controller.getSaveIndicator ? 20.0 : 0.0),
+                controller.getSaveIndicator
+                    ? Container()
+                    : button(
+                        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
+                        icon:const Icon(Icons.security, color: Colors.white),
+                        onPressed: () {
+                          if (controller.getEditModerator) {controller.save();}
+                          controller.setEditModerator = !controller.getEditModerator;
+                        },
+                        colorAccent: Colors.white,
+                        colorButton: controller.getEditModerator? Colors.green: Colors.orange,
+                        text: controller.getEditModerator? controller.getNewProduct?'Crear documento':'Actualizar documento': "Editar documento",
+                      ),
+                const SizedBox(height: 20.0),
+                controller.getSaveIndicator || controller.getNewProduct || !controller.getEditModerator
+                    ? Container()
+                    : button(
+                        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
+                        icon:const Icon(Icons.security, color: Colors.white),
+                        onPressed: controller.showDialogDeleteOPTDeveloper,
+                        colorAccent: Colors.white,
+                        colorButton: Colors.red,
+                        text: "Eliminar documento",
+                      ),
+                // text : marca de tiempo de la ultima actualización del documento
+                controller.getNewProduct?Container():Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: Opacity(opacity: 0.5,child: Center(child: Text('Creación ${Publications.getFechaPublicacion(controller.getProduct.documentCreation.toDate(), Timestamp.now().toDate()).toLowerCase()}'))),
+                ), 
+                const SizedBox(height: 30.0),
+              ],
+              // fin widget debug
+            ),
           ),
         ],
       ),
@@ -833,474 +892,5 @@ class _SelectCategoryState extends State<SelectCategory> {
         );
       },
     );
-  }
-}
-
-// select mark
-class WidgetSelectMark extends StatefulWidget {
-  const WidgetSelectMark({Key? key}) : super(key: key);
-
-  @override
-  _WidgetSelectMarkState createState() => _WidgetSelectMarkState();
-}
-
-class _WidgetSelectMarkState extends State<WidgetSelectMark> {
-  //  controllers
-  ControllerProductsEdit controllerProductsEdit = Get.find();
-  //  var
-  List<Mark> list = [];
-
-  @override
-  void initState() {
-    loadMarks();
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return widgetView();
-  }
-
-  Widget widgetView() {
-    return Column(
-      children: [
-        widgetAdd(),
-        Expanded(
-          child: list.isEmpty
-              ? widgetAnimLoad()
-              : ListView.builder(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  shrinkWrap: true,
-                  itemCount: list.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    Mark marcaSelect = list[index];
-                    if (index == 0) {
-                      return Column(
-                        children: [
-                          getWidgetOptionOther(),
-                          const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
-                          controllerProductsEdit.getUltimateSelectionMark.id =='' ||controllerProductsEdit.getUltimateSelectionMark.id =='other'? Container(): listTile(marcaSelect: controllerProductsEdit.getUltimateSelectionMark),
-                          const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
-                          listTile(marcaSelect: marcaSelect),
-                          const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
-                        ],
-                      );
-                    }
-                    return Column(
-                      children: <Widget>[
-                        listTile(marcaSelect: marcaSelect),
-                        const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
-                      ],
-                    );
-                  },
-                ),
-        ),
-      ],
-    );
-  }
-
-  // WIDGETS
-  Widget widgetAnimLoad() {
-    return Center(
-        child: ListView(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-          child: Shimmer.fromColors(
-              highlightColor: Colors.grey.withOpacity(0.01),
-              baseColor: Get.theme.scaffoldBackgroundColor,
-              child: const Card(child: SizedBox(width: double.infinity, height: 50))),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-          child: Shimmer.fromColors(
-              highlightColor: Colors.grey.withOpacity(0.01),
-              baseColor: Get.theme.scaffoldBackgroundColor,
-              child: const Card(child: SizedBox(width: double.infinity, height: 50))),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-          child: Shimmer.fromColors(
-              highlightColor: Colors.grey.withOpacity(0.01),
-              baseColor: Get.theme.scaffoldBackgroundColor,
-              child: const Card(child: SizedBox(width: double.infinity, height: 50))),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-          child: Shimmer.fromColors(
-              highlightColor: Colors.grey.withOpacity(0.01),
-              baseColor: Get.theme.scaffoldBackgroundColor,
-              child: const Card(child: SizedBox(width: double.infinity, height: 50))),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-          child: Shimmer.fromColors(
-              highlightColor: Colors.grey.withOpacity(0.01),
-              baseColor: Get.theme.scaffoldBackgroundColor,
-              child: const Card(child: SizedBox(width: double.infinity, height: 50))),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-          child: Shimmer.fromColors(
-              highlightColor: Colors.grey.withOpacity(0.01),
-              baseColor: Get.theme.scaffoldBackgroundColor,
-              child: const Card(child: SizedBox(width: double.infinity, height: 50))),
-        ),
-      ],
-    ));
-  }
-
-  Widget getWidgetOptionOther() {
-    //values
-    late Widget widget;
-    // recorre la la de marcas para buscar la informaciób de opción 'other'
-    if (controllerProductsEdit.getMarks.isEmpty) {
-      widget = Container();
-    } else {
-      for (var element in controllerProductsEdit.getMarks) {
-        if (element.id == 'other') {
-          widget = listTile(
-            marcaSelect: element,
-          );
-        }
-      }
-    }
-    return widget;
-  }
-
-  // WIDGETS COMPONENT
-  Widget widgetAdd() {
-    return Column(
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(bottom: 12, left: 12, right: 12, top: 12),
-          child: Row(
-            children: [
-              const Expanded(child: Text('Marcas', style: TextStyle(fontSize: 18))),
-              // TODO : delete icon 'add new mark for release'
-              IconButton(
-                  onPressed: () {
-                    Get.back();
-                    Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));
-                  },
-                  icon: const Icon(Icons.add)),
-              IconButton(
-                icon: const Icon(Icons.search),
-                onPressed: () {
-                  Get.back();
-                  showSearch(
-                    context: context,
-                    delegate: SearchPage<Mark>(
-                      items: list,
-                      searchLabel: 'Buscar marca',
-                      suggestion: const Center(
-                        child: Text('ej. Miller'),
-                      ),
-                      failure: const Center(
-                        child: Text('No se encontro :('),
-                      ),
-                      filter: (product) => [
-                        product.name,
-                        product.description,
-                      ],
-                      builder: (mark) => Column(
-                        children: <Widget>[
-                          listTile(marcaSelect: mark),
-                          const Divider(endIndent: 12.0, indent: 12.0, height: 0),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              )
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget listTile({required Mark marcaSelect, bool icon = true}) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      trailing: !icon ? null : AvatarApp(url: marcaSelect.image,size: 50,description:marcaSelect.name),
-      dense: true,
-      title: Text(marcaSelect.name,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-              fontSize: 18.0, color: Get.theme.textTheme.bodyText1!.color)),
-      subtitle: marcaSelect.description == ''
-          ? null
-          : Text(marcaSelect.description, overflow: TextOverflow.ellipsis),
-      onTap: () {
-        controllerProductsEdit.setUltimateSelectionMark = marcaSelect;
-        controllerProductsEdit.setMarkSelected = marcaSelect;
-        Get.back();
-      },
-      onLongPress: () {
-        // TODO : delete fuction
-        Get.to(() => CreateMark(mark: marcaSelect));
-      },
-    );
-  }
-
-  // functions
-  loadMarks() async {
-    if (controllerProductsEdit.getMarks.isEmpty) {
-      await Database.readListMarksFuture().then((value) {
-        setState(() {
-          for (var element in value.docs) {
-            Mark mark = Mark.fromMap(element.data());
-            mark.id = element.id;
-            list.add(mark);
-          }
-          controllerProductsEdit.setMarks = list;
-        });
-      });
-    } else {
-      // datos ya descargados
-      list = controllerProductsEdit.getMarks;
-      setState(() => list = controllerProductsEdit.getMarks);
-    }
-  }
-}
-
-// TODO : delete release
-
-class CreateMark extends StatefulWidget {
-  late final Mark mark;
-  CreateMark({required this.mark, Key? key}) : super(key: key);
-
-  @override
-  _CreateMarkState createState() => _CreateMarkState();
-}
-
-class _CreateMarkState extends State<CreateMark> {
-  // others controllers
-  final ControllerProductsEdit controllerProductsEdit = Get.find();
-
-  //var
-  var uuid = const Uuid();
-  bool newMark = false;
-  String title = 'Crear nueva marca';
-  bool load = false;
-  TextStyle textStyle = const TextStyle(fontSize: 24.0);
-  final ImagePicker _picker = ImagePicker();
-  XFile xFile = XFile('');
-
-  @override
-  void initState() {
-    newMark = widget.mark.id == '';
-    title = newMark ? 'Crear nueva marca' : 'Editar';
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: appbar(),
-      body: body(),
-    );
-  }
-
-  PreferredSizeWidget appbar() {
-    Color? colorAccent = Get.theme.textTheme.bodyText1!.color;
-
-    return AppBar(
-      backgroundColor: Get.theme.scaffoldBackgroundColor,
-      elevation: 0,
-      title: Text(
-        title,
-        style: TextStyle(color: colorAccent),
-      ),
-      centerTitle: true,
-      iconTheme: Get.theme.iconTheme.copyWith(color: colorAccent),
-      actions: [
-        newMark
-            ? Container()
-            : IconButton(onPressed: delete, icon: const Icon(Icons.delete)),
-        load
-            ? Container()
-            : IconButton(
-                icon: const Icon(Icons.check),
-                onPressed: save,
-              ),
-      ],
-      bottom: load ? ComponentApp.linearProgressBarApp() : null,
-    );
-  }
-
-  Widget body() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            children: [
-              xFile.path != ''
-                  ? CircleAvatar(
-                      backgroundImage: FileImage(File(xFile.path)),
-                      radius: 76,
-                    )
-                  : CachedNetworkImage(
-                      fit: BoxFit.cover,
-                      imageUrl: widget.mark.image,
-                      placeholder: (context, url) => CircleAvatar(
-                        backgroundColor: Colors.grey.shade100,
-                        radius: 75.0,
-                      ),
-                      imageBuilder: (context, image) => CircleAvatar(
-                        backgroundImage: image,
-                        radius: 75.0,
-                      ),
-                      errorWidget: (context, url, error) => CircleAvatar(
-                        backgroundColor: Colors.grey.shade100,
-                        radius: 75.0,
-                      ),
-                    ),
-              load
-                  ? Container()
-                  : TextButton(
-                      onPressed: getLoadImageMark,
-                      child: const Text("Cambiar imagen")),
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: TextField(
-            enabled: !load,
-            controller: TextEditingController(text: widget.mark.name),
-            onChanged: (value) => widget.mark.name = value,
-            decoration: const InputDecoration(
-                border: OutlineInputBorder(), labelText: "Nombre de la marca"),
-            style: textStyle,
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: TextField(
-            enabled: !load,
-            controller: TextEditingController(text: widget.mark.description),
-            onChanged: (value) => widget.mark.description = value,
-            decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: "Descripción (opcional)"),
-            style: textStyle,
-          ),
-        ),
-      ],
-    );
-  }
-
-  //  MARK CREATE
-  void getLoadImageMark() {
-    _picker
-        .pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 720.0,
-      maxHeight: 720.0,
-      imageQuality: 55,
-    )
-        .then((value) {
-      setState(() => xFile = value!);
-    });
-  }
-
-  void delete() async {
-    setState(() {
-      load = true;
-      title = 'Eliminando...';
-    });
-
-    if (widget.mark.id != '') {
-      // delele archive storage
-      await Database.referenceStorageProductPublic(id: widget.mark.id)
-          .delete()
-          .catchError((_) => null);
-      // delete document firestore
-      await Database.refFirestoreMark()
-          .doc(widget.mark.id)
-          .delete()
-          .then((value) {
-        // eliminar el objeto de la lista manualmente para evitar hacer una consulta innecesaria
-        controllerProductsEdit.getMarks.remove(widget.mark);
-        Get.back();
-      });
-    }
-  }
-
-  void save() async {
-    setState(() {
-      load = true;
-      title = newMark ? 'Guardando...' : 'Actualizando...';
-    });
-
-    // set values
-    widget.mark.verified = true;
-    if (widget.mark.id == '') {
-      widget.mark.id = uuid.v1();
-      if (widget.mark.id == '') {
-        widget.mark.id = DateTime.now().millisecondsSinceEpoch.toString();
-      }
-    }
-    if (widget.mark.name != '') {
-      // image save
-      // Si el "path" es distinto '' procede a guardar la imagen en la base de dato de almacenamiento
-      if (xFile.path != '') {
-        Reference ref =
-            Database.referenceStorageProductPublic(id: widget.mark.id);
-        // referencia de la imagen
-        UploadTask uploadTask = ref.putFile(File(xFile.path));
-        // cargamos la imagen a storage
-        await uploadTask;
-        // obtenemos la url de la imagen guardada
-        await ref
-            .getDownloadURL()
-            .then((value) async {
-              // set
-              widget.mark.image = value;
-              // mark save
-              await Database.refFirestoreMark()
-                  .doc(widget.mark.id)
-                  .set(widget.mark.toJson())
-                  .whenComplete(() {
-                controllerProductsEdit.setUltimateSelectionMark = widget.mark;
-                controllerProductsEdit.setMarkSelected = widget.mark;
-                // agregar el obj manualmente para evitar consulta a la db  innecesaria
-                controllerProductsEdit.getMarks.add(widget.mark);
-                Get.back();
-              });
-            })
-            .onError((error, stackTrace) {})
-            .catchError((_) {});
-      } else {
-        // mark save
-        await Database.refFirestoreMark()
-            .doc(widget.mark.id)
-            .set(widget.mark.toJson())
-            .whenComplete(() {
-          controllerProductsEdit.setUltimateSelectionMark = widget.mark;
-          controllerProductsEdit.setMarkSelected = widget.mark;
-          // agregar el obj manualmente para evitar consulta a la db  innecesaria
-          controllerProductsEdit.getMarks.add(widget.mark);
-          Get.back();
-        });
-      }
-    } else {
-      Get.snackbar('', 'Debes escribir un nombre de la marca');
-    }
   }
 }
