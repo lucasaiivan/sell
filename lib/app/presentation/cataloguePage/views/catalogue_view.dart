@@ -217,6 +217,102 @@ class CataloguePage extends StatelessWidget {
     Color dividerColor = homeController.getDarkMode?Colors.white.withOpacity(0.5):Colors.black.withOpacity(0.5);
     // widgets
     Widget divider = Divider(color: dividerColor,thickness: 0.15,height: 0,);
+    Widget description = Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // text : nombre de la marca
+                Text(
+                    item.nameMark,
+                    maxLines: 2,
+                    overflow: TextOverflow.clip,
+                    style: const TextStyle(color: Colors.blue),
+                  ), 
+                Wrap(
+                  children: [
+                    // text : precio de venta
+                    Text(Publications.getFormatoPrecio(monto: item.salePrice),style: TextStyle(fontWeight:FontWeight.w600,color: homeController.getDarkMode?Colors.white:Colors.black )),
+                    const SizedBox(width: 5),
+                    // text : porcentaje de ganancia
+                    Text(item.sProcentaje,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w500)),
+                    SizedBox(width: item.sProcentaje==''?0:5),
+                    // text : fecha de la ultima actualización
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.circle,size: 8, color: Get.theme.dividerColor),
+                        const SizedBox(width: 5),
+                        Text(Publications.getFechaPublicacion(item.upgrade.toDate(), Timestamp.now().toDate())),
+                        const SizedBox(width: 5),
+                      ],
+                    ),
+                    // text : cantidad de ventas
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        item.sales == 0? Container(): Icon(Icons.circle,size: 8, color: Get.theme.dividerColor),
+                        item.sales == 0? Container():const SizedBox(width: 5),
+                        item.sales == 0? Container(): Text('${item.sales} ${item.sales == 1 ? 'venta' : 'ventas'}'),
+                      ],
+                    ),
+                  ],
+                ),
+                // text : favorito y control de stock
+                Row(
+                  children: [
+                    item.favorite? const Text('Favorito'):Container(),
+                    item.favorite && alertStockText != ''? Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)):Container(),
+                    alertStockText == '' ? Container() : Text(alertStockText),
+                  ],
+                ),
+              ],
+            );
+    dynamic stockWidget = item.stock
+                ? Column(crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text('Stock',style: TextStyle(fontSize:10,color: cataloguePageController.getStockColor(productCatalogue: item))),
+                    Text(item.quantityStock.toString(),style: TextStyle(color: cataloguePageController.getStockColor(productCatalogue: item))),
+                  ],
+                )
+                : Container();
+
+    return ElasticIn(
+      child: InkWell(
+        onTap: () => cataloguePageController.toProductEdit(productCatalogue: item),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Hero(
+                    tag: 'avatarProduct',
+                    child: ImageAvatarApp(url: item.image,size: 80,favorite: item.favorite)),
+                  Flexible( 
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(item.description, maxLines: 1,style: TextStyle(fontSize: titleSize,fontWeight: FontWeight.w400)),
+                          description,
+                        ],
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10),
+                    child: stockWidget,
+                  ),
+                ],
+              ),
+            ),
+            divider,
+          ],
+        ),
+      ),
+    );
 
     return ElasticIn(
       child: Column(

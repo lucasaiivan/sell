@@ -479,7 +479,7 @@ void showDialogCerrarSesion() {
               ListTile(
               title: const Text('Cerrar sesión'),
               subtitle: Text(getUserAuth.email.toString(), maxLines: 1, overflow: TextOverflow.ellipsis),
-              trailing:  const Icon(Icons.close),
+              trailing:  const Icon(Icons.arrow_forward_ios_rounded),
               onTap: showDialogCerrarSesion,
             ),
             const Divider(endIndent: 0,indent: 0,height: 0),
