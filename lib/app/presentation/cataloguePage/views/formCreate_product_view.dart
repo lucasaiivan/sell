@@ -105,8 +105,8 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
                       controller.controllerTextEditCategory.text==''?Container():InputChip(shape:shape,checkmarkColor: Colors.red,surfaceTintColor: Colors.green,onPressed: (){controller.carouselController.animateToPage(3, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text(controller.controllerTextEditCategory.text)),
                       controller.controllerTextEditPrecioCompra.numberValue==0.0?Container():InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(4, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text(Publications.getFormatoPrecio(monto: controller.controllerTextEditPrecioCompra.numberValue))),
                       controller.controllerTextEditPrecioVenta.numberValue==0.0?Container():InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(5, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text(Publications.getFormatoPrecio(monto: controller.controllerTextEditPrecioVenta.numberValue))),
-                      controller.getProduct.favorite? InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(6, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label:const  Text('Favorito')):Container(),
-                      controller.getProduct.stock? InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(7, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: const Text('Controi de Stock')):Container(),
+                      controller.getFavorite? InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(6, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label:const  Text('Favorito')):Container(),
+                      controller.getStock? InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(7, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: const Text('Control de Stock')):Container(),
                     ],
                   ),
                 ),
@@ -318,7 +318,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
           child: GestureDetector(
             onTap: controller.showModalSelectMarca,
             child: Form(
-              key: controller.markFormKey,
+              key: controller.markFormKey, 
               child: TextFormField( 
                 autofocus: false,
                 focusNode: null,
@@ -327,13 +327,18 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 maxLength: 20, 
                 keyboardType: TextInputType.name,
-                decoration: const InputDecoration(border: UnderlineInputBorder(),labelText: 'Marca'),  
+                decoration: InputDecoration(border: const UnderlineInputBorder(),
+                labelText: controller.controllerTextEditMark.text=='' ? 'Seleccionar marca' : 'Marca',
+                ),  
                 onChanged: (value) => controller.formEditing = true, // validamos que el usuario ha modificado el formulario
-                // validator: validamos el texto que el usuario ha ingresado.
+                // validator: validamos el texto que el usuario ha ingresado. 
                 validator: (value) {
-                  if ( controller.controllerTextEditMark.text=='') { return 'Por favor, seleccione una marca'; }
+                  if ( value == null || value.isEmpty) { 
+                    Get.snackbar('Seleccione un marca', 'Este campo es esencial');
+                    return 'Por favor, seleccione una marca'; 
+                    }
                   return null;
-                },
+                },   
               ),
             ),
           ),
@@ -431,7 +436,9 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
           ),
         );
   }
+  //
   //  WIDGET : checkbox para seleccionar el producto como favorito
+  //
   Widget get favoriteProductCardCheckbox{
 
     return Column(
@@ -441,7 +448,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
           enabled: controller.getSaveIndicator ? false : true,
           checkColor: Colors.white,
           activeColor: Colors.amber,
-          value: controller.getProduct.favorite,
+          value: controller.getFavorite,
           title: Text(controller.getProduct.favorite?'Quitar de favorito':'Agregar a favorito'),subtitle: const Text('Accede rápidamente a tus productos favoritos'),
           onChanged: (value) {
             if (!controller.getSaveIndicator) { controller.setFavorite = value ?? false; }
@@ -451,7 +458,9 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
       ],
     );
   }
+  //
   // WIDGET : control de stock
+  //
   Widget get stockProductCardCheckbox{
 
     // variable para el espacio entre los widgets
@@ -468,7 +477,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
           enabled: controller.getSaveIndicator ? false : true,
           checkColor: Colors.white,
           activeColor: Colors.blue,
-          value: controller.getProduct.stock?controller.isSubscribed:false,
+          value: controller.getStock,
           title: Text(controller.getProduct.stock?'Quitar control de stock':'Agregar control de stock'),
           subtitle: const Text('Controlar el inventario de sus productos'),
           onChanged: (value) {
@@ -478,10 +487,10 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
           },
         ),
         LogoPremium(personalize: true),
-        controller.getProduct.stock && controller.isSubscribed? space : Container(), 
+        controller.getStock  ? space : Container(), 
         AnimatedContainer(
-          width: controller.getProduct.stock?null:0,
-          height: controller.getProduct.stock?null:0,
+          width: controller.getStock?null:0,
+          height: controller.getStock?null:0,
           duration: const Duration(milliseconds: 500),
           decoration: BoxDecoration(border: Border.all(color: Get.theme.textTheme.bodyMedium!.color?? Colors.black12,width: 1,),),
           padding: const EdgeInsets.symmetric(vertical: 12),
@@ -494,7 +503,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
                   child: TextFormField(
                     enabled: !controller.getSaveIndicator,
                     keyboardType: TextInputType.number,
-                    onChanged: (value) => controller.getProduct.quantityStock =int.parse(controller.controllerTextEditQuantityStock .text),
+                    onChanged: (value) => controller.setQuantityStock =int.parse(controller.controllerTextEditQuantityStock .text),
                     decoration: const InputDecoration(
                       filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
                       disabledBorder: InputBorder.none,
@@ -517,7 +526,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
                     child: TextField(
                       enabled: !controller.getSaveIndicator,
                       keyboardType: TextInputType.number,
-                      onChanged: (value) =>controller.getProduct.alertStock = int.parse(controller.controllerTextEditAlertStock.text),
+                      onChanged: (value) =>controller.setAlertStock = int.parse(controller.controllerTextEditAlertStock.text),
                       decoration: const InputDecoration(
                         filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
                         disabledBorder: InputBorder.none,
@@ -566,7 +575,9 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
       ],
     );
   }
+  //
   // WIDGET : una tarjeta para mostrar la imagen del producto, el codigo del producto, la marca, la descripcion
+  //
   Widget get cardFront{ 
     return AnimatedContainer(
       margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 24.0),

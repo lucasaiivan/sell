@@ -241,7 +241,9 @@ class ProductEdit extends StatelessWidget {
     return  Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        widgetsImagen(),
+        Hero(
+          tag: 'avatarProduct',
+          child: widgetsImagen()),
           Padding(
             padding: const EdgeInsets.all(12.0),
             child: Column(
@@ -367,14 +369,11 @@ class ProductEdit extends StatelessWidget {
                           border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                           enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
                           ),   
-                        onChanged: (value){
-                          controller.getProduct.purchasePrice = controller.controllerTextEditPrecioCompra.numberValue;
-                          controller.formEditing = true;
-                        },
+                        onChanged: (value) => controller.formEditing = true ,
                         // validator: validamos el texto que el usuario ha ingresado.
                         validator: (value) {
                           // if (value == null || value.isEmpty) { return 'Por favor, escriba un precio de compra'; }
-                          return null;
+                          return null; 
                         },
                       ),
                     ),
@@ -394,10 +393,7 @@ class ProductEdit extends StatelessWidget {
                           border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                           enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
                         ),  
-                        onChanged: (value){
-                          controller.getProduct.salePrice = controller.controllerTextEditPrecioVenta.numberValue;
-                          controller.formEditing = true;
-                        },
+                        onChanged: (value) => controller.formEditing = true,
                         // validator: validamos el texto que el usuario ha ingresado.
                         validator: (value) {
                           if ( controller.controllerTextEditPrecioVenta.numberValue == 0.0) { return 'Por favor, escriba un precio de venta'; }
@@ -416,7 +412,7 @@ class ProductEdit extends StatelessWidget {
                         enabled: controller.getSaveIndicator ? false : true,
                         checkColor: Colors.white,
                         activeColor: Colors.amber,
-                        value: controller.getProduct.favorite,
+                        value: controller.getFavorite,
                         title: Text(controller.getProduct.favorite?'Quitar de favorito':'Agregar a favorito'),subtitle: controller.getProduct.favorite?null: const Text('Accede rápidamente a tus productos favoritos'),
                         onChanged: (value) {
                           if (!controller.getSaveIndicator) { controller.setFavorite = value ?? false; }
@@ -438,7 +434,7 @@ class ProductEdit extends StatelessWidget {
                           enabled: controller.getSaveIndicator ? false : true,
                           checkColor: Colors.white,
                           activeColor: Colors.blue,
-                          value: controller.getProduct.stock?controller.isSubscribed:false,
+                          value: controller.getStock,
                           title: Text(controller.getProduct.stock?'Quitar control de stock':'Agregar control de stock'),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -453,8 +449,8 @@ class ProductEdit extends StatelessWidget {
                             }
                           },
                         ),  
-                        controller.getProduct.stock && controller.isSubscribed? space : Container(), 
-                        controller.getProduct.stock?Column(
+                        controller.getStock ? space : Container(), 
+                        controller.getStock?Column(
                           children: [
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 12,),
