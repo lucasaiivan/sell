@@ -1103,7 +1103,7 @@ class _CreateMarkState extends State<CreateMark> {
         newMark || load ? Container(): IconButton(onPressed: delete, icon: const Icon(Icons.delete)),
         load? Container() : IconButton(icon: const Icon(Icons.check),onPressed: save),
       ],
-      bottom: load ? ComponentApp.linearProgressBarApp() : null,
+      bottom: load ? ComponentApp().linearProgressBarApp() : null,
     );
   }
 

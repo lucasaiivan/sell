@@ -176,74 +176,71 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
 
           return Column(
           children: [
-            ListTile(
-              contentPadding:const EdgeInsets.symmetric(horizontal: 20,vertical: 12),
-              tileColor: tileColor,
-              leading: ImageAvatarApp(url: product.image,size: 50,favorite:product.favorite),
-              title: Text(product.description),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        '${product.nameMark} ',
-                        maxLines: 2,
-                        overflow: TextOverflow.clip,
-                        style: const TextStyle(color: Colors.blue),
-                      ),
-                      product.favorite?Text(
-                        'favorito',
-                        maxLines: 2,
-                        overflow: TextOverflow.clip,
-                        style: TextStyle(color: Colors.yellow.shade800),
-                      ):Container(),
-                    ],
-                  ),
-                  Wrap(
-                  children: [
-                    Text(Publications.getFormatoPrecio(monto: product.salePrice),style: const TextStyle(fontWeight:FontWeight.bold )),
-                    const SizedBox(width: 5),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.circle,size: 8, color: Get.theme.dividerColor),
-                        const SizedBox(width: 5),
-                        Text(Publications.getFechaPublicacion(product.upgrade.toDate(), Timestamp.now().toDate())),
-                        const SizedBox(width: 5),
-                      ],
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        product.sales == 0? Container(): Icon(Icons.circle,size: 8, color: Get.theme.dividerColor),
-                        product.sales == 0? Container():const SizedBox(width: 5),
-                        product.sales == 0? Container(): Text('${product.sales} ${product.sales == 1 ? 'venta' : 'ventas'}'),
-                        product.sales == 0 ? Container():const SizedBox(width: 5),
-                      ],
-                    ),
-                    // text : stock
-                    product.stock
-                      ?Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          product.stock == false ? Container(): Icon(Icons.circle,size: 8, color: Get.theme.dividerColor),
-                          product.stock == false ? Container():const SizedBox(width: 5),
-                          Text('stock ${product.quantityStock.toString()}',style: TextStyle(color: getStockColor(productCatalogue: product))), 
-                        ],
-                      ):Container(),
-                  ],
-                ), 
-                ],
-              ),
-              trailing: Text(Publications.getFormatoPrecio(monto: product.salePrice),),
+            InkWell(
               onTap: () {
                 Get.back();
                 toProductEdit(productCatalogue: product);
               },
-            ),
-            const Divider(height: 0,thickness: 0.2),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Row(
+                  children: [
+                    ImageAvatarApp(url: product.image,size: 75,favorite:product.favorite),
+                    // datos del producto
+                    Flexible(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Column( 
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(product.description),
+                            Text('${product.nameMark} ',maxLines: 2,overflow: TextOverflow.clip,style: const TextStyle(color: Colors.blue)),
+                            Wrap(
+                              children: [ 
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.circle,size: 8, color: Get.theme.dividerColor),
+                                    const SizedBox(width: 5),
+                                    Text(Publications.getFechaPublicacion(product.upgrade.toDate(), Timestamp.now().toDate())),
+                                    const SizedBox(width: 5),
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    product.sales == 0? Container(): Icon(Icons.circle,size: 8, color: Get.theme.dividerColor),
+                                    product.sales == 0? Container():const SizedBox(width: 5),
+                                    product.sales == 0? Container(): Text('${product.sales} ${product.sales == 1 ? 'venta' : 'ventas'}'),
+                                    product.sales == 0 ? Container():const SizedBox(width: 5),
+                                  ],
+                                ),
+                                // text : stock
+                                product.stock
+                                  ?Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      product.stock == false ? Container(): Icon(Icons.circle,size: 8, color: Get.theme.dividerColor),
+                                      product.stock == false ? Container():const SizedBox(width: 5),
+                                      Text('stock ${product.quantityStock.toString()}',style: TextStyle(color: getStockColor(productCatalogue: product))), 
+                                    ],
+                                  ):Container(),
+                              ],
+                            ), 
+                            // favorite
+                            product.favorite?Text('favorito',maxLines: 2,overflow: TextOverflow.clip,style: TextStyle(color: Colors.yellow.shade800)):Container(),
+                          ],
+                        ),
+                      ),
+                    ),
+                    // text : precio
+                    Text(Publications.getFormatoPrecio(monto: product.salePrice),style: const TextStyle(fontWeight:FontWeight.bold )),
+                  ],
+                ),
+              ),
+            ), 
+            ComponentApp().dividerApp(),
           ],
         );
         },
