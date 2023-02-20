@@ -141,6 +141,14 @@ class ControllerProductsEdit extends GetxController {
   MoneyMaskedTextController controllerTextEditPrecioVenta = MoneyMaskedTextController();
   MoneyMaskedTextController controllerTextEditPrecioCompra = MoneyMaskedTextController();
 
+  // description
+  String _description = '';
+  set setDescription(String value) {
+    _description = value;
+    update(['updateAll']);
+  }
+  get getDescription => _description;
+
   // mark
   Mark _markSelected = Mark(upgrade: Timestamp.now(), creation: Timestamp.now());
   set setMarkSelected(Mark value) {
@@ -164,6 +172,20 @@ class ControllerProductsEdit extends GetxController {
     update(['updateAll']);
   }
   Category get getCategory => _category;
+  // precio de compra
+  double _purchasePrice = 0.0;
+  set setPurchasePrice(double value) {
+    _purchasePrice = value;
+    update(['updateAll']);
+  }
+  get getPurchasePrice => _purchasePrice;
+  // precio de vente
+  double _salePrice = 0.0;
+  set setSalePrice(double value) {
+    _salePrice = value;
+    update(['updateAll']);
+  }
+  get getSalePrice => _salePrice;
 
   // faovrite
   bool _favorite = false;
@@ -273,12 +295,10 @@ class ControllerProductsEdit extends GetxController {
   //  fuction : comprobamos los datos necesarios para proceder publicar o actualizar el producto
   Future<void> save() async {
     if (getProduct.id != '') {
-      if (getProduct.description != '') {
-        if (getProduct.idMark != '' && getProduct.nameMark != '') {
-
-
-          if (getProduct.salePrice != 0 && getAccountAuth ||getProduct.salePrice == 0 && getAccountAuth == false) {
-            if ((getProduct.stock) ? (getProduct.quantityStock >= 1) : true) {
+      if ( getDescription!= '') {
+        if (getMarkSelected.id != '' && getMarkSelected.name != '') {
+          if (getSalePrice != 0 && getAccountAuth || getSalePrice == 0 && getAccountAuth == false) {
+            if ( getStock ? (getQuantityStock >= 1) : true) {
 
               // Deshabilitar la guía del usuario del catálogo
               homeController.disableCatalogUserGuide();
@@ -289,11 +309,12 @@ class ControllerProductsEdit extends GetxController {
               updateAll();
 
               // set : values
+              getProduct.description = getDescription;
               getProduct.upgrade = Timestamp.now();
               getProduct.idMark = getMarkSelected.id;
               getProduct.nameMark = getMarkSelected.name;
-              getProduct.purchasePrice = controllerTextEditPrecioCompra.numberValue;
-              getProduct.salePrice = controllerTextEditPrecioVenta.numberValue;
+              getProduct.purchasePrice = getPurchasePrice;
+              getProduct.salePrice = getSalePrice;
               getProduct.favorite = getFavorite;
               getProduct.stock = getStock;
               getProduct.quantityStock = getQuantityStock; 
@@ -559,24 +580,7 @@ class ControllerProductsEdit extends GetxController {
 
   //------------------------------------------------------//
   //- FUNCTIONS LOGIC VIEW FORM CREATE NEW PRODUCT START -//
-  //------------------------------------------------------// 
-  void checkDataAndSave() async {
-    // function : procedemos a verificar el formulario y simular el salvado de los datos con una animacion
-    
-    if(getProduct.isComplete){
-       // Validar devuelve verdadero si el formulario es válido o falso en caso contrario.
-      checkValidateForm=true;
-      // validate :  validamos el formulario
-      if ( controllerTextEditDescripcion.text!='' && controllerTextEditMark.text!='' && controllerTextEditPrecioVenta.text!='' ) { 
-        // view : animated
-        theFormIsComplete = true; //  set : el formulario esta completo
-        save(); // fuction : actualizamos el estado de las vistas
-      }
-    }else{ 
-      //  view : snackbar
-      Get.snackbar('Complete el formulario', 'Algunos campos requieren ser completados',snackPosition: SnackPosition.BOTTOM,snackStyle: SnackStyle.FLOATING,);
-    }
-  }
+  //------------------------------------------------------//  
    double get getProgressForm{
     // value : progreso del formulario
     double progress = 0.0;

@@ -281,7 +281,7 @@ class ProductEdit extends StatelessWidget {
                   minLines: 1,
                   maxLines: 5,
                   keyboardType: TextInputType.multiline,
-                  onChanged: (value) => controller.getProduct.description = value,
+                  onChanged: (value) => controller.setDescription = value,
                   decoration: const InputDecoration(
                       filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
                       disabledBorder: InputBorder.none,
@@ -349,7 +349,7 @@ class ProductEdit extends StatelessWidget {
               ),
             ),
           space,
-          // textfield prices
+          // textfield : precio de compra
           !controller.getAccountAuth
               ? Container()
               : Column(
@@ -413,7 +413,7 @@ class ProductEdit extends StatelessWidget {
                         checkColor: Colors.white,
                         activeColor: Colors.amber,
                         value: controller.getFavorite,
-                        title: Text(controller.getProduct.favorite?'Quitar de favorito':'Agregar a favorito'),subtitle: controller.getProduct.favorite?null: const Text('Accede rápidamente a tus productos favoritos'),
+                        title: Text(controller.getFavorite?'Quitar de favorito':'Agregar a favorito'),subtitle: controller.getFavorite?null: const Text('Accede rápidamente a tus productos favoritos'),
                         onChanged: (value) {
                           if (!controller.getSaveIndicator) { controller.setFavorite = value ?? false; }
                         },
@@ -435,12 +435,12 @@ class ProductEdit extends StatelessWidget {
                           checkColor: Colors.white,
                           activeColor: Colors.blue,
                           value: controller.getStock,
-                          title: Text(controller.getProduct.stock?'Quitar control de stock':'Agregar control de stock'),
+                          title: Text(controller.getStock?'Quitar control de stock':'Agregar control de stock'),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               LogoPremium(personalize: true),
-                              controller.getProduct.stock?Container():const Text('Controlar el inventario de sus productos'),
+                              controller.getStock?Container():const Text('Controlar el inventario de sus productos'),
                             ],
                           ),
                           onChanged: (value) {
@@ -482,7 +482,7 @@ class ProductEdit extends StatelessWidget {
                                   child: TextField(
                                     enabled: !controller.getSaveIndicator,
                                     keyboardType: TextInputType.number,
-                                    onChanged: (value) =>controller.getProduct.alertStock = int.parse(controller.controllerTextEditAlertStock.text),
+                                    onChanged: (value) =>controller.setAlertStock = int.parse(controller.controllerTextEditAlertStock.text),
                                     decoration: const InputDecoration(
                                       filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
                                       disabledBorder: InputBorder.none,
