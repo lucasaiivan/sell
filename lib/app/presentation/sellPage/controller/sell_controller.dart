@@ -191,62 +191,70 @@ class SalesController extends GetxController {
           
           return Column(
           children: [
-            ListTile(
-              contentPadding:const EdgeInsets.symmetric(horizontal: 20,vertical: 12),
-              tileColor: tileColor,
-              leading: ImageAvatarApp(url: product.image,size: 50,favorite:product.favorite),
-              title: Text(product.description),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text(
-                    product.nameMark,
-                    maxLines: 1,
-                    overflow: TextOverflow.clip, 
-                    style: const TextStyle(color: Colors.blue),
-                  ),
-                  
-                  Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.start,
-                    direction: Axis.horizontal,
-                    children: <Widget>[
-                      // text : code
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
-                            Text(product.code),
-                          ],
-                        ),
-                        // favorite
-                        product.favorite?Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
-                            const Text('Favorito'),
-                          ],
-                        ):Container(),
-                      //  text : alert stock
-                        alertStockText != ''?Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
-                            Text(alertStockText),
-                          ],
-                        ):Container(),
-                    ],
-                  ),
-
-                ],
-              ),
-              trailing: Text(Publications.getFormatoPrecio(monto: product.salePrice)),
+            InkWell(
               onTap: () {
                 selectedProduct(item: product);
                 Get.back();
               },
-            ),
-            const Divider(thickness: 0.2,height: 0),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // image
+                    ImageAvatarApp(url: product.image,size: 75,favorite:product.favorite),
+                    // text : datos del producto
+                    Flexible(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal:12),
+                        child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(product.description,maxLines: 1,overflow: TextOverflow.clip,style: TextStyle(fontWeight: FontWeight.w500)),
+                          Text(product.nameMark,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(color: Colors.blue)),
+                          Wrap(
+                            crossAxisAlignment: WrapCrossAlignment.start,
+                            direction: Axis.horizontal,
+                            children: <Widget>[
+                              // text : code
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 7, color: Get.theme.dividerColor)),
+                                    Text(product.code),
+                                  ],
+                                ),
+                                // favorite
+                                product.favorite?Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
+                                    const Text('Favorito'),
+                                  ],
+                                ):Container(),
+                              //  text : alert stock
+                                alertStockText != ''?Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
+                                    Text(alertStockText),
+                                  ],
+                                ):Container(),
+                            ],
+                          ),
+                                  
+                        ],
+                                      ),
+                      ),
+                    ),
+                    // text : precio
+                    Text(Publications.getFormatoPrecio(monto: product.salePrice))
+                  ],
+                ),
+              ),
+            ), 
+          ComponentApp().dividerApp(), 
           ],
         );
         },

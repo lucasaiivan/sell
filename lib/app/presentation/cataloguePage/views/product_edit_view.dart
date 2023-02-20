@@ -102,7 +102,7 @@ class ProductEdit extends StatelessWidget {
             ? Container()
             : controller.itsInTheCatalogue?TextButton.icon(onPressed: () => controller.save(), icon:const Icon( Icons.check ), label:const  Text('Actualizar')):Container(),
       ],
-      bottom: controller.getSaveIndicator?ComponentApp.linearProgressBarApp(color: controller.colorLoading):null,
+      bottom: controller.getSaveIndicator? ComponentApp().linearProgressBarApp(color: controller.colorLoading):null,
     );
   }
 
@@ -556,8 +556,8 @@ class ProductEdit extends StatelessWidget {
           
           //TODO: eliminar para desarrrollo
           /* OPCIONES PARA DESARROLLADOR - ELIMINAR ESTE CÓDIGO PARA PRODUCCION */
-          //const SizedBox(height:50),
-          //widgetForModerator,
+          const SizedBox(height:50),
+          widgetForModerator,
           ]             ,
       ),
     );

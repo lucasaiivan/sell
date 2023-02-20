@@ -157,7 +157,7 @@ class TransactionsView extends StatelessWidget {
     return ElasticIn(
       child: Dismissible(
         key:  UniqueKey(),
-        background: AnimatedContainer(duration: const Duration(milliseconds: 5000),color: Colors.black12),
+        background: Container(color: Colors.red.shade300.withOpacity(0.5)),
         confirmDismiss: (DismissDirection direction) async {
           return await showDialog(
             context: buildContext,
@@ -168,7 +168,7 @@ class TransactionsView extends StatelessWidget {
         },
         child: ListTile(
           contentPadding: const EdgeInsets.all(12),
-          onLongPress: () =>  transactionsController.deleteSale(ticketModel: ticketModel),
+          onLongPress: () =>  showTransactionAlertDialog(buildContext,ticketModel.toJson()),
           onTap: () => showTransactionAlertDialog(buildContext,ticketModel.toJson()),
           title: Row(
             children: [
@@ -265,7 +265,7 @@ class TransactionsView extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          contentPadding: const EdgeInsets.all(20),
+          contentPadding: const EdgeInsets.all(5),
           //  SingleChildScrollView : para que el contenido de la alerta se pueda desplazar
           content: SingleChildScrollView(
             child: Padding(
