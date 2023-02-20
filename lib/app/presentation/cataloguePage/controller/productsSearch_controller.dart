@@ -1,16 +1,9 @@
-
-import 'dart:io';
-import 'dart:typed_data';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:excel/excel.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:get/get.dart';
-import 'package:permission_handler/permission_handler.dart'; 
+ 
+import 'package:cloud_firestore/cloud_firestore.dart'; 
+import 'package:flutter/material.dart'; 
+import 'package:get/get.dart'; 
 import 'package:sell/app/data/datasource/database_cloud.dart';
-import 'package:sell/app/core/utils/dynamicTheme_lb.dart';
-import 'package:sell/app/core/utils/fuctions.dart';
+import 'package:sell/app/core/utils/dynamicTheme_lb.dart'; 
 import '../../../core/routes/app_pages.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../home/controller/home_controller.dart';
@@ -86,6 +79,14 @@ class ControllerProductsSearch extends GetxController {
   }
   List<Map<String, dynamic>> get getListExcelToJson => listExcelToJson;
 
+  // write code
+  bool _writeCode = false;
+  set setWriteCode(bool value){
+    _writeCode = value;
+    update(['updateAll']);
+  }
+  get getWriteCode => _writeCode;
+
   // result text
   String _codeBarParameter = "";
 
@@ -112,7 +113,7 @@ class ControllerProductsSearch extends GetxController {
       _buttonData = ButtonData(colorButton: colorButton, colorText: colorText);
   ButtonData get getButtonData => _buttonData;
 
-  // state search
+  // state search : estado de la busqueda
   bool _stateSearch = false;
   set setStateSearch(bool state) => _stateSearch = state;
   get getStateSearch => _stateSearch;
@@ -141,7 +142,7 @@ class ControllerProductsSearch extends GetxController {
 
   // FUCTIONS
   void queryProduct({required String id}) {
-    if (id != '') {
+    if (id != '' && id != '-1') {
       // set
       setStateSearch = true;
       update(['updateAll']);
@@ -158,6 +159,8 @@ class ControllerProductsSearch extends GetxController {
         setStateSearch = false;
         update(['updateAll']);
       });
+    }else{
+      clean(); 
     }
   }
 
