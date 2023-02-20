@@ -127,7 +127,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
             // button : next o save
             Center(
               child: TextButton( 
-                onPressed: controller.getSaveIndicator?null:controller.currentSlide == 8?controller.controllerTextEditDescripcion.text!=''&&controller.controllerTextEditMark.text!='' && controller.getUserConsent ? controller.checkDataAndSave :null :() => controller.next(),
+                onPressed: controller.getSaveIndicator?null:controller.currentSlide == 8?controller.save :() => controller.next(),
                 child: Text( controller.currentSlide == 8  ?'Publicar':'Siguiente')),
             ),
           ],
@@ -280,7 +280,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
               decoration: const InputDecoration(border: UnderlineInputBorder(),labelText: 'Descripción del producto'),
               onChanged: (value) {
                 controller.formEditing = true; // validamos que el usuario ha modificado el formulario
-                controller.getProduct.description=value;  //  actualizamos el valor de la descripcion del producto
+                controller.setDescription=value;  //  actualizamos el valor de la descripcion del producto
                 setState((){});
               },
               // validator: validamos el texto que el usuario ha ingresado.
@@ -395,7 +395,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           decoration: const InputDecoration(border: UnderlineInputBorder(),labelText: 'Precio de compra'),   
           onChanged: (value){
-            controller.getProduct.purchasePrice = controller.controllerTextEditPrecioCompra.numberValue;
+            controller.setPurchasePrice = controller.controllerTextEditPrecioCompra.numberValue;
             controller.formEditing = true;
           },
           // validator: validamos el texto que el usuario ha ingresado.
@@ -424,7 +424,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               decoration: const InputDecoration(border: UnderlineInputBorder(),labelText: 'Precio de venta al públuco'),  
               onChanged: (value){
-                controller.getProduct.salePrice = controller.controllerTextEditPrecioVenta.numberValue;
+                controller.setSalePrice = controller.controllerTextEditPrecioVenta.numberValue;
                 controller.formEditing = true;
               },
               // validator: validamos el texto que el usuario ha ingresado.

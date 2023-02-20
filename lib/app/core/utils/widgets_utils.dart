@@ -851,8 +851,7 @@ class ImageAvatarApp extends StatelessWidget {
   // avatar que se va usar en toda la app, especialemnte en los 'ListTile'
 
   @override
-  Widget build(BuildContext context) {
-
+  Widget build(BuildContext context) { 
  
     return SizedBox(
       width: size,height: size,
@@ -862,7 +861,7 @@ class ImageAvatarApp extends StatelessWidget {
         borderWidth: favorite?2:0,
         borderColor: favorite?Colors.yellow.shade700:Colors.transparent,
         avatarType: AvatarType.RECTANGLE,
-        backgroundColor: Colors.black.withOpacity(0.2),
+        backgroundColor: Theme.of(context).canvasColor ,
         imagePath: url,
         placeHolder: Container(color: Colors.black.withOpacity(0.1),child:const Icon(Icons.image, size: 25),),
         errorWidget: Container(color: Colors.black.withOpacity(0.1),child:const Icon(Icons.image, size: 25),),
