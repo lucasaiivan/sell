@@ -84,26 +84,22 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                     padding: const EdgeInsets.all(20.0),
                     child: Column(
                       children: [
-                        textFieldCodeBar(),
-                        const SizedBox(height: 50.0),
-                        // TODO : button : copiar de porta papeles ( opcion para moderador)
-                        controller.getStateSearch? FadeInRight(child: copyTextModeratorButton): Container(),
+                        controller.getWriteCode?textFieldCodeBar():Container(), 
+                        controller.getWriteCode?Container():TextButton(onPressed: (){ controller.setWriteCode =!controller.getWriteCode;}, child: const Text('Escribir código')),
                         const SizedBox(height: 12.0),
                         Opacity(
                           opacity: controller.getproductDoesNotExist ? 0.5 : 1.0,
                           child: Column(
                             children: [
-                              !controller.getStateSearch
+                              // button : buscar código
+                              controller.getStateSearch == false && controller.getWriteCode
                                   ? Padding(
                                     padding: EdgeInsets.symmetric(horizontal: controller.getproductDoesNotExist?12:0),
                                     child: FadeInRight(
                                         child: button(
-                                          icon: Icon(Icons.search,
-                                              color:
-                                                  controller.getButtonData.colorText),
+                                          icon: Icon(Icons.search, color: controller.getButtonData.colorText),
                                           onPressed: () =>
-                                              controller.textEditingController.text ==
-                                                      ''
+                                              controller.textEditingController.text == ''
                                                   ? null
                                                   : controller.queryProduct(
                                                       id: controller
@@ -192,33 +188,7 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
         });
   }
 
-  /* WIDGETS COMPONENT */
-  Widget get copyTextModeratorButton {
-    return button(
-                                  icon: Icon(Icons.copy,color: controller.getButtonData.colorText),
-                                  onPressed: () {
-                                    // obtenemos los datos de porta papeles del dispositivo
-                                    FlutterClipboard.paste().then((value) {
-                                      // verificamos que sea numero valido
-                                      if (controller.verifyIsNumber(
-                                          value: value)) {
-                                        controller.textEditingController.text =
-                                            value;
-                                        controller.queryProduct(id: value);
-                                      } else {
-                                        Get.snackbar('no se pudo copiar 👎',
-                                            'solo puedes ingresar un código valido que contengan números',
-                                            margin: const EdgeInsets.all(12));
-                                      }
-                                    });
-                                  },
-                                  text: "Pegar de porta papeles",
-                                  colorAccent:
-                                      controller.getButtonData.colorText,
-                                  colorButton:
-                                      controller.getButtonData.colorButton,
-                                );
-  }
+  /* WIDGETS COMPONENT */ 
   Widget button(
       {required Widget icon,
       required String text,

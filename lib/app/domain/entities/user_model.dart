@@ -48,8 +48,7 @@ class ProfileAccountModel {
       ""; // el ID de la cuenta por defecto es el ID del usuario quien lo creo
   String username = "";
   String image = "";
-  String name = "";
-  String description = "";
+  String name = ""; 
   String currencySign = "\$";
 
   // account info
@@ -62,8 +61,7 @@ class ProfileAccountModel {
   String countrycode = "";
   String country = "";
   String province = ""; // provincia o estado
-  String town = ""; // ciudad o pueblo
-  String address = ""; // dirección
+  String town = ""; // ciudad o pueblo 
 
   ProfileAccountModel({
     // account info
@@ -74,8 +72,7 @@ class ProfileAccountModel {
     this.subscribed=true, // subcripción
     this.username = '',
     this.image = "",
-    this.name = "",
-    this.description = "",
+    this.name = "", 
     this.currencySign = "\$",
     this.blockingAccount = false,
     this.blockingMessage = "",
@@ -83,8 +80,7 @@ class ProfileAccountModel {
     this.countrycode = "",
     this.country = "",
     this.province = "",
-    this.town = "",
-    this.address = "",
+    this.town = "", 
     required this.creation,
   });
 
@@ -93,10 +89,7 @@ class ProfileAccountModel {
     username = data['username'];
     subscribed = true;// data['subscribed']??false;
     image =data.containsKey('image') ? data['image'] : data['imagen_perfil'] ?? '';
-    name = data.containsKey('name') ? data['name'] : data['nombre_negocio'];
-    description = data.containsKey('description')
-        ? data['description']
-        : data['descripcion'];
+    name = data.containsKey('name') ? data['name'] : data['nombre_negocio']; 
     creation = data.containsKey('creation')
         ? data['creation']
         : data['timestamp_creation'];
@@ -114,8 +107,7 @@ class ProfileAccountModel {
         : data['cuenta_verificada'];
     countrycode = data.containsKey('countrycode')
         ? data['countrycode']
-        : data['codigo_pais'];
-    address = data.containsKey('address') ? data['address'] : data['direccion'];
+        : data['codigo_pais']; 
     town = data.containsKey('town') ? data['town'] : data['ciudad'];
     province =
         data.containsKey('province') ? data['province'] : data['provincia'];
@@ -126,8 +118,7 @@ class ProfileAccountModel {
         // "subscribed": subscribed,
         "username": username,
         "image": image,
-        "name": name,
-        "description": description,
+        "name": name, 
         "creation": creation,
         "currencySign": currencySign,
         "blockingAccount": blockingAccount,
@@ -136,8 +127,7 @@ class ProfileAccountModel {
         "countrycode": countrycode,
         "country": country,
         "province": province,
-        "town": town,
-        "address": address,
+        "town": town, 
       };
 
   ProfileAccountModel.fromDocumentSnapshot( {required DocumentSnapshot documentSnapshot}) {
@@ -153,10 +143,7 @@ class ProfileAccountModel {
     image = data.containsKey('image') ? data['image'] : data["imagen_perfil"] ?? '';
     name = data.containsKey('name')
         ? data['name']
-        : data["nombre_negocio"] ?? 'null';
-    description = data.containsKey('description')
-        ? data['description']
-        : data["descripcion"] ?? '';
+        : data["nombre_negocio"] ?? 'null'; 
     currencySign = data.containsKey('currencySign')
         ? data['currencySign']
         : data["signo_moneda"] ?? '';
@@ -177,8 +164,6 @@ class ProfileAccountModel {
     province = data.containsKey('province')
         ? data['province']
         : data["provincia"] ?? '';
-    town = data.containsKey('town') ? data['town'] : data["ciudad"] ?? '';
-    address =
-        data.containsKey('address') ? data['address'] : data["direccion"] ?? '';
+    town = data.containsKey('town') ? data['town'] : data["ciudad"] ?? ''; 
   }
 }

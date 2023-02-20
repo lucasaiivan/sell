@@ -241,7 +241,9 @@ class ProductEdit extends StatelessWidget {
     return  Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        widgetsImagen(),
+        Hero(
+          tag: 'avatarProduct',
+          child: widgetsImagen()),
           Padding(
             padding: const EdgeInsets.all(12.0),
             child: Column(
@@ -279,7 +281,7 @@ class ProductEdit extends StatelessWidget {
                   minLines: 1,
                   maxLines: 5,
                   keyboardType: TextInputType.multiline,
-                  onChanged: (value) => controller.getProduct.description = value,
+                  onChanged: (value) => controller.setDescription = value,
                   decoration: const InputDecoration(
                       filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
                       disabledBorder: InputBorder.none,
@@ -347,7 +349,7 @@ class ProductEdit extends StatelessWidget {
               ),
             ),
           space,
-          // textfield prices
+          // textfield : precio de compra
           !controller.getAccountAuth
               ? Container()
               : Column(
@@ -367,14 +369,11 @@ class ProductEdit extends StatelessWidget {
                           border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                           enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
                           ),   
-                        onChanged: (value){
-                          controller.getProduct.purchasePrice = controller.controllerTextEditPrecioCompra.numberValue;
-                          controller.formEditing = true;
-                        },
+                        onChanged: (value) => controller.formEditing = true ,
                         // validator: validamos el texto que el usuario ha ingresado.
                         validator: (value) {
                           // if (value == null || value.isEmpty) { return 'Por favor, escriba un precio de compra'; }
-                          return null;
+                          return null; 
                         },
                       ),
                     ),
@@ -394,10 +393,7 @@ class ProductEdit extends StatelessWidget {
                           border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                           enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
                         ),  
-                        onChanged: (value){
-                          controller.getProduct.salePrice = controller.controllerTextEditPrecioVenta.numberValue;
-                          controller.formEditing = true;
-                        },
+                        onChanged: (value) => controller.formEditing = true,
                         // validator: validamos el texto que el usuario ha ingresado.
                         validator: (value) {
                           if ( controller.controllerTextEditPrecioVenta.numberValue == 0.0) { return 'Por favor, escriba un precio de venta'; }
@@ -416,8 +412,8 @@ class ProductEdit extends StatelessWidget {
                         enabled: controller.getSaveIndicator ? false : true,
                         checkColor: Colors.white,
                         activeColor: Colors.amber,
-                        value: controller.getProduct.favorite,
-                        title: Text(controller.getProduct.favorite?'Quitar de favorito':'Agregar a favorito'),subtitle: controller.getProduct.favorite?null: const Text('Accede rápidamente a tus productos favoritos'),
+                        value: controller.getFavorite,
+                        title: Text(controller.getFavorite?'Quitar de favorito':'Agregar a favorito'),subtitle: controller.getFavorite?null: const Text('Accede rápidamente a tus productos favoritos'),
                         onChanged: (value) {
                           if (!controller.getSaveIndicator) { controller.setFavorite = value ?? false; }
                         },
@@ -438,13 +434,13 @@ class ProductEdit extends StatelessWidget {
                           enabled: controller.getSaveIndicator ? false : true,
                           checkColor: Colors.white,
                           activeColor: Colors.blue,
-                          value: controller.getProduct.stock?controller.isSubscribed:false,
-                          title: Text(controller.getProduct.stock?'Quitar control de stock':'Agregar control de stock'),
+                          value: controller.getStock,
+                          title: Text(controller.getStock?'Quitar control de stock':'Agregar control de stock'),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               LogoPremium(personalize: true),
-                              controller.getProduct.stock?Container():const Text('Controlar el inventario de sus productos'),
+                              controller.getStock?Container():const Text('Controlar el inventario de sus productos'),
                             ],
                           ),
                           onChanged: (value) {
@@ -453,8 +449,8 @@ class ProductEdit extends StatelessWidget {
                             }
                           },
                         ),  
-                        controller.getProduct.stock && controller.isSubscribed? space : Container(), 
-                        controller.getProduct.stock?Column(
+                        controller.getStock ? space : Container(), 
+                        controller.getStock?Column(
                           children: [
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 12,),
@@ -486,7 +482,7 @@ class ProductEdit extends StatelessWidget {
                                   child: TextField(
                                     enabled: !controller.getSaveIndicator,
                                     keyboardType: TextInputType.number,
-                                    onChanged: (value) =>controller.getProduct.alertStock = int.parse(controller.controllerTextEditAlertStock.text),
+                                    onChanged: (value) =>controller.setAlertStock = int.parse(controller.controllerTextEditAlertStock.text),
                                     decoration: const InputDecoration(
                                       filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
                                       disabledBorder: InputBorder.none,

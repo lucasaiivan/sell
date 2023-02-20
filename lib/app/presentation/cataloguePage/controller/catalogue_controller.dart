@@ -147,7 +147,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
 
   // navigator
   void toProductEdit({required ProductCatalogue productCatalogue}) {
-    Get.toNamed(Routes.EDITPRODUCT, arguments: {'product': productCatalogue});
+    Get.toNamed(Routes.EDITPRODUCT, arguments: {'product': productCatalogue.copyWith()});
   }
 
   void seach({required BuildContext context}) {
