@@ -218,7 +218,15 @@ void showDialogCerrarSesion() {
       TextButton(
           child: const Text('si'),
           onPressed: () async {
-            CustomFullScreenDialog.showDialog();
+            // visualizamos un diálogo alerta
+            Get.dialog(
+              const Center(
+                child: CircularProgressIndicator(),
+              ),
+              barrierDismissible: false,
+              barrierColor: const Color(0xff141A31).withOpacity(.3),
+              useSafeArea: true,
+            );
             // default values
             homeController.setProfileAccountSelected=ProfileAccountModel(creation: Timestamp.now());
             homeController.setProfileAdminUser = UserModel ();
@@ -232,7 +240,8 @@ void showDialogCerrarSesion() {
             final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
             Future.delayed(const Duration(seconds: 2)).then((_) {
               firebaseAuth.signOut().then((value) async {
-                CustomFullScreenDialog.cancelDialog();
+                // finalizamos el diálogo alerta
+                Get.back();
               });
             });
           }),
@@ -479,7 +488,7 @@ void showDialogCerrarSesion() {
               ListTile(
               title: const Text('Cerrar sesión'),
               subtitle: Text(getUserAuth.email.toString(), maxLines: 1, overflow: TextOverflow.ellipsis),
-              trailing:  const Icon(Icons.close),
+              trailing:  const Icon(Icons.arrow_forward_ios_rounded),
               onTap: showDialogCerrarSesion,
             ),
             const Divider(endIndent: 0,indent: 0,height: 0),
