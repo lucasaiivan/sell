@@ -89,7 +89,7 @@ class WidgetButtonListTile extends StatelessWidget {
   Widget buttonListTileCrearCuenta() {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15.0),
-      leading: const Icon(Icons.add),
+      trailing: const Icon(Icons.add), 
       dense: true,
       title: const Text("Crear mi perfil de mi negocio", style: TextStyle(fontSize: 16.0)),
       onTap: () {
@@ -137,7 +137,7 @@ class WidgetButtonListTile extends StatelessWidget {
           ),
           dense: true,
           title: Text(perfilNegocio.name),
-          subtitle: Text( homeController.getProfileAccountSelected.id != perfilNegocio.id ? ''  :  homeController.getProfileAdminUser.superAdmin && homeController.getProfileAccountSelected.id == perfilNegocio.id?'':'Tienes que ser administrador para editar esta cuenta'  ),
+          subtitle: homeController.getProfileAccountSelected.id != perfilNegocio.id ? null  : Text( homeController.getProfileAdminUser.superAdmin && homeController.getProfileAccountSelected.id == perfilNegocio.id?'Administrador':'Tienes que ser administrador para editar esta cuenta'  ),
           trailing: homeController.getProfileAdminUser.superAdmin && homeController.getProfileAccountSelected.id == perfilNegocio.id ? TextButton(onPressed: (){
               Get.back();
               Get.toNamed(Routes.ACCOUNT);
@@ -722,7 +722,7 @@ class WidgetSuggestionProduct extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.all(12.0),
-          child: Text("sugerencias para vos",style: Get.theme.textTheme.subtitle1),
+          child: Text("Sugerencias para vos",style: Get.theme.textTheme.subtitle1),
         ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -851,8 +851,7 @@ class ImageAvatarApp extends StatelessWidget {
   // avatar que se va usar en toda la app, especialemnte en los 'ListTile'
 
   @override
-  Widget build(BuildContext context) {
-
+  Widget build(BuildContext context) { 
  
     return SizedBox(
       width: size,height: size,
@@ -862,7 +861,7 @@ class ImageAvatarApp extends StatelessWidget {
         borderWidth: favorite?2:0,
         borderColor: favorite?Colors.yellow.shade700:Colors.transparent,
         avatarType: AvatarType.RECTANGLE,
-        backgroundColor: Colors.black.withOpacity(0.2),
+        backgroundColor: Theme.of(context).canvasColor ,
         imagePath: url,
         placeHolder: Container(color: Colors.black.withOpacity(0.1),child:const Icon(Icons.image, size: 25),),
         errorWidget: Container(color: Colors.black.withOpacity(0.1),child:const Icon(Icons.image, size: 25),),

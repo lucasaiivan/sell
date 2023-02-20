@@ -54,6 +54,7 @@ dependencies:
   sqflite: ^2.0.2+1
   get_storage: ^2.0.3
   # others 
+  flutter_animate: ^4.0.0
   permission_handler: ^10.2.0
   avatar_view: ^1.0.1
   path: ^1.8.2  # Una completa biblioteca de manipulación de rutas multiplataforma para Dart.
