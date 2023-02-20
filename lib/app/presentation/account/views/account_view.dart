@@ -130,6 +130,8 @@ class AccountView extends GetView<AccountController> {
   Widget widgetsImagen() {
     // values
     Color colorDefault = Colors.grey.withOpacity(0.2);
+    double radius = 45.0;
+
     return GetBuilder<AccountController>(
       id: 'image',
       builder: (_) {
@@ -141,7 +143,7 @@ class AccountView extends GetView<AccountController> {
                   ? controller.profileAccount.image == ''
                       ? CircleAvatar(
                           backgroundColor: colorDefault,
-                          radius: 75.0,
+                          radius: radius,
                         )
                       : CachedNetworkImage(
                           fit: BoxFit.cover,
@@ -150,19 +152,19 @@ class AccountView extends GetView<AccountController> {
                               : controller.profileAccount.image,
                           placeholder: (context, url) => CircleAvatar(
                             backgroundColor: colorDefault,
-                            radius: 75.0,
+                            radius: radius,
                           ),
                           imageBuilder: (context, image) => CircleAvatar(
                             backgroundImage: image,
-                            radius: 75.0,
+                            radius: radius,
                           ),
                           errorWidget: (context, url, error) => CircleAvatar(
                             backgroundColor: colorDefault,
-                            radius: 75.0,
+                            radius: radius,
                           ),
                         )
                   : CircleAvatar(
-                      radius: 75.0,
+                      radius:radius,
                       backgroundColor: Colors.transparent,
                       backgroundImage:
                           FileImage(File(controller.getxFile.path)),
@@ -195,17 +197,17 @@ class AccountView extends GetView<AccountController> {
               focusNode: focusTextEdiNombre,
             ),
             const Divider(color: Colors.transparent, thickness: 1),
-            // textfiel: descripción
-            TextField(
+            // textfiel: username
+            /*TextField(
               enabled: !controller.getSavingIndicator,
               minLines: 1,
               maxLines: 5,
               keyboardType: TextInputType.multiline,
-              onChanged: (value) => controller.profileAccount.description = value,
-              decoration: const InputDecoration(filled: true,labelText: "Descripción (opcional)"),
-              controller: TextEditingController(text: controller.profileAccount.description),
+              onChanged: (value) => controller.profileAccount.username = value,
+              decoration: const InputDecoration(filled: true,labelText: "Nombre de usuario"),
+              controller: TextEditingController(text: controller.profileAccount.username),
               textInputAction: TextInputAction.next,
-            ),
+            ), */
             const Divider(color: Colors.transparent, thickness: 1),
             // textfiel: signo de moneda
             InkWell(
@@ -268,25 +270,13 @@ class AccountView extends GetView<AccountController> {
               enabled: !controller.getSavingIndicator,
               onChanged: (value) => controller.profileAccount.town = value,
               decoration: const InputDecoration(
-                labelText: "Ciudad (ocional)",
+                labelText: "Ciudad (opcional)",
                 filled: true,
               ),
               controller:
                   TextEditingController(text: controller.profileAccount.town),
             ),
-            const Divider(color: Colors.transparent, thickness: 1),
-            // textfiel: dirección/calle
-            TextField(
-              enabled: !controller.getSavingIndicator,
-              onChanged: (value) => controller.profileAccount.address = value,
-              decoration: const InputDecoration(
-                labelText: "Dirección (ocional)",
-                filled: true,
-              ),
-              controller: TextEditingController(
-                  text: controller.profileAccount.address),
-              textInputAction: TextInputAction.next,
-            ),
+            const Divider(color: Colors.transparent, thickness: 1), 
             // text : marca de tiempo de la ultima actualización del documento
             controller.newAccount?Container():Padding(
               padding: const EdgeInsets.only(top: 50),
