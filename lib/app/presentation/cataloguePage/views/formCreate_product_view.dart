@@ -46,16 +46,22 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
     controller.darkMode = Theme.of(context).brightness == Brightness.dark;
     controller.cardProductDetailColor = controller.darkMode ?controller.formEditing?Colors.blueGrey.withOpacity(0.2):Colors.blueGrey.withOpacity(0.1) : controller.formEditing?Colors.grey.shade300:Colors.grey.shade200;
 
+    //  AnnotatedRegion : proporciona un valor a sus widgets hijos
     // SystemUiOverlayStyle : Especifica una preferencia para el estilo de la barra de estado del sistema
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
-      // Theme : definismos estilos
+      //  Theme : proporciona datos de tema a sus widgets hijos
       child: Theme(
         data: Theme.of(context).copyWith( 
           // style : estilo del AppBar
           appBarTheme: AppBarTheme(elevation: 0,color: Colors.transparent ,systemOverlayStyle: controller.darkMode?SystemUiOverlayStyle.light:SystemUiOverlayStyle.light,iconTheme: IconThemeData(color: controller.darkMode?Colors.white:Colors.white),titleTextStyle: TextStyle(color: controller.darkMode?Colors.white:Colors.white))),
-        child: Scaffold(
-          body: body(context: context),),
+        // WillPopScope : nos permite controlar el botón de retroceso del dispositivo
+        child: WillPopScope(
+        onWillPop: () => controller.onBackPressed(context: context),
+        //  Scaffold : proporciona una estructura visual básica para la aplicación
+          child: Scaffold(
+            body: body(context: context),),
+        ),
       ),
     );
   } 
@@ -126,7 +132,8 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
             TextButton(
               onPressed: controller.getSaveIndicator?null:controller.currentSlide==0?null:(){
               controller.previousPage();
-            }, child: Text('Anterior',style: TextStyle(color: controller.currentSlide==0?Colors.grey:null),)),
+            }, 
+            child: Text('Anterior',style: TextStyle(color: controller.currentSlide==0?Colors.grey:null),)),
             // button : next o save
             Center(
               child: TextButton( 

@@ -4,6 +4,7 @@ import 'package:carousel_slider/carousel_controller.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -22,6 +23,8 @@ class ControllerProductsEdit extends GetxController {
   final Color colorButton = Colors.blue;
   Color cardProductDetailColor = Colors.grey.withOpacity(0.2);
   bool darkMode = false;
+  // var logic
+  bool _onBackPressed = false;
 
 
   // controller : carousel de componentes para que el usuario complete los campos necesarios para crear un nuevo producto nuevo
@@ -168,7 +171,7 @@ class ControllerProductsEdit extends GetxController {
   Category _category = Category();
   set setCategory(Category value) {
     _category = value; 
-    controllerTextEditCategory.text = value.name;
+    controllerTextEditCategory.text = value.name; // actualizamos el textfield porque no se actualiza solo al cambiar el valor en un dialog
     update(['updateAll']);
   }
   Category get getCategory => _category;
@@ -276,8 +279,9 @@ class ControllerProductsEdit extends GetxController {
   // get 
   bool get isSubscribed => true;//homeController.getProfileAccountSelected.subscribed;
 
+  //
   // FUNCTIONES
-
+  //
   updateAll() => update(['updateAll']);
   back() => Get.back();
 
@@ -291,6 +295,48 @@ class ControllerProductsEdit extends GetxController {
       }
     }
   }
+  Future<bool> onBackPressed({required BuildContext context})async{
+
+    // si _onBackPressed es false no se puede salir de la app
+    if(_onBackPressed==false){ 
+      _onBackPressed = !_onBackPressed;
+      return false;
+    }
+
+    if(currentSlide!=0){
+      previousPage();
+      return false;
+    }
+
+    //  si _onBackPressed es true se puede salir de la app
+    if(currentSlide==0){
+      final  shouldPop = await showDialog<bool>(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('¿Realmente quieres salir?',textAlign: TextAlign.center),
+              content: const Text('Si sales perderás los datos que no hayas guardado',textAlign: TextAlign.center),
+              actionsAlignment: MainAxisAlignment.spaceBetween,
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Get.back();
+                  },
+                  child: const Text('Cancelar'),
+                ),
+                TextButton(
+                  onPressed: (){Get.back();Get.back();},
+                  child: const Text('Si'),
+                ),
+              ],
+            );
+          },
+        );
+        return shouldPop!;
+        }
+    return true;
+        
+  } 
 
   //  fuction : comprobamos los datos necesarios para proceder publicar o actualizar el producto
   Future<void> save() async {
@@ -317,7 +363,10 @@ class ControllerProductsEdit extends GetxController {
               getProduct.salePrice = getSalePrice;
               getProduct.favorite = getFavorite;
               getProduct.stock = getStock;
-              getProduct.quantityStock = getQuantityStock; 
+              getProduct.quantityStock = getQuantityStock;
+              getProduct.category = getCategory.id; 
+              getProduct.nameCategory = getCategory.name;
+              getProduct.alertStock = getAlertStock;
 
               // actualización de la imagen de perfil de la cuetna
               if (getXFileImage.path != '') {
@@ -484,7 +533,7 @@ class ControllerProductsEdit extends GetxController {
   }
 
   void getDataProduct({required String id}) {
-    // lee el documento del producto
+    // function : obtiene los datos del producto de la base de datos y los carga en el formulario de edición 
     if (id != '') {
       Database.readProductPublicFuture(id: id).then((value) {
         //  get
@@ -505,19 +554,31 @@ class ControllerProductsEdit extends GetxController {
   }
 
   void loadDataFormProduct() {
-    // set
-    controllerTextEditDescripcion =TextEditingController(text: getProduct.description);
-    controllerTextEditPrecioVenta =MoneyMaskedTextController(initialValue: getProduct.salePrice);
-    controllerTextEditPrecioCompra =MoneyMaskedTextController(initialValue: getProduct.purchasePrice);
-    controllerTextEditQuantityStock =TextEditingController(text: getProduct.quantityStock.toString());
-    controllerTextEditAlertStock = TextEditingController(text: getProduct.alertStock.toString());
+    // fuction : carga los datos del producto en el formulario una ves que se obtienen de la base de datos
+    // set : datos del producto para validar
+    setPurchasePrice = getProduct.purchasePrice;
+    setSalePrice = getProduct.salePrice;
+    setQuantityStock = getProduct.quantityStock;
+    setAlertStock = getProduct.alertStock;
+    setStock = getProduct.stock;
+    setDescription= getProduct.description;
+    setMarkSelected = Mark(id: getProduct.idMark, name: getProduct.nameMark, creation: Timestamp.now(), upgrade: Timestamp.now());
+    setCategory = Category(id: getProduct.category, name: getProduct.nameCategory);
+    // set : controles de las entradas de texto
+    controllerTextEditDescripcion =TextEditingController(text: getDescription);
+    controllerTextEditPrecioVenta =MoneyMaskedTextController(initialValue: getSalePrice);
+    controllerTextEditPrecioCompra =MoneyMaskedTextController(initialValue: getPurchasePrice);
+    controllerTextEditQuantityStock =TextEditingController(text: getQuantityStock.toString());
+    controllerTextEditAlertStock = TextEditingController(text: getAlertStock.toString());
+    controllerTextEditCategory = TextEditingController(text: getCategory.name);
     // primero verificamos que no tenga el metadato del dato de la marca para hacer un consulta inecesaria
-    if (getProduct.idMark != '') readMarkProducts();
-    if (getProduct.category != '') readCategory();
-    setSaveIndicator = false;
+    if (getProduct.idMark != ''){readMarkProducts();}
+    if (getProduct.category != ''){readCategory();}
+    setSaveIndicator = false; // desactivamos el indicador de carga
   }
 
   void readMarkProducts() {
+    //  function : lee la marca del producto
     if (getProduct.idMark.isNotEmpty) {
       Database.readMarkFuture(id: getProduct.idMark).then((value) {
         setMarkSelected = Mark.fromMap(value.data() as Map);
@@ -534,9 +595,8 @@ class ControllerProductsEdit extends GetxController {
   }
 
   void readCategory() {
-    Database.readCategotyCatalogueFuture(
-            idAccount: homeController.getProfileAccountSelected.id,
-            idCategory: getProduct.category)
+    //  function : lee la categoria del producto
+    Database.readCategotyCatalogueFuture(idAccount: homeController.getProfileAccountSelected.id, idCategory: getProduct.category)
         .then((value) {
       setCategory = Category.fromDocumentSnapshot(documentSnapshot: value);
     }).onError((error, stackTrace) {
@@ -549,6 +609,7 @@ class ControllerProductsEdit extends GetxController {
 
   // read XFile image
   void getLoadImageGalery() {
+    //  function : selecciona una imagen de la galeria
     _picker.pickImage(
       source: ImageSource.gallery,
       maxWidth: 720.0,
@@ -563,6 +624,7 @@ class ControllerProductsEdit extends GetxController {
   }
 
   void getLoadImageCamera() {
+    //  function : selecciona una imagen de la camara
     _picker
         .pickImage(
       source: ImageSource.camera,
@@ -581,7 +643,8 @@ class ControllerProductsEdit extends GetxController {
   //------------------------------------------------------//
   //- FUNCTIONS LOGIC VIEW FORM CREATE NEW PRODUCT START -//
   //------------------------------------------------------//  
-   double get getProgressForm{
+   double get getProgressForm{ 
+    // function : retorna el progreso del formulario
     // value : progreso del formulario
     double progress = 0.0;
     // estado de progreso
