@@ -254,7 +254,7 @@ class SalesController extends GetxController {
                 ),
               ),
             ), 
-          ComponentApp().dividerApp(), 
+          ComponentApp().divider(), 
           ],
         );
         },

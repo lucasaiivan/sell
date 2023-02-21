@@ -469,7 +469,7 @@ void showDialogCerrarSesion() {
                   return Column(
                     children: [
                       WidgetButtonListTile().buttonListTileItemCuenta(perfilNegocio: getManagedAccountsList[index]),
-                      const Divider(endIndent: 0,indent: 0,height: 0,thickness: 0.2),
+                      ComponentApp().divider(),
                     ],
                   );
                 },
@@ -491,7 +491,7 @@ void showDialogCerrarSesion() {
               trailing:  const Icon(Icons.arrow_forward_ios_rounded),
               onTap: showDialogCerrarSesion,
             ),
-            const Divider(endIndent: 0,indent: 0,height: 0),
+            ComponentApp().divider(),
             widget,
             ],
           ),

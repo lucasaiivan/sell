@@ -4,7 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:get/get.dart';
-import 'package:sell/app/presentation/cataloguePage/views/formCreate_product_view.dart'; 
+import 'package:sell/app/presentation/cataloguePage/views/formCreate_product_view.dart';
+import 'package:url_launcher/url_launcher.dart'; 
 import '../../../domain/entities/catalogo_model.dart'; 
 import '../../../core/utils/fuctions.dart';
 import '../../../core/utils/widgets_utils.dart';
@@ -217,13 +218,13 @@ class ProductEdit extends StatelessWidget {
                 )
               ],
             ),
-            // textField  : nombre del producto
+            // textField  : descripción del producto
             TextField(
               enabled: controller.getSaveIndicator? false: controller.getEditModerator || controller.getNewProduct,
               minLines: 1,
               maxLines: 5,
               keyboardType: TextInputType.multiline,
-              onChanged: (value) => controller.getProduct.description = value,
+              onChanged: (value) => controller.setDescription = value,
               decoration: const InputDecoration(
                 contentPadding: EdgeInsets.only(bottom: 12,top: 12),
                 filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
@@ -308,7 +309,7 @@ class ProductEdit extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
 
-          /* //TODO: eliminar para desarrrollo
+          //TODO: eliminar para desarrrollo
           TextButton(
               onPressed: () async {
                 String clave = controller.controllerTextEditDescripcion.text;
@@ -323,7 +324,7 @@ class ProductEdit extends StatelessWidget {
                 await launchUrl(uri,mode: LaunchMode.externalApplication);
               },
               child: const Text('Buscar en código Google (moderador)')), 
-          space, */
+          space,
           // textfield : seleccionar cátegoria
             !controller.getAccountAuth? Container(): GestureDetector(
               onTap: SelectCategory.show,

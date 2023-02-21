@@ -64,7 +64,7 @@ dependencies:
   intl: ^0.17.0
   cached_network_image: ^3.1.0 # Una biblioteca de aleteo para mostrar imágenes de Internet y mantenerlas en el directorio de caché.
   textfield_search: ^0.10.0 # FTFS es un paquete de Flutter que usa un TextField Widget para buscar y seleccionar un valor de una lista
-  search_page: ^2.2.0
+  search_page: ^2.3.0
   flutter_launcher_icons: ^0.10.0 #  Una herramienta de línea de comandos que simplifica la tarea de actualizar el icono de inicio de la aplicación Flutter
   flutter_barcode_scanner: ^2.0.0 # Un complemento para las aplicaciones Flutter que agrega compatibilidad con el escaneo de códigos de barras tanto en Android como en iOS.
   audioplayers: ^1.0.1

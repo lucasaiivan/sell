@@ -705,7 +705,7 @@ class ComponentApp extends StatelessWidget {
             valueColor: AlwaysStoppedAnimation<Color>(color)));
   }
 
-  Divider dividerApp({double thickness = 0.3}) {
+  Divider divider({double thickness = 0.2}) {
     return Divider(
       thickness: thickness,height: 0,
       color: Get.isDarkMode?Colors.white30:Colors.black38,
