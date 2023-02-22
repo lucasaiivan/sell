@@ -539,16 +539,16 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
   // values
   late double sizePremiumLogo = 16.0;
   Widget icon = Container();
-  String title = '';
+  String title = 'PREMIUM';
   String description = '';
 
   // functions
   void setData({required String id}){
     switch(id){
       case 'premium':
-        title = '' ;
+        title = 'PREMIUM' ;
         description ='Funcionalidades especiales para profesionalizar tu negocio';
-        icon =  Container();
+        icon =  const Icon(Icons.workspace_premium_outlined,size: 50,color: Colors.amber);
         sizePremiumLogo=20;
         break;
       case 'stock':
@@ -588,76 +588,71 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
     // value 
     BorderSide side = const BorderSide(color: Colors.transparent);
 
-    return Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.start,mainAxisSize: MainAxisSize.max,
+    return ListView(
+      //crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.start,mainAxisSize: MainAxisSize.max,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.center,alignment: WrapAlignment.center,
-                    //mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      icon,
-                      Text(title,textAlign: TextAlign.center,style: const TextStyle(fontSize: 25,fontWeight: FontWeight.bold)),
-                      const SizedBox(width: 12),
-                      LogoPremium(personalize: true,accentColor: Colors.amber.shade600,size: sizePremiumLogo,visible: true,),
-                      //const Icon(Icons.workspace_premium_outlined,size: 30,color: Colors.amber),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Opacity(opacity: 0.7,child: Text(description,textAlign: TextAlign.center )),
-                  const SizedBox(height: 50),
-                  const Text('CARACTERÍSTICAS',textAlign: TextAlign.center,style: TextStyle(fontWeight: FontWeight.w200)),
-                  const SizedBox(height: 12),
-                  Chip(backgroundColor: Colors.transparent,side: side,avatar: const Icon(Icons.check),label: const Text('Control de inventario')),
-                  Chip(backgroundColor: Colors.transparent,side: side,avatar: const Icon(Icons.check),label: const Text('Multi Usuarios')),
-                  Chip(backgroundColor: Colors.transparent,side: side,avatar:  const Icon(Icons.check),label: const Text('Informes y estadísticas')),
-                  Chip(backgroundColor: Colors.transparent,side: side,avatar: const Icon(Icons.check),label: const Text('Sin publicidad')),
-                ],
-              ),
+            const SizedBox(height: 25),
+            Text(title,textAlign: TextAlign.center,style: const TextStyle(fontSize: 25,fontWeight: FontWeight.bold)),  
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: icon,
             ),
             const SizedBox(height: 12),
-            // button : adquirir premium
-            /* SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: null,/*  (){
-                  // actualizamos la subcripción de la cuenta
-                  setState(() {
-                    homeController.getProfileAccountSelected.subscribed = !homeController.getProfileAccountSelected.subscribed;
-                  });
-                  if(homeController.getProfileAccountSelected.subscribed){Get.back();}
-                },  */
-                //  style: ButtonStyle(backgroundColor: MaterialStateProperty.all(homeController.getProfileAccountSelected.subscribed?Colors.grey:Colors.blue)),
-                style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.grey.withOpacity(0.1))),
-                icon: const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  // text : homeController.getProfileAccountSelected.subscribed?'Desuscribirme':'Subcribirme'
-                  child: Text('Subcribirme',style: TextStyle(fontSize: 24,color: Colors.white)),
-                ),
-                // icon : homeController.getProfileAccountSelected.subscribed?Icons.close:Icons.arrow_forward_rounded
-                label: const Icon(Icons.arrow_forward_rounded,color: Colors.white,),
-              ),
-            ), */
-            // text : precio de la versión Premium
-            const SizedBox(height: 50),
-            /* disponible para cuando las subcripciones esten desarrolladas
-
-            const Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(text: 'US \$6,99',style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold)),
-                  TextSpan(text: ' al mes',style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold)),
-                ],
-              ),textAlign: TextAlign.center,
-              textDirection: TextDirection.rtl,
-            ), */
+            Opacity(opacity: 0.7,child: Text(description,textAlign: TextAlign.center )),
+            const SizedBox(height: 25),
+            Container(padding:const  EdgeInsets.all(12),color: Colors.teal,width: double.infinity,child: Center(child: LogoPremium(personalize: true,accentColor: Colors.white,size: sizePremiumLogo,visible: true,))),
+            const SizedBox(height: 25),
+            const Text('CARACTERÍSTICAS',textAlign: TextAlign.center,style: TextStyle(fontWeight: FontWeight.w200)),
+            const SizedBox(height: 12),
+            Chip(backgroundColor: Colors.transparent,side: side,avatar: const Icon(Icons.check),label: const Text('Control de inventario')),
+            ComponentApp().divider(),
+            Chip(backgroundColor: Colors.transparent,side: side,avatar: const Icon(Icons.check),label: const Text('Multi Usuarios')),
+            ComponentApp().divider(),
+            Chip(backgroundColor: Colors.transparent,side: side,avatar:  const Icon(Icons.check),label: const Text('Informes y estadísticas')),
+            ComponentApp().divider(),
+            Chip(backgroundColor: Colors.transparent,side: side,avatar: const Icon(Icons.check),label: const Text('Sin publicidad')),
           ],
         ),
-      );
+        const SizedBox(height: 12),
+        // button : adquirir premium
+        /* SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: null,/*  (){
+              // actualizamos la subcripción de la cuenta
+              setState(() {
+                homeController.getProfileAccountSelected.subscribed = !homeController.getProfileAccountSelected.subscribed;
+              });
+              if(homeController.getProfileAccountSelected.subscribed){Get.back();}
+            },  */
+            //  style: ButtonStyle(backgroundColor: MaterialStateProperty.all(homeController.getProfileAccountSelected.subscribed?Colors.grey:Colors.blue)),
+            style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.grey.withOpacity(0.1))),
+            icon: const Padding(
+              padding: EdgeInsets.all(8.0),
+              // text : homeController.getProfileAccountSelected.subscribed?'Desuscribirme':'Subcribirme'
+              child: Text('Subcribirme',style: TextStyle(fontSize: 24,color: Colors.white)),
+            ),
+            // icon : homeController.getProfileAccountSelected.subscribed?Icons.close:Icons.arrow_forward_rounded
+            label: const Icon(Icons.arrow_forward_rounded,color: Colors.white,),
+          ),
+        ), */
+        // text : precio de la versión Premium
+        const SizedBox(height: 50),
+        /* disponible para cuando las subcripciones esten desarrolladas
+
+        const Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(text: 'US \$6,99',style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold)),
+              TextSpan(text: ' al mes',style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold)),
+            ],
+          ),textAlign: TextAlign.center,
+          textDirection: TextDirection.rtl,
+        ), */
+      ],
+    );
   }
 }

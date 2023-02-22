@@ -179,122 +179,152 @@ class AccountView extends GetView<AccountController> {
 
   Widget widgetFormEditText({required BuildContext context}) {
 
-    // creamos la vista del formulario 
-    return Obx(() => Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
+    // widget
+    const Widget divider = Divider(color: Colors.transparent, thickness: 0,height:20);
 
-            // textfiel: nombre del negocio
-            TextField(
-              enabled: !controller.getSavingIndicator,
-              minLines: 1,
-              maxLines: 5,
-              keyboardType: TextInputType.multiline,
-              onChanged: (value) => controller.profileAccount.name = value,
-              decoration: const InputDecoration(filled: true,labelText: "Nombre del Negocio",prefixIcon: Icon(Icons.other_houses_outlined)),
-              controller:TextEditingController(text: controller.profileAccount.name),
-              textInputAction: TextInputAction.next,
-              focusNode: focusTextEdiNombre,
-            ),
-            const Divider(color: Colors.transparent, thickness: 1),
-            // textfiel: username
-            /*TextField(
-              enabled: !controller.getSavingIndicator,
-              minLines: 1,
-              maxLines: 5,
-              keyboardType: TextInputType.multiline,
-              onChanged: (value) => controller.profileAccount.username = value,
-              decoration: const InputDecoration(filled: true,labelText: "Nombre de usuario"),
-              controller: TextEditingController(text: controller.profileAccount.username),
-              textInputAction: TextInputAction.next,
-            ), */
-            const Divider(color: Colors.transparent, thickness: 1),
-            // textfiel: signo de moneda
-            InkWell(
-              onTap: () => _bottomPickerSelectCurrency(list: controller.coinsList, context: context),
-              child: TextField(
+    // creamos la vista del formulario 
+    return Obx(() => Form(
+      key: controller.formKey,
+      child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+    
+              // textfiel: nombre del negocio
+              TextFormField(
+                enabled: !controller.getSavingIndicator,
                 minLines: 1,
                 maxLines: 5,
                 keyboardType: TextInputType.multiline,
-                enabled: false,
-                decoration: const InputDecoration(
-                  labelText: "Signo de moneda",
-                  filled: true,
-                  prefixIcon: Icon(Icons.monetization_on_outlined),
-                ),
-                controller: controller.getControllerTextEditSignoMoneda,
-                onChanged: (value) => controller.profileAccount.currencySign = value,
+                onChanged: (value) => controller.profileAccount.name = value,
+                decoration: const InputDecoration(filled: true,labelText: "Nombre del Negocio"),
+                controller:TextEditingController(text: controller.profileAccount.name),
+                textInputAction: TextInputAction.next,
+                focusNode: focusTextEdiNombre,
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'Por favor ingrese el nombre del negocio';
+                  }
+                  return null;
+                },
               ),
-            ),
-            const SizedBox(height: 24.0),
-            // text : texto informativo
-            controller.newAccount?widgetText(text: '¿Donde se encuentra?\n\n 🌍'): const Text("Ubicación", style: TextStyle(fontSize: 24.0)),
-            const SizedBox(height: 24.0),
-            // textfiel: seleccionar un pais
-            InkWell(
-              onTap: () => bottomPickerSelectCountries(list: controller.getCountries, context: context),
-              child: TextField(
+              // textfiel: username
+              /*TextField(
+                enabled: !controller.getSavingIndicator,
                 minLines: 1,
                 maxLines: 5,
                 keyboardType: TextInputType.multiline,
-                enabled: false,
-                decoration: const InputDecoration(labelText: "Pais",filled: true,prefixIcon: Icon(Icons.location_on_outlined)),
-                controller: controller.getControllerTextEditPais,
-                onChanged: (value) => controller.profileAccount.country = value,
-              ),
-            ),
-            const SizedBox(width: 12.0, height: 12.0),
-            // textfiel: seleccionar una provincia
-            InkWell(
-              onTap: () => controller.profileAccount.country == ''
-                  ? bottomPickerSelectCountries(list: controller.getCountries, context: context)
-                  : bottomPickerSelectCities(list: controller.getCities, context: context),
-              child: TextField(
+                onChanged: (value) => controller.profileAccount.username = value,
+                decoration: const InputDecoration(filled: true,labelText: "Nombre de usuario"),
+                controller: TextEditingController(text: controller.profileAccount.username),
+                textInputAction: TextInputAction.next,
+              ), */ 
+              divider,
+              // textfiel: signo de moneda
+              InkWell(
+                onTap: () => _bottomPickerSelectCurrency(list: controller.coinsList, context: context),
+                child: TextFormField(
                   minLines: 1,
                   maxLines: 5,
                   keyboardType: TextInputType.multiline,
                   enabled: false,
                   decoration: const InputDecoration(
-                    labelText: "Provincia",
+                    labelText: "Signo de moneda",
                     filled: true,
-                    prefixIcon: Icon(Icons.business),
+                    prefixIcon: Icon(Icons.monetization_on_outlined),
                   ),
-                  controller: controller.getControllerTextEditProvincia,
-                  onChanged: (value) {
-                    controller.profileAccount.province = value;
-                  }),
-            ),
-            const Divider(color: Colors.transparent, thickness: 1),
-            // textfiel: ciudad
-            TextField(
-              enabled: !controller.getSavingIndicator,
-              onChanged: (value) => controller.profileAccount.town = value,
-              decoration: const InputDecoration(
-                labelText: "Ciudad (opcional)",
-                filled: true,
+                  controller: controller.getControllerTextEditSignoMoneda,
+                  onChanged: (value) => controller.profileAccount.currencySign = value,
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Por favor ingrese el signo de la moneda';
+                    }
+                    return null;
+                  },
+                ),
               ),
-              controller:
-                  TextEditingController(text: controller.profileAccount.town),
-            ),
-            const Divider(color: Colors.transparent, thickness: 1), 
-            // text : marca de tiempo de la ultima actualización del documento
-            controller.newAccount?Container():Padding(
-              padding: const EdgeInsets.only(top: 50),
-              child: Opacity(opacity: 0.5,child: Center(child: Text('Te uniste ${Publications.getFechaPublicacion(controller.profileAccount.creation.toDate(), Timestamp.now().toDate()).toLowerCase()}'))),
-            ),
-            const SizedBox(height: 50),
-            // text : informativo 
-            controller.newAccount?controller.getSavingIndicator?Container():Column(
-              children: [
-                widgetText(text: 'listo! eso es todo! 💪'),
-                TextButton(onPressed:controller.saveAccount, child: const Text('Guardar')),
-                const SizedBox(height: 50),
-              ],
-            ): Container(),
-            
-            
-          ],
-        ));
+              divider,
+              // text : texto informativo
+              controller.newAccount?widgetText(text: '¿Donde se encuentra?\n\n 🌍'): const Text("Ubicación", style: TextStyle(fontSize: 24.0)),
+              divider,
+              // textfiel: seleccionar un pais
+              InkWell(
+                onTap: () => bottomPickerSelectCountries(list: controller.getCountries, context: context),
+                child: TextFormField(
+                  minLines: 1,
+                  maxLines: 5,
+                  keyboardType: TextInputType.multiline,
+                  enabled: false,
+                  decoration: const InputDecoration(labelText: "Pais",filled: true,prefixIcon: Icon(Icons.location_on_outlined)),
+                  controller: controller.getControllerTextEditPais,
+                  onChanged: (value) => controller.profileAccount.country = value,
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Por favor ingrese el pais';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              divider,
+              // textfiel: seleccionar una provincia
+              InkWell(
+                onTap: () => controller.profileAccount.country == ''
+                    ? bottomPickerSelectCountries(list: controller.getCountries, context: context)
+                    : bottomPickerSelectCities(list: controller.getCities, context: context),
+                child: TextFormField(
+                    minLines: 1,
+                    maxLines: 5,
+                    keyboardType: TextInputType.multiline,
+                    enabled: false,
+                    decoration: const InputDecoration(
+                      labelText: "Provincia",
+                      filled: true,
+                      prefixIcon: Icon(Icons.business),
+                    ),
+                    controller: controller.getControllerTextEditProvincia,
+                    onChanged: (value) {
+                      controller.profileAccount.province = value;
+                    },
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Por favor ingrese la provincia';
+                      }
+                      return null;
+                    },
+                    ),
+              ),
+              divider,
+              // textfiel: ciudad
+              TextField(
+                enabled: !controller.getSavingIndicator,
+                onChanged: (value) => controller.profileAccount.town = value,
+                decoration: const InputDecoration(
+                  labelText: "Ciudad (opcional)",
+                  filled: true,
+                ),
+                controller:
+                    TextEditingController(text: controller.profileAccount.town),
+              ),
+              const Divider(color: Colors.transparent, thickness: 1), 
+              // text : marca de tiempo de la ultima actualización del documento
+              controller.newAccount?Container():Padding(
+                padding: const EdgeInsets.only(top: 50),
+                child: Opacity(opacity: 0.5,child: Center(child: Text('Te uniste ${Publications.getFechaPublicacion(controller.profileAccount.creation.toDate(), Timestamp.now().toDate()).toLowerCase()}'))),
+              ),
+              const SizedBox(height: 50),
+              // text : informativo 
+              controller.newAccount?controller.getSavingIndicator?Container():Column(
+                children: [
+                  widgetText(text: 'listo! eso es todo! 💪'),
+                  TextButton(onPressed:controller.saveAccount, child: const Text('Guardar')),
+                  const SizedBox(height: 50),
+                ],
+              ): Container(),
+              
+              
+            ],
+          ),
+    ));
   }
 
   void bottomPickerSelectCities(

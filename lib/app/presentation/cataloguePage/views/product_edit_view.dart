@@ -116,7 +116,7 @@ class ProductEdit extends StatelessWidget {
             scrollDirection: Axis.vertical,
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             children: [
-              widgetFormEdit0(),
+              cardFrontProduct(),
               widgetFormEdit2(),
             ],
           ),
@@ -159,7 +159,7 @@ class ProductEdit extends StatelessWidget {
     );
   }
   // view  : descripcion del producto en una tarjeta con un icono de verificacion,  codigo, descripcion y marca
-  Widget widgetFormEdit0(){
+  Widget cardFrontProduct(){
     
     
     // view : descripcion del producto
@@ -167,11 +167,21 @@ class ProductEdit extends StatelessWidget {
       duration:   const Duration(milliseconds: 700),
       child: AnimatedContainer(
         margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 24.0),
-        duration: const Duration(milliseconds: 500),
-        decoration: BoxDecoration(color: controller.cardProductDetailColor,borderRadius: BorderRadius.circular(12.0)),
+        duration: const Duration(milliseconds: 1000),
+        //decoration: BoxDecoration(color: controller.cardProductDetailColor,borderRadius: BorderRadius.circular(12.0)),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12.0),
+          gradient: LinearGradient(
+            colors: [controller.dominateColorProduct.withOpacity(0.1), controller.cardProductDetailColor],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
         padding: const EdgeInsets.all(24.0),
-        child: Column(
+        child: Column( 
           children: [
+            //Icon(Icons.circle,color: controller.dominateColorProduct,),
+            //Icon(Icons.circle,color: controller.mutedColorProduct),
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -235,66 +245,6 @@ class ProductEdit extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-  //  view : descripcion del producto con formulario de edicion
-  Widget widgetFormEdit1(){
-    return  Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Hero(
-          tag: 'avatarProduct',
-          child: widgetsImagen()),
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              children: [
-                // text : codigo y verificaciones del producto
-                controller.getProduct.code != ""
-                    ? Opacity(
-                        opacity: 0.8,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 0,vertical: 1),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              controller.getProduct.verified?const Icon(Icons.verified_rounded,color: Colors.blue, size: 20):const Icon(Icons.qr_code_2_rounded, size: 20),
-                              const SizedBox(width: 5),
-                              Text(controller.getProduct.code,style: const TextStyle(height: 1,fontSize: 14,fontWeight: FontWeight.normal)),
-                            ],
-                          ),
-                        ),
-                      )
-                    : Container(),
-                space,
-                // textfield  : seleccionar una marca
-                textfielButton(
-                    stateEdit: controller.getSaveIndicator? false: controller.getEditModerator || controller.getNewProduct,
-                    textValue: controller.getMarkSelected.name,
-                    labelText: controller.getMarkSelected.id == ''? 'Seleccionar una marca': 'Marca',
-                    onTap: controller.getNewProduct || controller.getEditModerator? controller.showModalSelectMarca : () {}
-                ),
-                !controller.getAccountAuth ? Container() : space,
-                // textField  : nombre del producto
-                TextField(
-                  enabled: controller.getSaveIndicator? false: controller.getEditModerator || controller.getNewProduct,
-                  minLines: 1,
-                  maxLines: 5,
-                  keyboardType: TextInputType.multiline,
-                  onChanged: (value) => controller.setDescription = value,
-                  decoration: const InputDecoration(
-                      filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
-                      disabledBorder: InputBorder.none,
-                      labelText: "Descripción del producto", 
-                    ),
-                  textInputAction: TextInputAction.done,
-                  controller: controller.controllerTextEditDescripcion,
-                ),
-              ],
-            ),
-          ),
-      ],
     );
   }
   //  view : datos para el cátalogo con formulario de edicion
@@ -460,7 +410,7 @@ class ProductEdit extends StatelessWidget {
                                 child: TextFormField(
                                   enabled: !controller.getSaveIndicator,
                                   keyboardType: TextInputType.number,
-                                  onChanged: (value) => controller.getProduct.quantityStock =int.parse(controller.controllerTextEditQuantityStock .text),
+                                  onChanged: (value) => controller.setQuantityStock =int.parse(controller.controllerTextEditQuantityStock .text),
                                   decoration: const InputDecoration(
                                     filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
                                     disabledBorder: InputBorder.none,
