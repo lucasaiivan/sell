@@ -28,7 +28,8 @@ class AuthView extends GetView<LoginController> {
 
   return Theme(
       data: Theme.of(context).copyWith(primaryColor: colorAccent,appBarTheme: appBarTheme),
-      child: Scaffold( 
+      child: Scaffold(
+        appBar: AppBar(),
         body: body(context: context)),
     );
   }
@@ -36,12 +37,12 @@ class AuthView extends GetView<LoginController> {
   /// WIDGETS
   Widget body({required BuildContext context}) {
     // Definimos los estilos de colores de los botones
-    Color colorButtonText0 = Theme.of(context).brightness==Brightness.dark?Colors.white:Colors.black;
+    Color colorButtonText0 = Colors.white;
     Color colorButton0 = Theme.of(context).brightness==Brightness.dark?Colors.deepPurple.shade400:Colors.deepPurple.shade300;
     
     return Column(
       children: [
-        Flexible( child: OnboardingIntroduction(colorAccent: colorButtonText0)),
+        Flexible( child: OnboardingIntroduction(colorAccent: colorButton0)),
         Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [  
@@ -60,7 +61,9 @@ class AuthView extends GetView<LoginController> {
 
   /// WIDGETS COMPONENT
   Widget widgetCheckAcceptPrivacyAndUsePolicy() {
-    TextStyle defaultStyle = const  TextStyle( );
+
+    // styles
+    TextStyle defaultStyle = TextStyle( color: darkMode?Colors.white:Colors.black );
     TextStyle linkStyle = const TextStyle(color: Colors.blue);
 
     RichText text = RichText(
