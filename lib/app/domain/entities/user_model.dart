@@ -70,19 +70,60 @@ class ProfileAccountModel {
     // data user creation
     this.id = "",
     this.subscribed=true, // subcripción
+    this.countrycode = "",
     this.username = '',
     this.image = "",
     this.name = "", 
     this.currencySign = "\$",
     this.blockingAccount = false,
     this.blockingMessage = "",
-    this.verifiedAccount = false, // Cuenta verificada
-    this.countrycode = "",
+    this.verifiedAccount = false, // Cuenta verificada 
     this.country = "",
     this.province = "",
     this.town = "", 
     required this.creation,
   });
+  ProfileAccountModel copyWith({
+    // account info
+    // informacion de cuenta
+    // location
+    // data user creation
+    String? id,
+    bool? subscribed,
+    String? countrycode,
+    String? username,
+    String? image,
+    String? name, 
+    String? currencySign,
+    bool? blockingAccount,
+    String? blockingMessage,
+    bool? verifiedAccount, // Cuenta verificada 
+    String? country,
+    String? province,
+    String? town, 
+    Timestamp? creation,
+  }) {
+    return ProfileAccountModel(
+      // account info
+      // informacion de cuenta
+      // location
+      // data user creation
+      id: id ?? this.id,
+      subscribed: subscribed ?? this.subscribed,
+      countrycode: countrycode ?? this.countrycode,
+      username: username ?? this.username,
+      image: image ?? this.image,
+      name: name ?? this.name, 
+      currencySign: currencySign ?? this.currencySign,
+      blockingAccount: blockingAccount ?? this.blockingAccount,
+      blockingMessage: blockingMessage ?? this.blockingMessage,
+      verifiedAccount: verifiedAccount ?? this.verifiedAccount, // Cuenta verificada 
+      country: country ?? this.country,
+      province: province ?? this.province,
+      town: town ?? this.town, 
+      creation: creation ?? this.creation,
+    );
+  }
 
   ProfileAccountModel.fromMap(Map data) {
     id = data['id'];

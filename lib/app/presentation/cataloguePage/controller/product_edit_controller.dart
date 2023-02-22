@@ -4,10 +4,10 @@ import 'package:carousel_slider/carousel_controller.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:palette_generator/palette_generator.dart';
 import 'package:search_page/search_page.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:uuid/uuid.dart';
@@ -15,6 +15,7 @@ import '../../../domain/entities/catalogo_model.dart';
 import '../../../data/datasource/database_cloud.dart';
 import '../../../core/utils/widgets_utils.dart';
 import '../../home/controller/home_controller.dart';
+import 'package:http/http.dart' as http;
 
 class ControllerProductsEdit extends GetxController {
 
@@ -22,6 +23,8 @@ class ControllerProductsEdit extends GetxController {
   Color colorLoading = Colors.blue; 
   final Color colorButton = Colors.blue;
   Color cardProductDetailColor = Colors.grey.withOpacity(0.2);
+  Color dominateColorProduct = Colors.grey.withOpacity(0.2);
+  Color mutedColorProduct = Colors.grey.withOpacity(0.2);
   bool darkMode = false;
   // var logic
   bool _onBackPressed = false;
@@ -282,10 +285,10 @@ class ControllerProductsEdit extends GetxController {
   //
   // FUNCTIONES
   //
-  updateAll() => update(['updateAll']);
-  back() => Get.back();
+  updateAll() => update(['updateAll']); 
 
   isCatalogue() {
+    // return : si el producto esta en el catalogo
     for (var element in homeController.getCataloProducts) {
       if (element.id == getProduct.id) {
         // get values
@@ -295,7 +298,20 @@ class ControllerProductsEdit extends GetxController {
       }
     }
   }
+   Future<void> _getImageColors({required String url}) async {
+    final response = await http.get(Uri.parse(url));
+    final bytes = response.bodyBytes;
+    final image = MemoryImage(bytes);
+    final paletteGenerator = await PaletteGenerator.fromImageProvider(
+      image,
+      size: const Size(256, 256),
+    );
+    dominateColorProduct = paletteGenerator.dominantColor!.color;
+    mutedColorProduct = paletteGenerator.mutedColor!.color;
+    update();
+  }
   Future<bool> onBackPressed({required BuildContext context})async{
+    // fuction : si _onBackPressed es false no se puede salir de la app
 
     // si _onBackPressed es false no se puede salir de la app
     if(_onBackPressed==false){ 
@@ -368,15 +384,14 @@ class ControllerProductsEdit extends GetxController {
               getProduct.nameCategory = getCategory.name;
               getProduct.alertStock = getAlertStock;
 
-              // actualización de la imagen de perfil de la cuetna
+              // actualización de la imagen del producto
               if (getXFileImage.path != '') {
                 // image - Si el "path" es distinto '' quiere decir que ahi una nueva imagen para actualizar
                 // si es asi procede a guardar la imagen en la base de la app
-                Reference ref = Database.referenceStorageProductPublic(id: getProduct.id);
-                UploadTask uploadTask = ref.putFile(File(getXFileImage.path));
-                await uploadTask;
-                // obtenemos la url de la imagen guardada
-                await ref.getDownloadURL().then((value) => getProduct.image = value);
+                Reference ref = Database.referenceStorageProductPublic(id: getProduct.id); // obtenemos la referencia en el storage
+                UploadTask uploadTask = ref.putFile(File(getXFileImage.path)); // cargamos la imagen
+                await uploadTask; // esperamos a que se suba la imagen 
+                await ref.getDownloadURL().then((value) => getProduct.image = value); // obtenemos la url de la imagen
               }
               // procede agregrar el producto en el cátalogo
               // Mods - save data product global
@@ -555,6 +570,11 @@ class ControllerProductsEdit extends GetxController {
 
   void loadDataFormProduct() {
     // fuction : carga los datos del producto en el formulario una ves que se obtienen de la base de datos
+
+    // obtenemos los colores de la imagen del producto
+    if (getProduct.image != '') {
+      _getImageColors(url: getProduct.image);
+    }
     // set : datos del producto para validar
     setPurchasePrice = getProduct.purchasePrice;
     setSalePrice = getProduct.salePrice;
@@ -564,6 +584,7 @@ class ControllerProductsEdit extends GetxController {
     setDescription= getProduct.description;
     setMarkSelected = Mark(id: getProduct.idMark, name: getProduct.nameMark, creation: Timestamp.now(), upgrade: Timestamp.now());
     setCategory = Category(id: getProduct.category, name: getProduct.nameCategory);
+    
     // set : controles de las entradas de texto
     controllerTextEditDescripcion =TextEditingController(text: getDescription);
     controllerTextEditPrecioVenta =MoneyMaskedTextController(initialValue: getSalePrice);
@@ -720,8 +741,8 @@ class ControllerProductsEdit extends GetxController {
 
     // devuelve la imagen del product
     if (getXFileImage.path != '') {
-      // el usuario cargo un nueva imagen externa
-      return ImageAvatarApp(path: getXFileImage.path ,size: size,onTap: getNewProduct || getEditModerator? showModalBottomSheetCambiarImagen : null );
+      // el usuario cargo un nueva imagen externa 
+      return ImageAvatarApp( url: getProduct.image,size: size,onTap: getNewProduct || getEditModerator? showModalBottomSheetCambiarImagen : null );
     } else {
       // se visualiza la imagen del producto
       return ImageAvatarApp(url: getProduct.image ,size: size,onTap: getNewProduct || getEditModerator? showModalBottomSheetCambiarImagen : null );
@@ -781,8 +802,7 @@ class ControllerProductsEdit extends GetxController {
                 .delete()
                 .whenComplete(() {
                   Get.back();
-                  back();
-                  back();
+                  Get.back();
                 })
                 .onError((error, stackTrace) => Get.back())
                 .catchError((ex) => Get.back());

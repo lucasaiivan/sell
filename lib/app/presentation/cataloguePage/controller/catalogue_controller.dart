@@ -17,7 +17,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
   late TabController tabController;
 
   // color del texto de disponibilidad
-   Color? getStockColor( {required ProductCatalogue productCatalogue}){
+   Color? getStockColor( {required ProductCatalogue productCatalogue,Color color = Colors.black }){
 
     // var 
     Color? color = Get.theme.listTileTheme.textColor;
@@ -151,10 +151,14 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
   }
 
   void seach({required BuildContext context}) {
-    // Busca entre los productos de mi catálogo
+    // Busca entre los productos de mi catálogo 
 
-    // var
-    Color colorAccent = Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
+    // styles
+    final Color primaryTextColor  = Get.isDarkMode?Colors.white70:Colors.black87;
+    final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
+    // widgets
+    final Widget dividerCircle = Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child: Icon(Icons.circle,size: 4, color: primaryTextColor.withOpacity(0.5)));
+    Widget divider = ComponentApp().divider();
     
 
     showSearch(
@@ -162,17 +166,13 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
       delegate: SearchPage<ProductCatalogue>(
         items: homeController.getCataloProducts,
         searchLabel: 'Buscar',
-        searchStyle: TextStyle(color: colorAccent),
-        barTheme: Get.theme .copyWith(hintColor: colorAccent, highlightColor: colorAccent),
+        searchStyle: TextStyle(color: primaryTextColor),
+        barTheme: Get.theme .copyWith(hintColor: primaryTextColor, highlightColor: primaryTextColor),
         suggestion: const Center(child: Text('ej. alfajor')),
         failure: const Center(child: Text('No se encontro en tu cátalogo:(')),
         filter: (product) => [product.description, product.nameMark],
         
         builder: (product) {
-
-          // values
-          Color tileColor = product.stock? (product.quantityStock <= product.alertStock && homeController.getProfileAccountSelected.subscribed ? Colors.red.withOpacity(0.5): product.favorite?Colors.amber.withOpacity(0.3):Colors.transparent) : product.favorite?Colors.amber.withOpacity(0.3):Colors.transparent;
-          // String alertStockText =product.stock ? (product.quantityStock == 0 ? 'Sin stock' : '${product.quantityStock} en stock') : '';
 
           return Column(
           children: [
@@ -185,35 +185,30 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
                 padding: const EdgeInsets.all(12.0),
                 child: Row(
                   children: [
-                    ImageAvatarApp(url: product.image,size: 75,favorite:product.favorite),
+                    ImageAvatarApp(url: product.image,size: 75),
                     // datos del producto
-                    Flexible(
+                    Expanded( 
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         child: Column( 
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(product.description),
+                            // text : nombre del producto
+                            Text(product.description,maxLines: 1),
+                            // text : marca del producto
                             Text('${product.nameMark} ',maxLines: 2,overflow: TextOverflow.clip,style: const TextStyle(color: Colors.blue)),
+                            // text components : fecha de creacion y ventas
                             Wrap(
                               children: [ 
+                                // text : fecha de creacion
+                                Text(Publications.getFechaPublicacion(product.upgrade.toDate(), Timestamp.now().toDate()),style: textStyleSecundary,),
+                                //  text : ventas
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.circle,size: 8, color: Get.theme.dividerColor),
-                                    const SizedBox(width: 5),
-                                    Text(Publications.getFechaPublicacion(product.upgrade.toDate(), Timestamp.now().toDate())),
-                                    const SizedBox(width: 5),
-                                  ],
-                                ),
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    product.sales == 0? Container(): Icon(Icons.circle,size: 8, color: Get.theme.dividerColor),
-                                    product.sales == 0? Container():const SizedBox(width: 5),
-                                    product.sales == 0? Container(): Text('${product.sales} ${product.sales == 1 ? 'venta' : 'ventas'}'),
-                                    product.sales == 0 ? Container():const SizedBox(width: 5),
+                                    product.sales == 0? Container(): dividerCircle, 
+                                    product.sales == 0? Container(): Text('${product.sales} ${product.sales == 1 ? 'venta' : 'ventas'}',style: textStyleSecundary,), 
                                   ],
                                 ),
                                 // text : stock
@@ -221,9 +216,8 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
                                   ?Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      product.stock == false ? Container(): Icon(Icons.circle,size: 8, color: Get.theme.dividerColor),
-                                      product.stock == false ? Container():const SizedBox(width: 5),
-                                      Text('stock ${product.quantityStock.toString()}',style: TextStyle(color: getStockColor(productCatalogue: product))), 
+                                      product.stock == false ? Container(): dividerCircle, 
+                                      Text('stock ${product.quantityStock.toString()}',style: textStyleSecundary.copyWith(color: getStockColor(productCatalogue: product,color: textStyleSecundary.color as Color)),), 
                                     ],
                                   ):Container(),
                               ],
@@ -240,7 +234,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
                 ),
               ),
             ), 
-            ComponentApp().divider(),
+            divider
           ],
         );
         },

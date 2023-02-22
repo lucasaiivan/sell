@@ -15,8 +15,7 @@ class AuthView extends GetView<LoginController> {
 
   // var
   late bool darkMode;
-  Color colorFondo=Colors.white,
-  colorAccent=Colors.purple;
+  Color colorAccent=Colors.purple;
   late Size screenSize; // Obtenemos las vavriables de la dimension de la pantalla
 
   @override
@@ -28,20 +27,21 @@ class AuthView extends GetView<LoginController> {
     final AppBarTheme  appBarTheme= AppBarTheme(titleSpacing: 0, elevation: 0,toolbarHeight: 0,color: Colors.transparent ,systemOverlayStyle: darkMode?SystemUiOverlayStyle.light:SystemUiOverlayStyle.dark,iconTheme: IconThemeData(color: darkMode?Colors.white:Colors.white),titleTextStyle: TextStyle(color: darkMode?Colors.white:Colors.white));
 
   return Theme(
-      data: Theme.of(context).copyWith(scaffoldBackgroundColor: colorFondo,primaryColor: colorAccent,appBarTheme: appBarTheme),
-      child: Scaffold(
-        backgroundColor: colorFondo, body: body(context: context)),
+      data: Theme.of(context).copyWith(primaryColor: colorAccent,appBarTheme: appBarTheme),
+      child: Scaffold( 
+        body: body(context: context)),
     );
   }
 
   /// WIDGETS
   Widget body({required BuildContext context}) {
     // Definimos los estilos de colores de los botones
-    Color colorButtonText0 = Theme.of(context).brightness==Brightness.dark?Colors.white:Colors.white;
+    Color colorButtonText0 = Theme.of(context).brightness==Brightness.dark?Colors.white:Colors.black;
     Color colorButton0 = Theme.of(context).brightness==Brightness.dark?Colors.deepPurple.shade400:Colors.deepPurple.shade300;
+    
     return Column(
       children: [
-        Flexible( child: OnboardingIntroduction(colorAccent: colorAccent)),
+        Flexible( child: OnboardingIntroduction(colorAccent: colorButtonText0)),
         Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [  
@@ -52,7 +52,7 @@ class AuthView extends GetView<LoginController> {
               button(callback: controller.login,text:"Iniciar sesión con google",colorButton: colorButton0,colorText: colorButtonText0),
               const SizedBox(height: 20.0,),
             ],
-
+    
         ),
       ],
     );
@@ -60,7 +60,7 @@ class AuthView extends GetView<LoginController> {
 
   /// WIDGETS COMPONENT
   Widget widgetCheckAcceptPrivacyAndUsePolicy() {
-    TextStyle defaultStyle = const  TextStyle(color:Colors.black);
+    TextStyle defaultStyle = const  TextStyle( );
     TextStyle linkStyle = const TextStyle(color: Colors.blue);
 
     RichText text = RichText(
@@ -96,15 +96,12 @@ class AuthView extends GetView<LoginController> {
 
     return Obx(() => Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Theme(
-            data: ThemeData.light() ,
-            child: CheckboxListTile(
-              checkColor: Colors.white,
-              activeColor: Colors.blue,
-              title: text,
-              value: controller.getStateCheckAcceptPrivacyAndUsePolicy,
-              onChanged: (value) => controller.setStateCheckAcceptPrivacyAndUsePolicy = value!,
-            ),
+          child: CheckboxListTile(
+            checkColor: Colors.white,
+            activeColor: Colors.blue,
+            title: text,
+            value: controller.getStateCheckAcceptPrivacyAndUsePolicy,
+            onChanged: (value) => controller.setStateCheckAcceptPrivacyAndUsePolicy = value!,
           ),
         ));
   }
@@ -257,14 +254,14 @@ class _OnboardingIntroductionState extends State<OnboardingIntroduction> {
   Widget build(BuildContext context) {
 
     // Obtenemos los valores
-    darkMode = false;//Theme.of(context).brightness==Brightness.dark;
+    darkMode = Theme.of(context).brightness==Brightness.dark;
     screenSize = MediaQuery.of(context).size;
  
     // lista de widgets con las vistas
     widgets = [
-      pageView(context:context,colorContent:Colors.transparent,textColor: darkMode?Colors.white:Colors.black,colorIcon: darkMode?Colors.white:Colors.black,iconData: Icons.monetization_on,titulo:"VENTAS",subtitulo:"Registra tus ventas de una forma simple 😊"),
-      pageView(context:context,colorContent:Colors.transparent,textColor: darkMode?Colors.white:Colors.black,colorIcon: darkMode?Colors.white:Colors.black,iconData: Icons.analytics_outlined,titulo:"TRANSACCIONES",subtitulo:"Observa las transacciones que has realizado 💰"),
-      pageView(context:context,colorContent:Colors.transparent,textColor: darkMode?Colors.white:Colors.black,colorIcon: darkMode?Colors.white:Colors.black,iconData: Icons.category,titulo:"CATÁLOGO",subtitulo:"Arma tu catálogo y controla el stock de tus productos \n 🍫🍬🥫🍾"),
+      pageView(context:context,colorContent:Colors.transparent,textColor: widget.colorAccent,colorIcon: widget.colorAccent,iconData: Icons.monetization_on,titulo:"VENTAS",subtitulo:"Registra tus ventas de una forma simple 😊"),
+      pageView(context:context,colorContent:Colors.transparent,textColor: widget.colorAccent,colorIcon: widget.colorAccent,iconData: Icons.analytics_outlined,titulo:"TRANSACCIONES",subtitulo:"Observa las transacciones que has realizado 💰"),
+      pageView(context:context,colorContent:Colors.transparent,textColor: widget.colorAccent,colorIcon: widget.colorAccent,iconData: Icons.category,titulo:"CATÁLOGO",subtitulo:"Arma tu catálogo y controla el stock de tus productos \n 🍫🍬🥫🍾"),
     ];
 
     

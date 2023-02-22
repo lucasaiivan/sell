@@ -212,68 +212,73 @@ class CataloguePage extends StatelessWidget {
     final HomeController homeController = Get.find();
     
     // values
-    double titleSize = 18; 
-    String alertStockText = item.stock ? (item.quantityStock == 0 ? 'Sin stock' : '') : '';
-    Color dividerColor = homeController.getDarkMode?Colors.white.withOpacity(0.5):Colors.black.withOpacity(0.5);
+    double titleSize = 16; 
+    String alertStockText = item.stock ? (item.quantityStock == 0 ? 'Sin stock' : '') : ''; 
+
+    // styles
+    final Color primaryTextColor  = Get.isDarkMode?Colors.white70:Colors.black87;
+    final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
     // widgets
-    Widget divider = Divider(color: dividerColor,thickness: 0.15,height: 0,);
+    final Widget dividerCircle = Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child: Icon(Icons.circle,size: 4, color: primaryTextColor.withOpacity(0.5)));
+    Widget divider = ComponentApp().divider();
+
+    // widgets 
     Widget description = Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // text : nombre de la marca
+        Text(
+            item.nameMark,
+            maxLines: 2,
+            overflow: TextOverflow.clip,
+            style: const TextStyle(color: Colors.blue),
+          ), 
+        Wrap(
+          children: [
+            // text : fecha de la ultima actualización
+            Text(Publications.getFechaPublicacion(item.upgrade.toDate(), Timestamp.now().toDate()),style: textStyleSecundary,),
+            // text : cantidad de ventas
+            item.sales == 0? Container():Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // text : nombre de la marca
-                Text(
-                    item.nameMark,
-                    maxLines: 2,
-                    overflow: TextOverflow.clip,
-                    style: const TextStyle(color: Colors.blue),
-                  ), 
-                Wrap(
-                  children: [
-                    // text : precio de venta
-                    Text(Publications.getFormatoPrecio(monto: item.salePrice),style: TextStyle(fontWeight:FontWeight.w600,color: homeController.getDarkMode?Colors.white:Colors.black )),
-                    const SizedBox(width: 5),
-                    // text : porcentaje de ganancia
-                    Text(item.sProcentaje,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w500)),
-                    SizedBox(width: item.sProcentaje==''?0:5),
-                    // text : fecha de la ultima actualización
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.circle,size: 8, color: Get.theme.dividerColor),
-                        const SizedBox(width: 5),
-                        Text(Publications.getFechaPublicacion(item.upgrade.toDate(), Timestamp.now().toDate())),
-                        const SizedBox(width: 5),
-                      ],
-                    ),
-                    // text : cantidad de ventas
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        item.sales == 0? Container(): Icon(Icons.circle,size: 8, color: Get.theme.dividerColor),
-                        item.sales == 0? Container():const SizedBox(width: 5),
-                        item.sales == 0? Container(): Text('${item.sales} ${item.sales == 1 ? 'venta' : 'ventas'}'),
-                      ],
-                    ),
-                  ],
-                ),
-                // text : favorito y control de stock
-                Row(
-                  children: [
-                    item.favorite? const Text('Favorito'):Container(),
-                    item.favorite && alertStockText != ''? Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)):Container(),
-                    alertStockText == '' ? Container() : Text(alertStockText),
-                  ],
-                ),
+                dividerCircle,
+                Text('${item.sales} ${item.sales == 1 ? 'venta' : 'ventas'}',style:textStyleSecundary),
               ],
-            );
-    dynamic stockWidget = item.stock
-                ? Column(crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text('Stock',style: TextStyle(fontSize:10,color: cataloguePageController.getStockColor(productCatalogue: item))),
-                    Text(item.quantityStock.toString(),style: TextStyle(color: cataloguePageController.getStockColor(productCatalogue: item))),
-                  ],
-                )
-                : Container();
+            ),
+            item.stock?Row(
+              children: [
+                Text('Stock ',style: textStyleSecundary.copyWith(color: cataloguePageController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
+                Text(item.quantityStock.toString(),style: textStyleSecundary.copyWith(color: cataloguePageController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
+              ],
+            ):Container(),
+          ],
+        ),
+        // text : favorito y control de stock
+        Row(
+          children: [
+            item.favorite? Text('Favorito',style: TextStyle(color: Colors.yellow.shade800)):Container(),
+            item.favorite && alertStockText != ''? Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)):Container(),
+            alertStockText == '' ? Container() : Text(alertStockText),
+          ],
+        ),
+      ],
+    );
+    dynamic priceWidget = Column(crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // text : precio de venta
+        Text(Publications.getFormatoPrecio(monto: item.salePrice),style: TextStyle(fontWeight:FontWeight.w600,color: homeController.getDarkMode?Colors.white:Colors.black )),
+        const SizedBox(width: 5),
+        // text : porcentaje de ganancia
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.arrow_upward_rounded,size: 14,color: Colors.green),
+            Text(item.sProcentaje,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w500)),
+          ],
+        ),
+        
+      ],
+    );
 
     return ElasticIn(
       child: InkWell(
@@ -295,7 +300,7 @@ class CataloguePage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(item.description, maxLines: 1,style: TextStyle(fontSize: titleSize,fontWeight: FontWeight.w400)),
+                          Text(item.description, maxLines: 1,style: textStyleSecundary.copyWith(fontWeight: FontWeight.w600,fontSize: titleSize)),
                           description,
                         ],
                       ),
@@ -303,7 +308,7 @@ class CataloguePage extends StatelessWidget {
                   ),
                   Padding(
                     padding: const EdgeInsets.only(left: 10),
-                    child: stockWidget,
+                    child: priceWidget,
                   ),
                 ],
               ),
