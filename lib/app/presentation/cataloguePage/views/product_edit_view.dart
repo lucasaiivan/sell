@@ -171,17 +171,16 @@ class ProductEdit extends StatelessWidget {
         //decoration: BoxDecoration(color: controller.cardProductDetailColor,borderRadius: BorderRadius.circular(12.0)),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12.0),
+          // color : color  gradiente de la tarjeta 
           gradient: LinearGradient(
-            colors: [controller.dominateColorProduct.withOpacity(0.1), controller.cardProductDetailColor],
+            colors: [controller.dominateColorProduct.withOpacity(0.15), controller.cardProductDetailColor],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
         ),
         padding: const EdgeInsets.all(24.0),
         child: Column( 
-          children: [
-            //Icon(Icons.circle,color: controller.dominateColorProduct,),
-            //Icon(Icons.circle,color: controller.mutedColorProduct),
+          children: [ 
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceAround,

@@ -106,7 +106,7 @@ class TransactionsView extends StatelessWidget {
               WidgetAnalyticSalesTileExpanded(),
               WidgetAnalyticProductsTileExpanded(),
               tileItem( ticketModel: transactionsController.getTransactionsList[index]),
-              Divider(thickness: 0.1,color: darkTheme ?Colors.white70:Colors.black87,height: 0),
+              ComponentApp().divider(),
             ],
           );
         }
@@ -114,7 +114,7 @@ class TransactionsView extends StatelessWidget {
         return Column(
           children: [
             tileItem(ticketModel: transactionsController.getTransactionsList[index]),
-            Divider(thickness: 0.1,color: darkTheme ?Colors.white70:Colors.black87,height: 0),
+            ComponentApp().divider(),
           ],
         );
       },
@@ -205,8 +205,8 @@ class TransactionsView extends StatelessWidget {
                 // segunda fila : cantidad de items, valor del vuelto
                 Opacity(
                   opacity: 0.8,
-                  child: Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.center,
+                  child: Row( 
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       //  text : cantidad de items ( productos )
                       Text('${ticketModel.getLengh()} items',style:textStyleSecundary), 

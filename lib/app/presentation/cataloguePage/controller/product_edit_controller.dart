@@ -411,24 +411,28 @@ class ControllerProductsEdit extends GetxController {
                   town: homeController.getProfileAccountSelected.town,
                   time: Timestamp.fromDate(DateTime.now()),
                 );
-                // Firebase set : se guarda un documento con la referencia del precio del producto
+                // Firebase set : se crea un documento con la referencia del precio del producto
                 Database.refFirestoreRegisterPrice(idProducto: getProduct.id, isoPAis: 'ARG').doc(precio.id).set(precio.toJson());
 
-                // Firebase set : se actualiza los datos del producto del cátalogo de la cuenta
+                // comprobar si es un productonuevo en la DB
                 if(getNewProduct){
+                  //  Firebase set : se crea un documento con la referencia del producto en el cátalogo de la cuenta
                   Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id)
                     .set(getProduct.toJson())
                     .whenComplete(() async {
                       await Future.delayed(const Duration(seconds: 3)).then((value) {setSaveIndicator = false; Get.back();});
                     }).onError((error, stackTrace) => setSaveIndicator = false).catchError((_) => setSaveIndicator = false);
                 }else{
+                  // compro bar si el producto ya esta en el cátalogo
                   if(itsInTheCatalogue){
+                     // Firebase update : se actualiza los datos del producto del cátalogo de la cuenta
                     Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id)
                       .update(getProduct.toJson())
                       .whenComplete(() async {
                         await Future.delayed(const Duration(seconds: 3)).then((value) {setSaveIndicator = false; Get.back(); });
                     }).onError((error, stackTrace) => setSaveIndicator = false).catchError((_) => setSaveIndicator = false);
                   }else{
+                    // Firebase set : se crea los datos del producto del cátalogo de la cuenta
                     Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id)
                       .set(getProduct.toJson())
                       .whenComplete(() async {
@@ -646,16 +650,12 @@ class ControllerProductsEdit extends GetxController {
 
   void getLoadImageCamera() {
     //  function : selecciona una imagen de la camara
-    _picker
-        .pickImage(
-      source: ImageSource.camera,
-      maxWidth: 720.0,
-      maxHeight: 720.0,
-      imageQuality: 55,
-    )
+    _picker.pickImage(source: ImageSource.camera,maxWidth: 720.0,maxHeight: 720.0,imageQuality: 55,)
+    // esperamos a que se seleccione la imagen
     .then((value) {
-      formEditing = true;
-      setXFileImage = value!;
+    // set
+      formEditing = true; // activamos el formulario
+      setXFileImage = value!; // conservamos la imagen
       update(['updateAll']);  //  actualizamos la vista
       next(); //  siguiente componente
     });
@@ -742,7 +742,7 @@ class ControllerProductsEdit extends GetxController {
     // devuelve la imagen del product
     if (getXFileImage.path != '') {
       // el usuario cargo un nueva imagen externa 
-      return ImageAvatarApp( url: getProduct.image,size: size,onTap: getNewProduct || getEditModerator? showModalBottomSheetCambiarImagen : null );
+      return ImageAvatarApp( path: getXFileImage.path,size: size,onTap: getNewProduct || getEditModerator? showModalBottomSheetCambiarImagen : null );
     } else {
       // se visualiza la imagen del producto
       return ImageAvatarApp(url: getProduct.image ,size: size,onTap: getNewProduct || getEditModerator? showModalBottomSheetCambiarImagen : null );
@@ -756,8 +756,9 @@ class ControllerProductsEdit extends GetxController {
             leading: const Icon(Icons.camera),
             title: const Text('Capturar una imagen'),
             onTap: () {
+              getLoadImageCamera();
               Get.back();
-              getLoadImageCamera;
+              
             }),
         ListTile(
           leading: const Icon(Icons.image),

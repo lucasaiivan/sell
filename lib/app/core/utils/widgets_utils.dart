@@ -631,44 +631,43 @@ void showMessageAlertApp({required String title, required String message}) {
 // Cuadro de Dialogo
 // un checkbox para agregar el producto a mi cátalogo
 // ignore: must_be_immutable
-class CheckBoxAddProduct extends StatefulWidget {
+class WidgetCheckBoxAddProduct extends StatefulWidget {
   late ProductCatalogue productCatalogue ;
 
-  CheckBoxAddProduct({super.key, required this.productCatalogue});
+  WidgetCheckBoxAddProduct({super.key, required this.productCatalogue});
 
   @override
-  State<CheckBoxAddProduct> createState() => _CheckBoxAddProductState();
+  State<WidgetCheckBoxAddProduct> createState() => _WidgetCheckBoxAddProductState();
 }
 
-class _CheckBoxAddProductState extends State<CheckBoxAddProduct> {
+class _WidgetCheckBoxAddProductState extends State<WidgetCheckBoxAddProduct> {
 
   // others controllers
   final HomeController homeController = Get.find();
   //  values
+  bool darkMode = false;
   bool check = false;
+  Color colorAccent = Colors.white;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
+
+    // style 
+    darkMode = Theme.of(context).brightness == Brightness.dark;
+    colorAccent = darkMode ? Colors.white : Colors.black;
+    Color activeColor =  Colors.blue;
+
+    
+    return AnimatedContainer(
+      width:double.infinity, 
+      duration: const Duration(milliseconds: 500),
+      decoration: BoxDecoration(border: Border.all(color: check?activeColor:colorAccent,width: 0.5),color: check?activeColor.withOpacity(0.2):Colors.transparent,borderRadius: BorderRadius.circular(5)), 
       child: CheckboxListTile(
-        secondary: CachedNetworkImage(
-          imageUrl: widget.productCatalogue.image,
-          placeholder: (context, url) =>
-              CircleAvatar(backgroundColor: Get.theme.dividerColor),
-          imageBuilder: (context, image) => CircleAvatar(
-            backgroundImage: image,
-          ),
-          errorWidget: (context, url, error) =>
-              CircleAvatar(backgroundColor: Get.theme.dividerColor),
-        ),
-        title:
-            const Text('Agregar mi cátalogo', style: TextStyle(fontSize: 14)),
-        subtitle: Text(widget.productCatalogue.description,
-            style: const TextStyle(fontSize: 12), maxLines: 2),
-        value: check,
+        contentPadding: const EdgeInsets.symmetric(vertical: 5,horizontal: 12),
+        title: Text('Agregar a mi cátalogo', style: TextStyle(fontSize: 14,color: colorAccent)),
+        value: check, 
         checkColor: Colors.white,
-        activeColor: Colors.blue,
+        activeColor: activeColor, 
         onChanged: (value) {
           setState(() {
             check=!check;
@@ -705,7 +704,7 @@ class ComponentApp extends StatelessWidget {
             valueColor: AlwaysStoppedAnimation<Color>(color)));
   }
 
-  Divider divider({double thickness = 0.2}) {
+  Divider divider({double thickness = 0.1}) {
     return Divider(
       thickness: thickness,height: 0,
       color: Get.isDarkMode?Colors.white30:Colors.black38,
