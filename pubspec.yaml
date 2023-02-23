@@ -54,6 +54,7 @@ dependencies:
   sqflite: ^2.0.2+1
   get_storage: ^2.0.3
   # others 
+  image_picker: ^0.8.6+3  # Un complemento de Flutter para seleccionar imágenes desde el almacenamiento local del dispositivo.
   palette_generator: ^0.3.3+2 # Un paquete de Flutter que genera paletas de colores a partir de imágenes.
   flutter_animate: ^4.0.0 # Un paquete de Flutter que proporciona animaciones de entrada y salida para los widgets de Flutter.
   permission_handler: ^10.2.0 # Un complemento de Flutter para solicitar y administrar permisos en Android y iOS.
@@ -69,8 +70,7 @@ dependencies:
   flutter_launcher_icons: ^0.10.0 #  Una herramienta de línea de comandos que simplifica la tarea de actualizar el icono de inicio de la aplicación Flutter
   flutter_barcode_scanner: ^2.0.0 # Un complemento para las aplicaciones Flutter que agrega compatibilidad con el escaneo de códigos de barras tanto en Android como en iOS.
   audioplayers: ^1.0.1
-  flutter_masked_text2: ^0.9.1
-  image_picker: ^0.8.5+3
+  flutter_masked_text2: ^0.9.1 
   shimmer: ^2.0.0
   uuid: ^3.0.6  # Un paquete de Flutter que genera identificadores únicos universales (UUID).
   flutter_offline: ^2.1.0 # Un paquete de Flutter que le permite crear una interfaz de usuario que se adapte a la conexión de Internet del dispositivo.

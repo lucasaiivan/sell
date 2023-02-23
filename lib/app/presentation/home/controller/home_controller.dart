@@ -413,7 +413,7 @@ void showDialogCerrarSesion() {
   }
 
   void addProductToCatalogue({required ProductCatalogue product}) async {
-    // values : registra el precio en una colección publica para todos los usuarios
+    // values : se obtiene los datos para registrar del precio al publico del producto en una colección publica de la db
     Price precio = Price(
       id: getProfileAccountSelected.id,
       idAccount: getProfileAccountSelected.id,
@@ -425,20 +425,34 @@ void showDialogCerrarSesion() {
       town: getProfileAccountSelected.town,
       time: Timestamp.fromDate(DateTime.now()),
     );
-    // Firebase set : se guarda un documento con la referencia del precio del producto
-    await Database.refFirestoreRegisterPrice(
-            idProducto: product.id, isoPAis: 'ARG')
-        .doc(precio.id)
-        .set(precio.toJson());
 
-    // Firebase set : se actualiza los datos del producto del cátalogo de la cuenta
-    Database.refFirestoreCatalogueProduct(
-            idAccount: getProfileAccountSelected.id)
-        .doc(product.id)
-        .set(product.toJson())
-        .whenComplete(() async {})
-        .onError((error, stackTrace) => null)
-        .catchError((_) => null);
+    // Firebase set : se crea un documento con la referencia del precio del producto
+    Database.refFirestoreRegisterPrice(idProducto: product.id, isoPAis: 'ARG').doc(precio.id).set(precio.toJson());
+    // Firebase set : se actualiza el documento del producto del cátalogo
+    Database.refFirestoreCatalogueProduct(idAccount: getProfileAccountSelected.id).doc(product.id).set(product.toJson()).whenComplete(() async {}).onError((error, stackTrace) => null).catchError((_) => null);
+    // ser : se agrega el producto a la colección publica de DB
+    addProductToCollectionPublic(isNew: true, product: product.convertProductoDefault());
+  }
+   void addProductToCollectionPublic({required bool isNew,required Product product})  {
+    // esta función procede a guardar el documento de una colleción publica
+    
+    //  set : id de la cuenta desde la cual se creo el producto
+    product.idAccount = getProfileAccountSelected.id; 
+    //  set : marca de tiempo que se creo el documenti por primera vez
+    if(isNew) { product.creation = Timestamp.fromDate(DateTime.now());}
+    //  set : marca de tiempo que se actualizo el documento por ultima vez
+    product.upgrade = Timestamp.fromDate(DateTime.now());
+    //  set : id del usuario que creo el documento 
+    if(isNew) { product.idUserCreation = getProfileAdminUser.email;}
+    //  set : id del usuario que actualizo el documento
+    product.idUserUpgrade = getProfileAdminUser.email;
+
+    // dondition : si el producto es nuevo se crea un documento, si no se actualiza
+    if(isNew){
+      Database.refFirestoreProductPublic().doc(product.id).set(product.toJson());
+    }else{
+      Database.refFirestoreProductPublic().doc(product.id).update(product.toJson());
+    }
   }
 
   // Cambiar de cuenta
