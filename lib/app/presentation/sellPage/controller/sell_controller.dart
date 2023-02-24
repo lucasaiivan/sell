@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -12,6 +13,7 @@ import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart';
 import 'package:search_page/search_page.dart';
 import 'package:sell/app/presentation/home/controller/home_controller.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart';
@@ -60,6 +62,7 @@ class SalesController extends GetxController {
     product.quantity = 1;
     product.select = false;
     homeController.listProductsSelected.add(product);
+    update();
   }
   //  list : lista de productos seleccionados por el usaurio para la venta
   set removeProduct(String id) {
@@ -397,6 +400,7 @@ class SalesController extends GetxController {
         true,
         ScanMode.BARCODE,
       );
+      if(barcodeScanRes == '-1'){return;}
       playSoundScan();
       verifyExistenceInSelectedScanResult(id: barcodeScanRes);
     } on PlatformException {
@@ -417,7 +421,7 @@ class SalesController extends GetxController {
         // no se encontro el producto en la base de datos
         //
         // dialog : agregar producto nuevo
-        showDialogAddProductNew(productCatalogue: ProductCatalogue(id: id, creation: Timestamp.now(), documentCreation: Timestamp.now(), upgrade: Timestamp.now(), documentUpgrade: Timestamp.now()));
+        showDialogAddProductNew(productCatalogue: ProductCatalogue(id: id,code: id, creation: Timestamp.now(), documentCreation: Timestamp.now(), upgrade: Timestamp.now(), documentUpgrade: Timestamp.now()));
       }).catchError((error) {
         // error al consultar db
         Get.snackbar('ah ocurrido algo', 'Fallo el escaneo');
@@ -521,161 +525,13 @@ class SalesController extends GetxController {
   }
 
   void showDialogAddProductNew({ required ProductCatalogue productCatalogue}) {
-    // Dialog
-    // muestra este dialog cuando el producto no se encuentra en los registros de stock
-
-    // controllers 
-    TextEditingController controllerTextEditDescripcion = TextEditingController(text: productCatalogue.description);
-    MoneyMaskedTextController controllerTextEditPrecioVenta = MoneyMaskedTextController(initialValue: productCatalogue.salePrice);
-    // keys form
-    GlobalKey<FormState> descriptionFormKey = GlobalKey<FormState>();
-    GlobalKey<FormState> priceFormKey = GlobalKey<FormState>();
-
-    // variables
-    final colorAccent = Get.isDarkMode?Colors.white:Colors.black;
-    final bool isProductNew = productCatalogue.description==''?true:false;
-    // styles
-    final hintStyle = TextStyle(color: colorAccent.withOpacity(0.3));
-    final labelStyle = TextStyle(color: colorAccent.withOpacity(0.9));
-
-
-    // set 
-    controllerTextEditDescripcion.text = productCatalogue.description; 
-
-    // widgets 
-    Widget listtileProduct = ListTile(
-      title: Text('Código: ${productCatalogue.id}'), 
-    );
-    Widget widgetTextFieldDescription = Padding(
-      padding: const EdgeInsets.symmetric(horizontal:12, vertical: 6),
-      child: Form(
-        key: descriptionFormKey,
-        child: TextFormField( 
-          controller: controllerTextEditDescripcion,
-          enabled: true ,
-          autovalidateMode: AutovalidateMode.onUserInteraction,
-          focusNode: null, // sin foco
-          minLines: 1,
-          maxLines:2, 
-          inputFormatters: [ FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\- .]')),],
-          decoration:  InputDecoration(
-                  hintText: ' ej. agua saborisada 500 ml',
-                  labelText: 'Descripción del producto',
-                  hintStyle: hintStyle,
-                  labelStyle: labelStyle, 
-                  border: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent)),
-                  enabledBorder: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent)),
-                ),
-          onChanged: (value) => productCatalogue.description =value,
-          // validator: validamos el texto que el usuario ha ingresado.
-          validator: (value) {
-            if (value == null || value.isEmpty) { return 'Por favor, introduzca la descripción del producto'; }
-            return null;
-          },
-        ),
-      ),
-    );
-    Widget widgetTextFieldPrice = Padding(
-          padding: const EdgeInsets.symmetric(horizontal:12, vertical: 6),
-          child: Form(
-            key:  priceFormKey,
-            child: TextFormField( 
-              style: const TextStyle(fontSize: 18),
-              autofocus: true,
-              focusNode: null,
-              controller: controllerTextEditPrecioVenta,
-              enabled: true,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration( 
-                labelText: 'Precio de venta al públuco',
-                hintText: 'ej. agua saborisada 500 ml',  
-                hintStyle: hintStyle,
-                labelStyle: labelStyle,
-                border: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent)),
-                enabledBorder: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent)),
-                
-                ), 
-              onChanged: (value) => productCatalogue.salePrice = controllerTextEditPrecioVenta.numberValue,
-              // validator: validamos el texto que el usuario ha ingresado.
-              validator: (value) {
-                if ( controllerTextEditPrecioVenta.numberValue == 0.0) { return 'Por favor, introduzca el precio del producto'; }
-                return null;
-              },
-            ),
-          ),
-        );
-    // button 
-    final Widget buttonConfirm = Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: ElevatedButton.icon(
-          onPressed: () {
-            // condition : validamos los campos del formulario
-            if (descriptionFormKey.currentState!.validate() && priceFormKey.currentState!.validate()) {
-              // set 
-              productCatalogue.description = controllerTextEditDescripcion.text;
-              productCatalogue.salePrice = controllerTextEditPrecioVenta.numberValue;
-              //
-              // condition : si el usuario quiere agregar el producto a la lista de productos del catálogo
-              // entonces lo agregamos a la lista de productos del catálogo y a la colección de productos publica de la DB
-              //
-              if(homeController.checkAddProductToCatalogue){
-                // add product to catalogue
-                homeController.addProductToCatalogue(product: productCatalogue);
-              }
-              // add : agregamos el producto a la lista de productos seleccionados
-              addProduct(product: productCatalogue);
-              // close dialog
-              Get.back();
-            }
-          },
-          style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-              padding: const EdgeInsets.all(16.0),
-              backgroundColor: Colors.blue,),
-          icon: Container(),
-          label: const Text('Confirmar',style: TextStyle(color: Colors.white),),
-        ),
-    );
+    // dialog : muestra este dialog cuando el producto no se encuentra en el cáatalogo de la cuenta
 
     // creamos un dialog con GetX
     Get.dialog(
       ClipRRect(
         borderRadius: const  BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12), bottomLeft: Radius.circular(0), bottomRight: Radius.circular(0)),
-        child: Scaffold(
-          appBar: AppBar( 
-            title: Text(isProductNew?'Nuevo Producto':'Editar Producto'), 
-            centerTitle: true,
-            backgroundColor: Colors.transparent, 
-            automaticallyImplyLeading: false,
-            actions: [
-              IconButton(onPressed: Get.back, icon: const Icon(Icons.close)),
-            ],
-          ),
-          body: Container(
-            width: Get.width,
-            height: Get.height,
-            color: Colors.white,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Column(
-                children: [
-                  // listtile : datos del producto
-                  listtileProduct,
-                  // textfield : descripcion del producto
-                  widgetTextFieldDescription,
-                  const SizedBox(height: 12),
-                  // textfield : precio de venta
-                  widgetTextFieldPrice,
-                  // widget :  permiso para guardar el producto nuevo en mi cátalogo (app catalogo)
-                  Padding(padding: const EdgeInsets.all(12.0),child: WidgetCheckBoxAddProduct( productCatalogue: productCatalogue)),
-                  const Spacer(),
-                  SizedBox(width: double.infinity,child: buttonConfirm),
-                ],
-              ),
-            )
-          ),
-        ),
+        child: NewProductView(productCatalogue: productCatalogue),
       ),
     ); 
   }
@@ -947,5 +803,253 @@ class SalesController extends GetxController {
       }
     // si no es la primera ves que se inicica la aplicación devuelve una vistra vacia
     return Container();
+  }
+}
+
+//
+//
+// WIDGETS CLASS
+//
+//
+
+
+class NewProductView extends StatefulWidget {
+  
+  // parametro obligatorio
+  ProductCatalogue productCatalogue = ProductCatalogue(upgrade: Timestamp.now(), creation:  Timestamp.now(), documentCreation:  Timestamp.now(), documentUpgrade:  Timestamp.now() );
+  
+  NewProductView({Key? key, required this.productCatalogue}) : super(key: key);
+
+  @override
+  State<NewProductView> createState() => _NewProductViewState();
+}
+
+class _NewProductViewState extends State<NewProductView> { 
+
+  // Añade un constructor sin nombre a la clase
+  _NewProductViewState();
+  
+  // controllers 
+  final HomeController homeController = Get.find<HomeController>();
+  final SalesController salesController = Get.find<SalesController>();
+  late TextEditingController controllerTextEditDescripcion = TextEditingController(text: widget.productCatalogue.description);
+  late MoneyMaskedTextController controllerTextEditPrecioVenta = MoneyMaskedTextController(initialValue: widget.productCatalogue.salePrice);
+  // keys form
+  GlobalKey<FormState> descriptionFormKey = GlobalKey<FormState>();
+  GlobalKey<FormState> priceFormKey = GlobalKey<FormState>();
+
+  // variables
+  late Color  colorAccent ;
+  late  bool isProductNew ; 
+  bool checkAddCatalogue = false; 
+  Color checkActiveColor =  Colors.blue;
+  // styles
+  late TextStyle hintStyle ;
+  late TextStyle labelStyle ;
+  late TextStyle textStyle ;
+    
+  @override
+  void initState() {
+    super.initState();
+
+    // set
+    isProductNew = widget.productCatalogue.description==''?true:false;
+    colorAccent = Get.isDarkMode?Colors.white:Colors.black;
+    hintStyle = TextStyle(color: colorAccent.withOpacity(0.3));
+    labelStyle = TextStyle(color: colorAccent.withOpacity(0.9));
+    textStyle = TextStyle(color: colorAccent,height: 1,fontSize: 14,fontWeight: FontWeight.normal);
+    controllerTextEditDescripcion.text = widget.productCatalogue.description; 
+  }
+
+  @override
+  void dispose() {
+    controllerTextEditDescripcion.dispose();
+    controllerTextEditPrecioVenta.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    
+
+    // widgets 
+    Widget listtileCode = ListTile(
+      title: Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Text('Código: ',style: textStyle),
+        // icon : verificacion del producto
+        widget.productCatalogue.verified?const Icon(Icons.verified_rounded,color: Colors.blue, size: 20):Container(),
+        const SizedBox(width: 5),
+        // text :  crear un rich text para poder darle estilo al texto
+        Text(widget.productCatalogue.code,style: textStyle.copyWith(fontWeight: FontWeight.bold,fontSize: 16)),
+      ],
+    ), 
+    );
+    Widget listtileDescription = ListTile(
+      title: // text :  crear un rich text para poder darle estilo al texto
+        RichText(
+          text: TextSpan( 
+            style: textStyle,
+            children: <TextSpan>[
+              const TextSpan(text: 'Descripción: ' ),
+              TextSpan(text:widget.productCatalogue.description,style: textStyle.copyWith(fontWeight: FontWeight.bold,fontSize: 16) ),
+            ],
+          ),
+        ), 
+    );
+    Widget widgetTextFieldDescription = widget.productCatalogue.verified?listtileDescription: Padding(
+      padding: const EdgeInsets.symmetric(horizontal:12, vertical: 6),
+      child: Form(
+        key: descriptionFormKey,
+        child: TextFormField( 
+          controller: controllerTextEditDescripcion,
+          enabled: true ,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          focusNode: null, // sin foco
+          minLines: 1,
+          maxLines:2, 
+          inputFormatters: [ FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\- .]')),],
+          decoration:  InputDecoration(
+                  hintText: ' ej. agua saborisada 500 ml',
+                  labelText: 'Descripción del producto',
+                  hintStyle: hintStyle,
+                  labelStyle: labelStyle, 
+                  border: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent)),
+                  enabledBorder: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent)),
+                ),
+          onChanged: (value) => widget.productCatalogue.description =value,
+          // validator: validamos el texto que el usuario ha ingresado.
+          validator: (value) {
+            if (value == null || value.isEmpty) { return 'Por favor, introduzca la descripción del producto'; }
+            return null;
+          },
+        ),
+      ),
+    );
+    // TODO : RangeError TextFormField : cuando el usuario mantiene presionado el boton de borrar > 'RangeError : Invalid value: only valid value is 0: -1'
+    Widget widgetTextFieldPrice = Padding(
+          padding: const EdgeInsets.symmetric(horizontal:12, vertical: 6),
+          child: Form(
+            key:  priceFormKey,
+            child: TextFormField( 
+              style: const TextStyle(fontSize: 18),
+              autofocus: true,
+              focusNode: null,
+              controller: controllerTextEditPrecioVenta,
+              enabled: true,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration( 
+                labelText: 'Precio de venta al públuco',
+                hintText: 'ej. agua saborisada 500 ml',  
+                hintStyle: hintStyle,
+                labelStyle: labelStyle,
+                border: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent)),
+                enabledBorder: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent)),
+                
+                ), 
+              onChanged: (value) {
+                // condition : comprobar si es un monto valido 
+                if (controllerTextEditPrecioVenta.numberValue > 0.0) {
+                  widget.productCatalogue.salePrice = controllerTextEditPrecioVenta.numberValue;
+                }
+              },
+              // validator: validamos el texto que el usuario ha ingresado.
+              validator: (value) {
+                if ( controllerTextEditPrecioVenta.numberValue == 0.0) { return 'Por favor, introduzca el precio del producto'; }
+                return null;
+              },
+            ),
+          ),
+        );
+    // checkbox : agregar producto al catálogo
+    Widget checkboxAddProductToCatalogue =  AnimatedContainer(
+      width:double.infinity, 
+      duration: const Duration(milliseconds: 500),
+      decoration: BoxDecoration(border: Border.all(color: checkAddCatalogue?checkActiveColor:colorAccent,width: 0.5),color: checkAddCatalogue?checkActiveColor.withOpacity(0.2):Colors.transparent,borderRadius: BorderRadius.circular(5)), 
+      child: CheckboxListTile(
+        contentPadding: const EdgeInsets.symmetric(vertical: 5,horizontal: 12),
+        title: Text('Agregar a mi cátalogo', style: TextStyle(fontSize: 14,color: colorAccent)),
+        value: checkAddCatalogue, 
+        checkColor: Colors.white,
+        activeColor: checkActiveColor, 
+        onChanged: (value) {
+          setState(() { 
+            checkAddCatalogue=value!;
+          });
+        },
+      ),
+    );
+    // button 
+    final Widget buttonConfirm = Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: ElevatedButton.icon(
+          onPressed: () {
+            // variables de condiciones
+            bool conditionDescription = widget.productCatalogue.verified?true:descriptionFormKey.currentState!.validate();
+            bool conditionPrice = priceFormKey.currentState!.validate();
+            // condition : validamos los campos del formulario
+            if (  conditionPrice && conditionDescription) {
+              // set 
+              widget.productCatalogue.description = controllerTextEditDescripcion.text;
+              widget.productCatalogue.salePrice = controllerTextEditPrecioVenta.numberValue;
+              //
+              // condition : si el usuario quiere agregar el producto a la lista de productos del catálogo
+              // entonces lo agregamos a la lista de productos del catálogo y a la colección de productos publica de la DB
+              //
+              if(checkAddCatalogue){
+                // add product to catalogue
+                homeController.addProductToCatalogue(product: widget.productCatalogue);
+              }
+              // add : agregamos el producto a la lista de productos seleccionados
+              salesController.addProduct(product: widget.productCatalogue);
+              // close dialog
+              Get.back();
+            }
+          },
+          style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+              padding: const EdgeInsets.all(16.0),
+              backgroundColor: Colors.blue,),
+          icon: Container(),
+          label: const Text('Confirmar',style: TextStyle(color: Colors.white),),
+        ),
+    );
+    
+    return Scaffold(
+      appBar: AppBar( 
+        title: Text(isProductNew?'Nuevo Producto':'Producto'), 
+        backgroundColor: Colors.transparent, 
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(onPressed: Get.back, icon: const Icon(Icons.close)),
+        ],
+      ),
+      body: Container(
+        width: Get.width,
+        height: Get.height,
+        color: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Column(
+            children: [
+              // listtile : datos del producto
+              listtileCode,
+              // textfield : descripcion del producto
+              widgetTextFieldDescription,
+              const SizedBox(height: 12),
+              // textfield : precio de venta
+              widgetTextFieldPrice,
+              // widget :  permiso para guardar el producto nuevo en mi cátalogo (app catalogo)
+              Padding(padding: const EdgeInsets.all(12.0),child: checkboxAddProductToCatalogue),
+              const Spacer(),
+              SizedBox(width: double.infinity,child: buttonConfirm),
+            ],
+          ),
+        )
+      ),
+    );
   }
 }

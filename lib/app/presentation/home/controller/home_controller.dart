@@ -51,9 +51,7 @@ class HomeController extends GetxController {
     catalogUserHuideVisibility=false;
     await GetStorage().write('catalogUserHuideVisibility', catalogUserHuideVisibility);
   }
-
-  // value state : este valor valida si el usuario quiere que el código escaado quiere agregarlo a su cátalogue
-  bool checkAddProductToCatalogue = false;
+ 
   
   // list admins users
   final RxList<UserModel> _adminsUsersList = <UserModel>[].obs;
@@ -430,8 +428,10 @@ void showDialogCerrarSesion() {
     Database.refFirestoreRegisterPrice(idProducto: product.id, isoPAis: 'ARG').doc(precio.id).set(precio.toJson());
     // Firebase set : se actualiza el documento del producto del cátalogo
     Database.refFirestoreCatalogueProduct(idAccount: getProfileAccountSelected.id).doc(product.id).set(product.toJson()).whenComplete(() async {}).onError((error, stackTrace) => null).catchError((_) => null);
-    // ser : se agrega el producto a la colección publica de DB
-    addProductToCollectionPublic(isNew: true, product: product.convertProductoDefault());
+    // condition : si el producto no esta verificado se procede a crear un documento en la colección publica
+    if(product.verified == false ){
+      addProductToCollectionPublic(isNew: true, product: product.convertProductoDefault());
+    }
   }
    void addProductToCollectionPublic({required bool isNew,required Product product})  {
     // esta función procede a guardar el documento de una colleción publica

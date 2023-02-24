@@ -627,57 +627,7 @@ void showMessageAlertApp({required String title, required String message}) {
           ? Colors.white
           : Colors.black);
 }
-
-// Cuadro de Dialogo
-// un checkbox para agregar el producto a mi cátalogo
-// ignore: must_be_immutable
-class WidgetCheckBoxAddProduct extends StatefulWidget {
-  late ProductCatalogue productCatalogue ;
-
-  WidgetCheckBoxAddProduct({super.key, required this.productCatalogue});
-
-  @override
-  State<WidgetCheckBoxAddProduct> createState() => _WidgetCheckBoxAddProductState();
-}
-
-class _WidgetCheckBoxAddProductState extends State<WidgetCheckBoxAddProduct> {
-
-  // others controllers
-  final HomeController homeController = Get.find();
-  //  values
-  bool darkMode = false;
-  bool check = false;
-  Color colorAccent = Colors.white;
-
-  @override
-  Widget build(BuildContext context) {
-
-    // style 
-    darkMode = Theme.of(context).brightness == Brightness.dark;
-    colorAccent = darkMode ? Colors.white : Colors.black;
-    Color activeColor =  Colors.blue;
-
-    
-    return AnimatedContainer(
-      width:double.infinity, 
-      duration: const Duration(milliseconds: 500),
-      decoration: BoxDecoration(border: Border.all(color: check?activeColor:colorAccent,width: 0.5),color: check?activeColor.withOpacity(0.2):Colors.transparent,borderRadius: BorderRadius.circular(5)), 
-      child: CheckboxListTile(
-        contentPadding: const EdgeInsets.symmetric(vertical: 5,horizontal: 12),
-        title: Text('Agregar a mi cátalogo', style: TextStyle(fontSize: 14,color: colorAccent)),
-        value: check, 
-        checkColor: Colors.white,
-        activeColor: activeColor, 
-        onChanged: (value) {
-          setState(() {
-            check=!check;
-            homeController.checkAddProductToCatalogue = check;
-          });
-        },
-      ),
-    );
-  }
-}
+ 
  
 
 // ignore: must_be_immutable

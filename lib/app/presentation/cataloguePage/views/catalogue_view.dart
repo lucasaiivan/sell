@@ -227,7 +227,7 @@ class CataloguePage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // text : nombre de la marca
-        Text(
+        item.nameMark==''?Container():Text(
             item.nameMark,
             maxLines: 2,
             overflow: TextOverflow.clip,
@@ -269,7 +269,7 @@ class CataloguePage extends StatelessWidget {
         Text(Publications.getFormatoPrecio(monto: item.salePrice),style: TextStyle(fontWeight:FontWeight.w600,color: homeController.getDarkMode?Colors.white:Colors.black )),
         const SizedBox(width: 5),
         // text : porcentaje de ganancia
-        Row(
+        item.sProcentaje==''?Container():Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(Icons.arrow_upward_rounded,size: 14,color: Colors.green),
@@ -298,7 +298,7 @@ class CataloguePage extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start, 
                         children: [
                           Text(item.description, maxLines: 1,style: textStyleSecundary.copyWith(fontWeight: FontWeight.w600,fontSize: titleSize)),
                           description,
@@ -316,80 +316,6 @@ class CataloguePage extends StatelessWidget {
             divider,
           ],
         ),
-      ),
-    );
-
-    return ElasticIn(
-      child: Column(
-        children: [
-          ListTile(
-            contentPadding: const EdgeInsets.all(12),
-            onTap: () => cataloguePageController.toProductEdit(productCatalogue: item), 
-            leading: ImageAvatarApp(url: item.image,size: 50,favorite: item.favorite),  // image : avatar del producto
-            title: Text(item.description, maxLines: 1,style: TextStyle(fontSize: titleSize,fontWeight: FontWeight.w400)),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // text : nombre de la marca
-                Text(
-                    item.nameMark,
-                    maxLines: 2,
-                    overflow: TextOverflow.clip,
-                    style: const TextStyle(color: Colors.blue),
-                  ), 
-                Wrap(
-                  children: [
-                    // text : precio de venta
-                    Text(Publications.getFormatoPrecio(monto: item.salePrice),style: TextStyle(fontWeight:FontWeight.w600,color: homeController.getDarkMode?Colors.white:Colors.black )),
-                    const SizedBox(width: 5),
-                    // text : porcentaje de ganancia
-                    Text(item.sProcentaje,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w500)),
-                    SizedBox(width: item.sProcentaje==''?0:5),
-                    // text : fecha de la ultima actualización
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.circle,size: 8, color: Get.theme.dividerColor),
-                        const SizedBox(width: 5),
-                        Text(Publications.getFechaPublicacion(item.upgrade.toDate(), Timestamp.now().toDate())),
-                        const SizedBox(width: 5),
-                      ],
-                    ),
-                    // text : cantidad de ventas
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        item.sales == 0? Container(): Icon(Icons.circle,size: 8, color: Get.theme.dividerColor),
-                        item.sales == 0? Container():const SizedBox(width: 5),
-                        item.sales == 0? Container(): Text('${item.sales} ${item.sales == 1 ? 'venta' : 'ventas'}'),
-                      ],
-                    ),
-                  ],
-                ),
-                // text : favorito y control de stock
-                Row(
-                  children: [
-                    item.favorite? const Text('Favorito'):Container(),
-                    item.favorite && alertStockText != ''? Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)):Container(),
-                    alertStockText == '' ? Container() : Text(alertStockText),
-                  ],
-                ),
-              ],
-            ),
-            // text : stock
-            trailing: item.stock
-                ? Expanded(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text('Stock',style: TextStyle(fontSize:10,color: cataloguePageController.getStockColor(productCatalogue: item))),
-                      Text(item.quantityStock.toString(),style: TextStyle(color: cataloguePageController.getStockColor(productCatalogue: item))),
-                    ],
-                  ),
-                )
-                : null,
-          ),
-          divider,
-        ],
       ),
     );
   }
