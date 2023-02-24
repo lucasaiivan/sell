@@ -124,40 +124,7 @@ class ProductEdit extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Widget widgetsImagen() {
-    return Container(
-      padding: const EdgeInsets.all(24.0),
-      color: Colors.grey.withOpacity(0.05),
-      width: double.infinity,
-      height: Get.size.height * 0.25,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          // button
-          controller.getSaveIndicator
-              ? Container()
-              : controller.getNewProduct || controller.getEditModerator
-                  ? IconButton(
-                      onPressed: controller.getLoadImageCamera,
-                      icon: const Icon(Icons.camera_alt, color: Colors.grey))
-                  : Container(),
-          //  image
-          controller.loadImage(),
-          //  button
-          controller.getSaveIndicator
-              ? Container()
-              : controller.getNewProduct || controller.getEditModerator
-                  ? IconButton(
-                      onPressed: controller.getLoadImageGalery,
-                      icon: const Icon(Icons.image, color: Colors.grey))
-                  : Container(),
-        ],
-      ),
-    );
-  }
+  } 
   // view  : descripcion del producto en una tarjeta con un icono de verificacion,  codigo, descripcion y marca
   Widget cardFrontProduct(){
     
@@ -277,6 +244,7 @@ class ProductEdit extends StatelessWidget {
           // textfield : seleccionar cátegoria
             !controller.getAccountAuth? Container(): GestureDetector(
               onTap: SelectCategory.show,
+              // TODO : RangeError TextFormField : cuando el usuario mantiene presionado el boton de borrar > 'RangeError : Invalid value: only valid value is 0: -1'
               child: TextFormField(
                 autofocus: false,
                 focusNode:null,
@@ -330,6 +298,7 @@ class ProductEdit extends StatelessWidget {
                     space,
                     Form(
                       key: controller.salePriceFormKey,
+                      // TODO : RangeError TextFormField : cuando el usuario mantiene presionado el boton de borrar > 'RangeError : Invalid value: only valid value is 0: -1'
                       child: TextFormField(
                         style: const TextStyle(fontSize: 18),
                         autofocus: false,
