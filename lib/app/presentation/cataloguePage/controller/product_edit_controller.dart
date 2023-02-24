@@ -395,7 +395,7 @@ class ControllerProductsEdit extends GetxController {
               }
               // procede agregrar el producto en el cátalogo
               // Mods - save data product global
-              if (getNewProduct || getEditModerator) {
+              if ( getProduct.verified==false || getNewProduct || getEditModerator) {
                   setProductPublicFirestore(product: getProduct.convertProductoDefault());
               }
               

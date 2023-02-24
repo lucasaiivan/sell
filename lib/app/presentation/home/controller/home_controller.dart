@@ -2,17 +2,20 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart';
 import '../../../core/routes/app_pages.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../domain/entities/user_model.dart';
 import '../../../core/utils/widgets_utils.dart';
-import '../../splash/controllers/splash_controller.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 class HomeController extends GetxController {
 
@@ -200,8 +203,6 @@ class HomeController extends GetxController {
 
   // cerrar sesión
 void showDialogCerrarSesion() {
-  // others controllers
-  final HomeController homeController = Get.find();
 
   Widget widget = AlertDialog(
     title: const Text("Cerrar sesión"),
@@ -224,24 +225,12 @@ void showDialogCerrarSesion() {
               barrierDismissible: false,
               barrierColor: const Color(0xff141A31).withOpacity(.3),
               useSafeArea: true,
-            );
-            // default values
-            homeController.setProfileAccountSelected=ProfileAccountModel(creation: Timestamp.now());
-            homeController.setProfileAdminUser = UserModel ();
-            homeController.setCatalogueCategoryList = [];
-            homeController.setCatalogueCategoryList = [];
-            homeController.setCatalogueProducts = [];
-            homeController.setProductsOutstandingList = [];
-            // save key/values Storage
-            GetStorage().write('idAccount', '');
+            ); 
+            //
             // instancias de FirebaseAuth para proceder a cerrar sesión
-            final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
-            Future.delayed(const Duration(seconds: 2)).then((_) {
-              firebaseAuth.signOut().then((value) async {
-                // finalizamos el diálogo alerta
-                Get.back();
-              });
-            });
+            //
+            await signOutGoogle();
+
           }),
     ],
   );
@@ -250,6 +239,23 @@ void showDialogCerrarSesion() {
     widget,
   );
 }
+  // FUCTION FIREBASE AUTH
+  Future<void> signOutGoogle() async {
+    // intancias de FirebaseAuth para proceder a cerrar sesión
+    final FirebaseAuth auth = FirebaseAuth.instance;
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+    // cerramos sesión
+    try {
+      await googleSignIn.signOut(); // cerramos sesión de google
+      await auth.signOut(); // cerramos sesión de firebase
+      await FlutterSecureStorage().deleteAll(); // eliminamos los datos de la memorias del dispositivo 
+      await FirebaseAuth.instanceFor(app: Firebase.app()).signOut().then((value) => Get.back); // cerramos sesión de firebase 
+      
+      SystemNavigator.pop(); // cerramos la app
+    } catch (error) {
+      print('#### error : signOutGoogle');
+    }
+  }
 
   // QUERIES FIRESTORE
 

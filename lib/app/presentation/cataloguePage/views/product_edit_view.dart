@@ -181,10 +181,10 @@ class ProductEdit extends StatelessWidget {
                           // textfield  : seleccionar una marca
                           textfielButton(
                             contentPadding: const EdgeInsets.only(bottom: 0,top: 0),
-                              stateEdit: controller.getSaveIndicator? false: controller.getEditModerator || controller.getNewProduct,
+                              stateEdit: controller.getSaveIndicator? false: controller.getEditModerator || controller.getProduct.verified==false,
                               textValue: controller.getMarkSelected.name,
                               labelText: controller.getMarkSelected.id == ''? 'Seleccionar una marca': 'Marca',
-                              onTap: controller.getNewProduct || controller.getEditModerator? controller.showModalSelectMarca : () {}
+                              onTap: controller.getProduct.verified==false || controller.getEditModerator? controller.showModalSelectMarca : () {}
                           ),
                           !controller.getAccountAuth ? Container() : space,
                           
@@ -196,7 +196,7 @@ class ProductEdit extends StatelessWidget {
             ),
             // textField  : descripción del producto
             TextField(
-              enabled: controller.getSaveIndicator? false: controller.getEditModerator || controller.getNewProduct,
+              enabled: controller.getSaveIndicator? false: controller.getEditModerator || controller.getProduct.verified==false,
               minLines: 1,
               maxLines: 5,
               keyboardType: TextInputType.multiline,
