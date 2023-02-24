@@ -53,6 +53,7 @@ dependencies:
   # storage
   sqflite: ^2.0.2+1
   get_storage: ^2.0.3
+  flutter_secure_storage: ^8.0.0
   # others 
   image_picker: ^0.8.6+3  # Un complemento de Flutter para seleccionar imágenes desde el almacenamiento local del dispositivo.
   palette_generator: ^0.3.3+2 # Un paquete de Flutter que genera paletas de colores a partir de imágenes.
