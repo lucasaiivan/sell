@@ -311,11 +311,10 @@ class AccountView extends GetView<AccountController> {
                 padding: const EdgeInsets.only(top: 50),
                 child: Opacity(opacity: 0.5,child: Center(child: Text('Te uniste ${Publications.getFechaPublicacion(controller.profileAccount.creation.toDate(), Timestamp.now().toDate()).toLowerCase()}'))),
               ),
-              const SizedBox(height: 50),
+              const SizedBox(height: 75),
               // text : informativo 
               controller.newAccount?controller.getSavingIndicator?Container():Column(
-                children: [
-                  widgetText(text: 'listo! eso es todo! 💪'),
+                children: [ 
                   TextButton(onPressed:controller.saveAccount, child: const Text('Guardar')),
                   const SizedBox(height: 50),
                 ],

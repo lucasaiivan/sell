@@ -253,7 +253,6 @@ class SalesController extends GetxController {
         builder: (product) {
 
           // values
-          Color tileColor = product.stock? (product.quantityStock <= product.alertStock && homeController.getProfileAccountSelected.subscribed? Colors.red.withOpacity(0.3): product.favorite?Colors.amber.withOpacity(0.1):Colors.transparent): product.favorite?Colors.amber.withOpacity(0.1):Colors.transparent;
           String alertStockText =product.stock ? (product.quantityStock == 0 ? 'Sin stock' : '${product.quantityStock} en stock') : '';
           
           return Column(
@@ -266,7 +265,7 @@ class SalesController extends GetxController {
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     // image
                     ImageAvatarApp(url: product.image,size: 75,favorite:product.favorite),
@@ -278,7 +277,7 @@ class SalesController extends GetxController {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(product.description,maxLines: 1,overflow: TextOverflow.clip,style: TextStyle(fontWeight: FontWeight.w500)),
+                          Text(product.description,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(fontWeight: FontWeight.w500)),
                           Text(product.nameMark,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(color: Colors.blue)),
                           Wrap(
                             crossAxisAlignment: WrapCrossAlignment.start,
@@ -910,7 +909,7 @@ class _NewProductViewState extends State<NewProductView> {
           focusNode: null, // sin foco
           minLines: 1,
           maxLines:2, 
-          inputFormatters: [ FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\- .]')),],
+          inputFormatters: [ FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\- .³%]')) ],
           decoration:  InputDecoration(
                   hintText: ' ej. agua saborisada 500 ml',
                   labelText: 'Descripción del producto',
