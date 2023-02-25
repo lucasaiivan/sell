@@ -85,7 +85,7 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                     child: Column(
                       children: [
                         controller.getWriteCode?textFieldCodeBar():Container(), 
-                        controller.getWriteCode?Container():TextButton(onPressed: (){ controller.setWriteCode =!controller.getWriteCode;}, child: const Text('Escribir código')),
+                        controller.getWriteCode?Container():TextButton(onPressed: (){ controller.setWriteCode =!controller.getWriteCode;}, child: Text('Escribir código',style: TextStyle(color: controller.getproductDoesNotExist?Colors.white:Colors.blue) ,)),
                         const SizedBox(height: 12.0),
                         Opacity(
                           opacity: controller.getproductDoesNotExist ? 0.5 : 1.0,
@@ -98,17 +98,9 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                                     child: FadeInRight(
                                         child: button(
                                           icon: Icon(Icons.search, color: controller.getButtonData.colorText),
-                                          onPressed: () =>
-                                              controller.textEditingController.text == ''
-                                                  ? null
-                                                  : controller.queryProduct(
-                                                      id: controller
-                                                          .textEditingController
-                                                          .value
-                                                          .text),
+                                          onPressed: () =>controller.textEditingController.text == ''? null: controller.queryProduct(id: controller.textEditingController.value.text),
                                           text: "Buscar",
-                                          colorAccent:
-                                              controller.getButtonData.colorText,
+                                          colorAccent:controller.getButtonData.colorText,
                                           colorButton: controller.getButtonData.colorButton,
                                         ),
                                       ),

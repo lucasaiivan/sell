@@ -2,6 +2,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:get/get.dart';
 import 'package:sell/app/presentation/cataloguePage/views/formCreate_product_view.dart';
@@ -205,6 +206,7 @@ class ProductEdit extends StatelessWidget {
                 contentPadding: EdgeInsets.only(bottom: 12,top: 12),
                 filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
                 disabledBorder: InputBorder.none,labelText: "Descripción del producto"),
+                inputFormatters: [ FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\- .³%]')) ],
                 textInputAction: TextInputAction.done,
                 controller: controller.controllerTextEditDescripcion,
               ),
@@ -532,7 +534,7 @@ Widget get widgetForModerator{
                   },
                 ),
                 SizedBox(height: !controller.getSaveIndicator ? 20.0 : 0.0),
-                controller.getSaveIndicator
+                controller.getSaveIndicator || controller.getEditModerator
                     ? Container()
                     : button(
                         padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
@@ -543,7 +545,7 @@ Widget get widgetForModerator{
                         },
                         colorAccent: Colors.white,
                         colorButton: controller.getEditModerator? Colors.green: Colors.orange,
-                        text: controller.getEditModerator? controller.getNewProduct?'Crear documento':'Actualizar documento': "Editar documento",
+                        text:  "Editar documento",
                       ),
                 const SizedBox(height: 20.0),
                 controller.getSaveIndicator || controller.getNewProduct || !controller.getEditModerator

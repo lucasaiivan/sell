@@ -371,18 +371,18 @@ class ControllerProductsEdit extends GetxController {
               updateAll();
 
               // set : values
-              getProduct.description = getDescription;
+              getProduct.description = controllerTextEditDescripcion.text;
               getProduct.upgrade = Timestamp.now();
               getProduct.idMark = getMarkSelected.id;
               getProduct.nameMark = getMarkSelected.name;
-              getProduct.purchasePrice = getPurchasePrice;
-              getProduct.salePrice = getSalePrice;
+              getProduct.purchasePrice = controllerTextEditPrecioCompra.numberValue;
+              getProduct.salePrice = controllerTextEditPrecioVenta.numberValue;
               getProduct.favorite = getFavorite;
               getProduct.stock = getStock;
-              getProduct.quantityStock = getQuantityStock;
+              if(controllerTextEditQuantityStock.text!=''){getProduct.quantityStock = int.parse( controllerTextEditQuantityStock.text );}
               getProduct.category = getCategory.id; 
               getProduct.nameCategory = getCategory.name;
-              getProduct.alertStock = getAlertStock;
+              if(controllerTextEditAlertStock.text!=''){getProduct.alertStock  = int.parse( controllerTextEditAlertStock.text );}
 
               // actualización de la imagen del producto
               if (getXFileImage.path != '') {
@@ -395,7 +395,7 @@ class ControllerProductsEdit extends GetxController {
               }
               // procede agregrar el producto en el cátalogo
               // Mods - save data product global
-              if ( getProduct.verified==false || getNewProduct || getEditModerator) {
+              if ( getProduct.verified==false || getEditModerator) {
                   setProductPublicFirestore(product: getProduct.convertProductoDefault());
               }
               
@@ -414,32 +414,14 @@ class ControllerProductsEdit extends GetxController {
                 // Firebase set : se crea un documento con la referencia del precio del producto
                 Database.refFirestoreRegisterPrice(idProducto: getProduct.id, isoPAis: 'ARG').doc(precio.id).set(precio.toJson());
 
-                // comprobar si es un productonuevo en la DB
-                if(getNewProduct){
-                  //  Firebase set : se crea un documento con la referencia del producto en el cátalogo de la cuenta
-                  Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id)
-                    .set(getProduct.toJson())
-                    .whenComplete(() async {
-                      await Future.delayed(const Duration(seconds: 3)).then((value) {setSaveIndicator = false; Get.back();});
-                    }).onError((error, stackTrace) => setSaveIndicator = false).catchError((_) => setSaveIndicator = false);
-                }else{
-                  // compro bar si el producto ya esta en el cátalogo
-                  if(itsInTheCatalogue){
-                     // Firebase update : se actualiza los datos del producto del cátalogo de la cuenta
-                    Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id)
-                      .update(getProduct.toJson())
-                      .whenComplete(() async {
-                        await Future.delayed(const Duration(seconds: 3)).then((value) {setSaveIndicator = false; Get.back(); });
-                    }).onError((error, stackTrace) => setSaveIndicator = false).catchError((_) => setSaveIndicator = false);
-                  }else{
-                    // Firebase set : se crea los datos del producto del cátalogo de la cuenta
-                    Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id)
-                      .set(getProduct.toJson())
-                      .whenComplete(() async {
-                        await Future.delayed(const Duration(seconds: 3)).then((value) {setSaveIndicator = false; Get.back(); });
-                    }).onError((error, stackTrace) => setSaveIndicator = false).catchError((_) => setSaveIndicator = false);
-                  }
-                }
+                // Firebase set : se crea los datos del producto del cátalogo de la cuenta
+                Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id)
+                  .set(getProduct.toJson())
+                  .whenComplete(() async {
+                    await Future.delayed(const Duration(seconds: 3)).then((value) {setSaveIndicator = false; Get.back(); });
+                }).onError((error, stackTrace) => setSaveIndicator = false).catchError((_) => setSaveIndicator = false);
+
+
             } else {
               Get.snackbar(
                   'Stock no valido 😐', 'debe proporcionar un cantidad');
@@ -580,6 +562,7 @@ class ControllerProductsEdit extends GetxController {
       _getImageColors(url: getProduct.image);
     }
     // set : datos del producto para validar
+    setFavorite = getProduct.favorite;
     setPurchasePrice = getProduct.purchasePrice;
     setSalePrice = getProduct.salePrice;
     setQuantityStock = getProduct.quantityStock;
@@ -742,10 +725,10 @@ class ControllerProductsEdit extends GetxController {
     // devuelve la imagen del product
     if (getXFileImage.path != '') {
       // el usuario cargo un nueva imagen externa 
-      return ImageAvatarApp( path: getXFileImage.path,size: size,onTap: getNewProduct || getEditModerator? showModalBottomSheetCambiarImagen : null );
+      return ImageAvatarApp( path: getXFileImage.path,size: size,onTap: getProduct.verified==false || getEditModerator? showModalBottomSheetCambiarImagen : null );
     } else {
       // se visualiza la imagen del producto
-      return ImageAvatarApp(url: getProduct.image ,size: size,onTap: getNewProduct || getEditModerator? showModalBottomSheetCambiarImagen : null );
+      return ImageAvatarApp(url: getProduct.image ,size: size,onTap: getProduct.verified==false || getEditModerator? showModalBottomSheetCambiarImagen : null );
     }
   }
 

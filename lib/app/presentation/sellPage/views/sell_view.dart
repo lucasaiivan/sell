@@ -306,6 +306,9 @@ class SalesView extends StatelessWidget {
 
     // values
     const double height = 120;
+    final bool viewDefault = controller.getProductsOutstandingList.length==0;
+    final int itemCount = viewDefault?6:controller.getProductsOutstandingList.length;
+
 
     return Stack(
       children: [
@@ -314,13 +317,20 @@ class SalesView extends StatelessWidget {
           width: double.infinity,
           child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: controller.getProductsOutstandingList.length ,
+                itemCount: itemCount,
                 itemBuilder: (context, index) {
 
                   // values 
                   Widget widget = index <= (controller.getProductsOutstandingList.length-1)? circleAvatarProduct(productCatalogue:controller.getProductsOutstandingList[index]):circleAvatarProduct(productCatalogue: ProductCatalogue(creation: Timestamp.now(), upgrade: Timestamp.now(), documentCreation: Timestamp.now(), documentUpgrade: Timestamp.now()));
                   
+                  // condition : views default
+                  if( viewDefault){ return Padding(
+                    padding: EdgeInsets.only(left: index==0?5:0),
+                    child: circleAvatarSeachAndDefault(context: context),
+                  ); }
+                  // condition : vista de productos destacados
                   if(index == 0){ return Row(crossAxisAlignment: CrossAxisAlignment.start,children: [const SizedBox(width: 95.0,height: height),widget]);}
+                  
                   return widget;
                 },
               ),
@@ -344,12 +354,12 @@ class SalesView extends StatelessWidget {
         ),
           ),
         ),
-        circleAvatarBSeachDefault(context: context, seach: true)
+        circleAvatarSeachAndDefault(context: context, seach: true)
       ],
     );
   }
 
-  Widget circleAvatarBSeachDefault({bool seach = false, required BuildContext context}) {
+  Widget circleAvatarSeachAndDefault({bool seach = false, required BuildContext context}) {
     // controller
     final SalesController salesController = Get.find();
 
@@ -376,10 +386,7 @@ class SalesView extends StatelessWidget {
                           CircleAvatar(
                             radius: radius,
                             backgroundColor: Colors.grey.withOpacity(0.1),
-                            child: Icon(Icons.search,
-                                color: Get.theme.brightness == Brightness.dark
-                                    ? Colors.white
-                                    : Colors.black54),
+                            child: Icon(Icons.search,color: Get.theme.brightness == Brightness.dark? Colors.white: Colors.black54),
                           ),
                           SizedBox(
                             height: spaceImageText,
@@ -402,25 +409,23 @@ class SalesView extends StatelessWidget {
               ),
             ),
           )
-        : Padding(
-            padding: const EdgeInsets.only(left: 12),
-            child: ElasticIn(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(5.0),
-                    child: CircleAvatar(
-                      radius: radius,
-                      backgroundColor: Colors.grey.withOpacity(0.1),
-                    ),
-                  ),
-                  const Text(''),
-                ],
+        : ElasticIn(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: CircleAvatar(
+                  radius: radius,
+                  backgroundColor: Colors.grey.withOpacity(0.1),
+                ),
               ),
-            ),
-          );
+              const Text(''),
+            ],
+          ),
+        );
   }
 
   Widget circleAvatarProduct({required ProductCatalogue productCatalogue}) {
