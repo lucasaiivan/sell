@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:palette_generator/palette_generator.dart';
 import 'package:search_page/search_page.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:uuid/uuid.dart';
@@ -14,6 +15,7 @@ import '../../../domain/entities/catalogo_model.dart';
 import '../../../data/datasource/database_cloud.dart';
 import '../../../core/utils/widgets_utils.dart';
 import '../../home/controller/home_controller.dart';
+import 'package:http/http.dart' as http;
 
 class ControllerProductsEdit extends GetxController {
 
@@ -21,7 +23,11 @@ class ControllerProductsEdit extends GetxController {
   Color colorLoading = Colors.blue; 
   final Color colorButton = Colors.blue;
   Color cardProductDetailColor = Colors.grey.withOpacity(0.2);
+  Color dominateColorProduct = Colors.grey.withOpacity(0.2);
+  Color mutedColorProduct = Colors.grey.withOpacity(0.2);
   bool darkMode = false;
+  // var logic
+  bool _onBackPressed = false;
 
 
   // controller : carousel de componentes para que el usuario complete los campos necesarios para crear un nuevo producto nuevo
@@ -168,7 +174,7 @@ class ControllerProductsEdit extends GetxController {
   Category _category = Category();
   set setCategory(Category value) {
     _category = value; 
-    controllerTextEditCategory.text = value.name;
+    controllerTextEditCategory.text = value.name; // actualizamos el textfield porque no se actualiza solo al cambiar el valor en un dialog
     update(['updateAll']);
   }
   Category get getCategory => _category;
@@ -276,12 +282,13 @@ class ControllerProductsEdit extends GetxController {
   // get 
   bool get isSubscribed => true;//homeController.getProfileAccountSelected.subscribed;
 
+  //
   // FUNCTIONES
-
-  updateAll() => update(['updateAll']);
-  back() => Get.back();
+  //
+  updateAll() => update(['updateAll']); 
 
   isCatalogue() {
+    // return : si el producto esta en el catalogo
     for (var element in homeController.getCataloProducts) {
       if (element.id == getProduct.id) {
         // get values
@@ -291,6 +298,61 @@ class ControllerProductsEdit extends GetxController {
       }
     }
   }
+   Future<void> _getImageColors({required String url}) async {
+    final response = await http.get(Uri.parse(url));
+    final bytes = response.bodyBytes;
+    final image = MemoryImage(bytes);
+    final paletteGenerator = await PaletteGenerator.fromImageProvider(
+      image,
+      size: const Size(256, 256),
+    );
+    dominateColorProduct = paletteGenerator.dominantColor!.color;
+    mutedColorProduct = paletteGenerator.mutedColor!.color;
+    update();
+  }
+  Future<bool> onBackPressed({required BuildContext context})async{
+    // fuction : si _onBackPressed es false no se puede salir de la app
+
+    // si _onBackPressed es false no se puede salir de la app
+    if(_onBackPressed==false){ 
+      _onBackPressed = !_onBackPressed;
+      return false;
+    }
+
+    if(currentSlide!=0){
+      previousPage();
+      return false;
+    }
+
+    //  si _onBackPressed es true se puede salir de la app
+    if(currentSlide==0){
+      final  shouldPop = await showDialog<bool>(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('¿Realmente quieres salir?',textAlign: TextAlign.center),
+              content: const Text('Si sales perderás los datos que no hayas guardado',textAlign: TextAlign.center),
+              actionsAlignment: MainAxisAlignment.spaceBetween,
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Get.back();
+                  },
+                  child: const Text('Cancelar'),
+                ),
+                TextButton(
+                  onPressed: (){Get.back();Get.back();},
+                  child: const Text('Si'),
+                ),
+              ],
+            );
+          },
+        );
+        return shouldPop!;
+        }
+    return true;
+        
+  } 
 
   //  fuction : comprobamos los datos necesarios para proceder publicar o actualizar el producto
   Future<void> save() async {
@@ -317,21 +379,23 @@ class ControllerProductsEdit extends GetxController {
               getProduct.salePrice = getSalePrice;
               getProduct.favorite = getFavorite;
               getProduct.stock = getStock;
-              getProduct.quantityStock = getQuantityStock; 
+              getProduct.quantityStock = getQuantityStock;
+              getProduct.category = getCategory.id; 
+              getProduct.nameCategory = getCategory.name;
+              getProduct.alertStock = getAlertStock;
 
-              // actualización de la imagen de perfil de la cuetna
+              // actualización de la imagen del producto
               if (getXFileImage.path != '') {
                 // image - Si el "path" es distinto '' quiere decir que ahi una nueva imagen para actualizar
                 // si es asi procede a guardar la imagen en la base de la app
-                Reference ref = Database.referenceStorageProductPublic(id: getProduct.id);
-                UploadTask uploadTask = ref.putFile(File(getXFileImage.path));
-                await uploadTask;
-                // obtenemos la url de la imagen guardada
-                await ref.getDownloadURL().then((value) => getProduct.image = value);
+                Reference ref = Database.referenceStorageProductPublic(id: getProduct.id); // obtenemos la referencia en el storage
+                UploadTask uploadTask = ref.putFile(File(getXFileImage.path)); // cargamos la imagen
+                await uploadTask; // esperamos a que se suba la imagen 
+                await ref.getDownloadURL().then((value) => getProduct.image = value); // obtenemos la url de la imagen
               }
               // procede agregrar el producto en el cátalogo
               // Mods - save data product global
-              if (getNewProduct || getEditModerator) {
+              if ( getProduct.verified==false || getNewProduct || getEditModerator) {
                   setProductPublicFirestore(product: getProduct.convertProductoDefault());
               }
               
@@ -347,24 +411,28 @@ class ControllerProductsEdit extends GetxController {
                   town: homeController.getProfileAccountSelected.town,
                   time: Timestamp.fromDate(DateTime.now()),
                 );
-                // Firebase set : se guarda un documento con la referencia del precio del producto
+                // Firebase set : se crea un documento con la referencia del precio del producto
                 Database.refFirestoreRegisterPrice(idProducto: getProduct.id, isoPAis: 'ARG').doc(precio.id).set(precio.toJson());
 
-                // Firebase set : se actualiza los datos del producto del cátalogo de la cuenta
+                // comprobar si es un productonuevo en la DB
                 if(getNewProduct){
+                  //  Firebase set : se crea un documento con la referencia del producto en el cátalogo de la cuenta
                   Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id)
                     .set(getProduct.toJson())
                     .whenComplete(() async {
                       await Future.delayed(const Duration(seconds: 3)).then((value) {setSaveIndicator = false; Get.back();});
                     }).onError((error, stackTrace) => setSaveIndicator = false).catchError((_) => setSaveIndicator = false);
                 }else{
+                  // compro bar si el producto ya esta en el cátalogo
                   if(itsInTheCatalogue){
+                     // Firebase update : se actualiza los datos del producto del cátalogo de la cuenta
                     Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id)
                       .update(getProduct.toJson())
                       .whenComplete(() async {
                         await Future.delayed(const Duration(seconds: 3)).then((value) {setSaveIndicator = false; Get.back(); });
                     }).onError((error, stackTrace) => setSaveIndicator = false).catchError((_) => setSaveIndicator = false);
                   }else{
+                    // Firebase set : se crea los datos del producto del cátalogo de la cuenta
                     Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id)
                       .set(getProduct.toJson())
                       .whenComplete(() async {
@@ -484,7 +552,7 @@ class ControllerProductsEdit extends GetxController {
   }
 
   void getDataProduct({required String id}) {
-    // lee el documento del producto
+    // function : obtiene los datos del producto de la base de datos y los carga en el formulario de edición 
     if (id != '') {
       Database.readProductPublicFuture(id: id).then((value) {
         //  get
@@ -505,19 +573,37 @@ class ControllerProductsEdit extends GetxController {
   }
 
   void loadDataFormProduct() {
-    // set
-    controllerTextEditDescripcion =TextEditingController(text: getProduct.description);
-    controllerTextEditPrecioVenta =MoneyMaskedTextController(initialValue: getProduct.salePrice);
-    controllerTextEditPrecioCompra =MoneyMaskedTextController(initialValue: getProduct.purchasePrice);
-    controllerTextEditQuantityStock =TextEditingController(text: getProduct.quantityStock.toString());
-    controllerTextEditAlertStock = TextEditingController(text: getProduct.alertStock.toString());
+    // fuction : carga los datos del producto en el formulario una ves que se obtienen de la base de datos
+
+    // obtenemos los colores de la imagen del producto
+    if (getProduct.image != '') {
+      _getImageColors(url: getProduct.image);
+    }
+    // set : datos del producto para validar
+    setPurchasePrice = getProduct.purchasePrice;
+    setSalePrice = getProduct.salePrice;
+    setQuantityStock = getProduct.quantityStock;
+    setAlertStock = getProduct.alertStock;
+    setStock = getProduct.stock;
+    setDescription= getProduct.description;
+    setMarkSelected = Mark(id: getProduct.idMark, name: getProduct.nameMark, creation: Timestamp.now(), upgrade: Timestamp.now());
+    setCategory = Category(id: getProduct.category, name: getProduct.nameCategory);
+    
+    // set : controles de las entradas de texto
+    controllerTextEditDescripcion =TextEditingController(text: getDescription);
+    controllerTextEditPrecioVenta =MoneyMaskedTextController(initialValue: getSalePrice);
+    controllerTextEditPrecioCompra =MoneyMaskedTextController(initialValue: getPurchasePrice);
+    controllerTextEditQuantityStock =TextEditingController(text: getQuantityStock.toString());
+    controllerTextEditAlertStock = TextEditingController(text: getAlertStock.toString());
+    controllerTextEditCategory = TextEditingController(text: getCategory.name);
     // primero verificamos que no tenga el metadato del dato de la marca para hacer un consulta inecesaria
-    if (getProduct.idMark != '') readMarkProducts();
-    if (getProduct.category != '') readCategory();
-    setSaveIndicator = false;
+    if (getProduct.idMark != ''){readMarkProducts();}
+    if (getProduct.category != ''){readCategory();}
+    setSaveIndicator = false; // desactivamos el indicador de carga
   }
 
   void readMarkProducts() {
+    //  function : lee la marca del producto
     if (getProduct.idMark.isNotEmpty) {
       Database.readMarkFuture(id: getProduct.idMark).then((value) {
         setMarkSelected = Mark.fromMap(value.data() as Map);
@@ -534,9 +620,8 @@ class ControllerProductsEdit extends GetxController {
   }
 
   void readCategory() {
-    Database.readCategotyCatalogueFuture(
-            idAccount: homeController.getProfileAccountSelected.id,
-            idCategory: getProduct.category)
+    //  function : lee la categoria del producto
+    Database.readCategotyCatalogueFuture(idAccount: homeController.getProfileAccountSelected.id, idCategory: getProduct.category)
         .then((value) {
       setCategory = Category.fromDocumentSnapshot(documentSnapshot: value);
     }).onError((error, stackTrace) {
@@ -549,6 +634,7 @@ class ControllerProductsEdit extends GetxController {
 
   // read XFile image
   void getLoadImageGalery() {
+    //  function : selecciona una imagen de la galeria
     _picker.pickImage(
       source: ImageSource.gallery,
       maxWidth: 720.0,
@@ -563,16 +649,13 @@ class ControllerProductsEdit extends GetxController {
   }
 
   void getLoadImageCamera() {
-    _picker
-        .pickImage(
-      source: ImageSource.camera,
-      maxWidth: 720.0,
-      maxHeight: 720.0,
-      imageQuality: 55,
-    )
+    //  function : selecciona una imagen de la camara
+    _picker.pickImage(source: ImageSource.camera,maxWidth: 720.0,maxHeight: 720.0,imageQuality: 55,)
+    // esperamos a que se seleccione la imagen
     .then((value) {
-      formEditing = true;
-      setXFileImage = value!;
+    // set
+      formEditing = true; // activamos el formulario
+      setXFileImage = value!; // conservamos la imagen
       update(['updateAll']);  //  actualizamos la vista
       next(); //  siguiente componente
     });
@@ -581,7 +664,8 @@ class ControllerProductsEdit extends GetxController {
   //------------------------------------------------------//
   //- FUNCTIONS LOGIC VIEW FORM CREATE NEW PRODUCT START -//
   //------------------------------------------------------//  
-   double get getProgressForm{
+   double get getProgressForm{ 
+    // function : retorna el progreso del formulario
     // value : progreso del formulario
     double progress = 0.0;
     // estado de progreso
@@ -657,8 +741,8 @@ class ControllerProductsEdit extends GetxController {
 
     // devuelve la imagen del product
     if (getXFileImage.path != '') {
-      // el usuario cargo un nueva imagen externa
-      return ImageAvatarApp(path: getXFileImage.path ,size: size,onTap: getNewProduct || getEditModerator? showModalBottomSheetCambiarImagen : null );
+      // el usuario cargo un nueva imagen externa 
+      return ImageAvatarApp( path: getXFileImage.path,size: size,onTap: getNewProduct || getEditModerator? showModalBottomSheetCambiarImagen : null );
     } else {
       // se visualiza la imagen del producto
       return ImageAvatarApp(url: getProduct.image ,size: size,onTap: getNewProduct || getEditModerator? showModalBottomSheetCambiarImagen : null );
@@ -672,8 +756,9 @@ class ControllerProductsEdit extends GetxController {
             leading: const Icon(Icons.camera),
             title: const Text('Capturar una imagen'),
             onTap: () {
+              getLoadImageCamera();
               Get.back();
-              getLoadImageCamera;
+              
             }),
         ListTile(
           leading: const Icon(Icons.image),
@@ -718,8 +803,7 @@ class ControllerProductsEdit extends GetxController {
                 .delete()
                 .whenComplete(() {
                   Get.back();
-                  back();
-                  back();
+                  Get.back();
                 })
                 .onError((error, stackTrace) => Get.back())
                 .catchError((ex) => Get.back());
@@ -1103,7 +1187,7 @@ class _CreateMarkState extends State<CreateMark> {
         newMark || load ? Container(): IconButton(onPressed: delete, icon: const Icon(Icons.delete)),
         load? Container() : IconButton(icon: const Icon(Icons.check),onPressed: save),
       ],
-      bottom: load ? ComponentApp.linearProgressBarApp() : null,
+      bottom: load ? ComponentApp().linearProgressBarApp() : null,
     );
   }
 

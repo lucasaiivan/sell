@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -369,7 +367,9 @@ class SalesView extends StatelessWidget {
                 padding: const EdgeInsets.all(5),
                 child: Column(
                   children: [
-                    GestureDetector(
+                    InkWell(
+                      hoverColor: Colors.red,
+                      splashColor: Colors.amber,focusColor: Colors.pink, 
                       onTap: () => salesController.showSeach(context: context),
                       child: Column(
                         children: <Widget>[

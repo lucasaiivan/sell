@@ -46,16 +46,22 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
     controller.darkMode = Theme.of(context).brightness == Brightness.dark;
     controller.cardProductDetailColor = controller.darkMode ?controller.formEditing?Colors.blueGrey.withOpacity(0.2):Colors.blueGrey.withOpacity(0.1) : controller.formEditing?Colors.grey.shade300:Colors.grey.shade200;
 
+    //  AnnotatedRegion : proporciona un valor a sus widgets hijos
     // SystemUiOverlayStyle : Especifica una preferencia para el estilo de la barra de estado del sistema
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
-      // Theme : definismos estilos
+      //  Theme : proporciona datos de tema a sus widgets hijos
       child: Theme(
         data: Theme.of(context).copyWith( 
           // style : estilo del AppBar
           appBarTheme: AppBarTheme(elevation: 0,color: Colors.transparent ,systemOverlayStyle: controller.darkMode?SystemUiOverlayStyle.light:SystemUiOverlayStyle.light,iconTheme: IconThemeData(color: controller.darkMode?Colors.white:Colors.white),titleTextStyle: TextStyle(color: controller.darkMode?Colors.white:Colors.white))),
-        child: Scaffold(
-          body: body(context: context),),
+        // WillPopScope : nos permite controlar el botón de retroceso del dispositivo
+        child: WillPopScope(
+        onWillPop: () => controller.onBackPressed(context: context),
+        //  Scaffold : proporciona una estructura visual básica para la aplicación
+          child: Scaffold(
+            body: body(context: context),),
+        ),
       ),
     );
   } 
@@ -91,23 +97,26 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
             child: Column(
               children: [
                 appbar,
-                controller.getSaveIndicator?ComponentApp.linearProgressBarApp(color: controller.colorLoading):lineProgressIndicator,
+                controller.getSaveIndicator? ComponentApp().linearProgressBarApp(color: controller.colorLoading):lineProgressIndicator,
                 // view : tarjeta animada
                 cardFront,
                 AnimatedContainer(
                   width: double.infinity,
                   duration: const Duration(milliseconds: 500),
                   padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Wrap(
-                    spacing: 5.0, // establece el espacio negativo para compactar horizontalmente  
-                    alignment:  WrapAlignment.center,
-                    children: [
-                      controller.controllerTextEditCategory.text==''?Container():InputChip(shape:shape,checkmarkColor: Colors.red,surfaceTintColor: Colors.green,onPressed: (){controller.carouselController.animateToPage(3, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text(controller.controllerTextEditCategory.text)),
-                      controller.controllerTextEditPrecioCompra.numberValue==0.0?Container():InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(4, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text(Publications.getFormatoPrecio(monto: controller.controllerTextEditPrecioCompra.numberValue))),
-                      controller.controllerTextEditPrecioVenta.numberValue==0.0?Container():InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(5, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text(Publications.getFormatoPrecio(monto: controller.controllerTextEditPrecioVenta.numberValue))),
-                      controller.getFavorite? InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(6, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label:const  Text('Favorito')):Container(),
-                      controller.getStock? InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(7, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: const Text('Control de Stock')):Container(),
-                    ],
+                  child: Theme(
+                    data: ThemeData.light(),
+                    child: Wrap(
+                      spacing: 5.0, // establece el espacio negativo para compactar horizontalmente  
+                      alignment:  WrapAlignment.center,
+                      children: [
+                        controller.controllerTextEditCategory.text==''?Container():InputChip(shape:shape,checkmarkColor: Colors.red,surfaceTintColor: Colors.green,onPressed: (){controller.carouselController.animateToPage(3, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text(controller.controllerTextEditCategory.text)),
+                        controller.controllerTextEditPrecioCompra.numberValue==0.0?Container():InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(4, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text(Publications.getFormatoPrecio(monto: controller.controllerTextEditPrecioCompra.numberValue))),
+                        controller.controllerTextEditPrecioVenta.numberValue==0.0?Container():InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(5, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text(Publications.getFormatoPrecio(monto: controller.controllerTextEditPrecioVenta.numberValue))),
+                        controller.getFavorite? InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(6, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label:const  Text('Favorito')):Container(),
+                        controller.getStock? InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(7, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: const Text('Control de Stock')):Container(),
+                      ],
+                    ),
                   ),
                 ),
                 // formTexts
@@ -123,11 +132,12 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
             TextButton(
               onPressed: controller.getSaveIndicator?null:controller.currentSlide==0?null:(){
               controller.previousPage();
-            }, child: Text('Anterior',style: TextStyle(color: controller.currentSlide==0?Colors.grey:null),)),
+            }, 
+            child: Text('Anterior',style: TextStyle(color: controller.currentSlide==0?Colors.grey:null),)),
             // button : next o save
             Center(
               child: TextButton( 
-                onPressed: controller.getSaveIndicator?null:controller.currentSlide == 8?controller.save :() => controller.next(),
+                onPressed: controller.getSaveIndicator?null:controller.currentSlide == 8?controller.getUserConsent?controller.save:null :() => controller.next(),
                 child: Text( controller.currentSlide == 8  ?'Publicar':'Siguiente')),
             ),
           ],
@@ -160,7 +170,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
             AnimatedContainer(
               width: double.infinity, 
               padding: const EdgeInsets.symmetric(horizontal:5,vertical:0),
-              color: highlightValue?Colors.grey.withOpacity(0.15):null,
+              color: highlightValue?Colors.black12:null,
               duration: const Duration(milliseconds: 500),
               curve: Curves.easeIn,
               child: Text(description,style: const TextStyle(fontSize: 14,fontWeight: FontWeight.w300))),
@@ -292,6 +302,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
           ),
         ),
         //TODO: eliminar para desarrrollo
+        /*
         TextButton(
               onPressed: () async {
                 String clave = controller.controllerTextEditDescripcion.text;
@@ -305,7 +316,9 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
                 Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
                 await launchUrl(uri,mode: LaunchMode.externalApplication);
               },
-              child: const Text('Buscar en código Google (moderador)')), 
+              child: const Text('Buscar en código Google (moderador)')),
+
+         */
 
       ],
     );
@@ -571,7 +584,8 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
           padding: EdgeInsets.all(controller.getUserConsent?12.0:0),
           child: const Text('¡Gracias por hacer que esta aplicación sea aún más útil para más personas! 🚀'),
           ),
-          ProductEdit().widgetForModerator,
+          // TODO : Para moderador eliminar para produccion
+          // ProductEdit().widgetForModerator,
       ],
     );
   }
@@ -587,7 +601,6 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
         padding: const EdgeInsets.all(24.0),
         child: Column(
           mainAxisSize: MainAxisSize.max,
-    
           children: [
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -603,9 +616,9 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
                       crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,mainAxisSize: MainAxisSize.max,
                         children: [
                           //  text : codigo del producto
-                          textTitleAndDescription(title: 'Código del producto',description: controller.getProduct.code,highlightValue: false),
+                          textTitleAndDescription(title: 'Código del producto',description: controller.getProduct.code,highlightValue: true),
                           //  text : marca del producto
-                          textTitleAndDescription(title: 'Marca',description: controller.getProduct.nameMark,highlightValue: true),
+                          textTitleAndDescription(title: 'Marca',description: controller.getMarkSelected.name,highlightValue: true),
                         ],
                       ),
                   ),
@@ -613,7 +626,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
               ],
             ),
             //  text : marca del producto
-            textTitleAndDescription(title: 'Descripción del producto',description: controller.getProduct.description,highlightValue: true),
+            textTitleAndDescription(title: 'Descripción del producto',description: controller.getDescription,highlightValue: true),
           ], 
         ),
       ); 

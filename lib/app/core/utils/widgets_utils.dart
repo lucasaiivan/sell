@@ -1,12 +1,8 @@
 
 import 'dart:io';
-
-import 'package:avatar_view/avatar_view.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:sell/app/core/utils/dynamicTheme_lb.dart';
@@ -527,7 +523,7 @@ class WidgetDrawer extends StatelessWidget {
             ],
           ),
         ),
-        ListTile(
+        /* ListTile(
           leading: const Icon(Icons.launch_rounded),
           title: const Text('Mi catálogo'),
           subtitle: const Text('App'),
@@ -542,7 +538,7 @@ class WidgetDrawer extends StatelessWidget {
               if (await canLaunchUrl(uri)) { await launchUrl(uri,mode: LaunchMode.externalApplication);} else {throw 'Could not launch $uri';}
             }
           },
-        ),
+        ), */
         ListTile(
           contentPadding: const EdgeInsets.symmetric(vertical: 12,horizontal: 12),
           tileColor: Colors.blue.withOpacity(0.1),
@@ -631,67 +627,38 @@ void showMessageAlertApp({required String title, required String message}) {
           ? Colors.white
           : Colors.black);
 }
+ 
+ 
 
-// Cuadro de Dialogo
-// un checkbox para agregar el producto a mi cátalogo
 // ignore: must_be_immutable
-class CheckBoxAddProduct extends StatefulWidget {
-  late ProductCatalogue productCatalogue ;
+class ComponentApp extends StatelessWidget {
+  ComponentApp({Key? key}) : super(key: key);
 
-  CheckBoxAddProduct({super.key, required this.productCatalogue});
-
-  @override
-  State<CheckBoxAddProduct> createState() => _CheckBoxAddProductState();
-}
-
-class _CheckBoxAddProductState extends State<CheckBoxAddProduct> {
-
-  // others controllers
-  final HomeController homeController = Get.find();
-  //  values
-  bool check = false;
+  // var 
+  bool darkMode = false;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: CheckboxListTile(
-        secondary: CachedNetworkImage(
-          imageUrl: widget.productCatalogue.image,
-          placeholder: (context, url) =>
-              CircleAvatar(backgroundColor: Get.theme.dividerColor),
-          imageBuilder: (context, image) => CircleAvatar(
-            backgroundImage: image,
-          ),
-          errorWidget: (context, url, error) =>
-              CircleAvatar(backgroundColor: Get.theme.dividerColor),
-        ),
-        title:
-            const Text('Agregar mi cátalogo', style: TextStyle(fontSize: 14)),
-        subtitle: Text(widget.productCatalogue.description,
-            style: const TextStyle(fontSize: 12), maxLines: 2),
-        value: check,
-        checkColor: Colors.white,
-        activeColor: Colors.blue,
-        onChanged: (value) {
-          setState(() {
-            check=!check;
-            homeController.checkAddProductToCatalogue = check;
-          });
-        },
-      ),
-    );
-  }
-}
 
-class ComponentApp {
-  static PreferredSize linearProgressBarApp({Color color = Colors.purple}) {
+    // set 
+    darkMode = Get.theme.brightness == Brightness.dark;
+    return Container();
+  }
+
+  PreferredSize linearProgressBarApp({Color color = Colors.purple}) {
     return PreferredSize(
         preferredSize: const Size.fromHeight(0.0),
         child: LinearProgressIndicator(
             minHeight: 6.0,
             backgroundColor: Colors.white.withOpacity(0.3),
             valueColor: AlwaysStoppedAnimation<Color>(color)));
+  }
+
+  Divider divider({double thickness = 0.1}) {
+    return Divider(
+      thickness: thickness,height: 0,
+      color: Get.isDarkMode?Colors.white30:Colors.black38,
+    );
   }
 }
 
@@ -846,7 +813,8 @@ class ImageAvatarApp extends StatelessWidget {
   late String description;
   late String path;
   final VoidCallback?  onTap;
-  ImageAvatarApp({Key? key,this.favorite=false,this.url='',this.size=50,this.radius=12,this.description='',this.path='', this.onTap }) : super(key: key);
+  late Color canvasColor;
+  ImageAvatarApp({Key? key,this.canvasColor=Colors.black12,this.favorite=false,this.url='',this.size=50,this.radius=12,this.description='',this.path='', this.onTap }) : super(key: key);
 
   // avatar que se va usar en toda la app, especialemnte en los 'ListTile'
 
@@ -855,23 +823,40 @@ class ImageAvatarApp extends StatelessWidget {
  
     return SizedBox(
       width: size,height: size,
-      child: path =='' ? AvatarView(
-        onTap: onTap,
-        radius: radius,
-        borderWidth: favorite?2:0,
-        borderColor: favorite?Colors.yellow.shade700:Colors.transparent,
-        avatarType: AvatarType.RECTANGLE,
-        backgroundColor: Theme.of(context).canvasColor ,
-        imagePath: url,
-        placeHolder: Container(color: Colors.black.withOpacity(0.1),child:const Icon(Icons.image, size: 25),),
-        errorWidget: Container(color: Colors.black.withOpacity(0.1),child:const Icon(Icons.image, size: 25),),
+      child: path =='' ?InkWell(
+        child: Container(
+          width: 75,
+          height: 75,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8.0),
+            border: Border.all(
+              color: favorite?Colors.yellow.shade700:Colors.transparent,
+              width: favorite?2:0,
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(6.0),
+            child: InkWell(
+              onTap: onTap,
+              child: CachedNetworkImage(
+                imageUrl: url,
+                fit: BoxFit.cover,
+                placeholder: (context, url) =>  Container(color: canvasColor),
+                errorWidget: (context, url, error) => Container(color: canvasColor),
+              ),
+            ),
+          ),
+        ),
       ) : Card(
         elevation: 0,
         clipBehavior: Clip.antiAlias,
-        child: AspectRatio(
-          aspectRatio: 1 / 1,
-          child: Image.file(File(path), fit: BoxFit.cover),
-    ),
+        child: InkWell(
+          onTap: onTap,
+          child: AspectRatio(
+            aspectRatio: 1 / 1,
+            child: Image.file(File(path), fit: BoxFit.cover),
+            ),
+        ),
       ),
     );
   }
