@@ -157,6 +157,85 @@ class TransactionsView extends StatelessWidget {
             child: const Text('si, eliminar')),
       ]),
     ); 
+    
+    Widget listTilePerzonalice = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10), 
+      child: Row(
+        children: [
+          Flexible(
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                  // const Text('Pago con '),
+                    Material(
+                      color: (payMode['color'] as Color) .withOpacity(0.1),
+                      clipBehavior: Clip.antiAlias,
+                      borderRadius: const BorderRadius.all(Radius.circular(6)),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal:10,vertical:0),
+                        child: Text(payMode['name'],style: TextStyle(fontWeight: FontWeight.w600,color: (payMode['color'] as Color) .withOpacity(0.7)  )),
+                      )),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // primera fila : numero de caja, y id del vendedor
+                      Row(
+                        children: [
+                          // text : numero de caja
+                          Text('caja ${ticketModel.cashRegister}',style:textStyleSecundary),
+                          dividerCircle,
+                          // text : id del vendedor
+                          Text(ticketModel.seller.split('@')[0],style:textStyleSecundary), 
+                        ],
+                      ), 
+                      // segunda fila : cantidad de items, valor del vuelto
+                      Opacity(
+                        opacity: 0.8,
+                        child: Row( 
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            //  text : cantidad de items ( productos )
+                            Text('${ticketModel.getLengh()} items',style:textStyleSecundary), 
+                            // text : valor del vuelto
+                            ticketModel.valueReceived == 0? Container(): Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                dividerCircle,
+                                Text('Vuelto: ${Publications.getFormatoPrecio(monto: ticketModel.valueReceived - ticketModel.priceTotal)}',style:textStyleSecundary ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+          Column(
+              crossAxisAlignment:CrossAxisAlignment.end,mainAxisSize: MainAxisSize.min,
+              children: [
+                //  text : precio totol del ticket
+                Text(Publications.getFormatoPrecio(monto: ticketModel.priceTotal),style: TextStyle(fontWeight: FontWeight.bold,fontSize: 14,color: primaryTextColor)),
+                //  text : ganancias
+                Text(revenue,style: TextStyle(fontWeight: FontWeight.w900,fontSize: 12,color: Colors.green.withOpacity(0.9)  )),
+                //  text : fecha de publicación 
+                Text(Publications.getFechaPublicacion(ticketModel.creation.toDate(), Timestamp.now().toDate()),style: TextStyle(color: primaryTextColor.withOpacity(0.5),fontWeight: FontWeight.w400,fontSize:8))
+              ],
+            ),
+        ],
+      ),
+    );
+
+    //
+    // view
+    //
 
     return ElasticIn(
       child: Dismissible(
@@ -170,74 +249,13 @@ class TransactionsView extends StatelessWidget {
             },
           );
         },
-        child: ListTile(
-          contentPadding: const EdgeInsets.all(12),
+        child: InkWell(
           onLongPress: () =>  showAlertDialogTransactionInformation(buildContext,ticketModel.toJson()),
           onTap: () => showAlertDialogTransactionInformation(buildContext,ticketModel.toJson()),
-          title: Row(
-            children: [
-             // const Text('Pago con '),
-              Material(
-                color: (payMode['color'] as Color) .withOpacity(0.1),
-                clipBehavior: Clip.antiAlias,
-                borderRadius: const BorderRadius.all(Radius.circular(6)),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal:10,vertical:0),
-                  child: Text(payMode['name'],style: TextStyle(fontWeight: FontWeight.w600,color: (payMode['color'] as Color) .withOpacity(0.7)  )),
-                )),
-            ],
-          ),
-          subtitle: Padding(
-            padding: const EdgeInsets.only(left: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // primera fila : numero de caja, y id del vendedor
-                Row(
-                  children: [
-                    // text : numero de caja
-                    Text('caja ${ticketModel.cashRegister}',style:textStyleSecundary),
-                    dividerCircle,
-                    // text : id del vendedor
-                    Text(ticketModel.seller.split('@')[0],style:textStyleSecundary), 
-                  ],
-                ), 
-                // segunda fila : cantidad de items, valor del vuelto
-                Opacity(
-                  opacity: 0.8,
-                  child: Row( 
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      //  text : cantidad de items ( productos )
-                      Text('${ticketModel.getLengh()} items',style:textStyleSecundary), 
-                      // text : valor del vuelto
-                      ticketModel.valueReceived == 0? Container(): Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          dividerCircle,
-                          Text('Vuelto: ${Publications.getFormatoPrecio(monto: ticketModel.valueReceived - ticketModel.priceTotal)}',style:textStyleSecundary ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          trailing: Flexible(
-            child: Column(
-              crossAxisAlignment:CrossAxisAlignment.end,mainAxisSize: MainAxisSize.min,
-              children: [
-                //  text : precio totol del ticket
-                Text(Publications.getFormatoPrecio(monto: ticketModel.priceTotal),style: TextStyle(fontWeight: FontWeight.bold,fontSize: 14,color: primaryTextColor)),
-                //  text : ganancias
-                Text(revenue,style: TextStyle(fontWeight: FontWeight.w900,fontSize: 12,color: Colors.green.withOpacity(0.9)  )),
-                //  text : fecha de publicación 
-                Text(Publications.getFechaPublicacion(ticketModel.creation.toDate(), Timestamp.now().toDate()),style: TextStyle(color: primaryTextColor.withOpacity(0.5),fontWeight: FontWeight.w400,fontSize:8))
-              ],
-            ),
-          ),
-        ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 0,vertical: 12),
+            child: listTilePerzonalice,
+          )),
       ),
     );
   }

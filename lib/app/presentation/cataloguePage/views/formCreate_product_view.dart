@@ -286,7 +286,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
               maxLength: 100, // maximo de caracteres
               minLines: 1,
               maxLines:2, 
-              inputFormatters: [ FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\- .]')),],
+              inputFormatters: [ FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\- .,]')),],
               decoration: const InputDecoration(border: UnderlineInputBorder(),labelText: 'Descripción del producto'),
               onChanged: (value) {
                 controller.formEditing = true; // validamos que el usuario ha modificado el formulario

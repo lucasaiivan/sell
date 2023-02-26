@@ -2,6 +2,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:get/get.dart';
 import 'package:sell/app/presentation/cataloguePage/views/formCreate_product_view.dart';
@@ -201,6 +202,7 @@ class ProductEdit extends StatelessWidget {
               maxLines: 5,
               keyboardType: TextInputType.multiline,
               onChanged: (value) => controller.setDescription = value,
+              inputFormatters: [ FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\- .,]')),],
               decoration: const InputDecoration(
                 contentPadding: EdgeInsets.only(bottom: 12,top: 12),
                 filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
@@ -217,7 +219,7 @@ class ProductEdit extends StatelessWidget {
   Widget widgetFormEdit2(){
 
     // var
-    Color boderLineColor = Get.theme.textTheme.bodyMedium!.color ?? Colors.black;
+    Color boderLineColor = controller.darkMode? Colors.white30:Colors.black45;//Get.theme.textTheme.bodyMedium!.color ?? Colors.black87;
 
     return Container(
       padding: const EdgeInsets.all(12.0),
@@ -253,6 +255,7 @@ class ProductEdit extends StatelessWidget {
                 autovalidateMode: AutovalidateMode.onUserInteraction, 
                 keyboardType: TextInputType.name,
                 decoration: InputDecoration(
+                  filled: true,
                   labelText: controller.controllerTextEditCategory.text==''?'Seleccionar una cátegoria':'Cátegoria',
                   border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                   enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
@@ -282,7 +285,8 @@ class ProductEdit extends StatelessWidget {
                         enabled: true,
                         autovalidateMode: AutovalidateMode.onUserInteraction, 
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        decoration: InputDecoration( 
+                        decoration: InputDecoration(
+                          filled: true, 
                           labelText: 'Precio de compra',
                           border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                           enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
@@ -308,6 +312,7 @@ class ProductEdit extends StatelessWidget {
                         autovalidateMode: AutovalidateMode.onUserInteraction, 
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         decoration: InputDecoration(
+                          filled: true,
                           labelText: 'Precio de venta al públuco',
                           border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                           enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
@@ -325,7 +330,7 @@ class ProductEdit extends StatelessWidget {
                     AnimatedContainer(
                       width:double.infinity, 
                       duration: const Duration(milliseconds: 500),
-                      decoration: BoxDecoration(border: Border.all(color: Get.theme.textTheme.bodyMedium!.color?? Colors.black12,width: 0.1,),),
+                      decoration: BoxDecoration(border: Border.all(color: boderLineColor,width: 0.6,),),
                       child: CheckboxListTile(
                         contentPadding: const EdgeInsets.symmetric(horizontal:12, vertical: 12),
                         enabled: controller.getSaveIndicator ? false : true,
@@ -345,7 +350,7 @@ class ProductEdit extends StatelessWidget {
                     AnimatedContainer(
                       width:double.infinity, 
                       duration: const Duration(milliseconds: 500),
-                      decoration: BoxDecoration(border: Border.all(color: Get.theme.textTheme.bodyMedium!.color?? Colors.black12,width: 0.1,),),
+                      decoration: BoxDecoration(border: Border.all(color: boderLineColor,width: 0.6,),),
                       child: Column(
                       children: [
                         CheckboxListTile(
