@@ -1,6 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +12,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart';
 import 'package:search_page/search_page.dart';
 import 'package:sell/app/presentation/home/controller/home_controller.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart';
@@ -44,6 +50,11 @@ class SalesController extends GetxController {
   final TextEditingController textEditingControllerAddFlashDescription =TextEditingController();
   final TextEditingController textEditingControllerTicketMount =TextEditingController();
 
+  // xfiel : imagen temporal del producto
+  XFile _xFileImageCaptureBarCode = XFile('');
+  set setXFileImage(XFile value) => _xFileImageCaptureBarCode = value;
+  XFile get getXFileImage => _xFileImageCaptureBarCode;
+
   // list : lista de productos seleccionados por el usaurio para la venta
   List get getListProductsSelested => homeController.listProductsSelected;
   set setListProductsSelected(List value) => homeController.listProductsSelected = value;
@@ -51,6 +62,7 @@ class SalesController extends GetxController {
     product.quantity = 1;
     product.select = false;
     homeController.listProductsSelected.add(product);
+    update();
   }
   //  list : lista de productos seleccionados por el usaurio para la venta
   set removeProduct(String id) {
@@ -124,6 +136,61 @@ class SalesController extends GetxController {
 
 
   // FIREBASE
+ 
+  Future<void> save({required ProductCatalogue product}) async {
+    //  fuction : comprobamos los datos necesarios para proceder publicar el producto
+    
+    // actualización de la imagen del producto si existe una imagen nueva
+    if (getXFileImage.path != '') {
+      // image - Si el "path" es distinto '' quiere decir que ahi una nueva imagen para actualizar
+      // si es asi procede a guardar la imagen en la base de la app
+      Reference ref = Database.referenceStorageProductPublic(id: product.id); // obtenemos la referencia en el storage
+      UploadTask uploadTask = ref.putFile(File(getXFileImage.path)); // cargamos la imagen
+      await uploadTask; // esperamos a que se suba la imagen 
+      await ref.getDownloadURL().then((value) => product.image = value); // obtenemos la url de la imagen
+    }
+
+    // Registra el precio en una colección publica
+    Price precio = Price(
+      id: homeController.getProfileAccountSelected.id,
+      idAccount: homeController.getProfileAccountSelected.id,
+      imageAccount: homeController.getProfileAccountSelected.image,
+      nameAccount: homeController.getProfileAccountSelected.name,
+      price: product.salePrice,
+      currencySign: product.currencySign,
+      province: homeController.getProfileAccountSelected.province,
+      town: homeController.getProfileAccountSelected.town,
+      time: Timestamp.fromDate(DateTime.now()),
+    );
+    // Firebase set : se guarda un documento con la referencia del precio del producto
+    Database.refFirestoreRegisterPrice(idProducto: product.id, isoPAis: 'ARG').doc(precio.id).set(precio.toJson());
+    // Firebase set : se guarda un documento con la referencia del producto en el cátalogo de la cuenta
+    Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(product.id).set(product.toJson());
+
+    setProductPublicFirestore(product: product.convertProductoDefault(),isNew: true);
+
+  }
+  void setProductPublicFirestore({required Product product,required bool isNew})  {
+    // esta función procede a guardar el documento de una colleción publica
+    
+    //  set : id de la cuenta desde la cual se creo el producto
+    product.idAccount = homeController.getProfileAccountSelected.id; 
+    //  set : marca de tiempo que se creo el documenti por primera vez
+    if(isNew) { product.creation = Timestamp.fromDate(DateTime.now()); } 
+    //  set : marca de tiempo que se actualizo el documenti
+    product.upgrade = Timestamp.fromDate(DateTime.now());
+    //  set : id del usuario que creo el documentoi 
+    if(isNew) { product.idUserCreation = homeController.getProfileAdminUser.email;}
+    //  set : id del usuario que actualizo el documento
+    product.idUserUpgrade = homeController.getProfileAdminUser.email;
+
+    // set firestore - save product public
+    if(isNew){
+      Database.refFirestoreProductPublic().doc(product.id).set(product.toJson());
+    }else{
+      Database.refFirestoreProductPublic().doc(product.id).update(product.toJson());
+    }
+  }
 
   void registerTransaction() {
 
@@ -191,62 +258,70 @@ class SalesController extends GetxController {
           
           return Column(
           children: [
-            ListTile(
-              contentPadding:const EdgeInsets.symmetric(horizontal: 20,vertical: 12),
-              tileColor: tileColor,
-              leading: ImageAvatarApp(url: product.image,size: 50,favorite:product.favorite),
-              title: Text(product.description),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text(
-                    product.nameMark,
-                    maxLines: 1,
-                    overflow: TextOverflow.clip, 
-                    style: const TextStyle(color: Colors.blue),
-                  ),
-                  
-                  Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.start,
-                    direction: Axis.horizontal,
-                    children: <Widget>[
-                      // text : code
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
-                            Text(product.code),
-                          ],
-                        ),
-                        // favorite
-                        product.favorite?Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
-                            const Text('Favorito'),
-                          ],
-                        ):Container(),
-                      //  text : alert stock
-                        alertStockText != ''?Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
-                            Text(alertStockText),
-                          ],
-                        ):Container(),
-                    ],
-                  ),
-
-                ],
-              ),
-              trailing: Text(Publications.getFormatoPrecio(monto: product.salePrice)),
+            InkWell(
               onTap: () {
                 selectedProduct(item: product);
                 Get.back();
               },
-            ),
-            const Divider(thickness: 0.2,height: 0),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // image
+                    ImageAvatarApp(url: product.image,size: 75,favorite:product.favorite),
+                    // text : datos del producto
+                    Flexible(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal:12),
+                        child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(product.description,maxLines: 1,overflow: TextOverflow.clip,style: TextStyle(fontWeight: FontWeight.w500)),
+                          Text(product.nameMark,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(color: Colors.blue)),
+                          Wrap(
+                            crossAxisAlignment: WrapCrossAlignment.start,
+                            direction: Axis.horizontal,
+                            children: <Widget>[
+                              // text : code
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 7, color: Get.theme.dividerColor)),
+                                    Text(product.code),
+                                  ],
+                                ),
+                                // favorite
+                                product.favorite?Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
+                                    const Text('Favorito'),
+                                  ],
+                                ):Container(),
+                              //  text : alert stock
+                                alertStockText != ''?Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
+                                    Text(alertStockText),
+                                  ],
+                                ):Container(),
+                            ],
+                          ),
+                                  
+                        ],
+                                      ),
+                      ),
+                    ),
+                    // text : precio
+                    Text(Publications.getFormatoPrecio(monto: product.salePrice))
+                  ],
+                ),
+              ),
+            ), 
+          ComponentApp().divider(), 
           ],
         );
         },
@@ -280,7 +355,7 @@ class SalesController extends GetxController {
   }
 
   void verifyExistenceInSelectedScanResult({required String id}) {
-    // primero se verifica si el producto esta en la lista de productos deleccionados
+    // primero se verifica si el producto esta en la lista de productos seleccionados
     bool coincidence = false;
     for (ProductCatalogue product in getListProductsSelested) {
       if (product.id == id) {
@@ -325,6 +400,7 @@ class SalesController extends GetxController {
         true,
         ScanMode.BARCODE,
       );
+      if(barcodeScanRes == '-1'){return;}
       playSoundScan();
       verifyExistenceInSelectedScanResult(id: barcodeScanRes);
     } on PlatformException {
@@ -341,10 +417,11 @@ class SalesController extends GetxController {
         // show dialog
         showDialogAddProductNew(productCatalogue: ProductCatalogue.fromMap(value.data() as Map));
       
-      }).onError((error, stackTrace) {
-        // error o no existe en la db
-        showDialogQuickSale();
-        Get.snackbar('Lo siento','🙁 no se encontro el producto en nuestra base de datos');
+      }).onError((error, stackTrace) { 
+        // no se encontro el producto en la base de datos
+        //
+        // dialog : agregar producto nuevo
+        showDialogAddProductNew(productCatalogue: ProductCatalogue(id: id,code: id, creation: Timestamp.now(), documentCreation: Timestamp.now(), upgrade: Timestamp.now(), documentUpgrade: Timestamp.now()));
       }).catchError((error) {
         // error al consultar db
         Get.snackbar('ah ocurrido algo', 'Fallo el escaneo');
@@ -447,76 +524,20 @@ class SalesController extends GetxController {
     );
   }
 
-  void showDialogAddProductNew({required ProductCatalogue productCatalogue}) {
-    // Dialog
-    // muestra este dialog cuando el producto no se encuentra en los registros de stock
+  void showDialogAddProductNew({ required ProductCatalogue productCatalogue}) {
+    // dialog : muestra este dialog cuando el producto no se encuentra en el cáatalogo de la cuenta
 
-    Get.defaultDialog(
-        title: 'Nuevo Producto',
-        titlePadding: const EdgeInsets.all(20),
-        middleTextStyle: TextStyle(color: Get.theme.textTheme.bodyText1?.color),
-        cancel: TextButton(onPressed: Get.back, child: const Text('Cancelar')),
-        confirm: Theme(
-          data: Get.theme.copyWith(brightness: Get.theme.brightness),
-          child: TextButton(
-              onPressed: () {
-                if (productCatalogue.salePrice != 0.0) {
-                  addProduct(product: productCatalogue);
-                  if (homeController.checkAddProductToCatalogue) {homeController.addProductToCatalogue(product: productCatalogue);}
-                  update();
-                  Get.back();
-                } else {
-                  Get.snackbar('🙁 algo salio mal', 'Inserte un precio valido');
-                }
-              },
-              child: const Text('Agregar')),
-        ),
-        content: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24),
-          child: Column(
-            children: [
-              // return Widget view : permision: permiso para guardar el producto nuevo en mi cátalogo (app catalogo)
-              CheckBoxAddProduct(productCatalogue: productCatalogue),
-              // mount textfield
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: TextField(
-                  onChanged: (value) {
-                    if (value != "") {
-                      double valuePrice = double.parse(value);
-                      productCatalogue.salePrice = valuePrice;
-                    }
-                  },
-                  autofocus: true,
-                  keyboardType:const TextInputType.numberWithOptions(decimal: false),
-                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp('[1234567890]'))],
-                  decoration: const InputDecoration(hintText: '\$',labelText: "Escribe el precio"),
-                  style: const TextStyle(fontSize: 20.0),
-                  textInputAction: TextInputAction.done,
-                  onSubmitted: (value) {
-                    if (value != "") {
-                      double valuePrice = double.parse(value);
-                      if (valuePrice != 0.0) {
-                        productCatalogue.salePrice = valuePrice;
-                        addProduct(product: productCatalogue);
-                        if (homeController.checkAddProductToCatalogue) {
-                          homeController.addProductToCatalogue(product: productCatalogue);
-                        }
-                        update();
-                        animateAdd();
-                        Get.back();
-                      } else {Get.snackbar('🙁 algo salio mal', 'Inserte un precio valido');}
-                    } else {Get.snackbar('🙁 algo salio mal', 'Inserte un precio valido');}
-                  },
-                ),
-              ),
-            ],
-          ),
-        ));
+    // creamos un dialog con GetX
+    Get.dialog(
+      ClipRRect(
+        borderRadius: const  BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12), bottomLeft: Radius.circular(0), bottomRight: Radius.circular(0)),
+        child: NewProductView(productCatalogue: productCatalogue),
+      ),
+    ); 
   }
 
-  void showDialogQuickSale() {
-    // Dialog view : Hacer una venta rapida
+  void showDialogQuickSale({String id = ''}) {
+    // Dialog view : Hacer una venta rapida 
 
     //var
     FocusNode myFocusNode = FocusNode();
@@ -782,5 +803,253 @@ class SalesController extends GetxController {
       }
     // si no es la primera ves que se inicica la aplicación devuelve una vistra vacia
     return Container();
+  }
+}
+
+//
+//
+// WIDGETS CLASS
+//
+//
+
+
+class NewProductView extends StatefulWidget {
+  
+  // parametro obligatorio
+  ProductCatalogue productCatalogue = ProductCatalogue(upgrade: Timestamp.now(), creation:  Timestamp.now(), documentCreation:  Timestamp.now(), documentUpgrade:  Timestamp.now() );
+  
+  NewProductView({Key? key, required this.productCatalogue}) : super(key: key);
+
+  @override
+  State<NewProductView> createState() => _NewProductViewState();
+}
+
+class _NewProductViewState extends State<NewProductView> { 
+
+  // Añade un constructor sin nombre a la clase
+  _NewProductViewState();
+  
+  // controllers 
+  final HomeController homeController = Get.find<HomeController>();
+  final SalesController salesController = Get.find<SalesController>();
+  late TextEditingController controllerTextEditDescripcion = TextEditingController(text: widget.productCatalogue.description);
+  late MoneyMaskedTextController controllerTextEditPrecioVenta = MoneyMaskedTextController(initialValue: widget.productCatalogue.salePrice);
+  // keys form
+  GlobalKey<FormState> descriptionFormKey = GlobalKey<FormState>();
+  GlobalKey<FormState> priceFormKey = GlobalKey<FormState>();
+
+  // variables
+  late Color  colorAccent ;
+  late  bool isProductNew ; 
+  bool checkAddCatalogue = false; 
+  Color checkActiveColor =  Colors.blue;
+  // styles
+  late TextStyle hintStyle ;
+  late TextStyle labelStyle ;
+  late TextStyle textStyle ;
+    
+  @override
+  void initState() {
+    super.initState();
+
+    // set
+    isProductNew = widget.productCatalogue.description==''?true:false;
+    colorAccent = Get.isDarkMode?Colors.white:Colors.black;
+    hintStyle = TextStyle(color: colorAccent.withOpacity(0.3));
+    labelStyle = TextStyle(color: colorAccent.withOpacity(0.9));
+    textStyle = TextStyle(color: colorAccent,height: 1,fontSize: 14,fontWeight: FontWeight.normal);
+    controllerTextEditDescripcion.text = widget.productCatalogue.description; 
+  }
+
+  @override
+  void dispose() {
+    controllerTextEditDescripcion.dispose();
+    controllerTextEditPrecioVenta.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    
+
+    // widgets 
+    Widget listtileCode = ListTile(
+      title: Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Text('Código: ',style: textStyle),
+        // icon : verificacion del producto
+        widget.productCatalogue.verified?const Icon(Icons.verified_rounded,color: Colors.blue, size: 20):Container(),
+        const SizedBox(width: 5),
+        // text :  crear un rich text para poder darle estilo al texto
+        Text(widget.productCatalogue.code,style: textStyle.copyWith(fontWeight: FontWeight.bold,fontSize: 16)),
+      ],
+    ), 
+    );
+    Widget listtileDescription = ListTile(
+      title: // text :  crear un rich text para poder darle estilo al texto
+        RichText(
+          text: TextSpan( 
+            style: textStyle,
+            children: <TextSpan>[
+              const TextSpan(text: 'Descripción: ' ),
+              TextSpan(text:widget.productCatalogue.description,style: textStyle.copyWith(fontWeight: FontWeight.bold,fontSize: 16) ),
+            ],
+          ),
+        ), 
+    );
+    Widget widgetTextFieldDescription = widget.productCatalogue.verified?listtileDescription: Padding(
+      padding: const EdgeInsets.symmetric(horizontal:12, vertical: 6),
+      child: Form(
+        key: descriptionFormKey,
+        child: TextFormField( 
+          controller: controllerTextEditDescripcion,
+          enabled: true ,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          focusNode: null, // sin foco
+          minLines: 1,
+          maxLines:2, 
+          inputFormatters: [ FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\- .]')),],
+          decoration:  InputDecoration(
+                  hintText: ' ej. agua saborisada 500 ml',
+                  labelText: 'Descripción del producto',
+                  hintStyle: hintStyle,
+                  labelStyle: labelStyle, 
+                  border: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent)),
+                  enabledBorder: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent)),
+                ),
+          onChanged: (value) => widget.productCatalogue.description =value,
+          // validator: validamos el texto que el usuario ha ingresado.
+          validator: (value) {
+            if (value == null || value.isEmpty) { return 'Por favor, introduzca la descripción del producto'; }
+            return null;
+          },
+        ),
+      ),
+    );
+    // TODO : RangeError TextFormField : cuando el usuario mantiene presionado el boton de borrar > 'RangeError : Invalid value: only valid value is 0: -1'
+    Widget widgetTextFieldPrice = Padding(
+          padding: const EdgeInsets.symmetric(horizontal:12, vertical: 6),
+          child: Form(
+            key:  priceFormKey,
+            child: TextFormField( 
+              style: const TextStyle(fontSize: 18),
+              autofocus: true,
+              focusNode: null,
+              controller: controllerTextEditPrecioVenta,
+              enabled: true,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration( 
+                labelText: 'Precio de venta al públuco',
+                hintText: 'ej. agua saborisada 500 ml',  
+                hintStyle: hintStyle,
+                labelStyle: labelStyle,
+                border: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent)),
+                enabledBorder: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent)),
+                
+                ), 
+              onChanged: (value) {
+                // condition : comprobar si es un monto valido 
+                if (controllerTextEditPrecioVenta.numberValue > 0.0) {
+                  widget.productCatalogue.salePrice = controllerTextEditPrecioVenta.numberValue;
+                }
+              },
+              // validator: validamos el texto que el usuario ha ingresado.
+              validator: (value) {
+                if ( controllerTextEditPrecioVenta.numberValue == 0.0) { return 'Por favor, introduzca el precio del producto'; }
+                return null;
+              },
+            ),
+          ),
+        );
+    // checkbox : agregar producto al catálogo
+    Widget checkboxAddProductToCatalogue =  AnimatedContainer(
+      width:double.infinity, 
+      duration: const Duration(milliseconds: 500),
+      decoration: BoxDecoration(border: Border.all(color: checkAddCatalogue?checkActiveColor:colorAccent,width: 0.5),color: checkAddCatalogue?checkActiveColor.withOpacity(0.2):Colors.transparent,borderRadius: BorderRadius.circular(5)), 
+      child: CheckboxListTile(
+        contentPadding: const EdgeInsets.symmetric(vertical: 5,horizontal: 12),
+        title: Text('Agregar a mi cátalogo', style: TextStyle(fontSize: 14,color: colorAccent)),
+        value: checkAddCatalogue, 
+        checkColor: Colors.white,
+        activeColor: checkActiveColor, 
+        onChanged: (value) {
+          setState(() { 
+            checkAddCatalogue=value!;
+          });
+        },
+      ),
+    );
+    // button 
+    final Widget buttonConfirm = Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: ElevatedButton.icon(
+          onPressed: () {
+            // variables de condiciones
+            bool conditionDescription = widget.productCatalogue.verified?true:descriptionFormKey.currentState!.validate();
+            bool conditionPrice = priceFormKey.currentState!.validate();
+            // condition : validamos los campos del formulario
+            if (  conditionPrice && conditionDescription) {
+              // set 
+              widget.productCatalogue.description = controllerTextEditDescripcion.text;
+              widget.productCatalogue.salePrice = controllerTextEditPrecioVenta.numberValue;
+              //
+              // condition : si el usuario quiere agregar el producto a la lista de productos del catálogo
+              // entonces lo agregamos a la lista de productos del catálogo y a la colección de productos publica de la DB
+              //
+              if(checkAddCatalogue){
+                // add product to catalogue
+                homeController.addProductToCatalogue(product: widget.productCatalogue);
+              }
+              // add : agregamos el producto a la lista de productos seleccionados
+              salesController.addProduct(product: widget.productCatalogue);
+              // close dialog
+              Get.back();
+            }
+          },
+          style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+              padding: const EdgeInsets.all(16.0),
+              backgroundColor: Colors.blue,),
+          icon: Container(),
+          label: const Text('Confirmar',style: TextStyle(color: Colors.white),),
+        ),
+    );
+    
+    return Scaffold(
+      appBar: AppBar( 
+        title: Text(isProductNew?'Nuevo Producto':'Producto'), 
+        backgroundColor: Colors.transparent, 
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(onPressed: Get.back, icon: const Icon(Icons.close)),
+        ],
+      ),
+      body: Container(
+        width: Get.width,
+        height: Get.height,
+        color: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Column(
+            children: [
+              // listtile : datos del producto
+              listtileCode,
+              // textfield : descripcion del producto
+              widgetTextFieldDescription,
+              const SizedBox(height: 12),
+              // textfield : precio de venta
+              widgetTextFieldPrice,
+              // widget :  permiso para guardar el producto nuevo en mi cátalogo (app catalogo)
+              Padding(padding: const EdgeInsets.all(12.0),child: checkboxAddProductToCatalogue),
+              const Spacer(),
+              SizedBox(width: double.infinity,child: buttonConfirm),
+            ],
+          ),
+        )
+      ),
+    );
   }
 }

@@ -17,26 +17,21 @@ class AccountController extends GetxController {
   // state loading
   bool stateLoding = true;
 
-  late final Rx<TextEditingController> _controllerTextEditProvincia =
-      TextEditingController().obs;
-  TextEditingController get getControllerTextEditProvincia =>
-      _controllerTextEditProvincia.value;
-  set setControllerTextEditProvincia(TextEditingController value) =>
-      _controllerTextEditProvincia.value = value;
+  // var : TextFormField formKey
+  GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-  late final Rx<TextEditingController> controllerTextEditPais =
-      TextEditingController().obs;
-  TextEditingController get getControllerTextEditPais =>
-      controllerTextEditPais.value;
-  set setControllerTextEditPais(TextEditingController value) =>
-      controllerTextEditPais.value = value;
+  // controllers
+  late final Rx<TextEditingController> _controllerTextEditProvincia = TextEditingController().obs;
+  TextEditingController get getControllerTextEditProvincia => _controllerTextEditProvincia.value;
+  set setControllerTextEditProvincia(TextEditingController value) => _controllerTextEditProvincia.value = value;
 
-  late final Rx<TextEditingController> controllerTextEditSignoMoneda =
-      TextEditingController().obs;
-  TextEditingController get getControllerTextEditSignoMoneda =>
-      controllerTextEditSignoMoneda.value;
-  set setControllerTextEditSignoMoneda(TextEditingController value) =>
-      controllerTextEditSignoMoneda.value = value;
+  late final Rx<TextEditingController> controllerTextEditPais = TextEditingController().obs;
+  TextEditingController get getControllerTextEditPais => controllerTextEditPais.value;
+  set setControllerTextEditPais(TextEditingController value) => controllerTextEditPais.value = value;
+
+  late final Rx<TextEditingController> controllerTextEditSignoMoneda = TextEditingController().obs;
+  TextEditingController get getControllerTextEditSignoMoneda => controllerTextEditSignoMoneda.value;
+  set setControllerTextEditSignoMoneda(TextEditingController value) => controllerTextEditSignoMoneda.value = value;
 
   // values
   final List<String> coinsList = ["AR\$"];
@@ -115,59 +110,53 @@ class AccountController extends GetxController {
   @override
   void onClose() {}
 
-  void verifyAccount({required String idAccount}) {
-    // get
-    ProfileAccountModel accountProfile =
-        homeController.getProfileAccountSelected;
+  void verifyAccount({required String idAccount}) { 
+    // obtenemos los datos de la cuenta
+    setProfileAccount = homeController.getProfileAccountSelected.copyWith();
     // set
-    setProfileAccount = accountProfile;
     newAccount = profileAccount.name=='';
-    setControllerTextEditProvincia =
-        TextEditingController(text: profileAccount.province);
-    setControllerTextEditPais =
-        TextEditingController(text: profileAccount.country);
-    setControllerTextEditSignoMoneda =
-        TextEditingController(text: profileAccount.currencySign);
+    setControllerTextEditProvincia =TextEditingController(text: profileAccount.province);
+    setControllerTextEditPais =TextEditingController(text: profileAccount.country);
+    setControllerTextEditSignoMoneda =TextEditingController(text: profileAccount.currencySign);
+    // actuazamos la vista
     stateLoding = false;
     update(['load']);
   }
 
   void saveAccount() async {
-    //
-    if (profileAccount.name != "") {
-      if (getControllerTextEditProvincia.text != "") {
-        if (getControllerTextEditPais.text != "") {
-          // get
-          profileAccount.province = getControllerTextEditProvincia.text;
-          profileAccount.country = getControllerTextEditPais.text;
-          profileAccount.currencySign = getControllerTextEditSignoMoneda.text;
-          setSavingIndicator = true;
+    // fuction :  función para guardar los datos de la cuenta
+    if ( formKey.currentState!.validate()) {
 
-          // comprobar existencia de creacion de cuenta
-          if (newAccount) {
-            profileAccount.id = homeController.getUserAuth.uid;
-          }
-          // si se cargo una nueva imagen procede a guardar la imagen en Storage
-          if (getImageUpdate) {
-            UploadTask uploadTask = Database.referenceStorageAccountImageProfile(id: profileAccount.id).putFile(File(getxFile.path));
-            // para obtener la URL de la imagen de firebase storage
-            profileAccount.image = await (await uploadTask).ref.getDownloadURL();
-          }
+      // get : obtenemos los datos de los campos de texto
+      profileAccount.province = getControllerTextEditProvincia.text;
+      profileAccount.country = getControllerTextEditPais.text;
+      profileAccount.currencySign = getControllerTextEditSignoMoneda.text;
+      setSavingIndicator = true;
 
-          // si la cuenta no existe, se crea una nueva de lo contrario de actualiza los datos
-          newAccount? createAccount(data: profileAccount.toJson()): updateAccount(data: profileAccount.toJson());
-        } else {
-          Get.snackbar('😮', 'Debe proporcionar un pais de origen');
-        }
-      } else {
-        Get.snackbar('😔', 'Debe proporcionar una provincia');
+      // comprobar existencia de creacion de cuenta
+      if (newAccount) {
+        //  si es una nueva cuenta se crea un nuevo id obtenido de la id de autenticacion del usuario
+        // esto es para que la cuenta sea unica y no se pueda crear mas de una cuenta por usuario autenticado 
+        profileAccount.id = homeController.getUserAuth.uid;
       }
-    } else {
-      Get.snackbar('Lo siento 😔', 'Debe proporcionar un nombre');
+      // si se cargo una nueva imagen procede a guardar la imagen en Storage
+      if (getImageUpdate) {
+        //  subimos la imagen a firebase storage
+        UploadTask uploadTask = Database.referenceStorageAccountImageProfile(id: profileAccount.id).putFile(File(getxFile.path));
+        // para obtener la URL de la imagen de firebase storage
+        profileAccount.image = await (await uploadTask).ref.getDownloadURL();
+      }
+
+      // actualizamos los datos de la cuenta en la memoria en ejecucion de la app
+      homeController.setProfileAccountSelected = profileAccount.copyWith();
+
+      // si la cuenta no existe, se crea una nueva de lo contrario de actualiza los datos
+      newAccount? createAccount(data: profileAccount.toJson()): updateAccount(data: profileAccount.toJson());
     }
   }
 
   Future<void> updateAccount({required Map<String, dynamic> data}) async {
+    // Esto actualiza los datos de la cuenta
     if (data['id'] != '') {
       // db ref
       var documentReferencer = Database.refFirestoreAccount().doc(data['id']);

@@ -36,9 +36,12 @@ class HomeView extends GetView<HomeController> {
     controller.setBuildContext=context;
     controller.setDarkMode = Theme.of(context).brightness==Brightness.dark;
 
+    // Obx : nos permite observar los cambios en el estado de la variable
     return Obx(() {
+      // WillPopScope : nos permite controlar el botón de retroceso del dispositivo
       return WillPopScope(
-        onWillPop: () => controller.onBackPressed(context: context),
+        onWillPop: () => controller.onBackPressed(context: context), 
+        // getView : nos permite crear una vista con un diseño predefinido
         child: getView(index: controller.getIndexPage),
       );
     });

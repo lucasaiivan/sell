@@ -53,33 +53,35 @@ dependencies:
   # storage
   sqflite: ^2.0.2+1
   get_storage: ^2.0.3
+  flutter_secure_storage: ^8.0.0
   # others 
-  flutter_animate: ^4.0.0
-  permission_handler: ^10.2.0
-  avatar_view: ^1.0.1
+  image_picker: ^0.8.6+3  # Un complemento de Flutter para seleccionar imágenes desde el almacenamiento local del dispositivo.
+  palette_generator: ^0.3.3+2 # Un paquete de Flutter que genera paletas de colores a partir de imágenes.
+  flutter_animate: ^4.0.0 # Un paquete de Flutter que proporciona animaciones de entrada y salida para los widgets de Flutter.
+  permission_handler: ^10.2.0 # Un complemento de Flutter para solicitar y administrar permisos en Android y iOS.
+  avatar_view: ^1.0.1 # Un widget de vista de avatar que admite imágenes, iconos y texto.
   path: ^1.8.2  # Una completa biblioteca de manipulación de rutas multiplataforma para Dart.
-  url_launcher: ^6.1.5
-  font_awesome_flutter: ^10.1.0
+  url_launcher: ^6.1.5  # Un complemento de Flutter para abrir una URL en la plataforma nativa.
+  font_awesome_flutter: ^10.1.0 # Un paquete de iconos de Flutter que contiene más de 2.000 iconos de Font Awesome.
   animate_do: ^2.0.0 # Un paquete de animación inspirado en Animate.css , construido usando solo animaciones de Flutter, sin paquetes adicionales.
   intl: ^0.17.0
   cached_network_image: ^3.1.0 # Una biblioteca de aleteo para mostrar imágenes de Internet y mantenerlas en el directorio de caché.
   textfield_search: ^0.10.0 # FTFS es un paquete de Flutter que usa un TextField Widget para buscar y seleccionar un valor de una lista
-  search_page: ^2.2.0
+  search_page: ^2.3.0
   flutter_launcher_icons: ^0.10.0 #  Una herramienta de línea de comandos que simplifica la tarea de actualizar el icono de inicio de la aplicación Flutter
   flutter_barcode_scanner: ^2.0.0 # Un complemento para las aplicaciones Flutter que agrega compatibilidad con el escaneo de códigos de barras tanto en Android como en iOS.
   audioplayers: ^1.0.1
-  flutter_masked_text2: ^0.9.1
-  image_picker: ^0.8.5+3
+  flutter_masked_text2: ^0.9.1 
   shimmer: ^2.0.0
-  uuid: ^3.0.6
-  flutter_offline: ^2.1.0
-  file_picker: ^5.2.5
+  uuid: ^3.0.6  # Un paquete de Flutter que genera identificadores únicos universales (UUID).
+  flutter_offline: ^2.1.0 # Un paquete de Flutter que le permite crear una interfaz de usuario que se adapte a la conexión de Internet del dispositivo.
+  file_picker: ^5.2.5 # Un complemento de Flutter para seleccionar archivos desde el almacenamiento local del dispositivo.
   excel: ^2.0.1
-  clipboard: ^0.1.3
+  clipboard: ^0.1.3 # Un paquete de Flutter que proporciona acceso al portapapeles del sistema.
   external_app_launcher: ^3.0.0 #Un complemento de Flutter que te ayuda a abrir otra aplicación desde tu aplicación. El paquete le solicita cuatro parámetros, de los cuales dos son obligatorios.
   carousel_slider: ^4.1.1 # Un widget deslizante de carrusel
   email_validator: ^2.1.17
-  blur: ^3.0.0
+  blur: ^3.0.0  # Un paquete de Flutter que proporciona un widget de enfoque de desenfoque.
 
   
 flutter_icons:
@@ -114,7 +116,6 @@ flutter:
       - assets/soundBip.mp3
       - assets/scanbarcode.png
       - assets/productoLogo.png
-      - assets/dbProducts.xlsx
       
   #   - images/a_dot_ham.jpeg
 
