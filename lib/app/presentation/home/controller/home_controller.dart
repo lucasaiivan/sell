@@ -2,17 +2,20 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart';
 import '../../../core/routes/app_pages.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../domain/entities/user_model.dart';
 import '../../../core/utils/widgets_utils.dart';
-import '../../splash/controllers/splash_controller.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 class HomeController extends GetxController {
 
@@ -51,9 +54,7 @@ class HomeController extends GetxController {
     catalogUserHuideVisibility=false;
     await GetStorage().write('catalogUserHuideVisibility', catalogUserHuideVisibility);
   }
-
-  // value state : este valor valida si el usuario quiere que el código escaado quiere agregarlo a su cátalogue
-  bool checkAddProductToCatalogue = false;
+ 
   
   // list admins users
   final RxList<UserModel> _adminsUsersList = <UserModel>[].obs;
@@ -202,8 +203,6 @@ class HomeController extends GetxController {
 
   // cerrar sesión
 void showDialogCerrarSesion() {
-  // others controllers
-  final HomeController homeController = Get.find();
 
   Widget widget = AlertDialog(
     title: const Text("Cerrar sesión"),
@@ -226,24 +225,12 @@ void showDialogCerrarSesion() {
               barrierDismissible: false,
               barrierColor: const Color(0xff141A31).withOpacity(.3),
               useSafeArea: true,
-            );
-            // default values
-            homeController.setProfileAccountSelected=ProfileAccountModel(creation: Timestamp.now());
-            homeController.setProfileAdminUser = UserModel ();
-            homeController.setCatalogueCategoryList = [];
-            homeController.setCatalogueCategoryList = [];
-            homeController.setCatalogueProducts = [];
-            homeController.setProductsOutstandingList = [];
-            // save key/values Storage
-            GetStorage().write('idAccount', '');
+            ); 
+            //
             // instancias de FirebaseAuth para proceder a cerrar sesión
-            final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
-            Future.delayed(const Duration(seconds: 2)).then((_) {
-              firebaseAuth.signOut().then((value) async {
-                // finalizamos el diálogo alerta
-                Get.back();
-              });
-            });
+            //
+            await signOutGoogle();
+
           }),
     ],
   );
@@ -252,6 +239,23 @@ void showDialogCerrarSesion() {
     widget,
   );
 }
+  // FUCTION FIREBASE AUTH
+  Future<void> signOutGoogle() async {
+    // intancias de FirebaseAuth para proceder a cerrar sesión
+    final FirebaseAuth auth = FirebaseAuth.instance;
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+    // cerramos sesión
+    try {
+      await googleSignIn.signOut(); // cerramos sesión de google
+      await auth.signOut(); // cerramos sesión de firebase
+      await FlutterSecureStorage().deleteAll(); // eliminamos los datos de la memorias del dispositivo 
+      await FirebaseAuth.instanceFor(app: Firebase.app()).signOut().then((value) => Get.back); // cerramos sesión de firebase 
+      
+      SystemNavigator.pop(); // cerramos la app
+    } catch (error) {
+      print('#### error : signOutGoogle');
+    }
+  }
 
   // QUERIES FIRESTORE
 
@@ -413,7 +417,7 @@ void showDialogCerrarSesion() {
   }
 
   void addProductToCatalogue({required ProductCatalogue product}) async {
-    // values : registra el precio en una colección publica para todos los usuarios
+    // values : se obtiene los datos para registrar del precio al publico del producto en una colección publica de la db
     Price precio = Price(
       id: getProfileAccountSelected.id,
       idAccount: getProfileAccountSelected.id,
@@ -425,20 +429,36 @@ void showDialogCerrarSesion() {
       town: getProfileAccountSelected.town,
       time: Timestamp.fromDate(DateTime.now()),
     );
-    // Firebase set : se guarda un documento con la referencia del precio del producto
-    await Database.refFirestoreRegisterPrice(
-            idProducto: product.id, isoPAis: 'ARG')
-        .doc(precio.id)
-        .set(precio.toJson());
 
-    // Firebase set : se actualiza los datos del producto del cátalogo de la cuenta
-    Database.refFirestoreCatalogueProduct(
-            idAccount: getProfileAccountSelected.id)
-        .doc(product.id)
-        .set(product.toJson())
-        .whenComplete(() async {})
-        .onError((error, stackTrace) => null)
-        .catchError((_) => null);
+    // Firebase set : se crea un documento con la referencia del precio del producto
+    Database.refFirestoreRegisterPrice(idProducto: product.id, isoPAis: 'ARG').doc(precio.id).set(precio.toJson());
+    // Firebase set : se actualiza el documento del producto del cátalogo
+    Database.refFirestoreCatalogueProduct(idAccount: getProfileAccountSelected.id).doc(product.id).set(product.toJson()).whenComplete(() async {}).onError((error, stackTrace) => null).catchError((_) => null);
+    // condition : si el producto no esta verificado se procede a crear un documento en la colección publica
+    if(product.verified == false ){
+      addProductToCollectionPublic(isNew: true, product: product.convertProductoDefault());
+    }
+  }
+   void addProductToCollectionPublic({required bool isNew,required Product product})  {
+    // esta función procede a guardar el documento de una colleción publica
+    
+    //  set : id de la cuenta desde la cual se creo el producto
+    product.idAccount = getProfileAccountSelected.id; 
+    //  set : marca de tiempo que se creo el documenti por primera vez
+    if(isNew) { product.creation = Timestamp.fromDate(DateTime.now());}
+    //  set : marca de tiempo que se actualizo el documento por ultima vez
+    product.upgrade = Timestamp.fromDate(DateTime.now());
+    //  set : id del usuario que creo el documento 
+    if(isNew) { product.idUserCreation = getProfileAdminUser.email;}
+    //  set : id del usuario que actualizo el documento
+    product.idUserUpgrade = getProfileAdminUser.email;
+
+    // dondition : si el producto es nuevo se crea un documento, si no se actualiza
+    if(isNew){
+      Database.refFirestoreProductPublic().doc(product.id).set(product.toJson());
+    }else{
+      Database.refFirestoreProductPublic().doc(product.id).update(product.toJson());
+    }
   }
 
   // Cambiar de cuenta
@@ -469,7 +489,7 @@ void showDialogCerrarSesion() {
                   return Column(
                     children: [
                       WidgetButtonListTile().buttonListTileItemCuenta(perfilNegocio: getManagedAccountsList[index]),
-                      const Divider(endIndent: 0,indent: 0,height: 0,thickness: 0.2),
+                      ComponentApp().divider(),
                     ],
                   );
                 },
@@ -491,7 +511,7 @@ void showDialogCerrarSesion() {
               trailing:  const Icon(Icons.arrow_forward_ios_rounded),
               onTap: showDialogCerrarSesion,
             ),
-            const Divider(endIndent: 0,indent: 0,height: 0),
+            ComponentApp().divider(),
             widget,
             ],
           ),
@@ -539,16 +559,16 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
   // values
   late double sizePremiumLogo = 16.0;
   Widget icon = Container();
-  String title = '';
+  String title = 'PREMIUM';
   String description = '';
 
   // functions
   void setData({required String id}){
     switch(id){
       case 'premium':
-        title = '' ;
+        title = 'PREMIUM' ;
         description ='Funcionalidades especiales para profesionalizar tu negocio';
-        icon =  Container();
+        icon =  const Icon(Icons.workspace_premium_outlined,size: 50,color: Colors.amber);
         sizePremiumLogo=20;
         break;
       case 'stock':
@@ -588,76 +608,71 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
     // value 
     BorderSide side = const BorderSide(color: Colors.transparent);
 
-    return Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.start,mainAxisSize: MainAxisSize.max,
+    return ListView(
+      //crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.start,mainAxisSize: MainAxisSize.max,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.center,alignment: WrapAlignment.center,
-                    //mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      icon,
-                      Text(title,textAlign: TextAlign.center,style: const TextStyle(fontSize: 25,fontWeight: FontWeight.bold)),
-                      const SizedBox(width: 12),
-                      LogoPremium(personalize: true,accentColor: Colors.amber.shade600,size: sizePremiumLogo,visible: true,),
-                      //const Icon(Icons.workspace_premium_outlined,size: 30,color: Colors.amber),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Opacity(opacity: 0.7,child: Text(description,textAlign: TextAlign.center )),
-                  const SizedBox(height: 50),
-                  const Text('CARACTERÍSTICAS',textAlign: TextAlign.center,style: TextStyle(fontWeight: FontWeight.w200)),
-                  const SizedBox(height: 12),
-                  Chip(backgroundColor: Colors.transparent,side: side,avatar: const Icon(Icons.check),label: const Text('Control de inventario')),
-                  Chip(backgroundColor: Colors.transparent,side: side,avatar: const Icon(Icons.check),label: const Text('Multi Usuarios')),
-                  Chip(backgroundColor: Colors.transparent,side: side,avatar:  const Icon(Icons.check),label: const Text('Informes y estadísticas')),
-                  Chip(backgroundColor: Colors.transparent,side: side,avatar: const Icon(Icons.check),label: const Text('Sin publicidad')),
-                ],
-              ),
+            const SizedBox(height: 25),
+            Text(title,textAlign: TextAlign.center,style: const TextStyle(fontSize: 25,fontWeight: FontWeight.bold)),  
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: icon,
             ),
             const SizedBox(height: 12),
-            // button : adquirir premium
-            /* SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: null,/*  (){
-                  // actualizamos la subcripción de la cuenta
-                  setState(() {
-                    homeController.getProfileAccountSelected.subscribed = !homeController.getProfileAccountSelected.subscribed;
-                  });
-                  if(homeController.getProfileAccountSelected.subscribed){Get.back();}
-                },  */
-                //  style: ButtonStyle(backgroundColor: MaterialStateProperty.all(homeController.getProfileAccountSelected.subscribed?Colors.grey:Colors.blue)),
-                style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.grey.withOpacity(0.1))),
-                icon: const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  // text : homeController.getProfileAccountSelected.subscribed?'Desuscribirme':'Subcribirme'
-                  child: Text('Subcribirme',style: TextStyle(fontSize: 24,color: Colors.white)),
-                ),
-                // icon : homeController.getProfileAccountSelected.subscribed?Icons.close:Icons.arrow_forward_rounded
-                label: const Icon(Icons.arrow_forward_rounded,color: Colors.white,),
-              ),
-            ), */
-            // text : precio de la versión Premium
-            const SizedBox(height: 50),
-            /* disponible para cuando las subcripciones esten desarrolladas
-
-            const Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(text: 'US \$6,99',style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold)),
-                  TextSpan(text: ' al mes',style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold)),
-                ],
-              ),textAlign: TextAlign.center,
-              textDirection: TextDirection.rtl,
-            ), */
+            Opacity(opacity: 0.7,child: Text(description,textAlign: TextAlign.center )),
+            const SizedBox(height: 25),
+            Container(padding:const  EdgeInsets.all(12),color: Colors.teal,width: double.infinity,child: Center(child: LogoPremium(personalize: true,accentColor: Colors.white,size: sizePremiumLogo,visible: true,))),
+            const SizedBox(height: 25),
+            const Text('CARACTERÍSTICAS',textAlign: TextAlign.center,style: TextStyle(fontWeight: FontWeight.w200)),
+            const SizedBox(height: 12),
+            Chip(backgroundColor: Colors.transparent,side: side,avatar: const Icon(Icons.check),label: const Text('Control de inventario')),
+            ComponentApp().divider(),
+            Chip(backgroundColor: Colors.transparent,side: side,avatar: const Icon(Icons.check),label: const Text('Multi Usuarios')),
+            ComponentApp().divider(),
+            Chip(backgroundColor: Colors.transparent,side: side,avatar:  const Icon(Icons.check),label: const Text('Informes y estadísticas')),
+            ComponentApp().divider(),
+            Chip(backgroundColor: Colors.transparent,side: side,avatar: const Icon(Icons.check),label: const Text('Sin publicidad')),
           ],
         ),
-      );
+        const SizedBox(height: 12),
+        // button : adquirir premium
+        /* SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: null,/*  (){
+              // actualizamos la subcripción de la cuenta
+              setState(() {
+                homeController.getProfileAccountSelected.subscribed = !homeController.getProfileAccountSelected.subscribed;
+              });
+              if(homeController.getProfileAccountSelected.subscribed){Get.back();}
+            },  */
+            //  style: ButtonStyle(backgroundColor: MaterialStateProperty.all(homeController.getProfileAccountSelected.subscribed?Colors.grey:Colors.blue)),
+            style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.grey.withOpacity(0.1))),
+            icon: const Padding(
+              padding: EdgeInsets.all(8.0),
+              // text : homeController.getProfileAccountSelected.subscribed?'Desuscribirme':'Subcribirme'
+              child: Text('Subcribirme',style: TextStyle(fontSize: 24,color: Colors.white)),
+            ),
+            // icon : homeController.getProfileAccountSelected.subscribed?Icons.close:Icons.arrow_forward_rounded
+            label: const Icon(Icons.arrow_forward_rounded,color: Colors.white,),
+          ),
+        ), */
+        // text : precio de la versión Premium
+        const SizedBox(height: 50),
+        /* disponible para cuando las subcripciones esten desarrolladas
+
+        const Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(text: 'US \$6,99',style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold)),
+              TextSpan(text: ' al mes',style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold)),
+            ],
+          ),textAlign: TextAlign.center,
+          textDirection: TextDirection.rtl,
+        ), */
+      ],
+    );
   }
 }
