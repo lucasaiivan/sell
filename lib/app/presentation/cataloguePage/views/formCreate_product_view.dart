@@ -378,12 +378,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
                   enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
                   disabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
                 ),  
-              onChanged: (value) => controller.formEditing = true, // validamos que el usuario ha modificado el formulario
-              // validator: validamos el texto que el usuario ha ingresado.
-              validator: (value) {
-                if (controller.controllerTextEditCategory.text=='') { return 'Por favor, seleccione una cátegoria'; }
-                return null;
-              },
+              onChanged: (value) => controller.formEditing = true, // validamos que el usuario ha modificado el formulario 
             ),
           ),
         );
@@ -582,7 +577,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
           child: const Text('¡Gracias por hacer que esta aplicación sea aún más útil para más personas! 🚀'),
           ),
           // TODO : Para moderador eliminar para produccion
-          // ProductEdit().widgetForModerator,
+          ProductEdit().widgetForModerator,
       ],
     );
   }

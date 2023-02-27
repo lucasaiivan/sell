@@ -135,8 +135,7 @@ class ProductEdit extends StatelessWidget {
       duration:   const Duration(milliseconds: 700),
       child: AnimatedContainer(
         margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 24.0),
-        duration: const Duration(milliseconds: 1000),
-        //decoration: BoxDecoration(color: controller.cardProductDetailColor,borderRadius: BorderRadius.circular(12.0)),
+        duration: const Duration(milliseconds: 1000),  
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12.0),
           // color : color  gradiente de la tarjeta 
@@ -219,7 +218,8 @@ class ProductEdit extends StatelessWidget {
   Widget widgetFormEdit2(){
 
     // var
-    Color boderLineColor = Get.theme.textTheme.bodyMedium!.color ?? Colors.black;
+    final Color boderLineColor = Get.isDarkMode?Colors.white.withOpacity(0.3):Colors.black.withOpacity(0.3);
+    final Color fillColor = Get.isDarkMode?Colors.white.withOpacity(0.03):Colors.black.withOpacity(0.03);
 
     return Container(
       padding: const EdgeInsets.all(12.0),
@@ -255,6 +255,8 @@ class ProductEdit extends StatelessWidget {
                 autovalidateMode: AutovalidateMode.onUserInteraction, 
                 keyboardType: TextInputType.name,
                 decoration: InputDecoration(
+                  filled: true,
+                  fillColor: fillColor,
                   labelText: controller.controllerTextEditCategory.text==''?'Seleccionar una cátegoria':'Cátegoria',
                   border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                   enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
@@ -285,6 +287,8 @@ class ProductEdit extends StatelessWidget {
                         autovalidateMode: AutovalidateMode.onUserInteraction, 
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         decoration: InputDecoration( 
+                          filled: true,
+                          fillColor: fillColor,
                           labelText: 'Precio de compra',
                           border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                           enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
@@ -298,6 +302,7 @@ class ProductEdit extends StatelessWidget {
                       ),
                     ),
                     space,
+                    // precio de venta al público
                     Form(
                       key: controller.salePriceFormKey,
                       // TODO : RangeError TextFormField : cuando el usuario mantiene presionado el boton de borrar > 'RangeError : Invalid value: only valid value is 0: -1'
@@ -310,6 +315,8 @@ class ProductEdit extends StatelessWidget {
                         autovalidateMode: AutovalidateMode.onUserInteraction, 
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         decoration: InputDecoration(
+                          filled: true,
+                          fillColor: fillColor,
                           labelText: 'Precio de venta al públuco',
                           border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                           enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
@@ -327,14 +334,16 @@ class ProductEdit extends StatelessWidget {
                     AnimatedContainer(
                       width:double.infinity, 
                       duration: const Duration(milliseconds: 500),
-                      decoration: BoxDecoration(border: Border.all(color: Get.theme.textTheme.bodyMedium!.color?? Colors.black12,width: 0.1,),),
+                      decoration: BoxDecoration(border: Border.all(color: controller.getFavorite?Colors.amber :boderLineColor,width: 0.5,),),
                       child: CheckboxListTile(
                         contentPadding: const EdgeInsets.symmetric(horizontal:12, vertical: 12),
                         enabled: controller.getSaveIndicator ? false : true,
                         checkColor: Colors.white,
                         activeColor: Colors.amber,
                         value: controller.getFavorite,
-                        title: Text(controller.getFavorite?'Quitar de favorito':'Agregar a favorito'),subtitle: controller.getFavorite?null: const Text('Accede rápidamente a tus productos favoritos'),
+                        tileColor: controller.getFavorite?Colors.amber.withOpacity(0.1):null,
+                        title: Text(controller.getFavorite?'Quitar de favorito':'Agregar a favorito'),
+                        subtitle: controller.getFavorite?null: const Text('Accede rápidamente a tus productos favoritos'),
                         onChanged: (value) {
                           if (!controller.getSaveIndicator) { controller.setFavorite = value ?? false; }
                         },
@@ -347,7 +356,7 @@ class ProductEdit extends StatelessWidget {
                     AnimatedContainer(
                       width:double.infinity, 
                       duration: const Duration(milliseconds: 500),
-                      decoration: BoxDecoration(border: Border.all(color: Get.theme.textTheme.bodyMedium!.color?? Colors.black12,width: 0.1,),),
+                      decoration: BoxDecoration(color: controller.getStock?Colors.grey.withOpacity(0.1):null,border: Border.all(color: controller.getStock?Colors.grey:boderLineColor,width: 0.5,),),
                       child: Column(
                       children: [
                         CheckboxListTile(
@@ -381,10 +390,12 @@ class ProductEdit extends StatelessWidget {
                                   enabled: !controller.getSaveIndicator,
                                   keyboardType: TextInputType.number,
                                   onChanged: (value) => controller.setQuantityStock =int.parse(controller.controllerTextEditQuantityStock .text),
-                                  decoration: const InputDecoration(
-                                    filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
+                                  decoration: InputDecoration(
+                                    filled: true,fillColor: fillColor,hoverColor: Colors.blue,
                                     disabledBorder: InputBorder.none,
                                     labelText: "Stock", 
+                                    border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
                                   ),
                                   textInputAction: TextInputAction.done,
                                   //style: textStyle,
@@ -404,10 +415,12 @@ class ProductEdit extends StatelessWidget {
                                     enabled: !controller.getSaveIndicator,
                                     keyboardType: TextInputType.number,
                                     onChanged: (value) =>controller.setAlertStock = int.parse(controller.controllerTextEditAlertStock.text),
-                                    decoration: const InputDecoration(
-                                      filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
+                                    decoration: InputDecoration(
+                                      filled: true,fillColor: fillColor,hoverColor: Colors.blue,
                                       disabledBorder: InputBorder.none,
                                       labelText: "Alerta de stock (opcional)", 
+                                      border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
                                     ),
                                     textInputAction: TextInputAction.done,
                                     //style: textStyle,
@@ -418,7 +431,7 @@ class ProductEdit extends StatelessWidget {
                         ):Container(),
                       ],
                       ),
-                      ),
+                    ),
 
                     // text : marca de tiempo de la ultima actualización del documento
                     controller.getNewProduct || !controller.itsInTheCatalogue ? Container() :  Padding(

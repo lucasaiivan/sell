@@ -23,8 +23,7 @@ class ControllerProductsEdit extends GetxController {
   Color colorLoading = Colors.blue; 
   final Color colorButton = Colors.blue;
   Color cardProductDetailColor = Colors.grey.withOpacity(0.2);
-  Color dominateColorProduct = Colors.grey.withOpacity(0.2);
-  Color mutedColorProduct = Colors.grey.withOpacity(0.2);
+  Color dominateColorProduct = Colors.grey.withOpacity(0.2); 
   bool darkMode = false;
   // var logic
   bool _onBackPressed = false;
@@ -306,8 +305,7 @@ class ControllerProductsEdit extends GetxController {
       image,
       size: const Size(256, 256),
     );
-    dominateColorProduct = paletteGenerator.dominantColor!.color;
-    mutedColorProduct = paletteGenerator.mutedColor!.color;
+    dominateColorProduct = paletteGenerator.dominantColor!.color; 
     update();
   }
   Future<bool> onBackPressed({required BuildContext context})async{
@@ -503,6 +501,7 @@ class ControllerProductsEdit extends GetxController {
     if(getNewProduct) { product.idUserCreation = homeController.getProfileAdminUser.email;}
     //  set : id del usuario que actualizo el documento
     product.idUserUpgrade = homeController.getProfileAdminUser.email;
+     
 
     // set firestore - save product public
     if(getNewProduct){
@@ -561,7 +560,7 @@ class ControllerProductsEdit extends GetxController {
     if (getProduct.image != '') {
       _getImageColors(url: getProduct.image);
     }
-    // set : datos del producto para validar
+    // set : datos del producto para validar 
     setFavorite = getProduct.favorite;
     setPurchasePrice = getProduct.purchasePrice;
     setSalePrice = getProduct.salePrice;
@@ -581,7 +580,7 @@ class ControllerProductsEdit extends GetxController {
     controllerTextEditCategory = TextEditingController(text: getCategory.name);
     // primero verificamos que no tenga el metadato del dato de la marca para hacer un consulta inecesaria
     if (getProduct.idMark != ''){readMarkProducts();}
-    if (getProduct.category != ''){readCategory();}
+    if (getProduct.category != ''){readCategory();} 
     setSaveIndicator = false; // desactivamos el indicador de carga
   }
 
