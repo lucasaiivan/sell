@@ -869,11 +869,16 @@ class _NewProductViewState extends State<NewProductView> {
 
   @override
   Widget build(BuildContext context) {
+
+
+    // style
+    const EdgeInsetsGeometry padding = EdgeInsets.symmetric(vertical: 5,horizontal: 20);
     
 
     // widgets 
-    Widget listtileCode = ListTile(
-      title: Row(
+    Widget listtileCode = Padding(
+      padding: padding,
+      child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
@@ -885,9 +890,10 @@ class _NewProductViewState extends State<NewProductView> {
         Text(widget.productCatalogue.code,style: textStyle.copyWith(fontWeight: FontWeight.bold,fontSize: 16)),
       ],
     ), 
-    );
-    Widget listtileDescription = ListTile(
-      title: // text :  crear un rich text para poder darle estilo al texto
+    ); 
+    Widget listtileDescription = Padding(
+      padding: padding,
+      child: // text :  crear un rich text para poder darle estilo al texto
         RichText(
           text: TextSpan( 
             style: textStyle,
@@ -1026,16 +1032,16 @@ class _NewProductViewState extends State<NewProductView> {
           IconButton(onPressed: Get.back, icon: const Icon(Icons.close)),
         ],
       ),
-      body: Container(
+      body: SizedBox(
         width: Get.width,
         height: Get.height,
-        color: Colors.white,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 12),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // listtile : datos del producto
-              listtileCode,
+              listtileCode, 
               // textfield : descripcion del producto
               widgetTextFieldDescription,
               const SizedBox(height: 12),
