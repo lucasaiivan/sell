@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:sell/app/core/utils/fuctions.dart';
 
 
 class Product {
@@ -340,7 +341,8 @@ class ProductCatalogue {
   }
   
   // Fuction
-  String get sProcentaje{
+  String get getPorcentage{
+    // description : obtenemos el porcentaje de las ganancias
     double porcentaje = 0.0;
     double ganancia = 0.0;
     if (salePrice != 0.0 && purchasePrice !=0.0) {
@@ -348,6 +350,17 @@ class ProductCatalogue {
 
     porcentaje = ganancia / purchasePrice * 100;
     return "%${porcentaje.round()}";
+    }
+    return'';
+  }
+  String get getBenefits{
+    // description : obtenemos las ganancias 
+    double ganancia = 0.0;
+    if (salePrice != 0.0 && purchasePrice !=0.0) {
+      ganancia = salePrice - purchasePrice;
+
+    final String value = Publications.getFormatoPrecio(monto: ganancia);
+    return value;
     }
     return'';
   }

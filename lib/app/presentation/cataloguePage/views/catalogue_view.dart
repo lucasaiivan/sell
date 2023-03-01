@@ -237,14 +237,6 @@ class CataloguePage extends StatelessWidget {
           children: [
             // text : fecha de la ultima actualización
             Text(Publications.getFechaPublicacion(item.upgrade.toDate(), Timestamp.now().toDate()),style: textStyleSecundary,),
-            // text : cantidad de ventas
-            item.sales == 0? Container():Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                dividerCircle,
-                Text('${item.sales} ${item.sales == 1 ? 'venta' : 'ventas'}',style:textStyleSecundary),
-              ],
-            ),
             item.stock?Row(
               children: [
                 Text('Stock ',style: textStyleSecundary.copyWith(color: cataloguePageController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
@@ -263,19 +255,24 @@ class CataloguePage extends StatelessWidget {
         ),
       ],
     );
-    dynamic priceWidget = Column(crossAxisAlignment: CrossAxisAlignment.center,
+    dynamic priceWidget = Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         // text : precio de venta
         Text(Publications.getFormatoPrecio(monto: item.salePrice),style: TextStyle(fontWeight:FontWeight.w600,color: homeController.getDarkMode?Colors.white:Colors.black )),
         const SizedBox(width: 5),
         // text : porcentaje de ganancia
-        item.sProcentaje==''?Container():Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.arrow_upward_rounded,size: 14,color: Colors.green),
-            Text(item.sProcentaje,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w500)),
-          ],
-        ),
+        item.getPorcentage==''?Container():Opacity(opacity:0.7,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.arrow_upward_rounded,size: 14,color: Colors.green),
+              Text(item.getPorcentage,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w500)),
+            ],
+          )),
+        // text : monto de la ganancia
+        item.getBenefits==''?Container():Text(item.getBenefits,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w500)),
         
       ],
     );

@@ -394,7 +394,7 @@ class ControllerProductsEdit extends GetxController {
               // procede agregrar el producto en el cátalogo
               // Mods - save data product global
               if ( getProduct.verified==false || getEditModerator) {
-                  setProductPublicFirestore(product: getProduct.convertProductoDefault());
+                  setProductPublicFirestore(newProduct: getNewProduct,product: getProduct.convertProductoDefault());
               }
               
               // Registra el precio en una colección publica
@@ -441,70 +441,23 @@ class ControllerProductsEdit extends GetxController {
             'se produjo un error');}
   }
 
-  void saveProductPublic() async {
+  void setProductPublicFirestore({required Product product,required bool newProduct})  {
     // esta función procede a guardar el documento de una colleción publica
-
-    if (getProduct.id != '') {
-      if (getProduct.description != '') {
-        if (getProduct.idMark != '') {
-
-            // activate - indicator load
-            setSaveIndicator = true;
-            setTextAppBar = 'Espere por favor...';
-            updateAll();
-            
-            // values 
-            Product product = getProduct.convertProductoDefault();
-
-            // actualización de la imagen de perfil de la cuetna
-            if (getXFileImage.path != '') {
-              // image - Si el "path" es distinto '' quiere decir que ahi una nueva imagen para actualizar
-              // si es asi procede a guardar la imagen en la base de la app
-              Reference ref = Database.referenceStorageProductPublic(id: product.id);
-              UploadTask uploadTask = ref.putFile(File(getXFileImage.path));
-              await uploadTask;
-              // obtenemos la url de la imagen guardada
-              await ref.getDownloadURL().then((value) => product.image = value);
-            }
-
-            // set firestore
-            if(getNewProduct){
-              Database.refFirestoreProductPublic().doc(product.id).set(product.toJson()).whenComplete(() {
-                Get.back();
-                Get.snackbar('Estupendo 😃', 'Gracias por contribuir a la comunidad');
-              });
-            }else{
-              Database.refFirestoreProductPublic().doc(product.id).update(product.toJson()).whenComplete(() {
-                Get.back();
-                Get.snackbar('Estupendo 😃', 'Gracias por contribuir a la comunidad');
-              });
-            }
-            
-        } else {
-          Get.snackbar('No se puedo continuar 😐', 'debes seleccionar una marca');
-        }
-      } else {
-        Get.snackbar('No se puedo continuar 👎','debes escribir una descripción del producto');
-      }
-    }
-  }
-  void setProductPublicFirestore({required Product product})  {
-    // esta función procede a guardar el documento de una colleción publica
-    
-    //  set : id de la cuenta desde la cual se creo el producto
-    product.idAccount = homeController.getProfileAccountSelected.id; 
-    //  set : marca de tiempo que se creo el documenti por primera vez
-    if(getNewProduct) { product.creation = Timestamp.fromDate(DateTime.now()); } 
+     
+    // condition : si el producto es nuevo se le asigna los valores de creación
+    if( newProduct ){
+      product.idAccount = homeController.getProfileAccountSelected.id;
+      product.idUserCreation = homeController.getProfileAdminUser.email;
+      product.creation = Timestamp.fromDate(DateTime.now());
+     } 
     //  set : marca de tiempo que se actualizo el documenti
-    product.upgrade = Timestamp.fromDate(DateTime.now());
-    //  set : id del usuario que creo el documentoi 
-    if(getNewProduct) { product.idUserCreation = homeController.getProfileAdminUser.email;}
+    product.upgrade = Timestamp.fromDate(DateTime.now()); 
     //  set : id del usuario que actualizo el documento
     product.idUserUpgrade = homeController.getProfileAdminUser.email;
      
 
     // set firestore - save product public
-    if(getNewProduct){
+    if(newProduct){
       Database.refFirestoreProductPublic().doc(product.id).set(product.toJson());
     }else{
       Database.refFirestoreProductPublic().doc(product.id).update(product.toJson());

@@ -317,7 +317,7 @@ class ProductEdit extends StatelessWidget {
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: fillColor,
-                          labelText: 'Precio de venta al públuco',
+                          labelText: 'Precio de venta al público',
                           border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                           enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
                         ),  
