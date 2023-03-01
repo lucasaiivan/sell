@@ -44,8 +44,7 @@ class UserModel {
 class ProfileAccountModel {
   // Informacion de la cuenta
   Timestamp creation = Timestamp.now(); // Fecha en la que se creo la cuenta
-  String id =
-      ""; // el ID de la cuenta por defecto es el ID del usuario quien lo creo
+  String id = ""; // el ID de la cuenta por defecto es el ID del usuario quien lo creo
   String username = "";
   String image = "";
   String name = ""; 

@@ -58,7 +58,7 @@ class SalesController extends GetxController {
   // list : lista de productos seleccionados por el usaurio para la venta
   List get getListProductsSelested => homeController.listProductsSelected;
   set setListProductsSelected(List value) => homeController.listProductsSelected = value;
-  void addProduct({required ProductCatalogue product}) {
+  void addProductsSelected({required ProductCatalogue product}) {
     product.quantity = 1;
     product.select = false;
     homeController.listProductsSelected.add(product);
@@ -334,7 +334,7 @@ class SalesController extends GetxController {
 
   // verificamos si se trata de un código existente
     if (item.code == '') {
-      addProduct(product: item);
+      addProductsSelected(product: item);
     } else {
       // verifica si el ID del producto esta en la lista de seleccionados
       bool coincidence = false;
@@ -378,7 +378,7 @@ class SalesController extends GetxController {
       // si el producto se encuentra en el cátalgo de la cuenta se agrega a la lista de productos seleccionados
       if (product.id == id) {
         coincidence = true;
-        addProduct(product: product);
+        addProductsSelected(product: product);
         update();
         animateAdd();
       }
@@ -476,7 +476,7 @@ class SalesController extends GetxController {
 
     if (valuePrice != '') {
       if (double.parse(valuePrice) != 0) {
-        addProduct(product: ProductCatalogue(id: id,description: valueDescription,salePrice: double.parse(textEditingControllerAddFlashPrice.text),creation: Timestamp.now(),upgrade: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now()));
+        addProductsSelected(product: ProductCatalogue(id: id,description: valueDescription,salePrice: double.parse(textEditingControllerAddFlashPrice.text),creation: Timestamp.now(),upgrade: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now()));
         textEditingControllerAddFlashPrice.text = '';
         update();
         Get.back();
@@ -1009,7 +1009,7 @@ class _NewProductViewState extends State<NewProductView> {
                 homeController.addProductToCatalogue(product: widget.productCatalogue);
               }
               // add : agregamos el producto a la lista de productos seleccionados
-              salesController.addProduct(product: widget.productCatalogue);
+              salesController.addProductsSelected(product: widget.productCatalogue);
               // close dialog
               Get.back();
             }

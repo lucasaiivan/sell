@@ -1,5 +1,6 @@
 import 'dart:io';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -18,6 +19,21 @@ import '../../../core/utils/widgets_utils.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 class HomeController extends GetxController {
+
+  // info app
+  String _urlPlayStore = '';
+  set setUrlPlayStore(String value) => _urlPlayStore = value;
+  get getUrlPlayStore {
+
+    return _urlPlayStore==''?'':_urlPlayStore;
+  }
+  
+  bool _updateApp=false;
+  set setUpdateApp(bool value) {
+    _updateApp=value;
+    update();
+  }
+  bool get getUpdateApp => _updateApp;
 
   // buildContext : obtenemos el context para mostrar Sheet ( la hoja inferior )
   late BuildContext _buildContext;
@@ -132,6 +148,8 @@ class HomeController extends GetxController {
   void onInit() async {
 
     super.onInit(); 
+
+    isAppUpdated();
     getSalesUserGuideVisibility();
     getTheVisibilityOfTheCatalogueUserGuide();
     // obtenemos por parametro los datos de la cuenta de atentificación
@@ -248,7 +266,7 @@ void showDialogCerrarSesion() {
     try {
       await googleSignIn.signOut(); // cerramos sesión de google
       await auth.signOut(); // cerramos sesión de firebase
-      await FlutterSecureStorage().deleteAll(); // eliminamos los datos de la memorias del dispositivo 
+      await const FlutterSecureStorage().deleteAll(); // eliminamos los datos de la memorias del dispositivo 
       await FirebaseAuth.instanceFor(app: Firebase.app()).signOut().then((value) => Get.back); // cerramos sesión de firebase 
       
       SystemNavigator.pop(); // cerramos la app
@@ -257,7 +275,23 @@ void showDialogCerrarSesion() {
     }
   }
 
+  //
   // QUERIES FIRESTORE
+  //
+
+  Future<void> isAppUpdated() async {
+    try{
+      final packageInfo = await PackageInfo.fromPlatform();
+      final currentVersion = int.parse(packageInfo.buildNumber);
+      final docSnapshot = await Database.readVersionApp();
+      final firestoreVersion = docSnapshot.data()!['versionApp'] as int;
+      //urlPlayStore
+      setUrlPlayStore = docSnapshot.data()!['urlPlayStore'] as String;
+      setUpdateApp  = firestoreVersion > currentVersion;
+    }catch(e){
+      setUpdateApp = false;
+    }
+  }
 
   void readAccountsData({required String idAccount}) {
 
@@ -440,16 +474,19 @@ void showDialogCerrarSesion() {
     }
   }
    void addProductToCollectionPublic({required bool isNew,required Product product})  {
-    // esta función procede a guardar el documento de una colleción publica
-    
-    //  set : id de la cuenta desde la cual se creo el producto
-    product.idAccount = getProfileAccountSelected.id; 
-    //  set : marca de tiempo que se creo el documenti por primera vez
-    if(isNew) { product.creation = Timestamp.fromDate(DateTime.now());}
-    //  set : marca de tiempo que se actualizo el documento por ultima vez
-    product.upgrade = Timestamp.fromDate(DateTime.now());
-    //  set : id del usuario que creo el documento 
-    if(isNew) { product.idUserCreation = getProfileAdminUser.email;}
+    // esta función procede a guardar el documento de una colleción publica 
+
+    // var 
+    bool isNew = product.idUserCreation=='';
+
+    // condition : si el producto es nuevo se le asigna los valores de creación
+    if( isNew ){
+      product.idAccount = getProfileAccountSelected.id;
+      product.idUserCreation = getProfileAdminUser.email;
+      product.creation = Timestamp.fromDate(DateTime.now());
+     }  
+    //  set : marca de tiempo que se actualizo el documenti
+    product.upgrade = Timestamp.fromDate(DateTime.now()); 
     //  set : id del usuario que actualizo el documento
     product.idUserUpgrade = getProfileAdminUser.email;
 

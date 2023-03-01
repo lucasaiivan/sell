@@ -161,6 +161,8 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     Widget divider = ComponentApp().divider();
     
 
+    
+
     showSearch(
       context: context, 
       delegate: SearchPage<ProductCatalogue>(
@@ -173,6 +175,28 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
         filter: (product) => [product.description, product.nameMark],
         
         builder: (product) {
+
+          dynamic priceWidget = Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              // text : precio de venta
+              Text(Publications.getFormatoPrecio(monto: product.salePrice),style: TextStyle(fontWeight:FontWeight.w600,color: homeController.getDarkMode?Colors.white:Colors.black )),
+              const SizedBox(width: 5),
+              // text : porcentaje de ganancia
+              product.getPorcentage==''?Container():Opacity(opacity:0.7,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.arrow_upward_rounded,size: 14,color: Colors.green),
+                    Text(product.getPorcentage,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w500)),
+                  ],
+                )),
+              // text : monto de la ganancia
+              product.getBenefits==''?Container():Text(product.getBenefits,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w500)),
+              
+            ],
+          );
 
           return Column(
           children: [
@@ -203,14 +227,6 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
                               children: [ 
                                 // text : fecha de creacion
                                 Text(Publications.getFechaPublicacion(product.upgrade.toDate(), Timestamp.now().toDate()),style: textStyleSecundary,),
-                                //  text : ventas
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    product.sales == 0? Container(): dividerCircle, 
-                                    product.sales == 0? Container(): Text('${product.sales} ${product.sales == 1 ? 'venta' : 'ventas'}',style: textStyleSecundary,), 
-                                  ],
-                                ),
                                 // text : stock
                                 product.stock
                                   ?Row(
@@ -228,8 +244,8 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
                         ),
                       ),
                     ),
-                    // text : precio
-                    Text(Publications.getFormatoPrecio(monto: product.salePrice),style: const TextStyle(fontWeight:FontWeight.bold )),
+                    // content view : precio
+                    priceWidget,
                   ],
                 ),
               ),

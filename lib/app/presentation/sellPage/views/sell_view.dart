@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:sell/app/core/utils/widgets_utils.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../core/utils/dynamicTheme_lb.dart';
 import '../../home/controller/home_controller.dart';
@@ -58,6 +59,20 @@ class SalesView extends StatelessWidget {
   }
 
   Widget body(  {required SalesController controller} ) {
+
+    // Widgets
+    Widget updateview = homeController.getUpdateApp?
+      InkWell(
+        onTap: () async => await launchUrl(Uri.parse( homeController.getUrlPlayStore),mode: LaunchMode.externalApplication),
+        child: AnimatedContainer(
+          margin: const EdgeInsets.symmetric(vertical: 5),
+        padding: const EdgeInsets.all(12),
+        duration: const Duration(milliseconds: 300),
+        width: double.infinity ,
+        color: Colors.green,
+        child: const Center(child: Text('ACTUALIZAR',style: TextStyle(color: Colors.white,fontSize: 18),)),
+      ),
+    ):Container();
     return NestedScrollView(
       /* le permite crear una lista de elementos que se desplazarían hasta que el cuerpo alcanzara la parte superior */
       floatHeaderSlivers: true,
@@ -65,12 +80,13 @@ class SalesView extends StatelessWidget {
       headerSliverBuilder: (context, innerBoxIsScrolled) {
         return [
           // atentos a cualquier cambio que surja en los datos de la lista de marcas
-          SliverList(delegate: SliverChildListDelegate([controller.widgetProductSuggestionInfo, widgeSuggestedProducts(context: context,controller1: controller)]))
+          SliverList(delegate: SliverChildListDelegate([updateview,controller.widgetProductSuggestionInfo, widgeSuggestedProducts(context: context,controller1: controller)]))
         ];
       },
       body: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          
           controller.widgetSelectedProductsInformation,
           Expanded(
             child: GridView.builder(

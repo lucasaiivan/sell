@@ -3,15 +3,17 @@ import 'package:get/get.dart';
 import 'package:sell/app/presentation/sellPage/views/sell_view.dart';
 import 'package:sell/app/presentation/cataloguePage/views/catalogue_view.dart';
 import 'package:sell/app/presentation/transactionsPage/views/transactions_view.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/utils/widgets_utils.dart';
 import '../../multiuser/views/multiuser_view.dart';
 import '../controller/home_controller.dart';
+
 
 class HomeView extends GetView<HomeController> {
   // ignore: prefer_const_constructors_in_immutables
   HomeView({Key? key}) : super(key: key);
 
-  // var
+  // var 
   Widget getView({required index}) {
     switch (index) {
       case 0:
@@ -30,6 +32,8 @@ class HomeView extends GetView<HomeController> {
 
   @override
   Widget build(BuildContext context) {
+
+    
 
     // set
     if (controller.getProfileAccountSelected.id == ''){return viewDefault();}
