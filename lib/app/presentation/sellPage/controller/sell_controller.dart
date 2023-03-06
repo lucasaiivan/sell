@@ -237,16 +237,20 @@ class SalesController extends GetxController {
     // Busca entre los productos de mi catálogo
 
 
-    // var
-    Color colorAccent = Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
+    // styles
+    final Color primaryTextColor  = Get.isDarkMode?Colors.white70:Colors.black87;
+    final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
+    // widgets
+    final Widget dividerCircle = Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child: Icon(Icons.circle,size: 4, color: primaryTextColor.withOpacity(0.5)));
+    Widget divider = ComponentApp().divider();
 
     showSearch(
       context: context,
       delegate: SearchPage<ProductCatalogue>(
         items: homeController.getCataloProducts,
         searchLabel: 'Buscar',
-        searchStyle: TextStyle(color: colorAccent),
-        barTheme: Get.theme.copyWith(hintColor: colorAccent, highlightColor: colorAccent),
+        searchStyle: TextStyle(color: primaryTextColor),
+        barTheme: Get.theme.copyWith(hintColor: primaryTextColor, highlightColor: primaryTextColor),
         suggestion: const Center(child: Text('ej. alfajor')),
         failure: const Center(child: Text('No se encontro en tu cátalogo:(')),
         filter: (product) => [product.description, product.nameMark,product.code],
@@ -287,24 +291,24 @@ class SalesController extends GetxController {
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 7, color: Get.theme.dividerColor)),
-                                    Text(product.code),
+                                    dividerCircle,
+                                    Text(product.code,style: textStyleSecundary),
                                   ],
                                 ),
                                 // favorite
                                 product.favorite?Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
-                                    const Text('Favorito'),
+                                    dividerCircle,
+                                    Text('Favorito',style: textStyleSecundary),
                                   ],
                                 ):Container(),
                               //  text : alert stock
                                 alertStockText != ''?Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
-                                    Text(alertStockText),
+                                    dividerCircle,
+                                    Text(alertStockText,style: textStyleSecundary),
                                   ],
                                 ):Container(),
                             ],
@@ -315,7 +319,7 @@ class SalesController extends GetxController {
                       ),
                     ),
                     // text : precio
-                    Text(Publications.getFormatoPrecio(monto: product.salePrice))
+                    Text(Publications.getFormatoPrecio(monto: product.salePrice),style: const  TextStyle(fontSize: 18,fontWeight: FontWeight.w300),)
                   ],
                 ),
               ),
@@ -1032,28 +1036,24 @@ class _NewProductViewState extends State<NewProductView> {
           IconButton(onPressed: Get.back, icon: const Icon(Icons.close)),
         ],
       ),
-      body: SizedBox(
-        width: Get.width,
-        height: Get.height,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // listtile : datos del producto
-              listtileCode, 
-              // textfield : descripcion del producto
-              widgetTextFieldDescription,
-              const SizedBox(height: 12),
-              // textfield : precio de venta
-              widgetTextFieldPrice,
-              // widget :  permiso para guardar el producto nuevo en mi cátalogo (app catalogo)
-              Padding(padding: const EdgeInsets.all(12.0),child: checkboxAddProductToCatalogue),
-              const Spacer(),
-              SizedBox(width: double.infinity,child: buttonConfirm),
-            ],
-          ),
-        )
+      body: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // listtile : datos del producto
+            listtileCode, 
+            // textfield : descripcion del producto
+            widgetTextFieldDescription,
+            const SizedBox(height: 12),
+            // textfield : precio de venta
+            widgetTextFieldPrice,
+            // widget :  permiso para guardar el producto nuevo en mi cátalogo (app catalogo)
+            Padding(padding: const EdgeInsets.all(12.0),child: checkboxAddProductToCatalogue),
+            const Spacer(),
+            SizedBox(width: double.infinity,child: buttonConfirm),
+          ],
+        ),
       ),
     );
   }
