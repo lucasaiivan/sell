@@ -9,9 +9,23 @@ import 'app/core/routes/app_pages.dart';
 import 'app/presentation/splash/bindings/splash_binding.dart';
 import 'app/core/utils/dynamicTheme_lb.dart';
 
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+FirebaseOptions get firebaseOptions => const FirebaseOptions(
+  apiKey: "AIzaSyAMjGXHafddVhr7NzXp7xI7gq602dCgiq8",
+  authDomain: "commer-ef151.firebaseapp.com",
+  databaseURL: "https://commer-ef151.firebaseio.com",
+  projectId: "commer-ef151",
+  storageBucket: "commer-ef151.appspot.com",
+  messagingSenderId: "232181553323",
+  appId: "1:232181553323:web:33d24d2d7b8545c19b3fee",
+  measurementId: "G-YBR07J6S2B"
+);
+
 Future<void> main() async {
   // Evita errores causados ​​por la actualización de flutter. 
   WidgetsFlutterBinding.ensureInitialized();
+  // Initialize Firebase
   await Firebase.initializeApp();
   await GetStorage.init();
   SplashBinding().dependencies(); 

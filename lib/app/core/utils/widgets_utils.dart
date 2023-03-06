@@ -820,6 +820,17 @@ class ImageAvatarApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) { 
+
+
+     // var
+     final bool darkMode = Theme.of(context).brightness==Brightness.dark;
+
+
+    /// widgets
+    Widget imageDefault = AnimatedContainer(
+      duration: const Duration(milliseconds: 500),
+      color: darkMode?Colors.black12:Colors.grey.shade200,
+      child: Image.asset('assets/default_image.png',fit: BoxFit.cover,color: darkMode?Colors.white12 :Colors.grey.shade300,));
  
     return SizedBox(
       width: size,height: size,
@@ -841,8 +852,8 @@ class ImageAvatarApp extends StatelessWidget {
               child: CachedNetworkImage(
                 imageUrl: url,
                 fit: BoxFit.cover,
-                placeholder: (context, url) =>  Container(color: canvasColor),
-                errorWidget: (context, url, error) => Container(color: canvasColor),
+                placeholder: (context, url) =>  imageDefault,
+                errorWidget: (context, url, error) =>imageDefault,
               ),
             ),
           ),

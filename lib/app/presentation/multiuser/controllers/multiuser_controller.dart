@@ -138,7 +138,7 @@ class _AddAlertDialogState extends State<AddAlertDialog> {
                 if( admin==true || standar==true){
 
                   // create user 
-                  UserModel user = UserModel(email: _textFieldController.text , admin: admin==true);
+                  UserModel user = UserModel(email: _textFieldController.text , admin: admin??false);
 
                   // Firebase : ref 
                   var refFirestoreUserAccountsList = Database.refFirestoreUserAccountsList(email: user.email).doc( homeController.getIdAccountSelected );

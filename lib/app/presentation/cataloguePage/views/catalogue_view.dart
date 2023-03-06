@@ -260,7 +260,7 @@ class CataloguePage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         // text : precio de venta
-        Text(Publications.getFormatoPrecio(monto: item.salePrice),style: TextStyle(fontWeight:FontWeight.w600,color: homeController.getDarkMode?Colors.white:Colors.black )),
+        Text(Publications.getFormatoPrecio(monto: item.salePrice),style: TextStyle(fontSize: 18,fontWeight:FontWeight.w500,color: homeController.getDarkMode?Colors.white:Colors.black )),
         const SizedBox(width: 5),
         // text : porcentaje de ganancia
         item.getPorcentage==''?Container():Opacity(opacity:0.7,
@@ -268,11 +268,11 @@ class CataloguePage extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Icon(Icons.arrow_upward_rounded,size: 14,color: Colors.green),
-              Text(item.getPorcentage,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w500)),
+              Text(item.getPorcentage,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w300)),
             ],
           )),
         // text : monto de la ganancia
-        item.getBenefits==''?Container():Text(item.getBenefits,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w500)),
+        item.getBenefits==''?Container():Text(item.getBenefits,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w300)),
         
       ],
     );

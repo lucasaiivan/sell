@@ -16,7 +16,7 @@ import '../controller/product_edit_controller.dart';
 class ProductEdit extends StatelessWidget {
   ProductEdit({Key? key}) : super(key: key);
 
-  // controllers
+  // controllers  
   final ControllerProductsEdit controller = Get.find();
 
   // var 
@@ -33,6 +33,24 @@ class ProductEdit extends StatelessWidget {
     controller.darkMode = Get.isDarkMode;
     controller.cardProductDetailColor = controller.darkMode ? Colors.blueGrey.withOpacity(0.2) : Colors.brown.shade100.withOpacity(0.6);
 
+    Widget noEdit = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Icon(Icons.admin_panel_settings,size: 50),
+                SizedBox(height: 16.0),
+                Text('No eres administrador de esta cuenta',style: TextStyle(fontWeight: FontWeight.w300)),
+              ],
+            ),
+          ),
+        ), 
+        TextButton.icon(onPressed: Get.back, icon: const Icon(Icons.close_rounded), label: const Text('Cerrar')),
+      ],
+    );
 
     // GetBuilder - refresh all the views
     return GetBuilder<ControllerProductsEdit>(
@@ -43,7 +61,7 @@ class ProductEdit extends StatelessWidget {
         return Material(
           child: AnimatedSwitcher(
           duration: const  Duration(milliseconds: 100),
-            child: _.getNewProduct ? FormCreateProductView(): OfflineBuilder(
+            child: controller.getHomeController.getProfileAdminUser.superAdmin==false?noEdit: _.getNewProduct ? FormCreateProductView(): OfflineBuilder(
                 child: Container(),
                 connectivityBuilder: (
                   BuildContext context,

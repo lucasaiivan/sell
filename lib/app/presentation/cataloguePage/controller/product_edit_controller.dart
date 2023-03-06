@@ -51,6 +51,7 @@ class ControllerProductsEdit extends GetxController {
 
   // others controllers
   final HomeController homeController = Get.find();
+  HomeController get getHomeController => homeController;
 
 
   Future<void> categoryDelete({required String idCategory}) async => await Database.refFirestoreCategory(idAccount: homeController.getProfileAccountSelected.id).doc(idCategory).delete();
@@ -357,7 +358,7 @@ class ControllerProductsEdit extends GetxController {
     if (getProduct.id != '') {
       if ( getDescription!= '') {
         if (getMarkSelected.id != '' && getMarkSelected.name != '') {
-          if (getSalePrice != 0 && getAccountAuth || getSalePrice == 0 && getAccountAuth == false) {
+          if (getSalePrice > 0 ) {
             if ( getStock ? (getQuantityStock >= 1) : true) {
 
               // Deshabilitar la guía del usuario del catálogo

@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserModel {
   UserModel({
-    this.superAdmin = false,
-    this.admin = false,
+    this.superAdmin = false, // Super administrador es el usaurio que creo la cuenta
+    this.admin = false, // permiso de administrador del usuario para administrar la cuenta
     this.email = '',
   });
 
