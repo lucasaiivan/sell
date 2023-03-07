@@ -899,26 +899,18 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
                   return Column(
                     children: [
                       getWidgetOptionOther(),
-                      const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
-                      controllerProductsEdit.getUltimateSelectionMark.id ==
-                                  '' ||
-                              controllerProductsEdit
-                                      .getUltimateSelectionMark.id ==
-                                  'other'
-                          ? Container()
-                          : listTile(
-                              marcaSelect: controllerProductsEdit
-                                  .getUltimateSelectionMark),
-                      const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
+                      ComponentApp().divider(),
+                      controllerProductsEdit.getUltimateSelectionMark.id == '' || controllerProductsEdit.getUltimateSelectionMark.id == 'other'? Container(): listTile( marcaSelect: controllerProductsEdit.getUltimateSelectionMark),
+                      ComponentApp().divider(),
                       listTile(marcaSelect: marcaSelect),
-                      const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
+                      ComponentApp().divider(),
                     ],
                   );
                 }
                 return Column(
                   children: <Widget>[
                     listTile(marcaSelect: marcaSelect),
-                    const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
+                    ComponentApp().divider(),
                   ],
                 );
               },
@@ -992,9 +984,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
     } else {
       for (var element in controllerProductsEdit.getMarks) {
         if (element.id == 'other') {
-          widget = listTile(
-            marcaSelect: element,
-          );
+          widget = listTile(marcaSelect: element);
         }
       }
     }
@@ -1019,7 +1009,10 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         suggestion: const Center(child: Text('ej. Miller')),
         failure: const Center(child: Text('No se encontro :(')),
         filter: (product) => [product.name,product.description],
-        builder: (mark) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[listTile(marcaSelect: mark),const Divider(height: 0)]),
+        builder: (mark) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[
+          listTile(marcaSelect: mark),
+          ComponentApp().divider(),
+          ]),
       ),
     );
   }
@@ -1027,9 +1020,9 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
   Widget listTile({required Mark marcaSelect, bool icon = true}) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      trailing:!icon? null  : ImageAvatarApp(url: marcaSelect.image,size: 50,description:marcaSelect.name),
+      trailing:!icon? null  :marcaSelect.image==''?null: ImageAvatarApp(url: marcaSelect.image,size: 50,description:marcaSelect.name),
       dense: true,
-      title: Text(marcaSelect.name,overflow: TextOverflow.ellipsis),
+      title: Text(marcaSelect.name,overflow: TextOverflow.ellipsis,style: const TextStyle(fontWeight: FontWeight.w400,fontSize: 18),),
       subtitle: marcaSelect.description == ''
           ? null
           : Text(marcaSelect.description, overflow: TextOverflow.ellipsis),
@@ -1111,13 +1104,12 @@ class _CreateMarkState extends State<CreateMark> {
   }
 
   PreferredSizeWidget appbar() {
-    Color? colorAccent = Get.theme.textTheme.bodyText1!.color;
+    Color? colorAccent = Get.theme.textTheme.bodyLarge!.color;
 
     return AppBar(
       backgroundColor: Get.theme.scaffoldBackgroundColor,
       elevation: 0,
       title: Text(title, style: TextStyle(color: colorAccent)),
-      centerTitle: true,
       iconTheme: Get.theme.iconTheme.copyWith(color: colorAccent),
       actions: [
         newMark || load ? Container(): IconButton(onPressed: delete, icon: const Icon(Icons.delete)),
@@ -1131,6 +1123,9 @@ class _CreateMarkState extends State<CreateMark> {
 
     // widgets
     Widget circleAvatarDefault = CircleAvatar(backgroundColor: Colors.grey.shade300,radius: 75.0);
+
+    // var
+    final Color fillColor = Get.isDarkMode?Colors.white.withOpacity(0.03):Colors.black.withOpacity(0.03);
     
     return ListView(
       children: [
@@ -1157,8 +1152,10 @@ class _CreateMarkState extends State<CreateMark> {
             enabled: !load,
             controller: TextEditingController(text: widget.mark.name),
             onChanged: (value) => widget.mark.name = value,
-            decoration: const InputDecoration(
-                border: OutlineInputBorder(), labelText: "Nombre de la marca"),
+            decoration: InputDecoration(
+                filled: true, 
+                fillColor: fillColor,
+                labelText: "Nombre de la marca"),
             style: textStyle,
           ),
         ),
@@ -1168,8 +1165,9 @@ class _CreateMarkState extends State<CreateMark> {
             enabled: !load,
             controller: TextEditingController(text: widget.mark.description),
             onChanged: (value) => widget.mark.description = value,
-            decoration: const InputDecoration(
-                border: OutlineInputBorder(),
+            decoration: InputDecoration(
+                filled: true, 
+                fillColor: fillColor,
                 labelText: "Descripción (opcional)"),
             style: textStyle,
           ),
