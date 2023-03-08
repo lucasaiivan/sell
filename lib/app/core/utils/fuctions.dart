@@ -142,4 +142,22 @@ class Utils {
 
     return lista_color[Random().nextInt(lista_color.length)];
   }
+
+  String capitalize(String input) {
+  if (input.isEmpty) {
+    return input;
+  }
+  final words = input.split(' ');
+  final capitalizedWords = words.map((word) {
+    if (word.length > 1) {
+      return '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}';
+    } else {
+      return word.toUpperCase();
+    }
+  });
+  return capitalizedWords.join(' ');
+}
+
+
+
 }

@@ -504,13 +504,7 @@ class WidgetDrawer extends StatelessWidget {
                   onTap: () => homeController.setIndexPage = 2),
               superAdmin?ListTile(
                   leading: const Icon(Icons.add_moderator_outlined),
-                  title: Row(
-                    children: [
-                      const Text('Multi Usuario'),
-                      const SizedBox(width: 12),
-                      SizedBox(width: 90,child: LogoPremium()),
-                    ],
-                  ),
+                  title: const Text('Multi Usuario'),
                   onTap: () {
                     if( homeController.getProfileAccountSelected.subscribed ){
                       homeController.setIndexPage = 3;
@@ -551,13 +545,9 @@ class WidgetDrawer extends StatelessWidget {
             String whatsAppUrl = "";
             String phoneNumber = '541134862939';
             String description = "hola, estoy probando la App!";
-            whatsAppUrl ='https://wa.me/+$phoneNumber?text=${Uri.parse(description)}';
+            whatsAppUrl ='https://wa.me/+$phoneNumber?text=$description';
             Uri uri = Uri.parse( whatsAppUrl);
-            if (await canLaunchUrl(uri)) {
-              await launchUrl(uri,mode: LaunchMode.externalApplication);
-            } else {
-              throw 'Could not launch $uri';
-            }
+            await launchUrl(uri,mode: LaunchMode.externalNonBrowserApplication);
 
           },
         ),

@@ -92,28 +92,44 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
         list = homeController.getCataloProducts;
       }else{
         switch(key){
-          case '0': //  Mostrar productos con stock
+          case '0': // Mostrar todos
+            setTitleAppBar = 'Cátalogo';
+            list = homeController.getCataloProducts;
+            break; 
+          case '1': //  Mostrar productos con stock
             setTitleAppBar = 'Stock';
             List<ProductCatalogue> listSFilter = [];
             for(ProductCatalogue item in homeController.getCataloProducts){if(item.stock)listSFilter.add(item);}
             for(ProductCatalogue item in listSFilter){list.add(item);}
             break;
-          case '1': //  Mostrar productos favoritos
+          case '2': //  Mostrar productos favoritos
             setTitleAppBar = 'Favoritos';
             List<ProductCatalogue> listSFilter = [];
             for(ProductCatalogue item in homeController.getCataloProducts){if(item.favorite)listSFilter.add(item);}
             for(ProductCatalogue item in listSFilter){list.add(item);}
             break;
-          case '2': // Mostrar productos con stock bajos
+          case '3': // Mostrar productos con stock bajos
             setTitleAppBar = 'Stock Bajo';
             List<ProductCatalogue> listSFilter = [];
             for(ProductCatalogue item in homeController.getCataloProducts){if(item.stock){if(item.quantityStock<=item.alertStock){listSFilter.add(item);}}}
             for(ProductCatalogue item in listSFilter){list.add(item);}
             break;
-          case '3': // Mostrar todos
-            setTitleAppBar = 'Cátalogo';
-            list = homeController.getCataloProducts;
-            break; 
+          case '4': // Mostrar productos actualizados hace más de 90 días
+            setTitleAppBar = 'Filtro';
+            list = homeController.getCataloProducts.where((producto) {
+              DateTime fechaActualizacion = producto.upgrade.toDate();
+              return fechaActualizacion.isBefore(DateTime.now().subtract( const Duration(days: 90)));
+            }).toList();
+          
+            break;
+          case '5': // Mostrar productos actualizados hace más de 150 días
+            setTitleAppBar = 'Filtro';
+            list = homeController.getCataloProducts.where((producto) {
+              DateTime fechaActualizacion = producto.upgrade.toDate();
+              return fechaActualizacion.isBefore( DateTime.now().subtract( const Duration(days: 10 * 30)) );
+            }).toList();
+          
+            break;
         }
       }
     // set
