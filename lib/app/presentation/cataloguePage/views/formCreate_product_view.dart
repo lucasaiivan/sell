@@ -132,8 +132,9 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
             TextButton(
               onPressed: controller.getSaveIndicator?null:controller.currentSlide==0?null:(){
               controller.previousPage();
-            }, 
-            child: Text('Anterior',style: TextStyle(color: controller.currentSlide==0?Colors.grey:null),)),
+              }, 
+              child: Text('Anterior',style: TextStyle(color: controller.currentSlide==0?Colors.grey:null),),
+            ),
             // button : next o save
             Center(
               child: TextButton( 

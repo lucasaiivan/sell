@@ -49,10 +49,12 @@ class CataloguePage extends StatelessWidget {
               controller.catalogueFilter(key: selectedValue);
             },
             itemBuilder: (BuildContext ctx) => [
-                  const PopupMenuItem(value: '0', child: Text('Mostrar con stock')),
-                  const PopupMenuItem(value: '1', child: Text('Mostrar favoritos')),
-                  const PopupMenuItem(value: '2', child: Text('Mostrar con stock bajos')),
-                  const PopupMenuItem(value: '3', child: Text('Mostrar todos')),
+                  const PopupMenuItem(value: '0', child: Text('Mostrar todos')),
+                  const PopupMenuItem(value: '1', child: Text('Mostrar con stock')),
+                  const PopupMenuItem(value: '2', child: Text('Mostrar favoritos')),
+                  const PopupMenuItem(value: '3', child: Text('Mostrar con stock bajos')),
+                  const PopupMenuItem(value: '4', child: Text('Actualizado hace más de 2 meses')),
+                  const PopupMenuItem(value: '5', child: Text('Actualizado hace más de 5 meses')),
                 ]),
       ],
     );

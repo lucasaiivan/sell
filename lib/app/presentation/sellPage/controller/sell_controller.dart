@@ -539,71 +539,85 @@ class SalesController extends GetxController {
     ); 
   }
 
-  void showDialogQuickSale({String id = ''}) {
+  void showDialogQuickSale( ) {
     // Dialog view : Hacer una venta rapida 
 
     //var
-    FocusNode myFocusNode = FocusNode();
-    Get.defaultDialog(
-        title: 'Venta rápida',
-        titlePadding: const EdgeInsets.all(20),
-        cancel: TextButton(
-            onPressed: () {
-              textEditingControllerAddFlashPrice.text = '';
-              Get.back();
-            },
-            child: const Text('Cancelar')),
-        confirm: Theme(
-          data: Get.theme.copyWith(brightness: Get.theme.brightness),
-          child: TextButton(
-              onPressed: () {
-                addSaleFlash();
-                textEditingControllerAddFlashPrice.text = '';
-              },
-              child: const Text('Agregar')),
+    final FocusNode myFocusNode = FocusNode();
+    final ButtonStyle buttonStyle = ButtonStyle(padding: MaterialStateProperty.all(const EdgeInsets.all(12)));
+
+    // widgets
+    Widget content = Scaffold(
+      appBar: AppBar(
+        title: const Text('Venta rapida'), 
+        automaticallyImplyLeading: false,
         ),
-        content: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24),
-          child: Column(
-            children: [
-              // mount textfield
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: TextField(
-                  autofocus: true,
-                  controller: textEditingControllerAddFlashPrice,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: false),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp('[1234567890]'))
-                  ],
-                  decoration: const InputDecoration(
-                    hintText: '\$',
-                    labelText: "Escribe el precio",
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Column(
+                children: [
+                  // mount textfield
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: TextField(
+                      autofocus: true,
+                      controller: textEditingControllerAddFlashPrice,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: false),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp('[1234567890]'))
+                      ],
+                      decoration: const InputDecoration( 
+                        hintText: '\$',
+                        labelText: "Escribe el precio",
+                      ),
+                      style: const TextStyle(fontSize: 20.0),
+                      textInputAction: TextInputAction.next,
+                    ),
                   ),
-                  style: const TextStyle(fontSize: 20.0),
-                  textInputAction: TextInputAction.next,
-                ),
+                  const SizedBox( height: 20),
+                  // descrption textfield
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: TextField(
+                      focusNode: myFocusNode,
+                      autofocus: false,
+                      controller: textEditingControllerAddFlashDescription,
+                      decoration: const InputDecoration( 
+                        labelText: "Descripción (opcional)"),
+                      textInputAction: TextInputAction.done,
+                      onSubmitted: (value) {
+                        addSaleFlash();
+                        textEditingControllerAddFlashPrice.text = '';
+                      },
+                    ),
+                  ),
+                ],
               ),
-              // descrption textfield
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: TextField(
-                  focusNode: myFocusNode,
-                  autofocus: false,
-                  controller: textEditingControllerAddFlashDescription,
-                  decoration: const InputDecoration(
-                      labelText: "Descripción (opcional)"),
-                  textInputAction: TextInputAction.done,
-                  onSubmitted: (value) {
-                    addSaleFlash();
-                    textEditingControllerAddFlashPrice.text = '';
-                  },
-                ),
-              ),
-            ],
-          ),
-        ));
+            ),
+            const Spacer(),
+            // buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                TextButton(style:  buttonStyle,onPressed: () {textEditingControllerAddFlashPrice.text = '';Get.back();}, child: const Text('Cancelar',textAlign: TextAlign.center)),
+                TextButton(style:  buttonStyle,onPressed: () {addSaleFlash();textEditingControllerAddFlashPrice.text = '';}, child: const Text('Agregar',textAlign: TextAlign.center)),
+              ],
+            ),
+          ],
+        ),
+    );
+
+
+    // creamos un dialog con GetX
+    Get.dialog(
+      ClipRRect(
+        borderRadius: const  BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12), bottomLeft: Radius.circular(0), bottomRight: Radius.circular(0)),
+        child: content,
+      ),
+    );  
   }
 
   void dialogSelectedIncomeCash() {

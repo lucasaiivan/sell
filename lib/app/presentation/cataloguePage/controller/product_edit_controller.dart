@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:search_page/search_page.dart';
+import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:uuid/uuid.dart';
 import '../../../domain/entities/catalogo_model.dart';
@@ -370,7 +371,7 @@ class ControllerProductsEdit extends GetxController {
               updateAll();
 
               // set : values
-              getProduct.description = controllerTextEditDescripcion.text;
+              getProduct.description = Utils().capitalize(controllerTextEditDescripcion.text); // controllerTextEditDescripcion.text;
               getProduct.upgrade = Timestamp.now();
               getProduct.idMark = getMarkSelected.id;
               getProduct.nameMark = getMarkSelected.name;

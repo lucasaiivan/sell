@@ -51,8 +51,7 @@ Future<void> main() async {
   // theme
   Color colorDark = const Color.fromRGBO(43, 45, 57, 1);
   Color colorLight = const Color.fromRGBO(247, 245, 242, 1);
-  ThemeData themeData = ThemeData
-  (
+  ThemeData themeData = ThemeData(
     dialogTheme:const  DialogTheme(backgroundColor: Color.fromRGBO(249, 242, 237, 1)),
     popupMenuTheme: const PopupMenuThemeData(color: Color.fromRGBO(249, 242, 237, 1)), 
     visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -66,6 +65,7 @@ Future<void> main() async {
     canvasColor: colorLight,
     cardColor: colorLight,
     dialogBackgroundColor: colorLight,
+    inputDecorationTheme: InputDecorationTheme(filled: true,fillColor: Colors.black.withOpacity(0.03),border: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black.withOpacity(0.3)))),
   );
   ThemeData themeDataDark = ThemeData(
     dialogTheme:const  DialogTheme(backgroundColor: Color.fromRGBO(27, 36, 48, 1),),
@@ -81,6 +81,8 @@ Future<void> main() async {
     canvasColor: colorDark,
     cardColor: colorDark,
     dialogBackgroundColor: colorDark,
+    inputDecorationTheme: InputDecorationTheme(filled: true,fillColor: Colors.white.withOpacity(0.03),border: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),),
+    ), 
   );
 
   runApp(GetMaterialApp(
