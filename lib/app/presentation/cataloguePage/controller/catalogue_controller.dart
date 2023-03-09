@@ -126,7 +126,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
             setTitleAppBar = 'Filtro';
             list = homeController.getCataloProducts.where((producto) {
               DateTime fechaActualizacion = producto.upgrade.toDate();
-              return fechaActualizacion.isBefore( DateTime.now().subtract( const Duration(days: 10 * 30)) );
+              return fechaActualizacion.isBefore( DateTime.now().subtract( const Duration(days: 5 * 30)) );
             }).toList();
           
             break;

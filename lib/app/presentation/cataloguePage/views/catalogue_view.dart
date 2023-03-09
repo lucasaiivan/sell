@@ -54,7 +54,7 @@ class CataloguePage extends StatelessWidget {
                   const PopupMenuItem(value: '2', child: Text('Mostrar favoritos')),
                   const PopupMenuItem(value: '3', child: Text('Mostrar con stock bajos')),
                   const PopupMenuItem(value: '4', child: Text('Actualizado hace más de 2 meses')),
-                  const PopupMenuItem(value: '5', child: Text('Actualizado hace más de 5 meses')),
+                  const PopupMenuItem(value: '5', child: Text('Hace más de 5 meses')),
                 ]),
       ],
     );
