@@ -14,7 +14,9 @@ class TransactionsController extends GetxController {
   // others controllers
   final HomeController homeController = Get.find();
 
-  //obtenemos los modos de pago y sus respecvtivas ganancias
+  // style : estilo de la vista
+  final double cardBoderRadius = 20.0;
+  double get getCardBoderRadius => cardBoderRadius;
 
   // obtenemos los modos de pagos y sus respectivas ganancias
   // description : efective (Efectivo) - mercadopago (Mercado Pago) - card (Tarjeta De Crédito/Débito)

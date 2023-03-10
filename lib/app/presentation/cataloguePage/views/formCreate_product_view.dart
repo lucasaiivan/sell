@@ -44,7 +44,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
 
     // set : obtenemos los nuevos valores 
     controller.darkMode = Theme.of(context).brightness == Brightness.dark;
-    controller.cardProductDetailColor = controller.darkMode ?controller.formEditing?Colors.blueGrey.withOpacity(0.2):Colors.blueGrey.withOpacity(0.1) : controller.formEditing?Colors.grey.shade300:Colors.grey.shade200;
+    controller.cardProductDetailColor = controller.darkMode ?controller.formEditing?Colors.blueGrey.withOpacity(0.2):Colors.blueGrey.withOpacity(0.1) : Colors.grey.shade200;
 
     //  AnnotatedRegion : proporciona un valor a sus widgets hijos
     // SystemUiOverlayStyle : Especifica una preferencia para el estilo de la barra de estado del sistema
@@ -100,6 +100,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
                 controller.getSaveIndicator? ComponentApp().linearProgressBarApp(color: controller.colorLoading):lineProgressIndicator,
                 // view : tarjeta animada
                 cardFront,
+                // chips : chips de información
                 AnimatedContainer(
                   width: double.infinity,
                   duration: const Duration(milliseconds: 500),
@@ -112,11 +113,23 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
                       children: [
                         controller.controllerTextEditCategory.text==''?Container():InputChip(shape:shape,checkmarkColor: Colors.red,surfaceTintColor: Colors.green,onPressed: (){controller.carouselController.animateToPage(3, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text(controller.controllerTextEditCategory.text)),
                         controller.controllerTextEditPrecioCompra.numberValue==0.0?Container():InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(4, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text(Publications.getFormatoPrecio(monto: controller.controllerTextEditPrecioCompra.numberValue))),
+                        controller.getPorcentage==''?Container():InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(5, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text( controller.getPorcentage )),
                         controller.controllerTextEditPrecioVenta.numberValue==0.0?Container():InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(5, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text(Publications.getFormatoPrecio(monto: controller.controllerTextEditPrecioVenta.numberValue))),
                         controller.getFavorite? InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(6, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label:const  Text('Favorito')):Container(),
                         controller.getStock? InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(7, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: const Text('Control de Stock')):Container(),
                       ],
                     ),
+                  ),
+                ),
+                // text and button : modificar porcentaje de ganancia
+                controller.getPorcentage == '' || controller.currentSlide != 5 ? Container() : Padding(
+                  padding: const EdgeInsets.only(top: 20,left: 20,right: 20),
+                  child: Row(
+                    children: [  
+                      TextButton(onPressed: controller.showDialogAddProfitPercentage, child: Text( controller.getPorcentage )),
+                      const Spacer(),
+                      TextButton(onPressed: controller.showDialogAddProfitPercentage , child: const Text( 'Modificar porcentaje' )),
+                    ],
                   ),
                 ),
                 // formTexts
@@ -401,8 +414,11 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           decoration: const InputDecoration(border: UnderlineInputBorder(),labelText: 'Precio de compra'),   
           onChanged: (value){
-            controller.setPurchasePrice = controller.controllerTextEditPrecioCompra.numberValue;
-            controller.formEditing = true;
+            if( controller.controllerTextEditPrecioCompra.numberValue != 0){
+              controller.setPurchasePrice = controller.controllerTextEditPrecioCompra.numberValue;
+              controller.formEditing = true;
+            }
+             
           },
           // validator: validamos el texto que el usuario ha ingresado.
           validator: (value) {
@@ -428,10 +444,12 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
               autovalidateMode: AutovalidateMode.onUserInteraction,
               maxLength: 15, 
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(border: UnderlineInputBorder(),labelText: 'Precio de venta al públuco'),  
+              decoration: const InputDecoration(border: UnderlineInputBorder(),labelText: 'Precio de venta al público'),  
               onChanged: (value){
-                controller.setSalePrice = controller.controllerTextEditPrecioVenta.numberValue;
-                controller.formEditing = true;
+                if( controller.controllerTextEditPrecioVenta.numberValue != 0){
+                  controller.setSalePrice = controller.controllerTextEditPrecioVenta.numberValue;
+                  controller.formEditing = true;
+                }
               },
               // validator: validamos el texto que el usuario ha ingresado.
               validator: (value) {
