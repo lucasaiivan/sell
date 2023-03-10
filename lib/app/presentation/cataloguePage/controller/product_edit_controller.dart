@@ -4,6 +4,7 @@ import 'package:carousel_slider/carousel_controller.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -190,6 +191,7 @@ class ControllerProductsEdit extends GetxController {
   double _salePrice = 0.0;
   set setSalePrice(double value) {
     _salePrice = value;
+    controllerTextEditPrecioVenta =MoneyMaskedTextController(initialValue: value);
     update(['updateAll']);
   }
   get getSalePrice => _salePrice;
@@ -276,6 +278,14 @@ class ControllerProductsEdit extends GetxController {
   @override
   void onClose() {
     // llamado justo antes de que el controlador se elimine de la memoria - ej. closeStream(); //
+    controllerTextEditAlertStock.dispose();
+    controllerTextEditCategory.dispose();
+    controllerTextEditDescripcion.dispose();
+    controllerTextEditMark.dispose();
+    controllerTextEditPrecioCompra.dispose();
+    controllerTextEditPrecioVenta.dispose();
+    controllerTextEditQuantityStock.dispose();
+
     super.onClose();
   }
 
@@ -284,9 +294,28 @@ class ControllerProductsEdit extends GetxController {
   bool get isSubscribed => true;//homeController.getProfileAccountSelected.subscribed;
 
   //
-  // FUNCTIONES
+  // FUNCTIONS
   //
   updateAll() => update(['updateAll']); 
+
+  String get getPorcentage{
+    // description : obtenemos el porcentaje de las ganancias
+    if ( controllerTextEditPrecioCompra.numberValue == 0 ) {
+      return '';
+    }
+    if ( controllerTextEditPrecioVenta.numberValue == 0 ) {
+      return '0%';
+    }
+    
+    double ganancia = controllerTextEditPrecioVenta.numberValue - controllerTextEditPrecioCompra.numberValue;
+    double porcentajeDeGanancia = (ganancia / controllerTextEditPrecioCompra.numberValue) * 100;
+    
+    if (ganancia % 1 != 0) {
+      return '${porcentajeDeGanancia.toStringAsFixed(2)}%';
+    } else {
+      return '${porcentajeDeGanancia.toInt()}%';
+    }
+  }
 
   isCatalogue() {
     // return : si el producto esta en el catalogo
@@ -533,6 +562,7 @@ class ControllerProductsEdit extends GetxController {
     controllerTextEditQuantityStock =TextEditingController(text: getQuantityStock.toString());
     controllerTextEditAlertStock = TextEditingController(text: getAlertStock.toString());
     controllerTextEditCategory = TextEditingController(text: getCategory.name);
+
     // primero verificamos que no tenga el metadato del dato de la marca para hacer un consulta inecesaria
     if (getProduct.idMark != ''){readMarkProducts();}
     if (getProduct.category != ''){readCategory();} 
@@ -674,6 +704,81 @@ class ControllerProductsEdit extends GetxController {
 
   // WIDGETS
 
+  void showDialogAddProfitPercentage( ) {
+    // Dialog view :  muestra el dialogo para agregar el porcentaje de ganancia
+
+    //var 
+    final ButtonStyle buttonStyle = ButtonStyle(padding: MaterialStateProperty.all(const EdgeInsets.all(12)));
+    final TextEditingController controller = TextEditingController();
+
+    // widgets
+    Widget content = Scaffold(
+      appBar: AppBar(
+        title: const Text('Porcentaje de beneficio'), 
+        automaticallyImplyLeading: false,
+        ),
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Column(
+                children: [
+                  // mount textfield
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: TextField(
+                      controller: controller,
+                      autofocus: true, 
+                      keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp('[1234567890]'))
+                      ],
+                      decoration: const InputDecoration( 
+                        hintText: '%',
+                        labelText: "Porcentaje",
+                      ),
+                      style: const TextStyle(fontSize: 20.0),
+                      textInputAction: TextInputAction.next,
+                    ),
+                  ),  
+                ],
+              ),
+            ),
+            const Spacer(),
+            // buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                TextButton(style:  buttonStyle,onPressed: () { Get.back();}, child: const Text('Cancelar',textAlign: TextAlign.center)),
+                TextButton(style:  buttonStyle,onPressed: () {
+                  //  function : guarda el nuevo porcentaje de ganancia
+                  if(controller.text != ''){
+                    double porcentajeDeGanancia  = double.parse(controller.text); 
+                    double ganancia = getPurchasePrice * (porcentajeDeGanancia / 100);
+                    setSalePrice = getPurchasePrice + ganancia; 
+                    update(['updateAll']);
+                  }
+                  //  action : cierra el dialogo
+                  Get.back();
+                }, 
+                child: const Text('aceptar',textAlign: TextAlign.center)),
+              ],
+            ),
+          ],
+        ),
+    );
+
+
+    // creamos un dialog con GetX
+    Get.dialog(
+      ClipRRect(
+        borderRadius: const  BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12), bottomLeft: Radius.circular(0), bottomRight: Radius.circular(0)),
+        child: content,
+      ),
+    );  
+  }
+
+  // widget : imagen del producto
   Widget loadImage({double size = 120}) {
 
     // devuelve la imagen del product
@@ -1004,7 +1109,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
       context: context,
       delegate: SearchPage<Mark>(
         searchStyle: TextStyle(color: colorAccent),
-        barTheme: Get.theme.copyWith(hintColor: colorAccent, highlightColor: colorAccent),
+        barTheme: Get.theme.copyWith(hintColor: colorAccent, highlightColor: colorAccent,inputDecorationTheme: const InputDecorationTheme(filled: false)),
         items: list,
         searchLabel: 'Buscar marca',
         suggestion: const Center(child: Text('ej. Miller')),

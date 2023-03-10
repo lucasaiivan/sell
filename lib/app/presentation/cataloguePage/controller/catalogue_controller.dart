@@ -182,10 +182,11 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     showSearch(
       context: context, 
       delegate: SearchPage<ProductCatalogue>(
+        
         items: homeController.getCataloProducts,
         searchLabel: 'Buscar',
         searchStyle: TextStyle(color: primaryTextColor),
-        barTheme: Get.theme .copyWith(hintColor: primaryTextColor, highlightColor: primaryTextColor),
+        barTheme: Get.theme.copyWith(hintColor: primaryTextColor, highlightColor: primaryTextColor,inputDecorationTheme: const InputDecorationTheme(filled: false)),
         suggestion: const Center(child: Text('ej. alfajor')),
         failure: const Center(child: Text('No se encontro en tu cátalogo:(')),
         filter: (product) => [product.description, product.nameMark],

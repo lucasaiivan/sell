@@ -819,8 +819,8 @@ class ImageAvatarApp extends StatelessWidget {
     /// widgets
     Widget imageDefault = AnimatedContainer(
       duration: const Duration(milliseconds: 500),
-      color: darkMode?Colors.black12:Colors.grey.shade200,
-      child: Image.asset('assets/default_image.png',fit: BoxFit.cover,color: darkMode?Colors.white12 :Colors.grey.shade300,));
+      color: darkMode?Colors.black12:Colors.grey.shade300,
+      child: Image.asset('assets/default_image.png',fit: BoxFit.cover,color: darkMode?Colors.white12 :Colors.grey.shade200,));
  
     return SizedBox(
       width: size,height: size,

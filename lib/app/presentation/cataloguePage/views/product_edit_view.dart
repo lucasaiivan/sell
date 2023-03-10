@@ -293,6 +293,7 @@ class ProductEdit extends StatelessWidget {
           !controller.getAccountAuth
               ? Container()
               : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [ 
                     Form(
                       key: controller.purchasePriceFormKey,
@@ -318,6 +319,15 @@ class ProductEdit extends StatelessWidget {
                           return null; 
                         },
                       ),
+                    ),
+                    controller.getPorcentage == '' ? Container() :space,
+                    // text and button : modificar porcentaje de ganancia
+                    controller.getPorcentage == '' ? Container() : Row(
+                      children: [
+                        TextButton(onPressed: controller.showDialogAddProfitPercentage, child: Text( controller.getPorcentage )),
+                        const Spacer(),
+                        TextButton(onPressed: controller.showDialogAddProfitPercentage , child: const Text( 'Modificar porcentaje' )),
+                      ],
                     ),
                     space,
                     // precio de venta al público
@@ -842,3 +852,4 @@ class _SelectCategoryState extends State<SelectCategory> {
     );
   }
 }
+ 

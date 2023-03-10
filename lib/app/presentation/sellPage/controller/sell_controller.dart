@@ -242,7 +242,7 @@ class SalesController extends GetxController {
     final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
     // widgets
     final Widget dividerCircle = Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child: Icon(Icons.circle,size: 4, color: primaryTextColor.withOpacity(0.5)));
-    Widget divider = ComponentApp().divider();
+ 
 
     showSearch(
       context: context,
@@ -250,7 +250,7 @@ class SalesController extends GetxController {
         items: homeController.getCataloProducts,
         searchLabel: 'Buscar',
         searchStyle: TextStyle(color: primaryTextColor),
-        barTheme: Get.theme.copyWith(hintColor: primaryTextColor, highlightColor: primaryTextColor),
+        barTheme: Get.theme.copyWith(hintColor: primaryTextColor, highlightColor: primaryTextColor,inputDecorationTheme: const InputDecorationTheme(filled: false)),
         suggestion: const Center(child: Text('ej. alfajor')),
         failure: const Center(child: Text('No se encontro en tu cátalogo:(')),
         filter: (product) => [product.description, product.nameMark,product.code],

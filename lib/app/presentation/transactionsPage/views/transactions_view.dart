@@ -58,7 +58,7 @@ class TransactionsView extends StatelessWidget {
         PopupMenuButton(
             icon: Material(
               color: darkTheme?Colors.white70:Colors.black87,
-              borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+              borderRadius: const BorderRadius.all(Radius.circular(8.0)),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Row(
@@ -223,9 +223,9 @@ class TransactionsView extends StatelessWidget {
           crossAxisAlignment:CrossAxisAlignment.end,mainAxisSize: MainAxisSize.min,
           children: [
             //  text : precio totol del ticket
-            Text(Publications.getFormatoPrecio(monto: ticketModel.priceTotal),style: TextStyle(fontWeight: FontWeight.bold,fontSize: 14,color: primaryTextColor)),
+            Text(Publications.getFormatoPrecio(monto: ticketModel.priceTotal),style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18,color: primaryTextColor)),
             //  text : ganancias
-            Text(revenue,style: TextStyle(fontWeight: FontWeight.w900,fontSize: 14,color: Colors.green.withOpacity(0.9)  )),
+            Text(revenue,style: TextStyle(fontWeight: FontWeight.w500,fontSize: 14,color: Colors.green.withOpacity(0.9)  )),
           ],
         ),
         ],
@@ -422,7 +422,8 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
     final TransactionsController transactionsController = Get.find();
     final HomeController homeController = Get.find<HomeController>();
 
-    // valueS
+    // valueS  
+    double cardBorderRadius = 12.0;
     Color colorCard = Colors.blue.withOpacity(0.1);
     bool darkMode = false;
     bool isExpanded = false;
@@ -439,7 +440,8 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
   Widget build(BuildContext context) {
 
 
-    // get values
+    // get values 
+    cardBorderRadius = transactionsController.getCardBoderRadius;
     darkMode = Theme.of(context).brightness == Brightness.dark;
     textFilter = transactionsController.getFilterText;
     priceTotal = transactionsController.getInfoPriceTotal();
@@ -455,56 +457,51 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
           padding: EdgeInsets.all(20.0),
           child:Opacity(opacity: 0.7,child: Text('De mayor ganancia',overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold))),
         ),
-        Material(
-          elevation: 0,
-          color: Colors.transparent,
-          clipBehavior: Clip.antiAlias,
-          borderRadius: const BorderRadius.all(Radius.circular(12)),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // content
-              Blur(
-                colorOpacity: 0,
-                blur: homeController.getProfileAccountSelected.subscribed?0:2.5,
-                blurColor: Colors.transparent,
-                child: ListView.builder(
-                  physics: const  NeverScrollableScrollPhysics(),
-                  scrollDirection: Axis.vertical,
-                  itemCount: transactionsController.getBestSellingProductList.length,
-                  shrinkWrap: true,
-                  itemBuilder: (context, index) {
-                    return Column(
-                      children: [
-                        ListTile(
-                          leading: CachedNetworkImage(
-                                imageUrl:transactionsController.getBestSellingProductList[index].image,
-                                placeholder: (context, url) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
-                                imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Stack(
-                                  alignment: Alignment.centerLeft,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 5),
-                                      child: CircleAvatar(backgroundImage: image),
-                                    ),
-                                    CircleAvatar(radius: 10 ,backgroundColor: Colors.white,child: Text(transactionsController.getBestSellingProductList[index].quantity.toString(),style:const TextStyle(fontSize: 10,color:Colors.blue,fontWeight: FontWeight.bold))),
-                                  ],
-                                )),
-                                errorWidget: (context, url, error) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
-                              ),
-                          title: Text(transactionsController.getBestSellingProductList[index].nameMark,overflow:TextOverflow.ellipsis,style:const TextStyle()),
-                          subtitle: Text(transactionsController.getBestSellingProductList[index].description,overflow:TextOverflow.ellipsis,style:const TextStyle( )),
-                          trailing:Text('+${Publications.getFormatoPrecio(monto: transactionsController.getBestSellingProductList[index].revenue )}',style: TextStyle(overflow:TextOverflow.ellipsis ,color:Colors.green.shade700,fontWeight: FontWeight.w900 )),
-                        ),
-                        const Divider(endIndent:20,height: 0,indent:20),
-                      ],
-                    ); 
-                },),
-              ),
-              // text
-              Center(child: homeController.getProfileAccountSelected.subscribed?Container(): LogoPremium(personalize: true,accentColor: Colors.amber.shade600)),
-            ],
-          ),
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            // Blur : el blur se usa para que no se vea el contenido si no esta suscrito a la cuenta premium
+            Blur(
+              colorOpacity: 0,
+              blur: homeController.getProfileAccountSelected.subscribed?0:2.5,
+              blurColor: Colors.transparent,
+              // content : el contenido que se va a mostrar
+              child: ListView.builder(
+                physics: const  NeverScrollableScrollPhysics(),
+                scrollDirection: Axis.vertical,
+                itemCount: transactionsController.getBestSellingProductList.length,
+                shrinkWrap: true,
+                itemBuilder: (context, index) {
+                  return Column(
+                    children: [
+                      ListTile(
+                        leading: CachedNetworkImage(
+                              imageUrl:transactionsController.getBestSellingProductList[index].image,
+                              placeholder: (context, url) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                              imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Stack(
+                                alignment: Alignment.centerLeft,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 5),
+                                    child: CircleAvatar(backgroundImage: image),
+                                  ),
+                                  CircleAvatar(radius: 10 ,backgroundColor: Colors.white,child: Text(transactionsController.getBestSellingProductList[index].quantity.toString(),style:const TextStyle(fontSize: 10,color:Colors.blue,fontWeight: FontWeight.bold))),
+                                ],
+                              )),
+                              errorWidget: (context, url, error) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                            ),
+                        title: Text(transactionsController.getBestSellingProductList[index].nameMark,overflow:TextOverflow.ellipsis,style:const TextStyle()),
+                        subtitle: Text(transactionsController.getBestSellingProductList[index].description,overflow:TextOverflow.ellipsis,style:const TextStyle( )),
+                        trailing:Text('+${Publications.getFormatoPrecio(monto: transactionsController.getBestSellingProductList[index].revenue )}',style: TextStyle(overflow:TextOverflow.ellipsis ,color:Colors.green.shade700,fontWeight: FontWeight.w900 )),
+                      ),
+                      const Divider(endIndent:20,height: 0,indent:20),
+                    ],
+                  ); 
+              },),
+            ),
+            // text
+            Center(child: homeController.getProfileAccountSelected.subscribed?Container(): LogoPremium(personalize: true,accentColor: Colors.amber.shade600)),
+          ],
         ),
       ],
     );
@@ -516,47 +513,42 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
           padding: EdgeInsets.all(20.0),
           child:Opacity(opacity: 0.7,child: Text('Medios de pago',overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold))),
         ),
-       Material(
-          elevation: 0,
-          color: Colors.transparent,
-          clipBehavior: Clip.antiAlias,
-          borderRadius: const BorderRadius.all(Radius.circular(12)),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // content
-              Blur(
-                colorOpacity: 0,
-                blur: homeController.getProfileAccountSelected.subscribed?0:2.5,
-                blurColor: Colors.transparent,
-               child: ListView.builder(
-                  physics: const  NeverScrollableScrollPhysics(),
-                  scrollDirection: Axis.vertical,
-                  itemCount: transactionsController.getAnalyticsMeansOfPayment.length,
-                  shrinkWrap: true,
-                  itemBuilder: (context, index) {
+       Stack(
+         alignment: Alignment.center,
+         children: [
+           // Blur : el blur se usa para que no se vea el contenido si no esta suscrito a la cuenta premium
+           Blur(
+             colorOpacity: 0,
+             blur: homeController.getProfileAccountSelected.subscribed?0:2.5,
+             blurColor: Colors.transparent,
+             // content : lista de medios de pago
+            child: ListView.builder(
+               physics: const  NeverScrollableScrollPhysics(),
+               scrollDirection: Axis.vertical,
+               itemCount: transactionsController.getAnalyticsMeansOfPayment.length,
+               shrinkWrap: true,
+               itemBuilder: (context, index) {
        
-                    // var
-                    String value =transactionsController.getAnalyticsMeansOfPayment.keys.elementAt(index) ;
-                    Color color = transactionsController.getPayMode(idMode: value)['color'];
+                 // var
+                 String value =transactionsController.getAnalyticsMeansOfPayment.keys.elementAt(index) ;
+                 Color color = transactionsController.getPayMode(idMode: value)['color'];
        
-                    return Column(
-                      children: [
-                        ListTile(
-                          dense: true,
-                          title:Text(transactionsController.getPayMode(idMode: value)['name'],style: TextStyle(fontSize: 16,fontWeight: FontWeight.w800,color: color.withOpacity(0.7)  )),
-                          trailing:Opacity(opacity: 0.75,child: Text(Publications.getFormatoPrecio(monto: transactionsController.getAnalyticsMeansOfPayment.values.elementAt(index) ),style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w300) )),
-                        ),
-                        transactionsController.getAnalyticsMeansOfPayment.length!=index+1?const Divider(endIndent:20,height: 0,indent:20):Container(),
-                      ],
-                    ); 
-                },),
-             ),
-             // text
-              Center(child: homeController.getProfileAccountSelected.subscribed?Container(): LogoPremium(personalize: true,accentColor: Colors.amber.shade600)),
-           ],
+                 return Column(
+                   children: [
+                     ListTile(
+                       dense: true,
+                       title:Text(transactionsController.getPayMode(idMode: value)['name'],style: TextStyle(fontSize: 16,fontWeight: FontWeight.w800,color: color.withOpacity(0.7)  )),
+                       trailing:Opacity(opacity: 0.75,child: Text(Publications.getFormatoPrecio(monto: transactionsController.getAnalyticsMeansOfPayment.values.elementAt(index) ),style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w300) )),
+                     ),
+                     transactionsController.getAnalyticsMeansOfPayment.length!=index+1?const Divider(endIndent:20,height: 0,indent:20):Container(),
+                   ],
+                 ); 
+             },),
+          ),
+          // text
+           Center(child: homeController.getProfileAccountSelected.subscribed?Container(): LogoPremium(personalize: true,accentColor: Colors.amber.shade600)),
+        ],
          ),
-       ),
       ],
     );
     // view : monto de cada caja
@@ -570,6 +562,7 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
               padding: EdgeInsets.symmetric(horizontal: 20,vertical: 20),
               child: Opacity(opacity: 0.7,child: Text('Saldo en caja',overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold))),
             ),
+            // content : lista de cajas
             ListView.builder(
               physics: const  NeverScrollableScrollPhysics(),
               scrollDirection: Axis.vertical,
@@ -598,25 +591,28 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
         isExpanded = !isExpanded;
         transactionsController.update();
       },
+      // Theme : se usa para aplicar un estilo personalizado
       child: Theme(
         data: themeData,
+        // AnimateContainer : se usa para animar el tamaño del card segun el estado de la variable isExpanded
         child: AnimatedContainer(
           curve: !isExpanded ? const ElasticOutCurve(.9) : Curves.elasticOut,
           duration: const Duration(milliseconds: 5000),
           margin: EdgeInsets.symmetric(horizontal: isExpanded ? 8 : 2, vertical: 5),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
+            // card content : mostramos el contenido del card segun el estado de la variable isExpanded
             child: Card(
               clipBehavior: Clip.antiAlias,
               elevation: elevation,
               color: Colors.transparent,
               margin: const EdgeInsets.all(0),
-              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(bottomLeft:Radius.circular(12),bottomRight: Radius.circular(12),topLeft: Radius.circular(12),topRight: Radius.circular(12))),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(bottomLeft:Radius.circular(cardBorderRadius),bottomRight: Radius.circular(cardBorderRadius),topLeft: Radius.circular(cardBorderRadius),topRight: Radius.circular(cardBorderRadius))),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 500),
                 color: colorCard,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
               
                     // view : volumen de ventas
@@ -631,14 +627,8 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   // text : titulo
-                                  Row(
-                                    children: [
-                                      Text(textCategory,maxLines: isExpanded ? 1 : 2,overflow: TextOverflow.ellipsis, textAlign: TextAlign.start, style: const TextStyle(fontSize: 24)),
-                                      // icon : muestra si la tarjeta esta expandida o no
-                                      Icon(isExpanded? Icons.keyboard_arrow_down: Icons.keyboard_arrow_up,size: 27),
-                                    ],
-                                  ),
                                   const SizedBox(height: 12),
+                                  Text(textCategory,maxLines: isExpanded ? 1 : 2,overflow: TextOverflow.ellipsis, textAlign: TextAlign.start, style: const TextStyle(fontSize: 24)),
                                   //  text : cantidad de ventas
                                   Row(
                                     mainAxisSize: MainAxisSize.min,
@@ -673,6 +663,8 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
                         ],
                       ),
                     ),
+                    // icon : muestra si la tarjeta esta expandida o no
+                    isExpanded? Container(): const Padding(padding: EdgeInsets.only(bottom:12),child: Icon(Icons.keyboard_arrow_down,size: 27)),
                     // view : expandible de volumen de ventas
                     AnimatedCrossFade(
                       firstChild: const Text('', style: TextStyle(fontSize: 0)),
@@ -747,7 +739,8 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
     final TransactionsController transactionsController = Get.find();
     final HomeController homeController = Get.find<HomeController>();
 
-    // valueS
+    // valueS 
+    double cardBorderRadius = 12.0;
     Color colorCard = Colors.grey;
     bool darkMode = false;
     bool isExpanded = false;
@@ -763,6 +756,7 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
   Widget build(BuildContext context) {
 
     // get values 
+    cardBorderRadius = transactionsController.getCardBoderRadius;
     darkMode = Theme.of(context).brightness == Brightness.dark;
     textFilter = transactionsController.getFilterText;
     priceTotal = transactionsController.getInfoPriceTotal();
@@ -779,50 +773,44 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
           padding: EdgeInsets.symmetric(horizontal: 20,vertical: 20),
           child: Opacity(opacity: 0.7,child: Text('Más vendidos con el mayor monto',overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold))),
         ),
-        Material(
-          elevation: 0,
-          color: Colors.transparent,
-          clipBehavior: Clip.antiAlias,
-          borderRadius: const BorderRadius.all(Radius.circular(12)),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // content
-              Blur(
-                colorOpacity: 0,
-                blur: homeController.getProfileAccountSelected.subscribed?0:2.5,
-                blurColor: Colors.transparent,
-                child: ListView.builder(
-                  physics: const  NeverScrollableScrollPhysics(),
-                  scrollDirection: Axis.vertical,
-                  itemCount: transactionsController.getBestSellingProductsByAmount.length,
-                  shrinkWrap: true,
-                  itemBuilder: (context, index) {
-                    return Column(
-                      children: [
-                        ListTile(
-                          leading: CachedNetworkImage(
-                                imageUrl:transactionsController.getBestSellingProductsByAmount[index].image,
-                                placeholder: (context, url) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
-                                imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Padding(
-                                  padding: const EdgeInsets.only(left: 5),
-                                  child: CircleAvatar(backgroundImage: image),
-                                )),
-                                errorWidget: (context, url, error) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
-                              ),
-                          title: Text(transactionsController.getBestSellingProductsByAmount[index].nameMark,overflow:TextOverflow.ellipsis,style:const TextStyle()),
-                          subtitle: Text(transactionsController.getBestSellingProductsByAmount[index].description,overflow:TextOverflow.ellipsis,style:const TextStyle( )),
-                          trailing: Text(transactionsController.getBestSellingProductsByAmount[index].quantity.toString(),style:const TextStyle(color:Colors.blue)),
-                        ),
-                        transactionsController.getBestSellingProductsByAmount.length!=index+1?const Divider(endIndent:20,height: 0,indent:20):Container(),
-                      ],
-                    ); 
-                },),
-              ),
-              // text
-              Center(child: homeController.getProfileAccountSelected.subscribed?Container(): LogoPremium(personalize: true,accentColor: Colors.amber.shade600)),
-            ],
-          ),
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            
+            Blur(
+              colorOpacity: 0,
+              blur: homeController.getProfileAccountSelected.subscribed?0:2.5,
+              blurColor: Colors.transparent,
+              child: ListView.builder(
+                physics: const  NeverScrollableScrollPhysics(),
+                scrollDirection: Axis.vertical,
+                itemCount: transactionsController.getBestSellingProductsByAmount.length,
+                shrinkWrap: true,
+                itemBuilder: (context, index) {
+                  return Column(
+                    children: [
+                      ListTile(
+                        leading: CachedNetworkImage(
+                              imageUrl:transactionsController.getBestSellingProductsByAmount[index].image,
+                              placeholder: (context, url) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                              imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Padding(
+                                padding: const EdgeInsets.only(left: 5),
+                                child: CircleAvatar(backgroundImage: image),
+                              )),
+                              errorWidget: (context, url, error) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                            ),
+                        title: Text(transactionsController.getBestSellingProductsByAmount[index].nameMark,overflow:TextOverflow.ellipsis,style:const TextStyle()),
+                        subtitle: Text(transactionsController.getBestSellingProductsByAmount[index].description,overflow:TextOverflow.ellipsis,style:const TextStyle( )),
+                        trailing: Text(transactionsController.getBestSellingProductsByAmount[index].quantity.toString(),style:const TextStyle(color:Colors.blue)),
+                      ),
+                      transactionsController.getBestSellingProductsByAmount.length!=index+1?const Divider(endIndent:20,height: 0,indent:20):Container(),
+                    ],
+                  ); 
+              },),
+            ),
+            // text
+            Center(child: homeController.getProfileAccountSelected.subscribed?Container(): LogoPremium(personalize: true,accentColor: Colors.amber.shade600)),
+          ],
         ),
       ],
     );
@@ -844,50 +832,44 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
           padding: EdgeInsets.symmetric(horizontal: 20,vertical: 20),
           child: Opacity(opacity: 0.7,child: Text('Más vendidos',overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold))),
         ),
-        Material(
-          elevation: 0,
-          color: Colors.transparent,
-          clipBehavior: Clip.antiAlias,
-          borderRadius: const BorderRadius.all(Radius.circular(12)),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // content
-              Blur(
-                colorOpacity: 0,
-                blur: homeController.getProfileAccountSelected.subscribed?0:2.5,
-                blurColor: Colors.transparent,
-                child: ListView.builder(
-                  physics: const  NeverScrollableScrollPhysics(),
-                  scrollDirection: Axis.vertical,
-                  itemCount: transactionsController.getMostSelledProducts.length,
-                  shrinkWrap: true,
-                  itemBuilder: (context, index) {
-                    return Column(
-                      children: [
-                        ListTile(
-                          leading: CachedNetworkImage(
-                                imageUrl:transactionsController.getMostSelledProducts[index].image,
-                                placeholder: (context, url) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
-                                imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Padding(
-                                  padding: const EdgeInsets.only(left: 5),
-                                  child: CircleAvatar(backgroundImage: image),
-                                )),
-                                errorWidget: (context, url, error) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
-                              ),
-                          title: Text(transactionsController.getMostSelledProducts[index].nameMark,overflow:TextOverflow.ellipsis,style:const TextStyle()),
-                          subtitle: Text(transactionsController.getMostSelledProducts[index].description,overflow:TextOverflow.ellipsis,style:const TextStyle( )),
-                          trailing: Text(transactionsController.getMostSelledProducts[index].quantity.toString(),style:const TextStyle(color:Colors.blue)),
-                        ),
-                        transactionsController.getMostSelledProducts.length!=index+1?const Divider(endIndent:20,height: 0,indent:20):Container(),
-                      ],
-                    ); 
-                },),
-              ),
-              // text
-              Center(child: homeController.getProfileAccountSelected.subscribed?Container(): LogoPremium(personalize: true,accentColor: Colors.amber.shade600)),
-            ],
-          ),
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            // content
+            Blur(
+              colorOpacity: 0,
+              blur: homeController.getProfileAccountSelected.subscribed?0:2.5,
+              blurColor: Colors.transparent,
+              child: ListView.builder(
+                physics: const  NeverScrollableScrollPhysics(),
+                scrollDirection: Axis.vertical,
+                itemCount: transactionsController.getMostSelledProducts.length,
+                shrinkWrap: true,
+                itemBuilder: (context, index) {
+                  return Column(
+                    children: [
+                      ListTile(
+                        leading: CachedNetworkImage(
+                              imageUrl:transactionsController.getMostSelledProducts[index].image,
+                              placeholder: (context, url) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                              imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Padding(
+                                padding: const EdgeInsets.only(left: 5),
+                                child: CircleAvatar(backgroundImage: image),
+                              )),
+                              errorWidget: (context, url, error) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                            ),
+                        title: Text(transactionsController.getMostSelledProducts[index].nameMark,overflow:TextOverflow.ellipsis,style:const TextStyle()),
+                        subtitle: Text(transactionsController.getMostSelledProducts[index].description,overflow:TextOverflow.ellipsis,style:const TextStyle( )),
+                        trailing: Text(transactionsController.getMostSelledProducts[index].quantity.toString(),style:const TextStyle(color:Colors.blue)),
+                      ),
+                      transactionsController.getMostSelledProducts.length!=index+1?const Divider(endIndent:20,height: 0,indent:20):Container(),
+                    ],
+                  ); 
+              },),
+            ),
+            // text
+            Center(child: homeController.getProfileAccountSelected.subscribed?Container(): LogoPremium(personalize: true,accentColor: Colors.amber.shade600)),
+          ],
         ),
       ],
     );
@@ -913,7 +895,7 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
                     clipBehavior: Clip.antiAlias,
                     elevation: elevation, 
                     margin: const EdgeInsets.all(0),
-                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(bottomLeft:Radius.circular(12),bottomRight: Radius.circular(12),topLeft: Radius.circular(12),topRight: Radius.circular(12))),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(bottomLeft:Radius.circular(cardBorderRadius),bottomRight: Radius.circular(cardBorderRadius),topLeft: Radius.circular(cardBorderRadius),topRight: Radius.circular(cardBorderRadius))),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 500),
                       color: colorCard,
@@ -924,13 +906,7 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Row(
-                                    children: [
-                                      Text(textCategory,maxLines: isExpanded ? 1 : 2,overflow: TextOverflow.ellipsis, textAlign: TextAlign.start, style:const TextStyle( fontSize: 24)),
-                                      // icon : muestra si la tarjeta esta expandida o no
-                                      Icon(isExpanded? Icons.keyboard_arrow_down: Icons.keyboard_arrow_up,size: 27),
-                                    ],
-                                  ),
+                                  Text(textCategory,maxLines: isExpanded ? 1 : 2,overflow: TextOverflow.ellipsis, textAlign: TextAlign.start, style:const TextStyle( fontSize: 24)),
                                   const SizedBox(height: 12),
                                   Row(
                                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -979,6 +955,9 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
                                 ],
                               ),
                               ),
+                            // icon : muestra si la tarjeta esta expandida o no
+                            isExpanded? Container(): const Padding(padding: EdgeInsets.only(bottom:12),child: Icon(Icons.keyboard_arrow_down,size: 27)),
+                            // content : contenido expandible 
                             AnimatedCrossFade(
                                   firstChild: const Text('', style: TextStyle(fontSize: 0)),
                                   secondChild: Theme(
@@ -1001,6 +980,7 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
                                   reverseDuration: Duration.zero,
                                   sizeCurve: Curves.fastLinearToSlowEaseIn,
                                 ),
+                                
                             ],
                           ),
                     ),

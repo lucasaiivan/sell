@@ -129,8 +129,8 @@ class ProductCatalogue {
   int sales = 0;
   bool stock = false;
   int alertStock = 5;
-  double salePrice = 0.0;
-  double purchasePrice = 0.0;
+  double salePrice = 0.0; // precio de venta
+  double purchasePrice = 0.0; // precio de compra
   String currencySign = "\$"; // signo de la moneda
 
   // var optional
@@ -343,15 +343,18 @@ class ProductCatalogue {
   // Fuction
   String get getPorcentage{
     // description : obtenemos el porcentaje de las ganancias
-    double porcentaje = 0.0;
-    double ganancia = 0.0;
-    if (salePrice != 0.0 && purchasePrice !=0.0) {
-      ganancia = salePrice - purchasePrice;
-
-    porcentaje = ganancia / purchasePrice * 100;
-    return "%${porcentaje.round()}";
+    if ( purchasePrice == 0 || salePrice == 0) {
+      return '';
     }
-    return'';
+    
+    double ganancia = salePrice - purchasePrice;
+    double porcentajeDeGanancia = (ganancia / purchasePrice) * 100;
+    
+    if (ganancia % 1 != 0) {
+      return '${porcentajeDeGanancia.toStringAsFixed(2)}%';
+    } else {
+      return '${porcentajeDeGanancia.toInt()}%';
+    }
   }
   String get getBenefits{
     // description : obtenemos las ganancias 
