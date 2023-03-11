@@ -150,7 +150,7 @@ class SalesView extends StatelessWidget {
                             padding: padding,
                             child: Row(
                               children: [
-                                const Text('Productos:'),
+                                const Opacity(opacity: 0.7,child: Text('Productos:')),
                                 const Spacer(),
                                 Text(controller.getListProductsSelestedLength.toString()),
                               ],
@@ -161,7 +161,7 @@ class SalesView extends StatelessWidget {
                             padding: padding,
                             child: Row(
                               children: [
-                                const Text('Medio:'),
+                                const Opacity(opacity: 0.7,child: Text('Medio:')),
                                 const Spacer(),
                                 Text(controller.getTicket.getPayMode),
                               ],
@@ -174,7 +174,7 @@ class SalesView extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(horizontal: 20),
                             child: Row(
                               children: [
-                                const Text('Total',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w900,color: Colors.blue)),
+                                const Opacity(opacity: 0.7,child: Text('Total',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w900,color: Colors.blue))),
                                 const Spacer(),
                                 Text(Publications.getFormatoPrecio(monto: controller.getCountPriceTotal()),style: const TextStyle(color: Colors.blue,fontSize: 24,fontWeight: FontWeight.w900)),
                               ],
@@ -187,7 +187,7 @@ class SalesView extends StatelessWidget {
                               padding: padding,
                               child: Row(
                                 children: [
-                                  const Text('Pago con:'),
+                                  const Opacity(opacity: 0.7,child: Text('Pago con:')),
                                   const Spacer(),
                                   Text(controller.getValueReceived()),
                                 ],
@@ -200,7 +200,7 @@ class SalesView extends StatelessWidget {
                               padding: padding,
                               child: Row(
                                 children: [
-                                  const Text('Vuelto:'),
+                                  const Opacity(opacity: 0.7,child:  Text('Vuelto:')),
                                   const Spacer(),
                                   Material(
                                     elevation: 0,
