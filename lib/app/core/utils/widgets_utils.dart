@@ -669,7 +669,7 @@ class WidgetSuggestionProduct extends StatelessWidget {
     if (list.isEmpty) return Container();
 
     // values
-    Color? colorAccent = Get.theme.textTheme.subtitle1?.color;
+    Color? colorAccent = Get.theme.textTheme.titleMedium?.color;
     double radius = 32.0;
 
     return Column(
@@ -819,7 +819,7 @@ class ImageAvatarApp extends StatelessWidget {
     /// widgets
     Widget imageDefault = AnimatedContainer(
       duration: const Duration(milliseconds: 500),
-      color: darkMode?Colors.black12:Colors.grey.shade300,
+      color: darkMode?Colors.black12:Colors.black12,
       child: Image.asset('assets/default_image.png',fit: BoxFit.cover,color: darkMode?Colors.white12 :Colors.grey.shade200,));
  
     return SizedBox(

@@ -21,6 +21,11 @@ import 'package:http/http.dart' as http;
 
 class ControllerProductsEdit extends GetxController {
 
+  // Build context
+  BuildContext? context;
+  BuildContext get getContext => context!;
+  set setContext(BuildContext value) => context = value;
+
   // var style
   Color colorLoading = Colors.blue; 
   final Color colorButton = Colors.blue;
@@ -39,6 +44,7 @@ class ControllerProductsEdit extends GetxController {
   bool theFormIsComplete = false;
   bool checkValidateForm = false;
   bool enabledButton = false;
+
   // var : TextFormField formKey
   GlobalKey<FormState> descriptionFormKey = GlobalKey<FormState>();
   GlobalKey<FormState> markFormKey = GlobalKey<FormState>(); 
@@ -54,7 +60,6 @@ class ControllerProductsEdit extends GetxController {
   // others controllers
   final HomeController homeController = Get.find();
   HomeController get getHomeController => homeController;
-
 
   Future<void> categoryDelete({required String idCategory}) async => await Database.refFirestoreCategory(idAccount: homeController.getProfileAccountSelected.id).doc(idCategory).delete();
   Future<void> categoryUpdate({required Category categoria}) async {
@@ -273,6 +278,10 @@ class ControllerProductsEdit extends GetxController {
   void onReady() {
     // llamado después de que el widget se representa en la pantalla - ej. showIntroDialog(); //
     super.onReady();
+
+    controllerTextEditPrecioCompra.addListener(() {
+      updateAll(); 
+      });
   }
 
   @override

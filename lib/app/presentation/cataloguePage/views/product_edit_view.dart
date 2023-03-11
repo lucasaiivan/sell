@@ -29,6 +29,7 @@ class ProductEdit extends StatelessWidget {
   Widget build(BuildContext context) {
 
     // get : obtenemos los valores 
+    controller.setContext = context;
     controller.colorLoading = Get.theme.primaryColor;
     controller.darkMode = Get.isDarkMode;
     controller.cardProductDetailColor = controller.darkMode ? Colors.blueGrey.withOpacity(0.2) : Colors.brown.shade100.withOpacity(0.6);
@@ -280,7 +281,7 @@ class ProductEdit extends StatelessWidget {
                   enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
                   disabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
                 ),  
-                onChanged: (value) => controller.formEditing = true, // validamos que el usuario ha modificado el formulario
+                onChanged: (value) => controller.formEditing = true,  // validamos que el usuario ha modificado el formulario
                 // validator: validamos el texto que el usuario ha ingresado.
                 validator: (value) {
                   if (controller.controllerTextEditCategory.text=='') { return 'Por favor, seleccione una cátegoria'; }
@@ -311,8 +312,12 @@ class ProductEdit extends StatelessWidget {
                           labelText: 'Precio de compra',
                           border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                           enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
-                          ),   
-                        onChanged: (value) => controller.formEditing = true ,
+                          ),    
+                        onChanged: (value) => controller.formEditing = true , 
+                        onEditingComplete: (){
+                          controller.updateAll();
+                          FocusScope.of(controller.getContext).previousFocus();
+                        },
                         // validator: validamos el texto que el usuario ha ingresado.
                         validator: (value) {
                           // if (value == null || value.isEmpty) { return 'Por favor, escriba un precio de compra'; }
