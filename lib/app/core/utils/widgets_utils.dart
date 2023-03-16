@@ -494,14 +494,14 @@ class WidgetDrawer extends StatelessWidget {
                   leading: const Icon(Icons.attach_money_rounded),
                   title: const Text('Vender'),
                   onTap: () => homeController.setIndexPage = 0),
-              ListTile(
+              superAdmin?ListTile(
                   leading: const Icon(Icons.check),
                   title: const Text('Transacciones'),
-                  onTap: () => homeController.setIndexPage = 1),
-              ListTile(
+                  onTap: () => homeController.setIndexPage = 1):Container(),
+              superAdmin?ListTile(
                   leading: const Icon(Icons.apps_rounded),
                   title: const Text('Catálogo'),
-                  onTap: () => homeController.setIndexPage = 2),
+                  onTap: () => homeController.setIndexPage = 2):Container(),
               superAdmin?ListTile(
                   leading: const Icon(Icons.add_moderator_outlined),
                   title: const Text('Multi Usuario'),

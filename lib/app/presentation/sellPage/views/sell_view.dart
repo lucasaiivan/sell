@@ -292,7 +292,7 @@ class SalesView extends StatelessWidget {
     return PopupMenuButton(
                 icon: Material(
                   color: homeController.getDarkMode?Colors.white:Colors.black,
-                  borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+                  borderRadius: const BorderRadius.all(Radius.circular(8.0)),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8,vertical:1),
                     child: Row(
