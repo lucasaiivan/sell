@@ -221,7 +221,6 @@ class CataloguePage extends StatelessWidget {
     final Color primaryTextColor  = Get.isDarkMode?Colors.white70:Colors.black87;
     final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
     // widgets
-    final Widget dividerCircle = Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child: Icon(Icons.circle,size: 4, color: primaryTextColor.withOpacity(0.5)));
     Widget divider = ComponentApp().divider();
 
     // widgets 
@@ -241,8 +240,8 @@ class CataloguePage extends StatelessWidget {
             Text(Publications.getFechaPublicacion(item.upgrade.toDate(), Timestamp.now().toDate()),style: textStyleSecundary,),
             item.stock?Row(
               children: [
-                Text('Stock ',style: textStyleSecundary.copyWith(color: cataloguePageController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
                 Text(item.quantityStock.toString(),style: textStyleSecundary.copyWith(color: cataloguePageController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
+                Text(' Disponible ',style: textStyleSecundary.copyWith(color: cataloguePageController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
               ],
             ):Container(),
           ],

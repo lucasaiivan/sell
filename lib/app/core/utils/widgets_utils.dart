@@ -568,6 +568,11 @@ Widget viewDefault() {
 
   // controllers
   final HomeController homeController = Get.find();
+  const TextStyle textStyle = TextStyle(
+    fontFamily: 'Roboto', // o 'Open Sans'
+    fontSize: 20,
+    fontWeight: FontWeight.w400, // o cualquier otra variante
+  );
 
   return Material(
       child: Center(
@@ -580,7 +585,7 @@ Widget viewDefault() {
         children: [
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 20),
-            child: Text('Hola 🖐️\n\nEsto es una app en desarrollo muy pronto estara lista\n',textAlign: TextAlign.center),
+            child: Text('Hola 🖐️\n\nIngresa a tu cuenta para gestionar tu tienda\n',textAlign: TextAlign.center,style: textStyle,),
           ),
           const SizedBox(height: 20),
           TextButton(

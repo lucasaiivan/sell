@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:sell/app/presentation/sellPage/views/sell_view.dart';
 import 'package:sell/app/presentation/cataloguePage/views/catalogue_view.dart';
 import 'package:sell/app/presentation/transactionsPage/views/transactions_view.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../core/utils/widgets_utils.dart';
 import '../../multiuser/views/multiuser_view.dart';
 import '../controller/home_controller.dart';
@@ -35,8 +34,10 @@ class HomeView extends GetView<HomeController> {
 
     
 
-    // set
+    // condition : si el usuario no ha seleccionado una cuenta, se muestra la vista por defecto
     if (controller.getProfileAccountSelected.id == ''){return viewDefault();}
+
+    // get : nos permite obtener el valor de una variable
     controller.setBuildContext=context;
     controller.setDarkMode = Theme.of(context).brightness==Brightness.dark;
 
