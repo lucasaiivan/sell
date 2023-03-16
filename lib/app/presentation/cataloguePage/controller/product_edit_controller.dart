@@ -196,7 +196,7 @@ class ControllerProductsEdit extends GetxController {
   double _salePrice = 0.0;
   set setSalePrice(double value) {
     _salePrice = value;
-    controllerTextEditPrecioVenta =MoneyMaskedTextController(initialValue: value);
+    controllerTextEditPrecioVenta.updateValue(value);
     update(['updateAll']);
   }
   get getSalePrice => _salePrice;
@@ -763,8 +763,8 @@ class ControllerProductsEdit extends GetxController {
                   //  function : guarda el nuevo porcentaje de ganancia
                   if(controller.text != ''){
                     double porcentajeDeGanancia  = double.parse(controller.text); 
-                    double ganancia = getPurchasePrice * (porcentajeDeGanancia / 100);
-                    setSalePrice = getPurchasePrice + ganancia; 
+                    double ganancia = controllerTextEditPrecioCompra.numberValue * (porcentajeDeGanancia / 100);
+                    setSalePrice = controllerTextEditPrecioCompra.numberValue + ganancia; 
                     update(['updateAll']);
                   }
                   //  action : cierra el dialogo
