@@ -57,13 +57,13 @@ class TransactionsView extends StatelessWidget {
         
         PopupMenuButton(
             icon: Material(
-              color: darkTheme?Colors.white70:Colors.black87,
+              color: darkTheme?Colors.white:Colors.black,
               borderRadius: const BorderRadius.all(Radius.circular(8.0)),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Row(
                   children: [
-                    Text(transactionsController.getFilterText,style:TextStyle(color: darkTheme?Colors.black:Colors.white,fontWeight: FontWeight.w700)),
+                    Text(transactionsController.getFilterText,style:TextStyle(color: darkTheme?Colors.black:Colors.white,fontWeight: FontWeight.w400)),
                     const SizedBox(width: 5),
                     Icon(Icons.filter_list,color: darkTheme?Colors.black:Colors.white),
                   ],

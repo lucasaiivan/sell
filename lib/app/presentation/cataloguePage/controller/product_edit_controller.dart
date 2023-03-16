@@ -395,9 +395,9 @@ class ControllerProductsEdit extends GetxController {
   //  fuction : comprobamos los datos necesarios para proceder publicar o actualizar el producto
   Future<void> save() async {
     if (getProduct.id != '') {
-      if ( getDescription!= '') {
+      if ( controllerTextEditDescripcion.text != '') {
         if (getMarkSelected.id != '' && getMarkSelected.name != '') {
-          if (getSalePrice > 0 ) {
+          if (controllerTextEditPrecioVenta.numberValue > 0 ) {
             if ( getStock ? (getQuantityStock >= 1) : true) {
 
               // Deshabilitar la guía del usuario del catálogo

@@ -34,6 +34,7 @@ class CataloguePage extends StatelessWidget {
 
     // controllers
     final CataloguePageController controller = Get.find();
+    final HomeController homeController = Get.find();
 
     return AppBar(
       elevation: 0,
@@ -43,19 +44,36 @@ class CataloguePage extends StatelessWidget {
         // iconButton : buscar un producto del cátalogo
         IconButton(icon: const Icon(Icons.search),onPressed: (() => controller.seach(context: context))),
         // buttons : filter list
-        PopupMenuButton(
-            icon: const Icon(Icons.filter_list),
-            onSelected: (selectedValue) {
-              controller.catalogueFilter(key: selectedValue);
-            },
-            itemBuilder: (BuildContext ctx) => [
-                  const PopupMenuItem(value: '0', child: Text('Mostrar todos')),
-                  const PopupMenuItem(value: '1', child: Text('Mostrar con stock')),
-                  const PopupMenuItem(value: '2', child: Text('Mostrar favoritos')),
-                  const PopupMenuItem(value: '3', child: Text('Mostrar con stock bajos')),
-                  const PopupMenuItem(value: '4', child: Text('Actualizado hace más de 2 meses')),
-                  const PopupMenuItem(value: '5', child: Text('Hace más de 5 meses')),
-                ]),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 5),
+          child: Material(
+            color: homeController.getDarkMode?Colors.white:Colors.black,
+            borderRadius: const BorderRadius.all(Radius.circular(8.0)),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 1),
+              child: PopupMenuButton(
+                  //icon: const Icon(Icons.filter_list),
+                  child: Row(
+                    children: [
+                      Text('Filtrar',style:TextStyle(color: homeController.getDarkMode?Colors.black:Colors.white,fontWeight: FontWeight.w400)),
+                      const SizedBox(width: 5),
+                    Icon(Icons.filter_list,color: homeController.getDarkMode?Colors.black:Colors.white),
+                    ],
+                  ),
+                  onSelected: (selectedValue) {
+                    controller.catalogueFilter(key: selectedValue);
+                  },
+                  itemBuilder: (BuildContext ctx) => [
+                        const PopupMenuItem(value: '0', child: Text('Mostrar todos')),
+                        const PopupMenuItem(value: '1', child: Text('Mostrar con stock')),
+                        const PopupMenuItem(value: '2', child: Text('Mostrar favoritos')),
+                        const PopupMenuItem(value: '3', child: Text('Mostrar con stock bajos')),
+                        const PopupMenuItem(value: '4', child: Text('Actualizado hace más de 2 meses')),
+                        const PopupMenuItem(value: '5', child: Text('Hace más de 5 meses')),
+                      ]),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -232,7 +250,7 @@ class CataloguePage extends StatelessWidget {
             item.nameMark,
             maxLines: 2,
             overflow: TextOverflow.clip,
-            style: const TextStyle(color: Colors.blue),
+            style: TextStyle(color: item.verified?Colors.blue:null),
           ), 
         Wrap(
           children: [

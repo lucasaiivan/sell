@@ -484,7 +484,7 @@ class ProductEdit extends StatelessWidget {
                       child: CheckboxListTile(
                         contentPadding: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
                         controlAffinity: ListTileControlAffinity.leading,
-                        title: const Text('Al crear un nuevo producto, entiendo que no seré el dueño ni podré editarlo una vez agregado a la base de datos también entiendo que los precios de venta de los productos serán de carácter publico',style: TextStyle(fontWeight: FontWeight.w300)),
+                        title: const Text('Entiendo que no seré el propietario de los datos públicos asociados con el producto, ni podré editarlos después de la verificación. Además, los precios de venta serán públicos',style: TextStyle(fontWeight: FontWeight.w300)),
                         value: controller.getUserConsent,
                         onChanged: (value) {
                           controller.setUserConsent = value!;
