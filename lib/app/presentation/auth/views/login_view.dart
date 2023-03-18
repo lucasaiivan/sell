@@ -50,8 +50,10 @@ class AuthView extends GetView<LoginController> {
                 padding: const EdgeInsets.only(bottom: 20),
                 child: widgetCheckAcceptPrivacyAndUsePolicy(),
               ),
-              button(callback: controller.login,text:"Iniciar sesión con google",colorButton: colorButton0,colorText: colorButtonText0),
-              const SizedBox(height: 20.0,),
+              button(callback: controller.login,text:"Iniciar sesión con google",colorButton: Colors.blueAccent,colorText: colorButtonText0),
+              const SizedBox(height: 8.0),
+              button(callback: controller.signInAnonymously,text:"Entrar como invitado",colorButton: Colors.blueGrey,colorText: colorButtonText0),
+              const SizedBox(height: 12.0),
             ],
     
         ),
@@ -118,8 +120,8 @@ class AuthView extends GetView<LoginController> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0),side: BorderSide(color:colorButton)),
               side: BorderSide(color: colorButton),
             ),
-            child: Text(text.toUpperCase(), style: TextStyle(color: colorText,fontSize: 18.0,fontWeight: FontWeight.bold)),
             onPressed: callback,
+            child: Text(text.toUpperCase(), style: TextStyle(color: colorText,fontSize: 18.0,fontWeight: FontWeight.bold)),
           ),
         );
   }
@@ -278,7 +280,7 @@ class _OnboardingIntroductionState extends State<OnboardingIntroduction> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    //  indicador de vista
+                    //  indicador de las vistas
                     Flexible(
                       child: Padding(
                         padding: const EdgeInsets.all(1.0),

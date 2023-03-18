@@ -234,10 +234,13 @@ class CataloguePage extends StatelessWidget {
     // values
     double titleSize = 16; 
     String alertStockText = item.stock ? (item.quantityStock == 0 ? 'Sin stock' : '') : ''; 
+    String valueDataUpdate ='Actualizado ${Publications.getFechaPublicacion(item.upgrade.toDate(), Timestamp.now().toDate())}';
+    valueDataUpdate = valueDataUpdate.substring(0, 1).toUpperCase() + valueDataUpdate.substring(1).toLowerCase();
 
     // styles
     final Color primaryTextColor  = Get.isDarkMode?Colors.white70:Colors.black87;
-    final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
+    final TextStyle textStylePrimery = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
+    final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w200);
     // widgets
     Widget divider = ComponentApp().divider();
 
@@ -255,11 +258,12 @@ class CataloguePage extends StatelessWidget {
         Wrap(
           children: [
             // text : fecha de la ultima actualización
-            Text(Publications.getFechaPublicacion(item.upgrade.toDate(), Timestamp.now().toDate()),style: textStyleSecundary,),
+            Text( valueDataUpdate ,style: textStyleSecundary.copyWith(fontSize: 12),),
+            // text : disponibilidad de stock
             item.stock?Row(
               children: [
-                Text(item.quantityStock.toString(),style: textStyleSecundary.copyWith(color: cataloguePageController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
-                Text(' Disponible ',style: textStyleSecundary.copyWith(color: cataloguePageController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
+                Text(item.quantityStock.toString(),style: textStylePrimery.copyWith(color: cataloguePageController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
+                Text(' Disponible ',style: textStylePrimery.copyWith(color: cataloguePageController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
               ],
             ):Container(),
           ],

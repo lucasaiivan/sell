@@ -316,7 +316,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
           ),
         ),
         //TODO: eliminar para desarrrollo
-        TextButton(
+        /* TextButton(
               onPressed: () async {
                 String clave = controller.controllerTextEditDescripcion.text;
                 Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
@@ -329,7 +329,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
                 Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
                 await launchUrl(uri,mode: LaunchMode.externalApplication);
               },
-              child: const Text('Buscar en código Google (moderador)')),
+              child: const Text('Buscar en código Google (moderador)')), */
 
       ],
     );
@@ -596,7 +596,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
           child: const Text('¡Gracias por hacer que esta aplicación sea aún más útil para más personas! 🚀'),
           ),
           // TODO : Para moderador eliminar para produccion
-          ProductEdit().widgetForModerator,
+          //ProductEdit().widgetForModerator,
       ],
     );
   }

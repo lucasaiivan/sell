@@ -18,7 +18,14 @@ import '../../../domain/entities/user_model.dart';
 import '../../../core/utils/widgets_utils.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
+import '../../auth/controller/login_controller.dart';
+
 class HomeController extends GetxController {
+
+  // Firebase 
+  late  FirebaseAuth _firebaseAuth;
+  set setFirebaseAuth(FirebaseAuth value) => _firebaseAuth=value;
+  get getFirebaseAuth => _firebaseAuth;
 
   // info app
   String _urlPlayStore = '';
@@ -149,21 +156,34 @@ class HomeController extends GetxController {
 
     super.onInit(); 
 
-    isAppUpdated();
-    getSalesUserGuideVisibility();
-    getTheVisibilityOfTheCatalogueUserGuide();
-    // obtenemos por parametro los datos de la cuenta de atentificación
-    Map map = Get.arguments as Map;
-    // verificamos y obtenemos los datos pasados por parametro
-    setUserAuth = map['currentUser'];
-    // obtenemos el id de la cuenta seleccionada si es que existe
-    map.containsKey('idAccount') ? readAccountsData(idAccount: map['idAccount']): readAccountsData(idAccount: '');
+    // inicialización de la variable
+    setFirebaseAuth = FirebaseAuth.instance; 
+    
+    isAppUpdated(); // verificamos si la app esta actualizada
+    getSalesUserGuideVisibility(); // obtenemos la visibilidad de la guía del usuario de ventas
+    getTheVisibilityOfTheCatalogueUserGuide(); // obtenemos la visibilidad de la guía del usuario del catálogo
+
+    // condition : si el usuario es anonimo, se porporcionara algunos datos para que pueda probar la app sin autenticarse
+    if(getFirebaseAuth.currentUser!.isAnonymous){
+      readAccountsInviteData(); 
+    }else{
+      // obtenemos por parametro los datos de la cuenta de atentificación
+      Map map = Get.arguments as Map;
+      // verificamos y obtenemos los datos pasados por parametro
+      setUserAuth = map['currentUser'];
+      // obtenemos el id de la cuenta seleccionada si es que existe 
+      map.containsKey('idAccount') ? readAccountsData(idAccount: map['idAccount']): readAccountsData(idAccount: ''); 
+    }
   }
 
   @override
   void onClose() {}
 
   // FUNCTIONS
+
+  void userInviteUpdateValues(){
+    
+  }
   
   Future<bool> onBackPressed({required BuildContext context})async{
 
@@ -219,7 +239,39 @@ class HomeController extends GetxController {
     return product;
   }
 
-  // cerrar sesión
+  // login
+  void login() async {
+    // Inicio de sesión con Google
+    // Primero comprobamos que el usuario acepto los términos de uso de servicios y que a leído las politicas de privacidad
+ 
+     // FirebaseAuth and GoogleSignIn instances
+    late final GoogleSignIn googleSign = GoogleSignIn();
+    final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+
+    // set state load
+    CustomFullScreenDialog.showDialog();
+
+    // signIn : Inicia la secuencia de inicio de sesión de Google.
+    GoogleSignInAccount? googleSignInAccount = await googleSign.signIn();
+    // condition : Si googleSignInAccount es nulo, significa que el usuario no ha iniciado sesión.
+    if (googleSignInAccount == null) {
+      CustomFullScreenDialog.cancelDialog();
+    } else {
+      // Obtenga los detalles de autenticación de la solicitud
+      GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
+      // Crea una nueva credencial de OAuth genérica.
+      OAuthCredential oAuthCredential = GoogleAuthProvider.credential(accessToken: googleSignInAuthentication.accessToken,idToken: googleSignInAuthentication.idToken);
+      // Una vez que haya iniciado sesión, devuelva el UserCredential
+      await firebaseAuth.signInWithCredential(oAuthCredential);
+      // navigation : navegamos a la pantalla principal
+      Get.offAllNamed(Routes.HOME, arguments: {'currentUser': firebaseAuth.currentUser,'idAccount': ''});
+      // finalizamos el diálogo alerta
+      CustomFullScreenDialog.cancelDialog();
+ 
+    } 
+  }
+
+// cerrar sesión
 void showDialogCerrarSesion() {
 
   Widget widget = AlertDialog(
@@ -292,7 +344,17 @@ void showDialogCerrarSesion() {
       setUpdateApp = false;
     }
   }
+  void readAccountsInviteData() {
 
+    //default values
+    setCatalogueCategoryList = []; // lista de categorias del catálogo
+    setCatalogueProducts = []; // lista de productos del catálogo
+    setProductsOutstandingList = []; // lista de productos destacados
+    setProfileAccountSelected = ProfileAccountModel(creation: Timestamp.now(),name: 'Mi negocio',);  // datos de la cuenta 
+    setManagedAccountsList = []; // lista de cuentas gestionadas
+    setProfileAdminUser = UserModel(superAdmin: true,admin: true,email: 'userInvite@correo.com');  // datos del usuario
+    setAdminsUsersList = [];  // lista de usuarios administradores 
+  }
   void readAccountsData({required String idAccount}) {
 
     //default values
@@ -516,7 +578,7 @@ void showDialogCerrarSesion() {
           children: [
             const Padding(
               padding:  EdgeInsets.only(bottom: 12,left: 12,right: 12,top: 20),
-              child: Text('Seleccione una cuentas'),
+              child: Text('Tienes acceso a estas cuentas'),
             ),
             ListView.builder(
                 padding: const EdgeInsets.symmetric(),
