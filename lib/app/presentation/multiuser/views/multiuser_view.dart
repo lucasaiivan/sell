@@ -51,6 +51,7 @@ class LoadingInitView extends StatelessWidget {
     return AppBar(
       title: const Text('Multiusuario'),
       actions: [
+        controller.homeController.getFirebaseAuth.currentUser!.isAnonymous?Container():
         IconButton(onPressed: controller.addItem, 
         icon:  Material(
             color: homeController.getDarkMode?Colors.white:Colors.black,
@@ -63,6 +64,7 @@ class LoadingInitView extends StatelessWidget {
     // controllers
     final MultiUserController controller = Get.find();
 
+    if(controller.homeController.getFirebaseAuth.currentUser!.isAnonymous){ return const Center(child: Text('Debes iniciar sesión para para ver esta sección'));}
     if(controller.getUsersList.isEmpty ){ return const  Center(child: CircularProgressIndicator());}
 
     return ListView.builder(
