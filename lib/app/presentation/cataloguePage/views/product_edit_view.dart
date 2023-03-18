@@ -62,7 +62,8 @@ class ProductEdit extends StatelessWidget {
         return Material(
           child: AnimatedSwitcher(
           duration: const  Duration(milliseconds: 100),
-            child: controller.getHomeController.getProfileAdminUser.superAdmin==false?noEdit: _.getNewProduct ? FormCreateProductView(): OfflineBuilder(
+            child: controller.getHomeController.getProfileAdminUser.superAdmin==false?noEdit: _.getNewProduct ? FormCreateProductView()
+            : OfflineBuilder(
                 child: Container(),
                 connectivityBuilder: (
                   BuildContext context,
@@ -246,8 +247,10 @@ class ProductEdit extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
 
+          !controller.getAccountAuth? Container():const Text('Personaliza tu producto',style: TextStyle(fontSize: 18.0)),
+
           //TODO: eliminar para desarrrollo
-          TextButton(
+          /* TextButton(
               onPressed: () async {
                 String clave = controller.controllerTextEditDescripcion.text;
                 Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
@@ -260,7 +263,7 @@ class ProductEdit extends StatelessWidget {
                 Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
                 await launchUrl(uri,mode: LaunchMode.externalApplication);
               },
-              child: const Text('Buscar en código Google (moderador)')), 
+              child: const Text('Buscar en código Google (moderador)')),  */
           space,
           // textfield : seleccionar cátegoria
             !controller.getAccountAuth? Container(): GestureDetector(
@@ -517,21 +520,20 @@ class ProductEdit extends StatelessWidget {
                       padding: const EdgeInsets.only(bottom: 12, top: 20, left: 0, right: 0),
                       child: button(padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),colorAccent: Colors.white,colorButton: Colors.red.shade400,icon: const Icon(Icons.delete,color: Colors.white),text: 'Eliminar de mi catálogo', onPressed: controller.showDialogDelete),
                     )
-                  : Container(),
-            controller.widgetTextButtonAddProduct,
+                  : Container(), 
             const SizedBox(height: 20.0),
           
           //TODO: eliminar para desarrrollo
           /* OPCIONES PARA DESARROLLADOR - ELIMINAR ESTE CÓDIGO PARA PRODUCCION */
-          const SizedBox(height:50),
-          widgetForModerator,
+          /* const SizedBox(height:50),
+          widgetForModerator, */
           ]             ,
       ),
     );
   }
 
   /* WIDGETS COMPONENT */
-Widget get widgetForModerator{
+/* Widget get widgetForModerator{
   // TODO : delete release
   return Theme(
     data: ThemeData.dark(),
@@ -618,7 +620,7 @@ Widget get widgetForModerator{
       ),
     ),
   );
-}
+} */
   Widget textfielButton({required String labelText,String textValue = '',required Function() onTap,bool stateEdit = true,EdgeInsetsGeometry contentPadding = const EdgeInsets.all(12) }) {
 
     // value

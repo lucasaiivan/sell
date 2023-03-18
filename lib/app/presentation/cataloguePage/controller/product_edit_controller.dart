@@ -878,8 +878,6 @@ class ControllerProductsEdit extends GetxController {
     );
   }
 
-  //TODO: eliminar para release
-  // DEVELOPER OPTIONS
   setOutstanding({required bool value}) {
     getProduct.outstanding = value;
     update(['updateAll']);
@@ -890,7 +888,9 @@ class ControllerProductsEdit extends GetxController {
     update(['updateAll']);
   }
 
-  void showDialogDeleteOPTDeveloper() {
+  //TODO: eliminar para release
+  // DEVELOPER OPTIONS
+  /* void showDialogDeleteOPTDeveloper() {
     Get.dialog(AlertDialog(
       title: const Text(
           "¿Seguro que quieres eliminar este documento definitivamente? (Mods)"),
@@ -934,27 +934,8 @@ class ControllerProductsEdit extends GetxController {
         ),
       ],
     ));
-  }
+  } */
 
-  Widget get widgetTextButtonAddProduct{
-    // widget : este texto button se va a mostrar por unica ves 
-
-    // comprobamos si es la primera ves que se inicia la aplicación
-    if(homeController.catalogUserHuideVisibility && !homeController.isCatalogue(id: getProduct.id)){
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Padding(
-            padding: EdgeInsets.only(top: 50,left: 12,right: 12,bottom: 20),
-            child: Opacity(opacity: 0.8,child: Text('¡Eso es todo 😃!',textAlign: TextAlign.center,style: TextStyle(fontSize: 20))),
-          ),
-          TextButton(onPressed: save,child: const Text('Agregar a mi cátalogo')),
-        ],
-      );
-      }
-    // si no es la primera ves que se inicica la aplicación devuelve una vistra vacia
-    return Container();
-  }
 }
 
 // select mark
@@ -995,7 +976,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         title: const Text('Marcas'),
         actions: [
           // TODO : delete icon 'add new mark for release'
-          IconButton(onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},icon: const Icon(Icons.add)),
+          //IconButton(onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},icon: const Icon(Icons.add)),
           IconButton(icon: const Icon(Icons.search),onPressed: () {Get.back();showSeachMarks();})
         ],
       ),
@@ -1146,10 +1127,10 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         controllerProductsEdit.setMarkSelected = marcaSelect;
         Get.back();
       },
-      onLongPress: () {
+      /* onLongPress: () {
         // TODO : delete fuction
         Get.to(() => CreateMark(mark: marcaSelect));
-      },
+      }, */
     );
   }
 
@@ -1176,7 +1157,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
 }
 
 // TODO : delete release
-class CreateMark extends StatefulWidget {
+/* class CreateMark extends StatefulWidget {
   final Mark mark;
   const CreateMark({required this.mark, Key? key}) : super(key: key);
 
@@ -1387,3 +1368,4 @@ class _CreateMarkState extends State<CreateMark> {
 
 
 
+ */

@@ -170,8 +170,9 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     // Busca entre los productos de mi catálogo 
 
     // styles
-    final Color primaryTextColor  = Get.isDarkMode?Colors.white70:Colors.black87;
-    final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
+    final Color primaryTextColor  = Get.isDarkMode?Colors.white70:Colors.black87; 
+    final TextStyle textStylePrimery = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
+    final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w200);
     // widgets
     final Widget dividerCircle = Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child: Icon(Icons.circle,size: 4, color: primaryTextColor.withOpacity(0.5)));
     Widget divider = ComponentApp().divider();
@@ -192,6 +193,10 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
         filter: (product) => [product.description, product.nameMark],
         
         builder: (product) {
+
+          // var  
+          String valueDataUpdate ='Actualizado ${Publications.getFechaPublicacion(product.upgrade.toDate(), Timestamp.now().toDate())}';
+          valueDataUpdate = valueDataUpdate.substring(0, 1).toUpperCase() + valueDataUpdate.substring(1).toLowerCase();
 
           dynamic priceWidget = Column(
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -243,14 +248,14 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
                             Wrap(
                               children: [ 
                                 // text : fecha de creacion
-                                Text(Publications.getFechaPublicacion(product.upgrade.toDate(), Timestamp.now().toDate()),style: textStyleSecundary,),
+                                Text( valueDataUpdate ,style: textStyleSecundary,),
                                 // text : stock
                                 product.stock
                                   ?Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       product.stock == false ? Container(): dividerCircle, 
-                                      Text('stock ${product.quantityStock.toString()}',style: textStyleSecundary.copyWith(color: getStockColor(productCatalogue: product,color: textStyleSecundary.color as Color)),), 
+                                      Text('stock ${product.quantityStock.toString()}',style: textStylePrimery.copyWith(color: getStockColor(productCatalogue: product,color: textStyleSecundary.color as Color)),), 
                                     ],
                                   ):Container(),
                               ],

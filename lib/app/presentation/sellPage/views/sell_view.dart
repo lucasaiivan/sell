@@ -115,6 +115,10 @@ class SalesView extends StatelessWidget {
     // values 
     const EdgeInsets  padding = EdgeInsets.symmetric(horizontal: 20,vertical: 2);
 
+    // style 
+    final TextStyle textValuesStyle = TextStyle(fontFamily: 'monospace',fontWeight: FontWeight.bold,color: Get.theme.brightness == Brightness.dark? Colors.white: Colors.black);
+    final TextStyle textDescrpitionStyle = TextStyle(fontFamily: 'monospace',fontWeight: FontWeight.bold,color: Get.theme.brightness == Brightness.dark? Colors.white70: Colors.black87);
+
     return AnimatedContainer(
       width: controller.getTicketView ? Get.size.width : 0,
       curve: Curves.fastOutSlowIn,
@@ -125,7 +129,7 @@ class SalesView extends StatelessWidget {
         child: Padding(
           padding:const EdgeInsets.only(bottom: 2, top: 12, right: 5, left: 24),
           child: Material(
-            borderRadius: const BorderRadius.all(Radius.circular(20)),
+            borderRadius: const BorderRadius.all(Radius.circular(12)),
             color: Get.theme.brightness == Brightness.dark? Colors.white10: Colors.white,
             child: Drawer(
               elevation: 0,
@@ -137,12 +141,12 @@ class SalesView extends StatelessWidget {
                       shrinkWrap: false,
                         children: [
                           const SizedBox(height: 20),
-                          const Text('Ticket',textAlign: TextAlign.center,style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+                          Text('Ticket',textAlign: TextAlign.center,style: textDescrpitionStyle.copyWith(fontSize: 30, fontWeight: FontWeight.bold)),
                           Material(
                             color: Colors.blueGrey.withOpacity(0.1),
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
-                              child: Text(homeController.getProfileAccountSelected.name,textAlign: TextAlign.center,style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                              child: Text(homeController.getProfileAccountSelected.name,textAlign: TextAlign.center,style: textValuesStyle.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
                             )),
                           const SizedBox(height: 25),
                           // text : cantidad de elementos 'productos' seleccionados
@@ -150,9 +154,9 @@ class SalesView extends StatelessWidget {
                             padding: padding,
                             child: Row(
                               children: [
-                                const Opacity(opacity: 0.7,child: Text('Productos:')),
+                                Opacity(opacity: 0.7,child: Text('Productos:',style:textDescrpitionStyle)),
                                 const Spacer(),
-                                Text(controller.getListProductsSelestedLength.toString()),
+                                Text(controller.getListProductsSelestedLength.toString(),style:textValuesStyle),
                               ],
                             ),
                           ),
@@ -161,22 +165,22 @@ class SalesView extends StatelessWidget {
                             padding: padding,
                             child: Row(
                               children: [
-                                const Opacity(opacity: 0.7,child: Text('Medio:')),
+                                Opacity(opacity: 0.7,child: Text('Medio:',style:textDescrpitionStyle)),
                                 const Spacer(),
-                                Text(controller.getTicket.getPayMode),
+                                Text(controller.getTicket.getPayMode,style:textValuesStyle),
                               ],
                             ),
                           ),
                           // view : lines ------
-                          Padding(padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 20),child: Dash(color: Get.theme.dividerColor,height: 2, width: 12)),
+                          Padding(padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 20),child: Dash(color: Get.theme.dividerColor,height: 2, width: 12)),
                           // text : el monto total de la transacción
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20),
                             child: Row(
                               children: [
-                                const Opacity(opacity: 0.7,child: Text('Total',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w900,color: Colors.blue))),
+                                Opacity(opacity: 0.7,child: Text('Total',style: textDescrpitionStyle.copyWith(fontSize: 20,fontWeight: FontWeight.w900,color: Colors.blue,))),
                                 const Spacer(),
-                                Text(Publications.getFormatoPrecio(monto: controller.getCountPriceTotal()),style: const TextStyle(color: Colors.blue,fontSize: 24,fontWeight: FontWeight.w900)),
+                                Text(Publications.getFormatoPrecio(monto: controller.getCountPriceTotal()),style: textValuesStyle.copyWith(color: Colors.blue,fontSize: 24,fontWeight: FontWeight.w900)),
                               ],
                             ),
                           ),
@@ -187,9 +191,9 @@ class SalesView extends StatelessWidget {
                               padding: padding,
                               child: Row(
                                 children: [
-                                  const Opacity(opacity: 0.7,child: Text('Pago con:')),
+                                  Opacity(opacity: 0.7,child: Text('Pago con:',style: textDescrpitionStyle,)),
                                   const Spacer(),
-                                  Text(controller.getValueReceived()),
+                                  Text(controller.getValueReceived(),style:textValuesStyle),
                                 ],
                               ),
                           ),
@@ -200,7 +204,7 @@ class SalesView extends StatelessWidget {
                               padding: padding,
                               child: Row(
                                 children: [
-                                  const Opacity(opacity: 0.7,child:  Text('Vuelto:')),
+                                  Opacity(opacity: 0.7,child:  Text('Vuelto:',style:textDescrpitionStyle)),
                                   const Spacer(),
                                   Material(
                                     elevation: 0,
@@ -210,8 +214,8 @@ class SalesView extends StatelessWidget {
                                       padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 1),
                                       child: Row(
                                         children: [
-                                          const Text('Dar vuelto ',style:TextStyle(color: Colors.white)),
-                                          Text(controller.getValueChange(),style: const TextStyle(color: Colors.white,fontSize: 16),),
+                                          Text('Dar vuelto ',style:textValuesStyle.copyWith(color: Colors.white)),
+                                          Text(controller.getValueChange(),style: textValuesStyle.copyWith(color: Colors.white,fontSize: 16),),
                                         ],
                                       ),
                                     ),
@@ -220,7 +224,7 @@ class SalesView extends StatelessWidget {
                               ),
                           ),
                           // view : lines ------
-                          Padding(padding: const EdgeInsets.all(20.0),child: Dash(color: Get.theme.dividerColor,height: 2, width: 12)),
+                          Padding(padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 20),child: Dash(color: Get.theme.dividerColor,height: 2, width: 12)),
                           // view 2
                           Padding(
                             padding:const EdgeInsets.only(bottom: 24, top: 24),
@@ -230,7 +234,7 @@ class SalesView extends StatelessWidget {
                               children: [
                                 // texto : texto que se va a mostrar por unica ves
                                 controller.widgetTextFirstSale,
-                                const Text('El cliente paga con:',style:TextStyle(fontWeight: FontWeight.bold)),
+                                Text('El cliente paga con:',style:textValuesStyle.copyWith(fontWeight: FontWeight.bold)),
                                 const SizedBox(height: 12),
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
