@@ -29,6 +29,7 @@ class MultiUserController extends GetxController {
   void onInit() {
     super.onInit();
 
+
     _periodicTimer = Timer.periodic(
       const Duration(seconds: 1),
       (timer) {
