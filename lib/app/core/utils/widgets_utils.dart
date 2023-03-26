@@ -1,6 +1,7 @@
 
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -397,24 +398,15 @@ class _ProductoItemState extends State<ProductoItem> {
 
 Widget drawerApp() {
   //Los rieles de navegación brindan acceso a los destinos principales en las aplicaciones cuando se usan pantallas de tabletas y computadoras de escritorio.
-
-  return GetBuilder<HomeController>(
-    builder: (homeController) {
-      // values
-      String email = homeController.getUserAuth.email ?? 'null';
-
-      return Drawer(child: WidgetDrawer(email: email));
-    },
-  );
+  
+  
+  return Drawer(child: WidgetDrawer());
 }
 
 class WidgetDrawer extends StatelessWidget {
-  const WidgetDrawer({
-    super.key,
-    required this.email,
-  });
-
-  final String email;
+   // ignore: prefer_const_constructors_in_immutables
+   WidgetDrawer({super.key});
+ 
   
 
   @override
@@ -422,7 +414,17 @@ class WidgetDrawer extends StatelessWidget {
 
     // controllers
     final HomeController homeController = Get.find<HomeController>();
-     bool superAdmin = homeController.getProfileAdminUser.superAdmin;
+
+    // variables
+    bool superAdmin = homeController.getProfileAdminUser.superAdmin;
+    homeController.getFirebaseAuth.currentUser!.isAnonymous;
+    Color colorTextVersion = Colors.blue;
+
+    // widgets
+    final textButtonLogin = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: SizedBox(width: double.infinity,child: FloatingActionButton(onPressed: homeController.login,elevation: 0,child: const Text('Iniciar sesión'))),
+    );
 
 
 
@@ -430,8 +432,9 @@ class WidgetDrawer extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 50),
+        homeController.getFirebaseAuth.currentUser!.isAnonymous?textButtonLogin
         //  avatar de la cuenta
-        ListTile(
+        :ListTile(
           leading: Container(
             padding: const EdgeInsets.all(0.0),
             child: homeController.getProfileAccountSelected.image == ''
@@ -449,33 +452,34 @@ class WidgetDrawer extends StatelessWidget {
           onTap: () {
             homeController.showModalBottomSheetSelectAccount();
           },
-        ),
+        ), 
+        const SizedBox(height: 12),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: TextButton(onPressed:(){
             Get.back(); // cierra drawer
             homeController.showModalBottomSheetSubcription();
           }, child: RichText(
-      text: TextSpan(
-        style: DefaultTextStyle.of(context).style,
-        children: <TextSpan>[
-          const TextSpan(
-            text: 'Versión gratuita',
-            style: TextStyle(
-              color: Colors.blue,
-              fontWeight: FontWeight.bold,
+            text: TextSpan(
+              style: DefaultTextStyle.of(context).style,
+              children: <TextSpan>[
+                TextSpan(
+                  text: 'Versión gratuita',
+                  style: TextStyle(
+                    color: colorTextVersion,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                TextSpan(
+                  text: ' Nuestro objetivo es hacer las cosas simples y eficientes para tu negocio',
+                  style: TextStyle(
+                    color: colorTextVersion.withOpacity(0.6),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
-          ),
-          TextSpan(
-            text: ' Nuestro objetivo es hacer las cosas simples y eficientes para tu negocio',
-            style: TextStyle(
-              color: Colors.blue.withOpacity(0.6),
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    )),
+          )),
         ),
         /* Esta version de la app las funciones PREMIUM son gratis
 
@@ -494,23 +498,17 @@ class WidgetDrawer extends StatelessWidget {
                   leading: const Icon(Icons.attach_money_rounded),
                   title: const Text('Vender'),
                   onTap: () => homeController.setIndexPage = 0),
-              ListTile(
+              superAdmin?ListTile(
                   leading: const Icon(Icons.check),
                   title: const Text('Transacciones'),
-                  onTap: () => homeController.setIndexPage = 1),
-              ListTile(
+                  onTap: () => homeController.setIndexPage = 1):Container(),
+              superAdmin?ListTile(
                   leading: const Icon(Icons.apps_rounded),
                   title: const Text('Catálogo'),
-                  onTap: () => homeController.setIndexPage = 2),
+                  onTap: () => homeController.setIndexPage = 2):Container(),
               superAdmin?ListTile(
                   leading: const Icon(Icons.add_moderator_outlined),
-                  title: Row(
-                    children: [
-                      const Text('Multi Usuario'),
-                      const SizedBox(width: 12),
-                      SizedBox(width: 90,child: LogoPremium()),
-                    ],
-                  ),
+                  title: const Text('Multi Usuario'),
                   onTap: () {
                     if( homeController.getProfileAccountSelected.subscribed ){
                       homeController.setIndexPage = 3;
@@ -523,10 +521,10 @@ class WidgetDrawer extends StatelessWidget {
             ],
           ),
         ),
-        /* ListTile(
-          leading: const Icon(Icons.launch_rounded),
-          title: const Text('Mi catálogo'),
-          subtitle: const Text('App'),
+        ListTile(
+          leading: const Icon(Icons.get_app_sharp),
+          title: const Text('Comprobar actualización'),
+          subtitle: const Text('Play Store'),
           onTap: () async {
             
             // values
@@ -538,7 +536,7 @@ class WidgetDrawer extends StatelessWidget {
               if (await canLaunchUrl(uri)) { await launchUrl(uri,mode: LaunchMode.externalApplication);} else {throw 'Could not launch $uri';}
             }
           },
-        ), */
+        ), 
         ListTile(
           contentPadding: const EdgeInsets.symmetric(vertical: 12,horizontal: 12),
           tileColor: Colors.blue.withOpacity(0.1),
@@ -551,13 +549,9 @@ class WidgetDrawer extends StatelessWidget {
             String whatsAppUrl = "";
             String phoneNumber = '541134862939';
             String description = "hola, estoy probando la App!";
-            whatsAppUrl ='https://wa.me/+$phoneNumber?text=${Uri.parse(description)}';
+            whatsAppUrl ='https://wa.me/+$phoneNumber?text=$description';
             Uri uri = Uri.parse( whatsAppUrl);
-            if (await canLaunchUrl(uri)) {
-              await launchUrl(uri,mode: LaunchMode.externalApplication);
-            } else {
-              throw 'Could not launch $uri';
-            }
+            await launchUrl(uri,mode: LaunchMode.externalNonBrowserApplication);
 
           },
         ),
@@ -578,6 +572,11 @@ Widget viewDefault() {
 
   // controllers
   final HomeController homeController = Get.find();
+  const TextStyle textStyle = TextStyle(
+    fontFamily: 'Roboto', // o 'Open Sans'
+    fontSize: 20,
+    fontWeight: FontWeight.w400, // o cualquier otra variante
+  );
 
   return Material(
       child: Center(
@@ -590,7 +589,7 @@ Widget viewDefault() {
         children: [
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 20),
-            child: Text('Hola 🖐️\n\nEsto es una app en desarrollo muy pronto estara lista\n',textAlign: TextAlign.center),
+            child: Text('Hola 🖐️\n\nIngresa a tu cuenta para gestionar tu tienda\n',textAlign: TextAlign.center,style: textStyle,),
           ),
           const SizedBox(height: 20),
           TextButton(
@@ -679,7 +678,7 @@ class WidgetSuggestionProduct extends StatelessWidget {
     if (list.isEmpty) return Container();
 
     // values
-    Color? colorAccent = Get.theme.textTheme.subtitle1?.color;
+    Color? colorAccent = Get.theme.textTheme.titleMedium?.color;
     double radius = 32.0;
 
     return Column(
@@ -820,6 +819,17 @@ class ImageAvatarApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) { 
+
+
+     // var
+     final bool darkMode = Theme.of(context).brightness==Brightness.dark;
+
+
+    /// widgets
+    Widget imageDefault = AnimatedContainer(
+      duration: const Duration(milliseconds: 500),
+      color: darkMode?Colors.black12:Colors.black12,
+      child: Image.asset('assets/default_image.png',fit: BoxFit.cover,color: darkMode?Colors.white12 :Colors.grey.shade200,));
  
     return SizedBox(
       width: size,height: size,
@@ -841,8 +851,8 @@ class ImageAvatarApp extends StatelessWidget {
               child: CachedNetworkImage(
                 imageUrl: url,
                 fit: BoxFit.cover,
-                placeholder: (context, url) =>  Container(color: canvasColor),
-                errorWidget: (context, url, error) => Container(color: canvasColor),
+                placeholder: (context, url) =>  imageDefault,
+                errorWidget: (context, url, error) =>imageDefault,
               ),
             ),
           ),

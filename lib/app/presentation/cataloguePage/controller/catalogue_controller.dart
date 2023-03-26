@@ -92,28 +92,44 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
         list = homeController.getCataloProducts;
       }else{
         switch(key){
-          case '0': //  Mostrar productos con stock
+          case '0': // Mostrar todos
+            setTitleAppBar = 'Cátalogo';
+            list = homeController.getCataloProducts;
+            break; 
+          case '1': //  Mostrar productos con stock
             setTitleAppBar = 'Stock';
             List<ProductCatalogue> listSFilter = [];
             for(ProductCatalogue item in homeController.getCataloProducts){if(item.stock)listSFilter.add(item);}
             for(ProductCatalogue item in listSFilter){list.add(item);}
             break;
-          case '1': //  Mostrar productos favoritos
+          case '2': //  Mostrar productos favoritos
             setTitleAppBar = 'Favoritos';
             List<ProductCatalogue> listSFilter = [];
             for(ProductCatalogue item in homeController.getCataloProducts){if(item.favorite)listSFilter.add(item);}
             for(ProductCatalogue item in listSFilter){list.add(item);}
             break;
-          case '2': // Mostrar productos con stock bajos
+          case '3': // Mostrar productos con stock bajos
             setTitleAppBar = 'Stock Bajo';
             List<ProductCatalogue> listSFilter = [];
             for(ProductCatalogue item in homeController.getCataloProducts){if(item.stock){if(item.quantityStock<=item.alertStock){listSFilter.add(item);}}}
             for(ProductCatalogue item in listSFilter){list.add(item);}
             break;
-          case '3': // Mostrar todos
-            setTitleAppBar = 'Cátalogo';
-            list = homeController.getCataloProducts;
-            break; 
+          case '4': // Mostrar productos actualizados hace más de 90 días
+            setTitleAppBar = 'Filtro';
+            list = homeController.getCataloProducts.where((producto) {
+              DateTime fechaActualizacion = producto.upgrade.toDate();
+              return fechaActualizacion.isBefore(DateTime.now().subtract( const Duration(days: 90)));
+            }).toList();
+          
+            break;
+          case '5': // Mostrar productos actualizados hace más de 150 días
+            setTitleAppBar = 'Filtro';
+            list = homeController.getCataloProducts.where((producto) {
+              DateTime fechaActualizacion = producto.upgrade.toDate();
+              return fechaActualizacion.isBefore( DateTime.now().subtract( const Duration(days: 5 * 30)) );
+            }).toList();
+          
+            break;
         }
       }
     // set
@@ -154,25 +170,55 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     // Busca entre los productos de mi catálogo 
 
     // styles
-    final Color primaryTextColor  = Get.isDarkMode?Colors.white70:Colors.black87;
-    final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
+    final Color primaryTextColor  = Get.isDarkMode?Colors.white70:Colors.black87; 
+    final TextStyle textStylePrimery = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
+    final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w200);
     // widgets
     final Widget dividerCircle = Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child: Icon(Icons.circle,size: 4, color: primaryTextColor.withOpacity(0.5)));
     Widget divider = ComponentApp().divider();
     
 
+    
+
     showSearch(
       context: context, 
       delegate: SearchPage<ProductCatalogue>(
+        
         items: homeController.getCataloProducts,
         searchLabel: 'Buscar',
         searchStyle: TextStyle(color: primaryTextColor),
-        barTheme: Get.theme .copyWith(hintColor: primaryTextColor, highlightColor: primaryTextColor),
+        barTheme: Get.theme.copyWith(hintColor: primaryTextColor, highlightColor: primaryTextColor,inputDecorationTheme: const InputDecorationTheme(filled: false)),
         suggestion: const Center(child: Text('ej. alfajor')),
         failure: const Center(child: Text('No se encontro en tu cátalogo:(')),
         filter: (product) => [product.description, product.nameMark],
         
         builder: (product) {
+
+          // var  
+          String valueDataUpdate ='Actualizado ${Publications.getFechaPublicacion(product.upgrade.toDate(), Timestamp.now().toDate())}';
+          valueDataUpdate = valueDataUpdate.substring(0, 1).toUpperCase() + valueDataUpdate.substring(1).toLowerCase();
+
+          dynamic priceWidget = Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              // text : precio de venta
+              Text(Publications.getFormatoPrecio(monto: product.salePrice),style: TextStyle(fontWeight:FontWeight.w600,color: homeController.getDarkMode?Colors.white:Colors.black )),
+              const SizedBox(width: 5),
+              // text : porcentaje de ganancia
+              product.getPorcentage==''?Container():Opacity(opacity:0.7,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.arrow_upward_rounded,size: 14,color: Colors.green),
+                    Text(product.getPorcentage,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w500)),
+                  ],
+                )),
+              // text : monto de la ganancia
+              product.getBenefits==''?Container():Text(product.getBenefits,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w500)),
+              
+            ],
+          );
 
           return Column(
           children: [
@@ -202,22 +248,14 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
                             Wrap(
                               children: [ 
                                 // text : fecha de creacion
-                                Text(Publications.getFechaPublicacion(product.upgrade.toDate(), Timestamp.now().toDate()),style: textStyleSecundary,),
-                                //  text : ventas
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    product.sales == 0? Container(): dividerCircle, 
-                                    product.sales == 0? Container(): Text('${product.sales} ${product.sales == 1 ? 'venta' : 'ventas'}',style: textStyleSecundary,), 
-                                  ],
-                                ),
+                                Text( valueDataUpdate ,style: textStyleSecundary,),
                                 // text : stock
                                 product.stock
                                   ?Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       product.stock == false ? Container(): dividerCircle, 
-                                      Text('stock ${product.quantityStock.toString()}',style: textStyleSecundary.copyWith(color: getStockColor(productCatalogue: product,color: textStyleSecundary.color as Color)),), 
+                                      Text('stock ${product.quantityStock.toString()}',style: textStylePrimery.copyWith(color: getStockColor(productCatalogue: product,color: textStyleSecundary.color as Color)),), 
                                     ],
                                   ):Container(),
                               ],
@@ -228,8 +266,8 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
                         ),
                       ),
                     ),
-                    // text : precio
-                    Text(Publications.getFormatoPrecio(monto: product.salePrice),style: const TextStyle(fontWeight:FontWeight.bold )),
+                    // content view : precio
+                    priceWidget,
                   ],
                 ),
               ),

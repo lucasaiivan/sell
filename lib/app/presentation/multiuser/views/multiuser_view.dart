@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:sell/app/presentation/home/controller/home_controller.dart';
 import 'package:sell/app/presentation/splash/controllers/splash_controller.dart';
 import '../../../domain/entities/user_model.dart';
 import '../../../core/utils/widgets_utils.dart';
@@ -45,11 +46,16 @@ class LoadingInitView extends StatelessWidget {
 
     // controllers
     final MultiUserController controller = Get.find();
+    final HomeController homeController = Get.find();
 
     return AppBar(
       title: const Text('Multiusuario'),
       actions: [
-        IconButton(onPressed: controller.addItem, icon: const Icon(Icons.add))
+        controller.homeController.getFirebaseAuth.currentUser!.isAnonymous?Container():
+        IconButton(onPressed: controller.addItem, 
+        icon:  Material(
+            color: homeController.getDarkMode?Colors.white:Colors.black,
+            borderRadius: const BorderRadius.all(Radius.circular(5.0)),child: Icon(Icons.add,color:  homeController.getDarkMode?Colors.black:Colors.white,)))
       ],
     );
   }
@@ -58,6 +64,7 @@ class LoadingInitView extends StatelessWidget {
     // controllers
     final MultiUserController controller = Get.find();
 
+    if(controller.homeController.getFirebaseAuth.currentUser!.isAnonymous){ return const Center(child: Text('Debes iniciar sesión para para ver esta sección'));}
     if(controller.getUsersList.isEmpty ){ return const  Center(child: CircularProgressIndicator());}
 
     return ListView.builder(

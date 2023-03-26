@@ -29,6 +29,7 @@ class MultiUserController extends GetxController {
   void onInit() {
     super.onInit();
 
+
     _periodicTimer = Timer.periodic(
       const Duration(seconds: 1),
       (timer) {
@@ -109,6 +110,7 @@ class _AddAlertDialogState extends State<AddAlertDialog> {
 
       content: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TextField(
             controller: _textFieldController,
@@ -116,13 +118,16 @@ class _AddAlertDialogState extends State<AddAlertDialog> {
           ),
           const Padding(
             padding: EdgeInsets.only(top:40),
-            child: Text('Permisos del usuario'),
+            child: Opacity(opacity: 0.7,child: Text('Permisos')),
           ),
           CheckboxListTile(title:const Text('Administrador'),value: admin, onChanged: (value){setState(() {
             admin=value;
             if(admin==true){standar=false;}
           });}),
-          CheckboxListTile(title:const Text('Estandar'),value: standar, onChanged: (value){setState(() {
+          CheckboxListTile(
+            title:const Text('Estandar'),
+            subtitle: const Text('Solo puede vender'),
+            value: standar, onChanged: (value){setState(() {
             standar=value;
             if(standar==true){admin=false;}
           });}),
@@ -138,7 +143,7 @@ class _AddAlertDialogState extends State<AddAlertDialog> {
                 if( admin==true || standar==true){
 
                   // create user 
-                  UserModel user = UserModel(email: _textFieldController.text , admin: admin==true);
+                  UserModel user = UserModel(email: _textFieldController.text , admin: admin??false);
 
                   // Firebase : ref 
                   var refFirestoreUserAccountsList = Database.refFirestoreUserAccountsList(email: user.email).doc( homeController.getIdAccountSelected );

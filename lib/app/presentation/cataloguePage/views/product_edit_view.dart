@@ -2,6 +2,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:get/get.dart';
 import 'package:sell/app/presentation/cataloguePage/views/formCreate_product_view.dart';
@@ -15,7 +16,7 @@ import '../controller/product_edit_controller.dart';
 class ProductEdit extends StatelessWidget {
   ProductEdit({Key? key}) : super(key: key);
 
-  // controllers
+  // controllers  
   final ControllerProductsEdit controller = Get.find();
 
   // var 
@@ -28,10 +29,29 @@ class ProductEdit extends StatelessWidget {
   Widget build(BuildContext context) {
 
     // get : obtenemos los valores 
+    controller.setContext = context;
     controller.colorLoading = Get.theme.primaryColor;
     controller.darkMode = Get.isDarkMode;
     controller.cardProductDetailColor = controller.darkMode ? Colors.blueGrey.withOpacity(0.2) : Colors.brown.shade100.withOpacity(0.6);
 
+    Widget noEdit = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Icon(Icons.admin_panel_settings,size: 50),
+                SizedBox(height: 16.0),
+                Text('No eres administrador de esta cuenta',style: TextStyle(fontWeight: FontWeight.w300)),
+              ],
+            ),
+          ),
+        ), 
+        TextButton.icon(onPressed: Get.back, icon: const Icon(Icons.close_rounded), label: const Text('Cerrar')),
+      ],
+    );
 
     // GetBuilder - refresh all the views
     return GetBuilder<ControllerProductsEdit>(
@@ -42,7 +62,8 @@ class ProductEdit extends StatelessWidget {
         return Material(
           child: AnimatedSwitcher(
           duration: const  Duration(milliseconds: 100),
-            child: _.getNewProduct ? FormCreateProductView(): OfflineBuilder(
+            child: controller.getHomeController.getProfileAdminUser.superAdmin==false?noEdit: _.getNewProduct ? FormCreateProductView()
+            : OfflineBuilder(
                 child: Container(),
                 connectivityBuilder: (
                   BuildContext context,
@@ -134,8 +155,7 @@ class ProductEdit extends StatelessWidget {
       duration:   const Duration(milliseconds: 700),
       child: AnimatedContainer(
         margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 24.0),
-        duration: const Duration(milliseconds: 1000),
-        //decoration: BoxDecoration(color: controller.cardProductDetailColor,borderRadius: BorderRadius.circular(12.0)),
+        duration: const Duration(milliseconds: 1000),  
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12.0),
           // color : color  gradiente de la tarjeta 
@@ -205,6 +225,7 @@ class ProductEdit extends StatelessWidget {
                 contentPadding: EdgeInsets.only(bottom: 12,top: 12),
                 filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
                 disabledBorder: InputBorder.none,labelText: "Descripción del producto"),
+                inputFormatters: [ FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\- .³%]')) ],
                 textInputAction: TextInputAction.done,
                 controller: controller.controllerTextEditDescripcion,
               ),
@@ -217,7 +238,8 @@ class ProductEdit extends StatelessWidget {
   Widget widgetFormEdit2(){
 
     // var
-    Color boderLineColor = Get.theme.textTheme.bodyMedium!.color ?? Colors.black;
+    final Color boderLineColor = Get.isDarkMode?Colors.white.withOpacity(0.3):Colors.black.withOpacity(0.3);
+    final Color fillColor = Get.isDarkMode?Colors.white.withOpacity(0.03):Colors.black.withOpacity(0.03);
 
     return Container(
       padding: const EdgeInsets.all(12.0),
@@ -225,8 +247,10 @@ class ProductEdit extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
 
+          !controller.getAccountAuth? Container():const Text('Personaliza tu producto',style: TextStyle(fontSize: 18.0)),
+
           //TODO: eliminar para desarrrollo
-          TextButton(
+          /* TextButton(
               onPressed: () async {
                 String clave = controller.controllerTextEditDescripcion.text;
                 Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
@@ -239,7 +263,7 @@ class ProductEdit extends StatelessWidget {
                 Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
                 await launchUrl(uri,mode: LaunchMode.externalApplication);
               },
-              child: const Text('Buscar en código Google (moderador)')), 
+              child: const Text('Buscar en código Google (moderador)')),  */
           space,
           // textfield : seleccionar cátegoria
             !controller.getAccountAuth? Container(): GestureDetector(
@@ -253,12 +277,14 @@ class ProductEdit extends StatelessWidget {
                 autovalidateMode: AutovalidateMode.onUserInteraction, 
                 keyboardType: TextInputType.name,
                 decoration: InputDecoration(
+                  filled: true,
+                  fillColor: fillColor,
                   labelText: controller.controllerTextEditCategory.text==''?'Seleccionar una cátegoria':'Cátegoria',
                   border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                   enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
                   disabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
                 ),  
-                onChanged: (value) => controller.formEditing = true, // validamos que el usuario ha modificado el formulario
+                onChanged: (value) => controller.formEditing = true,  // validamos que el usuario ha modificado el formulario
                 // validator: validamos el texto que el usuario ha ingresado.
                 validator: (value) {
                   if (controller.controllerTextEditCategory.text=='') { return 'Por favor, seleccione una cátegoria'; }
@@ -271,6 +297,7 @@ class ProductEdit extends StatelessWidget {
           !controller.getAccountAuth
               ? Container()
               : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [ 
                     Form(
                       key: controller.purchasePriceFormKey,
@@ -283,11 +310,17 @@ class ProductEdit extends StatelessWidget {
                         autovalidateMode: AutovalidateMode.onUserInteraction, 
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         decoration: InputDecoration( 
+                          filled: true,
+                          fillColor: fillColor,
                           labelText: 'Precio de compra',
                           border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                           enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
-                          ),   
-                        onChanged: (value) => controller.formEditing = true ,
+                          ),    
+                        onChanged: (value) => controller.formEditing = true , 
+                        onEditingComplete: (){
+                          controller.updateAll();
+                          FocusScope.of(controller.getContext).previousFocus();
+                        },
                         // validator: validamos el texto que el usuario ha ingresado.
                         validator: (value) {
                           // if (value == null || value.isEmpty) { return 'Por favor, escriba un precio de compra'; }
@@ -295,7 +328,17 @@ class ProductEdit extends StatelessWidget {
                         },
                       ),
                     ),
+                    controller.getPorcentage == '' ? Container() :space,
+                    // text and button : modificar porcentaje de ganancia
+                    controller.getPorcentage == '' ? Container() : Row(
+                      children: [
+                        TextButton(onPressed: controller.showDialogAddProfitPercentage, child: Text( controller.getPorcentage )),
+                        const Spacer(),
+                        TextButton(onPressed: controller.showDialogAddProfitPercentage , child: const Text( 'Modificar porcentaje' )),
+                      ],
+                    ),
                     space,
+                    // precio de venta al público
                     Form(
                       key: controller.salePriceFormKey,
                       // TODO : RangeError TextFormField : cuando el usuario mantiene presionado el boton de borrar > 'RangeError : Invalid value: only valid value is 0: -1'
@@ -308,7 +351,9 @@ class ProductEdit extends StatelessWidget {
                         autovalidateMode: AutovalidateMode.onUserInteraction, 
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         decoration: InputDecoration(
-                          labelText: 'Precio de venta al públuco',
+                          filled: true,
+                          fillColor: fillColor,
+                          labelText: 'Precio de venta al público',
                           border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                           enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
                         ),  
@@ -325,14 +370,16 @@ class ProductEdit extends StatelessWidget {
                     AnimatedContainer(
                       width:double.infinity, 
                       duration: const Duration(milliseconds: 500),
-                      decoration: BoxDecoration(border: Border.all(color: Get.theme.textTheme.bodyMedium!.color?? Colors.black12,width: 0.1,),),
+                      decoration: BoxDecoration(border: Border.all(color: controller.getFavorite?Colors.amber :boderLineColor,width: 0.5,),),
                       child: CheckboxListTile(
                         contentPadding: const EdgeInsets.symmetric(horizontal:12, vertical: 12),
                         enabled: controller.getSaveIndicator ? false : true,
                         checkColor: Colors.white,
                         activeColor: Colors.amber,
                         value: controller.getFavorite,
-                        title: Text(controller.getFavorite?'Quitar de favorito':'Agregar a favorito'),subtitle: controller.getFavorite?null: const Text('Accede rápidamente a tus productos favoritos'),
+                        tileColor: controller.getFavorite?Colors.amber.withOpacity(0.1):null,
+                        title: Text(controller.getFavorite?'Quitar de favorito':'Agregar a favorito'),
+                        subtitle: controller.getFavorite?null: const Text('Accede rápidamente a tus productos favoritos'),
                         onChanged: (value) {
                           if (!controller.getSaveIndicator) { controller.setFavorite = value ?? false; }
                         },
@@ -345,7 +392,7 @@ class ProductEdit extends StatelessWidget {
                     AnimatedContainer(
                       width:double.infinity, 
                       duration: const Duration(milliseconds: 500),
-                      decoration: BoxDecoration(border: Border.all(color: Get.theme.textTheme.bodyMedium!.color?? Colors.black12,width: 0.1,),),
+                      decoration: BoxDecoration(color: controller.getStock?Colors.grey.withOpacity(0.1):null,border: Border.all(color: controller.getStock?Colors.grey:boderLineColor,width: 0.5,),),
                       child: Column(
                       children: [
                         CheckboxListTile(
@@ -379,10 +426,12 @@ class ProductEdit extends StatelessWidget {
                                   enabled: !controller.getSaveIndicator,
                                   keyboardType: TextInputType.number,
                                   onChanged: (value) => controller.setQuantityStock =int.parse(controller.controllerTextEditQuantityStock .text),
-                                  decoration: const InputDecoration(
-                                    filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
+                                  decoration: InputDecoration(
+                                    filled: true,fillColor: fillColor,hoverColor: Colors.blue,
                                     disabledBorder: InputBorder.none,
                                     labelText: "Stock", 
+                                    border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
                                   ),
                                   textInputAction: TextInputAction.done,
                                   //style: textStyle,
@@ -402,10 +451,12 @@ class ProductEdit extends StatelessWidget {
                                     enabled: !controller.getSaveIndicator,
                                     keyboardType: TextInputType.number,
                                     onChanged: (value) =>controller.setAlertStock = int.parse(controller.controllerTextEditAlertStock.text),
-                                    decoration: const InputDecoration(
-                                      filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
+                                    decoration: InputDecoration(
+                                      filled: true,fillColor: fillColor,hoverColor: Colors.blue,
                                       disabledBorder: InputBorder.none,
                                       labelText: "Alerta de stock (opcional)", 
+                                      border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
                                     ),
                                     textInputAction: TextInputAction.done,
                                     //style: textStyle,
@@ -416,7 +467,7 @@ class ProductEdit extends StatelessWidget {
                         ):Container(),
                       ],
                       ),
-                      ),
+                    ),
 
                     // text : marca de tiempo de la ultima actualización del documento
                     controller.getNewProduct || !controller.itsInTheCatalogue ? Container() :  Padding(
@@ -436,7 +487,7 @@ class ProductEdit extends StatelessWidget {
                       child: CheckboxListTile(
                         contentPadding: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
                         controlAffinity: ListTileControlAffinity.leading,
-                        title: const Text('Al crear un nuevo producto, entiendo que no seré el dueño ni podré editarlo una vez agregado a la base de datos también entiendo que los precios de venta de los productos serán de carácter publico',style: TextStyle(fontWeight: FontWeight.w300)),
+                        title: const Text('Entiendo que no seré el propietario de los datos públicos asociados con el producto, ni podré editarlos después de la verificación. Además, los precios de venta serán públicos',style: TextStyle(fontWeight: FontWeight.w300)),
                         value: controller.getUserConsent,
                         onChanged: (value) {
                           controller.setUserConsent = value!;
@@ -469,21 +520,20 @@ class ProductEdit extends StatelessWidget {
                       padding: const EdgeInsets.only(bottom: 12, top: 20, left: 0, right: 0),
                       child: button(padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),colorAccent: Colors.white,colorButton: Colors.red.shade400,icon: const Icon(Icons.delete,color: Colors.white),text: 'Eliminar de mi catálogo', onPressed: controller.showDialogDelete),
                     )
-                  : Container(),
-            controller.widgetTextButtonAddProduct,
+                  : Container(), 
             const SizedBox(height: 20.0),
           
           //TODO: eliminar para desarrrollo
           /* OPCIONES PARA DESARROLLADOR - ELIMINAR ESTE CÓDIGO PARA PRODUCCION */
-          const SizedBox(height:50),
-          widgetForModerator,
+          /* const SizedBox(height:50),
+          widgetForModerator, */
           ]             ,
       ),
     );
   }
 
   /* WIDGETS COMPONENT */
-Widget get widgetForModerator{
+/* Widget get widgetForModerator{
   // TODO : delete release
   return Theme(
     data: ThemeData.dark(),
@@ -532,7 +582,7 @@ Widget get widgetForModerator{
                   },
                 ),
                 SizedBox(height: !controller.getSaveIndicator ? 20.0 : 0.0),
-                controller.getSaveIndicator
+                controller.getSaveIndicator || controller.getEditModerator
                     ? Container()
                     : button(
                         padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
@@ -543,7 +593,7 @@ Widget get widgetForModerator{
                         },
                         colorAccent: Colors.white,
                         colorButton: controller.getEditModerator? Colors.green: Colors.orange,
-                        text: controller.getEditModerator? controller.getNewProduct?'Crear documento':'Actualizar documento': "Editar documento",
+                        text:  "Editar documento",
                       ),
                 const SizedBox(height: 20.0),
                 controller.getSaveIndicator || controller.getNewProduct || !controller.getEditModerator
@@ -570,7 +620,7 @@ Widget get widgetForModerator{
       ),
     ),
   );
-}
+} */
   Widget textfielButton({required String labelText,String textValue = '',required Function() onTap,bool stateEdit = true,EdgeInsetsGeometry contentPadding = const EdgeInsets.all(12) }) {
 
     // value
@@ -809,3 +859,4 @@ class _SelectCategoryState extends State<SelectCategory> {
     );
   }
 }
+ 

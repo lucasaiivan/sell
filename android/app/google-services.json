@@ -76,11 +76,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "232181553323-7ub25j2htvjuamfk2o4ugnrsf1dlb5d4.apps.googleusercontent.com",
+          "client_id": "232181553323-79jlp8ep6me9skvhnnphqqbiupl5aksp.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.logicabooleana.sell",
-            "certificate_hash": "362754dc45d99c716caf710380299d87f34b5ebc"
+            "certificate_hash": "96e7a8e9bf80fe9bb8a15ba6fbd8178f3720d6d9"
           }
         },
         {

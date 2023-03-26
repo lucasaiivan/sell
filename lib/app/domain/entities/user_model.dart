@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserModel {
   UserModel({
-    this.superAdmin = false,
-    this.admin = false,
+    this.superAdmin = false, // Super administrador es el usaurio que creo la cuenta
+    this.admin = false, // permiso de administrador del usuario para administrar la cuenta
     this.email = '',
   });
 
@@ -44,8 +44,7 @@ class UserModel {
 class ProfileAccountModel {
   // Informacion de la cuenta
   Timestamp creation = Timestamp.now(); // Fecha en la que se creo la cuenta
-  String id =
-      ""; // el ID de la cuenta por defecto es el ID del usuario quien lo creo
+  String id = ""; // el ID de la cuenta por defecto es el ID del usuario quien lo creo
   String username = "";
   String image = "";
   String name = ""; 
