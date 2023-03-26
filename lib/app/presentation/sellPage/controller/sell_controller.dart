@@ -58,7 +58,7 @@ class SalesController extends GetxController {
   // list : lista de productos seleccionados por el usaurio para la venta
   List get getListProductsSelested => homeController.listProductsSelected;
   set setListProductsSelected(List value) => homeController.listProductsSelected = value;
-  void addProduct({required ProductCatalogue product}) {
+  void addProductsSelected({required ProductCatalogue product}) {
     product.quantity = 1;
     product.select = false;
     homeController.listProductsSelected.add(product);
@@ -237,23 +237,26 @@ class SalesController extends GetxController {
     // Busca entre los productos de mi catálogo
 
 
-    // var
-    Color colorAccent = Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
+    // styles
+    final Color primaryTextColor  = Get.isDarkMode?Colors.white70:Colors.black87;
+    final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
+    // widgets
+    final Widget dividerCircle = Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child: Icon(Icons.circle,size: 4, color: primaryTextColor.withOpacity(0.5)));
+ 
 
     showSearch(
       context: context,
       delegate: SearchPage<ProductCatalogue>(
         items: homeController.getCataloProducts,
         searchLabel: 'Buscar',
-        searchStyle: TextStyle(color: colorAccent),
-        barTheme: Get.theme.copyWith(hintColor: colorAccent, highlightColor: colorAccent),
+        searchStyle: TextStyle(color: primaryTextColor),
+        barTheme: Get.theme.copyWith(hintColor: primaryTextColor, highlightColor: primaryTextColor,inputDecorationTheme: const InputDecorationTheme(filled: false)),
         suggestion: const Center(child: Text('ej. alfajor')),
         failure: const Center(child: Text('No se encontro en tu cátalogo:(')),
         filter: (product) => [product.description, product.nameMark,product.code],
         builder: (product) {
 
           // values
-          Color tileColor = product.stock? (product.quantityStock <= product.alertStock && homeController.getProfileAccountSelected.subscribed? Colors.red.withOpacity(0.3): product.favorite?Colors.amber.withOpacity(0.1):Colors.transparent): product.favorite?Colors.amber.withOpacity(0.1):Colors.transparent;
           String alertStockText =product.stock ? (product.quantityStock == 0 ? 'Sin stock' : '${product.quantityStock} en stock') : '';
           
           return Column(
@@ -266,7 +269,7 @@ class SalesController extends GetxController {
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     // image
                     ImageAvatarApp(url: product.image,size: 75,favorite:product.favorite),
@@ -278,7 +281,7 @@ class SalesController extends GetxController {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(product.description,maxLines: 1,overflow: TextOverflow.clip,style: TextStyle(fontWeight: FontWeight.w500)),
+                          Text(product.description,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(fontWeight: FontWeight.w500)),
                           Text(product.nameMark,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(color: Colors.blue)),
                           Wrap(
                             crossAxisAlignment: WrapCrossAlignment.start,
@@ -288,24 +291,24 @@ class SalesController extends GetxController {
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 7, color: Get.theme.dividerColor)),
-                                    Text(product.code),
+                                    dividerCircle,
+                                    Text(product.code,style: textStyleSecundary),
                                   ],
                                 ),
                                 // favorite
                                 product.favorite?Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
-                                    const Text('Favorito'),
+                                    dividerCircle,
+                                    Text('Favorito',style: textStyleSecundary),
                                   ],
                                 ):Container(),
                               //  text : alert stock
                                 alertStockText != ''?Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)),
-                                    Text(alertStockText),
+                                    dividerCircle,
+                                    Text(alertStockText,style: textStyleSecundary),
                                   ],
                                 ):Container(),
                             ],
@@ -316,7 +319,7 @@ class SalesController extends GetxController {
                       ),
                     ),
                     // text : precio
-                    Text(Publications.getFormatoPrecio(monto: product.salePrice))
+                    Text(Publications.getFormatoPrecio(monto: product.salePrice),style: const  TextStyle(fontSize: 18,fontWeight: FontWeight.w300),)
                   ],
                 ),
               ),
@@ -335,7 +338,7 @@ class SalesController extends GetxController {
 
   // verificamos si se trata de un código existente
     if (item.code == '') {
-      addProduct(product: item);
+      addProductsSelected(product: item);
     } else {
       // verifica si el ID del producto esta en la lista de seleccionados
       bool coincidence = false;
@@ -379,7 +382,7 @@ class SalesController extends GetxController {
       // si el producto se encuentra en el cátalgo de la cuenta se agrega a la lista de productos seleccionados
       if (product.id == id) {
         coincidence = true;
-        addProduct(product: product);
+        addProductsSelected(product: product);
         update();
         animateAdd();
       }
@@ -477,7 +480,7 @@ class SalesController extends GetxController {
 
     if (valuePrice != '') {
       if (double.parse(valuePrice) != 0) {
-        addProduct(product: ProductCatalogue(id: id,description: valueDescription,salePrice: double.parse(textEditingControllerAddFlashPrice.text),creation: Timestamp.now(),upgrade: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now()));
+        addProductsSelected(product: ProductCatalogue(id: id,description: valueDescription,salePrice: double.parse(textEditingControllerAddFlashPrice.text),creation: Timestamp.now(),upgrade: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now()));
         textEditingControllerAddFlashPrice.text = '';
         update();
         Get.back();
@@ -536,71 +539,85 @@ class SalesController extends GetxController {
     ); 
   }
 
-  void showDialogQuickSale({String id = ''}) {
+  void showDialogQuickSale( ) {
     // Dialog view : Hacer una venta rapida 
 
     //var
-    FocusNode myFocusNode = FocusNode();
-    Get.defaultDialog(
-        title: 'Venta rápida',
-        titlePadding: const EdgeInsets.all(20),
-        cancel: TextButton(
-            onPressed: () {
-              textEditingControllerAddFlashPrice.text = '';
-              Get.back();
-            },
-            child: const Text('Cancelar')),
-        confirm: Theme(
-          data: Get.theme.copyWith(brightness: Get.theme.brightness),
-          child: TextButton(
-              onPressed: () {
-                addSaleFlash();
-                textEditingControllerAddFlashPrice.text = '';
-              },
-              child: const Text('Agregar')),
+    final FocusNode myFocusNode = FocusNode();
+    final ButtonStyle buttonStyle = ButtonStyle(padding: MaterialStateProperty.all(const EdgeInsets.all(12)));
+
+    // widgets
+    Widget content = Scaffold(
+      appBar: AppBar(
+        title: const Text('Venta rapida'), 
+        automaticallyImplyLeading: false,
         ),
-        content: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24),
-          child: Column(
-            children: [
-              // mount textfield
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: TextField(
-                  autofocus: true,
-                  controller: textEditingControllerAddFlashPrice,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: false),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp('[1234567890]'))
-                  ],
-                  decoration: const InputDecoration(
-                    hintText: '\$',
-                    labelText: "Escribe el precio",
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Column(
+                children: [
+                  // mount textfield
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: TextField(
+                      autofocus: true,
+                      controller: textEditingControllerAddFlashPrice,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: false),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp('[1234567890]'))
+                      ],
+                      decoration: const InputDecoration( 
+                        hintText: '\$',
+                        labelText: "Escribe el precio",
+                      ),
+                      style: const TextStyle(fontSize: 20.0),
+                      textInputAction: TextInputAction.next,
+                    ),
                   ),
-                  style: const TextStyle(fontSize: 20.0),
-                  textInputAction: TextInputAction.next,
-                ),
+                  const SizedBox( height: 20),
+                  // descrption textfield
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: TextField(
+                      focusNode: myFocusNode,
+                      autofocus: false,
+                      controller: textEditingControllerAddFlashDescription,
+                      decoration: const InputDecoration( 
+                        labelText: "Descripción (opcional)"),
+                      textInputAction: TextInputAction.done,
+                      onSubmitted: (value) {
+                        addSaleFlash();
+                        textEditingControllerAddFlashPrice.text = '';
+                      },
+                    ),
+                  ),
+                ],
               ),
-              // descrption textfield
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: TextField(
-                  focusNode: myFocusNode,
-                  autofocus: false,
-                  controller: textEditingControllerAddFlashDescription,
-                  decoration: const InputDecoration(
-                      labelText: "Descripción (opcional)"),
-                  textInputAction: TextInputAction.done,
-                  onSubmitted: (value) {
-                    addSaleFlash();
-                    textEditingControllerAddFlashPrice.text = '';
-                  },
-                ),
-              ),
-            ],
-          ),
-        ));
+            ),
+            const Spacer(),
+            // buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                TextButton(style:  buttonStyle,onPressed: () {textEditingControllerAddFlashPrice.text = '';Get.back();}, child: const Text('Cancelar',textAlign: TextAlign.center)),
+                TextButton(style:  buttonStyle,onPressed: () {addSaleFlash();textEditingControllerAddFlashPrice.text = '';}, child: const Text('Agregar',textAlign: TextAlign.center)),
+              ],
+            ),
+          ],
+        ),
+    );
+
+
+    // creamos un dialog con GetX
+    Get.dialog(
+      ClipRRect(
+        borderRadius: const  BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12), bottomLeft: Radius.circular(0), bottomRight: Radius.circular(0)),
+        child: content,
+      ),
+    );  
   }
 
   void dialogSelectedIncomeCash() {
@@ -870,11 +887,16 @@ class _NewProductViewState extends State<NewProductView> {
 
   @override
   Widget build(BuildContext context) {
+
+
+    // style
+    const EdgeInsetsGeometry padding = EdgeInsets.symmetric(vertical: 5,horizontal: 20);
     
 
     // widgets 
-    Widget listtileCode = ListTile(
-      title: Row(
+    Widget listtileCode = Padding(
+      padding: padding,
+      child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
@@ -886,9 +908,10 @@ class _NewProductViewState extends State<NewProductView> {
         Text(widget.productCatalogue.code,style: textStyle.copyWith(fontWeight: FontWeight.bold,fontSize: 16)),
       ],
     ), 
-    );
-    Widget listtileDescription = ListTile(
-      title: // text :  crear un rich text para poder darle estilo al texto
+    ); 
+    Widget listtileDescription = Padding(
+      padding: padding,
+      child: // text :  crear un rich text para poder darle estilo al texto
         RichText(
           text: TextSpan( 
             style: textStyle,
@@ -910,7 +933,7 @@ class _NewProductViewState extends State<NewProductView> {
           focusNode: null, // sin foco
           minLines: 1,
           maxLines:2, 
-          inputFormatters: [ FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\- .]')),],
+          inputFormatters: [ FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\- .³%]')) ],
           decoration:  InputDecoration(
                   hintText: ' ej. agua saborisada 500 ml',
                   labelText: 'Descripción del producto',
@@ -1004,7 +1027,7 @@ class _NewProductViewState extends State<NewProductView> {
                 homeController.addProductToCatalogue(product: widget.productCatalogue);
               }
               // add : agregamos el producto a la lista de productos seleccionados
-              salesController.addProduct(product: widget.productCatalogue);
+              salesController.addProductsSelected(product: widget.productCatalogue);
               // close dialog
               Get.back();
             }
@@ -1027,28 +1050,24 @@ class _NewProductViewState extends State<NewProductView> {
           IconButton(onPressed: Get.back, icon: const Icon(Icons.close)),
         ],
       ),
-      body: Container(
-        width: Get.width,
-        height: Get.height,
-        color: Colors.white,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          child: Column(
-            children: [
-              // listtile : datos del producto
-              listtileCode,
-              // textfield : descripcion del producto
-              widgetTextFieldDescription,
-              const SizedBox(height: 12),
-              // textfield : precio de venta
-              widgetTextFieldPrice,
-              // widget :  permiso para guardar el producto nuevo en mi cátalogo (app catalogo)
-              Padding(padding: const EdgeInsets.all(12.0),child: checkboxAddProductToCatalogue),
-              const Spacer(),
-              SizedBox(width: double.infinity,child: buttonConfirm),
-            ],
-          ),
-        )
+      body: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // listtile : datos del producto
+            listtileCode, 
+            // textfield : descripcion del producto
+            widgetTextFieldDescription,
+            const SizedBox(height: 12),
+            // textfield : precio de venta
+            widgetTextFieldPrice,
+            // widget :  permiso para guardar el producto nuevo en mi cátalogo (app catalogo)
+            Padding(padding: const EdgeInsets.all(12.0),child: checkboxAddProductToCatalogue),
+            const Spacer(),
+            SizedBox(width: double.infinity,child: buttonConfirm),
+          ],
+        ),
       ),
     );
   }

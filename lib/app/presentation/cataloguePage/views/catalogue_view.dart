@@ -34,6 +34,7 @@ class CataloguePage extends StatelessWidget {
 
     // controllers
     final CataloguePageController controller = Get.find();
+    final HomeController homeController = Get.find();
 
     return AppBar(
       elevation: 0,
@@ -43,17 +44,36 @@ class CataloguePage extends StatelessWidget {
         // iconButton : buscar un producto del cátalogo
         IconButton(icon: const Icon(Icons.search),onPressed: (() => controller.seach(context: context))),
         // buttons : filter list
-        PopupMenuButton(
-            icon: const Icon(Icons.filter_list),
-            onSelected: (selectedValue) {
-              controller.catalogueFilter(key: selectedValue);
-            },
-            itemBuilder: (BuildContext ctx) => [
-                  const PopupMenuItem(value: '0', child: Text('Mostrar con stock')),
-                  const PopupMenuItem(value: '1', child: Text('Mostrar favoritos')),
-                  const PopupMenuItem(value: '2', child: Text('Mostrar con stock bajos')),
-                  const PopupMenuItem(value: '3', child: Text('Mostrar todos')),
-                ]),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 5),
+          child: Material(
+            color: homeController.getDarkMode?Colors.white:Colors.black,
+            borderRadius: const BorderRadius.all(Radius.circular(8.0)),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 1),
+              child: PopupMenuButton(
+                  //icon: const Icon(Icons.filter_list),
+                  child: Row(
+                    children: [
+                      Text('Filtrar',style:TextStyle(color: homeController.getDarkMode?Colors.black:Colors.white,fontWeight: FontWeight.w400)),
+                      const SizedBox(width: 5),
+                    Icon(Icons.filter_list,color: homeController.getDarkMode?Colors.black:Colors.white),
+                    ],
+                  ),
+                  onSelected: (selectedValue) {
+                    controller.catalogueFilter(key: selectedValue);
+                  },
+                  itemBuilder: (BuildContext ctx) => [
+                        const PopupMenuItem(value: '0', child: Text('Mostrar todos')),
+                        const PopupMenuItem(value: '1', child: Text('Mostrar con stock')),
+                        const PopupMenuItem(value: '2', child: Text('Mostrar favoritos')),
+                        const PopupMenuItem(value: '3', child: Text('Mostrar con stock bajos')),
+                        const PopupMenuItem(value: '4', child: Text('Actualizado hace más de 2 meses')),
+                        const PopupMenuItem(value: '5', child: Text('Hace más de 5 meses')),
+                      ]),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -214,12 +234,14 @@ class CataloguePage extends StatelessWidget {
     // values
     double titleSize = 16; 
     String alertStockText = item.stock ? (item.quantityStock == 0 ? 'Sin stock' : '') : ''; 
+    String valueDataUpdate ='Actualizado ${Publications.getFechaPublicacion(item.upgrade.toDate(), Timestamp.now().toDate())}';
+    valueDataUpdate = valueDataUpdate.substring(0, 1).toUpperCase() + valueDataUpdate.substring(1).toLowerCase();
 
     // styles
     final Color primaryTextColor  = Get.isDarkMode?Colors.white70:Colors.black87;
-    final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
+    final TextStyle textStylePrimery = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
+    final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w200);
     // widgets
-    final Widget dividerCircle = Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child: Icon(Icons.circle,size: 4, color: primaryTextColor.withOpacity(0.5)));
     Widget divider = ComponentApp().divider();
 
     // widgets 
@@ -231,24 +253,17 @@ class CataloguePage extends StatelessWidget {
             item.nameMark,
             maxLines: 2,
             overflow: TextOverflow.clip,
-            style: const TextStyle(color: Colors.blue),
+            style: TextStyle(color: item.verified?Colors.blue:null),
           ), 
         Wrap(
           children: [
             // text : fecha de la ultima actualización
-            Text(Publications.getFechaPublicacion(item.upgrade.toDate(), Timestamp.now().toDate()),style: textStyleSecundary,),
-            // text : cantidad de ventas
-            item.sales == 0? Container():Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                dividerCircle,
-                Text('${item.sales} ${item.sales == 1 ? 'venta' : 'ventas'}',style:textStyleSecundary),
-              ],
-            ),
+            Text( valueDataUpdate ,style: textStyleSecundary.copyWith(fontSize: 12),),
+            // text : disponibilidad de stock
             item.stock?Row(
               children: [
-                Text('Stock ',style: textStyleSecundary.copyWith(color: cataloguePageController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
-                Text(item.quantityStock.toString(),style: textStyleSecundary.copyWith(color: cataloguePageController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
+                Text(item.quantityStock.toString(),style: textStylePrimery.copyWith(color: cataloguePageController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
+                Text(' Disponible ',style: textStylePrimery.copyWith(color: cataloguePageController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
               ],
             ):Container(),
           ],
@@ -263,19 +278,24 @@ class CataloguePage extends StatelessWidget {
         ),
       ],
     );
-    dynamic priceWidget = Column(crossAxisAlignment: CrossAxisAlignment.center,
+    dynamic priceWidget = Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         // text : precio de venta
-        Text(Publications.getFormatoPrecio(monto: item.salePrice),style: TextStyle(fontWeight:FontWeight.w600,color: homeController.getDarkMode?Colors.white:Colors.black )),
+        Text(Publications.getFormatoPrecio(monto: item.salePrice),style: TextStyle(fontSize: 18,fontWeight:FontWeight.w500,color: homeController.getDarkMode?Colors.white:Colors.black )),
         const SizedBox(width: 5),
         // text : porcentaje de ganancia
-        item.sProcentaje==''?Container():Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.arrow_upward_rounded,size: 14,color: Colors.green),
-            Text(item.sProcentaje,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w500)),
-          ],
-        ),
+        item.getPorcentage==''?Container():Opacity(opacity:0.7,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.arrow_upward_rounded,size: 14,color: Colors.green),
+              Text(item.getPorcentage,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w300)),
+            ],
+          )),
+        // text : monto de la ganancia
+        item.getBenefits==''?Container():Text(item.getBenefits,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w300)),
         
       ],
     );

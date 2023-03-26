@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:sell/app/core/utils/fuctions.dart';
 
 
 class Product {
@@ -128,8 +129,8 @@ class ProductCatalogue {
   int sales = 0;
   bool stock = false;
   int alertStock = 5;
-  double salePrice = 0.0;
-  double purchasePrice = 0.0;
+  double salePrice = 0.0; // precio de venta
+  double purchasePrice = 0.0; // precio de compra
   String currencySign = "\$"; // signo de la moneda
 
   // var optional
@@ -340,14 +341,29 @@ class ProductCatalogue {
   }
   
   // Fuction
-  String get sProcentaje{
-    double porcentaje = 0.0;
+  String get getPorcentage{
+    // description : obtenemos el porcentaje de las ganancias
+    if ( purchasePrice == 0 || salePrice == 0) {
+      return '';
+    }
+    
+    double ganancia = salePrice - purchasePrice;
+    double porcentajeDeGanancia = (ganancia / purchasePrice) * 100;
+    
+    if (ganancia % 1 != 0) {
+      return '${porcentajeDeGanancia.toStringAsFixed(2)}%';
+    } else {
+      return '${porcentajeDeGanancia.toInt()}%';
+    }
+  }
+  String get getBenefits{
+    // description : obtenemos las ganancias 
     double ganancia = 0.0;
     if (salePrice != 0.0 && purchasePrice !=0.0) {
       ganancia = salePrice - purchasePrice;
 
-    porcentaje = ganancia / purchasePrice * 100;
-    return "%${porcentaje.round()}";
+    final String value = Publications.getFormatoPrecio(monto: ganancia);
+    return value;
     }
     return'';
   }

@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sell/app/presentation/sellPage/views/sell_view.dart';
@@ -7,11 +8,12 @@ import '../../../core/utils/widgets_utils.dart';
 import '../../multiuser/views/multiuser_view.dart';
 import '../controller/home_controller.dart';
 
+
 class HomeView extends GetView<HomeController> {
   // ignore: prefer_const_constructors_in_immutables
   HomeView({Key? key}) : super(key: key);
 
-  // var
+  // var 
   Widget getView({required index}) {
     switch (index) {
       case 0:
@@ -29,10 +31,13 @@ class HomeView extends GetView<HomeController> {
   
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) { 
+     
 
-    // set
-    if (controller.getProfileAccountSelected.id == ''){return viewDefault();}
+    // condition : si el usuario no ha seleccionado una cuenta, se muestra la vista por defecto
+    if (controller.getProfileAccountSelected.id == '' && controller.getFirebaseAuth.currentUser!.isAnonymous == false){return viewDefault();}
+
+    // get : nos permite obtener el valor de una variable
     controller.setBuildContext=context;
     controller.setDarkMode = Theme.of(context).brightness==Brightness.dark;
 

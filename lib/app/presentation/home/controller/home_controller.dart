@@ -1,5 +1,6 @@
 import 'dart:io';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -17,7 +18,29 @@ import '../../../domain/entities/user_model.dart';
 import '../../../core/utils/widgets_utils.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
+import '../../auth/controller/login_controller.dart';
+
 class HomeController extends GetxController {
+
+  // Firebase 
+  late  FirebaseAuth _firebaseAuth;
+  set setFirebaseAuth(FirebaseAuth value) => _firebaseAuth=value;
+  get getFirebaseAuth => _firebaseAuth;
+
+  // info app
+  String _urlPlayStore = '';
+  set setUrlPlayStore(String value) => _urlPlayStore = value;
+  get getUrlPlayStore {
+
+    return _urlPlayStore==''?'':_urlPlayStore;
+  }
+  
+  bool _updateApp=false;
+  set setUpdateApp(bool value) {
+    _updateApp=value;
+    update();
+  }
+  bool get getUpdateApp => _updateApp;
 
   // buildContext : obtenemos el context para mostrar Sheet ( la hoja inferior )
   late BuildContext _buildContext;
@@ -132,20 +155,35 @@ class HomeController extends GetxController {
   void onInit() async {
 
     super.onInit(); 
-    getSalesUserGuideVisibility();
-    getTheVisibilityOfTheCatalogueUserGuide();
-    // obtenemos por parametro los datos de la cuenta de atentificación
-    Map map = Get.arguments as Map;
-    // verificamos y obtenemos los datos pasados por parametro
-    setUserAuth = map['currentUser'];
-    // obtenemos el id de la cuenta seleccionada si es que existe
-    map.containsKey('idAccount') ? readAccountsData(idAccount: map['idAccount']): readAccountsData(idAccount: '');
+
+    // inicialización de la variable
+    setFirebaseAuth = FirebaseAuth.instance; 
+    
+    isAppUpdated(); // verificamos si la app esta actualizada
+    getSalesUserGuideVisibility(); // obtenemos la visibilidad de la guía del usuario de ventas
+    getTheVisibilityOfTheCatalogueUserGuide(); // obtenemos la visibilidad de la guía del usuario del catálogo
+
+    // condition : si el usuario es anonimo, se porporcionara algunos datos para que pueda probar la app sin autenticarse
+    if(getFirebaseAuth.currentUser!.isAnonymous){
+      readAccountsInviteData(); 
+    }else{
+      // obtenemos por parametro los datos de la cuenta de atentificación
+      Map map = Get.arguments as Map;
+      // verificamos y obtenemos los datos pasados por parametro
+      setUserAuth = map['currentUser'];
+      // obtenemos el id de la cuenta seleccionada si es que existe 
+      map.containsKey('idAccount') ? readAccountsData(idAccount: map['idAccount']): readAccountsData(idAccount: ''); 
+    }
   }
 
   @override
   void onClose() {}
 
   // FUNCTIONS
+
+  void userInviteUpdateValues(){
+    
+  }
   
   Future<bool> onBackPressed({required BuildContext context})async{
 
@@ -201,7 +239,39 @@ class HomeController extends GetxController {
     return product;
   }
 
-  // cerrar sesión
+  // login
+  void login() async {
+    // Inicio de sesión con Google
+    // Primero comprobamos que el usuario acepto los términos de uso de servicios y que a leído las politicas de privacidad
+ 
+     // FirebaseAuth and GoogleSignIn instances
+    late final GoogleSignIn googleSign = GoogleSignIn();
+    final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+
+    // set state load
+    CustomFullScreenDialog.showDialog();
+
+    // signIn : Inicia la secuencia de inicio de sesión de Google.
+    GoogleSignInAccount? googleSignInAccount = await googleSign.signIn();
+    // condition : Si googleSignInAccount es nulo, significa que el usuario no ha iniciado sesión.
+    if (googleSignInAccount == null) {
+      CustomFullScreenDialog.cancelDialog();
+    } else {
+      // Obtenga los detalles de autenticación de la solicitud
+      GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
+      // Crea una nueva credencial de OAuth genérica.
+      OAuthCredential oAuthCredential = GoogleAuthProvider.credential(accessToken: googleSignInAuthentication.accessToken,idToken: googleSignInAuthentication.idToken);
+      // Una vez que haya iniciado sesión, devuelva el UserCredential
+      await firebaseAuth.signInWithCredential(oAuthCredential);
+      // navigation : navegamos a la pantalla principal
+      Get.offAllNamed(Routes.HOME, arguments: {'currentUser': firebaseAuth.currentUser,'idAccount': ''});
+      // finalizamos el diálogo alerta
+      CustomFullScreenDialog.cancelDialog();
+ 
+    } 
+  }
+
+// cerrar sesión
 void showDialogCerrarSesion() {
 
   Widget widget = AlertDialog(
@@ -248,7 +318,7 @@ void showDialogCerrarSesion() {
     try {
       await googleSignIn.signOut(); // cerramos sesión de google
       await auth.signOut(); // cerramos sesión de firebase
-      await FlutterSecureStorage().deleteAll(); // eliminamos los datos de la memorias del dispositivo 
+      await const FlutterSecureStorage().deleteAll(); // eliminamos los datos de la memorias del dispositivo 
       await FirebaseAuth.instanceFor(app: Firebase.app()).signOut().then((value) => Get.back); // cerramos sesión de firebase 
       
       SystemNavigator.pop(); // cerramos la app
@@ -257,8 +327,34 @@ void showDialogCerrarSesion() {
     }
   }
 
+  //
   // QUERIES FIRESTORE
+  //
 
+  Future<void> isAppUpdated() async {
+    try{
+      final packageInfo = await PackageInfo.fromPlatform();
+      final currentVersion = int.parse(packageInfo.buildNumber);
+      final docSnapshot = await Database.readVersionApp();
+      final firestoreVersion = docSnapshot.data()!['versionApp'] as int;
+      //urlPlayStore
+      setUrlPlayStore = docSnapshot.data()!['urlPlayStore'] as String;
+      setUpdateApp  = firestoreVersion > currentVersion;
+    }catch(e){
+      setUpdateApp = false;
+    }
+  }
+  void readAccountsInviteData() {
+
+    //default values
+    setCatalogueCategoryList = []; // lista de categorias del catálogo
+    setCatalogueProducts = []; // lista de productos del catálogo
+    setProductsOutstandingList = []; // lista de productos destacados
+    setProfileAccountSelected = ProfileAccountModel(creation: Timestamp.now(),name: 'Mi negocio',);  // datos de la cuenta 
+    setManagedAccountsList = []; // lista de cuentas gestionadas
+    setProfileAdminUser = UserModel(superAdmin: true,admin: true,email: 'userInvite@correo.com');  // datos del usuario
+    setAdminsUsersList = [];  // lista de usuarios administradores 
+  }
   void readAccountsData({required String idAccount}) {
 
     //default values
@@ -440,16 +536,19 @@ void showDialogCerrarSesion() {
     }
   }
    void addProductToCollectionPublic({required bool isNew,required Product product})  {
-    // esta función procede a guardar el documento de una colleción publica
-    
-    //  set : id de la cuenta desde la cual se creo el producto
-    product.idAccount = getProfileAccountSelected.id; 
-    //  set : marca de tiempo que se creo el documenti por primera vez
-    if(isNew) { product.creation = Timestamp.fromDate(DateTime.now());}
-    //  set : marca de tiempo que se actualizo el documento por ultima vez
-    product.upgrade = Timestamp.fromDate(DateTime.now());
-    //  set : id del usuario que creo el documento 
-    if(isNew) { product.idUserCreation = getProfileAdminUser.email;}
+    // esta función procede a guardar el documento de una colleción publica 
+
+    // var 
+    bool isNew = product.idUserCreation=='';
+
+    // condition : si el producto es nuevo se le asigna los valores de creación
+    if( isNew ){
+      product.idAccount = getProfileAccountSelected.id;
+      product.idUserCreation = getProfileAdminUser.email;
+      product.creation = Timestamp.fromDate(DateTime.now());
+     }  
+    //  set : marca de tiempo que se actualizo el documenti
+    product.upgrade = Timestamp.fromDate(DateTime.now()); 
     //  set : id del usuario que actualizo el documento
     product.idUserUpgrade = getProfileAdminUser.email;
 
@@ -479,7 +578,7 @@ void showDialogCerrarSesion() {
           children: [
             const Padding(
               padding:  EdgeInsets.only(bottom: 12,left: 12,right: 12,top: 20),
-              child: Text('Seleccione una cuentas'),
+              child: Text('Tienes acceso a estas cuentas'),
             ),
             ListView.builder(
                 padding: const EdgeInsets.symmetric(),

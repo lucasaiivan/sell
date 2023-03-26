@@ -5,6 +5,10 @@ import 'package:google_sign_in/google_sign_in.dart';
 import '../../splash/controllers/splash_controller.dart';
 
 class LoginController extends GetxController {
+
+  // firebase
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
   // controllers
   SplashController homeController = Get.find<SplashController>();
 
@@ -29,8 +33,9 @@ class LoginController extends GetxController {
       // set state load
       CustomFullScreenDialog.showDialog();
 
-      // Activar el flujo de autenticación
+      // signIn : Inicia la secuencia de inicio de sesión de Google.
       GoogleSignInAccount? googleSignInAccount = await homeController.googleSign.signIn();
+      // condition : Si googleSignInAccount es nulo, significa que el usuario no ha iniciado sesión.
       if (googleSignInAccount == null) {
         CustomFullScreenDialog.cancelDialog();
       } else {
@@ -50,8 +55,26 @@ class LoginController extends GetxController {
           'Primero tienes que leer nuestras políticas y términos de uso 🙂',
           'Tienes que aceptar nuestros términos de uso y política de privacidad para usar esta aplicación');
     }
+  } 
+  void signInAnonymously() async { 
+
+    // set state load
+    CustomFullScreenDialog.showDialog();
+
+    try {
+      // signInAnonymously : Inicia sesión en Firebase con una cuenta anónima.
+      await auth.signInAnonymously();
+      CustomFullScreenDialog.cancelDialog();
+    } catch (e) {
+      // message : Error: [firebase_auth/operation-not-allowed] Anonymous Sign-In is not enabled for this project. Enable it in the Firebase Console, under the Sign-in method tab of the Auth section.
+      Get.snackbar('Error', e.toString());
+      CustomFullScreenDialog.cancelDialog();
+    }
   }
 }
+
+
+
 
 // RELEASE
 // Mostrar un diálogo con Get.dialog()

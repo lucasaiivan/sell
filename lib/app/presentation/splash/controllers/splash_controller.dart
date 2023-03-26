@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -18,10 +17,6 @@ class SplashController extends GetxController {
   String idAccount = '';
   RxBool isSignIn = true.obs; // default values
 
-  @override
-  void onInit() {
-    super.onInit();
-  }
 
   @override
   void onReady() async {
