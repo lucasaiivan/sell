@@ -31,9 +31,11 @@ Future<void> main() async {
   SplashBinding().dependencies(); 
   
   // theme
-  bool isDark = (GetStorage().read('isDarkMode') ?? false);
+  bool isDark =
+   (GetStorage().read('isDarkMode') ?? false);
   
   if (Platform.isAndroid) {
+
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       systemNavigationBarColor:
           isDark ? ThemesDataApp.colorBlack : ThemesDataApp.colorLight,
