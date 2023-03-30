@@ -22,7 +22,7 @@ class MultiUserController extends GetxController {
 
   // usuarios que administran la cuenta
   final RxList<UserModel> usersAdminsList = <UserModel>[].obs;
-  List<UserModel> get getUsersList => usersAdminsList.value;
+  List<UserModel> get getUsersList => usersAdminsList;
   set setUsersList( List<UserModel> value) => usersAdminsList.value= value;
 
   @override

@@ -829,13 +829,13 @@ class SalesController extends GetxController {
 // WIDGETS CLASS
 //
 //
-
-
+ 
 class NewProductView extends StatefulWidget {
   
   // parametro obligatorio
-  ProductCatalogue productCatalogue = ProductCatalogue(upgrade: Timestamp.now(), creation:  Timestamp.now(), documentCreation:  Timestamp.now(), documentUpgrade:  Timestamp.now() );
+  late final ProductCatalogue productCatalogue ;
   
+  // ignore: prefer_const_constructors_in_immutables
   NewProductView({Key? key, required this.productCatalogue}) : super(key: key);
 
   @override

@@ -699,7 +699,8 @@ void showDialogCerrarSesion() {
 
 class WidgetBottomSheet extends StatefulWidget {
 
-  late String id;
+  late final String id;
+  // ignore: prefer_const_constructors_in_immutables
   WidgetBottomSheet({Key? key,required this.id}) : super(key: key);
 
   @override
