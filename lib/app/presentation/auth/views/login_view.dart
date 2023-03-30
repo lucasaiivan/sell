@@ -11,12 +11,13 @@ import 'package:url_launcher/url_launcher.dart';
 // En esta pantalla de inicio de sesión, agregaremos un logotipo, dos campos de texto y firmaremos con el botón de Google
 
 class AuthView extends GetView<LoginController> {
+  // ignore: prefer_const_constructors_in_immutables
   AuthView({Key? key}) : super(key: key);
 
   // var
-  late bool darkMode;
-  Color colorAccent=Colors.purple;
-  late Size screenSize; // Obtenemos las vavriables de la dimension de la pantalla
+  late final bool darkMode;
+  final Color colorAccent=Colors.purple;
+  late final Size screenSize; // Obtenemos las vavriables de la dimension de la pantalla
 
   @override
   Widget build(BuildContext context) {
@@ -133,9 +134,10 @@ class AuthView extends GetView<LoginController> {
 
 
 class OnboardingIntroduction extends StatefulWidget {
+  // ignore: prefer_const_constructors_in_immutables
   OnboardingIntroduction({this.colorAccent = Colors.deepPurple,Key? key}) : super(key: key);
 
-  late Color colorAccent;
+  late final Color colorAccent;
 
   @override
   State<OnboardingIntroduction> createState() => _OnboardingIntroductionState();

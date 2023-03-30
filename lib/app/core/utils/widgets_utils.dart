@@ -808,14 +808,15 @@ class LogoPremium extends StatelessWidget {
 }
 
 class ImageAvatarApp extends StatelessWidget {
-  late bool favorite;
-  late String url;
-  late double size;
-  late double radius;
-  late String description;
-  late String path;
+  late final bool favorite;
+  late final String url;
+  late final double size;
+  late final double radius;
+  late final String description;
+  late final String path;
   final VoidCallback?  onTap;
-  late Color canvasColor;
+  late final Color canvasColor;
+  // ignore: prefer_const_constructors_in_immutables
   ImageAvatarApp({Key? key,this.canvasColor=Colors.black12,this.favorite=false,this.url='',this.size=50,this.radius=12,this.description='',this.path='', this.onTap }) : super(key: key);
 
   // avatar que se va usar en toda la app, especialemnte en los 'ListTile'
