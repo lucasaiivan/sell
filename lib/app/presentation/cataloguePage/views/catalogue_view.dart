@@ -214,8 +214,8 @@ class CataloguePage extends StatelessWidget {
   // WIDGETS COMPONENTS
   Widget floatingActionButton({required CataloguePageController controller}) {
     return FloatingActionButton(
-        backgroundColor: Colors.blue,
-        onPressed: () => controller.tabController.index == 0
+        backgroundColor: controller.homeController.getUserAnonymous?Colors.grey:Colors.blue,
+        onPressed: controller.homeController.getUserAnonymous?null: () => controller.tabController.index == 0
             ? controller.toSeachProduct()
             : showDialogSetCategoria(categoria: Category()),
         child: const Icon(
@@ -302,7 +302,7 @@ class CataloguePage extends StatelessWidget {
 
     return ElasticIn(
       child: InkWell(
-        onTap: () => cataloguePageController.toProductEdit(productCatalogue: item),
+        onTap: homeController.getUserAnonymous?null: () => cataloguePageController.toProductEdit(productCatalogue: item),
         child: Column(
           children: [
             Padding(
