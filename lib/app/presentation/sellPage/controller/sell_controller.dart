@@ -212,6 +212,7 @@ class SalesController extends GetxController {
     getTicket.priceTotal = getCountPriceTotal();
     getTicket.valueReceived = getValueReceivedTicket;
     getTicket.creation = Timestamp.now();
+    
     // set firestore : guarda la transacción
     Database.refFirestoretransactions(idAccount: homeController.getIdAccountSelected).doc(getTicket.id).set(getTicket.toJson());
     for (Map element in listIdsProducts) {
@@ -509,8 +510,8 @@ class SalesController extends GetxController {
     // Deshabilitar la guía del usuario de las ventas
     homeController.disableSalesUserGuide();
 
-    // set firestore
-    registerTransaction();
+    // condition : registramos la venta si el usuario esta logueado
+    if(homeController.getUserAnonymous == false){registerTransaction(); } 
     // el usuario confirmo su venta
     setStateConfirmPurchase = true;
     // mostramos una vista 'confirm purchase' por 2 segundos
@@ -763,11 +764,11 @@ class SalesController extends GetxController {
         ));
   }
   
-  Widget get widgetSelectedProductsInformation{
+  Widget get  widgetSelectedProductsInformation{
     // widget : información de productos seleccionados que se va a mostrar al usuario por unica vez
 
     // comprobamos si es la primera ves que se inicia la aplicación
-    if(homeController.salesUserGuideVisibility){
+    if(homeController.salesUserGuideVisibility || homeController.getUserAnonymous ){
       return const Column(
         children: [
           Padding(
@@ -784,7 +785,7 @@ class SalesController extends GetxController {
     // widget : información de sugerencias de los productos que se va a mostrar al usuario por unica ves
 
     // comprobamos si es la primera ves que se inicia la aplicación
-    if(homeController.salesUserGuideVisibility){
+    if(homeController.salesUserGuideVisibility || homeController.getUserAnonymous ){
       return const Opacity(
         opacity: 0.8,
         child: Column(
@@ -804,7 +805,7 @@ class SalesController extends GetxController {
     // widget : este texto se va a mostrar en la primera venta
 
     // comprobamos si es la primera ves que se inicia la aplicación
-    if(homeController.salesUserGuideVisibility){
+    if(homeController.salesUserGuideVisibility || homeController.getUserAnonymous ){
       return const Opacity(
         opacity: 0.6,
         child: Column(
@@ -812,7 +813,7 @@ class SalesController extends GetxController {
           children: [
             Padding(
               padding: EdgeInsets.only(top: 50,left: 12,right: 12,bottom: 20),
-              child: Text('¡Elige el método de pago y listo\n😁\nregistra tu primera venta!',textAlign: TextAlign.center,style: TextStyle(fontSize: 20)),
+              child: Text('¡Elige el método de pago y listo\n😁\nregistra tu venta!',textAlign: TextAlign.center,style: TextStyle(fontSize: 20)),
             ),
           ],
         ),
@@ -941,11 +942,13 @@ class _NewProductViewState extends State<NewProductView> {
                   labelStyle: labelStyle, 
                   border: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent)),
                   enabledBorder: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent)),
-                ),
+                ), 
+           textInputAction: TextInputAction.next,
           onChanged: (value) => widget.productCatalogue.description =value,
           // validator: validamos el texto que el usuario ha ingresado.
           validator: (value) {
-            if (value == null || value.isEmpty) { return 'Por favor, introduzca la descripción del producto'; }
+            // condition : si el usuario no ha seleccionado la opcion de añadir el producto al catalogo no se valida el campo
+            if (checkAddCatalogue && (value == null || value.isEmpty) ) { return 'Por favor, introduzca la descripción del producto'; }
             return null;
           },
         ),
@@ -988,7 +991,7 @@ class _NewProductViewState extends State<NewProductView> {
           ),
         );
     // checkbox : agregar producto al catálogo
-    Widget checkboxAddProductToCatalogue =  AnimatedContainer(
+    Widget checkboxAddProductToCatalogue = homeController.getUserAnonymous?Container(): AnimatedContainer(
       width:double.infinity, 
       duration: const Duration(milliseconds: 500),
       decoration: BoxDecoration(border: Border.all(color: checkAddCatalogue?checkActiveColor:colorAccent,width: 0.5),color: checkAddCatalogue?checkActiveColor.withOpacity(0.2):Colors.transparent,borderRadius: BorderRadius.circular(5)), 
@@ -1022,7 +1025,7 @@ class _NewProductViewState extends State<NewProductView> {
               // condition : si el usuario quiere agregar el producto a la lista de productos del catálogo
               // entonces lo agregamos a la lista de productos del catálogo y a la colección de productos publica de la DB
               //
-              if(checkAddCatalogue){
+              if(checkAddCatalogue && homeController.getUserAnonymous == false){
                 // add product to catalogue
                 homeController.addProductToCatalogue(product: widget.productCatalogue);
               }

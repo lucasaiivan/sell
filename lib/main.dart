@@ -49,11 +49,82 @@ Future<void> main() async {
           isDark ? ThemesDataApp.colorBlack : ThemesDataApp.colorLight,
     ));
   }
-
+  Color coloras = Color.fromARGB(255, 33, 150, 243);
   // theme
   Color colorDark = const Color.fromRGBO(43, 45, 57, 1);
   Color colorLight = const Color.fromRGBO(247, 245, 242, 1);
+  const lightColorScheme = ColorScheme(
+    brightness: Brightness.light,
+    primary: Color(0xFF343DFF),
+    onPrimary: Color(0xFFFFFFFF),
+    primaryContainer: Color(0xFFE0E0FF),
+    onPrimaryContainer: Color(0xFF00006E),
+    secondary: Color(0xFF343DFF),
+    onSecondary: Color(0xFFFFFFFF),
+    secondaryContainer: Color(0xFFE0E0FF),
+    onSecondaryContainer: Color(0xFF00006E),
+    tertiary: Color(0xFF00629F),
+    onTertiary: Color(0xFFFFFFFF),
+    tertiaryContainer: Color(0xFFD0E4FF),
+    onTertiaryContainer: Color(0xFF001D34),
+    error: Color(0xFFBA1A1A),
+    errorContainer: Color(0xFFFFDAD6),
+    onError: Color(0xFFFFFFFF),
+    onErrorContainer: Color(0xFF410002),
+    background: Color(0xFFFFFBFF),
+    onBackground: Color(0xFF1B1B1F),
+    surface: Color(0xFFFFFBFF),
+    onSurface: Color(0xFF1B1B1F),
+    surfaceVariant: Color(0xFFE4E1EC),
+    onSurfaceVariant: Color(0xFF46464F),
+    outline: Color(0xFF777680),
+    onInverseSurface: Color(0xFFF3EFF4),
+    inverseSurface: Color(0xFF303034),
+    inversePrimary: Color(0xFFBEC2FF),
+    shadow: Color(0xFF000000),
+    surfaceTint: Color(0xFF343DFF),
+    outlineVariant: Color(0xFFC7C5D0),
+    scrim: Color(0xFF000000),
+  );
+
+const darkColorScheme = ColorScheme(
+  brightness: Brightness.dark,
+  primary: Color(0xFFBEC2FF),
+  onPrimary: Color(0xFF0001AC),
+  primaryContainer: Color(0xFF0000EF),
+  onPrimaryContainer: Color(0xFFE0E0FF),
+  secondary: Color(0xFFBEC2FF),
+  onSecondary: Color(0xFF0001AC),
+  secondaryContainer: Color(0xFF0000EF),
+  onSecondaryContainer: Color(0xFFE0E0FF),
+  tertiary: Color(0xFF9BCBFF),
+  onTertiary: Color(0xFF003356),
+  tertiaryContainer: Color(0xFF004A79),
+  onTertiaryContainer: Color(0xFFD0E4FF),
+  error: Color(0xFFFFB4AB),
+  errorContainer: Color(0xFF93000A),
+  onError: Color(0xFF690005),
+  onErrorContainer: Color(0xFFFFDAD6),
+  background: Color(0xFF1B1B1F),
+  onBackground: Color(0xFFE5E1E6),
+  surface: Color(0xFF1B1B1F),
+  onSurface: Color(0xFFE5E1E6),
+  surfaceVariant: Color(0xFF46464F),
+  onSurfaceVariant: Color(0xFFC7C5D0),
+  outline: Color(0xFF91909A),
+  onInverseSurface: Color(0xFF1B1B1F),
+  inverseSurface: Color(0xFFE5E1E6),
+  inversePrimary: Color(0xFF343DFF),
+  shadow: Color(0xFF000000),
+  surfaceTint: Color(0xFFBEC2FF),
+  outlineVariant: Color(0xFF46464F),
+  scrim: Color(0xFF000000),
+);
+
+
   ThemeData themeData = ThemeData(
+  
+    colorScheme: lightColorScheme,
     dialogTheme:const  DialogTheme(backgroundColor: Color.fromRGBO(249, 242, 237, 1)),
     popupMenuTheme: const PopupMenuThemeData(color: Color.fromRGBO(249, 242, 237, 1)), 
     visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -70,6 +141,7 @@ Future<void> main() async {
     inputDecorationTheme: InputDecorationTheme(filled: true,fillColor: Colors.black.withOpacity(0.03),border: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black.withOpacity(0.3)))),
   );
   ThemeData themeDataDark = ThemeData(
+    colorScheme: darkColorScheme, 
     dialogTheme:const  DialogTheme(backgroundColor: Color.fromRGBO(27, 36, 48, 1),),
     popupMenuTheme: const PopupMenuThemeData(color: Color.fromRGBO(27, 36, 48, 1)),
     indicatorColor: Colors.blue,
@@ -97,3 +169,4 @@ Future<void> main() async {
     darkTheme: themeDataDark,
   ));
 }
+ 

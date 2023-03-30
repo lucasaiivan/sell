@@ -325,9 +325,10 @@ class SalesView extends StatelessWidget {
     HomeController controller  = Get.find();
 
     // values
+    int numItemDefault = 5;
     const double height = 120;
     final bool viewDefault = controller.getProductsOutstandingList.length==0;
-    final int itemCount = viewDefault?6:controller.getProductsOutstandingList.length;
+    final int itemCount = viewDefault?6:controller.getProductsOutstandingList.length+numItemDefault;
 
 
     return Stack(
@@ -341,7 +342,7 @@ class SalesView extends StatelessWidget {
                 itemBuilder: (context, index) {
 
                   // values 
-                  Widget widget = index <= (controller.getProductsOutstandingList.length-1)? circleAvatarProduct(productCatalogue:controller.getProductsOutstandingList[index]):circleAvatarProduct(productCatalogue: ProductCatalogue(creation: Timestamp.now(), upgrade: Timestamp.now(), documentCreation: Timestamp.now(), documentUpgrade: Timestamp.now()));
+                  Widget widget = index <= (controller.getProductsOutstandingList.length-1) && index < itemCount-numItemDefault? circleAvatarProduct(productCatalogue:controller.getProductsOutstandingList[index]):circleAvatarProduct(productCatalogue: ProductCatalogue(creation: Timestamp.now(), upgrade: Timestamp.now(), documentCreation: Timestamp.now(), documentUpgrade: Timestamp.now()));
                   
                   // condition : views default
                   if( viewDefault){ return Padding(
@@ -455,11 +456,10 @@ class SalesView extends StatelessWidget {
     // values
     bool defaultValues = productCatalogue.id == '';
     double radius = 35.0;
-    double spaceImageText = 10;
-
-    // alert control stock
+    double spaceImageText = 10; 
+    Color backgroundColor = Colors.grey.withOpacity(0.1);
     bool stateAlertStock = productCatalogue.stock && homeController.getProfileAccountSelected.subscribed ? productCatalogue.quantityStock < 5 : false;
-    Color borderCicleColor = stateAlertStock? Colors.red: productCatalogue.favorite? Colors.amber: Get.theme.dividerColor;
+    Color borderCicleColor = stateAlertStock? Colors.red: productCatalogue.favorite? Colors.amber:backgroundColor; 
 
     return ElasticIn(
       child: Container(
@@ -481,8 +481,8 @@ class SalesView extends StatelessWidget {
                     imageUrl: productCatalogue.image,
                     placeholder: (context, url) => CircleAvatar(
                         radius: radius,
-                        backgroundColor: Get.theme.dividerColor,
-                        child: defaultValues?Container():Text(Publications.getFormatoPrecio(monto: productCatalogue.salePrice),style: TextStyle(color: Get.textTheme.bodyText1?.color))),
+                        backgroundColor: backgroundColor,
+                        child: defaultValues?Container():Text(Publications.getFormatoPrecio(monto: productCatalogue.salePrice),style: TextStyle(color: Get.textTheme.bodyLarge?.color))),
                     imageBuilder: (context, image) => CircleAvatar(
                       radius: radius,
                       backgroundColor: borderCicleColor,
@@ -491,13 +491,13 @@ class SalesView extends StatelessWidget {
                         backgroundColor: Get.theme.scaffoldBackgroundColor,
                         child: CircleAvatar(
                             radius: radius - 5,
-                            backgroundColor: Get.theme.scaffoldBackgroundColor,
+                            backgroundColor: backgroundColor,
                             child:defaultValues?Container(): CircleAvatar(radius: radius, backgroundImage: image)),
                       ),
                     ),
                     errorWidget: (context, url, error) => CircleAvatar(
                       radius: radius,
-                      backgroundColor: Get.theme.dividerColor,
+                      backgroundColor: backgroundColor,
                       child: defaultValues?Container(): Text(Publications.getFormatoPrecio(monto: productCatalogue.salePrice),style:TextStyle(color: Get.textTheme.bodyMedium?.color)),
                     ),
                   ), 
@@ -535,10 +535,10 @@ class SalesView extends StatelessWidget {
         child: Material(
           borderRadius: const BorderRadius.all(Radius.circular(12)),
           color: background,
-          child: Center(
+          child: const Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: const [
+              children: [
                 Icon(Icons.check_rounded,size: 200,color:accentColor),
                 SizedBox(height:25),
                 Text('Hecho',style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold,color: accentColor)),
@@ -583,7 +583,7 @@ class SalesView extends StatelessWidget {
           child: FloatingActionButton.extended(
               onPressed: controller.getListProductsSelested.isEmpty? null: () {controller.setTicketView = true;controller.setValueReceivedTicket = 0.0;},
               backgroundColor:controller.getListProductsSelested.isEmpty ? Colors.grey : null,
-              label: Text( 'Cobrar ${controller.getListProductsSelested.isEmpty ? '' : Publications.getFormatoPrecio(monto: controller.getCountPriceTotal())}')),
+              label: Text( 'Cobrar ${controller.getListProductsSelested.isEmpty ? '' : Publications.getFormatoPrecio(monto: controller.getCountPriceTotal())}',style:const  TextStyle(color: Colors.white))),
         ),
       ],
     );
@@ -604,7 +604,7 @@ class SalesView extends StatelessWidget {
               const SizedBox(width: 8),
               FloatingActionButton.extended(
                   onPressed: controller.confirmedPurchase,
-                  label: const Text('Confirmar venta')),
+                  label: const Text('Confirmar venta',style: TextStyle(color: Colors.white),)),
             ],
           );
   }

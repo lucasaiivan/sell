@@ -22,7 +22,7 @@ import '../routes/app_pages.dart';
 class ImageBarWidget extends StatelessWidget {
   /// Tamaño deseado y color deseado.
   final double size;
-  late Color color;
+  late final  Color color;
 
   /// Crea un widget de una imagen de Scan.
   ///
@@ -254,14 +254,14 @@ class _ProductoItemState extends State<ProductoItem> {
                     onPressed: () =>
                         salesController.selectedItem(id: widget.producto.id),
                     icon: CircleAvatar(
-                      backgroundColor: Colors.blue,
+                      backgroundColor: Colors.black,
                       child: Padding(
                         padding: const EdgeInsets.all(2.0),
                         child: CircleAvatar(
                             backgroundColor: Colors.white,
                             child: Center(
                               child:
-                                  Text(widget.producto.quantity.toString()),
+                                  Text(widget.producto.quantity.toString(),style: const TextStyle(color: Colors.black),),
                             )),
                       ),
                     ),
@@ -279,7 +279,7 @@ class _ProductoItemState extends State<ProductoItem> {
                         }
                       },
                       icon: const CircleAvatar(
-                          backgroundColor: Colors.grey,
+                          backgroundColor: Colors.blue,
                           child: Icon(
                             Icons.horizontal_rule,
                             color: Colors.white,
@@ -295,7 +295,7 @@ class _ProductoItemState extends State<ProductoItem> {
                         salesController.update();
                       },
                       icon: const CircleAvatar(
-                          backgroundColor: Colors.grey,
+                          backgroundColor: Colors.blue,
                           child: Icon(
                             Icons.add,
                             color: Colors.white,
@@ -423,7 +423,7 @@ class WidgetDrawer extends StatelessWidget {
     // widgets
     final textButtonLogin = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: SizedBox(width: double.infinity,child: FloatingActionButton(onPressed: homeController.login,elevation: 0,child: const Text('Iniciar sesión'))),
+      child: SizedBox(width: double.infinity,child: FloatingActionButton(onPressed: homeController.signOutFirebase,elevation: 0,child: const Text('Iniciar sesión'))),
     );
 
 
@@ -663,11 +663,14 @@ class ComponentApp extends StatelessWidget {
 
 
 class WidgetSuggestionProduct extends StatelessWidget {
-  //values
 
-  bool searchButton = false;
-  List<Product> list = <Product>[];
-  WidgetSuggestionProduct({super.key, required this.list, this.searchButton = false});
+  // ignore: prefer_const_constructors_in_immutables
+  WidgetSuggestionProduct({Key? key, required this.list, this.searchButton = false}): super(key: key);
+
+  //values
+  final bool searchButton ;
+  final List<Product> list ;
+  
 
   @override
   Widget build(BuildContext context) {

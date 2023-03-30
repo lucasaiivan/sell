@@ -10,7 +10,7 @@ import '../../home/controller/home_controller.dart';
 
 class ButtonData {
   Color colorButton = Colors.purple;
-  Color colorText = Colors.white;
+  Color colorText = Colors.white; 
   ButtonData({required Color colorButton, required Color colorText}) {
     this.colorButton = colorButton;
     this.colorText = colorText;
@@ -96,7 +96,7 @@ class ControllerProductsSearch extends GetxController {
   Color get getColorFondo => _colorFondo;
 
   // Color de icono y texto de appbar y textfield
-  Color? _colorTextField = Get.theme.textTheme.bodyText1!.color;
+  Color? _colorTextField = Get.theme.textTheme.bodyLarge!.color;
   set setColorTextField(Color color) => _colorTextField = color;
   get getColorTextField => _colorTextField;
 
@@ -179,7 +179,7 @@ class ControllerProductsSearch extends GetxController {
     setStateSearch = false;
     textEditingController.clear();
     setproductDoesNotExist = false;
-    setButtonData(colorButton: Get.theme.primaryColor, colorText: Colors.white);
+    setButtonData(colorButton: Get.theme.colorScheme.primary, colorText: Colors.white);
     setColorFondo = Get.theme.scaffoldBackgroundColor;
     setColorTextField = Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
     update(['updateAll']);
