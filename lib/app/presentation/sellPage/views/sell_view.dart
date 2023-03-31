@@ -172,7 +172,7 @@ class SalesView extends StatelessWidget {
                             ),
                           ),
                           // view : lines ------
-                          Padding(padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 20),child: Dash(color: Get.theme.dividerColor,height: 2, width: 12)),
+                          Padding(padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 20),child: Dash(color: Get.theme.dividerColor,height:0.5, width: 12)),
                           // text : el monto total de la transacción
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -224,7 +224,7 @@ class SalesView extends StatelessWidget {
                               ),
                           ),
                           // view : lines ------
-                          Padding(padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 20),child: Dash(color: Get.theme.dividerColor,height: 2, width: 12)),
+                          Padding(padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 20),child: Dash(color: Get.theme.dividerColor,height: 0.5, width: 12)),
                           // view 2
                           Padding(
                             padding:const EdgeInsets.only(bottom: 24, top: 24),
