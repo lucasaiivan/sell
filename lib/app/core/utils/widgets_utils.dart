@@ -423,7 +423,7 @@ class WidgetDrawer extends StatelessWidget {
     // widgets
     final textButtonLogin = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: SizedBox(width: double.infinity,child: FloatingActionButton(onPressed: homeController.signOutFirebase,elevation: 0,child: const Text('Iniciar sesión'))),
+      child: SizedBox(width: double.infinity,child: FloatingActionButton(onPressed: homeController.signOutFirebase,elevation: 0,child: const Text('Iniciar sesión',style: TextStyle(color: Colors.white),))),
     );
 
 
@@ -464,14 +464,14 @@ class WidgetDrawer extends StatelessWidget {
               style: DefaultTextStyle.of(context).style,
               children: <TextSpan>[
                 TextSpan(
-                  text: 'Versión gratuita',
+                  text: 'Versión en desarrollo gratuita',
                   style: TextStyle(
                     color: colorTextVersion,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 TextSpan(
-                  text: ' Nuestro objetivo es hacer las cosas simples y eficientes para tu negocio',
+                  text: ' Nuestro objetivo es hacer las cosas simples y eficientes',
                   style: TextStyle(
                     color: colorTextVersion.withOpacity(0.6),
                     fontWeight: FontWeight.bold,
@@ -521,8 +521,8 @@ class WidgetDrawer extends StatelessWidget {
             ],
           ),
         ),
-        ListTile(
-          leading: const Icon(Icons.get_app_sharp),
+        /*  ListTile(
+          leading: const Icon(Icons.cloud_download_outlined),
           title: const Text('Comprobar actualización'),
           subtitle: const Text('Play Store'),
           onTap: () async {
@@ -536,6 +536,18 @@ class WidgetDrawer extends StatelessWidget {
               if (await canLaunchUrl(uri)) { await launchUrl(uri,mode: LaunchMode.externalApplication);} else {throw 'Could not launch $uri';}
             }
           },
+        ),  */
+        ListTile(
+          leading: const Icon(Icons.cloud_download_outlined),
+          title: const Text('Comprobar actualización'),
+          subtitle: const Text('Play Store'),
+          onTap: () async {
+            
+            // values
+            Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.logicabooleana.sell');
+            //  redireccionara para la tienda de aplicaciones
+            await launchUrl(uri,mode: LaunchMode.externalApplication);
+          },
         ), 
         ListTile(
           contentPadding: const EdgeInsets.symmetric(vertical: 12,horizontal: 12),
@@ -548,7 +560,7 @@ class WidgetDrawer extends StatelessWidget {
             // abre la app de mensajeria
             String whatsAppUrl = "";
             String phoneNumber = '541134862939';
-            String description = "hola, estoy probando la App!";
+            String description = "hola, estoy probando la App SELL - Gestiona Tus Ventas y me gustaría compartirte mi opinión";
             whatsAppUrl ='https://wa.me/+$phoneNumber?text=$description';
             Uri uri = Uri.parse( whatsAppUrl);
             await launchUrl(uri,mode: LaunchMode.externalNonBrowserApplication);

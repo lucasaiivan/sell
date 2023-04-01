@@ -1,9 +1,6 @@
-import 'dart:convert';
 import 'dart:io';
-
 import 'package:audioplayers/audioplayers.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/gestures.dart';
+import 'package:firebase_storage/firebase_storage.dart'; 
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -12,8 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:path/path.dart';
+import 'package:image_picker/image_picker.dart'; 
 import 'package:search_page/search_page.dart';
 import 'package:sell/app/presentation/home/controller/home_controller.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart';
@@ -125,6 +121,10 @@ class SalesController extends GetxController {
   void onInit() async {
     super.onInit(); 
     getCashRegisterNumber();
+
+    homeController.showTutorial(targetFocus: [homeController.buttonAddItemFlashTargetFocus],next: showDialogQuickSale ); // mostramos la guía del usuario
+    
+
 
   }
   @override
@@ -283,7 +283,7 @@ class SalesController extends GetxController {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(product.description,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(fontWeight: FontWeight.w500)),
-                          Text(product.nameMark,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(color: Colors.blue)),
+                          product.nameMark==''?Container():Text(product.nameMark,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(color: Colors.blue)),
                           Wrap(
                             crossAxisAlignment: WrapCrossAlignment.start,
                             direction: Axis.horizontal,
@@ -604,7 +604,23 @@ class SalesController extends GetxController {
               mainAxisAlignment: MainAxisAlignment.spaceAround,crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 TextButton(style:  buttonStyle,onPressed: () {textEditingControllerAddFlashPrice.text = '';Get.back();}, child: const Text('Cancelar',textAlign: TextAlign.center)),
-                TextButton(style:  buttonStyle,onPressed: () {addSaleFlash();textEditingControllerAddFlashPrice.text = '';}, child: const Text('Agregar',textAlign: TextAlign.center)),
+                TextButton(style:  buttonStyle,onPressed: () {
+                  addSaleFlash();textEditingControllerAddFlashPrice.text = '';
+                  homeController.showTutorial(targetFocus:[homeController.buttonAddProductTargetFocus],next:(){
+                    selectedProduct(item: homeController.getProductsOutstandingList[0]);
+                    homeController.showTutorial(targetFocus: [homeController.buttonRegisterTransactionTargetFocus],next:(){
+                       setTicketView = true;
+
+                       // sleep 1 second
+                        Future.delayed(
+                          const Duration(milliseconds: 1000),
+                          () {
+                            homeController.showTutorial(targetFocus: [homeController.buttonsOptionsPaymentMethodTargetFocus,homeController.buttonsConfirmTransactionTargetFocus],next:(){},alignSkip: Alignment.topRight );
+                          }); // mostramos la guía del usuario
+                       
+                       },alignSkip: Alignment.topRight );
+                    } ,alignSkip: Alignment.bottomLeft); // mostramos la guía del usuario
+                  }, child: const Text('Agregar',textAlign: TextAlign.center)),
               ],
             ),
           ],
@@ -764,64 +780,7 @@ class SalesController extends GetxController {
         ));
   }
   
-  Widget get  widgetSelectedProductsInformation{
-    // widget : información de productos seleccionados que se va a mostrar al usuario por unica vez
-
-    // comprobamos si es la primera ves que se inicia la aplicación
-    if(homeController.salesUserGuideVisibility || homeController.getUserAnonymous ){
-      return const Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(20.0),
-            child: Opacity(opacity: 0.8,child: Text('En estos artículos vacíos aparecerán los productos que selecciones para vender\n    👇',textAlign: TextAlign.start,style: TextStyle(fontSize: 20))),
-          ),
-        ],
-      );
-      }
-    // si no es la primera ves que se inicica la aplicación devuelve una vistra vacia
-    return Container();
-  }
-  Widget get widgetProductSuggestionInfo{
-    // widget : información de sugerencias de los productos que se va a mostrar al usuario por unica ves
-
-    // comprobamos si es la primera ves que se inicia la aplicación
-    if(homeController.salesUserGuideVisibility || homeController.getUserAnonymous ){
-      return const Opacity(
-        opacity: 0.8,
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.all(20.0),
-              child: Text('Aquí vamos a sugerirte algunos productos de tu catálogo 😉',textAlign: TextAlign.end,style: TextStyle(fontSize: 20)),
-            ),
-          ],
-        ),
-      );
-      }
-    // si no es la primera ves que se inicica la aplicación devuelve una vistra vacia
-    return Container();
-  }
-  Widget get widgetTextFirstSale{
-    // widget : este texto se va a mostrar en la primera venta
-
-    // comprobamos si es la primera ves que se inicia la aplicación
-    if(homeController.salesUserGuideVisibility || homeController.getUserAnonymous ){
-      return const Opacity(
-        opacity: 0.6,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Padding(
-              padding: EdgeInsets.only(top: 50,left: 12,right: 12,bottom: 20),
-              child: Text('¡Elige el método de pago y listo\n😁\nregistra tu venta!',textAlign: TextAlign.center,style: TextStyle(fontSize: 20)),
-            ),
-          ],
-        ),
-      );
-      }
-    // si no es la primera ves que se inicica la aplicación devuelve una vistra vacia
-    return Container();
-  }
+ 
 }
 
 //
