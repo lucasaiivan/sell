@@ -8,7 +8,9 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../core/utils/dynamicTheme_lb.dart';
 import '../../home/controller/home_controller.dart';
-import '../controller/sell_controller.dart';
+import '../controller/sell_controller.dart'; 
+
+
 
 // ignore: must_be_immutable
 class SalesView extends StatelessWidget {
@@ -18,18 +20,23 @@ class SalesView extends StatelessWidget {
   late BuildContext buildContext;
 
   // others controllers
-  final HomeController homeController = Get.find();
+  final HomeController homeController = Get.find(); 
+
+ 
 
   @override
   Widget build(BuildContext context) {
+
 
     // set 
     buildContext = context;
 
     return GetBuilder<SalesController>(
       init: SalesController(),
-      initState: (_) {},
+      // initState : se activa cuando se crea el widget
+      initState: (_) {  },
       builder: (controller) {
+
         return Obx(() => Scaffold(
               appBar: appbar(controller: controller),
               drawer: drawerApp(),
@@ -80,14 +87,12 @@ class SalesView extends StatelessWidget {
       headerSliverBuilder: (context, innerBoxIsScrolled) {
         return [
           // atentos a cualquier cambio que surja en los datos de la lista de marcas
-          SliverList(delegate: SliverChildListDelegate([updateview,controller.widgetProductSuggestionInfo, widgeSuggestedProducts(context: context,controller1: controller)]))
+          SliverList(delegate: SliverChildListDelegate([updateview, widgeSuggestedProducts(context: context,controller1: controller)]))
         ];
       },
       body: Column(
         mainAxisSize: MainAxisSize.min,
-        children: [
-          
-          controller.widgetSelectedProductsInformation,
+        children: [ 
           Expanded(
             child: GridView.builder(
               padding: const EdgeInsets.all(12),
@@ -109,7 +114,7 @@ class SalesView extends StatelessWidget {
       ),
     );
   }
-
+  
   Widget drawerTicket({required SalesController controller}) {
 
     // values 
@@ -118,6 +123,7 @@ class SalesView extends StatelessWidget {
     // style 
     final TextStyle textValuesStyle = TextStyle(fontFamily: 'monospace',fontWeight: FontWeight.bold,color: Get.theme.brightness == Brightness.dark? Colors.white: Colors.black);
     final TextStyle textDescrpitionStyle = TextStyle(fontFamily: 'monospace',fontWeight: FontWeight.bold,color: Get.theme.brightness == Brightness.dark? Colors.white70: Colors.black87);
+ 
 
     return AnimatedContainer(
       width: controller.getTicketView ? Get.size.width : 0,
@@ -231,36 +237,37 @@ class SalesView extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                // texto : texto que se va a mostrar por unica ves
-                                controller.widgetTextFirstSale,
+                              children: [ 
                                 Text('El cliente paga con:',style:textValuesStyle.copyWith(fontWeight: FontWeight.bold)),
                                 const SizedBox(height: 12),
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    //  button : pago con efectivo
-                                    ElevatedButton.icon(
-                                      style: ButtonStyle(elevation: MaterialStateProperty.all(controller.getTicket.payMode =='effective'? 5: 0)),
-                                      icon: controller.getTicket.payMode != 'effective'?Container():const Icon(Icons.money_rounded),
-                                      onPressed: (){
-                                        controller.setPayModeTicket = 'effective'; // se
-                                        controller.dialogSelectedIncomeCash();
-                                      },
-                                      label: Text(controller.getValueReceivedTicket != 0.0? Publications.getFormatoPrecio(monto: controller.getValueReceivedTicket): 'Efectivo'),
-                                    ),
-                                    // button : pago con mercado pago
-                                    ElevatedButton.icon(
-                                      style: ButtonStyle(elevation: MaterialStateProperty.all(controller.getTicket.payMode == 'mercadopago'? 5: 0)),
-                                      icon: controller.getTicket.payMode != 'mercadopago'?Container():const Icon(Icons.check_circle_rounded),
-                                      onPressed: () {
-                                        controller.setPayModeTicket = 'mercadopago';
-                                        // default value
-                                        controller.setValueReceivedTicket=0.0;
-                                      },
-                                      label: const Text('Mercado Pago'),
-                                    ),
-                                  ],
+                                Container(
+                                  key: homeController.buttonsPaymenyMode,
+                                  child: Row( 
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      //  button : pago con efectivo
+                                      ElevatedButton.icon(
+                                        style: ButtonStyle(elevation: MaterialStateProperty.all(controller.getTicket.payMode =='effective'? 5: 0)),
+                                        icon: controller.getTicket.payMode != 'effective'?Container():const Icon(Icons.money_rounded),
+                                        onPressed: (){
+                                          controller.setPayModeTicket = 'effective'; // se
+                                          controller.dialogSelectedIncomeCash();
+                                        },
+                                        label: Text(controller.getValueReceivedTicket != 0.0? Publications.getFormatoPrecio(monto: controller.getValueReceivedTicket): 'Efectivo'),
+                                      ),
+                                      // button : pago con mercado pago
+                                      ElevatedButton.icon(
+                                        style: ButtonStyle(elevation: MaterialStateProperty.all(controller.getTicket.payMode == 'mercadopago'? 5: 0)),
+                                        icon: controller.getTicket.payMode != 'mercadopago'?Container():const Icon(Icons.check_circle_rounded),
+                                        onPressed: () {
+                                          controller.setPayModeTicket = 'mercadopago';
+                                          // default value
+                                          controller.setValueReceivedTicket=0.0;
+                                        },
+                                        label: const Text('Mercado Pago'),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                                 //  button : pago con tarjeta de credito/debito
                                 ElevatedButton.icon(
@@ -327,7 +334,7 @@ class SalesView extends StatelessWidget {
     // values
     int numItemDefault = 5;
     const double height = 120;
-    final bool viewDefault = controller.getProductsOutstandingList.length==0;
+    final bool viewDefault = controller.getProductsOutstandingList.isEmpty;
     final int itemCount = viewDefault?6:controller.getProductsOutstandingList.length+numItemDefault;
 
 
@@ -350,7 +357,7 @@ class SalesView extends StatelessWidget {
                     child: circleAvatarSeachAndDefault(context: context),
                   ); }
                   // condition : vista de productos destacados
-                  if(index == 0){ return Row(crossAxisAlignment: CrossAxisAlignment.start,children: [const SizedBox(width: 95.0,height: height),widget]);}
+                  if(index == 0){ return Row(crossAxisAlignment: CrossAxisAlignment.start,children: [const SizedBox(width: 95.0,height: height),Container(key: homeController.itemProductFlashKeyButton,child: widget)]);}
                   
                   return widget;
                 },
@@ -471,7 +478,7 @@ class SalesView extends StatelessWidget {
             GestureDetector(
               onTap: () {
                 if( defaultValues == false ){
-                  salesController.selectedProduct(item: productCatalogue);
+                  salesController.selectedProduct(item: productCatalogue);  
                 }
               },
               child: Column(
@@ -558,9 +565,10 @@ class SalesView extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         FloatingActionButton(
+          key: homeController.floatingActionButtonRegisterFlashKeyButton,
             backgroundColor: Colors.amber,
             onPressed: () {
-              // default values
+              // default values 
               controller.textEditingControllerAddFlashPrice.text = '';
               controller.textEditingControllerAddFlashDescription.text = '';
               controller.showDialogQuickSale();
@@ -579,9 +587,10 @@ class SalesView extends StatelessWidget {
             )),
         const SizedBox(width: 8),
         ElasticIn(
+          key: homeController.floatingActionButtonTransacctionRegister,
           controller: (p0) => controller.floatingActionButtonAnimateController=p0,
-          child: FloatingActionButton.extended(
-              onPressed: controller.getListProductsSelested.isEmpty? null: () {controller.setTicketView = true;controller.setValueReceivedTicket = 0.0;},
+          child: FloatingActionButton.extended( 
+              onPressed: controller.getListProductsSelested.isEmpty? null: () { controller.setTicketView = true;controller.setValueReceivedTicket = 0.0; },
               backgroundColor:controller.getListProductsSelested.isEmpty ? Colors.grey : null,
               label: Text( 'Cobrar ${controller.getListProductsSelested.isEmpty ? '' : Publications.getFormatoPrecio(monto: controller.getCountPriceTotal())}',style:const  TextStyle(color: Colors.white))),
         ),
@@ -603,6 +612,7 @@ class SalesView extends StatelessWidget {
                   child: const Icon(Icons.close, color: Colors.white)),
               const SizedBox(width: 8),
               FloatingActionButton.extended(
+                key: homeController.floatingActionButtonTransacctionConfirm,
                   onPressed: controller.confirmedPurchase,
                   label: const Text('Confirmar venta',style: TextStyle(color: Colors.white),)),
             ],
