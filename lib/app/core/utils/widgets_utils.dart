@@ -22,7 +22,7 @@ import '../routes/app_pages.dart';
 class ImageBarWidget extends StatelessWidget {
   /// Tamaño deseado y color deseado.
   final double size;
-  late Color color;
+  late final  Color color;
 
   /// Crea un widget de una imagen de Scan.
   ///
@@ -254,14 +254,14 @@ class _ProductoItemState extends State<ProductoItem> {
                     onPressed: () =>
                         salesController.selectedItem(id: widget.producto.id),
                     icon: CircleAvatar(
-                      backgroundColor: Colors.blue,
+                      backgroundColor: Colors.black,
                       child: Padding(
                         padding: const EdgeInsets.all(2.0),
                         child: CircleAvatar(
                             backgroundColor: Colors.white,
                             child: Center(
                               child:
-                                  Text(widget.producto.quantity.toString()),
+                                  Text(widget.producto.quantity.toString(),style: const TextStyle(color: Colors.black),),
                             )),
                       ),
                     ),
@@ -279,7 +279,7 @@ class _ProductoItemState extends State<ProductoItem> {
                         }
                       },
                       icon: const CircleAvatar(
-                          backgroundColor: Colors.grey,
+                          backgroundColor: Colors.blue,
                           child: Icon(
                             Icons.horizontal_rule,
                             color: Colors.white,
@@ -295,7 +295,7 @@ class _ProductoItemState extends State<ProductoItem> {
                         salesController.update();
                       },
                       icon: const CircleAvatar(
-                          backgroundColor: Colors.grey,
+                          backgroundColor: Colors.blue,
                           child: Icon(
                             Icons.add,
                             color: Colors.white,
@@ -423,7 +423,7 @@ class WidgetDrawer extends StatelessWidget {
     // widgets
     final textButtonLogin = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: SizedBox(width: double.infinity,child: FloatingActionButton(onPressed: homeController.login,elevation: 0,child: const Text('Iniciar sesión'))),
+      child: SizedBox(width: double.infinity,child: FloatingActionButton(onPressed: homeController.signOutFirebase,elevation: 0,child: const Text('Iniciar sesión',style: TextStyle(color: Colors.white),))),
     );
 
 
@@ -464,14 +464,14 @@ class WidgetDrawer extends StatelessWidget {
               style: DefaultTextStyle.of(context).style,
               children: <TextSpan>[
                 TextSpan(
-                  text: 'Versión gratuita',
+                  text: 'Versión en desarrollo gratuita',
                   style: TextStyle(
                     color: colorTextVersion,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 TextSpan(
-                  text: ' Nuestro objetivo es hacer las cosas simples y eficientes para tu negocio',
+                  text: ' Nuestro objetivo es hacer las cosas simples y eficientes',
                   style: TextStyle(
                     color: colorTextVersion.withOpacity(0.6),
                     fontWeight: FontWeight.bold,
@@ -521,8 +521,8 @@ class WidgetDrawer extends StatelessWidget {
             ],
           ),
         ),
-        ListTile(
-          leading: const Icon(Icons.get_app_sharp),
+        /*  ListTile(
+          leading: const Icon(Icons.cloud_download_outlined),
           title: const Text('Comprobar actualización'),
           subtitle: const Text('Play Store'),
           onTap: () async {
@@ -536,6 +536,18 @@ class WidgetDrawer extends StatelessWidget {
               if (await canLaunchUrl(uri)) { await launchUrl(uri,mode: LaunchMode.externalApplication);} else {throw 'Could not launch $uri';}
             }
           },
+        ),  */
+        ListTile(
+          leading: const Icon(Icons.cloud_download_outlined),
+          title: const Text('Comprobar actualización'),
+          subtitle: const Text('Play Store'),
+          onTap: () async {
+            
+            // values
+            Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.logicabooleana.sell');
+            //  redireccionara para la tienda de aplicaciones
+            await launchUrl(uri,mode: LaunchMode.externalApplication);
+          },
         ), 
         ListTile(
           contentPadding: const EdgeInsets.symmetric(vertical: 12,horizontal: 12),
@@ -548,7 +560,7 @@ class WidgetDrawer extends StatelessWidget {
             // abre la app de mensajeria
             String whatsAppUrl = "";
             String phoneNumber = '541134862939';
-            String description = "hola, estoy probando la App!";
+            String description = "hola, estoy probando la App SELL - Gestiona Tus Ventas y me gustaría compartirte mi opinión";
             whatsAppUrl ='https://wa.me/+$phoneNumber?text=$description';
             Uri uri = Uri.parse( whatsAppUrl);
             await launchUrl(uri,mode: LaunchMode.externalNonBrowserApplication);
@@ -663,11 +675,14 @@ class ComponentApp extends StatelessWidget {
 
 
 class WidgetSuggestionProduct extends StatelessWidget {
-  //values
 
-  bool searchButton = false;
-  List<Product> list = <Product>[];
-  WidgetSuggestionProduct({super.key, required this.list, this.searchButton = false});
+  // ignore: prefer_const_constructors_in_immutables
+  WidgetSuggestionProduct({Key? key, required this.list, this.searchButton = false}): super(key: key);
+
+  //values
+  final bool searchButton ;
+  final List<Product> list ;
+  
 
   @override
   Widget build(BuildContext context) {
@@ -805,14 +820,15 @@ class LogoPremium extends StatelessWidget {
 }
 
 class ImageAvatarApp extends StatelessWidget {
-  late bool favorite;
-  late String url;
-  late double size;
-  late double radius;
-  late String description;
-  late String path;
+  late final bool favorite;
+  late final String url;
+  late final double size;
+  late final double radius;
+  late final String description;
+  late final String path;
   final VoidCallback?  onTap;
-  late Color canvasColor;
+  late final Color canvasColor;
+  // ignore: prefer_const_constructors_in_immutables
   ImageAvatarApp({Key? key,this.canvasColor=Colors.black12,this.favorite=false,this.url='',this.size=50,this.radius=12,this.description='',this.path='', this.onTap }) : super(key: key);
 
   // avatar que se va usar en toda la app, especialemnte en los 'ListTile'

@@ -1,9 +1,7 @@
-import 'dart:io';
+import 'dart:io'; 
 import 'package:package_info_plus/package_info_plus.dart';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart'; 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -12,15 +10,32 @@ import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart';
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import '../../../core/routes/app_pages.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../domain/entities/user_model.dart';
 import '../../../core/utils/widgets_utils.dart';
-import 'package:flutter/services.dart' show rootBundle;
-
+import 'package:flutter/services.dart' show rootBundle; 
 import '../../auth/controller/login_controller.dart';
 
 class HomeController extends GetxController {
+
+ 
+
+  // var : tutorial para el usuario
+  final GlobalKey floatingActionButtonRegisterFlashKeyButton = GlobalKey(); 
+  final GlobalKey itemProductFlashKeyButton = GlobalKey(); 
+  final GlobalKey floatingActionButtonTransacctionRegister = GlobalKey();
+  final GlobalKey floatingActionButtonTransacctionConfirm = GlobalKey();
+  final GlobalKey buttonsPaymenyMode = GlobalKey();
+  final List<TargetFocus> targets = List<TargetFocus>.empty(growable: true); 
+  late final TutorialCoachMark tutorialCoachMark ;
+
+
+  // user anonymous
+  bool _userAnonymous=false;
+  set setUserAnonymous(bool value) => _userAnonymous=value;
+  bool get getUserAnonymous => _userAnonymous;
 
   // Firebase 
   late  FirebaseAuth _firebaseAuth;
@@ -42,7 +57,7 @@ class HomeController extends GetxController {
   }
   bool get getUpdateApp => _updateApp;
 
-  // buildContext : obtenemos el context para mostrar Sheet ( la hoja inferior )
+  // buildContext : // buildContext : obtenemos el context de la vista
   late BuildContext _buildContext;
   set  setBuildContext(BuildContext context) => _buildContext=context;
   BuildContext get getBuildContext =>_buildContext; 
@@ -53,7 +68,7 @@ class HomeController extends GetxController {
   bool get getDarkMode => _darkMode;
 
   // Guide user : Ventas
-  bool salesUserGuideVisibility=false;
+  bool salesUserGuideVisibility=false; 
   void getSalesUserGuideVisibility(){
     // obtenemos la visibilidad de la guía del usuario de ventas
     salesUserGuideVisibility = GetStorage().read('salesUserGuideVisibility') ?? true;
@@ -66,10 +81,11 @@ class HomeController extends GetxController {
   }
 
   // Guide user : Catalogue
-  bool catalogUserHuideVisibility=false;
+  bool catalogUserHuideVisibility=false; 
+  get getCatalogUserHuideVisibility => catalogUserHuideVisibility;
   void getTheVisibilityOfTheCatalogueUserGuide(){
     // obtenemos la visibilidad de la guía del usuario del catálogo
-    catalogUserHuideVisibility=GetStorage().read('catalogUserHuideVisibility') ?? true;
+    catalogUserHuideVisibility= GetStorage().read('catalogUserHuideVisibility') ?? true; 
     update();
   }
   void disableCatalogUserGuide()async{
@@ -106,7 +122,7 @@ class HomeController extends GetxController {
 
   // list products más vendidos
   final RxList<ProductCatalogue> _productsOutstandingList = <ProductCatalogue>[].obs;
-  get getProductsOutstandingList => _productsOutstandingList;
+  List<ProductCatalogue> get getProductsOutstandingList => _productsOutstandingList;
   set setProductsOutstandingList(List<ProductCatalogue> list) { _productsOutstandingList.value = list;}
 
   addToListProductSelecteds({required ProductCatalogue item}) {_productsOutstandingList.add(item);}
@@ -154,11 +170,9 @@ class HomeController extends GetxController {
   @override
   void onInit() async {
 
-    super.onInit(); 
-
+    super.onInit();  
     // inicialización de la variable
-    setFirebaseAuth = FirebaseAuth.instance; 
-    
+    setFirebaseAuth = FirebaseAuth.instance;  
     isAppUpdated(); // verificamos si la app esta actualizada
     getSalesUserGuideVisibility(); // obtenemos la visibilidad de la guía del usuario de ventas
     getTheVisibilityOfTheCatalogueUserGuide(); // obtenemos la visibilidad de la guía del usuario del catálogo
@@ -173,18 +187,160 @@ class HomeController extends GetxController {
       setUserAuth = map['currentUser'];
       // obtenemos el id de la cuenta seleccionada si es que existe 
       map.containsKey('idAccount') ? readAccountsData(idAccount: map['idAccount']): readAccountsData(idAccount: ''); 
-    }
+    }  
   }
+
 
   @override
   void onClose() {}
 
-  // FUNCTIONS
-
-  void userInviteUpdateValues(){
-    
+  // TUTORIAL PARA EL USUARIO
+  TargetFocus get buttonAddItemFlashTargetFocus{
+    return TargetFocus(
+      identify: "registro rapido",
+      keyTarget: floatingActionButtonRegisterFlashKeyButton,
+      contents: [
+        TargetContent(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20.0),
+            align: ContentAlign.top, 
+            child: const Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text("Registra una venta rápida",style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 20.0),),
+                Padding(padding: EdgeInsets.only(top: 10.0),child: Text("Puedes registrar un producto rapido solo con el precio y opcionalmente una descripción",style: TextStyle(color: Colors.white),),),
+              ],
+            )
+        )
+      ]
+    );
   }
-  
+  TargetFocus get buttonAddProductTargetFocus{
+    return TargetFocus(
+      identify: "agregar producto",
+      keyTarget: itemProductFlashKeyButton,
+      contents: [
+        TargetContent(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20.0),
+            align: ContentAlign.bottom, 
+            child: const Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text("Agrega productos rápidamente",style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 20.0),),
+                Padding(padding: EdgeInsets.only(top: 10.0),child: Text("En esta sección aparecen tus productos favoritos y los que allas vendido",style: TextStyle(color: Colors.white),),),
+              ],
+            )
+        )
+      ]
+    );
+  }
+  TargetFocus get buttonRegisterTransactionTargetFocus{
+    return TargetFocus(
+      identify: "Procede a registrar la venta",
+      keyTarget: floatingActionButtonTransacctionRegister,
+      contents: [
+        TargetContent(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20.0),
+            align: ContentAlign.top, 
+            child: const Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text("Registra la venta",style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 20.0),),
+                Padding(padding: EdgeInsets.only(top: 10.0),child: Text("Procede a registrar tu primera transacción",style: TextStyle(color: Colors.white),),),
+              ],
+            )
+        )
+      ]
+    );
+  }
+  TargetFocus get buttonsOptionsPaymentMethodTargetFocus{
+    return TargetFocus(
+      identify: "metodo de pago",
+      keyTarget: buttonsPaymenyMode,
+      contents: [
+        TargetContent(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 60.0),
+            align: ContentAlign.top, 
+            child: const Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text("Elige el método de pago y listo",style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 20.0),),
+                //Padding(padding: EdgeInsets.only(top: 10.0),child: Text("Procede a registrar tu primera transacción",style: TextStyle(color: Colors.white),),),
+              ],
+            )
+        )
+      ]
+    );
+  }
+  TargetFocus get buttonsConfirmTransactionTargetFocus{
+    return TargetFocus(
+      identify: "confirmar venta",
+      keyTarget: floatingActionButtonTransacctionConfirm,
+      contents: [
+        TargetContent(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 50.0),
+            align: ContentAlign.top, 
+            child: const Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[ 
+                Text("Confirma la transacción",style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 20.0),), 
+                Padding(padding: EdgeInsets.only(top: 10.0),child: Text("Finalmente terminar de concretar tu primera venta",style: TextStyle(color: Colors.white),),),
+              ],
+            )
+        )
+      ]
+    );
+  }
+  void showTutorial({required List<TargetFocus> targetFocus , required void Function() next,AlignmentGeometry  alignSkip = Alignment.bottomRight,String textSkip = "Salir"}) { 
+    
+    // condition : comprueba si el usaurio inicio por primera vez la app 
+    // si es asi, se mostrara el tutorial
+     if (salesUserGuideVisibility==true || getUserAnonymous  ){ 
+
+      TutorialCoachMark( 
+        targets: targetFocus, 
+        colorShadow: Colors.black12,
+        textSkip: "Salir", 
+        alignSkip: alignSkip,
+        onClickTarget: (target){
+          // onClickTarget : cuando se hace click en el target sin obtener la posicion del click en el target
+
+          next();
+
+          // ignore: avoid_print
+          print(target);
+        },
+        onClickTargetWithTapPosition: (target, tapDetails) {
+          // onClickTargetWithTapPosition : cuando se hace click en el target y se obtiene la posicion del click en el target
+          // ignore: avoid_print
+          print("target: $target");
+          // ignore: avoid_print
+          print("clicked at position local: ${tapDetails.localPosition} - global: ${tapDetails.globalPosition}");
+        },
+        onClickOverlay: (target){
+          // onClickOverlay : cuando se hace click en el overlay (background)  
+          // ignore: avoid_print
+          print(target);
+        },
+        onSkip: (){
+          // onSkip : cuando se hace click en el boton de skip 
+          // ignore: avoid_print
+          print("skip");
+        },
+        onFinish: (){
+          // onFinish : cuando se termina de mostrar todos los targets
+          // ignore: avoid_print
+          print("finish");
+        },
+      ).show(context:getBuildContext);
+    }
+  } 
+
+  // FUNCTIONS
   Future<bool> onBackPressed({required BuildContext context})async{
 
     // si el usuario no se encuentra en el index 0, va a devolver la vista al index 0
@@ -271,6 +427,20 @@ class HomeController extends GetxController {
     } 
   }
 
+// cerrar sesion de firebase 
+  Future<void> signOutFirebase() async {
+    // visualizamos un diálogo alerta
+    CustomFullScreenDialog.showDialog();
+    // FirebaseAuth and GoogleSignIn instances
+    final FirebaseAuth firebaseAuth = FirebaseAuth.instance;  
+    // signOut : Cierra la sesión del usuario actual.
+    await firebaseAuth.signOut();
+    // navigation : navegamos a la pantalla principal
+    Get.offAllNamed(Routes.LOGIN);
+    // finalizamos el diálogo alerta
+    CustomFullScreenDialog.cancelDialog();
+  }
+
 // cerrar sesión
 void showDialogCerrarSesion() {
 
@@ -299,7 +469,7 @@ void showDialogCerrarSesion() {
             //
             // instancias de FirebaseAuth para proceder a cerrar sesión
             //
-            await signOutGoogle();
+            await signOutGoogleAndFirebase();
 
           }),
     ],
@@ -309,19 +479,26 @@ void showDialogCerrarSesion() {
     widget,
   );
 }
-  // FUCTION FIREBASE AUTH
-  Future<void> signOutGoogle() async {
+  // FUCTION : cerrar sesión de google y firebase
+  Future<void> signOutGoogleAndFirebase() async {
     // intancias de FirebaseAuth para proceder a cerrar sesión
     final FirebaseAuth auth = FirebaseAuth.instance;
     final GoogleSignIn googleSignIn = GoogleSignIn();
     // cerramos sesión
-    try {
-      await googleSignIn.signOut(); // cerramos sesión de google
-      await auth.signOut(); // cerramos sesión de firebase
-      await const FlutterSecureStorage().deleteAll(); // eliminamos los datos de la memorias del dispositivo 
-      await FirebaseAuth.instanceFor(app: Firebase.app()).signOut().then((value) => Get.back); // cerramos sesión de firebase 
-      
-      SystemNavigator.pop(); // cerramos la app
+    try { 
+
+      // 1. Cerrar sesión de Google
+      await googleSignIn.signOut();
+
+      // 2. Cerrar sesión de Firebase
+      await auth.signOut();
+
+      // 3. Revocar el token de acceso actual
+      await googleSignIn.disconnect();
+
+      // Eliminar los datos de la memoria del dispositivo
+      await const FlutterSecureStorage().deleteAll();
+
     } catch (error) {
       print('#### error : signOutGoogle');
     }
@@ -345,11 +522,45 @@ void showDialogCerrarSesion() {
     }
   }
   void readAccountsInviteData() {
-
+ 
     //default values
+    setUserAnonymous = true;
     setCatalogueCategoryList = []; // lista de categorias del catálogo
-    setCatalogueProducts = []; // lista de productos del catálogo
-    setProductsOutstandingList = []; // lista de productos destacados
+    setCatalogueProducts = [
+      ProductCatalogue(
+        creation: Timestamp.now(), 
+        upgrade: Timestamp.now(),
+        documentCreation: Timestamp.now(),
+        documentUpgrade: Timestamp.now(),
+        id: '078943658457643',code: '078943658457643', 
+        description: 'Agua Mineral 1L',
+        salePrice: 170,purchasePrice: 99, 
+        favorite: true,
+        sales: 4,
+        stock: true,quantityStock: 22
+      ),
+      ProductCatalogue(
+        creation: Timestamp.now(), 
+        upgrade: Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 1))),
+        documentCreation: Timestamp.now(),
+        documentUpgrade: Timestamp.now(),
+        id: '69696435423878',code: '69696435423878', 
+        description: 'Alfajor De Chocolate Con Dulce De Leche 110 g', 
+        salePrice: 60,purchasePrice: 35,  
+        sales: 1,stock: true,quantityStock: 47
+      ),
+      ProductCatalogue(
+        creation: Timestamp.now(), 
+        upgrade: Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 1))),
+        documentCreation: Timestamp.now(),
+        documentUpgrade: Timestamp.now(),
+        id: '98679678967969',code: '98679678967969', 
+        description: 'Galletitas Dulces 200 g', 
+        salePrice: 140,purchasePrice: 80,  
+        sales: 7,stock: true,quantityStock: 18
+      ),
+    ]; // lista de productos del catálogo
+    setProductsOutstandingList = getCataloProducts; // lista de productos destacados
     setProfileAccountSelected = ProfileAccountModel(creation: Timestamp.now(),name: 'Mi negocio',);  // datos de la cuenta 
     setManagedAccountsList = []; // lista de cuentas gestionadas
     setProfileAdminUser = UserModel(superAdmin: true,admin: true,email: 'userInvite@correo.com');  // datos del usuario
@@ -357,7 +568,8 @@ void showDialogCerrarSesion() {
   }
   void readAccountsData({required String idAccount}) {
 
-    //default values
+    //default values'
+    setUserAnonymous = false;
     setCatalogueCategoryList = [];
     setCatalogueProducts = [];
     setProductsOutstandingList = [];
@@ -643,7 +855,8 @@ void showDialogCerrarSesion() {
 
 class WidgetBottomSheet extends StatefulWidget {
 
-  late String id;
+  late final String id;
+  // ignore: prefer_const_constructors_in_immutables
   WidgetBottomSheet({Key? key,required this.id}) : super(key: key);
 
   @override

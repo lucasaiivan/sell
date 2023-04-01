@@ -243,7 +243,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
                             // text : nombre del producto
                             Text(product.description,maxLines: 1),
                             // text : marca del producto
-                            Text('${product.nameMark} ',maxLines: 2,overflow: TextOverflow.clip,style: const TextStyle(color: Colors.blue)),
+                            product.nameMark==''?Container():Text('${product.nameMark} ',maxLines: 2,overflow: TextOverflow.clip,style: const TextStyle(color: Colors.blue)),
                             // text components : fecha de creacion y ventas
                             Wrap(
                               children: [ 
