@@ -15,7 +15,7 @@ publish_to: 'none' # Quite esta línea si desea publicar en pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: '>=2.18.0-130.0.dev <3.0.0'
@@ -58,6 +58,7 @@ dependencies:
   # app info 
   package_info_plus: ^3.0.3 # Un complemento de Flutter para obtener información sobre el paquete actual, como el nombre, la versión y el número de compilación.
   # others 
+  tutorial_coach_mark: ^1.2.8 # Un paquete de Flutter que le permite crear tutoriales de aplicación de forma fácil y rápida.
   image_picker: ^0.8.6+3  # Un complemento de Flutter para seleccionar imágenes desde el almacenamiento local del dispositivo.
   palette_generator: ^0.3.3+2 # Un paquete de Flutter que genera paletas de colores a partir de imágenes.
   flutter_animate: ^4.0.0 # Un paquete de Flutter que proporciona animaciones de entrada y salida para los widgets de Flutter.

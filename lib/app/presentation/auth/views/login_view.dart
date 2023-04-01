@@ -11,12 +11,13 @@ import 'package:url_launcher/url_launcher.dart';
 // En esta pantalla de inicio de sesión, agregaremos un logotipo, dos campos de texto y firmaremos con el botón de Google
 
 class AuthView extends GetView<LoginController> {
+  // ignore: prefer_const_constructors_in_immutables
   AuthView({Key? key}) : super(key: key);
 
   // var
-  late bool darkMode;
-  Color colorAccent=Colors.purple;
-  late Size screenSize; // Obtenemos las vavriables de la dimension de la pantalla
+  late final bool darkMode;
+  final Color colorAccent=Colors.purple;
+  late final Size screenSize; // Obtenemos las vavriables de la dimension de la pantalla
 
   @override
   Widget build(BuildContext context) {
@@ -38,11 +39,11 @@ class AuthView extends GetView<LoginController> {
   Widget body({required BuildContext context}) {
     // Definimos los estilos de colores de los botones
     Color colorButtonText0 = Colors.white;
-    Color colorButton0 = Theme.of(context).brightness==Brightness.dark?Colors.deepPurple.shade400:Colors.deepPurple.shade300;
+    Color colorButton0 = Colors.blue;
     
     return Column(
       children: [
-        Flexible( child: OnboardingIntroduction(colorAccent: colorButton0)),
+        Flexible( child: OnboardingIntroduction(colorAccent: colorButton0,colorText: darkMode?Colors.white:Colors.black,)),
         Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [  
@@ -51,7 +52,6 @@ class AuthView extends GetView<LoginController> {
                 child: widgetCheckAcceptPrivacyAndUsePolicy(),
               ),
               button(callback: controller.login,text:"Iniciar sesión con google",colorButton: Colors.blueAccent,colorText: colorButtonText0),
-              const SizedBox(height: 8.0),
               button(callback: controller.signInAnonymously,text:"Entrar como invitado",colorButton: Colors.blueGrey,colorText: colorButtonText0),
               const SizedBox(height: 12.0),
             ],
@@ -73,9 +73,7 @@ class AuthView extends GetView<LoginController> {
       text: TextSpan(
         style: defaultStyle,
         children: <TextSpan>[
-          const TextSpan(
-              text:
-                  'Al hacer clic en INICIAR SESIÓN, usted ah leído y acepta nuestros '),
+          const TextSpan(text:'Al iniciar en INICIAR SESIÓN, usted ah leído y acepta nuestros '),
           TextSpan(
               text: 'Términos y condiciones de uso',
               style: linkStyle,
@@ -133,9 +131,11 @@ class AuthView extends GetView<LoginController> {
 
 
 class OnboardingIntroduction extends StatefulWidget {
-  OnboardingIntroduction({this.colorAccent = Colors.deepPurple,Key? key}) : super(key: key);
+  // ignore: prefer_const_constructors_in_immutables
+  OnboardingIntroduction({this.colorAccent = Colors.deepPurple,this.colorText = Colors.white,Key? key}) : super(key: key);
 
-  late Color colorAccent;
+  late final Color colorAccent;
+  late final Color colorText;
 
   @override
   State<OnboardingIntroduction> createState() => _OnboardingIntroductionState();
@@ -220,7 +220,8 @@ class _OnboardingIntroductionState extends State<OnboardingIntroduction> {
   void positionIndicatorLogic(){
     // logica de los indicadores de posicion que cambiar cada sierto tiempo
     timer = Timer.periodic( const Duration(microseconds: 50000), (timer) {
-      setState(() {
+      try{
+        setState(() {
         if(indicatorProgressItem01<1 ){
           if( indicatorProgressItem01 >=0.1 && indicatorProgressItem01 <= 0.8 ){indicatorProgressItem01 += 0.02;}
           else{indicatorProgressItem01 += 0.01;}
@@ -243,6 +244,9 @@ class _OnboardingIntroductionState extends State<OnboardingIntroduction> {
         }
 
       });
+      }catch(e){
+        print(e);
+      }
     });
   }
 
@@ -264,9 +268,9 @@ class _OnboardingIntroductionState extends State<OnboardingIntroduction> {
  
     // lista de widgets con las vistas
     widgets = [
-      pageView(context:context,colorContent:Colors.transparent,textColor: widget.colorAccent,colorIcon: widget.colorAccent,iconData: Icons.monetization_on,titulo:"VENTAS",subtitulo:"Registra tus ventas de una forma simple 😊"),
-      pageView(context:context,colorContent:Colors.transparent,textColor: widget.colorAccent,colorIcon: widget.colorAccent,iconData: Icons.analytics_outlined,titulo:"TRANSACCIONES",subtitulo:"Observa las transacciones que has realizado 💰"),
-      pageView(context:context,colorContent:Colors.transparent,textColor: widget.colorAccent,colorIcon: widget.colorAccent,iconData: Icons.category,titulo:"CATÁLOGO",subtitulo:"Arma tu catálogo y controla el stock de tus productos \n 🍫🍬🥫🍾"),
+      pageView(context:context,colorContent:Colors.transparent,textColor: widget.colorText,colorIcon: Colors.orange.shade300,iconData: Icons.monetization_on,titulo:"VENTAS",subtitulo:"Registra tus ventas de una forma simple 😊"),
+      pageView(context:context,colorContent:Colors.transparent,textColor: widget.colorText,colorIcon: Colors.teal.shade300,iconData: Icons.analytics_outlined,titulo:"TRANSACCIONES",subtitulo:"Observa las transacciones que has realizado 💰"),
+      pageView(context:context,colorContent:Colors.transparent,textColor: widget.colorText,colorIcon: Colors.deepPurple.shade300,iconData: Icons.category,titulo:"CATÁLOGO",subtitulo:"Arma tu catálogo y controla el stock de tus productos \n 🍫🍬🥫🍾"),
     ];
 
     

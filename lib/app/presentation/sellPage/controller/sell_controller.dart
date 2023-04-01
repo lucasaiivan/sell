@@ -1,9 +1,6 @@
-import 'dart:convert';
 import 'dart:io';
-
 import 'package:audioplayers/audioplayers.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/gestures.dart';
+import 'package:firebase_storage/firebase_storage.dart'; 
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -12,8 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:path/path.dart';
+import 'package:image_picker/image_picker.dart'; 
 import 'package:search_page/search_page.dart';
 import 'package:sell/app/presentation/home/controller/home_controller.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart';
@@ -126,6 +122,10 @@ class SalesController extends GetxController {
     super.onInit(); 
     getCashRegisterNumber();
 
+    homeController.showTutorial(targetFocus: [homeController.buttonAddItemFlashTargetFocus],next: showDialogQuickSale ); // mostramos la guía del usuario
+    
+
+
   }
   @override
   void onClose() {
@@ -212,6 +212,7 @@ class SalesController extends GetxController {
     getTicket.priceTotal = getCountPriceTotal();
     getTicket.valueReceived = getValueReceivedTicket;
     getTicket.creation = Timestamp.now();
+    
     // set firestore : guarda la transacción
     Database.refFirestoretransactions(idAccount: homeController.getIdAccountSelected).doc(getTicket.id).set(getTicket.toJson());
     for (Map element in listIdsProducts) {
@@ -282,7 +283,7 @@ class SalesController extends GetxController {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(product.description,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(fontWeight: FontWeight.w500)),
-                          Text(product.nameMark,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(color: Colors.blue)),
+                          product.nameMark==''?Container():Text(product.nameMark,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(color: Colors.blue)),
                           Wrap(
                             crossAxisAlignment: WrapCrossAlignment.start,
                             direction: Axis.horizontal,
@@ -509,8 +510,8 @@ class SalesController extends GetxController {
     // Deshabilitar la guía del usuario de las ventas
     homeController.disableSalesUserGuide();
 
-    // set firestore
-    registerTransaction();
+    // condition : registramos la venta si el usuario esta logueado
+    if(homeController.getUserAnonymous == false){registerTransaction(); } 
     // el usuario confirmo su venta
     setStateConfirmPurchase = true;
     // mostramos una vista 'confirm purchase' por 2 segundos
@@ -603,7 +604,23 @@ class SalesController extends GetxController {
               mainAxisAlignment: MainAxisAlignment.spaceAround,crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 TextButton(style:  buttonStyle,onPressed: () {textEditingControllerAddFlashPrice.text = '';Get.back();}, child: const Text('Cancelar',textAlign: TextAlign.center)),
-                TextButton(style:  buttonStyle,onPressed: () {addSaleFlash();textEditingControllerAddFlashPrice.text = '';}, child: const Text('Agregar',textAlign: TextAlign.center)),
+                TextButton(style:  buttonStyle,onPressed: () {
+                  addSaleFlash();textEditingControllerAddFlashPrice.text = '';
+                  homeController.showTutorial(targetFocus:[homeController.buttonAddProductTargetFocus],next:(){
+                    selectedProduct(item: homeController.getProductsOutstandingList[0]);
+                    homeController.showTutorial(targetFocus: [homeController.buttonRegisterTransactionTargetFocus],next:(){
+                       setTicketView = true;
+
+                       // sleep 1 second
+                        Future.delayed(
+                          const Duration(milliseconds: 1000),
+                          () {
+                            homeController.showTutorial(targetFocus: [homeController.buttonsOptionsPaymentMethodTargetFocus,homeController.buttonsConfirmTransactionTargetFocus],next:(){},alignSkip: Alignment.topRight );
+                          }); // mostramos la guía del usuario
+                       
+                       },alignSkip: Alignment.topRight );
+                    } ,alignSkip: Alignment.bottomLeft); // mostramos la guía del usuario
+                  }, child: const Text('Agregar',textAlign: TextAlign.center)),
               ],
             ),
           ],
@@ -763,64 +780,7 @@ class SalesController extends GetxController {
         ));
   }
   
-  Widget get widgetSelectedProductsInformation{
-    // widget : información de productos seleccionados que se va a mostrar al usuario por unica vez
-
-    // comprobamos si es la primera ves que se inicia la aplicación
-    if(homeController.salesUserGuideVisibility){
-      return Column(
-        children: const [
-          Padding(
-            padding: EdgeInsets.all(20.0),
-            child: Opacity(opacity: 0.8,child: Text('En estos artículos vacíos aparecerán los productos que selecciones para vender\n    👇',textAlign: TextAlign.start,style: TextStyle(fontSize: 20))),
-          ),
-        ],
-      );
-      }
-    // si no es la primera ves que se inicica la aplicación devuelve una vistra vacia
-    return Container();
-  }
-  Widget get widgetProductSuggestionInfo{
-    // widget : información de sugerencias de los productos que se va a mostrar al usuario por unica ves
-
-    // comprobamos si es la primera ves que se inicia la aplicación
-    if(homeController.salesUserGuideVisibility){
-      return Opacity(
-        opacity: 0.8,
-        child: Column(
-          children: const [
-            Padding(
-              padding: EdgeInsets.all(20.0),
-              child: Text('Aquí vamos a sugerirte algunos productos de tu catálogo 😉',textAlign: TextAlign.end,style: TextStyle(fontSize: 20)),
-            ),
-          ],
-        ),
-      );
-      }
-    // si no es la primera ves que se inicica la aplicación devuelve una vistra vacia
-    return Container();
-  }
-  Widget get widgetTextFirstSale{
-    // widget : este texto se va a mostrar en la primera venta
-
-    // comprobamos si es la primera ves que se inicia la aplicación
-    if(homeController.salesUserGuideVisibility){
-      return Opacity(
-        opacity: 0.6,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Padding(
-              padding: EdgeInsets.only(top: 50,left: 12,right: 12,bottom: 20),
-              child: Text('¡Elige el método de pago y listo\n😁\nregistra tu primera venta!',textAlign: TextAlign.center,style: TextStyle(fontSize: 20)),
-            ),
-          ],
-        ),
-      );
-      }
-    // si no es la primera ves que se inicica la aplicación devuelve una vistra vacia
-    return Container();
-  }
+ 
 }
 
 //
@@ -828,13 +788,13 @@ class SalesController extends GetxController {
 // WIDGETS CLASS
 //
 //
-
-
+ 
 class NewProductView extends StatefulWidget {
   
   // parametro obligatorio
-  ProductCatalogue productCatalogue = ProductCatalogue(upgrade: Timestamp.now(), creation:  Timestamp.now(), documentCreation:  Timestamp.now(), documentUpgrade:  Timestamp.now() );
+  late final ProductCatalogue productCatalogue ;
   
+  // ignore: prefer_const_constructors_in_immutables
   NewProductView({Key? key, required this.productCatalogue}) : super(key: key);
 
   @override
@@ -941,11 +901,13 @@ class _NewProductViewState extends State<NewProductView> {
                   labelStyle: labelStyle, 
                   border: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent)),
                   enabledBorder: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent)),
-                ),
+                ), 
+           textInputAction: TextInputAction.next,
           onChanged: (value) => widget.productCatalogue.description =value,
           // validator: validamos el texto que el usuario ha ingresado.
           validator: (value) {
-            if (value == null || value.isEmpty) { return 'Por favor, introduzca la descripción del producto'; }
+            // condition : si el usuario no ha seleccionado la opcion de añadir el producto al catalogo no se valida el campo
+            if (checkAddCatalogue && (value == null || value.isEmpty) ) { return 'Por favor, introduzca la descripción del producto'; }
             return null;
           },
         ),
@@ -988,7 +950,7 @@ class _NewProductViewState extends State<NewProductView> {
           ),
         );
     // checkbox : agregar producto al catálogo
-    Widget checkboxAddProductToCatalogue =  AnimatedContainer(
+    Widget checkboxAddProductToCatalogue = homeController.getUserAnonymous?Container(): AnimatedContainer(
       width:double.infinity, 
       duration: const Duration(milliseconds: 500),
       decoration: BoxDecoration(border: Border.all(color: checkAddCatalogue?checkActiveColor:colorAccent,width: 0.5),color: checkAddCatalogue?checkActiveColor.withOpacity(0.2):Colors.transparent,borderRadius: BorderRadius.circular(5)), 
@@ -1022,7 +984,7 @@ class _NewProductViewState extends State<NewProductView> {
               // condition : si el usuario quiere agregar el producto a la lista de productos del catálogo
               // entonces lo agregamos a la lista de productos del catálogo y a la colección de productos publica de la DB
               //
-              if(checkAddCatalogue){
+              if(checkAddCatalogue && homeController.getUserAnonymous == false){
                 // add product to catalogue
                 homeController.addProductToCatalogue(product: widget.productCatalogue);
               }
