@@ -122,7 +122,11 @@ class SalesController extends GetxController {
     super.onInit(); 
     getCashRegisterNumber();
 
-    homeController.showTutorial(targetFocus: [homeController.buttonAddItemFlashTargetFocus],next: showDialogQuickSale ); // mostramos la guía del usuario
+    // esperamos un momento 
+    await Future.delayed( const Duration(milliseconds: 700),() {
+      // mostramos la guía del usuario
+      homeController.showTutorial(targetFocus: [homeController.buttonAddItemFlashTargetFocus],next: showDialogQuickSale ); // mostramos la guía del usuario
+    },);
     
 
 
@@ -507,9 +511,6 @@ class SalesController extends GetxController {
 
   void confirmedPurchase() {
 
-    // Deshabilitar la guía del usuario de las ventas
-    homeController.disableSalesUserGuide();
-
     // condition : registramos la venta si el usuario esta logueado
     if(homeController.getUserAnonymous == false){registerTransaction(); } 
     // el usuario confirmo su venta
@@ -614,17 +615,33 @@ class SalesController extends GetxController {
 
                        // sleep 1 second
                         Future.delayed(
-                          const Duration(milliseconds: 100),
+                          const Duration(milliseconds: 300),
                           () {
 
-                            // mostramos la guía del usuario
+                            // mostramos la guía del usuario si el usuario no ha visto la guía de usuario de la pantalla de ventas
                             homeController.showTutorial(targetFocus: [homeController.buttonsOptionsPaymentMethodTargetFocus],next:(){ 
                               setPayModeTicket = 'mercadopago'; 
-                              // mostramos la siguiente guía de usuario
-                              homeController.showTutorial(targetFocus: [homeController.buttonsConfirmTransactionTargetFocus],next:()async{ 
-                                // esperar 1 segundo
-                                await Future.delayed(const Duration(milliseconds: 800));
-                                confirmedPurchase();
+                              // mostramos la siguiente guía de usuario si el usuario no ha visto la guía de usuario de la pantalla de ventas
+                              homeController.showTutorial(targetFocus: [homeController.buttonsConfirmTransactionTargetFocus],next:() async { 
+                                // confirmamos la venta
+                                confirmedPurchase(); 
+                                // esperar un momento
+                                await Future.delayed(const Duration(milliseconds: 500));
+                                // mostramos la siguiente guía de usuario si el usuario no ha visto la guía de usuario de la pantalla de ventas
+                                homeController.showTutorial(
+                                  targetFocus: [homeController.buttonsScanCodeBarTargetFocusGuideUX],
+                                  next:()async{ 
+                                    // mostramos la siguiente guía de usuario si el usuario no ha visto la guía de usuario de la pantalla de ventas
+                                    homeController.showTutorial(
+                                      targetFocus: [homeController.buttonsNumCajaTargetFocusGuideUX],
+                                      next:(){
+                                        // final de la guia de usuari0
+                                        homeController.disableSalesUserGuide();
+                                        
+                                      },
+                                      alignSkip: Alignment.topRight );
+                                  },
+                                  alignSkip: Alignment.topRight );
                               },alignSkip: Alignment.topRight );
 
                               },alignSkip: Alignment.topRight );

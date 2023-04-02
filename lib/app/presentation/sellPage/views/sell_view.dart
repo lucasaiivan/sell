@@ -44,11 +44,11 @@ class SalesView extends StatelessWidget {
               body: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  controller.getTicketView? Container(): Expanded(child: body(controller: controller)),
+                  controller.getTicketView? Container(): Expanded(child: body(controller: controller )),
                   drawerTicket(controller: controller),
                 ],
               ),
-              floatingActionButton: controller.getTicketView ? floatingActionButtonTicket(controller: controller): floatingActionButton(controller: controller).animate(delay: const Duration(milliseconds: 1500)).fade(),
+              floatingActionButton: controller.getTicketView ? floatingActionButtonTicket(controller: controller): floatingActionButton(controller: controller).animate(delay: Duration(milliseconds: homeController.salesUserGuideVisibility?500:0)).fade(),
             ));
       },
     );
@@ -61,7 +61,9 @@ class SalesView extends StatelessWidget {
       actions: [
         controller.getListProductsSelestedLength != 0
             ? TextButton.icon(icon: const Icon(Icons.clear_rounded),label: const Text('Descartar Ticket'),onPressed: controller.dialogCleanTicketAlert)
-            : cashRegisterNumberPopupMenuButton(),
+            : Container(
+              key: homeController.floatingActionButtonSelectedCajaKey,
+              child: cashRegisterNumberPopupMenuButton()),
       ],
     );
   }
@@ -596,7 +598,8 @@ class SalesView extends StatelessWidget {
               color: Colors.white,
             )),
         const SizedBox(width: 8),
-        FloatingActionButton(
+        FloatingActionButton( 
+          key: homeController.floatingActionButtonScanCodeBarKey,
             backgroundColor: Colors.blue,
             onPressed: controller.scanBarcodeNormal,
             child: SizedBox(
