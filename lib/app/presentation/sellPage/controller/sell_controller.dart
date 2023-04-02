@@ -606,6 +606,7 @@ class SalesController extends GetxController {
                 TextButton(style:  buttonStyle,onPressed: () {textEditingControllerAddFlashPrice.text = '';Get.back();}, child: const Text('Cancelar',textAlign: TextAlign.center)),
                 TextButton(style:  buttonStyle,onPressed: () {
                   addSaleFlash();textEditingControllerAddFlashPrice.text = '';
+                  // mostramos la guía del usuario
                   homeController.showTutorial(targetFocus:[homeController.buttonAddProductTargetFocus],next:(){
                     selectedProduct(item: homeController.getProductsOutstandingList[0]);
                     homeController.showTutorial(targetFocus: [homeController.buttonRegisterTransactionTargetFocus],next:(){
@@ -613,9 +614,20 @@ class SalesController extends GetxController {
 
                        // sleep 1 second
                         Future.delayed(
-                          const Duration(milliseconds: 1000),
+                          const Duration(milliseconds: 100),
                           () {
-                            homeController.showTutorial(targetFocus: [homeController.buttonsOptionsPaymentMethodTargetFocus,homeController.buttonsConfirmTransactionTargetFocus],next:(){},alignSkip: Alignment.topRight );
+
+                            // mostramos la guía del usuario
+                            homeController.showTutorial(targetFocus: [homeController.buttonsOptionsPaymentMethodTargetFocus],next:(){ 
+                              setPayModeTicket = 'mercadopago'; 
+                              // mostramos la siguiente guía de usuario
+                              homeController.showTutorial(targetFocus: [homeController.buttonsConfirmTransactionTargetFocus],next:()async{ 
+                                // esperar 1 segundo
+                                await Future.delayed(const Duration(milliseconds: 800));
+                                confirmedPurchase();
+                              },alignSkip: Alignment.topRight );
+
+                              },alignSkip: Alignment.topRight );
                           }); // mostramos la guía del usuario
                        
                        },alignSkip: Alignment.topRight );

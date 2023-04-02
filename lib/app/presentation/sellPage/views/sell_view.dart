@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:sell/app/core/utils/widgets_utils.dart';
@@ -47,7 +48,7 @@ class SalesView extends StatelessWidget {
                   drawerTicket(controller: controller),
                 ],
               ),
-              floatingActionButton: controller.getTicketView ? floatingActionButtonTicket(controller: controller): floatingActionButton(controller: controller),
+              floatingActionButton: controller.getTicketView ? floatingActionButtonTicket(controller: controller): floatingActionButton(controller: controller).animate(delay: const Duration(milliseconds: 1500)).fade(),
             ));
       },
     );
@@ -123,8 +124,19 @@ class SalesView extends StatelessWidget {
     // style 
     final TextStyle textValuesStyle = TextStyle(fontFamily: 'monospace',fontWeight: FontWeight.bold,color: Get.theme.brightness == Brightness.dark? Colors.white: Colors.black);
     final TextStyle textDescrpitionStyle = TextStyle(fontFamily: 'monospace',fontWeight: FontWeight.bold,color: Get.theme.brightness == Brightness.dark? Colors.white70: Colors.black87);
- 
 
+    // widgets
+    Widget dividerLinesWidget = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 5),
+      child: CustomDivider(
+              height: 0.3,
+              dashWidth: 10.0,
+              dashGap: 5.0,
+              color: Get.theme.brightness == Brightness.dark? Colors.white: Colors.black,
+            ),
+    );
+    
+    
     return AnimatedContainer(
       width: controller.getTicketView ? Get.size.width : 0,
       curve: Curves.fastOutSlowIn,
@@ -147,14 +159,19 @@ class SalesView extends StatelessWidget {
                       shrinkWrap: false,
                         children: [
                           const SizedBox(height: 20),
-                          Text('Ticket',textAlign: TextAlign.center,style: textDescrpitionStyle.copyWith(fontSize: 30, fontWeight: FontWeight.bold)),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text('Ticket',textAlign: TextAlign.center,style: textDescrpitionStyle.copyWith(fontSize: 30, fontWeight: FontWeight.bold)),
+                          ), 
                           Material(
-                            color: Colors.blueGrey.withOpacity(0.1),
+                            color: Colors.transparent,//Colors.blueGrey.withOpacity(0.1),
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Text(homeController.getProfileAccountSelected.name,textAlign: TextAlign.center,style: textValuesStyle.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
                             )),
-                          const SizedBox(height: 25),
+                            // view : lines ------
+                            dividerLinesWidget,  
+                            const SizedBox(height: 20),
                           // text : cantidad de elementos 'productos' seleccionados
                           Padding(
                             padding: padding,
@@ -177,8 +194,9 @@ class SalesView extends StatelessWidget {
                               ],
                             ),
                           ),
+                          const SizedBox(height: 20),
                           // view : lines ------
-                          Padding(padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 20),child: Dash(color: Get.theme.dividerColor,height:0.5, width: 12)),
+                          dividerLinesWidget,
                           // text : el monto total de la transacción
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -230,7 +248,7 @@ class SalesView extends StatelessWidget {
                               ),
                           ),
                           // view : lines ------
-                          Padding(padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 20),child: Dash(color: Get.theme.dividerColor,height: 0.5, width: 12)),
+                          dividerLinesWidget,
                           // view 2
                           Padding(
                             padding:const EdgeInsets.only(bottom: 24, top: 24),
@@ -238,7 +256,7 @@ class SalesView extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [ 
-                                Text('El cliente paga con:',style:textValuesStyle.copyWith(fontWeight: FontWeight.bold)),
+                                Text('El cliente paga con:',style:textDescrpitionStyle),
                                 const SizedBox(height: 12),
                                 Container(
                                   key: homeController.buttonsPaymenyMode,
@@ -542,13 +560,13 @@ class SalesView extends StatelessWidget {
         child: Material(
           borderRadius: const BorderRadius.all(Radius.circular(12)),
           color: background,
-          child: const Center(
+          child: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.check_rounded,size: 200,color:accentColor),
-                SizedBox(height:25),
-                Text('Hecho',style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold,color: accentColor)),
+                const Icon(Icons.check_rounded,size: 200,color:accentColor),
+                const SizedBox(height:25),
+                const Text('Hecho',style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold,color: accentColor)),
               ],
             ),
           ),
@@ -618,24 +636,27 @@ class SalesView extends StatelessWidget {
             ],
           );
   }
-}
-
-class Dash extends StatelessWidget {
+} 
+class CustomDivider extends StatelessWidget {
   final double height;
-  final double width;
+  final double dashWidth;
+  final double dashGap;
   final Color color;
 
-  const Dash(
-      {super.key, this.height = 1, this.width = 3, this.color = Colors.black});
+  const CustomDivider({super.key, 
+    this.height = 1.0,
+    this.dashWidth = 5.0,
+    this.dashGap = 3.0,
+    this.color = Colors.grey,
+  });
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final boxWidth = constraints.constrainWidth();
-        final dashWidth = width;
         final dashHeight = height;
-        final dashCount = (boxWidth / (2 * dashWidth)).floor();
+        final dashCount = (boxWidth / (dashWidth + dashGap)).floor();
         return Flex(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           direction: Axis.horizontal,
@@ -653,13 +674,3 @@ class Dash extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
