@@ -71,7 +71,7 @@ class HomeController extends GetxController {
   bool salesUserGuideVisibility=false; 
   void getSalesUserGuideVisibility(){
     // obtenemos la visibilidad de la guía del usuario de ventas
-    salesUserGuideVisibility = GetStorage().read('salesUserGuideVisibility') ?? true;
+    salesUserGuideVisibility = true;//GetStorage().read('salesUserGuideVisibility') ?? true;
     update();
   }
   void disableSalesUserGuide()async{
@@ -203,10 +203,10 @@ class HomeController extends GetxController {
         TargetContent(
           padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20.0),
             align: ContentAlign.top, 
-            child: const Column(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
+              children: const <Widget>[
                 Text("Registra una venta rápida",style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 20.0),),
                 Padding(padding: EdgeInsets.only(top: 10.0),child: Text("Puedes registrar un producto rapido solo con el precio y opcionalmente una descripción",style: TextStyle(color: Colors.white),),),
               ],
@@ -223,10 +223,10 @@ class HomeController extends GetxController {
         TargetContent(
           padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20.0),
             align: ContentAlign.bottom, 
-            child: const Column(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
+              children: const <Widget>[
                 Text("Agrega productos rápidamente",style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 20.0),),
                 Padding(padding: EdgeInsets.only(top: 10.0),child: Text("En esta sección aparecen tus productos favoritos y los que allas vendido",style: TextStyle(color: Colors.white),),),
               ],
@@ -243,10 +243,10 @@ class HomeController extends GetxController {
         TargetContent(
           padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20.0),
             align: ContentAlign.top, 
-            child: const Column(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
+              children: const <Widget>[
                 Text("Registra la venta",style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 20.0),),
                 Padding(padding: EdgeInsets.only(top: 10.0),child: Text("Procede a registrar tu primera transacción",style: TextStyle(color: Colors.white),),),
               ],
@@ -263,10 +263,10 @@ class HomeController extends GetxController {
         TargetContent(
           padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 60.0),
             align: ContentAlign.top, 
-            child: const Column(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
+              children: const <Widget>[
                 Text("Elige el método de pago y listo",style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 20.0),),
                 //Padding(padding: EdgeInsets.only(top: 10.0),child: Text("Procede a registrar tu primera transacción",style: TextStyle(color: Colors.white),),),
               ],
@@ -283,10 +283,10 @@ class HomeController extends GetxController {
         TargetContent(
           padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 50.0),
             align: ContentAlign.top, 
-            child: const Column(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[ 
+              children: const <Widget>[ 
                 Text("Confirma la transacción",style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 20.0),), 
                 Padding(padding: EdgeInsets.only(top: 10.0),child: Text("Finalmente terminar de concretar tu primera venta",style: TextStyle(color: Colors.white),),),
               ],
@@ -295,15 +295,19 @@ class HomeController extends GetxController {
       ]
     );
   }
-  void showTutorial({required List<TargetFocus> targetFocus , required void Function() next,AlignmentGeometry  alignSkip = Alignment.bottomRight,String textSkip = "Salir"}) { 
+  void showTutorial({required List<TargetFocus> targetFocus , required void Function() next,AlignmentGeometry  alignSkip = Alignment.bottomRight,String textSkip = "Salir"}) async{ 
+
+    // delay : para que se muestre el tutorial despues de que se muestre la pantalla
+    await Future.delayed(const Duration(milliseconds: 1300));
     
     // condition : comprueba si el usaurio inicio por primera vez la app 
     // si es asi, se mostrara el tutorial
-     if (salesUserGuideVisibility==true || getUserAnonymous  ){ 
+     if (salesUserGuideVisibility==true  ){ 
 
+      // ignore: use_build_context_synchronously
       TutorialCoachMark( 
         targets: targetFocus, 
-        colorShadow: Colors.black12,
+        colorShadow: Colors.black12.withOpacity(0.1),
         textSkip: "Salir", 
         alignSkip: alignSkip,
         onClickTarget: (target){

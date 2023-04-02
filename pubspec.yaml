@@ -57,11 +57,11 @@ dependencies:
   flutter_secure_storage: ^8.0.0
   # app info 
   package_info_plus: ^3.0.3 # Un complemento de Flutter para obtener información sobre el paquete actual, como el nombre, la versión y el número de compilación.
-  # others 
+  # others  
   tutorial_coach_mark: ^1.2.8 # Un paquete de Flutter que le permite crear tutoriales de aplicación de forma fácil y rápida.
   image_picker: ^0.8.6+3  # Un complemento de Flutter para seleccionar imágenes desde el almacenamiento local del dispositivo.
   palette_generator: ^0.3.3+2 # Un paquete de Flutter que genera paletas de colores a partir de imágenes.
-  flutter_animate: ^4.0.0 # Un paquete de Flutter que proporciona animaciones de entrada y salida para los widgets de Flutter.
+  flutter_animate: ^4.1.1+1 # Un paquete de Flutter que proporciona animaciones de entrada y salida para los widgets de Flutter.
   permission_handler: ^10.2.0 # Un complemento de Flutter para solicitar y administrar permisos en Android y iOS.
   avatar_view: ^1.0.1 # Un widget de vista de avatar que admite imágenes, iconos y texto.
   path: ^1.8.2  # Una completa biblioteca de manipulación de rutas multiplataforma para Dart.
