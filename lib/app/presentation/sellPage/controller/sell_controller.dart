@@ -639,7 +639,7 @@ class SalesController extends GetxController {
                                         homeController.disableSalesUserGuide();
                                         
                                       },
-                                      alignSkip: Alignment.topRight );
+                                      alignSkip: Alignment.bottomRight );
                                   },
                                   alignSkip: Alignment.topRight );
                               },alignSkip: Alignment.topRight );
