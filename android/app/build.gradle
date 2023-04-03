@@ -71,7 +71,7 @@ android {
     // TODO :`flutter run --release` para produccion y --debug para desarrollo.
     buildTypes {
         release {
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
         }
     }
 

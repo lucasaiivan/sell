@@ -27,6 +27,8 @@ class HomeController extends GetxController {
   final GlobalKey itemProductFlashKeyButton = GlobalKey(); 
   final GlobalKey floatingActionButtonTransacctionRegister = GlobalKey();
   final GlobalKey floatingActionButtonTransacctionConfirm = GlobalKey();
+  final GlobalKey floatingActionButtonScanCodeBarKey = GlobalKey();
+  final GlobalKey floatingActionButtonSelectedCajaKey = GlobalKey();
   final GlobalKey buttonsPaymenyMode = GlobalKey();
   final List<TargetFocus> targets = List<TargetFocus>.empty(growable: true); 
   late final TutorialCoachMark tutorialCoachMark ;
@@ -71,7 +73,7 @@ class HomeController extends GetxController {
   bool salesUserGuideVisibility=false; 
   void getSalesUserGuideVisibility(){
     // obtenemos la visibilidad de la guía del usuario de ventas
-    salesUserGuideVisibility = GetStorage().read('salesUserGuideVisibility') ?? true;
+    salesUserGuideVisibility = true;//GetStorage().read('salesUserGuideVisibility') ?? true;
     update();
   }
   void disableSalesUserGuide()async{
@@ -196,6 +198,12 @@ class HomeController extends GetxController {
 
   // TUTORIAL PARA EL USUARIO
   TargetFocus get buttonAddItemFlashTargetFocus{
+
+    // style
+    const TextStyle titleSTexttyle =  TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 25.0);
+    const TextStyle descriptionTextStyle = TextStyle(color: Colors.white,fontSize: 18.0);
+    
+    
     return TargetFocus(
       identify: "registro rapido",
       keyTarget: floatingActionButtonRegisterFlashKeyButton,
@@ -203,12 +211,12 @@ class HomeController extends GetxController {
         TargetContent(
           padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20.0),
             align: ContentAlign.top, 
-            child: const Column(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text("Registra una venta rápida",style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 20.0),),
-                Padding(padding: EdgeInsets.only(top: 10.0),child: Text("Puedes registrar un producto rapido solo con el precio y opcionalmente una descripción",style: TextStyle(color: Colors.white),),),
+              children: const <Widget>[
+                Text("Registra una venta rápida",style: titleSTexttyle),
+                Padding(padding: EdgeInsets.only(top: 10.0),child: Text("Puedes registrar un producto rapido solo con el precio y opcionalmente una descripción",style: descriptionTextStyle),),
               ],
             )
         )
@@ -216,6 +224,11 @@ class HomeController extends GetxController {
     );
   }
   TargetFocus get buttonAddProductTargetFocus{
+
+    // style
+    const TextStyle titleSTexttyle =  TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 25.0);
+    const TextStyle descriptionTextStyle = TextStyle(color: Colors.white,fontSize: 18.0);
+
     return TargetFocus(
       identify: "agregar producto",
       keyTarget: itemProductFlashKeyButton,
@@ -223,12 +236,12 @@ class HomeController extends GetxController {
         TargetContent(
           padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20.0),
             align: ContentAlign.bottom, 
-            child: const Column(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text("Agrega productos rápidamente",style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 20.0),),
-                Padding(padding: EdgeInsets.only(top: 10.0),child: Text("En esta sección aparecen tus productos favoritos y los que allas vendido",style: TextStyle(color: Colors.white),),),
+              children: const <Widget>[
+                Text("Agrega productos rápidamente",style: titleSTexttyle),
+                Padding(padding: EdgeInsets.only(top: 10.0),child: Text("En esta sección aparecen tus productos favoritos y los que allas vendido",style: descriptionTextStyle),),
               ],
             )
         )
@@ -236,19 +249,24 @@ class HomeController extends GetxController {
     );
   }
   TargetFocus get buttonRegisterTransactionTargetFocus{
+
+     // style
+    const TextStyle titleSTexttyle =  TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 25.0);
+    const TextStyle descriptionTextStyle = TextStyle(color: Colors.white,fontSize: 18.0);
+
     return TargetFocus(
       identify: "Procede a registrar la venta",
       keyTarget: floatingActionButtonTransacctionRegister,
       contents: [
         TargetContent(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20.0),
+          padding: const EdgeInsets.only(left: 12.0,right: 12.0,bottom: 100.0),
             align: ContentAlign.top, 
-            child: const Column(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text("Registra la venta",style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 20.0),),
-                Padding(padding: EdgeInsets.only(top: 10.0),child: Text("Procede a registrar tu primera transacción",style: TextStyle(color: Colors.white),),),
+              children: const <Widget>[
+                Text("Registra la venta",style: titleSTexttyle),
+                Padding(padding: EdgeInsets.only(top: 10.0),child: Text("Procede a registrar tu primera transacción",style: descriptionTextStyle),),
               ],
             )
         )
@@ -256,18 +274,24 @@ class HomeController extends GetxController {
     );
   }
   TargetFocus get buttonsOptionsPaymentMethodTargetFocus{
+
+     // style
+    const TextStyle titleSTexttyle =  TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 25.0);
+    const TextStyle descriptionTextStyle = TextStyle(color: Colors.white,fontSize: 18.0);
+
+
     return TargetFocus(
       identify: "metodo de pago",
       keyTarget: buttonsPaymenyMode,
       contents: [
         TargetContent(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 60.0),
+          padding: const EdgeInsets.only(left: 12.0,right: 12.0,bottom: 130.0),
             align: ContentAlign.top, 
-            child: const Column(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text("Elige el método de pago y listo",style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 20.0),),
+              children: const <Widget>[
+                Text("Elige el método de pago y listo",style: titleSTexttyle),
                 //Padding(padding: EdgeInsets.only(top: 10.0),child: Text("Procede a registrar tu primera transacción",style: TextStyle(color: Colors.white),),),
               ],
             )
@@ -276,6 +300,12 @@ class HomeController extends GetxController {
     );
   }
   TargetFocus get buttonsConfirmTransactionTargetFocus{
+
+     // style
+    const TextStyle titleSTexttyle =  TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 25.0);
+    const TextStyle descriptionTextStyle = TextStyle(color: Colors.white,fontSize: 18.0);
+
+
     return TargetFocus(
       identify: "confirmar venta",
       keyTarget: floatingActionButtonTransacctionConfirm,
@@ -283,27 +313,81 @@ class HomeController extends GetxController {
         TargetContent(
           padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 50.0),
             align: ContentAlign.top, 
-            child: const Column(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[ 
-                Text("Confirma la transacción",style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 20.0),), 
-                Padding(padding: EdgeInsets.only(top: 10.0),child: Text("Finalmente terminar de concretar tu primera venta",style: TextStyle(color: Colors.white),),),
+              children: const <Widget>[ 
+                Text("Confirma la transacción",style: titleSTexttyle), 
+                Padding(padding: EdgeInsets.only(top: 10.0),child: Text("Finalmente terminar de concretar tu primera venta",style: descriptionTextStyle),),
               ],
             )
         )
       ]
     );
   }
-  void showTutorial({required List<TargetFocus> targetFocus , required void Function() next,AlignmentGeometry  alignSkip = Alignment.bottomRight,String textSkip = "Salir"}) { 
+  TargetFocus get buttonsScanCodeBarTargetFocusGuideUX{
+
+     // style
+    const TextStyle titleSTexttyle =  TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 25.0);
+    const TextStyle descriptionTextStyle = TextStyle(color: Colors.white,fontSize: 18.0);
+
+
+    return TargetFocus(
+      identify: "button scan bar",
+      keyTarget: floatingActionButtonScanCodeBarKey,
+      contents: [
+        TargetContent(
+          padding: const EdgeInsets.only(left: 12.0,right: 12.0,bottom: 100.0),
+            align: ContentAlign.top, 
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const <Widget>[ 
+                Text("Escanea el código de barra de un producto",style: titleSTexttyle),  
+              ],
+            )
+        )
+      ]
+    );
+  }
+  TargetFocus get buttonsNumCajaTargetFocusGuideUX{
+
+     // style
+    const TextStyle titleSTexttyle =  TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 25.0);
+    const TextStyle descriptionTextStyle = TextStyle(color: Colors.white,fontSize: 18.0);
+
+
+    return TargetFocus(
+      identify: "numero de caja",
+      keyTarget: floatingActionButtonSelectedCajaKey,
+      contents: [
+        TargetContent(
+          padding: const EdgeInsets.only(left: 12.0,right: 12.0,top: 100.0),
+            align: ContentAlign.bottom, 
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const <Widget>[ 
+                Text("Elige la caja en la que vas a vender",style: titleSTexttyle),  
+              ],
+            )
+        )
+      ]
+    );
+  }
+  void showTutorial({required List<TargetFocus> targetFocus , required void Function() next,AlignmentGeometry  alignSkip = Alignment.bottomRight,String textSkip = "Salir"}) async{ 
+
+    // delay : para que se muestre el tutorial despues de que se muestre la pantalla
+    await Future.delayed(const Duration(milliseconds: 1300));
     
     // condition : comprueba si el usaurio inicio por primera vez la app 
     // si es asi, se mostrara el tutorial
-     if (salesUserGuideVisibility==true || getUserAnonymous  ){ 
+     if (salesUserGuideVisibility==true  ){ 
 
+      // ignore: use_build_context_synchronously
       TutorialCoachMark( 
         targets: targetFocus, 
-        colorShadow: Colors.black12,
+        colorShadow: Colors.black12.withOpacity(0.1),
         textSkip: "Salir", 
         alignSkip: alignSkip,
         onClickTarget: (target){
