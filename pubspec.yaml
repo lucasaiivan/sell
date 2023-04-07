@@ -15,7 +15,7 @@ publish_to: 'none' # Quite esta línea si desea publicar en pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.1+2
+version: 1.0.2+3
 
 environment:
   sdk: '>=2.18.0-130.0.dev <3.0.0'
@@ -37,13 +37,13 @@ dependencies:
  
 
   # Google
-  google_sign_in: ^6.0.2
+  google_sign_in: ^6.1.0
   # Firebase
-  cloud_firestore: ^4.4.3
-  firebase_storage: ^11.0.14
-  firebase_core: ^2.7.0
+  cloud_firestore: ^4.5.0
+  firebase_storage: ^11.1.0
+  firebase_core: ^2.9.0
   firebase_crashlytics: ^3.0.15
-  firebase_auth: ^4.2.9
+  firebase_auth: ^4.4.0
   firebase_dynamic_links: ^5.0.15
   # Google Pay
   in_app_review: ^2.0.6
@@ -57,7 +57,9 @@ dependencies:
   flutter_secure_storage: ^8.0.0
   # app info 
   package_info_plus: ^3.0.3 # Un complemento de Flutter para obtener información sobre el paquete actual, como el nombre, la versión y el número de compilación.
-  # others  
+  # others 
+  fast_cached_network_image: ^1.1.1 
+  cached_network_image: ^3.2.3 # Un paquete de Flutter que proporciona una implementación de red de imágenes que se almacenan en caché.
   tutorial_coach_mark: ^1.2.8 # Un paquete de Flutter que le permite crear tutoriales de aplicación de forma fácil y rápida.
   image_picker: ^0.8.6+3  # Un complemento de Flutter para seleccionar imágenes desde el almacenamiento local del dispositivo.
   palette_generator: ^0.3.3+2 # Un paquete de Flutter que genera paletas de colores a partir de imágenes.
@@ -69,12 +71,11 @@ dependencies:
   font_awesome_flutter: ^10.1.0 # Un paquete de iconos de Flutter que contiene más de 2.000 iconos de Font Awesome.
   animate_do: ^2.0.0 # Un paquete de animación inspirado en Animate.css , construido usando solo animaciones de Flutter, sin paquetes adicionales.
   intl: ^0.17.0
-  cached_network_image: ^3.1.0 # Una biblioteca de aleteo para mostrar imágenes de Internet y mantenerlas en el directorio de caché.
   textfield_search: ^0.10.0 # FTFS es un paquete de Flutter que usa un TextField Widget para buscar y seleccionar un valor de una lista
   search_page: ^2.3.0
   flutter_launcher_icons: ^0.10.0 #  Una herramienta de línea de comandos que simplifica la tarea de actualizar el icono de inicio de la aplicación Flutter
   flutter_barcode_scanner: ^2.0.0 # Un complemento para las aplicaciones Flutter que agrega compatibilidad con el escaneo de códigos de barras tanto en Android como en iOS.
-  audioplayers: ^1.0.1
+  audioplayers: ^3.0.1
   flutter_masked_text2: ^0.9.1 
   shimmer: ^2.0.0
   uuid: ^3.0.6  # Un paquete de Flutter que genera identificadores únicos universales (UUID).

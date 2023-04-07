@@ -34,7 +34,7 @@ class LoginController extends GetxController {
       CustomFullScreenDialog.showDialog();
 
       // signIn : Inicia la secuencia de inicio de sesión de Google.
-      GoogleSignInAccount? googleSignInAccount = await homeController.googleSign.signIn();
+      GoogleSignInAccount? googleSignInAccount = await GoogleSignIn().signIn(); 
       // condition : Si googleSignInAccount es nulo, significa que el usuario no ha iniciado sesión.
       if (googleSignInAccount == null) {
         CustomFullScreenDialog.cancelDialog();
