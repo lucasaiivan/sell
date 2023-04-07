@@ -51,11 +51,14 @@ class LoadingInitView extends StatelessWidget {
     return AppBar(
       title: const Text('Multiusuario'),
       actions: [
-        controller.homeController.getFirebaseAuth.currentUser!.isAnonymous?Container():
-        IconButton(onPressed: controller.addItem, 
-        icon:  Material(
-            color: homeController.getDarkMode?Colors.white:Colors.black,
-            borderRadius: const BorderRadius.all(Radius.circular(5.0)),child: Icon(Icons.add,color:  homeController.getDarkMode?Colors.black:Colors.white,)))
+        IconButton(onPressed: homeController.getUserAnonymous?null:controller.addItem, 
+        icon:  Opacity(
+          opacity: homeController.getUserAnonymous?0.1:1,
+          child: Material(
+              color: homeController.getDarkMode?Colors.white:Colors.black,
+              borderRadius: const BorderRadius.all(Radius.circular(5.0)),
+              child: Icon(Icons.add,color:  homeController.getDarkMode?Colors.black:Colors.white,)),
+        ))
       ],
     );
   }

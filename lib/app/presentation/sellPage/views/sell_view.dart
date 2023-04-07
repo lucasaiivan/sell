@@ -1,5 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; 
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
@@ -526,7 +526,7 @@ class SalesView extends StatelessWidget {
                       radius: radius,
                       backgroundColor: backgroundColor,
                       child: defaultValues?Container(): Text(Publications.getFormatoPrecio(monto: productCatalogue.salePrice),style:TextStyle(color: Get.textTheme.bodyMedium?.color)),
-                    ),
+                    ), 
                   ), 
                   SizedBox(height: spaceImageText),
                   Padding(
@@ -562,13 +562,13 @@ class SalesView extends StatelessWidget {
         child: Material(
           borderRadius: const BorderRadius.all(Radius.circular(12)),
           color: background,
-          child: Center(
+          child: const Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.check_rounded,size: 200,color:accentColor),
-                const SizedBox(height:25),
-                const Text('Hecho',style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold,color: accentColor)),
+                Icon(Icons.check_rounded,size: 200,color:accentColor),
+                SizedBox(height:25),
+                Text('Hecho',style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold,color: accentColor)),
               ],
             ),
           ),

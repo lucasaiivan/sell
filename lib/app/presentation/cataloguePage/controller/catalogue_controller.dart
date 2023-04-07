@@ -225,7 +225,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
             InkWell(
               onTap: () {
                 Get.back();
-                toProductEdit(productCatalogue: product);
+                homeController.getUserAnonymous?null:toProductEdit(productCatalogue: product);
               },
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
