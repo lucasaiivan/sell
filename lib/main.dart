@@ -1,54 +1,58 @@
 
-import 'dart:io';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'app/core/routes/app_pages.dart';
 import 'app/presentation/splash/bindings/splash_binding.dart';
-import 'app/core/utils/dynamicTheme_lb.dart';
+import 'package:firebase_core/firebase_core.dart';
+
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-FirebaseOptions get firebaseOptions => const FirebaseOptions(
+const FirebaseOptions firebaseConfig = FirebaseOptions(
   apiKey: "AIzaSyAMjGXHafddVhr7NzXp7xI7gq602dCgiq8",
-  authDomain: "commer-ef151.firebaseapp.com",
-  databaseURL: "https://commer-ef151.firebaseio.com",
-  projectId: "commer-ef151",
-  storageBucket: "commer-ef151.appspot.com",
-  messagingSenderId: "232181553323",
-  appId: "1:232181553323:web:33d24d2d7b8545c19b3fee",
-  measurementId: "G-YBR07J6S2B"
+    authDomain: "commer-ef151.firebaseapp.com",
+    databaseURL: "https://commer-ef151.firebaseio.com",
+    projectId: "commer-ef151",
+    storageBucket: "commer-ef151.appspot.com",
+    messagingSenderId: "232181553323",
+    appId: "1:232181553323:web:e20bbcc40716001c9b3fee",
+    measurementId: "G-8X75V0XVWS"
 );
 
 Future<void> main() async {
   // Evita errores causados ​​por la actualización de flutter. 
   WidgetsFlutterBinding.ensureInitialized();
   // Initialize Firebase
-  await Firebase.initializeApp();
+  if(kIsWeb){
+    await Firebase.initializeApp(options: firebaseConfig );
+  }else{
+    await Firebase.initializeApp();
+  }  
+
   await GetStorage.init();
-  SplashBinding().dependencies(); 
+  SplashBinding().dependencies(); //
   
   // theme
-  bool isDark =
-   (GetStorage().read('isDarkMode') ?? false);
+   bool isDark = false;//(GetStorage().read('isDarkMode') ?? false);
   
-  if (Platform.isAndroid) {
-
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      systemNavigationBarColor:
-          isDark ? ThemesDataApp.colorBlack : ThemesDataApp.colorLight,
-      statusBarColor:
-          isDark ? ThemesDataApp.colorBlack : ThemesDataApp.colorLight,
-      statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
-      statusBarIconBrightness: isDark ? Brightness.dark : Brightness.light,
-      systemNavigationBarIconBrightness:
-          isDark ? Brightness.light : Brightness.dark,
-      systemNavigationBarDividerColor:
-          isDark ? ThemesDataApp.colorBlack : ThemesDataApp.colorLight,
-    ));
-  }
+  // if (Platform.isAndroid) {
+  //
+  //   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+  //     systemNavigationBarColor:
+  //         isDark ? ThemesDataApp.colorBlack : ThemesDataApp.colorLight,
+  //     statusBarColor:
+  //         isDark ? ThemesDataApp.colorBlack : ThemesDataApp.colorLight,
+  //     statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+  //     statusBarIconBrightness: isDark ? Brightness.dark : Brightness.light,
+  //     systemNavigationBarIconBrightness:
+  //         isDark ? Brightness.light : Brightness.dark,
+  //     systemNavigationBarDividerColor:
+  //         isDark ? ThemesDataApp.colorBlack : ThemesDataApp.colorLight,
+  //   ));
+  // }
   Color colorPrimary = const Color.fromARGB(255, 33, 150, 243); // 0xFF2196F3
   // theme
   Color colorDark = const Color.fromRGBO(43, 45, 57, 1);
@@ -159,7 +163,9 @@ ColorScheme darkColorScheme = const ColorScheme(
     inputDecorationTheme: InputDecorationTheme(filled: true,fillColor: Colors.white.withOpacity(0.03),border: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),),
     ), 
   );
-
+  // runApp( MaterialApp(home: Scaffold(
+  //   appBar: AppBar(title: Text('web')),
+  // ),));
   runApp(GetMaterialApp(
     title: "Punto de Venta",
     initialRoute: AppPages.INITIAL,
