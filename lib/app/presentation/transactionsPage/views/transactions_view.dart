@@ -51,8 +51,9 @@ class TransactionsView extends StatelessWidget {
 
     return AppBar(
       elevation: 0,
+      centerTitle: false,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      title: const Text('Transacciones'),
+      title: const Text('Transacciones',textAlign: TextAlign.center),
       actions: [
         
         PopupMenuButton(

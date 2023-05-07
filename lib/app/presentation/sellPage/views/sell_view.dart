@@ -41,12 +41,16 @@ class SalesView extends StatelessWidget {
         return Obx(() => Scaffold(
               appBar: appbar(controller: controller),
               drawer: drawerApp(),
-              body: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  controller.getTicketView? Container(): Expanded(child: body(controller: controller )),
-                  drawerTicket(controller: controller),
-                ],
+              body: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Expanded(child: body(controller: controller )),
+                      drawerTicket(controller: controller),
+                    ],
+                  );
+                }
               ),
               floatingActionButton: controller.getTicketView ? floatingActionButtonTicket(controller: controller): floatingActionButton(controller: controller).animate(delay: Duration(milliseconds: homeController.salesUserGuideVisibility?500:0)).fade(),
             ));
@@ -57,7 +61,8 @@ class SalesView extends StatelessWidget {
   // WIDGETS VIEWS
   PreferredSizeWidget appbar({required SalesController controller}) {
     return AppBar(
-      title: Text(controller.valueResponseChatGpt),
+      title: Text(controller.titleText,textAlign: TextAlign.center ),
+      centerTitle: false,
       actions: [
         controller.getListProductsSelestedLength != 0
             ? TextButton.icon(icon: const Icon(Icons.clear_rounded),label: const Text('Descartar Ticket'),onPressed: controller.dialogCleanTicketAlert)
@@ -69,6 +74,10 @@ class SalesView extends StatelessWidget {
   }
 
   Widget body(  {required SalesController controller} ) {
+
+    // var : logica de la vista para la web
+    final screenWidth = Get.size.width;
+    final isMobile = screenWidth < 700; // ejemplo: pantalla de teléfono
 
     // Widgets
     Widget updateview = homeController.getUpdateApp?
@@ -92,28 +101,37 @@ class SalesView extends StatelessWidget {
           // atentos a cualquier cambio que surja en los datos de la lista de marcas
           SliverList(delegate: SliverChildListDelegate([updateview, widgeSuggestedProducts(context: context,controller1: controller)]))
         ];
-      },
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [ 
-          Expanded(
-            child: GridView.builder(
-              padding: const EdgeInsets.all(12),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3,crossAxisSpacing: 1.0,mainAxisSpacing: 1.0),
-              itemCount: controller.getListProductsSelested.length + 15,
-              itemBuilder: (context, index) {
-                // mostramos un número de elementos vacíos de los cuales el primero tendrá un icono 'add'
-                List list = controller.getListProductsSelested.reversed.toList();
-                if (index < list.length) {
-                  if(index == 0 ){return ZoomIn(controller: (p0) => controller.newProductSelectedAnimationController=p0,child: ProductoItem(producto:list[index]));}
-                  return ProductoItem(producto:list[index]);
-                } else {
-                  return ElasticIn(child: Card(elevation: 0, color: Colors.grey.withOpacity(0.1)));
-                }
-              },
-            ),
-          ),
-        ],
+      }, 
+      //  LayoutBuilder : control de vista 
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+
+          // var : logica de la vista para la web
+           int crossAxisCount =  constraints.maxWidth < 700 ? 3 : constraints.maxWidth < 900 ?4:5;
+
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [ 
+              Expanded(
+                child: GridView.builder(
+                  padding: const EdgeInsets.all(12),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: crossAxisCount,crossAxisSpacing: 1.0,mainAxisSpacing: 1.0),
+                  itemCount: controller.getListProductsSelested.length + 15,
+                  itemBuilder: (context, index) {
+                    // mostramos un número de elementos vacíos de los cuales el primero tendrá un icono 'add'
+                    List list = controller.getListProductsSelested.reversed.toList();
+                    if (index < list.length) {
+                      if(index == 0 ){return ZoomIn(controller: (p0) => controller.newProductSelectedAnimationController=p0,child: ProductoItem(producto:list[index]));}
+                      return ProductoItem(producto:list[index]);
+                    } else {
+                      return ElasticIn(child: Card(elevation: 0, color: Colors.grey.withOpacity(0.1)));
+                    }
+                  },
+                ),
+              ),
+            ],
+          );
+        }
       ),
     );
   }
@@ -137,136 +155,140 @@ class SalesView extends StatelessWidget {
               color: Get.theme.brightness == Brightness.dark? Colors.white: Colors.black,
             ),
     );
+    // var : logica de la vista para la web
+    final screenWidth = Get.size.width;
+    final isMobile = screenWidth < 700; // ejemplo: pantalla de teléfono
     
     
     return AnimatedContainer(
-      width: controller.getTicketView ? Get.size.width : 0,
+      width: controller.getTicketView ?  isMobile?screenWidth:400 : 0,
       curve: Curves.fastOutSlowIn,
       duration: const Duration(milliseconds: 300),
       child: AnimatedOpacity(
         opacity: controller.getTicketView ? 1 : 0,
         duration: Duration(milliseconds: controller.getTicketView ? 1500 : 100),
-        child: Padding(
-          padding:const EdgeInsets.only(bottom: 2, top: 12, right: 5, left: 24),
-          child: Material(
-            borderRadius: const BorderRadius.all(Radius.circular(12)),
-            color: Get.theme.brightness == Brightness.dark? Colors.white10: Colors.white,
-            child: Drawer(
-              elevation: 0,
-              backgroundColor: Colors.transparent,
-              child: Center(
-                child: controller.getStateConfirmPurchase
-                    ? widgetConfirmedPurchase()
-                    : ListView(
-                      shrinkWrap: false,
-                        children: [
-                          const SizedBox(height: 20),
-                          Padding(
+        child: Material(
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
+          color: Get.theme.brightness == Brightness.dark? Colors.white10: Colors.white,
+          child: Drawer(
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            child: Center(
+              child: controller.getStateConfirmPurchase
+                  ? widgetConfirmedPurchase()
+                  : ListView(
+                    key: const Key('ticket'),
+                    shrinkWrap: false,
+                      children: [
+                        const SizedBox(height: 20),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text('Ticket',textAlign: TextAlign.center,style: textDescrpitionStyle.copyWith(fontSize: 30, fontWeight: FontWeight.bold)),
+                        ), 
+                        Material(
+                          color: Colors.transparent,//Colors.blueGrey.withOpacity(0.1),
+                          child: Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Text('Ticket',textAlign: TextAlign.center,style: textDescrpitionStyle.copyWith(fontSize: 30, fontWeight: FontWeight.bold)),
-                          ), 
-                          Material(
-                            color: Colors.transparent,//Colors.blueGrey.withOpacity(0.1),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(homeController.getProfileAccountSelected.name,textAlign: TextAlign.center,style: textValuesStyle.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
-                            )),
-                            // view : lines ------
-                            dividerLinesWidget,  
-                            const SizedBox(height: 20),
-                          // text : cantidad de elementos 'productos' seleccionados
-                          Padding(
-                            padding: padding,
-                            child: Row(
-                              children: [
-                                Opacity(opacity: 0.7,child: Text('Productos:',style:textDescrpitionStyle)),
-                                const Spacer(),
-                                Text(controller.getListProductsSelestedLength.toString(),style:textValuesStyle),
-                              ],
-                            ),
-                          ),
-                          // text : medio de pago
-                          Padding(
-                            padding: padding,
-                            child: Row(
-                              children: [
-                                Opacity(opacity: 0.7,child: Text('Medio:',style:textDescrpitionStyle)),
-                                const Spacer(),
-                                Text(controller.getTicket.getPayMode,style:textValuesStyle),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 20),
+                            child: Text(homeController.getProfileAccountSelected.name,textAlign: TextAlign.center,style: textValuesStyle.copyWith(fontSize: 18, fontWeight: FontWeight.bold)),
+                          )),
                           // view : lines ------
-                          dividerLinesWidget,
-                          // text : el monto total de la transacción
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                          dividerLinesWidget,  
+                          const SizedBox(height: 20),
+                        // text : cantidad de elementos 'productos' seleccionados
+                        Padding(
+                          padding: padding,
+                          child: Row(
+                            children: [
+                              Opacity(opacity: 0.7,child: Text('Productos:',style:textDescrpitionStyle)),
+                              const Spacer(),
+                              Text(controller.getListProductsSelestedLength.toString(),style:textValuesStyle),
+                            ],
+                          ),
+                        ),
+                        // text : medio de pago
+                        Padding(
+                          padding: padding,
+                          child: Row(
+                            children: [
+                              Opacity(opacity: 0.7,child: Text('Medio:',style:textDescrpitionStyle)),
+                              const Spacer(),
+                              Text(controller.getTicket.getPayMode,style:textValuesStyle),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        // view : lines ------
+                        dividerLinesWidget,
+                        // text : el monto total de la transacción
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Row(
+                            children: [
+                              Opacity(opacity: 0.7,child: Text('Total',style: textDescrpitionStyle.copyWith(fontSize: 20,fontWeight: FontWeight.w900,color: Colors.blue,))),
+                              const Spacer(),
+                              Text(Publications.getFormatoPrecio(monto: controller.getCountPriceTotal()),style: textValuesStyle.copyWith(color: Colors.blue,fontSize: 24,fontWeight: FontWeight.w900)),
+                            ],
+                          ),
+                        ),
+                        // text : paga con 
+                        controller.getValueReceivedTicket == 0 ||controller.getTicket.payMode !='effective'
+                          ? Container()
+                          :Padding(
+                            padding: padding,
                             child: Row(
                               children: [
-                                Opacity(opacity: 0.7,child: Text('Total',style: textDescrpitionStyle.copyWith(fontSize: 20,fontWeight: FontWeight.w900,color: Colors.blue,))),
+                                Opacity(opacity: 0.7,child: Text('Pago con:',style: textDescrpitionStyle,)),
                                 const Spacer(),
-                                Text(Publications.getFormatoPrecio(monto: controller.getCountPriceTotal()),style: textValuesStyle.copyWith(color: Colors.blue,fontSize: 24,fontWeight: FontWeight.w900)),
+                                Text(controller.getValueReceived(),style:textValuesStyle),
                               ],
                             ),
-                          ),
-                          // text : paga con 
-                          controller.getValueReceivedTicket == 0 ||controller.getTicket.payMode !='effective'
-                            ? Container()
-                            :Padding(
-                              padding: padding,
-                              child: Row(
-                                children: [
-                                  Opacity(opacity: 0.7,child: Text('Pago con:',style: textDescrpitionStyle,)),
-                                  const Spacer(),
-                                  Text(controller.getValueReceived(),style:textValuesStyle),
-                                ],
-                              ),
-                          ),
-                          // text : vuelto 
-                          controller.getValueReceivedTicket == 0 ||controller.getTicket.payMode !='effective'
-                            ? Container()
-                            :Padding(
-                              padding: padding,
-                              child: Row(
-                                children: [
-                                  Opacity(opacity: 0.7,child:  Text('Vuelto:',style:textDescrpitionStyle)),
-                                  const Spacer(),
-                                  Material(
-                                    elevation: 0,
-                                    color: Colors.green.shade300,
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 1),
-                                      child: Row(
-                                        children: [
-                                          Text('Dar vuelto ',style:textValuesStyle.copyWith(color: Colors.white)),
-                                          Text(controller.getValueChange(),style: textValuesStyle.copyWith(color: Colors.white,fontSize: 16),),
-                                        ],
-                                      ),
+                        ),
+                        // text : vuelto 
+                        controller.getValueReceivedTicket == 0 ||controller.getTicket.payMode !='effective'
+                          ? Container()
+                          :Padding(
+                            padding: padding,
+                            child: Row(
+                              children: [
+                                Opacity(opacity: 0.7,child:  Text('Vuelto:',style:textDescrpitionStyle)),
+                                const Spacer(),
+                                Material(
+                                  elevation: 0,
+                                  color: Colors.green.shade300,
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 1),
+                                    child: Row(
+                                      children: [
+                                        Text('Dar vuelto ',style:textValuesStyle.copyWith(color: Colors.white)),
+                                        Text(controller.getValueChange(),style: textValuesStyle.copyWith(color: Colors.white,fontSize: 16),),
+                                      ],
                                     ),
                                   ),
-                                ],
-                              ),
-                          ),
-                          // view : lines ------
-                          dividerLinesWidget,
-                          // view 2
-                          Padding(
-                            padding:const EdgeInsets.only(bottom: 24, top: 24),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [ 
-                                Text('El cliente paga con:',style:textDescrpitionStyle),
-                                const SizedBox(height: 12),
-                                Container(
-                                  key: homeController.buttonsPaymenyMode,
-                                  child: Row( 
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      //  button : pago con efectivo
-                                      ElevatedButton.icon(
+                                ),
+                              ],
+                            ),
+                        ),
+                        // view : lines ------
+                        dividerLinesWidget,
+                        // view 2
+                        Padding(
+                          padding:const EdgeInsets.only(bottom: 24, top: 24),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [ 
+                              Text('El cliente paga con:',style:textDescrpitionStyle),
+                              const SizedBox(height: 12),
+                              Container(
+                                key: homeController.buttonsPaymenyMode,
+                                child: Row( 
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    //  button : pago con efectivo
+                                    Padding(
+                                      padding: const EdgeInsets.all(2.0),
+                                      child: ElevatedButton.icon(
                                         style: ButtonStyle(elevation: MaterialStateProperty.all(controller.getTicket.payMode =='effective'? 5: 0)),
                                         icon: controller.getTicket.payMode != 'effective'?Container():const Icon(Icons.money_rounded),
                                         onPressed: (){
@@ -275,8 +297,11 @@ class SalesView extends StatelessWidget {
                                         },
                                         label: Text(controller.getValueReceivedTicket != 0.0? Publications.getFormatoPrecio(monto: controller.getValueReceivedTicket): 'Efectivo'),
                                       ),
-                                      // button : pago con mercado pago
-                                      ElevatedButton.icon(
+                                    ),
+                                    // button : pago con mercado pago
+                                    Padding(
+                                      padding: const EdgeInsets.all(2.0),
+                                      child: ElevatedButton.icon(
                                         style: ButtonStyle(elevation: MaterialStateProperty.all(controller.getTicket.payMode == 'mercadopago'? 5: 0)),
                                         icon: controller.getTicket.payMode != 'mercadopago'?Container():const Icon(Icons.check_circle_rounded),
                                         onPressed: () {
@@ -286,11 +311,14 @@ class SalesView extends StatelessWidget {
                                         },
                                         label: const Text('Mercado Pago'),
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
-                                //  button : pago con tarjeta de credito/debito
-                                ElevatedButton.icon(
+                              ),
+                              //  button : pago con tarjeta de credito/debito
+                              Padding(
+                                padding: const EdgeInsets.all(2.0),
+                                child: ElevatedButton.icon(
                                   style: ButtonStyle(elevation: MaterialStateProperty.all(controller.getTicket.payMode =='card'? 5 : 0)),
                                   icon: controller.getTicket.payMode != 'card'?Container(): const Icon(Icons.credit_card_outlined),
                                   onPressed: (){
@@ -300,13 +328,13 @@ class SalesView extends StatelessWidget {
                                   },
                                   label:const Text('Tarjeta de Debito/Credito'),
                                 ),
-                                const SizedBox(height: 12),
-                              ],
-                            ),
+                              ),
+                              const SizedBox(height: 12),
+                            ],
                           ),
-                        ],
-                      ),
-              ),
+                        ),
+                      ],
+                    ),
             ),
           ),
         ),
@@ -528,15 +556,19 @@ class SalesView extends StatelessWidget {
                       child: defaultValues?Container(): Text(Publications.getFormatoPrecio(monto: productCatalogue.salePrice),style:TextStyle(color: Get.textTheme.bodyMedium?.color)),
                     ), 
                   ), 
-                  SizedBox(height: spaceImageText),
+                  SizedBox(
+                    height: spaceImageText,
+                  ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 5),
-                    child:defaultValues?Container(): Text(productCatalogue.description,
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
-                        overflow: TextOverflow.fade,
+                    child: Text(productCatalogue.description,
+                        style: const TextStyle( 
+                            fontSize: 12,
+                            fontWeight: FontWeight.normal),
+                        overflow: TextOverflow.clip,
                         maxLines: 1,
                         softWrap: false),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -562,10 +594,10 @@ class SalesView extends StatelessWidget {
         child: Material(
           borderRadius: const BorderRadius.all(Radius.circular(12)),
           color: background,
-          child: const Center(
+          child: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: [
+              children: const [
                 Icon(Icons.check_rounded,size: 200,color:accentColor),
                 SizedBox(height:25),
                 Text('Hecho',style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold,color: accentColor)),

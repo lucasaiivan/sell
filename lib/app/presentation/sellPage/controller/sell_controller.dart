@@ -21,7 +21,7 @@ import '../../../domain/entities/ticket_model.dart';
 class SalesController extends GetxController {
 
 
-  String valueResponseChatGpt = 'Vender'; 
+  String titleText = 'Vender'; 
 
   // others controllers
   final HomeController homeController = Get.find();
@@ -601,56 +601,59 @@ class SalesController extends GetxController {
             ),
             const Spacer(),
             // buttons
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                TextButton(style:  buttonStyle,onPressed: () {textEditingControllerAddFlashPrice.text = '';Get.back();}, child: const Text('Cancelar',textAlign: TextAlign.center)),
-                TextButton(style:  buttonStyle,onPressed: () {
-                  addSaleFlash();textEditingControllerAddFlashPrice.text = '';
-                  // mostramos la guía del usuario
-                  homeController.showTutorial(targetFocus:[homeController.buttonAddProductTargetFocus],next:(){
-                    selectedProduct(item: homeController.getProductsOutstandingList[0]);
-                    homeController.showTutorial(targetFocus: [homeController.buttonRegisterTransactionTargetFocus],next:(){
-                       setTicketView = true;
-
-                       // sleep 1 second
-                        Future.delayed(
-                          const Duration(milliseconds: 300),
-                          () {
-
-                            // mostramos la guía del usuario si el usuario no ha visto la guía de usuario de la pantalla de ventas
-                            homeController.showTutorial(targetFocus: [homeController.buttonsOptionsPaymentMethodTargetFocus],next:(){ 
-                              setPayModeTicket = 'mercadopago'; 
-                              // mostramos la siguiente guía de usuario si el usuario no ha visto la guía de usuario de la pantalla de ventas
-                              homeController.showTutorial(targetFocus: [homeController.buttonsConfirmTransactionTargetFocus],next:() async { 
-                                // confirmamos la venta
-                                confirmedPurchase(); 
-                                // esperar un momento
-                                await Future.delayed(const Duration(milliseconds: 500));
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  ElevatedButton(style:  buttonStyle.copyWith(elevation: MaterialStateProperty.all(0)),onPressed: () {textEditingControllerAddFlashPrice.text = '';Get.back();}, child: const Text('Cancelar',textAlign: TextAlign.center)),
+                  ElevatedButton(style:  buttonStyle,onPressed: () {
+                    addSaleFlash();textEditingControllerAddFlashPrice.text = '';
+                    // mostramos la guía del usuario
+                    homeController.showTutorial(targetFocus:[homeController.buttonAddProductTargetFocus],next:(){
+                      selectedProduct(item: homeController.getProductsOutstandingList[0]);
+                      homeController.showTutorial(targetFocus: [homeController.buttonRegisterTransactionTargetFocus],next:(){
+                        setTicketView = true;
+            
+                         // sleep 1 second
+                          Future.delayed(
+                            const Duration(milliseconds: 300),
+                            () {
+            
+                              // mostramos la guía del usuario si el usuario no ha visto la guía de usuario de la pantalla de ventas
+                              homeController.showTutorial(targetFocus: [homeController.buttonsOptionsPaymentMethodTargetFocus],next:(){ 
+                                setPayModeTicket = 'mercadopago'; 
                                 // mostramos la siguiente guía de usuario si el usuario no ha visto la guía de usuario de la pantalla de ventas
-                                homeController.showTutorial(
-                                  targetFocus: [homeController.buttonsScanCodeBarTargetFocusGuideUX],
-                                  next:()async{ 
-                                    // mostramos la siguiente guía de usuario si el usuario no ha visto la guía de usuario de la pantalla de ventas
-                                    homeController.showTutorial(
-                                      targetFocus: [homeController.buttonsNumCajaTargetFocusGuideUX],
-                                      next:(){
-                                        // final de la guia de usuari0
-                                        homeController.disableSalesUserGuide();
-                                        
-                                      },
-                                      alignSkip: Alignment.bottomRight );
-                                  },
-                                  alignSkip: Alignment.topRight );
-                              },alignSkip: Alignment.topRight );
-
-                              },alignSkip: Alignment.topRight );
-                          }); // mostramos la guía del usuario
-                       
-                       },alignSkip: Alignment.topRight );
-                    } ,alignSkip: Alignment.bottomLeft); // mostramos la guía del usuario
-                  }, child: const Text('Agregar',textAlign: TextAlign.center)),
-              ],
+                                homeController.showTutorial(targetFocus: [homeController.buttonsConfirmTransactionTargetFocus],next:() async { 
+                                  // confirmamos la venta
+                                  confirmedPurchase(); 
+                                  // esperar un momento
+                                  await Future.delayed(const Duration(milliseconds: 500));
+                                  // mostramos la siguiente guía de usuario si el usuario no ha visto la guía de usuario de la pantalla de ventas
+                                  homeController.showTutorial(
+                                    targetFocus: [homeController.buttonsScanCodeBarTargetFocusGuideUX],
+                                    next:()async{ 
+                                      // mostramos la siguiente guía de usuario si el usuario no ha visto la guía de usuario de la pantalla de ventas
+                                      homeController.showTutorial(
+                                        targetFocus: [homeController.buttonsNumCajaTargetFocusGuideUX],
+                                        next:(){
+                                          // final de la guia de usuari0
+                                          homeController.disableSalesUserGuide();
+                                          
+                                        },
+                                        alignSkip: Alignment.bottomRight );
+                                    },
+                                    alignSkip: Alignment.topRight );
+                                },alignSkip: Alignment.topRight );
+            
+                                },alignSkip: Alignment.topRight );
+                            }); // mostramos la guía del usuario
+                         
+                         },alignSkip: Alignment.topRight );
+                      } ,alignSkip: Alignment.bottomLeft); // mostramos la guía del usuario
+                    }, child: const Text('Agregar',textAlign: TextAlign.center)),
+                ],
+              ),
             ),
           ],
         ),

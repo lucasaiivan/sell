@@ -122,6 +122,9 @@ flutter:
       - assets/scanbarcode.png
       - assets/productoLogo.png
       - assets/default_image.png
+      - assets/catalogue.png
+      - assets/sell.png
+      - assets/transaction.png
       
   #   - images/a_dot_ham.jpeg
 

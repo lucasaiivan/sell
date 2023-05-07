@@ -1,8 +1,8 @@
-import 'dart:async';
+import 'dart:async'; 
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:sell/app/presentation/auth/controller/login_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -10,29 +10,40 @@ import 'package:url_launcher/url_launcher.dart';
 // RELEASE
 // En esta pantalla de inicio de sesión, agregaremos un logotipo, dos campos de texto y firmaremos con el botón de Google
 
+// ignore: must_be_immutable
 class AuthView extends GetView<LoginController> {
   // ignore: prefer_const_constructors_in_immutables
   AuthView({Key? key}) : super(key: key);
 
   // var
-  late final bool darkMode;
+  late bool darkMode;
   final Color colorAccent=Colors.purple;
-  late final Size screenSize; // Obtenemos las vavriables de la dimension de la pantalla
+  late Size screenSize; // Obtenemos las vavriables de la dimension de la pantalla
+  bool isExpandedView = false;
 
   @override
   Widget build(BuildContext context) {
 
     // Obtenemos los valores
-    darkMode = Theme.of(context).brightness==Brightness.dark;
     screenSize = MediaQuery.of(context).size;
+    darkMode = Theme.of(context).brightness==Brightness.dark; 
     final AppBarTheme  appBarTheme= AppBarTheme(titleSpacing: 0, elevation: 0,toolbarHeight: 0,color: Colors.transparent ,systemOverlayStyle: darkMode?SystemUiOverlayStyle.light:SystemUiOverlayStyle.dark,iconTheme: IconThemeData(color: darkMode?Colors.white:Colors.white),titleTextStyle: TextStyle(color: darkMode?Colors.white:Colors.white));
 
-  return Theme(
-      data: Theme.of(context).copyWith(primaryColor: colorAccent,appBarTheme: appBarTheme),
-      child: Scaffold(
-        appBar: AppBar(),
-        body: body(context: context)),
-    );
+  return LayoutBuilder(
+    builder: (BuildContext context, BoxConstraints constraints) {
+
+      // var  
+      screenSize = MediaQuery.of(context).size;
+      isExpandedView = screenSize.width>600;
+
+      return Theme(
+          data: Theme.of(context).copyWith(primaryColor: colorAccent,appBarTheme: appBarTheme),
+          child: Scaffold(
+            appBar: AppBar(),
+            body: body(context: context)),
+        );
+    }
+  );
   }
 
   /// WIDGETS
@@ -40,25 +51,48 @@ class AuthView extends GetView<LoginController> {
     // Definimos los estilos de colores de los botones
     Color colorButtonText0 = Colors.white;
     Color colorButton0 = Colors.blue;
-    
-    return Column(
-      children: [
-        Flexible( child: OnboardingIntroduction(colorAccent: colorButton0,colorText: darkMode?Colors.white:Colors.black,)),
-        Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [  
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20),
-                child: widgetCheckAcceptPrivacyAndUsePolicy(),
-              ),
-              button(callback: controller.login,text:"Iniciar sesión con google",colorButton: Colors.blueAccent,colorText: colorButtonText0),
-              button(callback: controller.signInAnonymously,text:"Entrar como invitado",colorButton: Colors.blueGrey,colorText: colorButtonText0),
-              const SizedBox(height: 12.0),
-            ],
-    
+
+    // widget
+    List<Widget> widgets = [
+      Flexible( child: Card(
+        color: darkMode?Colors.white10:Colors.white,
+        elevation:0, 
+        child: OnboardingIntroduction(colorAccent: colorButton0,colorText: darkMode?Colors.white:Colors.black,))),
+      SizedBox(
+        width: isExpandedView?400:double.infinity,
+        child: Padding(
+          padding: EdgeInsets.all(isExpandedView?20.0:0),
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [ 
+                // check button : aceptar terminos y condiciones   
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: FadeIn(
+                    key:  Key((!controller.getStateCheckAcceptPrivacyAndUsePolicy).toString()),
+                    animate:true,
+                    child: ClipRRect( 
+                      borderRadius: BorderRadius.circular(12.0),
+                      child: Obx(() => AnimatedContainer( 
+                        duration: const Duration(milliseconds:500),
+                        color: controller.checkPolicyAlertColor.value,
+                        child: widgetCheckAcceptPrivacyAndUsePolicy()))),
+                  ),
+                ),
+                // buttons : login with google 
+                button(callback: controller.login,text:"Iniciar sesión con google",colorButton: Colors.blueAccent,colorText: colorButtonText0),
+                // button : login with anonymous
+                button(callback: controller.signInAnonymously,text:"Entrar como invitado",colorButton: Colors.blueGrey,colorText: colorButtonText0),
+                const SizedBox(height: 12.0),
+              ],
+              
+          ),
         ),
-      ],
-    );
+      ),
+    ];
+    
+    return isExpandedView?Row(children:widgets):Column(children: widgets);
   }
 
   /// WIDGETS COMPONENT
@@ -262,20 +296,28 @@ class _OnboardingIntroductionState extends State<OnboardingIntroduction> {
   @override
   Widget build(BuildContext context) {
 
+    // Getx controller <LoginController>
+    final LoginController loginController = Get.find();
     // Obtenemos los valores
     darkMode = Theme.of(context).brightness==Brightness.dark;
     screenSize = MediaQuery.of(context).size;
  
     // lista de widgets con las vistas
     widgets = [
-      pageView(context:context,colorContent:Colors.transparent,textColor: widget.colorText,colorIcon: Colors.orange.shade300,iconData: Icons.monetization_on,titulo:"VENTAS",subtitulo:"Registra tus ventas de una forma simple 😊"),
-      pageView(context:context,colorContent:Colors.transparent,textColor: widget.colorText,colorIcon: Colors.teal.shade300,iconData: Icons.analytics_outlined,titulo:"TRANSACCIONES",subtitulo:"Observa las transacciones que has realizado 💰"),
-      pageView(context:context,colorContent:Colors.transparent,textColor: widget.colorText,colorIcon: Colors.deepPurple.shade300,iconData: Icons.category,titulo:"CATÁLOGO",subtitulo:"Arma tu catálogo y controla el stock de tus productos \n 🍫🍬🥫🍾"),
+      pageView( context:context,colorContent:Colors.transparent,textColor: Colors.white,colorIcon: Colors.orange.shade300,iconData: Icons.monetization_on,titulo:"VENTAS",subtitulo:"Registra tus ventas de una forma simple 😊"),
+      pageView( context:context,colorContent:Colors.transparent,textColor: Colors.white,colorIcon: Colors.teal.shade300,iconData: Icons.analytics_outlined,titulo:"TRANSACCIONES",subtitulo:"Observa las transacciones que has realizado 💰"),
+      pageView( context:context,colorContent:Colors.transparent,textColor: Colors.white,colorIcon: Colors.deepPurple.shade300,iconData: Icons.category,titulo:"CATÁLOGO",subtitulo:"Arma tu catálogo y controla el stock de tus productos \n 🍫🍬🥫🍾"),
     ];
+
+    String uriImage = index==0?loginController.sellImagen:index==1?loginController.transactionImage:loginController.catalogueImage;
+
 
     
     return Stack(
       children: [
+        // Imagen background
+        ClipRRect( borderRadius: BorderRadius.circular(10.0), child: Opacity(opacity: 0.8,child: Image(image: AssetImage(uriImage),width: double.infinity,height:double.infinity,fit: BoxFit.cover))) ,
+        // view : contenidos
         Column(
           children: [
             SafeArea(
@@ -292,7 +334,7 @@ class _OnboardingIntroductionState extends State<OnboardingIntroduction> {
                           borderRadius: BorderRadius.circular(10.0),
                           child: LinearProgressIndicator(
                             minHeight: 5,
-                            color: widget.colorAccent,
+                            color: Colors.white,
                             backgroundColor: darkMode?Colors.white12:Colors.black12,
                             value: indicatorProgressItem01,
                           ),
@@ -307,7 +349,7 @@ class _OnboardingIntroductionState extends State<OnboardingIntroduction> {
                           borderRadius: BorderRadius.circular(10.0),
                           child: LinearProgressIndicator(
                             minHeight: 5,
-                            color: widget.colorAccent,
+                            color: Colors.white,
                             backgroundColor: darkMode?Colors.white12:Colors.black12,
                             value: indicatorProgressItem02,
                           ),
@@ -322,7 +364,7 @@ class _OnboardingIntroductionState extends State<OnboardingIntroduction> {
                           borderRadius: BorderRadius.circular(10.0),
                           child: LinearProgressIndicator(
                             minHeight: 5,
-                            color: widget.colorAccent,
+                            color: Colors.white,
                             backgroundColor: darkMode?Colors.white12:Colors.black12,
                             value: indicatorProgressItem03,
                           ),
@@ -340,9 +382,9 @@ class _OnboardingIntroductionState extends State<OnboardingIntroduction> {
         Row(
           children: [
             // toque izquierdo
-            Flexible(child: InkWell(onTap: leftTouch,highlightColor: Colors.transparent,splashColor: Colors.transparent)),
+            Flexible(child: InkWell(onTap: leftTouch,highlightColor: Colors.transparent,splashColor: Colors.transparent,focusColor: Colors.transparent,hoverColor: Colors.transparent,)),
             //  toque derecho
-            Flexible(child: InkWell(onTap: rightTouch,highlightColor: Colors.transparent,splashColor: Colors.transparent)),
+            Flexible(child: InkWell(onTap: rightTouch,highlightColor: Colors.transparent,splashColor: Colors.transparent,focusColor: Colors.transparent,hoverColor: Colors.transparent,)),
             //  touch
           ],
         ),
@@ -355,8 +397,8 @@ class _OnboardingIntroductionState extends State<OnboardingIntroduction> {
     // Definimos los estilos
     colorContent ??= Theme.of(context).brightness==Brightness.dark?Colors.white:Colors.black;
     colorIcon ??= colorContent;
-    final estiloTitulo = TextStyle(fontSize: 30.0, fontWeight: FontWeight.bold,color: textColor);
-    final estiloSubTitulo = TextStyle(fontSize: 20.0,color: textColor.withOpacity(0.5));
+    final estiloTitulo = TextStyle(fontSize: 34.0, fontWeight: FontWeight.bold,color: textColor);
+    final estiloSubTitulo = TextStyle(fontSize: 24.0,fontWeight: FontWeight.bold,color: textColor.withOpacity(0.8));
 
     return SafeArea(
         child: Padding(
@@ -364,11 +406,14 @@ class _OnboardingIntroductionState extends State<OnboardingIntroduction> {
           child: Column(
             children: <Widget>[
               const Spacer(),
+              // view : si existe mostramos una imagen de asset
               assetImage!=null?Padding(padding: const EdgeInsets.all(12.0),child: Image(image: assetImage,width: screenSize.width / 2,height: screenSize.height / 2,fit: BoxFit.contain),):Container(),
-              iconData!=null?Container(padding:const EdgeInsets.all(12.0),child:Icon(iconData,size: screenSize.height*0.10,color: colorIcon)).animate(key: Key(subtitulo)).move():Container(),
+              // icon : un icono con animion
+              iconData!=null?Container(padding:const EdgeInsets.all(12.0),child:FadeInDown(key: Key(titulo),duration: const Duration(milliseconds: 500),child: Icon(iconData,size: screenSize.height*0.10,color: colorIcon))):Container(),
               Text(titulo,style: estiloTitulo,textAlign: TextAlign.center),
               const SizedBox(height: 12.0),
-              Text(subtitulo,style: estiloSubTitulo,textAlign: TextAlign.center),
+              // text : un texto con animacion
+              FadeInUp(key: Key(subtitulo),animate: true,delay: const Duration(milliseconds: 700), child: Text(subtitulo,style: estiloSubTitulo,textAlign: TextAlign.center)),  
               const SizedBox(height: 12.0),
               const Spacer(),
             ],

@@ -210,11 +210,37 @@ class HomeController extends GetxController {
         TargetContent(
           padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20.0),
             align: ContentAlign.top, 
-            child: const Column(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
+              children: const <Widget>[
                 Text("Registra una venta rápida",style: titleSTexttyle),
+                Padding(padding: EdgeInsets.only(top: 10.0),child: Text("Puedes registrar un producto rapido solo con el precio y opcionalmente una descripción",style: descriptionTextStyle),),
+              ],
+            )
+        )
+      ]
+    );
+  }
+  TargetFocus get viewTicketTargetFocus{
+
+    // style
+    const TextStyle titleSTexttyle =  TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 25.0);
+    const TextStyle descriptionTextStyle = TextStyle(color: Colors.white,fontSize: 18.0);
+    
+    
+    return TargetFocus(
+      identify: "ticket",
+      keyTarget: floatingActionButtonRegisterFlashKeyButton,
+      contents: [
+        TargetContent(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20.0),
+            align: ContentAlign.top, 
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const <Widget>[
+                Text("vista previa del ticket",style: titleSTexttyle),
                 Padding(padding: EdgeInsets.only(top: 10.0),child: Text("Puedes registrar un producto rapido solo con el precio y opcionalmente una descripción",style: descriptionTextStyle),),
               ],
             )
@@ -235,10 +261,10 @@ class HomeController extends GetxController {
         TargetContent(
           padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20.0),
             align: ContentAlign.bottom, 
-            child: const Column(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
+              children: const <Widget>[
                 Text("Agrega productos rápidamente",style: titleSTexttyle),
                 Padding(padding: EdgeInsets.only(top: 10.0),child: Text("En esta sección aparecen tus productos favoritos y los que allas vendido",style: descriptionTextStyle),),
               ],
@@ -260,10 +286,10 @@ class HomeController extends GetxController {
         TargetContent(
           padding: const EdgeInsets.only(left: 12.0,right: 12.0,bottom: 100.0),
             align: ContentAlign.top, 
-            child: const Column(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
+              children:const <Widget>[
                 Text("Registra la venta",style: titleSTexttyle),
                 Padding(padding: EdgeInsets.only(top: 10.0),child: Text("Procede a registrar tu primera transacción",style: descriptionTextStyle),),
               ],
@@ -286,10 +312,10 @@ class HomeController extends GetxController {
         TargetContent(
           padding: const EdgeInsets.only(left: 12.0,right: 12.0,bottom: 130.0),
             align: ContentAlign.top, 
-            child: const Column(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
+              children: const <Widget>[
                 Text("Elige el método de pago y listo",style: titleSTexttyle),
                 //Padding(padding: EdgeInsets.only(top: 10.0),child: Text("Procede a registrar tu primera transacción",style: TextStyle(color: Colors.white),),),
               ],
@@ -312,7 +338,7 @@ class HomeController extends GetxController {
         TargetContent(
           padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 50.0),
             align: ContentAlign.top, 
-            child: const Column(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[ 
@@ -338,10 +364,10 @@ class HomeController extends GetxController {
         TargetContent(
           padding: const EdgeInsets.only(left: 12.0,right: 12.0,bottom: 100.0),
             align: ContentAlign.top, 
-            child: const Column(
+            child:  Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[ 
+              children: <Widget>  [ 
                 Text("Escanea el código de barra de un producto",style: titleSTexttyle),  
               ],
             )
@@ -362,10 +388,10 @@ class HomeController extends GetxController {
         TargetContent(
           padding: const EdgeInsets.only(left: 12.0,right: 12.0,top: 100.0),
             align: ContentAlign.bottom, 
-            child: const Column(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[ 
+              children: const <Widget>[ 
                 Text("Elige la Caja en la que vas a vender",style: titleSTexttyle),  
               ],
             )
