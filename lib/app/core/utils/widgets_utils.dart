@@ -1,7 +1,6 @@
 
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -378,7 +377,7 @@ class _ProductoItemState extends State<ProductoItem> {
                         fontWeight: FontWeight.normal,
                         fontSize: 14.0,
                         color: Colors.grey),
-                    overflow: TextOverflow.fade,
+                    overflow: TextOverflow.clip,
                     softWrap: false),
                 Text(
                     Publications.getFormatoPrecio(
@@ -388,7 +387,7 @@ class _ProductoItemState extends State<ProductoItem> {
                         fontWeight: FontWeight.bold,
                         fontSize: 16.0,
                         color: Colors.black),
-                    overflow: TextOverflow.fade,
+                    overflow: TextOverflow.clip,
                     softWrap: false),
               ],
             ),

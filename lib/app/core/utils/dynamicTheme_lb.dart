@@ -41,8 +41,10 @@ class ThemeService {
 
   /// Switch theme and save to local storage
   static void switchTheme() {
-    if (Platform.isAndroid) {
-      
+
+    saveSsDarkMode(!loadisDArkMode());
+    Get.changeThemeMode(loadisDArkMode() ? ThemeMode.light : ThemeMode.dark);
+    if (Platform.isAndroid) { 
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
         systemNavigationBarColor: loadisDArkMode()
             ? ThemesDataApp.light.scaffoldBackgroundColor
@@ -61,8 +63,8 @@ class ThemeService {
             : ThemesDataApp.dark.scaffoldBackgroundColor,
       ));
     }
-    Get.changeThemeMode(loadisDArkMode() ? ThemeMode.light : ThemeMode.dark);
-    saveSsDarkMode(!loadisDArkMode());
+    
+    
   }
   static void switchThemeColor({required Color color}) {
     if (Platform.isAndroid) {
