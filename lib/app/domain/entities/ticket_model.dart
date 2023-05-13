@@ -56,8 +56,8 @@ class TicketModel {
       seller: data['seller'] ?? '',
       currencySymbol: data['currencySymbol'] ?? '\$',
       cashRegister: data['cashRegister'] ?? '1',
-      priceTotal: data['priceTotal'] ?? 0.0,
-      valueReceived: data['valueReceived'] ?? 0.0,
+      priceTotal: (data['priceTotal'] ?? 0).toDouble(),
+      valueReceived: (data['valueReceived'] ?? 0).toDouble(),
       listPoduct: data['listPoduct'] ?? [],
       creation: data['creation'],
     );

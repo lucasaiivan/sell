@@ -45,65 +45,72 @@ class Publications {
 
   // Recibe la fecha y la decha actual para devolver hace cuanto tiempo se publico
   static String getFechaPublicacionFormating({required DateTime dateTime}) => DateFormat('dd/MM/yyyy HH:mm').format(dateTime).toString();
-  static String getFechaPublicacion(
-      DateTime fechaPublicacion, DateTime fechaActual) {
-    String sFecha = "";
-
-    var diffDt = fechaActual.difference(fechaPublicacion);
-
-    // Calcular tiempos (Feacha de pubicación)
-    var diff_Munutos = diffDt.inMinutes;
-    var diff_Horas = diffDt.inHours;
-    var diff_Dias = diffDt.inDays;
-
-    if (diff_Dias == 0) {
-      if (diff_Horas > 0) {
-        // si la publicacion tiene menos de 24 horas
-        if (diff_Horas == 1) {
-          sFecha = "Hace " + diff_Horas.toString() + " " + "hora";
-        } else {
-          sFecha = "Hace " + diff_Horas.toString() + " horas";
-        }
-      } else if (
-          // si la publicacion tiene más de 24 horas
-          diff_Munutos != 0) {
-        if (diff_Munutos == 1) {
-          sFecha = "Hace " + diff_Munutos.toString() + " minutos";
-        } else if (diff_Munutos > 1) {
-          sFecha = "Hace " + diff_Munutos.toString() + " minutos";
-        }
-      } else {
-        sFecha = "Hace instantes";
-      }
-    } else if (diff_Dias == 1) {
-      sFecha = "Ayer";
-    } else if (diff_Dias == 2) {
-      sFecha = "Ante ayer";
-    } else if (diff_Dias == 3) {
-      sFecha = "Hace 3 días";
-    } else if (diff_Dias == 4) {
-      sFecha = "Hace 4 días";
-    } else if (diff_Dias == 5) {
-      sFecha = "Hace 5 días";
-    } else if (diff_Dias >= 7 && diff_Dias <= 12) {
-      sFecha = "Hace una semana";
-    } else if (diff_Dias >= 30 && diff_Dias <= 50) {
-      sFecha = "Hace un mes";
-    } else if (diff_Dias >= 60 && diff_Dias <= 80) {
-      sFecha = "Hace dos meses";
-    } else if (diff_Dias >= 80 && diff_Dias <= 100) {
-      sFecha = "Hace tres meses";
-    } else if (diff_Dias >= 100 && diff_Dias <= 120) {
-      sFecha = "Hace cuatro meses";
-    } else if (diff_Dias >= 365 && diff_Dias <= 600) {
-      sFecha = "Hace cuatro meses";
+  static String getFechaPublicacionSimple(DateTime postDate, DateTime currentDate) {
+  /** 
+    Obtiene la fecha de publicación en formato legible para el usuario.
+    @param postDate La fecha de publicación del contenido.
+    @param currentDate La fecha actual del sistema.
+    @return La fecha en formato legible para el usuario.
+  */
+  if (postDate.year != currentDate.year) {
+    // Si la publicación es de un año diferente, muestra la fecha completa
+    return DateFormat('dd MMM. yyyy').format(postDate);
+  } else if (postDate.month != currentDate.month || postDate.day != currentDate.day) {
+    // Si la publicación no es del mismo día de hoy
+    if (postDate.year == currentDate.year &&
+        postDate.month == currentDate.month &&
+        postDate.day == currentDate.day - 1) {
+      // Si la publicación es del día anterior, muestra "Ayer"
+      return 'Ayer';
     } else {
-      // si la publicación tiene más de 5 dias
-      return DateFormat('dd MMM.  yyyy').format(fechaPublicacion);
+      // Si la publicación no es del día anterior, muestra la fecha sin el año
+      return DateFormat('dd MMM.').format(postDate);
     }
-
-    return sFecha;
+  } else {
+    // Si la publicación es del mismo día de hoy, muestra "Hoy"
+    return 'Hoy';
   }
+} 
+static String getFechaPublicacion(DateTime fechaPublicacion, DateTime fechaActual) {
+  /** 
+    Obtiene la fecha de publicación en formato legible para el usuario.
+    @param fechaPublicacion La fecha de publicación del contenido.
+    @param fechaActual La fecha actual del sistema.
+    @return La fecha en formato legible para el usuario.
+  */
+  if (fechaPublicacion.year != fechaActual.year) {
+    // Si la publicación es de un año diferente, muestra la fecha completa
+    return DateFormat('dd MMM. yyyy HH:mm').format(fechaPublicacion);
+  } else if (fechaPublicacion.month != fechaActual.month || fechaPublicacion.day != fechaActual.day) {
+    // Si la publicación no es del mismo día de hoy
+    if (fechaPublicacion.year == fechaActual.year &&
+        fechaPublicacion.month == fechaActual.month &&
+        fechaPublicacion.day == fechaActual.day - 1) {
+      // Si la publicación es del día anterior, muestra "Ayer"
+      return 'Ayer ${DateFormat('HH:mm').format(fechaPublicacion)}';
+    }else {
+      // Si la publicación no es del día anterior, muestra la fecha sin el año
+      return DateFormat('dd MMM. HH:mm').format(fechaPublicacion);
+    }
+  } else {
+    // Si la publicación es del mismo día de hoy
+    Duration difference = fechaActual.difference(fechaPublicacion);
+    if (difference.inMinutes < 30) {
+      // Si la publicación fue hace menos de 30 minutos, muestra "Hace instantes"
+      return 'Hace instantes';
+    } else if (difference.inMinutes < 60) {
+      // Si la publicación fue hace menos de una hora, muestra los minutos
+      return 'Hace ${difference.inMinutes} min.';
+    } else if (difference.inHours < 8) {
+      // Si la publicación fue hace menos de 8 horas, muestra las horas
+      return 'Hace ${difference.inHours} horas';
+    } else {
+      // Si la publicación fue hace 8 horas o más, muestra "Hoy"
+      return 'Hoy';
+    }
+  }
+}
+
 
   static String sGanancia(
       {required double precioCompra, required double precioVenta}) {
@@ -117,7 +124,7 @@ class Publications {
 class Utils {
   // Devuelve un color Random
   static MaterialColor getRandomColor() {
-    List<MaterialColor> lista_color = [
+    List<MaterialColor> listaColor = [
       Colors.amber,
       Colors.blue,
       Colors.blueGrey,
@@ -140,7 +147,7 @@ class Utils {
       Colors.deepPurple,
     ];
 
-    return lista_color[Random().nextInt(lista_color.length)];
+    return listaColor[Random().nextInt(listaColor.length)];
   }
 
   String capitalize(String input) {

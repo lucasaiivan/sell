@@ -1,16 +1,16 @@
 import 'package:blur/blur.dart';
 import 'package:cached_network_image/cached_network_image.dart'; 
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart'; 
 import 'package:intl/intl.dart'; 
 import 'package:sell/app/core/utils/fuctions.dart';
-import 'package:sell/app/core/utils/widgets_utils.dart';
+import 'package:sell/app/core/utils/widgets_utils.dart'; 
 import '../../../domain/entities/ticket_model.dart';
 import '../../../core/utils/dynamicTheme_lb.dart';
 import '../../home/controller/home_controller.dart';
 import '../controller/transactions_controller.dart';
-import 'package:animate_do/animate_do.dart';
+import 'package:animate_do/animate_do.dart'; 
 
 // ignore: must_be_immutable
 class TransactionsView extends StatelessWidget {
@@ -87,6 +87,7 @@ class TransactionsView extends StatelessWidget {
   }
 
   Widget body({required BuildContext context}) {
+
     // others controllers
     final TransactionsController transactionsController = Get.find();
 
@@ -95,31 +96,39 @@ class TransactionsView extends StatelessWidget {
       return Center( child: Text( 'Sin transacciones ${transactionsController.getFilterText.toLowerCase()}'));
     }
 
+    // define una variable currentDate para realizar el seguimiento de la fecha actual en la que se está construyendo la lista. Inicializa esta variable con la fecha de la primera transacción en la lista
+    DateTime currentDate = transactionsController.getTransactionsList[0].creation.toDate();
+    // lista de widgets List<Widget> donde se almacenarán los elementos de la lista
+    List<Widget> transactions = [];
+    // Itera sobre la lista de transacciones y verifica si la fecha de la transacción actual es diferente a la fecha actual. Si es así, crea un elemento Divider y actualiza la fecha actual
+    for (int i = 0; i < transactionsController.getTransactionsList.length; i++) {
+      // condition : si es la primera transacción
+      if(i==0){
+        // add : añade tarjetas de estadísticas
+        transactions.add(StaticsCards()); 
+        // add : añade un Text con el texto 'Registros'
+        transactions.add(const Padding(padding: EdgeInsets.only(left: 8.0,top: 20.0,bottom:4.0),child: Text('Registros',style:TextStyle(fontSize: 24,fontWeight: FontWeight.w300))));
+      }
+      // condition : si la fecha actual es diferente a la fecha de la transacción actual
+      if (currentDate.day != transactionsController.getTransactionsList[i].creation.toDate().day || i==0) {
+        //  set : actualiza la fecha actual de la variable
+        currentDate = transactionsController.getTransactionsList[i].creation.toDate();
+        // add : añade un Container con el texto de la fecha como divisor
+        transactions.add(Container(padding: const EdgeInsets.symmetric(horizontal: 8.0,vertical: 8.0),width: double.infinity,color: Colors.grey.withOpacity(.05),child: Opacity(opacity: 0.8,child: Text(Publications.getFechaPublicacionSimple(  transactionsController.getTransactionsList[i].creation.toDate(),Timestamp.now().toDate()),textAlign: TextAlign.center,style: const TextStyle(fontSize: 18,fontWeight: FontWeight.w300)))));
+      }
+      //  add : añade el elemento de la lista actual a la lista de widgets
+      transactions.add(tileItem(ticketModel: transactionsController.getTransactionsList[i]),);
+      // agregar un divider
+      transactions.add( ComponentApp().divider());
+    }
+    // Finalmente, utiliza la lista de widgets widgets e
     return ListView.builder(
-      
-      itemCount: transactionsController.getTransactionsList.length,
-      itemBuilder: (context, index) {
-        if (index == 0) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              WidgetAnalyticSalesTileExpanded(),
-              WidgetAnalyticProductsTileExpanded(),
-              tileItem( ticketModel: transactionsController.getTransactionsList[index]),
-              ComponentApp().divider(),
-            ],
-          );
-        }
-
-        return Column(
-          children: [
-            tileItem(ticketModel: transactionsController.getTransactionsList[index]),
-            ComponentApp().divider(),
-          ],
-        );
+      itemCount: transactions.length,
+      itemBuilder: (BuildContext context, int index) {
+        return transactions[index];
       },
     );
+
   }
 
   // WIDGETS COMPONENTS
@@ -248,7 +257,8 @@ class TransactionsView extends StatelessWidget {
         child: InkWell(
           onLongPress: () =>  showAlertDialogTransactionInformation(buildContext,ticketModel.toJson()),
           onTap: () => showAlertDialogTransactionInformation(buildContext,ticketModel.toJson()),
-          child: listTile),
+          child: listTile,
+          ),
       ),
     );
   }
@@ -447,8 +457,8 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
     textFilter = transactionsController.getFilterText;
     priceTotal = transactionsController.getInfoPriceTotal();
     revenue  = transactionsController.readTotalEarnings();
-    colorCard = darkMode? Colors.blue.withOpacity(0.1) : isExpanded?Colors.black.withOpacity(0.1):Colors.black.withOpacity(0.9);
-    themeData = darkMode?ThemeData.dark():isExpanded?ThemeData.light():ThemeData.dark();
+    colorCard = darkMode? Colors.blue.withOpacity(0.1) :Colors.black.withOpacity(0.1);
+    themeData = darkMode?ThemeData.dark():ThemeData.light();
 
     // widget : productos de mayor ganancia
     Widget wProductsRevenue = transactionsController.getBestSellingProductList.isEmpty?Container():Column(
@@ -697,7 +707,7 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
                                   LogoPremium(size: 12),
                                 ],
                               ),
-                            ),
+                            ), 
                             // view : productos con mayor ganancia
                             wProductsRevenue,
                             //  view : medios de pagos
@@ -723,9 +733,10 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
 }
 
 class WidgetAnalyticProductsTileExpanded extends StatefulWidget {
+ 
 
   // ignore: prefer_const_constructors_in_immutables
-  WidgetAnalyticProductsTileExpanded({super.key,});
+  WidgetAnalyticProductsTileExpanded({ super.key,});
   // muestra un item con contenedor expandible
   @override
   // ignore: library_private_types_in_public_api
@@ -762,8 +773,8 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
     textFilter = transactionsController.getFilterText;
     priceTotal = transactionsController.getInfoPriceTotal();
     revenue  = transactionsController.readTotalEarnings();
-    colorCard = darkMode? Colors.blue.withOpacity(0.1) : isExpanded?Colors.black.withOpacity(0.1):Colors.black.withOpacity(0.9);
-    themeData = darkMode?ThemeData.dark():isExpanded?ThemeData.light():ThemeData.dark();
+    colorCard = darkMode? Colors.blue.withOpacity(0.1) : Colors.black.withOpacity(0.1) ;
+    themeData = darkMode?ThemeData.dark():ThemeData.light();
 
     // widget : productos con mayor ganancia
     Widget higherPriedProductsWidget = transactionsController.getBestSellingProductsByAmount.isEmpty?Container():Column(
@@ -790,16 +801,17 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
                 itemBuilder: (context, index) {
                   return Column(
                     children: [
+                      // 
                       ListTile(
                         leading: CachedNetworkImage(
-                              imageUrl:transactionsController.getBestSellingProductsByAmount[index].image,
-                              placeholder: (context, url) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
-                              imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Padding(
-                                padding: const EdgeInsets.only(left: 5),
-                                child: CircleAvatar(backgroundImage: image),
-                              )),
-                              errorWidget: (context, url, error) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
-                            ),
+                          imageUrl:transactionsController.getBestSellingProductsByAmount[index].image,
+                          placeholder: (context, url) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                          imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: Padding(
+                            padding: const EdgeInsets.only(left: 5),
+                            child: CircleAvatar(backgroundImage: image),
+                            )),
+                            errorWidget: (context, url, error) => CircleAvatar(radius: 14,backgroundColor: Get.theme.dividerColor),
+                          ),
                         title: Text(transactionsController.getBestSellingProductsByAmount[index].nameMark,overflow:TextOverflow.ellipsis,style:const TextStyle()),
                         subtitle: Text(transactionsController.getBestSellingProductsByAmount[index].description,overflow:TextOverflow.ellipsis,style:const TextStyle( )),
                         trailing: Text(transactionsController.getBestSellingProductsByAmount[index].quantity.toString(),style:const TextStyle(color:Colors.blue)),
@@ -992,3 +1004,150 @@ class _WidgetAnalyticProductsTileExpandedState extends State<WidgetAnalyticProdu
     );
   }
 }
+
+class StaticsCards extends StatelessWidget {
+  StaticsCards({Key? key}) : super(key: key);
+
+  // controllers
+  final TransactionsController transactionsController = Get.find();
+  final HomeController homeController = Get.find<HomeController>();
+
+  // variables
+  late String priceTotal;
+  late String revenue;
+
+  @override
+  Widget build(BuildContext context) {
+
+    // get
+    priceTotal = transactionsController.getInfoPriceTotal();
+    revenue  = transactionsController.readTotalEarnings();
+
+
+
+    // widgets
+    List<Widget> cards =   [ 
+          CardAnalityc(
+            backgroundColor: Colors.blueGrey.shade200.withOpacity(0.7),
+            titleText: 'Facturación',
+            valueText: priceTotal,
+            description: '',
+            ), 
+          CardAnalityc( 
+            backgroundColor: Colors.green.shade200.withOpacity(0.7),
+            titleText: 'Ganancia',
+            valueText: revenue,
+            description: '',
+            ),    
+          CardAnalityc( 
+            backgroundColor: Colors.teal.shade200.withOpacity(0.7),
+            titleText: 'Transacciones',
+            valueText: transactionsController.getTransactionsList.length.toString(),
+            description: '',
+            ), 
+          CardAnalityc( 
+            backgroundColor: Colors.orangeAccent.shade100.withOpacity(0.7),
+            titleText: 'Medio de pago',
+            valueText: Publications.getFormatoPrecio(monto: transactionsController.getPreferredPaymentMethod()['value'] ),
+            description:'${transactionsController.getPreferredPaymentMethod()['name']} más usado',
+            ),
+          CardAnalityc( 
+            backgroundColor: Colors.blue.shade200.withOpacity(0.7),
+            titleText: 'Productos vendidos',
+            valueText: Publications.getFormatAmount(value:transactionsController.readTotalProducts()),
+            description: '',
+            ), 
+          CardAnalityc( 
+            backgroundColor: Colors.cyan.shade200.withOpacity(0.7),
+            titleText: 'Producto más vendido',
+            valueText:transactionsController.getBestSellingProductList.isNotEmpty? transactionsController.getBestSellingProductList[0].description:'Sin datos',
+            description: 'Ganancias ${'${ transactionsController.getBestSellingProductList.isNotEmpty?Publications.getFormatoPrecio(monto: transactionsController.getBestSellingProductList[0].revenue ):'Sin datos'}'}',
+            ), 
+        ]; 
+    // reversed : primero revertimos el orden de las cajas y luego las agregamos a la lista de tarjetas 
+    Map.fromEntries(transactionsController.getCashAnalysisMap.entries.toList().reversed) .forEach((key, value) {
+      // add : agregamos las tarjetas de las cajas en una posicion especifica
+      cards.insert(2,CardAnalityc( 
+            backgroundColor: Colors.grey.shade400.withOpacity(0.7),
+            titleText: 'Caja $key',
+            valueText: Publications.getFormatoPrecio(monto: value ),
+            description: 'Total',
+            ));
+    }); 
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 12),
+      child: Wrap( 
+        crossAxisAlignment: WrapCrossAlignment.start,
+        alignment: WrapAlignment.start,
+        direction: Axis.horizontal,
+        spacing: 8,
+        runSpacing: MediaQuery.of(context).size.width < 600 ? 8 : 16,
+        children: cards,
+      ),
+    );
+  }
+}
+
+// CLASS : una simple clase llamada 'CardAnalityc' de un tarjeta [Card] vacia con fondo gris con un aspecto de relacion aspecto cuadrado
+class CardAnalityc extends StatelessWidget {
+
+  late final dynamic backgroundColor;
+  late final String titleText;
+  late final String description;
+  late final String valueText; 
+
+  // ignore: prefer_const_constructors_in_immutables
+  CardAnalityc({Key? key,this.backgroundColor=Colors.grey,this.titleText='',this.description='',this.valueText='' }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+
+
+    // var : logica para el tamaño de la tarjeta
+    double width =  MediaQuery.of(context).size.width / 2 - 12;
+    if( MediaQuery.of(context).size.width > 500){  width = MediaQuery.of(context).size.width / 2 - 12;}
+    if( MediaQuery.of(context).size.width > 600){  width = MediaQuery.of(context).size.width / 3 - 12;}
+    if(MediaQuery.of(context).size.width > 800){  width = MediaQuery.of(context).size.width / 4 - 12;}
+    if(MediaQuery.of(context).size.width > 1000){  width = MediaQuery.of(context).size.width / 5 - 12;}
+
+    return SizedBox(
+      width:width,
+      height: 130,
+      child: AspectRatio(
+        aspectRatio: 1.2,
+        child: Card(
+          color: backgroundColor,
+          clipBehavior: Clip.antiAlias,
+          elevation: 0,
+          margin: const EdgeInsets.all(0),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: content,
+          ),
+        ),
+      ),
+    );
+  }
+  // WIDGETS VIEWS
+  Widget get content {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [ 
+        Text(titleText,style: const TextStyle(fontWeight: FontWeight.w400)),
+        const Spacer(),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(valueText,maxLines: 2, textAlign: TextAlign.start, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w500,overflow: TextOverflow.clip)),
+            description==''?Container():Opacity(opacity: 0.7, child: Text(description, style: const TextStyle(fontSize: 12))),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+
+ 
