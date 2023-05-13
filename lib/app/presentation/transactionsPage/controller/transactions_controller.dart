@@ -20,9 +20,18 @@ class TransactionsController extends GetxController {
 
   // obtenemos los modos de pagos y sus respectivas ganancias
   // description : efective (Efectivo) - mercadopago (Mercado Pago) - card (Tarjeta De Crédito/Débito)
-  Map<String,double> analyticsMeansOfPaymentMap = {}; 
-  Map<String,double> get getAnalyticsMeansOfPayment => analyticsMeansOfPaymentMap;
-  set setAnalyticsMeansOfPayment(Map<String,double> value) => analyticsMeansOfPaymentMap = value;
+  Map<String,double> _analyticsMeansOfPaymentMap = {}; 
+  Map<String,double> get getAnalyticsMeansOfPayment => _analyticsMeansOfPaymentMap;
+  set setAnalyticsMeansOfPayment(Map<String,double> value) => _analyticsMeansOfPaymentMap = value;
+  Map<String,dynamic>  getPreferredPaymentMethod(){
+      //obtenemos el modo de pago que se utilizo más 
+      List<MapEntry<String, double>> list = getAnalyticsMeansOfPayment.entries.toList();
+      list.sort((a, b) => b.value.compareTo(a.value));
+      if( list.isNotEmpty){
+        return {'name':list[0].key,'value': list[0].value};
+      }
+      return {'name':'','value': 0.0};
+    }
 
   // obtenemos los montos de cada caja
     Map<String,double> cashAnalysisMap = {}; 
@@ -112,9 +121,7 @@ class TransactionsController extends GetxController {
     //obtenemos los documentos creados el año pasado
 
     // a la marca de tiempo actual le descontamos dias
-    DateTime getTime = Timestamp.now().toDate();
-    //Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(DateTime(getTime.year, 1, 1, 0).millisecondsSinceEpoch);
-    
+    DateTime getTime = Timestamp.now().toDate(); 
     //  a la marca de tiempo actual le descontamos dias del mes
     Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(
         DateTime(getTime.year-1, 0, 0, 0).millisecondsSinceEpoch);
@@ -465,7 +472,7 @@ class TransactionsController extends GetxController {
     for (var element in getTransactionsList) {
       switch (element.payMode) {
         case 'effective':
-          getAnalyticsMeansOfPayment.containsKey('Efectivo')?getAnalyticsMeansOfPayment['Efectivo']=(getAnalyticsMeansOfPayment['Efectivo'] as double) +element.priceTotal : getAnalyticsMeansOfPayment['Efectivo']=element.priceTotal;
+          getAnalyticsMeansOfPayment.containsKey('Efectivo') ? getAnalyticsMeansOfPayment['Efectivo']=(getAnalyticsMeansOfPayment['Efectivo'] as double) +element.priceTotal : getAnalyticsMeansOfPayment['Efectivo']=element.priceTotal;
           break;
         case 'mercadopago':
           getAnalyticsMeansOfPayment.containsKey('Mercado Pago')?getAnalyticsMeansOfPayment['Mercado Pago']= (getAnalyticsMeansOfPayment['Mercado Pago'] as double) + element.priceTotal : getAnalyticsMeansOfPayment['Mercado Pago']= element.priceTotal;
@@ -479,6 +486,7 @@ class TransactionsController extends GetxController {
       }
       }
     }
+    
     void readCashAnalysis( ){
     //obtenemos el monto de cada caja
     setCashAnalysisMap = {};
@@ -522,40 +530,40 @@ class TransactionsController extends GetxController {
     }
     return value;
   }
-  String readTotalEarnings(){
-    // leemos el total de las ganancias
+  String readTotalEarnings() {
+  double totalEarnings = 0;
+  String currencySymbol = '\$';
 
-    double value  = 0;
-    double totalSaleValue = 0.0;
-    double fullValueAtCost  = 0.0;
-    String currencySymbol = '\$';
+  // recorremos la lista de transacciones de venta
+  for (TicketModel ticket in getTransactionsList) {
+    currencySymbol = ticket.currencySymbol;
+    double transactionEarnings = 0;
 
-    // recorremos la lista de productos que se vendieron
-    for (TicketModel ticket in getTransactionsList) {
-      currencySymbol= ticket.currencySymbol;
-      for (Map item in ticket.listPoduct) {
+    // recorremos los productos vendidos en la transacción
+    for (Map item in ticket.listPoduct) {
+      final ProductCatalogue product = ProductCatalogue.fromMap(item);
 
-        // var
-        final ProductCatalogue product = ProductCatalogue.fromMap(item);
-
-        if( product.purchasePrice != 0 ){
-          totalSaleValue+= product.salePrice * product.quantity;
-          fullValueAtCost+= product.purchasePrice * product.quantity;
-        }
+      // si el precio de compra es distinto de cero, sumamos las ganancias
+      if (product.purchasePrice != 0) {
+        transactionEarnings += (product.salePrice - product.purchasePrice) * product.quantity;
       }
     }
-    value = totalSaleValue-fullValueAtCost; // obtenemos el total de las ganancias
 
-    return value==0.0?  '':Publications.getFormatoPrecio(monto:value,moneda: currencySymbol);
+    // sumamos las ganancias de la transacción al total de ganancias
+    totalEarnings += transactionEarnings;
   }
+
+  // devolvemos el total de ganancias formateado como una cadena de texto
+  return totalEarnings == 0.0 ? '' : Publications.getFormatoPrecio(monto: totalEarnings, moneda: currencySymbol);
+}
+
   String readEarnings({required TicketModel ticket }){
-    // leemos ganancias
+    // description : leemos las ganancias de una transacción 
 
     // var
-    double value  = 0;
-    double totalSaleValue = 0.0;
-    double fullValueAtCost  = 0.0;
-    String currencySymbol = ticket.currencySymbol;
+    double totalEarnings = 0;
+    String currencySymbol = ticket.currencySymbol; 
+    double transactionEarnings = 0;
 
     // recorremos la lista de productos que se vendieron
     for (Map item in ticket.listPoduct) {
@@ -563,18 +571,17 @@ class TransactionsController extends GetxController {
       // var
       ProductCatalogue product = ProductCatalogue.fromMap(item);
 
-      // get : precio de venta
-      totalSaleValue+= product.salePrice  * product.quantity;
-      //  get : precio de compra
-      if( product.purchasePrice != 0.0){ fullValueAtCost+= product.purchasePrice * product.quantity;}
+      // si el precio de compra es distinto de cero, sumamos las ganancias
+      if (product.purchasePrice != 0) {
+        transactionEarnings += (product.salePrice - product.purchasePrice) * product.quantity;
+      }
     
-    }
-    // obtenemos el resultado final
-    if( fullValueAtCost != 0 ){ 
-      value = totalSaleValue - fullValueAtCost; // obtenemos el total de las ganancias
-    }
+    } 
+    // sumamos las ganancias de la transacción al total de ganancias
+    totalEarnings += transactionEarnings;
 
-    return value  ==  0.0 ?  '':'+${Publications.getFormatoPrecio(monto:value,moneda: currencySymbol)}';
+    // devolvemos el total de ganancias formateado como una cadena de texto
+    return totalEarnings == 0.0 ? '' : Publications.getFormatoPrecio(monto: totalEarnings, moneda: currencySymbol);
   }
   String getInfoPriceTotal() {
 

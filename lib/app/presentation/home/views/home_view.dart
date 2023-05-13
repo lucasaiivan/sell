@@ -5,7 +5,7 @@ import 'package:sell/app/presentation/sellPage/views/sell_view.dart';
 import 'package:sell/app/presentation/cataloguePage/views/catalogue_view.dart';
 import 'package:sell/app/presentation/transactionsPage/views/transactions_view.dart';
 import '../../../core/utils/widgets_utils.dart';
-import '../../multiuser/views/multiuser_view.dart';
+import '../../multiuser/views/multiuser_view.dart';  
 import '../controller/home_controller.dart';
 
 
