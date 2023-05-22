@@ -1,6 +1,8 @@
+ 
 import 'package:blur/blur.dart';
 import 'package:cached_network_image/cached_network_image.dart'; 
-import 'package:cloud_firestore/cloud_firestore.dart'; 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fl_chart/fl_chart.dart'; 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart'; 
 import 'package:intl/intl.dart'; 
@@ -99,7 +101,9 @@ class TransactionsView extends StatelessWidget {
     // define una variable currentDate para realizar el seguimiento de la fecha actual en la que se está construyendo la lista. Inicializa esta variable con la fecha de la primera transacción en la lista
     DateTime currentDate = transactionsController.getTransactionsList[0].creation.toDate();
     // lista de widgets List<Widget> donde se almacenarán los elementos de la lista
-    List<Widget> transactions = [];
+    List<Widget> transactions = []; 
+    // add
+    //transactions.add(WidgetAnalyticSalesTileExpanded());
     // Itera sobre la lista de transacciones y verifica si la fecha de la transacción actual es diferente a la fecha actual. Si es así, crea un elemento Divider y actualiza la fecha actual
     for (int i = 0; i < transactionsController.getTransactionsList.length; i++) {
       // condition : si es la primera transacción
@@ -124,9 +128,7 @@ class TransactionsView extends StatelessWidget {
     // Finalmente, utiliza la lista de widgets widgets e
     return ListView.builder(
       itemCount: transactions.length,
-      itemBuilder: (BuildContext context, int index) {
-        return transactions[index];
-      },
+      itemBuilder: (BuildContext context, int index) => transactions[index],
     );
 
   }
@@ -1021,7 +1023,7 @@ class StaticsCards extends StatelessWidget {
 
     // get
     priceTotal = transactionsController.getInfoPriceTotal();
-    revenue  = transactionsController.readTotalEarnings();
+    revenue  = transactionsController.readTotalEarnings(); 
 
 
 
@@ -1029,39 +1031,49 @@ class StaticsCards extends StatelessWidget {
     List<Widget> cards =   [ 
           CardAnalityc(
             backgroundColor: Colors.blueGrey.shade200.withOpacity(0.7),
+            icon:  const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.attach_money_rounded,color: Colors.white,size:14)))),
             titleText: 'Facturación',
             valueText: priceTotal,
             description: '',
             ), 
           CardAnalityc( 
             backgroundColor: Colors.green.shade200.withOpacity(0.7),
+            icon:  const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.show_chart_rounded,color: Colors.white,size:14)))),
+            subtitle: '%${transactionsController.getPorcentEarningsTotal()}',
             titleText: 'Ganancia',
             valueText: revenue,
             description: '',
             ),    
           CardAnalityc( 
             backgroundColor: Colors.teal.shade200.withOpacity(0.7),
+            icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.receipt,color: Colors.white,size:14)))),
             titleText: 'Transacciones',
             valueText: transactionsController.getTransactionsList.length.toString(),
             description: '',
             ), 
-          CardAnalityc( 
-            backgroundColor: Colors.orangeAccent.shade100.withOpacity(0.7),
-            titleText: 'Medio de pago',
-            valueText: Publications.getFormatoPrecio(monto: transactionsController.getPreferredPaymentMethod()['value'] ),
-            description:'${transactionsController.getPreferredPaymentMethod()['name']} más usado',
-            ),
+          
           CardAnalityc( 
             backgroundColor: Colors.blue.shade200.withOpacity(0.7),
+            icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.category_rounded,color: Colors.white,size:14)))),
             titleText: 'Productos vendidos',
             valueText: Publications.getFormatAmount(value:transactionsController.readTotalProducts()),
             description: '',
             ), 
           CardAnalityc( 
+            backgroundColor: Colors.orangeAccent.shade100.withOpacity(0.7),
+            icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.payment_rounded,color: Colors.white,size:14)))),
+            subtitle: '%${transactionsController.getPreferredPaymentMethod()['porcent'].toString()}',
+            titleText: 'Medio de pago',
+            valueText: Publications.getFormatoPrecio(monto: transactionsController.getPreferredPaymentMethod()['value'] ),
+            description:'${transactionsController.getPreferredPaymentMethod()['name']} más usado',
+            ),
+          CardAnalityc( 
             backgroundColor: Colors.cyan.shade200.withOpacity(0.7),
-            titleText: 'Producto más vendido',
+            icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.query_stats_rounded,color: Colors.white,size:14)))),
+            titleText: 'Rentabilidad',
+            subtitle: '${transactionsController.getBestSellingProductList.isNotEmpty?transactionsController.getBestSellingProductList[0].quantity:''}',
             valueText:transactionsController.getBestSellingProductList.isNotEmpty? transactionsController.getBestSellingProductList[0].description:'Sin datos',
-            description: 'Ganancias ${'${ transactionsController.getBestSellingProductList.isNotEmpty?Publications.getFormatoPrecio(monto: transactionsController.getBestSellingProductList[0].revenue ):'Sin datos'}'}',
+            description: 'Ganancias ${transactionsController.getBestSellingProductList.isNotEmpty?Publications.getFormatoPrecio(monto: transactionsController.getBestSellingProductList[0].revenue ):'Sin datos'}',
             ), 
         ]; 
     // reversed : primero revertimos el orden de las cajas y luego las agregamos a la lista de tarjetas 
@@ -1069,6 +1081,7 @@ class StaticsCards extends StatelessWidget {
       // add : agregamos las tarjetas de las cajas en una posicion especifica
       cards.insert(2,CardAnalityc( 
             backgroundColor: Colors.grey.shade400.withOpacity(0.7),
+            icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.point_of_sale_sharp,color: Colors.white,size:14)))),
             titleText: 'Caja $key',
             valueText: Publications.getFormatoPrecio(monto: value ),
             description: 'Total',
@@ -1096,9 +1109,11 @@ class CardAnalityc extends StatelessWidget {
   late final String titleText;
   late final String description;
   late final String valueText; 
+  late final String subtitle;
+  late final Widget icon;
 
   // ignore: prefer_const_constructors_in_immutables
-  CardAnalityc({Key? key,this.backgroundColor=Colors.grey,this.titleText='',this.description='',this.valueText='' }) : super(key: key);
+  CardAnalityc({Key? key,this.backgroundColor=Colors.grey,this.titleText='',this.description='',this.valueText='',this.subtitle='' ,required this.icon }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -1113,7 +1128,7 @@ class CardAnalityc extends StatelessWidget {
 
     return SizedBox(
       width:width,
-      height: 130,
+      height: 175,
       child: AspectRatio(
         aspectRatio: 1.2,
         child: Card(
@@ -1135,12 +1150,18 @@ class CardAnalityc extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [ 
-        Text(titleText,style: const TextStyle(fontWeight: FontWeight.w400)),
+        Row(
+          children: [
+            icon,
+            Text(titleText,style: const TextStyle(fontWeight: FontWeight.w400),overflow:  TextOverflow.ellipsis,),
+          ],
+        ),
         const Spacer(),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(valueText,maxLines: 2, textAlign: TextAlign.start, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w500,overflow: TextOverflow.clip)),
+            subtitle==''?Container(): Opacity(opacity: 0.7, child: Text(subtitle,style: const TextStyle(fontSize: 18,fontWeight: FontWeight.w300))),
+            Text(valueText,maxLines: 2, textAlign: TextAlign.start, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w500,overflow: TextOverflow.ellipsis)),
             description==''?Container():Opacity(opacity: 0.7, child: Text(description, style: const TextStyle(fontSize: 12))),
           ],
         ),
@@ -1149,5 +1170,3 @@ class CardAnalityc extends StatelessWidget {
   }
 }
 
-
- 

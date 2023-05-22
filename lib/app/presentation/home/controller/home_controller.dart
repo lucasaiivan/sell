@@ -406,7 +406,8 @@ class HomeController extends GetxController {
     
     // condition : comprueba si el usaurio inicio por primera vez la app 
     // si es asi, se mostrara el tutorial
-     if (salesUserGuideVisibility==true || getUserAnonymous   ){ 
+     //if (salesUserGuideVisibility==true || getUserAnonymous   ){ 
+      if(false){
 
       // ignore: use_build_context_synchronously
       TutorialCoachMark( 
