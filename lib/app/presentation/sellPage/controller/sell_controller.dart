@@ -11,17 +11,35 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart'; 
 import 'package:search_page/search_page.dart';
+import 'package:sell/app/domain/entities/cashRegister_model.dart';
 import 'package:sell/app/presentation/home/controller/home_controller.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:sell/app/core/utils/widgets_utils.dart';
 import '../../../domain/entities/catalogo_model.dart';
-import '../../../domain/entities/ticket_model.dart';
+import '../../../domain/entities/ticket_model.dart'; 
 
 class SalesController extends GetxController {
+  
 
-
+  // titulo del Appbar
   String titleText = 'Vender'; 
+
+  // cash register
+  CashRegister cashRegisterSelected = CashRegister(id: '',description: '',opening: DateTime.now(),closure: DateTime.now(),billing: 0.0,cashInFlow: 0.0,cashOutFlow: 0.0,expectedBalance: 0.0,balance: 0.0,cashFlowList: [], cashOutFlowList: [],initialCash: 0.0);
+  String get getIdCashRegister => cashRegisterSelected.id;
+  set setIdCashRegister(String value) {
+    cashRegisterSelected.id=value;
+    cashRegisterSelected.description=value;
+    update();
+  } 
+  void selectedCashRegisterDefault() {
+    cashRegisterSelected = CashRegister(id: '',description: '',opening: DateTime.now(),closure: DateTime.now(),billing: 0.0,cashInFlow: 0.0,cashOutFlow: 0.0,expectedBalance: 0.0,balance: 0.0,cashFlowList: [], cashOutFlowList: [],initialCash: 0.0);
+    update();
+  }
+  List listCashRegister = [];
+  set setListCashRegister(List value) => listCashRegister = value;
+  List get getListCashRegister => listCashRegister;
 
   // others controllers
   final HomeController homeController = Get.find();

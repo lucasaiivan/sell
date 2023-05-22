@@ -1,11 +1,10 @@
 
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:sell/app/domain/entities/catalogo_model.dart';
-
 import '../../../domain/entities/ticket_model.dart';
 import '../../home/controller/home_controller.dart';
 
@@ -24,13 +23,18 @@ class TransactionsController extends GetxController {
   Map<String,double> get getAnalyticsMeansOfPayment => _analyticsMeansOfPaymentMap;
   set setAnalyticsMeansOfPayment(Map<String,double> value) => _analyticsMeansOfPaymentMap = value;
   Map<String,dynamic>  getPreferredPaymentMethod(){
+
+      // sacar porcetaje de cada medio de pago 
+      double total = 0.0; 
+      for (TicketModel ticket in getTransactionsList) { total += ticket.priceTotal; } 
+      
       //obtenemos el modo de pago que se utilizo más 
       List<MapEntry<String, double>> list = getAnalyticsMeansOfPayment.entries.toList();
       list.sort((a, b) => b.value.compareTo(a.value));
       if( list.isNotEmpty){
-        return {'name':list[0].key,'value': list[0].value};
+        return {'name':list[0].key,'value': list[0].value,'porcent': ((list[0].value/total)*100).toInt()};
       }
-      return {'name':'','value': 0.0};
+      return {'name':'','value': 0.0,'porcent':0};
     }
 
   // obtenemos los montos de cada caja
@@ -183,11 +187,15 @@ class TransactionsController extends GetxController {
 
     // obtenemos los obj(productos) del catalogo de la cuenta del negocio
     if (homeController.getProfileAccountSelected.id != '') {
-      Database.readTransactionsFilterTimeStream(
+      // stream var
+      Stream<QuerySnapshot<Map<String, dynamic>>> stream = Database.readTransactionsFilterTimeStream(
         idAccount: homeController.getProfileAccountSelected.id,
         timeStart: timeStart,
         timeEnd: timeEnd,
-      ).listen((value) {
+      );
+      stream.listen((value) {
+
+        
         List<TicketModel> list = [];
         //  get
         for (var element in value.docs) {
@@ -195,7 +203,7 @@ class TransactionsController extends GetxController {
         }
         //  set
         withMoreSales(list: list);
-        setTransactionsList = list;
+        setTransactionsList = list; 
       });
     }
   }
@@ -447,8 +455,7 @@ class TransactionsController extends GetxController {
     // ordenar los productos en forma descendente
     var sortedByKeyMap = Map.fromEntries( productsList.entries.toList()..sort((e1, e2) => e2.value.revenue.compareTo(e1.value.revenue)));
 
-    // nuevos valores
-    // obtenemos la ganancia
+    //  obtenemos la ganancia
     int count = 0;
     List<ProductCatalogue> newValuesList = [];
     if( sortedByKeyMap.isNotEmpty){
@@ -462,7 +469,7 @@ class TransactionsController extends GetxController {
         
       }
     } 
-    
+    // set : seteamos los nuevos valores de los productos con mas ganancias
     setBestSellingProductList =  newValuesList;
   }
   void readAnalyticsMeansOfPayment( ){
@@ -563,7 +570,7 @@ class TransactionsController extends GetxController {
     // var
     double totalEarnings = 0;
     String currencySymbol = ticket.currencySymbol; 
-    double transactionEarnings = 0;
+    double transactionEarnings = 0; // ganancias de la transacción
 
     // recorremos la lista de productos que se vendieron
     for (Map item in ticket.listPoduct) {
@@ -593,6 +600,35 @@ class TransactionsController extends GetxController {
     }
 
     return Publications.getFormatoPrecio(monto: total);
+  }
+  // devuelve el porcentaje de ganancias
+  int getPorcentEarningsTotal() {
+    //  var
+    double total = 0.0;
+    double transactionEarnings = 0; // ganancias de la transacción
+
+    for (TicketModel ticket in getTransactionsList) {
+
+      // sumamos el total de la transacción al total
+      total += ticket.priceTotal; 
+
+      // recorremos la lista de productos que se vendieron
+      for (Map item in ticket.listPoduct) {
+
+        // var
+        ProductCatalogue product = ProductCatalogue.fromMap(item);
+
+        // si el precio de compra es distinto de cero, sumamos las ganancias
+        if (product.purchasePrice != 0) {
+          // sumamos las ganancias de la transacción
+          transactionEarnings += (product.salePrice - product.purchasePrice) * product.quantity;
+        }
+      
+      } 
+
+    } 
+    // devolvemos el porcentaje de ganancias
+    return (transactionEarnings * 100 / total).round();
   }
 
   Map getPayMode({required String idMode}) {
@@ -636,3 +672,17 @@ class TransactionsController extends GetxController {
   }
  
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

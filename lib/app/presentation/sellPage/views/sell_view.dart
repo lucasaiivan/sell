@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; 
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:get/get.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:sell/app/core/utils/widgets_utils.dart';
@@ -72,12 +73,10 @@ class SalesView extends StatelessWidget {
       ],
     );
   }
+ 
 
   Widget body(  {required SalesController controller} ) {
-
-    // var : logica de la vista para la web
-    final screenWidth = Get.size.width;
-    final isMobile = screenWidth < 700; // ejemplo: pantalla de teléfono
+ 
 
     // Widgets
     Widget updateview = homeController.getUpdateApp?
@@ -111,7 +110,7 @@ class SalesView extends StatelessWidget {
 
           return Column(
             mainAxisSize: MainAxisSize.min,
-            children: [ 
+            children: [  
               Expanded(
                 child: GridView.builder(
                   padding: const EdgeInsets.all(12),
@@ -348,6 +347,36 @@ class SalesView extends StatelessWidget {
     // controllers
     final SalesController salesController = Get.find();
 
+
+    if(salesController.cashRegisterSelected.id == ''){
+      return PopupMenuButton(
+        icon: Material(
+          color: homeController.getDarkMode?Colors.white:Colors.black,
+          borderRadius: const BorderRadius.all(Radius.circular(8.0)),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8,vertical:1),
+            child: Row(
+              children: [
+                Text('Iniciar caja',style:TextStyle(color: homeController.getDarkMode?Colors.black:Colors.white)),
+                const SizedBox(width: 5),
+                Icon(Icons.keyboard_arrow_down_rounded,color: homeController.getDarkMode?Colors.black:Colors.white),
+              ],
+            ),
+          ),
+        ),
+        onSelected: (selectedValue) {  
+            // Get : view dialog
+            Get.dialog(CashRegister(id: 'apertura'));
+            salesController.setCashRegisterNumber(number: selectedValue); 
+          }, 
+        itemBuilder: (BuildContext ctx) => [
+          //const PopupMenuItem(value: 1, child: Text('Caja Nicolas')),
+          //const PopupMenuItem(value: 2, child: Text('Caja kiosco')),    
+          const PopupMenuItem(value: 0,child: Row(children: [Icon(Icons.add),Padding(padding: EdgeInsets.fromLTRB(12, 0, 0, 0),child: Text('Crear nueva caja')),])),
+          
+            ]);
+    }
+
     return PopupMenuButton(
                 icon: Material(
                   color: homeController.getDarkMode?Colors.white:Colors.black,
@@ -356,22 +385,100 @@ class SalesView extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 8,vertical:1),
                     child: Row(
                       children: [
-                        Text('Caja ${salesController.cashRegisterNumber}',style:TextStyle(color: homeController.getDarkMode?Colors.black:Colors.white)),
+                        Text('Caja ${salesController.cashRegisterSelected.description}',style:TextStyle(color: homeController.getDarkMode?Colors.black:Colors.white)),
                         const SizedBox(width: 5),
                         Icon(Icons.keyboard_arrow_down_rounded,color: homeController.getDarkMode?Colors.black:Colors.white),
                       ],
                     ),
                   ),
                 ),
-                onSelected: (selectedValue) {
-                  salesController.setCashRegisterNumber(number: selectedValue);
-                },
+                onSelected: (selectedValue) { 
+
+                  late String id;
+                  switch(selectedValue){
+                    case 0:
+                      id = 'detalles';
+                      break;
+                    case 1:
+                      id = 'ingreso';
+                      break;
+                    case 2:
+                      id = 'egreso';
+                      break;
+                    case 3:
+                      id = 'cierre';
+                      break;
+                    default:
+                      id = 'apertura';
+                      break;
+                  }
+                  // Get : view dialog
+                  Get.dialog(CashRegister(id:id),useSafeArea: true);
+                  salesController.setCashRegisterNumber(number: selectedValue); }, 
                 itemBuilder: (BuildContext ctx) => [
-                      const PopupMenuItem(value: 1, child: Text('Caja 1')),
-                      const PopupMenuItem(value: 2, child: Text('Caja 2')),
-                      const PopupMenuItem(value: 3, child: Text('Caja 3')),
-                      const PopupMenuItem(value: 4, child: Text('Caja 4')),
-                      const PopupMenuItem(value: 5, child: Text('Caja 5')),
+
+                  PopupMenuItem(value: 0, child: RichText(
+                    text: TextSpan(
+                      text: "Caja '${salesController.cashRegisterSelected.description}' en curso\n",
+                      style: TextStyle(color: homeController.getDarkMode?Colors.white:Colors.black),
+                      children: <TextSpan> [
+                        TextSpan(
+                          text: Publications.getFormatoPrecio(monto: salesController.cashRegisterSelected.balance), 
+                          style: const TextStyle(fontWeight: FontWeight.w600,fontSize: 18),
+                        ), 
+                      ],
+                    ),
+                  )
+                  ),
+                  PopupMenuItem(value:1, child: Row(
+                    children: [
+                      // icon
+                      Icon(Icons.arrow_downward_rounded,color: Colors.green.shade400),
+                      // text
+                      RichText(
+                        text: TextSpan(
+                          text: 'Ingreso\n',
+                          style: TextStyle(color:Colors.green.shade400,fontSize: 18,fontWeight: FontWeight.w600),
+                          children: <TextSpan> [
+                            TextSpan(
+                              text: Publications.getFormatoPrecio(monto: salesController.cashRegisterSelected.cashInFlow), 
+                              style: TextStyle(fontWeight: FontWeight.w600,fontSize: 12,color: Colors.green.shade400.withOpacity(0.5)),
+                            ), 
+                          ],
+                        ),
+                      ),
+                    ],
+                  )
+                  ), 
+                  PopupMenuItem(value:2, child: Row(
+                    children: [
+                      // icon
+                      Icon(Icons.arrow_outward_rounded,color: Colors.red.shade400),
+                      // text
+                      RichText(
+                        text: TextSpan(
+                          text: 'Egreso\n',
+                          style: TextStyle(color:Colors.red.shade400,fontSize: 18,fontWeight: FontWeight.w600),
+                          children: <TextSpan> [
+                            TextSpan(
+                              text: Publications.getFormatoPrecio(monto: salesController.cashRegisterSelected.cashOutFlow), 
+                              style: TextStyle(fontWeight: FontWeight.w600,fontSize: 12,color: Colors.red.shade400.withOpacity(0.5)),
+                            ), 
+                          ],
+                        ),
+                      ),
+                    ],
+                  )
+                  ), 
+                 //PopupMenuItem(value: 0,child: Row(children: [Icon(Icons.arrow_downward_rounded,color: Colors.green.shade400),Padding(padding: const EdgeInsets.fromLTRB(12, 0, 0, 0),child: Text('Ingreso',style: TextStyle(color: Colors.green.shade400),)),])),
+                  //PopupMenuItem(value: 0,child: Row(children: [Icon(Icons.arrow_outward_rounded,color: Colors.red.shade400),Padding(padding: const  EdgeInsets.fromLTRB(12, 0, 0, 0),child: Text('Egreso',style:TextStyle(color: Colors.red.shade400))),])),
+                  PopupMenuItem(value:3,child: Row(children: const [Icon(Icons.close),Padding(padding: EdgeInsets.fromLTRB(12, 0, 0, 0),child: Text('Cerrar Caja')),])),
+                  /* const PopupMenuItem(value: 1, child: Text('Caja 1')),
+                  const PopupMenuItem(value: 2, child: Text('Caja 2')),
+                  const PopupMenuItem(value: 3, child: Text('Caja 3')),
+                  const PopupMenuItem(value: 4, child: Text('Caja 4')),
+                  const PopupMenuItem(value: 5, child: Text('Caja 5')),
+ */                      
                     ]);
   }
   Widget widgeSuggestedProducts({required SalesController controller1,required BuildContext context}) {
@@ -594,10 +701,10 @@ class SalesView extends StatelessWidget {
         child: Material(
           borderRadius: const BorderRadius.all(Radius.circular(12)),
           color: background,
-          child: Center(
+          child: const Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: const [
+              children: [
                 Icon(Icons.check_rounded,size: 200,color:accentColor),
                 SizedBox(height:25),
                 Text('Hecho',style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold,color: accentColor)),
@@ -706,6 +813,283 @@ class CustomDivider extends StatelessWidget {
           }),
         );
       },
+    );
+  }
+}
+
+
+// ignore: must_be_immutable
+class CashRegister extends StatefulWidget { 
+  late String id;
+  CashRegister({super.key,required this.id});
+
+  @override
+  State<CashRegister> createState() => _CashRegisterState();
+}
+
+class _CashRegisterState extends State<CashRegister> {
+
+
+  // controllers
+  final SalesController salesController = Get.find<SalesController>();
+  // var
+  String titleAppBar = ''; 
+  bool confirmState = false;
+
+  @override
+  Widget build(BuildContext context) { 
+
+    // widgets
+    Widget view = Container();
+    switch (widget.id) {
+      case 'apertura': 
+        titleAppBar = 'Apertura de caja';
+        view = body;
+        break;
+      case 'detalles': 
+        titleAppBar = 'Detalles de caja'; 
+        view = detailContent;
+        break;
+      case 'cierre': 
+        titleAppBar = 'Cierre de caja'; 
+        view = detailContent;
+        break;
+      case 'ingreso': 
+        titleAppBar = 'Ingreso'; 
+        view = bodyEgresoIngreso();
+        break;
+      case 'egreso': 
+        titleAppBar = 'Egreso'; 
+        view = bodyEgresoIngreso(isEgreso: true);
+        break;
+      default:
+        titleAppBar = 'Apertura de caja'; 
+        view = body;
+        break;
+    } 
+
+    return Builder(builder: (context) {
+      
+      return Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Material(
+        color: Colors.transparent,
+        child: Card(
+          clipBehavior: Clip.antiAlias,
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Scaffold(
+            appBar:appbar(text: widget.id),
+            body: Padding(
+              padding:const EdgeInsets.symmetric(horizontal:18),
+              child: view,
+            ),
+          ),
+        ),
+          ),
+      );
+    },);
+  }
+
+  // WIDGETS VIEWS
+  PreferredSizeWidget appbar({required String text}){
+    return AppBar( 
+      automaticallyImplyLeading: false, 
+      title: Text(titleAppBar[0].toUpperCase()+titleAppBar.substring(1)),
+      centerTitle: true,
+      actions: [ 
+        IconButton(onPressed:Get.back, icon: const Icon(Icons.close)),
+        const SizedBox(width: 10),
+      ],
+    );
+  }
+  Widget bodyEgresoIngreso({bool isEgreso = false,}){
+
+    // controllers
+    MoneyMaskedTextController moneyMaskedTextController = MoneyMaskedTextController();
+    TextEditingController textEditingController = TextEditingController();
+
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 12),
+        // textfield : efectivo inicial de la caja
+        const Text('Escriba el monto' ,style: TextStyle(fontSize: 18,fontWeight: FontWeight.w400)),
+        const SizedBox(height: 8),
+        TextField(  
+          controller: moneyMaskedTextController,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(
+            border: UnderlineInputBorder(),
+            enabledBorder: UnderlineInputBorder(),
+            labelText: 'Monto',
+          ),
+        ),
+        // textfield : descripcion (opcional)
+        const SizedBox(height: 20),
+        TextField(  
+          controller: textEditingController,
+          keyboardType: TextInputType.text,
+          decoration: const InputDecoration(
+            border: UnderlineInputBorder(),
+            enabledBorder: UnderlineInputBorder(),
+            labelText: 'Descripción (opcional)',
+          ),
+        ),
+        const Spacer(),
+        // button : iniciar caja 
+        Container(
+          padding: const EdgeInsets.only(bottom: 20),
+          child: SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () { 
+                if(moneyMaskedTextController.numberValue>0){
+                  if(isEgreso){
+                    salesController.cashRegisterSelected.cashOutFlow += moneyMaskedTextController.numberValue;
+                  }else{
+                    salesController.cashRegisterSelected.cashInFlow += moneyMaskedTextController.numberValue;
+                  }
+
+                  Get.back();
+                }
+                Get.back();
+              },
+              style: ButtonStyle(padding: MaterialStateProperty.all(const EdgeInsets.all(20)),shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)))),
+              child: const Text('Confirmar'),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+  Widget get detailContent{
+
+    // controllers
+    MoneyMaskedTextController moneyMaskedTextController = MoneyMaskedTextController();
+
+    // var
+    ButtonStyle buttonStyle = ButtonStyle(backgroundColor: MaterialStateProperty.all(confirmState?Colors.blue:null),padding: MaterialStateProperty.all(const EdgeInsets.all(20)),shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(borderRadius: BorderRadius.circular(2))));
+    TextStyle textStylebutton = TextStyle(color: confirmState?Colors.white:Colors.blue);
+    TextStyle textStyleDescription = const TextStyle( fontWeight: FontWeight.w300);
+    TextStyle textStyleValue = const TextStyle(fontSize: 18,fontWeight: FontWeight.w600);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 20),
+        // view info : descripcion
+        Row(children: [Text('Descripción',style: textStyleDescription),const Spacer(),Text(salesController.cashRegisterSelected.description,style: textStyleValue)]),
+        // view info : fecha
+        const SizedBox(height: 12),
+        Row(children: [Text('Fecha',style: textStyleDescription), const Spacer(),Text(Publications.getFechaPublicacionFormating(dateTime: salesController.cashRegisterSelected.opening),style: textStyleValue)]), 
+        // view info : efectivo incial
+        const SizedBox(height: 12),
+        Row(children: [Text('Efectivo inicial',style: textStyleDescription),const Spacer(),Text(Publications.getFormatoPrecio(monto: salesController.cashRegisterSelected.expectedBalance),style: textStyleValue)]),
+        // view info : facturacion
+        const SizedBox(height: 12),
+        Row(children: [Text('Facturación',style: textStyleDescription),const Spacer(),Text('\$${salesController.cashRegisterSelected.billing}',style: textStyleValue)]),
+        // view info : egresos
+        const SizedBox(height: 12),
+        Row(children: [Text('Egresos',style: textStyleDescription),const Spacer(),Text(Publications.getFormatoPrecio(monto: salesController.cashRegisterSelected.cashInFlow),style: textStyleValue)]),
+        // view info : ingresos
+        const SizedBox(height: 12),
+        Row(children: [Text('Ingresos',style: textStyleDescription),const Spacer(),Text(Publications.getFormatoPrecio(monto: salesController.cashRegisterSelected.cashOutFlow),style: textStyleValue)]),
+        // view info : monto esperado en la caja
+        const SizedBox(height: 12),
+        Row(children: [Text('Monto esperado en la caja',style: textStyleDescription),const Spacer(),Text(Publications.getFormatoPrecio(monto: salesController.cashRegisterSelected.expectedBalance),style: textStyleValue)]),
+        const SizedBox(height: 20),
+        // textfield : Monto en caja
+        confirmState?TextField(  
+          controller: moneyMaskedTextController,
+          keyboardType: TextInputType.text,
+          decoration: const InputDecoration(
+            border: UnderlineInputBorder(),
+            enabledBorder: UnderlineInputBorder(),
+            labelText: 'Monto actual en caja (opcional)',
+          ),
+        ):Container(),
+        const Spacer(),
+        // button : iniciar caja 
+        Container( 
+          padding: const EdgeInsets.only(bottom: 20),
+          child: SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                if(confirmState){
+                  salesController.setIdCashRegister = '';
+                  Get.back();
+                }else{
+                  setState(() { confirmState=!confirmState; });
+                } 
+                
+              },
+              style:buttonStyle ,
+              child: Text(confirmState?'Confirmar cierre de caja':'Cerrar caja',style:textStylebutton),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+  Widget get body{ 
+    
+    // controllers 
+    MoneyMaskedTextController moneyMaskedTextController = MoneyMaskedTextController();
+    TextEditingController descriptionTextEditingController = TextEditingController(); 
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 12),
+        // textfield : efectivo inicial de la caja
+        const Text('Efectivo inicial',style: TextStyle(fontSize: 18,fontWeight: FontWeight.w400)),
+        const SizedBox(height: 5), 
+        TextField(  
+          controller: moneyMaskedTextController,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(
+            border: UnderlineInputBorder(),
+            enabledBorder: UnderlineInputBorder(),
+            labelText: 'Monto',
+          ),
+        ),
+        // textfield : descripcion (opcional)
+        const SizedBox(height: 12),
+        const Text('Descripción de la caja',style: TextStyle(fontSize: 18,fontWeight: FontWeight.w400)),
+        const SizedBox(height: 5),
+        TextField(  
+          controller: descriptionTextEditingController,
+          keyboardType: TextInputType.text,
+          decoration: const InputDecoration( 
+            border: UnderlineInputBorder(),
+            enabledBorder: UnderlineInputBorder(),
+            labelText: 'Descripción',
+          ),
+        ),
+        const Spacer(),
+        // button : iniciar caja 
+        Container(
+          padding: const EdgeInsets.only(bottom: 20),
+          child: SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                salesController.cashRegisterSelected.id = descriptionTextEditingController.text==''?'1':descriptionTextEditingController.text;
+                salesController.cashRegisterSelected.description = descriptionTextEditingController.text==''?'1':descriptionTextEditingController.text;
+                salesController.cashRegisterSelected.initialCash = moneyMaskedTextController.numberValue;
+                salesController.cashRegisterSelected.expectedBalance += moneyMaskedTextController.numberValue;
+                salesController.update();
+                Get.back();
+              },
+              style: ButtonStyle(padding: MaterialStateProperty.all(const EdgeInsets.all(20)),shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)))),
+              child: const Text('Iniciar caja'),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
