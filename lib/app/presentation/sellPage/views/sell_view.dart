@@ -439,7 +439,7 @@ class SalesView extends StatelessWidget {
                         text: TextSpan(
                           text: 'Ingreso\n',
                           style: TextStyle(color:Colors.green.shade400,fontSize: 18,fontWeight: FontWeight.w600),
-                          children: <TextSpan> [
+                          children: <TextSpan> [ 
                             TextSpan(
                               text: Publications.getFormatoPrecio(monto: salesController.cashRegisterSelected.cashInFlow), 
                               style: TextStyle(fontWeight: FontWeight.w600,fontSize: 12,color: Colors.green.shade400.withOpacity(0.5)),
