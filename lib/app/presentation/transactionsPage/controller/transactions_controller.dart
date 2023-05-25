@@ -499,7 +499,7 @@ class TransactionsController extends GetxController {
     setCashAnalysisMap = {};
 
     for (var element in getTransactionsList) {
-      switch (element.cashRegister) {
+      switch (element.cashRegisterName) {
         case '1':
           getCashAnalysisMap.containsKey('1')?getCashAnalysisMap['1']=(getCashAnalysisMap['1'] as double) +element.priceTotal : getCashAnalysisMap['1']=element.priceTotal;
           break;

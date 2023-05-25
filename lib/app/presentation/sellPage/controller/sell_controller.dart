@@ -1,8 +1,7 @@
 import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:firebase_storage/firebase_storage.dart'; 
-import 'package:flutter_masked_text2/flutter_masked_text2.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter_masked_text2/flutter_masked_text2.dart'; 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,36 +15,72 @@ import 'package:sell/app/presentation/home/controller/home_controller.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:sell/app/core/utils/widgets_utils.dart';
+import 'package:uuid/uuid.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../domain/entities/ticket_model.dart'; 
 
 class SalesController extends GetxController {
+
+  // controllers views //
+  final HomeController homeController = Get.find();
   
 
-  // titulo del Appbar
+  // titulo del Appbar //
   String titleText = 'Vender'; 
 
-  // cash register
-  CashRegister cashRegisterSelected = CashRegister(id: '',description: '',opening: DateTime.now(),closure: DateTime.now(),billing: 0.0,cashInFlow: 0.0,cashOutFlow: 0.0,expectedBalance: 0.0,balance: 0.0,cashFlowList: [], cashOutFlowList: [],initialCash: 0.0);
-  String get getIdCashRegister => cashRegisterSelected.id;
-  set setIdCashRegister(String value) {
-    cashRegisterSelected.id=value;
-    cashRegisterSelected.description=value;
+  //  cash register  // 
+  set setIdCashRegister(String description){  
+    String uniqueId = const Uuid().v4(); // genera un id unico
+    homeController.cashRegister.id=uniqueId;
+    homeController.cashRegister.description=description;
+    cashRegisterLocalSave();
+    Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(uniqueId).set(homeController.cashRegister.toJson());
     update();
   } 
-  void selectedCashRegisterDefault() {
-    cashRegisterSelected = CashRegister(id: '',description: '',opening: DateTime.now(),closure: DateTime.now(),billing: 0.0,cashInFlow: 0.0,cashOutFlow: 0.0,expectedBalance: 0.0,balance: 0.0,cashFlowList: [], cashOutFlowList: [],initialCash: 0.0);
+  void cashRegisterLoad(){
+    // carga la caja seleccionada
+    Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).get().then((value){
+      List<CashRegister> list = [];
+      for (dynamic item in value.docs) {
+        list.add(CashRegister.fromMap(item.data()));
+      }
+      setListCashRegister = list;
+      update(); 
+    } );
+  }
+  void cashRegisterDefault() {
+    homeController.cashRegister = CashRegister.initialData();
     update();
   }
-  List listCashRegister = [];
-  set setListCashRegister(List value) => listCashRegister = value;
-  List get getListCashRegister => listCashRegister;
+  void cashRegisterOutFlow({required double amount,String description = ''}){
+    // egreso de dinero al flujo de caja
+    homeController.cashRegister.cashOutFlow -= amount;
+    homeController.cashRegister.cashOutFlowList.add(CashFlow(
+      id: const Uuid().v4(),
+      description: description,
+      amount: amount,
+      date: DateTime.now(),
+    ).toJson());
+  }
+  void cashRegisterInFlow({required double amount,String description = ''}){
+    // ingreso de dinero al flujo de caja
+    homeController.cashRegister.cashInFlow += amount;
+    homeController.cashRegister.cashInFlowList.add(CashFlow(
+      id: const Uuid().v4(),
+      description: description,
+      amount: amount,
+      date: DateTime.now(),
+    ).toJson());
+  }
+  void getCashRegisterLocal(){ String valueId = GetStorage().read('cashRegisterID') ?? '';}
+  void cashRegisterLocalSave()async{  await GetStorage().write('cashRegisterID', homeController.cashRegister.id);}
+  List<CashRegister> listCashRegister = [];
+  set setListCashRegister(List<CashRegister> value) => listCashRegister = value;
+  List get getListCashRegister => listCashRegister; 
 
-  // others controllers
-  final HomeController homeController = Get.find();
+  // others controllers // 
   late AnimationController floatingActionButtonAnimateController;
   late AnimationController newProductSelectedAnimationController;
-
   void animateAdd({bool itemListAnimated=true }){
     try{
       if(itemListAnimated){newProductSelectedAnimationController.repeat();}
@@ -53,13 +88,13 @@ class SalesController extends GetxController {
     floatingActionButtonAnimateController.repeat();
   }
 
-  // productos seleccionados recientemente
+  // productos seleccionados recientemente  //
   List<ProductCatalogue> get getRecentlySelectedProductsList => homeController.getProductsOutstandingList;
 
   // efecto de sonido para escaner
   void playSoundScan() async {AudioCache cache = AudioCache();cache.load("soundBip.mp3");}
 
-  // text field controllers
+  // text field controllers 
   final TextEditingController textEditingControllerAddFlashPrice = TextEditingController();
   final TextEditingController textEditingControllerAddFlashDescription =TextEditingController();
   final TextEditingController textEditingControllerTicketMount =TextEditingController();
@@ -95,20 +130,7 @@ class SalesController extends GetxController {
     }
     return count;
   }
-
-  // cash Register Number : obtenemos la caja seleccionada por el usuario en el dispositivo que es actualmente utilizada
-  int cashRegisterNumber=1;
-  void getCashRegisterNumber(){
-    cashRegisterNumber = GetStorage().read('cashRegisterNumber') ?? 1; 
-  }
-  //  cash Register Number : obtenemos la caja seleccionada por el usuario en el dispositivo que es actualmente utilizada
-  void setCashRegisterNumber({required int number})async{
-    cashRegisterNumber=number;
-    await GetStorage().write('cashRegisterNumber', number);
-    update();
-    
-  }
-
+ 
   // ticket
   TicketModel ticket = TicketModel(creation: Timestamp.now(), listPoduct: []);
   TicketModel get getTicket => ticket;
@@ -138,7 +160,7 @@ class SalesController extends GetxController {
   @override
   void onInit() async {
     super.onInit(); 
-    getCashRegisterNumber();
+    cashRegisterLoad();
 
     // esperamos un momento 
     await Future.delayed( const Duration(milliseconds: 700),() {
@@ -227,7 +249,8 @@ class SalesController extends GetxController {
       listIdsProducts.add(element.toJson());
     }
     //  set values
-    getTicket.cashRegister = cashRegisterNumber.toString();
+    getTicket.cashRegisterName = homeController.cashRegister.description.toString(); // nombre de la caja registradora
+    getTicket.cashRegisterId = homeController.cashRegister.id; // id de la caja registradora
     getTicket.id = id;
     getTicket.seller = homeController.getUserAuth.email!;
     getTicket.listPoduct = listIdsProducts;
@@ -530,7 +553,9 @@ class SalesController extends GetxController {
   void confirmedPurchase() {
 
     // condition : registramos la venta si el usuario esta logueado
-    if(homeController.getUserAnonymous == false){registerTransaction(); } 
+    if(homeController.getUserAnonymous == false){
+      registerTransaction(); 
+      } 
     // el usuario confirmo su venta
     setStateConfirmPurchase = true;
     // mostramos una vista 'confirm purchase' por 2 segundos

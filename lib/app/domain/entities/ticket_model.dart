@@ -3,7 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class TicketModel {
   String id = '';
   String seller = ''; // nombre del vendedor
-  String cashRegister = '1'; // nombre o numero de caja que se efectuo la venta
+  String cashRegisterName = '1'; // nombre o numero de caja que se efectuo la venta
+  String cashRegisterId = ''; // id de la caja que se efectuo la venta
   String payMode = ''; // efective (Efectivo) - mercadopago (Mercado Pago) - card (Tarjeta De Crédito/Débito)
   double priceTotal = 0.0;
   double valueReceived = 0.0;
@@ -16,7 +17,8 @@ class TicketModel {
     this.payMode = "",
     this.currencySymbol = "\$",
     this.seller = "",
-    this.cashRegister = "1",
+    this.cashRegisterName = "",
+    this.cashRegisterId = "",
     this.priceTotal = 0.0,
     this.valueReceived = 0.0,
     required this.listPoduct,
@@ -43,7 +45,8 @@ class TicketModel {
         "payMode": payMode,
         "currencySymbol": currencySymbol,
         "seller": seller,
-        "cashRegister": cashRegister,
+        "cashRegisterName": cashRegisterName,
+        'cashRegisterId' : cashRegisterId,
         "priceTotal": priceTotal,
         "valueReceived": valueReceived,
         "listPoduct": listPoduct,
@@ -55,7 +58,8 @@ class TicketModel {
       payMode: data['payMode'] ?? '',
       seller: data['seller'] ?? '',
       currencySymbol: data['currencySymbol'] ?? '\$',
-      cashRegister: data['cashRegister'] ?? '1',
+      cashRegisterName: data['cashRegisterName'] ?? '',
+      cashRegisterId: data['cashRegisterId'] ?? '',
       priceTotal: (data['priceTotal'] ?? 0).toDouble(),
       valueReceived: (data['valueReceived'] ?? 0).toDouble(),
       listPoduct: data['listPoduct'] ?? [],
@@ -69,7 +73,8 @@ class TicketModel {
     payMode = data['payMode'] ?? '';
     seller = data['seller'] ?? '';
     currencySymbol = data['currencySymbol'] ?? '\$';
-    cashRegister = data['cashRegister'] ?? '1';
+    cashRegisterName = data['cashRegister'] ?? '';
+    cashRegisterId = data['cashRegisterId'] ?? '';
     priceTotal = data['priceTotal'];
     listPoduct = data['listPoduct'] ??[];
     creation = data['creation'];
