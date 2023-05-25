@@ -198,7 +198,7 @@ class TransactionsView extends StatelessWidget {
                     Row(
                       children: [
                         // text : numero de caja
-                        Text('caja ${ticketModel.cashRegister}',style:textStyleSecundary),
+                        Text('caja ${ticketModel.cashRegisterName}',style:textStyleSecundary),
                         dividerCircle,
                         // text : id del vendedor
                         Text(ticketModel.seller.split('@')[0],style:textStyleSecundary), 

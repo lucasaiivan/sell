@@ -12,6 +12,7 @@ import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import '../../../core/routes/app_pages.dart';
+import '../../../domain/entities/cashRegister_model.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../domain/entities/user_model.dart';
 import '../../../core/utils/widgets_utils.dart';
@@ -109,8 +110,9 @@ class HomeController extends GetxController {
   List<Category> get getCatalogueCategoryList => _categoryList;
   set setCatalogueCategoryList(List<Category> value) {
     _categoryList.value = value;
-  }
-
+  } 
+  // cash register  //
+  CashRegister cashRegister = CashRegister(id: '',description: '',opening: DateTime.now(),closure: DateTime.now(),billing: 0.0,cashInFlow: 0.0,cashOutFlow: 0.0,expectedBalance: 0.0,balance: 0.0,cashInFlowList: [], cashOutFlowList: [],initialCash: 0.0);
   // list products for catalogue
   final RxList<ProductCatalogue> _catalogueBusiness = <ProductCatalogue>[].obs;
   List<ProductCatalogue> get getCataloProducts => _catalogueBusiness;
