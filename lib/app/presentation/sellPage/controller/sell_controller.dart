@@ -29,26 +29,27 @@ class SalesController extends GetxController {
   String titleText = 'Vender'; 
 
   //  cash register  // 
-  set setIdCashRegister(String description){  
-    String uniqueId = const Uuid().v4(); // genera un id unico
-    homeController.cashRegister.id=uniqueId;
-    homeController.cashRegister.description=description;
-    cashRegisterLocalSave();
+  void startCashRegister({required String description,required double initialCash,required double expectedBalance}){   
+    
+    String uniqueId = Publications.generateUid(); // genera un id unico
+    homeController.cashRegister.id=uniqueId; // asigna el id unico a la caja
+    homeController.cashRegister.description=description; // asigna la descripcion a la caja 
+    homeController.cashRegister.initialCash = initialCash; // asigna el dinero inicial a la caja
+    homeController.cashRegister.expectedBalance += expectedBalance;  // asigna el dinero esperado a la caja al iniciar
+    cashRegisterLocalSave(); // guarda el id de la caja en el dispositivo
+    // firebase : guarda un documento de la caja registradora
     Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(uniqueId).set(homeController.cashRegister.toJson());
-    update();
-  } 
-  void cashRegisterLoad(){
-    // carga la caja seleccionada
-    Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).get().then((value){
-      List<CashRegister> list = [];
-      for (dynamic item in value.docs) {
-        list.add(CashRegister.fromMap(item.data()));
-      }
-      setListCashRegister = list;
-      update(); 
-    } );
-  }
-  void cashRegisterDefault() {
+    update(); // actualiza la vista
+  }  
+  void closeCashRegisterDefault() {
+    // cierre de la caja seleccionada
+    homeController.cashRegister.closure = DateTime.now(); // asigna la fecha de cierre
+    homeController.cashRegister.expectedBalance = homeController.cashRegister.getBalance; // actualizamos el balance de la caja actual 
+    // firebase : guardamos un copia del documento de la caja en la colección de cajas cerradas
+    Database.refFirestoreRecords(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegister.id).set(homeController.cashRegister.toJson());
+    // firebase : eliminamos el documento de la caja de la colección de cajas abiertas
+    Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegister.id).delete();
+    // default values
     homeController.cashRegister = CashRegister.initialData();
     update();
   }
@@ -61,6 +62,8 @@ class SalesController extends GetxController {
       amount: amount,
       date: DateTime.now(),
     ).toJson());
+    // firebase : actualizamos el documento de la caja
+    Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegister.id).update(homeController.cashRegister.toJson());
   }
   void cashRegisterInFlow({required double amount,String description = ''}){
     // ingreso de dinero al flujo de caja
@@ -71,12 +74,18 @@ class SalesController extends GetxController {
       amount: amount,
       date: DateTime.now(),
     ).toJson());
-  }
-  void getCashRegisterLocal(){ String valueId = GetStorage().read('cashRegisterID') ?? '';}
+    // firebase : actualizamos el documento de la caja
+    Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegister.id).update(homeController.cashRegister.toJson());
+  
+  } 
   void cashRegisterLocalSave()async{  await GetStorage().write('cashRegisterID', homeController.cashRegister.id);}
-  List<CashRegister> listCashRegister = [];
-  set setListCashRegister(List<CashRegister> value) => listCashRegister = value;
-  List get getListCashRegister => listCashRegister; 
+  void upgradeCashRegister({required String id})async{
+    await homeController.upgradeCashRegister(id: id);
+    cashRegisterLocalSave();
+    update();
+  }
+  List get getListCashRegister => homeController.listCashRegister; 
+  
 
   // others controllers // 
   late AnimationController floatingActionButtonAnimateController;
@@ -159,8 +168,7 @@ class SalesController extends GetxController {
 
   @override
   void onInit() async {
-    super.onInit(); 
-    cashRegisterLoad();
+    super.onInit();  
 
     // esperamos un momento 
     await Future.delayed( const Duration(milliseconds: 700),() {

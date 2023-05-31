@@ -498,13 +498,17 @@ class WidgetDrawer extends StatelessWidget {
                   title: const Text('Vender'),
                   onTap: () => homeController.setIndexPage = 0),
               superAdmin?ListTile(
-                  leading: const Icon(Icons.check),
-                  title: const Text('Transacciones'),
+                  leading: const Icon(Icons.manage_search_rounded),
+                  title: const Text('Historial de caja'),
                   onTap: () => homeController.setIndexPage = 1):Container(),
+              superAdmin?ListTile(
+                  leading: const Icon(Icons.receipt_long_rounded),
+                  title: const Text('Transacciones'),
+                  onTap: () => homeController.setIndexPage = 2):Container(),
               superAdmin?ListTile(
                   leading: const Icon(Icons.apps_rounded),
                   title: const Text('Catálogo'),
-                  onTap: () => homeController.setIndexPage = 2):Container(),
+                  onTap: () => homeController.setIndexPage = 3):Container(),
               superAdmin?ListTile(
                   leading: const Icon(Icons.add_moderator_outlined),
                   title: const Text('Multi Usuario'),
@@ -602,13 +606,21 @@ Widget viewDefault() {
             padding: EdgeInsets.symmetric(horizontal: 20),
             child: Text('Hola 🖐️\n\nIngresa a tu cuenta para gestionar tu tienda\n',textAlign: TextAlign.center,style: textStyle,),
           ),
-          const SizedBox(height: 20),
-          TextButton(
-            child: const Text('Selecciona una cuenta'),
-            onPressed: () {
-              homeController.showModalBottomSheetSelectAccount();
-            },
-          ),
+          const SizedBox(height: 20), 
+          !homeController.checkAccountExistence?WidgetButtonListTile().buttonListTileCrearCuenta()
+          :ListView.builder(
+                padding: const EdgeInsets.symmetric(),
+                shrinkWrap: true,
+                itemCount: homeController.getManagedAccountsList.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Column(
+                    children: [
+                      WidgetButtonListTile().buttonListTileItemCuenta(perfilNegocio: homeController.getManagedAccountsList[index]),
+                      ComponentApp().divider(),
+                    ],
+                  );
+                },
+              ),
         ],
       ),
       Column(

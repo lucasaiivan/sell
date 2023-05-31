@@ -9,6 +9,7 @@ abstract class Routes {
   static const SEACH_PRODUCT = _Paths.SEACH_PRODUCT;
   static const ACCOUNT = _Paths.ACCOUNT;
   static const MULTIUSER = _Paths.MULTIUSER;
+  static const HISTORY_CASH_TERHGISTER = _Paths.HISTORY_CASH_TERHGISTER;
 }
 
 abstract class _Paths {
@@ -19,4 +20,5 @@ abstract class _Paths {
   static const SEACH_PRODUCT = '/seachProduct';
   static const ACCOUNT = '/account';
   static const MULTIUSER = '/multiuser';
+  static const HISTORY_CASH_TERHGISTER = '/historyCashRegister';
 }
