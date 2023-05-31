@@ -113,6 +113,35 @@ class HomeController extends GetxController {
   } 
   // cash register  //
   CashRegister cashRegister = CashRegister(id: '',description: '',opening: DateTime.now(),closure: DateTime.now(),billing: 0.0,cashInFlow: 0.0,cashOutFlow: 0.0,expectedBalance: 0.0,balance: 0.0,cashInFlowList: [], cashOutFlowList: [],initialCash: 0.0);
+  List<CashRegister> listCashRegister = [];
+  void loadCashRegisters(){
+    // firebase : create 'Stream' de la  collecion de cajas registradoras
+     Stream<QuerySnapshot<Map<String, dynamic>>> db= Database.readCashRegistersStream(idAccount: getProfileAccountSelected.id);
+     db.listen((event) { 
+      listCashRegister.clear(); // limpiamos la lista de cajas
+
+      if (event.docs.isNotEmpty) {
+        // añadimos las cajas disponibles
+        for (var element in event.docs) {  
+          listCashRegister.add( CashRegister.fromMap(  element.data() )); 
+        } 
+        upgradeCashRegister();
+      }
+    });
+  }
+  upgradeCashRegister({String id=''}) async{
+    // description : busca un coincidencia con la id de la caja seleccionada que se guardo para que persista en el dispositivo en la lista de cajas 'getListCashRegister'
+    // y la actualiza con la caja actual 
+    if(id==''){  id = GetStorage().read('cashRegisterID')??''; } 
+    for (CashRegister item in listCashRegister) {
+      if(item.id == id){
+        cashRegister = item;
+        update();
+        break;
+      }
+    }
+  }
+  
   // list products for catalogue
   final RxList<ProductCatalogue> _catalogueBusiness = <ProductCatalogue>[].obs;
   List<ProductCatalogue> get getCataloProducts => _catalogueBusiness;
@@ -162,7 +191,17 @@ class HomeController extends GetxController {
   set setManagedAccountsList(List<ProfileAccountModel> value) =>_managedAccountsList.value = value;
   set addManagedAccountsList(ProfileAccountModel profileData) {
     // agregamos la nueva cuenta
-    _managedAccountsList.add(profileData);
+    _managedAccountsList.add(profileData); 
+  }
+  bool get checkAccountExistence{
+    // comprobamos si el usuario autenticado ya creo un cuenta 
+    String idAccountAthentication = getUserAuth.uid;
+    for (ProfileAccountModel element in getManagedAccountsList) { 
+      if(idAccountAthentication == element.id){
+        return true;
+      }
+    }
+    return false;
   }
 
 // index
@@ -212,10 +251,10 @@ class HomeController extends GetxController {
         TargetContent(
           padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20.0),
             align: ContentAlign.top, 
-            child: Column(
+            child: const Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const <Widget>[
+              children: <Widget>[
                 Text("Registra una venta rápida",style: titleSTexttyle),
                 Padding(padding: EdgeInsets.only(top: 10.0),child: Text("Puedes registrar un producto rapido solo con el precio y opcionalmente una descripción",style: descriptionTextStyle),),
               ],
@@ -238,10 +277,10 @@ class HomeController extends GetxController {
         TargetContent(
           padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20.0),
             align: ContentAlign.top, 
-            child: Column(
+            child: const Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const <Widget>[
+              children: <Widget>[
                 Text("vista previa del ticket",style: titleSTexttyle),
                 Padding(padding: EdgeInsets.only(top: 10.0),child: Text("Puedes registrar un producto rapido solo con el precio y opcionalmente una descripción",style: descriptionTextStyle),),
               ],
@@ -263,10 +302,10 @@ class HomeController extends GetxController {
         TargetContent(
           padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 20.0),
             align: ContentAlign.bottom, 
-            child: Column(
+            child: const Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const <Widget>[
+              children: <Widget>[
                 Text("Agrega productos rápidamente",style: titleSTexttyle),
                 Padding(padding: EdgeInsets.only(top: 10.0),child: Text("En esta sección aparecen tus productos favoritos y los que allas vendido",style: descriptionTextStyle),),
               ],
@@ -288,10 +327,10 @@ class HomeController extends GetxController {
         TargetContent(
           padding: const EdgeInsets.only(left: 12.0,right: 12.0,bottom: 100.0),
             align: ContentAlign.top, 
-            child: Column(
+            child: const Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children:const <Widget>[
+              children:<Widget>[
                 Text("Registra la venta",style: titleSTexttyle),
                 Padding(padding: EdgeInsets.only(top: 10.0),child: Text("Procede a registrar tu primera transacción",style: descriptionTextStyle),),
               ],
@@ -314,10 +353,10 @@ class HomeController extends GetxController {
         TargetContent(
           padding: const EdgeInsets.only(left: 12.0,right: 12.0,bottom: 130.0),
             align: ContentAlign.top, 
-            child: Column(
+            child: const Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const <Widget>[
+              children: <Widget>[
                 Text("Elige el método de pago y listo",style: titleSTexttyle),
                 //Padding(padding: EdgeInsets.only(top: 10.0),child: Text("Procede a registrar tu primera transacción",style: TextStyle(color: Colors.white),),),
               ],
@@ -340,7 +379,7 @@ class HomeController extends GetxController {
         TargetContent(
           padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 50.0),
             align: ContentAlign.top, 
-            child: Column(
+            child: const Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[ 
@@ -366,7 +405,7 @@ class HomeController extends GetxController {
         TargetContent(
           padding: const EdgeInsets.only(left: 12.0,right: 12.0,bottom: 100.0),
             align: ContentAlign.top, 
-            child:  Column(
+            child:  const Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>  [ 
@@ -390,10 +429,10 @@ class HomeController extends GetxController {
         TargetContent(
           padding: const EdgeInsets.only(left: 12.0,right: 12.0,top: 100.0),
             align: ContentAlign.bottom, 
-            child: Column(
+            child: const Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const <Widget>[ 
+              children: <Widget>[ 
                 Text("Elige la Caja en la que vas a vender",style: titleSTexttyle),  
               ],
             )
@@ -698,6 +737,7 @@ void showDialogCerrarSesion() {
           //get profile account
           setProfileAccountSelected =  ProfileAccountModel.fromDocumentSnapshot(documentSnapshot: value);
           // load
+          loadCashRegisters();
           readDataAdminUser(email: getUserAuth.email ?? '', idAccount: idAccount);
           readProductsCatalogue(idAccount: idAccount);
           readAdminsUsers(idAccount: idAccount);
@@ -765,14 +805,15 @@ void showDialogCerrarSesion() {
 
   void readProductsCatalogue({required String idAccount}) {
     // obtenemos los obj(productos) del catalogo de la cuenta del negocio
-    Database.readProductsCatalogueStream(id: idAccount).listen((value) {
+    Stream<QuerySnapshot<Map<String, dynamic>>>  streamSubscription = Database.readProductsCatalogueStream(id: idAccount);
+    streamSubscription.listen((value) {
 
       //  values
       List<ProductCatalogue> list = [];
 
       if (value.docs.isNotEmpty) {
         for (var element in value.docs) {
-          list.add(ProductCatalogue.fromMap(element.data()));
+          list.add(ProductCatalogue.fromMap( element.data() ));
         }
       }
       //  obtenemos los productos más vendidos
@@ -791,7 +832,7 @@ void showDialogCerrarSesion() {
       List<UserModel> list = [];
       //  get
       for (var element in value.docs) {
-        list.add(UserModel.fromMap(element.data()));
+        list.add( UserModel.fromMap(element.data()));
       }
       //  set values
       setAdminsUsersList = list;
@@ -895,8 +936,7 @@ void showDialogCerrarSesion() {
   // BottomSheet - Getx
   void showModalBottomSheetSelectAccount() {
     // muestra las cuentas en el que el usuario tiene accesos
-    Widget widget = getManagedAccountsList.isEmpty
-        ? WidgetButtonListTile().buttonListTileCrearCuenta()
+    Widget widget = !checkAccountExistence ? WidgetButtonListTile().buttonListTileCrearCuenta()
         : Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -934,7 +974,7 @@ void showDialogCerrarSesion() {
               trailing:  const Icon(Icons.arrow_forward_ios_rounded),
               onTap: showDialogCerrarSesion,
             ),
-            ComponentApp().divider(),
+            ComponentApp().divider(), 
             widget,
             ],
           ),

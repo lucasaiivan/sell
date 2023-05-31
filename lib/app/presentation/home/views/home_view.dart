@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:sell/app/presentation/historyCashRegisterPage/views/historyCashRegister_view.dart';
 import 'package:sell/app/presentation/sellPage/views/sell_view.dart';
 import 'package:sell/app/presentation/cataloguePage/views/catalogue_view.dart';
 import 'package:sell/app/presentation/transactionsPage/views/transactions_view.dart';
@@ -19,10 +20,12 @@ class HomeView extends GetView<HomeController> {
       case 0:
         return SalesView();
       case 1:
-        return TransactionsView();
+        return HistoryCashRegisterView();
       case 2:
-        return CataloguePage();
+        return TransactionsView();
       case 3:
+        return CataloguePage();
+      case 4:
         return MultiUser();
       default:
         return SalesView();
@@ -35,7 +38,7 @@ class HomeView extends GetView<HomeController> {
      
 
     // condition : si el usuario no ha seleccionado una cuenta, se muestra la vista por defecto
-    if (controller.getProfileAccountSelected.id == '' && controller.getFirebaseAuth.currentUser!.isAnonymous == false){return viewDefault();}
+    if (controller.getProfileAccountSelected.id == '' && controller.getFirebaseAuth.currentUser!.isAnonymous == false){return Obx(() => viewDefault());}
 
     // get : nos permite obtener el valor de una variable
     controller.setBuildContext=context;

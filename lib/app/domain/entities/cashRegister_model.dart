@@ -1,5 +1,7 @@
 
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class CashRegister {
   String id; // id de la caja
   String description; // descripción de la caja
@@ -8,11 +10,11 @@ class CashRegister {
   double initialCash; // monto inicial
   double billing; // monto de facturación
   double cashInFlow; // monto de ingresos
-  double cashOutFlow; // monto de egresos
+  double cashOutFlow; // monto de egresos (numero negativo)
   double expectedBalance; // monto esperado
   double balance; // monto actual
-  List<Map<String, dynamic>> cashInFlowList; // lista de ingresos de caja
-  List<Map<String, dynamic>> cashOutFlowList; // lista de egresos de caja
+  List<dynamic> cashInFlowList; // lista de ingresos de caja
+  List<dynamic> cashOutFlowList; // lista de egresos de caja
 
   CashRegister({
     required this.id,
@@ -31,7 +33,7 @@ class CashRegister {
  
   // balance : devuelve el balance actual de la caja
   double get getBalance{
-    return (initialCash + cashInFlow) - cashOutFlow;
+    return (initialCash + cashInFlow+ billing) + cashOutFlow;
   }
   // default values  
   factory CashRegister.initialData(){
@@ -64,24 +66,40 @@ class CashRegister {
         "balance": balance,
         "cashInFlowList": cashInFlowList,
         "cashOutFlowList": cashOutFlowList,
-      };
+      }; 
   // fromjson : convierte el json en un objeto
-  factory CashRegister.fromMap(Map<dynamic, dynamic> data) {
+  factory CashRegister.fromMap(Map  data) {
     return CashRegister(
-      id: data['id'] ?? '',
-      description: data['description'] ?? '',
-      initialCash: (data['initialCash'] ?? 0).toDouble(),
+      id: data['id'] ,
+      description: data['description'] ,
+      initialCash: double.parse(data['initialCash'].toString()),
       opening: data['opening'].toDate(),
       closure: data['closure'].toDate(),
-      billing: (data['billing'] ?? 0).toDouble(),
-      cashInFlow: (data['cashInFlow'] ?? 0).toDouble(),
-      cashOutFlow: (data['cashOutFlow'] ?? 0).toDouble(),
-      expectedBalance: (data['expectedBalance'] ?? 0).toDouble(),
-      balance: (data['balance'] ?? 0).toDouble(),
+      billing: double.parse(data['billing'].toString()),
+      cashInFlow: double.parse(data['cashInFlow'].toString()) ,
+      cashOutFlow: double.parse(data['cashOutFlow'].toString()),
+      expectedBalance:double.parse(data['expectedBalance'].toString()),
+      balance: double.parse(data['balance'].toString()),
       cashInFlowList: data['cashInFlowList'] ?? [],
       cashOutFlowList: data['cashOutFlowList'] ?? [],
     );
   }
+
+  fromDocumentSnapshot( {required DocumentSnapshot documentSnapshot}) { 
+    id = documentSnapshot.id;
+    description = documentSnapshot['description'];
+    initialCash = documentSnapshot['initialCash'].toDouble();
+    opening = documentSnapshot['opening'].toDate();
+    closure = documentSnapshot['closure'].toDate();
+    billing = documentSnapshot['billing'].toDouble();
+    cashInFlow = documentSnapshot['cashInFlow'].toDouble();
+    cashOutFlow = documentSnapshot['cashOutFlow'].toDouble();
+    expectedBalance = documentSnapshot['expectedBalance'].toDouble();
+    balance = documentSnapshot['balance'].toDouble();
+    cashInFlowList = documentSnapshot['cashInFlowList'];
+    cashOutFlowList = documentSnapshot['cashOutFlowList'];
+  }
+ 
 }
 
 // flujo de caja
