@@ -30,7 +30,10 @@ class SalesController extends GetxController {
 
   //  cash register  // 
   void startCashRegister({required String description,required double initialCash,required double expectedBalance}){   
-    
+    // inicializa nueva caja
+    //
+    if(description==''){description=(homeController.listCashRegister.length+1).toString();}
+    // set
     String uniqueId = Publications.generateUid(); // genera un id unico
     homeController.cashRegister.id=uniqueId; // asigna el id unico a la caja
     homeController.cashRegister.description=description; // asigna la descripcion a la caja 
@@ -44,7 +47,7 @@ class SalesController extends GetxController {
   void closeCashRegisterDefault() {
     // cierre de la caja seleccionada
     homeController.cashRegister.closure = DateTime.now(); // asigna la fecha de cierre
-    homeController.cashRegister.expectedBalance = homeController.cashRegister.getBalance; // actualizamos el balance de la caja actual 
+    homeController.cashRegister.expectedBalance = homeController.cashRegister.getExpectedBalance; // actualizamos el balance de la caja actual 
     // firebase : guardamos un copia del documento de la caja en la colección de cajas cerradas
     Database.refFirestoreRecords(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegister.id).set(homeController.cashRegister.toJson());
     // firebase : eliminamos el documento de la caja de la colección de cajas abiertas
@@ -55,29 +58,74 @@ class SalesController extends GetxController {
   }
   void cashRegisterOutFlow({required double amount,String description = ''}){
     // egreso de dinero al flujo de caja
-    homeController.cashRegister.cashOutFlow -= amount;
-    homeController.cashRegister.cashOutFlowList.add(CashFlow(
-      id: const Uuid().v4(),
-      description: description,
-      amount: amount,
-      date: DateTime.now(),
-    ).toJson());
-    // firebase : actualizamos el documento de la caja
-    Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegister.id).update(homeController.cashRegister.toJson());
+    //
+    // firebase
+    FirebaseFirestore  firebaseFirestoreInstance  = FirebaseFirestore.instance;
+    firebaseFirestoreInstance.runTransaction((transaction) async {
+      // Obtiene el documento actual
+      DocumentReference documentRef = Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegister.id);
+      // creamos una transacción de firebase 
+      DocumentSnapshot snapshot = await transaction.get(documentRef);
+      // Verifica si el documento existe y contiene un campo 'numero'
+      if (snapshot.exists) {
+        // Crea una instancia de la clase CashRegister a partir de los datos del documento
+        CashRegister cashRegister = CashRegister.fromMap(snapshot.data() as Map<String, dynamic>);
+        // incrementa el valor total de los ingresos
+        cashRegister.cashOutFlow += amount;
+        // agregamos el registro del ingreso
+        cashRegister.cashOutFlowList.add(CashFlow(id: const Uuid().v4(),userId: homeController.getIdAccountSelected,description: description,amount: amount,date: DateTime.now(),).toJson());
+        // Actualiza el valor del número en el documento
+        transaction.update(documentRef, cashRegister.toJson());
+      }
+    }); 
   }
   void cashRegisterInFlow({required double amount,String description = ''}){
-    // ingreso de dinero al flujo de caja
-    homeController.cashRegister.cashInFlow += amount;
-    homeController.cashRegister.cashInFlowList.add(CashFlow(
-      id: const Uuid().v4(),
-      description: description,
-      amount: amount,
-      date: DateTime.now(),
-    ).toJson());
-    // firebase : actualizamos el documento de la caja
-    Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegister.id).update(homeController.cashRegister.toJson());
-  
+    // ingreso de dinero al flujo de caja 
+    //
+    // firebase
+    FirebaseFirestore  firebaseFirestoreInstance  = FirebaseFirestore.instance;
+    firebaseFirestoreInstance.runTransaction((transaction) async {
+      // Obtiene el documento actual
+      DocumentReference documentRef = Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegister.id);
+      // creamos una transacción de firebase 
+      DocumentSnapshot snapshot = await transaction.get(documentRef);
+      // Verifica si el documento existe y contiene un campo 'numero'
+      if (snapshot.exists) {
+        // Crea una instancia de la clase CashRegister a partir de los datos del documento
+        CashRegister cashRegister = CashRegister.fromMap(snapshot.data() as Map<String, dynamic>);
+        // incrementa el valor total de los ingresos
+        cashRegister.cashInFlow += amount;
+        // agregamos el registro del ingreso
+        cashRegister.cashInFlowList.add(CashFlow(id: const Uuid().v4(),description: description,userId: homeController.getIdAccountSelected,amount: amount,date: DateTime.now(),).toJson());
+        // Actualiza el valor del número en el documento
+        transaction.update(documentRef, cashRegister.toJson());
+      }
+    }); 
   } 
+  void cashRegisterSetTransaction({required double amount}){
+    // incrementar monto de transaccion de caja
+    //
+    // firebase
+    if(homeController.cashRegister.id!=''){
+      FirebaseFirestore  firebaseFirestoreInstance  = FirebaseFirestore.instance;
+      firebaseFirestoreInstance.runTransaction((transaction) async {
+        // Obtiene el documento actual
+        DocumentReference documentRef = Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegister.id);
+        // creamos una transacción de firebase 
+        DocumentSnapshot snapshot = await transaction.get(documentRef);
+        // Verifica si el documento existe y contiene un campo 'numero'
+        if (snapshot.exists) {
+          // Crea una instancia de la clase CashRegister a partir de los datos del documento
+          CashRegister cashRegister = CashRegister.fromMap(snapshot.data() as Map<String, dynamic>);
+          // incrementa el valor total de la facturacion de la caja
+          cashRegister.billing += amount; 
+          // Actualiza el valor del número en el documento
+          transaction.update(documentRef, cashRegister.toJson());
+        }
+      }); 
+    }
+  }
+
   void cashRegisterLocalSave()async{  await GetStorage().write('cashRegisterID', homeController.cashRegister.id);}
   void upgradeCashRegister({required String id})async{
     await homeController.upgradeCashRegister(id: id);
@@ -265,6 +313,9 @@ class SalesController extends GetxController {
     getTicket.priceTotal = getCountPriceTotal();
     getTicket.valueReceived = getValueReceivedTicket;
     getTicket.creation = Timestamp.now();
+
+    // registramos el monto en caja
+    cashRegisterSetTransaction(amount: getTicket.priceTotal);
     
     // set firestore : guarda la transacción
     Database.refFirestoretransactions(idAccount: homeController.getIdAccountSelected).doc(getTicket.id).set(getTicket.toJson());

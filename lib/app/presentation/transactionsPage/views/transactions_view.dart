@@ -102,9 +102,7 @@ class TransactionsView extends StatelessWidget {
     DateTime currentDate = transactionsController.getTransactionsList[0].creation.toDate();
     // lista de widgets List<Widget> donde se almacenarán los elementos de la lista
     List<Widget> transactions = []; 
-    // add
-    //transactions.add(WidgetAnalyticSalesTileExpanded());
-    // Itera sobre la lista de transacciones y verifica si la fecha de la transacción actual es diferente a la fecha actual. Si es así, crea un elemento Divider y actualiza la fecha actual
+    // add : Itera sobre la lista de transacciones y verifica si la fecha de la transacción actual es diferente a la fecha actual. Si es así, crea un elemento Divider y actualiza la fecha actual
     for (int i = 0; i < transactionsController.getTransactionsList.length; i++) {
       // condition : si es la primera transacción
       if(i==0){

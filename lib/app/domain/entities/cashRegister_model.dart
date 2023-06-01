@@ -12,7 +12,7 @@ class CashRegister {
   double cashInFlow; // monto de ingresos
   double cashOutFlow; // monto de egresos (numero negativo)
   double expectedBalance; // monto esperado
-  double balance; // monto actual
+  double balance; // monto de cierre
   List<dynamic> cashInFlowList; // lista de ingresos de caja
   List<dynamic> cashOutFlowList; // lista de egresos de caja
 
@@ -31,8 +31,13 @@ class CashRegister {
     required this.cashOutFlowList,
   });
  
-  // balance : devuelve el balance actual de la caja
-  double get getBalance{
+  // difference : devuelve la diferencia entre el monto esperado y el monto de cierre
+  double get getDifference{
+    if(balance == 0){ return 0.0;}
+    return balance - expectedBalance;
+  }
+  // balance : devuelve el balance esperado de la caja
+  double get getExpectedBalance{
     return (initialCash + cashInFlow+ billing) + cashOutFlow;
   }
   // default values  
@@ -105,12 +110,14 @@ class CashRegister {
 // flujo de caja
 class CashFlow{ 
   String id = '';
+  String userId = '';
   String description = '';
   double amount = 0.0;
   DateTime date = DateTime.now();
 
   CashFlow({
     required this.id,
+    required this.userId,
     required this.description,
     required this.amount,
     required this.date,
@@ -120,6 +127,7 @@ class CashFlow{
   factory CashFlow.initialData(){
     return CashFlow(
       id: '',
+      userId: '',
       description: '',
       amount: 0.0,
       date: DateTime.now(),
@@ -128,6 +136,7 @@ class CashFlow{
   // tojson : convierte el objeto a json
   Map<String, dynamic> toJson() => {
         "id": id,
+        "userId": userId,
         "description": description,
         "amount": amount,
         "date": date,
@@ -136,6 +145,7 @@ class CashFlow{
   factory CashFlow.fromMap(Map<dynamic, dynamic> data) {
     return CashFlow(
       id: data['id'] ?? '',
+      userId: data['userId'] ?? '',
       description: data['description'] ?? '',
       amount: (data['amount'] ?? 0).toDouble(),
       date: data['date'].toDate(),

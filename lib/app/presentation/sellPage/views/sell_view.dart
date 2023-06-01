@@ -1,9 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart'; 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; 
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_masked_text2/flutter_masked_text2.dart';
+import 'package:flutter_masked_text2/flutter_masked_text2.dart'; 
 import 'package:get/get.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:sell/app/core/utils/widgets_utils.dart';
@@ -436,7 +436,7 @@ class SalesView extends StatelessWidget {
                       style: TextStyle(color: homeController.getDarkMode?Colors.white:Colors.black),
                       children: <TextSpan> [
                         TextSpan(
-                          text: Publications.getFormatoPrecio(monto: homeController.cashRegister.getBalance ), 
+                          text: Publications.getFormatoPrecio(monto: homeController.cashRegister.getExpectedBalance ), 
                           style: const TextStyle(fontWeight: FontWeight.w600,fontSize: 18),
                         ), 
                       ],
@@ -848,11 +848,20 @@ class _CashRegisterState extends State<CashRegister> {
   final HomeController homeController = Get.find<HomeController>();
   final SalesController salesController = Get.find<SalesController>();
   // others controllers
-  MoneyMaskedTextController moneyMaskedTextController = MoneyMaskedTextController();
+  MoneyMaskedTextController moneyMaskedTextController = MoneyMaskedTextController(leftSymbol: '\$',decimalSeparator: ',',thousandSeparator: '.',precision:2);
   TextEditingController textEditingController = TextEditingController();
+  final FocusNode _amountCashRegisterFocusNode = FocusNode();
   // var
   String titleAppBar = ''; 
   bool confirmState = false;
+
+  @override
+  void dispose() {
+    _amountCashRegisterFocusNode.dispose();
+    textEditingController.dispose();
+    moneyMaskedTextController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) { 
@@ -921,8 +930,7 @@ class _CashRegisterState extends State<CashRegister> {
       ],
     );
   }
-  Widget bodyEgresoIngreso({bool isEgreso = false,}){
-
+  Widget bodyEgresoIngreso({bool isEgreso = false,}){ 
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -933,7 +941,7 @@ class _CashRegisterState extends State<CashRegister> {
         const SizedBox(height: 8),
         TextField(  
           controller: moneyMaskedTextController,
-          keyboardType: TextInputType.number,
+          keyboardType: TextInputType.number, 
           decoration: const InputDecoration(
             border: UnderlineInputBorder(),
             enabledBorder: UnderlineInputBorder(),
@@ -961,7 +969,7 @@ class _CashRegisterState extends State<CashRegister> {
               onPressed: () { 
                 if(moneyMaskedTextController.numberValue>0){
                   if(isEgreso){
-                    salesController.cashRegisterOutFlow(amount: moneyMaskedTextController.numberValue,description: textEditingController.text);
+                    salesController.cashRegisterOutFlow(amount: -moneyMaskedTextController.numberValue,description: textEditingController.text);
                   }else{
                     salesController.cashRegisterInFlow(amount: moneyMaskedTextController.numberValue,description: textEditingController.text);
                   }
@@ -978,10 +986,7 @@ class _CashRegisterState extends State<CashRegister> {
       ],
     );
   }
-  Widget get detailContent{
-
-    // controllers
-    MoneyMaskedTextController moneyMaskedTextController = MoneyMaskedTextController();
+  Widget get detailContent{ 
 
     // var
     ButtonStyle buttonStyle = ButtonStyle(backgroundColor: MaterialStateProperty.all(confirmState?Colors.blue:null),padding: MaterialStateProperty.all(const EdgeInsets.all(20)),shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(borderRadius: BorderRadius.circular(2))));
@@ -989,41 +994,47 @@ class _CashRegisterState extends State<CashRegister> {
     TextStyle textStyleDescription = const TextStyle( fontWeight: FontWeight.w300);
     TextStyle textStyleValue = const TextStyle(fontSize: 18,fontWeight: FontWeight.w600);
 
-    return ListView( 
+    return Column(
       children: [
-        const SizedBox(height: 20),
-        // view info : descripcion
-        Row(children: [Text('Descripción',style: textStyleDescription),const Spacer(),Text(homeController.cashRegister.description,style: textStyleValue)]),
-        // view info : fecha
-        const SizedBox(height: 12),
-        Row(children: [Text('Inicio',style: textStyleDescription), const Spacer(),Text(Publications.getFechaPublicacionFormating(dateTime: homeController.cashRegister.opening),style: textStyleValue)]), 
-        // view info : efectivo incial
-        const SizedBox(height: 12),
-        Row(children: [Text('Efectivo inicial',style: textStyleDescription),const Spacer(),Text(Publications.getFormatoPrecio(monto: homeController.cashRegister.expectedBalance),style: textStyleValue)]),
-        // view info : facturacion
-        const SizedBox(height: 12),
-        Row(children: [Text('Facturación',style: textStyleDescription),const Spacer(),Text('\$${homeController.cashRegister.billing}',style: textStyleValue)]),
-        // view info : egresos
-        const SizedBox(height: 12),
-        Row(children: [Text('Egresos',style: textStyleDescription),const Spacer(),Text(Publications.getFormatoPrecio(monto: homeController.cashRegister.cashOutFlow),style: textStyleValue)]),
-        // view info : ingresos
-        const SizedBox(height: 12),
-        Row(children: [Text('Ingresos',style: textStyleDescription),const Spacer(),Text(Publications.getFormatoPrecio(monto: homeController.cashRegister.cashInFlow),style: textStyleValue)]),
-        // view info : monto esperado en la caja
-        const SizedBox(height: 12),
-        Row(children: [Text('Monto esperado en la caja',style: textStyleDescription),const Spacer(),Text(Publications.getFormatoPrecio(monto: homeController.cashRegister.getBalance),style: textStyleValue)]),
-        const SizedBox(height: 20),
-        // textfield : Monto en caja
-        confirmState?TextField(  
-          controller: moneyMaskedTextController,
-          keyboardType: TextInputType.text,
-          decoration: const InputDecoration(
-            border: UnderlineInputBorder(),
-            enabledBorder: UnderlineInputBorder(),
-            labelText: 'Monto actual en caja (opcional)',
+        Expanded(
+          child: ListView( 
+            children: [
+              const SizedBox(height: 20),
+              // view info : descripcion
+              Row(children: [Text('Descripción',style: textStyleDescription),const Spacer(),Text(homeController.cashRegister.description,style: textStyleValue)]),
+              // view info : fecha
+              const SizedBox(height: 12),
+              Row(children: [Text('Inicio',style: textStyleDescription), const Spacer(),Text(Publications.getFechaPublicacionFormating(dateTime: homeController.cashRegister.opening),style: textStyleValue)]), 
+              // view info : efectivo incial
+              const SizedBox(height: 12),
+              Row(children: [Text('Efectivo inicial',style: textStyleDescription),const Spacer(),Text(Publications.getFormatoPrecio(monto: homeController.cashRegister.expectedBalance),style: textStyleValue)]),
+              // view info : facturacion
+              const SizedBox(height: 12),
+              Row(children: [Text('Facturación',style: textStyleDescription),const Spacer(),Text(Publications.getFormatoPrecio(monto:homeController.cashRegister.billing),style: textStyleValue)]),
+              // view info : egresos
+              const SizedBox(height: 12),
+              Row(children: [Text('Egresos',style: textStyleDescription),const Spacer(),Text(Publications.getFormatoPrecio(monto: homeController.cashRegister.cashOutFlow),style: textStyleValue.copyWith(color: Colors.red.shade300))]),
+              // view info : ingresos
+              const SizedBox(height: 12),
+              Row(children: [Text('Ingresos',style: textStyleDescription),const Spacer(),Text(Publications.getFormatoPrecio(monto: homeController.cashRegister.cashInFlow),style: textStyleValue)]),
+              // view info : monto esperado en la caja
+              const SizedBox(height: 12),
+              Row(children: [Text('Monto esperado en la caja',style: textStyleDescription),const Spacer(),Text(Publications.getFormatoPrecio(monto: homeController.cashRegister.getExpectedBalance),style: textStyleValue)]),
+              const SizedBox(height: 20),
+              // textfield : Monto en caja
+              confirmState?TextField(  
+                focusNode: _amountCashRegisterFocusNode,
+                controller: moneyMaskedTextController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: false,signed: false),
+                decoration: const InputDecoration(
+                  border: UnderlineInputBorder(),
+                  enabledBorder: UnderlineInputBorder(),
+                  labelText: 'Monto actual en caja (opcional)',
+                ),
+              ):Container(), 
+            ],
           ),
-        ):Container(),
-        const SizedBox(height: 50),
+        ),
         // button : iniciar caja 
         Container( 
           padding: const EdgeInsets.only(bottom: 20),
@@ -1032,10 +1043,16 @@ class _CashRegisterState extends State<CashRegister> {
             child: ElevatedButton(
               onPressed: () {
                 if(confirmState){
+                  // comprobamos si el usuario ingreso un monto en caja
+                  if( moneyMaskedTextController.numberValue!=0){homeController.cashRegister.balance = moneyMaskedTextController.numberValue;}
+                  // cerramos la caja
                   salesController.closeCashRegisterDefault();
                   Get.back();
                 }else{
-                  setState(() { confirmState=!confirmState; });
+                  setState(() { 
+                    confirmState=!confirmState; 
+                    _amountCashRegisterFocusNode.requestFocus();
+                    });
                 } 
                 
               },
@@ -1051,8 +1068,8 @@ class _CashRegisterState extends State<CashRegister> {
 
     // description : vista para la apertura de la caja
     
-    // controllers 
-    MoneyMaskedTextController moneyMaskedTextController = MoneyMaskedTextController();
+    // controllers  
+    MoneyMaskedTextController moneyMaskedTextController = MoneyMaskedTextController(leftSymbol: '\$',decimalSeparator: ',',thousandSeparator: '.',precision:2);
     TextEditingController descriptionTextEditingController = TextEditingController(); 
 
     return Column(
@@ -1062,13 +1079,14 @@ class _CashRegisterState extends State<CashRegister> {
         // textfield : efectivo inicial de la caja
         const Text('Efectivo inicial',style: TextStyle(fontSize: 18,fontWeight: FontWeight.w400)),
         const SizedBox(height: 5), 
-        TextField(  
-          controller: moneyMaskedTextController,
-          keyboardType: TextInputType.number,
+        TextField(   
+          keyboardType: const TextInputType.numberWithOptions(decimal: false,signed: false),
+          controller: moneyMaskedTextController, 
+          style: const TextStyle(fontSize: 24 ) ,
           decoration: const InputDecoration(
             border: UnderlineInputBorder(),
             enabledBorder: UnderlineInputBorder(),
-            labelText: 'Monto',
+            labelText: 'Monto' ,
           ),
         ),
         // textfield : descripcion (opcional)
@@ -1078,7 +1096,8 @@ class _CashRegisterState extends State<CashRegister> {
         TextField(  
           controller: descriptionTextEditingController,
           keyboardType: TextInputType.text,
-          decoration: const InputDecoration( 
+          maxLength: 7, // Límite de caracteres
+          decoration: const InputDecoration(  
             border: UnderlineInputBorder(),
             enabledBorder: UnderlineInputBorder(),
             labelText: 'Descripción',
