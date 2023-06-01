@@ -890,7 +890,7 @@ class ControllerProductsEdit extends GetxController {
 
   //TODO: eliminar para release
   // DEVELOPER OPTIONS
-  /* void showDialogDeleteOPTDeveloper() {
+  void showDialogDeleteOPTDeveloper() {
     Get.dialog(AlertDialog(
       title: const Text(
           "¿Seguro que quieres eliminar este documento definitivamente? (Mods)"),
@@ -934,7 +934,7 @@ class ControllerProductsEdit extends GetxController {
         ),
       ],
     ));
-  } */
+  }
 
 }
 
@@ -1157,7 +1157,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
 }
 
 // TODO : delete release
-/* class CreateMark extends StatefulWidget {
+class CreateMark extends StatefulWidget {
   final Mark mark;
   const CreateMark({required this.mark, Key? key}) : super(key: key);
 
@@ -1367,5 +1367,3 @@ class _CreateMarkState extends State<CreateMark> {
 }
 
 
-
- */

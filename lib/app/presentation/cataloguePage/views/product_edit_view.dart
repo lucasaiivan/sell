@@ -37,11 +37,11 @@ class ProductEdit extends StatelessWidget {
     Widget noEdit = Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Flexible(
+        const Flexible(
           child: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: const [
+              children: [
                 Icon(Icons.admin_panel_settings,size: 50),
                 SizedBox(height: 16.0),
                 Text('No eres administrador de esta cuenta',style: TextStyle(fontWeight: FontWeight.w300)),
@@ -62,7 +62,7 @@ class ProductEdit extends StatelessWidget {
         return Material(
           child: AnimatedSwitcher(
           duration: const  Duration(milliseconds: 100),
-            child: controller.getHomeController.getProfileAdminUser.superAdmin==false?noEdit: _.getNewProduct ? FormCreateProductView()
+            child: controller.getHomeController.getProfileAdminUser.superAdmin==false?noEdit: _.getNewProduct ? const FormCreateProductView()
             : OfflineBuilder(
                 child: Container(),
                 connectivityBuilder: (
@@ -83,10 +83,10 @@ class ProductEdit extends StatelessWidget {
                             .copyWith(color: colorAccent),
                         title: Text(controller.getTextAppBar,style: TextStyle(  color: colorAccent,fontSize: 18 )),
                       ),
-                      body: Center(
+                      body: const Center(
                           child: Column(
                         mainAxisSize: MainAxisSize.min,
-                        children: const [
+                        children: [
                           Padding(
                             padding: EdgeInsets.all(12.0),
                             child: Icon(Icons.wifi_off_rounded),
@@ -148,89 +148,80 @@ class ProductEdit extends StatelessWidget {
   } 
   // view  : descripcion del producto en una tarjeta con un icono de verificacion,  codigo, descripcion y marca
   Widget cardFrontProduct(){
+
+    // var
+    bool enableEdit = controller.getSaveIndicator? false: controller.getEditModerator || controller.getProduct.verified==false;
+    final Color fillColor = Get.isDarkMode?Colors.white.withOpacity(0.03):Colors.black.withOpacity(0.03);
     
     
     // view : descripcion del producto
-    return FadeIn(
-      duration:   const Duration(milliseconds: 700),
-      child: AnimatedContainer(
-        margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 24.0),
-        duration: const Duration(milliseconds: 1000),  
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12.0),
-          // color : color  gradiente de la tarjeta 
-          gradient: LinearGradient(
-            colors: [controller.dominateColorProduct.withOpacity(0.15), controller.cardProductDetailColor],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+    return Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: Column( 
+        children: [ 
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              //  image : imagen del producto
+              controller.loadImage(size:100),
+              // view : codigo,icon de verificaciones, descripcion y marca del producto
+              Flexible(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 24.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        controller.getProduct.code != ""
+                            ? Opacity(
+                                opacity: 0.8,
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    // icon : verificacion del producto
+                                    controller.getProduct.verified?const Icon(Icons.verified_rounded,color: Colors.blue, size: 20):const Icon(Icons.qr_code_2_rounded, size: 20),
+                                    const SizedBox(width: 5),
+                                    // text : codigo del producto
+                                    Text(controller.getProduct.code,style: const TextStyle(height: 1,fontSize: 14,fontWeight: FontWeight.normal)),
+                                  ],
+                                ),
+                              )
+                            : Container(),
+                        space,
+                        // textfield  : seleccionar una marca
+                        textfielButton(
+                          contentPadding: const EdgeInsets.only(bottom: 5,top: 5,left: 12,right: 12),
+                            stateEdit: controller.getSaveIndicator? false: controller.getEditModerator || controller.getProduct.verified==false,
+                            textValue: controller.getMarkSelected.name,
+                            labelText: controller.getMarkSelected.id == ''? 'Seleccionar una marca': 'Marca',
+                            onTap: controller.getProduct.verified==false || controller.getEditModerator? controller.showModalSelectMarca : () {}
+                        ),
+                        !controller.getAccountAuth ? Container() : space,
+                        
+                      ],
+                    ),
+                ),
+              )
+            ],
           ),
-        ),
-        padding: const EdgeInsets.all(24.0),
-        child: Column( 
-          children: [ 
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                //  image : imagen del producto
-                controller.loadImage(size:100),
-                // view : codigo,icon de verificaciones, descripcion y marca del producto
-                Flexible(
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          controller.getProduct.code != ""
-                              ? Opacity(
-                                  opacity: 0.8,
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      // icon : verificacion del producto
-                                      controller.getProduct.verified?const Icon(Icons.verified_rounded,color: Colors.blue, size: 20):const Icon(Icons.qr_code_2_rounded, size: 20),
-                                      const SizedBox(width: 5),
-                                      // text : codigo del producto
-                                      Text(controller.getProduct.code,style: const TextStyle(height: 1,fontSize: 14,fontWeight: FontWeight.normal)),
-                                    ],
-                                  ),
-                                )
-                              : Container(),
-                          space,
-                          // textfield  : seleccionar una marca
-                          textfielButton(
-                            contentPadding: const EdgeInsets.only(bottom: 0,top: 0),
-                              stateEdit: controller.getSaveIndicator? false: controller.getEditModerator || controller.getProduct.verified==false,
-                              textValue: controller.getMarkSelected.name,
-                              labelText: controller.getMarkSelected.id == ''? 'Seleccionar una marca': 'Marca',
-                              onTap: controller.getProduct.verified==false || controller.getEditModerator? controller.showModalSelectMarca : () {}
-                          ),
-                          !controller.getAccountAuth ? Container() : space,
-                          
-                        ],
-                      ),
-                  ),
-                )
-              ],
+          const SizedBox(height: 12),
+          // textField  : descripción del producto
+          TextField(
+            enabled: enableEdit,
+            minLines: 1,
+            maxLines: 5,
+            keyboardType: TextInputType.multiline,
+            onChanged: (value) => controller.setDescription = value,
+            decoration: InputDecoration(
+              contentPadding: const EdgeInsets.only(bottom: 5,top: 5,left: 12,right: 12),
+              filled: true,fillColor: enableEdit?fillColor:Colors.transparent,hoverColor: Colors.blue,
+              disabledBorder: InputBorder.none,labelText: "Descripción del producto"),
+              inputFormatters: [ FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\- .³%]')) ],
+              textInputAction: TextInputAction.done,
+              controller: controller.controllerTextEditDescripcion,
             ),
-            // textField  : descripción del producto
-            TextField(
-              enabled: controller.getSaveIndicator? false: controller.getEditModerator || controller.getProduct.verified==false,
-              minLines: 1,
-              maxLines: 5,
-              keyboardType: TextInputType.multiline,
-              onChanged: (value) => controller.setDescription = value,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.only(bottom: 12,top: 12),
-                filled: true,fillColor: Colors.transparent,hoverColor: Colors.blue,
-                disabledBorder: InputBorder.none,labelText: "Descripción del producto"),
-                inputFormatters: [ FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\- .³%]')) ],
-                textInputAction: TextInputAction.done,
-                controller: controller.controllerTextEditDescripcion,
-              ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -247,10 +238,9 @@ class ProductEdit extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
 
-          !controller.getAccountAuth? Container():const Text('Personaliza tu producto',style: TextStyle(fontSize: 18.0)),
-
           //TODO: eliminar para desarrrollo
-          /* TextButton(
+          // inicio : contenido para desarrollo
+          TextButton(
               onPressed: () async {
                 String clave = controller.controllerTextEditDescripcion.text;
                 Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
@@ -263,7 +253,9 @@ class ProductEdit extends StatelessWidget {
                 Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
                 await launchUrl(uri,mode: LaunchMode.externalApplication);
               },
-              child: const Text('Buscar en código Google (moderador)')),  */
+              child: const Text('Buscar en código Google (moderador)')),
+          // fin : contenido para desarrollo
+          !controller.getAccountAuth? Container():const Text('Personaliza tu producto',style: TextStyle(fontSize: 18.0)),
           space,
           // textfield : seleccionar cátegoria
             !controller.getAccountAuth? Container(): GestureDetector(
@@ -314,7 +306,7 @@ class ProductEdit extends StatelessWidget {
                           fillColor: fillColor,
                           labelText: 'Precio de compra',
                           border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
-                          enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
+                          enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                           ),    
                         onChanged: (value) => controller.formEditing = true , 
                         onEditingComplete: (){
@@ -525,15 +517,15 @@ class ProductEdit extends StatelessWidget {
           
           //TODO: eliminar para desarrrollo
           /* OPCIONES PARA DESARROLLADOR - ELIMINAR ESTE CÓDIGO PARA PRODUCCION */
-          /* const SizedBox(height:50),
-          widgetForModerator, */
+          const SizedBox(height:50),
+          widgetForModerator,
           ]             ,
       ),
     );
   }
 
   /* WIDGETS COMPONENT */
-/* Widget get widgetForModerator{
+Widget get widgetForModerator{
   // TODO : delete release
   return Theme(
     data: ThemeData.dark(),
@@ -620,10 +612,11 @@ class ProductEdit extends StatelessWidget {
       ),
     ),
   );
-} */
+}
   Widget textfielButton({required String labelText,String textValue = '',required Function() onTap,bool stateEdit = true,EdgeInsetsGeometry contentPadding = const EdgeInsets.all(12) }) {
 
     // value
+    final Color fillColor = Get.isDarkMode?Colors.white.withOpacity(0.03):Colors.black.withOpacity(0.03);
     Color borderColor = Get.isDarkMode?Colors.white70:Colors.black87;
 
     return InkWell(
@@ -634,8 +627,8 @@ class ProductEdit extends StatelessWidget {
         controller: TextEditingController(text: textValue),
         decoration: InputDecoration( 
           contentPadding: contentPadding,
-          filled: false,
-          fillColor:stateEdit?null:Colors.transparent ,
+          filled: true,
+          fillColor:stateEdit?fillColor:Colors.transparent ,
           disabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: stateEdit?borderColor:Colors.transparent,)),
           labelText: labelText,
           ),
@@ -775,8 +768,8 @@ class _SelectCategoryState extends State<SelectCategory> {
               builder: (context) {
                 return AlertDialog(
                   contentPadding: const EdgeInsets.all(16.0),
-                  content: Row(
-                    children: const <Widget>[
+                  content: const Row(
+                    children: <Widget>[
                       Expanded(child:Text("¿Desea continuar eliminando esta categoría?"))
                     ],
                   ),
