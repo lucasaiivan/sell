@@ -29,6 +29,25 @@ class SalesController extends GetxController {
   String titleText = 'Vender'; 
 
   //  cash register  // 
+  void deleteFixedDescription({required String description}){
+    // elimina una descripción fija
+    Database.refFirestoreFixedDescriptions(idAccount:homeController.getProfileAccountSelected.id).doc(description).delete();
+  }
+  void registerFixerDescription({required String description}){
+    // registra una descripción fija
+    Database.refFirestoreFixedDescriptions(idAccount:homeController.getProfileAccountSelected.id).doc(description).set({'description':description});
+  }
+  Future<List<String>> loadFixerDescriotions(){
+    // obtenemos las descripciones fijadas por el usuario
+    return Database.refFirestoreFixedDescriptions(idAccount:homeController.getProfileAccountSelected.id).get().then((value) {
+      List<String> list = [];
+      for (var element in value.docs) {
+        list.add(element['description'] as String);
+      }
+      return list;
+    });
+    
+  }
   void startCashRegister({required String description,required double initialCash,required double expectedBalance}){   
     // inicializa nueva caja
     //

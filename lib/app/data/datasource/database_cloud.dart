@@ -28,6 +28,7 @@ class Database {
   static Future<DocumentSnapshot<Map<String, dynamic>>> readMarkFuture({required String id}) =>FirebaseFirestore.instance.collection('/APP/ARG/MARCAS/').doc(id).get();
   static Future<DocumentSnapshot<Map<String, dynamic>>> readVersionApp() =>FirebaseFirestore.instance.collection('/APP/').doc('INFO').get();
   static Future<DocumentSnapshot<Map<String, dynamic>>>readFutureAdminUser({required String idAccount,required String email}) =>FirebaseFirestore.instance.collection('ACCOUNTS').doc(idAccount).collection('USERS').doc(email).get();
+ 
 
   // stream - DocumentSnapshot
   static Stream<DocumentSnapshot<Map<String, dynamic>>> readAccountModelStream(String id) =>FirebaseFirestore.instance.collection('ACCOUNTS').doc(id).snapshots();
@@ -50,6 +51,7 @@ class Database {
   static CollectionReference refFirestoreCatalogueProduct({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/CATALOGUE/');
   static CollectionReference refFirestoreRecords({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/RECORDS/'); // registros de los arqueos de caja
   static CollectionReference refFirestoreCashRegisters({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/CASHREGISTERS/'); // cajas registradoras activas
+  static CollectionReference refFirestoreFixedDescriptions({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/FIXERDESCRIPTIONS/');  // fixed descriptions
   static CollectionReference refFirestoreProductPublic() =>FirebaseFirestore.instance.collection('/APP/ARG/PRODUCTOS/');
   static CollectionReference refFirestoreRegisterPrice({required String idProducto, String isoPAis = 'ARG'}) =>FirebaseFirestore.instance.collection('/APP/$isoPAis/PRODUCTOS/$idProducto/PRICES/');
   static CollectionReference refFirestoreMark() =>FirebaseFirestore.instance.collection('/APP/ARG/MARCAS/');

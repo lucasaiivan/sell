@@ -265,14 +265,14 @@ class TransactionsView extends StatelessWidget {
 
   // DIALOG : mostrar detalles de la transacción
   void showAlertDialogTransactionInformation(BuildContext context, Map<dynamic, dynamic> transactionData) {
-    String id = transactionData['id'];
-    String seller = transactionData['seller'];
-    String cashRegister = transactionData['cashRegister'];
-    String payMode = transactionData['payMode'];
+    String id = transactionData['id'].toString();
+    String seller = transactionData['seller'].toString();
+    String cashRegister = transactionData['cashRegisterName'].toString();
+    String payMode = transactionData['payMode'].toString();
     double priceTotal = transactionData['priceTotal'];
     double valueReceived = transactionData['valueReceived'];
     double changeAmount = valueReceived==0?0.0: valueReceived - priceTotal;
-    String currencySymbol = transactionData['currencySymbol'];
+    String currencySymbol = transactionData['currencySymbol'].toString();
     List<dynamic> listProduct = transactionData['listPoduct'];
     Timestamp creation = transactionData['creation'];
 
