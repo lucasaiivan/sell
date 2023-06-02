@@ -854,6 +854,7 @@ class _CashRegisterState extends State<CashRegister> {
   // var
   String titleAppBar = ''; 
   bool confirmState = false;
+  bool pinUpDescritpion = false;
 
   @override
   void dispose() {
@@ -1067,43 +1068,103 @@ class _CashRegisterState extends State<CashRegister> {
   Widget get body{ 
 
     // description : vista para la apertura de la caja
-    
-    // controllers  
-    MoneyMaskedTextController moneyMaskedTextController = MoneyMaskedTextController(leftSymbol: '\$',decimalSeparator: ',',thousandSeparator: '.',precision:2);
-    TextEditingController descriptionTextEditingController = TextEditingController(); 
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 12),
-        // textfield : efectivo inicial de la caja
-        const Text('Efectivo inicial',style: TextStyle(fontSize: 18,fontWeight: FontWeight.w400)),
-        const SizedBox(height: 5), 
-        TextField(   
-          keyboardType: const TextInputType.numberWithOptions(decimal: false,signed: false),
-          controller: moneyMaskedTextController, 
-          style: const TextStyle(fontSize: 24 ) ,
-          decoration: const InputDecoration(
-            border: UnderlineInputBorder(),
-            enabledBorder: UnderlineInputBorder(),
-            labelText: 'Monto' ,
+        Expanded(
+          child: ListView(
+            children: [
+              const SizedBox(height: 12),
+            // textfield : efectivo inicial de la caja
+            const Text('Efectivo inicial',style: TextStyle(fontSize: 18,fontWeight: FontWeight.w400)),
+            const SizedBox(height: 5), 
+            TextField(   
+              keyboardType: const TextInputType.numberWithOptions(decimal: false,signed: false),
+              controller: moneyMaskedTextController, 
+              style: const TextStyle(fontSize: 24 ) ,
+              decoration: const InputDecoration(
+                border: UnderlineInputBorder(),
+                enabledBorder: UnderlineInputBorder(),
+                labelText: 'Monto' ,
+              ),
+            ),
+            // textfield : descripcion (opcional)
+            const SizedBox(height: 12),
+            const Text('Descripción de la caja',style: TextStyle(fontSize: 18,fontWeight: FontWeight.w400)),
+            const SizedBox(height: 5),
+            TextField(  
+              controller: textEditingController,
+              keyboardType: TextInputType.text,
+              maxLength: 7, // Límite de caracteres
+              decoration: const InputDecoration(  
+                border: UnderlineInputBorder(),
+                enabledBorder: UnderlineInputBorder(),
+                labelText: 'Descripción',
+              ),
+            ),
+            // CheckboxListTile : fijar descripcion 
+            CheckboxListTile(
+              title: const Text('Recordar descripción',style: TextStyle(fontSize: 18,fontWeight: FontWeight.w400)),
+              onChanged: (bool? value) {  
+                setState(() {
+                  pinUpDescritpion=value!;
+                });
+              }, 
+              value: pinUpDescritpion,
+              ),
+            const SizedBox(height: 12),
+            // obtenemos los datos futuros en un List de salesController.loadFixerDescriotions()
+            FutureBuilder<List<String>>(
+              future: salesController.loadFixerDescriotions(),
+              builder: (context, snapshot) {
+                if(snapshot.hasData){
+                  // widgets
+                  Widget title = const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Descripciones fijadas'),
+                      Divider(thickness: 0.3),
+                    ],
+                  );
+                  if( snapshot.data!.isEmpty){ title=Container(); }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      title,
+                      ListView.builder(
+                        padding: const EdgeInsets.all(0),
+                        shrinkWrap: true,
+                        itemCount: snapshot.data!.length,
+                        itemBuilder: (context, index) {
+                          return ListTile(
+                            title: Text(snapshot.data![index]),
+                            // button : delete 
+                            trailing: IconButton(
+                              onPressed: (){
+                                // eliminamos la descripcion
+                                salesController.deleteFixedDescription(description: snapshot.data![index]);
+                                // actualizamos la vista
+                                setState(() {}); 
+                              },
+                              icon: const Icon(Icons.delete),
+                            ),
+                            onTap: (){
+                              textEditingController.text=snapshot.data![index];
+                            },
+                          );
+                        },
+                      ),
+                    ],
+                  );
+                }else{
+                  return const Center(child: CircularProgressIndicator());
+                }
+              }
+            ),
+            ],
           ),
-        ),
-        // textfield : descripcion (opcional)
-        const SizedBox(height: 12),
-        const Text('Descripción de la caja',style: TextStyle(fontSize: 18,fontWeight: FontWeight.w400)),
-        const SizedBox(height: 5),
-        TextField(  
-          controller: descriptionTextEditingController,
-          keyboardType: TextInputType.text,
-          maxLength: 7, // Límite de caracteres
-          decoration: const InputDecoration(  
-            border: UnderlineInputBorder(),
-            enabledBorder: UnderlineInputBorder(),
-            labelText: 'Descripción',
-          ),
-        ),
-        const Spacer(),
+        ), 
         // button : iniciar caja 
         Container(
           padding: const EdgeInsets.only(bottom: 20),
@@ -1111,7 +1172,11 @@ class _CashRegisterState extends State<CashRegister> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () { 
-                salesController.startCashRegister(description: descriptionTextEditingController.text, initialCash: moneyMaskedTextController.numberValue, expectedBalance: moneyMaskedTextController.numberValue);
+                if(pinUpDescritpion){
+                  // guardamos la descripcion si el usuario lo desea
+                  salesController.registerFixerDescription(description: textEditingController.text);
+                }
+                salesController.startCashRegister(description: textEditingController.text, initialCash: moneyMaskedTextController.numberValue, expectedBalance: moneyMaskedTextController.numberValue);
                 Get.back();
               },
               style: ButtonStyle(padding: MaterialStateProperty.all(const EdgeInsets.all(20)),shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)))),
