@@ -112,7 +112,7 @@ class HomeController extends GetxController {
     _categoryList.value = value;
   } 
   // cash register  //
-  CashRegister cashRegister = CashRegister(id: '',description: '',opening: DateTime.now(),closure: DateTime.now(),billing: 0.0,cashInFlow: 0.0,cashOutFlow: 0.0,expectedBalance: 0.0,balance: 0.0,cashInFlowList: [], cashOutFlowList: [],initialCash: 0.0);
+  CashRegister cashRegister = CashRegister(id: '',sales: 0,description: '',opening: DateTime.now(),closure: DateTime.now(),billing: 0.0,cashInFlow: 0.0,cashOutFlow: 0.0,expectedBalance: 0.0,balance: 0.0,cashInFlowList: [], cashOutFlowList: [],initialCash: 0.0);
   List<CashRegister> listCashRegister = [];
   void loadCashRegisters(){
     // firebase : create 'Stream' de la  collecion de cajas registradoras

@@ -112,7 +112,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
                       alignment:  WrapAlignment.center,
                       children: [
                         controller.controllerTextEditCategory.text==''?Container():InputChip(shape:shape,checkmarkColor: Colors.red,surfaceTintColor: Colors.green,onPressed: (){controller.carouselController.animateToPage(3, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text(controller.controllerTextEditCategory.text)),
-                        controller.controllerTextEditPrecioCompra.numberValue==0.0?Container():InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(4, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text(Publications.getFormatoPrecio(monto: controller.controllerTextEditPrecioCompra.numberValue))),
+                        controller.controllerTextEditPrecioCosto.numberValue==0.0?Container():InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(4, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text(Publications.getFormatoPrecio(monto: controller.controllerTextEditPrecioCosto.numberValue))),
                         controller.getPorcentage==''?Container():InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(5, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text( controller.getPorcentage )),
                         controller.controllerTextEditPrecioVenta.numberValue==0.0?Container():InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(5, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text(Publications.getFormatoPrecio(monto: controller.controllerTextEditPrecioVenta.numberValue))),
                         controller.getFavorite? InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(6, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label:const  Text('Favorito')):Container(),
@@ -407,15 +407,15 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
           style: const TextStyle(fontSize: 18),
           autofocus: true,
           focusNode:controller.purchasePriceTextFormFieldfocus,
-          controller: controller.controllerTextEditPrecioCompra,
+          controller: controller.controllerTextEditPrecioCosto,
           enabled: true,
           autovalidateMode: AutovalidateMode.onUserInteraction,
           maxLength: 15, 
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           decoration: const InputDecoration(border: UnderlineInputBorder(),labelText: 'Precio de compra'),   
           onChanged: (value){
-            if( controller.controllerTextEditPrecioCompra.numberValue != 0){
-              controller.setPurchasePrice = controller.controllerTextEditPrecioCompra.numberValue;
+            if( controller.controllerTextEditPrecioCosto.numberValue != 0){
+              controller.setPurchasePrice = controller.controllerTextEditPrecioCosto.numberValue;
               controller.formEditing = true;
             }
              

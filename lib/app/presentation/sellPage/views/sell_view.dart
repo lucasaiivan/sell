@@ -380,7 +380,7 @@ class SalesView extends StatelessWidget {
           items.add(const PopupMenuItem(value:'apertura',child: Row(children: [Icon(Icons.add),Padding(padding: EdgeInsets.fromLTRB(12, 0, 0, 0),child: Text('Crear nueva caja')),])));
           // agregar las cajas existentes
           for (var element in homeController.listCashRegister) {
-            items.add(PopupMenuItem(value: element.id,child: Row(children: [ Padding(padding: EdgeInsets.fromLTRB(12, 0, 0, 0),child: Text(element.description)),])));
+            items.add(PopupMenuItem(value: element.id,child: Row(children: [ Padding(padding: const EdgeInsets.fromLTRB(12, 0, 0, 0),child: Text(element.description)),])));
           }
           // generate vista de cada item de homeController.cashRegisterList
           return List.generate(homeController.listCashRegister.length+1, (index) {
@@ -834,8 +834,8 @@ class CustomDivider extends StatelessWidget {
 
 // ignore: must_be_immutable
 class CashRegister extends StatefulWidget { 
-  late String id;
-  CashRegister({super.key,required this.id});
+  late String id; 
+  CashRegister({super.key,required this.id });
 
   @override
   State<CashRegister> createState() => _CashRegisterState();
@@ -852,23 +852,13 @@ class _CashRegisterState extends State<CashRegister> {
   TextEditingController textEditingController = TextEditingController();
   final FocusNode _amountCashRegisterFocusNode = FocusNode();
   // var
-  String titleAppBar = ''; 
-  bool confirmState = false;
+  String titleAppBar = '';  
   bool pinUpDescritpion = false;
+  bool confirmCloseState = false; 
+  late Widget view  ;
 
-  @override
-  void dispose() {
-    _amountCashRegisterFocusNode.dispose();
-    textEditingController.dispose();
-    moneyMaskedTextController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) { 
-
-    // widgets
-    Widget view = Container();
+  // void
+  void loadData(){
     switch (widget.id) {
       case 'apertura': 
         titleAppBar = 'Apertura de caja';
@@ -876,9 +866,10 @@ class _CashRegisterState extends State<CashRegister> {
         break;
       case 'detalles': 
         titleAppBar = 'Detalles de caja'; 
-        view = detailContent;
+        view = detailContent; 
         break;
       case 'cierre': 
+      confirmCloseState=true;
         titleAppBar = 'Cierre de caja'; 
         view = detailContent;
         break;
@@ -895,6 +886,26 @@ class _CashRegisterState extends State<CashRegister> {
         view = body;
         break;
     } 
+  }
+
+  // init 
+  @override
+  void initState() {
+    super.initState();
+    loadData();
+  }
+
+  @override
+  void dispose() {
+    _amountCashRegisterFocusNode.dispose();
+    textEditingController.dispose();
+    moneyMaskedTextController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {  
+    
 
     return Builder(builder: (context) {
       
@@ -990,8 +1001,8 @@ class _CashRegisterState extends State<CashRegister> {
   Widget get detailContent{ 
 
     // var
-    ButtonStyle buttonStyle = ButtonStyle(backgroundColor: MaterialStateProperty.all(confirmState?Colors.blue:null),padding: MaterialStateProperty.all(const EdgeInsets.all(20)),shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(borderRadius: BorderRadius.circular(2))));
-    TextStyle textStylebutton = TextStyle(color: confirmState?Colors.white:Colors.blue);
+    ButtonStyle buttonStyle = ButtonStyle(backgroundColor: MaterialStateProperty.all(confirmCloseState?Colors.blue:null),padding: MaterialStateProperty.all(const EdgeInsets.all(20)),shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(borderRadius: BorderRadius.circular(2))));
+    TextStyle textStylebutton = TextStyle(color: confirmCloseState?Colors.white:Colors.blue);
     TextStyle textStyleDescription = const TextStyle( fontWeight: FontWeight.w300);
     TextStyle textStyleValue = const TextStyle(fontSize: 18,fontWeight: FontWeight.w600);
 
@@ -1009,6 +1020,9 @@ class _CashRegisterState extends State<CashRegister> {
               // view info : efectivo incial
               const SizedBox(height: 12),
               Row(children: [Text('Efectivo inicial',style: textStyleDescription),const Spacer(),Text(Publications.getFormatoPrecio(monto: homeController.cashRegister.expectedBalance),style: textStyleValue)]),
+              // view info : cantidad de ventas
+              const SizedBox(height: 12),
+              Row(children: [Text('Ventas',style: textStyleDescription),const Spacer(),Text(homeController.cashRegister.sales.toString(),style: textStyleValue)]),
               // view info : facturacion
               const SizedBox(height: 12),
               Row(children: [Text('Facturación',style: textStyleDescription),const Spacer(),Text(Publications.getFormatoPrecio(monto:homeController.cashRegister.billing),style: textStyleValue)]),
@@ -1023,7 +1037,7 @@ class _CashRegisterState extends State<CashRegister> {
               Row(children: [Text('Monto esperado en la caja',style: textStyleDescription),const Spacer(),Text(Publications.getFormatoPrecio(monto: homeController.cashRegister.getExpectedBalance),style: textStyleValue)]),
               const SizedBox(height: 20),
               // textfield : Monto en caja
-              confirmState?TextField(  
+              confirmCloseState?TextField(  
                 focusNode: _amountCashRegisterFocusNode,
                 controller: moneyMaskedTextController,
                 keyboardType: const TextInputType.numberWithOptions(decimal: false,signed: false),
@@ -1043,7 +1057,8 @@ class _CashRegisterState extends State<CashRegister> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                if(confirmState){
+                // comprobamos si el usuario ya confirmo el cierre de caja  
+                if(confirmCloseState){
                   // comprobamos si el usuario ingreso un monto en caja
                   if( moneyMaskedTextController.numberValue!=0){homeController.cashRegister.balance = moneyMaskedTextController.numberValue;}
                   // cerramos la caja
@@ -1051,14 +1066,27 @@ class _CashRegisterState extends State<CashRegister> {
                   Get.back();
                 }else{
                   setState(() { 
-                    confirmState=!confirmState; 
+                    confirmCloseState=!confirmCloseState; 
                     _amountCashRegisterFocusNode.requestFocus();
                     });
                 } 
                 
               },
               style:buttonStyle ,
-              child: Text(confirmState?'Confirmar cierre de caja':'Cerrar caja',style:textStylebutton),
+              child: Text(confirmCloseState?'Confirmar cierre de caja':'Cerrar caja',style:textStylebutton),
+            ),
+          ),
+        ),
+        // textButton : cancelar
+        Container(
+          padding: const EdgeInsets.only(bottom: 20),
+          child: SizedBox(
+            width: double.infinity,
+            child: TextButton(
+              onPressed: () { 
+                Get.back();
+              },
+              child: const Text('Cancelar'),
             ),
           ),
         ),

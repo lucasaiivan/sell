@@ -150,6 +150,7 @@ class ProductEdit extends StatelessWidget {
   Widget cardFrontProduct(){
 
     // var
+    final Color boderLineColor = Get.isDarkMode?Colors.white.withOpacity(0.3):Colors.black.withOpacity(0.3);
     bool enableEdit = controller.getSaveIndicator? false: controller.getEditModerator || controller.getProduct.verified==false;
     final Color fillColor = Get.isDarkMode?Colors.white.withOpacity(0.03):Colors.black.withOpacity(0.03);
     
@@ -175,23 +176,13 @@ class ProductEdit extends StatelessWidget {
                         controller.getProduct.code != ""
                             ? Opacity(
                                 opacity: 0.8,
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    // icon : verificacion del producto
-                                    controller.getProduct.verified?const Icon(Icons.verified_rounded,color: Colors.blue, size: 20):const Icon(Icons.qr_code_2_rounded, size: 20),
-                                    const SizedBox(width: 5),
-                                    // text : codigo del producto
-                                    Text(controller.getProduct.code,style: const TextStyle(height: 1,fontSize: 14,fontWeight: FontWeight.normal)),
-                                  ],
-                                ),
+                                child: Text('Código: ${controller.getProduct.code}',style: const TextStyle(height: 1,fontSize: 14,fontWeight: FontWeight.normal)),
                               )
                             : Container(),
                         space,
                         // textfield  : seleccionar una marca
-                        textfielButton(
-                          contentPadding: const EdgeInsets.only(bottom: 5,top: 5,left: 12,right: 12),
+                        textfielBottomSheetListOptions(
+                          contentPadding: const EdgeInsets.only(bottom: 12,top: 12,left: 12,right: 12),
                             stateEdit: controller.getSaveIndicator? false: controller.getEditModerator || controller.getProduct.verified==false,
                             textValue: controller.getMarkSelected.name,
                             labelText: controller.getMarkSelected.id == ''? 'Seleccionar una marca': 'Marca',
@@ -214,9 +205,15 @@ class ProductEdit extends StatelessWidget {
             keyboardType: TextInputType.multiline,
             onChanged: (value) => controller.setDescription = value,
             decoration: InputDecoration(
-              contentPadding: const EdgeInsets.only(bottom: 5,top: 5,left: 12,right: 12),
-              filled: true,fillColor: enableEdit?fillColor:Colors.transparent,hoverColor: Colors.blue,
-              disabledBorder: InputBorder.none,labelText: "Descripción del producto"),
+              border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color:boderLineColor),),
+              disabledBorder: UnderlineInputBorder(borderSide: BorderSide(color:!enableEdit?Colors.transparent:boderLineColor)),
+                  
+              contentPadding: const EdgeInsets.only(bottom: 12,top: 12,left: 12,right: 12),
+              filled: enableEdit,
+              fillColor: enableEdit?fillColor:Colors.transparent,
+              hoverColor: Colors.blue, 
+              labelText: "Descripción del producto"),
               inputFormatters: [ FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\- .³%]')) ],
               textInputAction: TextInputAction.done,
               controller: controller.controllerTextEditDescripcion,
@@ -297,18 +294,21 @@ class ProductEdit extends StatelessWidget {
                         style: const TextStyle(fontSize: 18),
                         autofocus: false,
                         focusNode:controller.purchasePriceTextFormFieldfocus,
-                        controller: controller.controllerTextEditPrecioCompra,
+                        controller: controller.controllerTextEditPrecioCosto,
                         enabled: true,
                         autovalidateMode: AutovalidateMode.onUserInteraction, 
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         decoration: InputDecoration( 
                           filled: true,
                           fillColor: fillColor,
-                          labelText: 'Precio de compra',
+                          labelText: 'Precio de costo',
                           border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                           enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                           ),    
-                        onChanged: (value) => controller.formEditing = true , 
+                        onChanged: (value) { 
+                          controller.formEditing = true;  
+                          controller.updateAll(); 
+                        } ,  
                         onEditingComplete: (){
                           controller.updateAll();
                           FocusScope.of(controller.getContext).previousFocus();
@@ -320,9 +320,9 @@ class ProductEdit extends StatelessWidget {
                         },
                       ),
                     ),
-                    controller.getPorcentage == '' ? Container() :space,
+                    controller.getPorcentage == '' ? Container():space,
                     // text and button : modificar porcentaje de ganancia
-                    controller.getPorcentage == '' ? Container() : Row(
+                    controller.getPorcentage == '' ? Container():Row(
                       children: [
                         TextButton(onPressed: controller.showDialogAddProfitPercentage, child: Text( controller.getPorcentage )),
                         const Spacer(),
@@ -613,11 +613,11 @@ Widget get widgetForModerator{
     ),
   );
 }
-  Widget textfielButton({required String labelText,String textValue = '',required Function() onTap,bool stateEdit = true,EdgeInsetsGeometry contentPadding = const EdgeInsets.all(12) }) {
+  Widget textfielBottomSheetListOptions({required String labelText,String textValue = '',required Function() onTap,bool stateEdit = true,EdgeInsetsGeometry contentPadding = const EdgeInsets.all(12) }) {
 
     // value
     final Color fillColor = Get.isDarkMode?Colors.white.withOpacity(0.03):Colors.black.withOpacity(0.03);
-    Color borderColor = Get.isDarkMode?Colors.white70:Colors.black87;
+    Color boderLineColor = Get.isDarkMode?Colors.white.withOpacity(0.3):Colors.black.withOpacity(0.3);
 
     return InkWell(
       borderRadius: BorderRadius.circular(5),
@@ -626,10 +626,12 @@ Widget get widgetForModerator{
         enabled: false,
         controller: TextEditingController(text: textValue),
         decoration: InputDecoration( 
+          border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+          enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color:boderLineColor),),
+          disabledBorder: UnderlineInputBorder(borderSide: BorderSide(color:!stateEdit?Colors.transparent:boderLineColor)),
           contentPadding: contentPadding,
-          filled: true,
-          fillColor:stateEdit?fillColor:Colors.transparent ,
-          disabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: stateEdit?borderColor:Colors.transparent,)),
+          filled: stateEdit,
+          fillColor:stateEdit?fillColor:Colors.transparent , 
           labelText: labelText,
           ),
       ),

@@ -8,6 +8,7 @@ class CashRegister {
   DateTime opening; // fecha de apertura
   DateTime closure; // fecha de cierre
   double initialCash; // monto inicial
+  int sales; // cantidad de ventas
   double billing; // monto de facturación
   double cashInFlow; // monto de ingresos
   double cashOutFlow; // monto de egresos (numero negativo)
@@ -22,6 +23,7 @@ class CashRegister {
     required this.initialCash,
     required this.opening,
     required this.closure,
+    required this.sales,
     required this.billing,
     required this.cashInFlow,
     required this.cashOutFlow,
@@ -48,6 +50,7 @@ class CashRegister {
       initialCash: 0.0,
       opening: DateTime.now(),
       closure: DateTime.now(),
+      sales: 0,
       billing: 0.0,
       cashInFlow: 0.0,
       cashOutFlow: 0.0,
@@ -64,6 +67,7 @@ class CashRegister {
         "initialCash": initialCash,
         "opening": opening,
         "closure": closure,
+        "sales": sales,
         "billing": billing,
         "cashInFlow": cashInFlow,
         "cashOutFlow": cashOutFlow,
@@ -80,6 +84,7 @@ class CashRegister {
       initialCash: double.parse(data['initialCash'].toString()),
       opening: data['opening'].toDate(),
       closure: data['closure'].toDate(),
+      sales: data['sales'] ?? 0,
       billing: double.parse(data['billing'].toString()),
       cashInFlow: double.parse(data['cashInFlow'].toString()) ,
       cashOutFlow: double.parse(data['cashOutFlow'].toString()),
@@ -97,6 +102,7 @@ class CashRegister {
     opening = documentSnapshot['opening'].toDate();
     closure = documentSnapshot['closure'].toDate();
     billing = documentSnapshot['billing'].toDouble();
+    sales = documentSnapshot['sales'];
     cashInFlow = documentSnapshot['cashInFlow'].toDouble();
     cashOutFlow = documentSnapshot['cashOutFlow'].toDouble();
     expectedBalance = documentSnapshot['expectedBalance'].toDouble();

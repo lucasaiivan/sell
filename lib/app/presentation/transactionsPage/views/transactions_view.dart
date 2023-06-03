@@ -1,8 +1,7 @@
  
 import 'package:blur/blur.dart';
 import 'package:cached_network_image/cached_network_image.dart'; 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fl_chart/fl_chart.dart'; 
+import 'package:cloud_firestore/cloud_firestore.dart'; 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart'; 
 import 'package:intl/intl.dart'; 
@@ -180,12 +179,21 @@ class TransactionsView extends StatelessWidget {
                   children: [
                     // const Text('Pago con '),
                     Material(
-                      color: (payMode['color'] as Color) .withOpacity(0.1),
+                      color: (payMode['color'] as Color).withOpacity(0.1),
                       clipBehavior: Clip.antiAlias,
                       borderRadius: const BorderRadius.all(Radius.circular(6)),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal:10,vertical:0),
-                        child: Text(payMode['name'],style: TextStyle(fontWeight: FontWeight.w600,color: (payMode['color'] as Color) .withOpacity(0.7)  )),
+                      child: Row(
+                        children: [
+                          // verificar si existe el dato 'payMode['iconData']' para mostrar el icono de la forma de pago de lo contrario se muestra un contenedor vacio
+                          payMode['iconData']!=null?Padding(
+                            padding: const EdgeInsets.only(left:5,bottom: 2,top:2,right:0),
+                            child: Icon(payMode['iconData'],color: payMode['color'].withOpacity(0.7),size: 20),
+                          ):Container(),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal:5,vertical:0),
+                            child: Text(payMode['name'],style: TextStyle(fontWeight: FontWeight.w600,color: (payMode['color'] as Color) .withOpacity(0.7)  )),
+                          ),
+                        ],
                       )),
                   ],
                 ),
@@ -212,7 +220,7 @@ class TransactionsView extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           //  text : cantidad de items ( productos )
-                          Text('${ticketModel.getLengh()} items',style:textStyleSecundary), 
+                          Text('${ticketModel.getLengh()} artículos',style:textStyleSecundary), 
                           // text : valor del vuelto
                           ticketModel.valueReceived == 0? Container(): Row(
                             mainAxisSize: MainAxisSize.min,
@@ -288,9 +296,11 @@ class TransactionsView extends StatelessWidget {
     // styles
     const double opacity = 0.8;
     Widget divider = ComponentApp().divider();
-    const TextStyle textStyle = TextStyle(fontSize: 14,fontWeight: FontWeight.w500);
+    Widget spacer = const SizedBox(height: 12);
+    TextStyle textStyleDescription = const TextStyle( fontWeight: FontWeight.w300);
+    TextStyle textStyleValue = const TextStyle(fontSize: 16,fontWeight: FontWeight.w600);
 
-  //  dialog  : mostrar detalles de la transacción
+  //  showDialog  : mostrar detalles de la transacción
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -300,6 +310,7 @@ class TransactionsView extends StatelessWidget {
           content: SizedBox(
             // establece el ancho a toda la pantalla
             width:  MediaQuery.of(context).size.width,
+            // SingleChildScrollView : permite hacer scroll en el contenido
             child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
@@ -307,81 +318,86 @@ class TransactionsView extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
+                    // text : titulo de la alerta
                     const Padding(
                       padding: EdgeInsets.only(bottom: 12),
                       child: Text("Información de transacción",textAlign: TextAlign.center, style: TextStyle(fontSize: 18,fontWeight: FontWeight.w400)),
                     ),
                     const SizedBox(height: 20),
+                    // text
                     Row(
                       children: <Widget>[
-                        const Opacity(opacity:opacity,child: Text("Id: ")),
+                        Opacity(opacity:opacity,child: Text("Id: ",style: textStyleDescription)),
                         const Spacer(),
-                        Text(id,style: textStyle),
+                        Text(id,style: textStyleValue),
                       ],
                     ),
-                    divider,
+                    spacer,
                     Row(
                       children: <Widget>[
-                        const Opacity(opacity:opacity,child: Text("Fecha de creación: ")),
+                        Opacity(opacity:opacity,child: Text("Fecha de creación: ",style: textStyleDescription)),
                         const Spacer(),
-                        Text(formattedCreationDate,style: textStyle),
+                        Text(formattedCreationDate,style: textStyleValue),
                       ],
                     ),
-                    divider,
+                    spacer,
                     Row(
                       children: <Widget>[
-                        const Opacity(opacity:opacity,child: Text("Caja registradora: ")),
+                        Opacity(opacity:opacity,child: Text("Caja registradora: ",style: textStyleDescription)),
                         const Spacer(),
-                        Text(cashRegister,style: textStyle),
+                        Text(cashRegister,style: textStyleValue),
                       ],
                     ),
-                    divider,
+                    spacer,
                     Row(
                       children: <Widget>[
-                        const Opacity(opacity:opacity,child: Text("Vendedor: ")),
+                        Opacity(opacity:opacity,child: Text("Vendedor: ",style: textStyleDescription)),
                         const Spacer(),
-                        Text(seller,style: textStyle),
+                        Text(seller,style: textStyleValue),
                       ],
                     ),
+                    spacer,  
                     divider,
-                    const SizedBox(height: 20,width: double.infinity), 
+                    spacer,  
                     Row(
                       children: <Widget>[
-                        const Opacity(opacity:opacity,child: Text("Cantidad de productos: ")),
+                        Opacity(opacity:opacity,child: Text("Cantidad de artículos: ",style: textStyleDescription)),
                         const Spacer(),
-                        Text("${listProduct.length}",style: textStyle),
+                        Text("${listProduct.length}",style: textStyleValue),
                       ],
                     ),
-                    divider,
+                    spacer,
                     Row(
                       children: <Widget>[
-                        const Opacity(opacity:opacity,child: Text("Modo de pago: ")),
+                        Opacity(opacity:opacity,child: Text("Modo de pago: ",style: textStyleDescription)),
                         const Spacer(),
-                        Text("${ payModeMap['name'] }",style: textStyle),
+                        Text("${ payModeMap['name'] }",style: textStyleValue),
                       ],
                     ),
+                    spacer,  
                     divider,
+                    spacer,  
                     Row(
                       children: <Widget>[
-                        const Opacity(opacity:opacity,child: Text("Precio total: ")),
+                        Opacity(opacity:opacity,child: Text("Precio total: ",style: textStyleDescription)),
                         const Spacer(),
-                        Text( Publications.getFormatoPrecio(monto: priceTotal,moneda: currencySymbol),style: textStyle),
+                        Text( Publications.getFormatoPrecio(monto: priceTotal,moneda: currencySymbol),style: textStyleValue),
                       ],
                     ),
-                    divider,
+                    spacer,
                     Row(
                       children: <Widget>[
-                        const Opacity(opacity:opacity,child: Text("Valor recibido: ")),
+                        Opacity(opacity:opacity,child: Text("Valor recibido: ",style: textStyleDescription)),
                         const Spacer(),
-                        Text(Publications.getFormatoPrecio(monto: valueReceived,moneda: currencySymbol),style: textStyle),
+                        Text(Publications.getFormatoPrecio(monto: valueReceived,moneda: currencySymbol),style: textStyleValue),
                       ],
                     ),
-                    divider,
+                    spacer,
                     Row(
                       children: <Widget>[
-                        const Opacity(opacity:opacity,child: Text("Vuelto: ")),
+                        Opacity(opacity:opacity,child: Text("Vuelto: ",style: textStyleDescription)),
                         const Spacer(),
-                        Text( Publications.getFormatoPrecio(monto: changeAmount,moneda: currencySymbol),style: textStyle),
+                        Text( Publications.getFormatoPrecio(monto: changeAmount,moneda: currencySymbol),style: textStyleValue),
                       ],
                     ),
                     

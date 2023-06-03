@@ -633,9 +633,9 @@ class TransactionsController extends GetxController {
 
   Map getPayMode({required String idMode}) {
 
-    if( idMode=='effective' || idMode ==  'Efectivo') return {'name':'Efectivo','color':Colors.green};
-    if( idMode=='mercadopago' || idMode ==  'Mercado Pago') return {'name':'Mercado Pago','color':Colors.blue};
-    if( idMode=='card' || idMode ==  'Tarjeta De Crédito/Débito') return {'name':'Tarjeta Credito/Debito','color':Colors.orange};
+    if( idMode=='effective' || idMode ==  'Efectivo') return {'name':'Efectivo','color':Colors.green,'iconData':Icons.money};
+    if( idMode=='mercadopago' || idMode ==  'Mercado Pago') return {'name':'Mercado Pago','color':Colors.blue,'iconData':Icons.handshake_outlined};
+    if( idMode=='card' || idMode ==  'Tarjeta De Crédito/Débito') return {'name':'Tarjeta Credito/Debito','color':Colors.orange,'iconData':Icons.credit_card};
     return {'name':'Sin esprecificar','color':Colors.grey};
 
   }
