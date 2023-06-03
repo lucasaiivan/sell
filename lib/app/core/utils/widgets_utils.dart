@@ -831,6 +831,7 @@ class LogoPremium extends StatelessWidget {
 }
 
 class ImageAvatarApp extends StatelessWidget {
+  late final bool iconAdd;
   late final bool favorite;
   late final String url;
   late final double size;
@@ -840,7 +841,7 @@ class ImageAvatarApp extends StatelessWidget {
   final VoidCallback?  onTap;
   late final Color canvasColor;
   // ignore: prefer_const_constructors_in_immutables
-  ImageAvatarApp({Key? key,this.canvasColor=Colors.black12,this.favorite=false,this.url='',this.size=50,this.radius=12,this.description='',this.path='', this.onTap }) : super(key: key);
+  ImageAvatarApp({Key? key,this.iconAdd=false,this.canvasColor=Colors.black12,this.favorite=false,this.url='',this.size=50,this.radius=12,this.description='',this.path='', this.onTap }) : super(key: key);
 
   // avatar que se va usar en toda la app, especialemnte en los 'ListTile'
 
@@ -856,7 +857,7 @@ class ImageAvatarApp extends StatelessWidget {
     Widget imageDefault = AnimatedContainer(
       duration: const Duration(milliseconds: 500),
       color: darkMode?Colors.black12:Colors.black12,
-      child: Image.asset('assets/default_image.png',fit: BoxFit.cover,color: darkMode?Colors.white12 :Colors.grey.shade200,));
+      child:iconAdd?const Opacity(opacity: 0.5,child: Icon(Icons.add_a_photo)): Image.asset('assets/default_image.png',fit: BoxFit.cover,color: darkMode?Colors.white12 :Colors.grey.shade200,));
  
     return SizedBox(
       width: size,height: size,

@@ -151,8 +151,8 @@ class ControllerProductsEdit extends GetxController {
   TextEditingController controllerTextEditCategory = TextEditingController();
   TextEditingController controllerTextEditQuantityStock = TextEditingController();
   TextEditingController controllerTextEditAlertStock = TextEditingController();
-  MoneyMaskedTextController controllerTextEditPrecioVenta = MoneyMaskedTextController();
-  MoneyMaskedTextController controllerTextEditPrecioCompra = MoneyMaskedTextController();
+  MoneyMaskedTextController controllerTextEditPrecioVenta = MoneyMaskedTextController(leftSymbol: '\$');
+  MoneyMaskedTextController controllerTextEditPrecioCosto = MoneyMaskedTextController(leftSymbol: '\$');
 
   // description
   String _description = '';
@@ -279,7 +279,7 @@ class ControllerProductsEdit extends GetxController {
     // llamado después de que el widget se representa en la pantalla - ej. showIntroDialog(); //
     super.onReady();
 
-    controllerTextEditPrecioCompra.addListener(() {
+    controllerTextEditPrecioCosto.addListener(() {
       updateAll(); 
       });
   }
@@ -291,7 +291,7 @@ class ControllerProductsEdit extends GetxController {
     controllerTextEditCategory.dispose();
     controllerTextEditDescripcion.dispose();
     controllerTextEditMark.dispose();
-    controllerTextEditPrecioCompra.dispose();
+    controllerTextEditPrecioCosto.dispose();
     controllerTextEditPrecioVenta.dispose();
     controllerTextEditQuantityStock.dispose();
 
@@ -309,15 +309,15 @@ class ControllerProductsEdit extends GetxController {
 
   String get getPorcentage{
     // description : obtenemos el porcentaje de las ganancias
-    if ( controllerTextEditPrecioCompra.numberValue == 0 ) {
+    if ( controllerTextEditPrecioCosto.numberValue == 0 ) {
       return '';
     }
     if ( controllerTextEditPrecioVenta.numberValue == 0 ) {
       return '0%';
     }
     
-    double ganancia = controllerTextEditPrecioVenta.numberValue - controllerTextEditPrecioCompra.numberValue;
-    double porcentajeDeGanancia = (ganancia / controllerTextEditPrecioCompra.numberValue) * 100;
+    double ganancia = controllerTextEditPrecioVenta.numberValue - controllerTextEditPrecioCosto.numberValue;
+    double porcentajeDeGanancia = (ganancia / controllerTextEditPrecioCosto.numberValue) * 100;
     
     if (ganancia % 1 != 0) {
       return '${porcentajeDeGanancia.toStringAsFixed(2)}%';
@@ -413,7 +413,7 @@ class ControllerProductsEdit extends GetxController {
               getProduct.upgrade = Timestamp.now();
               getProduct.idMark = getMarkSelected.id;
               getProduct.nameMark = getMarkSelected.name;
-              getProduct.purchasePrice = controllerTextEditPrecioCompra.numberValue;
+              getProduct.purchasePrice = controllerTextEditPrecioCosto.numberValue;
               getProduct.salePrice = controllerTextEditPrecioVenta.numberValue;
               getProduct.favorite = getFavorite;
               getProduct.stock = getStock;
@@ -566,8 +566,8 @@ class ControllerProductsEdit extends GetxController {
     
     // set : controles de las entradas de texto
     controllerTextEditDescripcion =TextEditingController(text: getDescription);
-    controllerTextEditPrecioVenta =MoneyMaskedTextController(initialValue: getSalePrice);
-    controllerTextEditPrecioCompra =MoneyMaskedTextController(initialValue: getPurchasePrice);
+    controllerTextEditPrecioVenta =MoneyMaskedTextController(initialValue: getSalePrice,leftSymbol: '\$');
+    controllerTextEditPrecioCosto =MoneyMaskedTextController(initialValue: getPurchasePrice,leftSymbol: '\$');
     controllerTextEditQuantityStock =TextEditingController(text: getQuantityStock.toString());
     controllerTextEditAlertStock = TextEditingController(text: getAlertStock.toString());
     controllerTextEditCategory = TextEditingController(text: getCategory.name);
@@ -763,8 +763,8 @@ class ControllerProductsEdit extends GetxController {
                   //  function : guarda el nuevo porcentaje de ganancia
                   if(controller.text != ''){
                     double porcentajeDeGanancia  = double.parse(controller.text); 
-                    double ganancia = controllerTextEditPrecioCompra.numberValue * (porcentajeDeGanancia / 100);
-                    setSalePrice = controllerTextEditPrecioCompra.numberValue + ganancia; 
+                    double ganancia = controllerTextEditPrecioCosto.numberValue * (porcentajeDeGanancia / 100);
+                    setSalePrice = controllerTextEditPrecioCosto.numberValue + ganancia; 
                     update(['updateAll']);
                   }
                   //  action : cierra el dialogo
@@ -794,7 +794,12 @@ class ControllerProductsEdit extends GetxController {
     if (getXFileImage.path != '') {
       // el usuario cargo un nueva imagen externa 
       return ImageAvatarApp( path: getXFileImage.path,size: size,onTap: getProduct.verified==false || getEditModerator? showModalBottomSheetCambiarImagen : null );
-    } else {
+    } else { 
+
+      // si no contiene ningun dato la imagen del producto se visualiza una imagen con un icon para agregar foto
+      if(getProduct.image == ''){
+        return ImageAvatarApp( iconAdd: true,path: '',size: size,onTap: getProduct.verified==false || getEditModerator? showModalBottomSheetCambiarImagen : null );
+      }
       // se visualiza la imagen del producto
       return ImageAvatarApp(url: getProduct.image ,size: size,onTap: getProduct.verified==false || getEditModerator? showModalBottomSheetCambiarImagen : null );
     }

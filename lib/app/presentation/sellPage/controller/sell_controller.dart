@@ -30,15 +30,15 @@ class SalesController extends GetxController {
 
   //  cash register  // 
   void deleteFixedDescription({required String description}){
-    // elimina una descripción fija
+    // firebase : elimina una descripción fijada
     Database.refFirestoreFixedDescriptions(idAccount:homeController.getProfileAccountSelected.id).doc(description).delete();
   }
   void registerFixerDescription({required String description}){
-    // registra una descripción fija
+    // firebase : registra una descripción fija
     Database.refFirestoreFixedDescriptions(idAccount:homeController.getProfileAccountSelected.id).doc(description).set({'description':description});
   }
   Future<List<String>> loadFixerDescriotions(){
-    // obtenemos las descripciones fijadas por el usuario
+    // firebase : obtenemos las descripciones fijadas por el usuario
     return Database.refFirestoreFixedDescriptions(idAccount:homeController.getProfileAccountSelected.id).get().then((value) {
       List<String> list = [];
       for (var element in value.docs) {
@@ -138,12 +138,14 @@ class SalesController extends GetxController {
           CashRegister cashRegister = CashRegister.fromMap(snapshot.data() as Map<String, dynamic>);
           // incrementa el valor total de la facturacion de la caja
           cashRegister.billing += amount; 
+          // incrementa el valor de las ventas de la caja
+          cashRegister.sales ++;
           // Actualiza el valor del número en el documento
           transaction.update(documentRef, cashRegister.toJson());
         }
       }); 
     }
-  }
+  } 
 
   void cashRegisterLocalSave()async{  await GetStorage().write('cashRegisterID', homeController.cashRegister.id);}
   void upgradeCashRegister({required String id})async{
