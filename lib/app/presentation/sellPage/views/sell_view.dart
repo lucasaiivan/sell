@@ -892,7 +892,6 @@ class _CashRegisterState extends State<CashRegister> {
   @override
   void initState() {
     super.initState();
-    loadData();
   }
 
   @override
@@ -905,6 +904,8 @@ class _CashRegisterState extends State<CashRegister> {
 
   @override
   Widget build(BuildContext context) {  
+
+    loadData();
     
 
     return Builder(builder: (context) {
@@ -1010,7 +1011,7 @@ class _CashRegisterState extends State<CashRegister> {
       children: [
         Expanded(
           child: ListView( 
-            children: [
+            children: [ 
               const SizedBox(height: 20),
               // view info : descripcion
               Row(children: [Text('Descripción',style: textStyleDescription),const Spacer(),Text(homeController.cashRegister.description,style: textStyleValue)]),
@@ -1032,6 +1033,9 @@ class _CashRegisterState extends State<CashRegister> {
               // view info : ingresos
               const SizedBox(height: 12),
               Row(children: [Text('Ingresos',style: textStyleDescription),const Spacer(),Text(Publications.getFormatoPrecio(monto: homeController.cashRegister.cashInFlow),style: textStyleValue)]),
+              // divider 
+              const SizedBox(height: 20),
+              ComponentApp().divider(thickness:1),
               // view info : monto esperado en la caja
               const SizedBox(height: 12),
               Row(children: [Text('Monto esperado en la caja',style: textStyleDescription),const Spacer(),Text(Publications.getFormatoPrecio(monto: homeController.cashRegister.getExpectedBalance),style: textStyleValue)]),
@@ -1136,7 +1140,7 @@ class _CashRegisterState extends State<CashRegister> {
               title: const Text('Recordar descripción',style: TextStyle(fontSize: 18,fontWeight: FontWeight.w400)),
               onChanged: (bool? value) {  
                 setState(() {
-                  pinUpDescritpion=value!;
+                  pinUpDescritpion=!pinUpDescritpion;
                 });
               }, 
               value: pinUpDescritpion,

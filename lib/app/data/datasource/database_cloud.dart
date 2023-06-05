@@ -62,7 +62,7 @@ class Database {
   static Future dbProductStockIncrement({required String idAccount, required String idProduct,int quantity=1}) =>FirebaseFirestore.instance.collection('ACCOUNTS/$idAccount/CATALOGUE/').doc(idProduct).update({"quantityStock": FieldValue.increment(quantity)}); 
   static Future dbProductStockDecrement({required String idAccount, required String idProduct,int quantity=-1}) =>FirebaseFirestore.instance.collection('ACCOUNTS/$idAccount/CATALOGUE/').doc(idProduct).update({"quantityStock": FieldValue.increment(-quantity)}); 
   // get - consultas compuestas
-  static Stream<QuerySnapshot<Map<String, dynamic>>>readSalesProduct({required String idAccount}) =>FirebaseFirestore.instance.collection('ACCOUNTS/$idAccount/CATALOGUE').where("sales", isNotEqualTo:0).orderBy("sales", descending: true).limit(50).snapshots();
+  static Stream<QuerySnapshot<Map<String, dynamic>>>readSalesProduct({required String idAccount,int limit = 50}) =>FirebaseFirestore.instance.collection('ACCOUNTS/$idAccount/CATALOGUE').where("sales", isNotEqualTo:0).orderBy("sales", descending: true).limit(limit).snapshots();
   static Stream<QuerySnapshot<Map<String, dynamic>>> readTransactionsFilterTimeStream({required String idAccount,required Timestamp timeEnd,required Timestamp timeStart}) => FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/TRANSACTIONS/')
         .orderBy('creation', descending: true)
         .where('creation',isGreaterThan: timeStart)

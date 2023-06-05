@@ -761,7 +761,7 @@ void showDialogCerrarSesion() {
   getTheBestSellingProducts({required String idAccount}) {
     // obtenemos los productos más vendidos
     // Firestore get
-    Database.readSalesProduct(idAccount: idAccount).listen((value) {
+    Database.readSalesProduct(idAccount: idAccount,limit: 75).listen((value) {
 
       // values 
       List<ProductCatalogue> list = [];

@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:sell/app/domain/entities/catalogo_model.dart';
+import '../../../domain/entities/cashRegister_model.dart';
 import '../../../domain/entities/ticket_model.dart';
 import '../../home/controller/home_controller.dart';
 
@@ -38,9 +39,9 @@ class TransactionsController extends GetxController {
     }
 
   // obtenemos los montos de cada caja
-    Map<String,double> cashAnalysisMap = {}; 
-    Map<String,double> get getCashAnalysisMap => cashAnalysisMap;
-    set setCashAnalysisMap(Map<String,double> value) => cashAnalysisMap = value;
+    Map<String,Map> cashAnalysisMap = {}; 
+    Map<String,Map> get getCashAnalysisMap => cashAnalysisMap;
+    set setCashAnalysisMap(Map<String,Map> value) => cashAnalysisMap = value;
 
   // producto con más ganancias
   List<ProductCatalogue> bestSellingProductList = [];
@@ -496,31 +497,21 @@ class TransactionsController extends GetxController {
     
     void readCashAnalysis( ){
     //obtenemos el monto de cada caja
-    setCashAnalysisMap = {};
+    setCashAnalysisMap = {}; 
+    
+    for (TicketModel element in getTransactionsList) {
 
-    for (var element in getTransactionsList) {
-      switch (element.cashRegisterName) {
-        case '1':
-          getCashAnalysisMap.containsKey('1')?getCashAnalysisMap['1']=(getCashAnalysisMap['1'] as double) +element.priceTotal : getCashAnalysisMap['1']=element.priceTotal;
-          break;
-        case '2':
-          getCashAnalysisMap.containsKey('2')?getCashAnalysisMap['2']= (getCashAnalysisMap['2'] as double) + element.priceTotal : getCashAnalysisMap['2']= element.priceTotal;
-          break;
-        case '3':
-          getCashAnalysisMap.containsKey('3')?getCashAnalysisMap['3']=(getCashAnalysisMap['3'] as double) +element.priceTotal : getCashAnalysisMap['3']=element.priceTotal;
-          break;
-        case '4':
-          getCashAnalysisMap.containsKey('4')?getCashAnalysisMap['4']=(getCashAnalysisMap['4'] as double) +element.priceTotal : getCashAnalysisMap['4']=element.priceTotal;
-          break;
-        case '5':
-          getCashAnalysisMap.containsKey('5')?getCashAnalysisMap['5']=(getCashAnalysisMap['5'] as double) +element.priceTotal : getCashAnalysisMap['5']=element.priceTotal;
-          break;
-        default:
-          getCashAnalysisMap.containsKey('1')?getCashAnalysisMap['1']=(getCashAnalysisMap['1'] as double) +element.priceTotal : getCashAnalysisMap['1']=element.priceTotal;
-          break;
-      }
-      }
-      // ordenar los productos en forma descendente
+      // get : obtenemos los datos del ticket
+      TicketModel ticketModel = element;
+      // obtenemos los tickets de las cajas activas actualmente
+      for (CashRegister cashRegister in homeController.listCashRegister) {
+        if(cashRegister.id == ticketModel.cashRegisterId){
+          getCashAnalysisMap.containsKey(cashRegister.id)? getCashAnalysisMap[cashRegister.id]={'total':(getCashAnalysisMap[cashRegister.id]?['total'] as double) +element.priceTotal,'name':cashRegister.description} : getCashAnalysisMap[cashRegister.id]={'total':element.priceTotal,'name':cashRegister.description};
+        }
+      } 
+
+    }
+    // ordenar los productos en forma descendente
     setCashAnalysisMap = Map.fromEntries( getCashAnalysisMap.entries.toList()..sort((e1, e2) => e1.key.compareTo(e2.key)));
     }
    // FUCTIONS
