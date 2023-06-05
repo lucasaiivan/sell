@@ -599,8 +599,8 @@ class _WidgetAnalyticSalesTileExpandedState extends State<WidgetAnalyticSalesTil
                 return Column(
                   children: [
                     ListTile(
-                      title: Text('Caja ${transactionsController.getCashAnalysisMap.keys.elementAt(index)}',overflow:TextOverflow.ellipsis ),
-                      trailing:Opacity(opacity: 0.75,child: Text(Publications.getFormatoPrecio(monto: transactionsController.getCashAnalysisMap.values.elementAt(index) ),style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w300))),
+                      title: Text('Caja ${transactionsController.getCashAnalysisMap.values.elementAt(index)['name']}',overflow:TextOverflow.ellipsis ),
+                      trailing:Opacity(opacity: 0.75,child: Text(Publications.getFormatoPrecio(monto: transactionsController.getCashAnalysisMap.values.elementAt(index)['total'] ),style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w300))),
                     ),
                     transactionsController.getCashAnalysisMap.length!=index+1?const Divider(endIndent:20,height: 0,indent:20):Container(),
                   ],
@@ -1096,8 +1096,8 @@ class StaticsCards extends StatelessWidget {
       cards.insert(2,CardAnalityc( 
             backgroundColor: Colors.grey.shade400.withOpacity(0.7),
             icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.point_of_sale_sharp,color: Colors.white,size:14)))),
-            titleText: 'Caja $key',
-            valueText: Publications.getFormatoPrecio(monto: value ),
+            titleText: 'Caja ${value['name']}',
+            valueText: Publications.getFormatoPrecio(monto: value['total'] ),
             description: 'Total',
             ));
     }); 
