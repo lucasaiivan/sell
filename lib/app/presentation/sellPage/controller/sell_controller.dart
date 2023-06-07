@@ -173,7 +173,7 @@ class SalesController extends GetxController {
   void playSoundScan() async {AudioCache cache = AudioCache();cache.load("soundBip.mp3");}
 
   // text field controllers 
-  final TextEditingController textEditingControllerAddFlashPrice = TextEditingController();
+  final MoneyMaskedTextController textEditingControllerAddFlashPrice = MoneyMaskedTextController(leftSymbol: '\$',decimalSeparator: ',',thousandSeparator: '.',precision:2);
   final TextEditingController textEditingControllerAddFlashDescription =TextEditingController();
   final TextEditingController textEditingControllerTicketMount =TextEditingController();
 
@@ -458,6 +458,23 @@ class SalesController extends GetxController {
     );
   }
   
+  Future<void> scanBarcodeNormal() async {
+    // Escanner Code - Abre en pantalla completa la camara para escanear el código
+    try {
+      late String barcodeScanRes;
+      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+        "#ff6666",
+        "Cancel",
+        true,
+        ScanMode.BARCODE,
+      );
+      if(barcodeScanRes == '-1'){return;}
+      playSoundScan();
+      verifyExistenceInSelectedScanResult(id:barcodeScanRes);
+    } on PlatformException {
+      Get.snackbar('scanBarcode', 'Failed to get platform version');
+    }
+  }
 
   void selectedProduct({required ProductCatalogue item}) {
     // agregamos un nuevo producto a la venta
@@ -519,38 +536,26 @@ class SalesController extends GetxController {
     }
   }
 
-  Future<void> scanBarcodeNormal() async {
-    // Escanner Code - Abre en pantalla completa la camara para escanear el código
-    try {
-      late String barcodeScanRes;
-      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-        "#ff6666",
-        "Cancel",
-        true,
-        ScanMode.BARCODE,
-      );
-      if(barcodeScanRes == '-1'){return;}
-      playSoundScan();
-      verifyExistenceInSelectedScanResult(id: barcodeScanRes);
-    } on PlatformException {
-      Get.snackbar('scanBarcode', 'Failed to get platform version');
-    }
-  }
-
   void queryProductDbPublic({required String id}) {
     // consulta el código existe en la base de datos de productos publicos
     if (id != '') {
+      // firebase
+      Future<DocumentSnapshot<Map<String, dynamic>>> documentSnapshot = Database.readProductPublicFuture(id: id);
       // query
-      Database.readProductPublicFuture(id: id).then((value) { 
+      documentSnapshot.then((value) { 
 
+        // get : product
+        ProductCatalogue product = ProductCatalogue.fromMap(value.data() as Map);
+        // set : marca de tiempo
+        product.upgrade = Timestamp.now();
         // show dialog
-        showDialogAddProductNew(productCatalogue: ProductCatalogue.fromMap(value.data() as Map));
+        showDialogAddProductNew(productCatalogue:product);
       
       }).onError((error, stackTrace) { 
         // no se encontro el producto en la base de datos
         //
         // dialog : agregar producto nuevo
-        showDialogAddProductNew(productCatalogue: ProductCatalogue(id: id,code: id, creation: Timestamp.now(), documentCreation: Timestamp.now(), upgrade: Timestamp.now(), documentUpgrade: Timestamp.now()));
+        showDialogAddProductNew(productCatalogue: ProductCatalogue(id: id,description: error.toString(),code: id, creation: Timestamp.now(), documentCreation: Timestamp.now(), upgrade: Timestamp.now(), documentUpgrade: Timestamp.now()));
       }).catchError((error) {
         // error al consultar db
         Get.snackbar('ah ocurrido algo', 'Fallo el escaneo');
@@ -601,20 +606,16 @@ class SalesController extends GetxController {
     // generate new ID
     var id = Publications.generateUid();
     // var
-    String valuePrice = textEditingControllerAddFlashPrice.text;
+    double  valuePrice = textEditingControllerAddFlashPrice.numberValue;
     String valueDescription = textEditingControllerAddFlashDescription.text;
 
-    if (valuePrice != '') {
-      if (double.parse(valuePrice) != 0) {
-        addProductsSelected(product: ProductCatalogue(id: id,description: valueDescription,salePrice: double.parse(textEditingControllerAddFlashPrice.text),creation: Timestamp.now(),upgrade: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now()));
-        textEditingControllerAddFlashPrice.text = '';
-        update();
-        Get.back();
-      } else {
-        showMessageAlertApp(title: '😔No se puedo agregar 😔',message: 'Debe ingresar un valor distinto a 0');
-      }
+    if (valuePrice != 0) {
+      addProductsSelected(product: ProductCatalogue(id: id,description: valueDescription,salePrice: textEditingControllerAddFlashPrice.numberValue,creation: Timestamp.now(),upgrade: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now()));
+      textEditingControllerAddFlashPrice.clear();
+      update();
+      Get.back();
     } else {
-      showMessageAlertApp(title: '😔', message: 'Debe ingresar un valor valido');
+      showMessageAlertApp(title: '😔No se puedo agregar 😔',message: 'Debe ingresar un valor distinto a 0');
     }
   }
 
@@ -670,7 +671,7 @@ class SalesController extends GetxController {
     //var
     final FocusNode myFocusNode = FocusNode();
     final ButtonStyle buttonStyle = ButtonStyle(padding: MaterialStateProperty.all(const EdgeInsets.all(12)));
-
+ 
     // widgets
     Widget content = Scaffold(
       appBar: AppBar(
@@ -715,7 +716,7 @@ class SalesController extends GetxController {
                       textInputAction: TextInputAction.done,
                       onSubmitted: (value) {
                         addSaleFlash();
-                        textEditingControllerAddFlashPrice.text = '';
+                        textEditingControllerAddFlashPrice.clear();
                       },
                     ),
                   ),
@@ -731,7 +732,8 @@ class SalesController extends GetxController {
                 children: [
                   ElevatedButton(style:  buttonStyle.copyWith(elevation: MaterialStateProperty.all(0)),onPressed: () {textEditingControllerAddFlashPrice.text = '';Get.back();}, child: const Text('Cancelar',textAlign: TextAlign.center)),
                   ElevatedButton(style:  buttonStyle,onPressed: () {
-                    addSaleFlash();textEditingControllerAddFlashPrice.text = '';
+                    addSaleFlash();
+                    textEditingControllerAddFlashPrice.clear();
                     // mostramos la guía del usuario
                     homeController.showTutorial(targetFocus:[homeController.buttonAddProductTargetFocus],next:(){
                       selectedProduct(item: homeController.getProductsOutstandingList[0]);
@@ -934,8 +936,6 @@ class SalesController extends GetxController {
           ),
         ));
   }
-  
- 
 }
 
 //

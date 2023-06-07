@@ -159,7 +159,12 @@ class ProductEdit extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(12.0),
       child: Column( 
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [ 
+          // text : codigo del producto
+          controller.getProduct.code != ""?Opacity(opacity: 0.8,child: Text('Código: ${controller.getProduct.code}',style: const TextStyle(height: 1,fontSize: 14,fontWeight: FontWeight.normal))):Container(),
+          const SizedBox(height: 12),
+          // view : texto y imagen
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -170,28 +175,13 @@ class ProductEdit extends StatelessWidget {
               Flexible(
                 child: Padding(
                   padding: const EdgeInsets.only(left: 24.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        controller.getProduct.code != ""
-                            ? Opacity(
-                                opacity: 0.8,
-                                child: Text('Código: ${controller.getProduct.code}',style: const TextStyle(height: 1,fontSize: 14,fontWeight: FontWeight.normal)),
-                              )
-                            : Container(),
-                        space,
-                        // textfield  : seleccionar una marca
-                        textfielBottomSheetListOptions(
-                          contentPadding: const EdgeInsets.only(bottom: 12,top: 12,left: 12,right: 12),
-                            stateEdit: controller.getSaveIndicator? false: controller.getEditModerator || controller.getProduct.verified==false,
-                            textValue: controller.getMarkSelected.name,
-                            labelText: controller.getMarkSelected.id == ''? 'Seleccionar una marca': 'Marca',
-                            onTap: controller.getProduct.verified==false || controller.getEditModerator? controller.showModalSelectMarca : () {}
-                        ),
-                        !controller.getAccountAuth ? Container() : space,
-                        
-                      ],
-                    ),
+                  child: textfielBottomSheetListOptions(
+                    contentPadding: const EdgeInsets.only(bottom: 12,top: 12,left: 12,right: 12),
+                      stateEdit: controller.getSaveIndicator? false: controller.getEditModerator || controller.getProduct.verified==false,
+                      textValue: controller.getMarkSelected.name,
+                      labelText: controller.getMarkSelected.id == ''? 'Seleccionar una marca': 'Marca',
+                      onTap: controller.getProduct.verified==false || controller.getEditModerator? controller.showModalSelectMarca : () {}
+                  ),
                 ),
               )
             ],
