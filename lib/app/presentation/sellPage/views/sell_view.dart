@@ -736,8 +736,8 @@ class SalesView extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // primero determinar si es un dispositivo movil o web
-        kIsWeb?const Spacer():FloatingActionButton(
+        // FloatingActionButton : efectuar una venta rapida
+        FloatingActionButton(
           key: homeController.floatingActionButtonRegisterFlashKeyButton,
             backgroundColor: Colors.amber,
             onPressed: () {
@@ -751,7 +751,8 @@ class SalesView extends StatelessWidget {
               color: Colors.white,
             )),
         const SizedBox(width: 8),
-        FloatingActionButton( 
+        // FloatingActionButton : determinar si es un dispositivo movil o web para mostrar este buton
+        kIsWeb?const Spacer():FloatingActionButton( 
           key: homeController.floatingActionButtonScanCodeBarKey,
             backgroundColor: Colors.blue,
             onPressed: controller.scanBarcodeNormal,
@@ -848,8 +849,8 @@ class _CashRegisterState extends State<CashRegister> {
   final HomeController homeController = Get.find<HomeController>();
   final SalesController salesController = Get.find<SalesController>();
   // others controllers
-  MoneyMaskedTextController moneyMaskedTextController = MoneyMaskedTextController(leftSymbol: '\$',decimalSeparator: ',',thousandSeparator: '.',precision:2);
-  TextEditingController textEditingController = TextEditingController();
+  final MoneyMaskedTextController moneyMaskedTextController = MoneyMaskedTextController(leftSymbol: '\$',decimalSeparator: ',',thousandSeparator: '.',precision:2);
+  final TextEditingController textEditingController = TextEditingController();
   final FocusNode _amountCashRegisterFocusNode = FocusNode();
   // var
   String titleAppBar = '';  
@@ -996,6 +997,19 @@ class _CashRegisterState extends State<CashRegister> {
             ),
           ),
         ),
+        // textButton : cancelar
+        Container(
+          padding: const EdgeInsets.only(bottom: 20),
+          child: SizedBox(
+            width: double.infinity,
+            child: TextButton(
+              onPressed: () { 
+                Get.back();
+              },
+              child: const Text('Cancelar'),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -1056,7 +1070,7 @@ class _CashRegisterState extends State<CashRegister> {
         ),
         // button : iniciar caja 
         Container( 
-          padding: const EdgeInsets.only(bottom: 20),
+          padding: const EdgeInsets.only(bottom: 20,top:20),
           child: SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -1107,7 +1121,7 @@ class _CashRegisterState extends State<CashRegister> {
         Expanded(
           child: ListView(
             children: [
-              const SizedBox(height: 12),
+            const SizedBox(height: 12),
             // textfield : efectivo inicial de la caja
             const Text('Efectivo inicial',style: TextStyle(fontSize: 18,fontWeight: FontWeight.w400)),
             const SizedBox(height: 5), 

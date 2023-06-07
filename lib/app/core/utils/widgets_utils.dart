@@ -514,7 +514,7 @@ class WidgetDrawer extends StatelessWidget {
                   title: const Text('Multi Usuario'),
                   onTap: () {
                     if( homeController.getProfileAccountSelected.subscribed ){
-                      homeController.setIndexPage = 3;
+                      homeController.setIndexPage = 4;
                     }else{
                       Get.back(); // cierra drawer
                       homeController.showModalBottomSheetSubcription(id: 'multiuser');

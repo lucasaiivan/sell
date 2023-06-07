@@ -243,32 +243,20 @@ class ProductCatalogue {
       idMark:data.containsKey('idMark') ? data['idMark'] : data['id_marca'] ?? '',
       nameMark: data['nameMark'] ?? '',
       image: data.containsKey('image')? data['image']: data['urlimagen'] ?? 'https://default',
-      description: data.containsKey('description')
-          ? data['description']
-          : data['descripcion'] ?? '',
+      description: data.containsKey('description')?data['description']: data['descripcion'] ?? '',
       code: data.containsKey('code') ? data['code'] : data['codigo'] ?? '',
-      category: data.containsKey('category')
-          ? data['category']
-          : data['categoria'] ?? '',
-      nameCategory: data.containsKey('nameCategory')
-          ? data['nameCategory']
-          : data['categoriaName'] ?? '',
-      subcategory: data.containsKey('subcategory')
-          ? data['subcategory']
-          : data['subcategoria'] ?? '',
-      nameSubcategory: data.containsKey('nameSubcategory')
-          ? data['nameSubcategory']
-          : data['subcategoriaName'] ?? '',
+      category: data.containsKey('category')?data['category']:data['categoria'] ?? '',
+      nameCategory: data.containsKey('nameCategory')?data['nameCategory']:data['categoriaName'] ?? '',
+      subcategory: data.containsKey('subcategory')?data['subcategory']:data['subcategoria'] ?? '',
+      nameSubcategory: data.containsKey('nameSubcategory')?data['nameSubcategory']:data['subcategoriaName'] ?? '',
       upgrade: data.containsKey('upgrade')? data['upgrade']: data['timestamp_actualizacion'] ?? Timestamp.now(),
       creation: data.containsKey('creation')? data['creation']: data['timestamp_creation'] ?? Timestamp.now(),
       documentCreation: data['documentCreation'] ?? Timestamp.now(),
       documentUpgrade:  data['documentUpgrade'] ?? Timestamp.now(),
       // valores de la cuenta
-      salePrice: data.containsKey('salePrice') ? (data['salePrice']??0).toDouble(): (data['precio_venta']??0).todDouble(),
-      purchasePrice: data.containsKey('purchasePrice') ? (data['purchasePrice']??0).toDouble(): (data['precio_compra']??0).todDouble(),
-      currencySign: data.containsKey('currencySign')
-          ? data['currencySign']
-          : data['signo_moneda'] ?? '',
+      salePrice: data.containsKey('salePrice') ? data['salePrice']??0.0:data['precio_venta']??0.0,
+      purchasePrice: data.containsKey('purchasePrice') ? data['purchasePrice']??0.0:data['precio_compra']??0.0,
+      currencySign: data.containsKey('currencySign')?data['currencySign']:data['signo_moneda'] ?? '',
       quantity: data.containsKey('quantity') ? data['quantity'] : 1,
       quantityStock: data['quantityStock'] ?? 0,
       sales: data.containsKey('sales')? data['sales'] : 0,
