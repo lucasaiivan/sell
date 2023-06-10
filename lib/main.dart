@@ -162,9 +162,6 @@ ColorScheme darkColorScheme = const ColorScheme(
     inputDecorationTheme: InputDecorationTheme(filled: true,fillColor: Colors.white.withOpacity(0.03),border: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),),
     ), 
   );
-  // runApp( MaterialApp(home: Scaffold(
-  //   appBar: AppBar(title: Text('web')),
-  // ),));
   runApp(GetMaterialApp(
     title: "Punto de Venta",
     initialRoute: AppPages.INITIAL,

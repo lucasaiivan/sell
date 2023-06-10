@@ -377,7 +377,7 @@ class SalesView extends StatelessWidget {
 
           // var : list of items
           List<PopupMenuItem> items = [];
-          items.add(const PopupMenuItem(value:'apertura',child: Row(children: [Icon(Icons.add),Padding(padding: EdgeInsets.fromLTRB(12, 0, 0, 0),child: Text('Crear nueva caja')),])));
+          items.add(const PopupMenuItem(value:'apertura',child: Row(children: [Icon(Icons.add),Padding(padding: EdgeInsets.fromLTRB(12, 0, 0, 0),child: Text('Nueva arqueo de caja')),])));
           // agregar las cajas existentes
           for (var element in homeController.listCashRegister) {
             items.add(PopupMenuItem(value: element.id,child: Row(children: [ Padding(padding: const EdgeInsets.fromLTRB(12, 0, 0, 0),child: Text(element.description)),])));
@@ -432,7 +432,7 @@ class SalesView extends StatelessWidget {
 
                   PopupMenuItem(value: 0, child: RichText(
                     text: TextSpan(
-                      text: "Caja '${homeController.cashRegister.description}' en curso\n",
+                      text: "Balance total\n",
                       style: TextStyle(color: homeController.getDarkMode?Colors.white:Colors.black),
                       children: <TextSpan> [
                         TextSpan(
@@ -446,7 +446,7 @@ class SalesView extends StatelessWidget {
                   PopupMenuItem(value:1, child: Row(
                     children: [
                       // icon
-                      Icon(Icons.arrow_downward_rounded,color: Colors.green.shade400),
+                      Icon(Icons.south_west_rounded,color: Colors.green.shade400),
                       // text
                       RichText(
                         text: TextSpan(
@@ -482,16 +482,8 @@ class SalesView extends StatelessWidget {
                       ),
                     ],
                   )
-                  ), 
-                 //PopupMenuItem(value: 0,child: Row(children: [Icon(Icons.arrow_downward_rounded,color: Colors.green.shade400),Padding(padding: const EdgeInsets.fromLTRB(12, 0, 0, 0),child: Text('Ingreso',style: TextStyle(color: Colors.green.shade400),)),])),
-                  //PopupMenuItem(value: 0,child: Row(children: [Icon(Icons.arrow_outward_rounded,color: Colors.red.shade400),Padding(padding: const  EdgeInsets.fromLTRB(12, 0, 0, 0),child: Text('Egreso',style:TextStyle(color: Colors.red.shade400))),])),
+                  ),  
                   const PopupMenuItem(value:3,child: Row(children: [Icon(Icons.close),Padding(padding: EdgeInsets.fromLTRB(12, 0, 0, 0),child: Text('Cerrar Caja')),])),
-                  /* const PopupMenuItem(value: 1, child: Text('Caja 1')),
-                  const PopupMenuItem(value: 2, child: Text('Caja 2')),
-                  const PopupMenuItem(value: 3, child: Text('Caja 3')),
-                  const PopupMenuItem(value: 4, child: Text('Caja 4')),
-                  const PopupMenuItem(value: 5, child: Text('Caja 5')),
- */                      
                     ]);
   }
   Widget widgeSuggestedProducts({required SalesController controller1,required BuildContext context}) {
@@ -866,7 +858,7 @@ class _CashRegisterState extends State<CashRegister> {
         view = body;
         break;
       case 'detalles': 
-        titleAppBar = 'Detalles de caja'; 
+        titleAppBar = 'Arqueo de caja'; 
         view = detailContent; 
         break;
       case 'cierre': 
@@ -893,6 +885,8 @@ class _CashRegisterState extends State<CashRegister> {
   @override
   void initState() {
     super.initState();
+    //  set : values
+    homeController.cashRegister.balance=0; // reseteamos el balance  para evitar que se acumule
   }
 
   @override
@@ -1029,9 +1023,10 @@ class _CashRegisterState extends State<CashRegister> {
               const SizedBox(height: 20),
               // view info : descripcion
               Row(children: [Text('Descripción',style: textStyleDescription),const Spacer(),Text(homeController.cashRegister.description,style: textStyleValue)]),
+    
               // view info : fecha
               const SizedBox(height: 12),
-              Row(children: [Text('Inicio',style: textStyleDescription), const Spacer(),Text(Publications.getFechaPublicacionFormating(dateTime: homeController.cashRegister.opening),style: textStyleValue)]), 
+              Row(children: [Text('Apertura',style: textStyleDescription), const Spacer(),Text(Publications.getFechaPublicacionFormating(dateTime: homeController.cashRegister.opening),style: textStyleValue)]), 
               // view info : efectivo incial
               const SizedBox(height: 12),
               Row(children: [Text('Efectivo inicial',style: textStyleDescription),const Spacer(),Text(Publications.getFormatoPrecio(monto: homeController.cashRegister.expectedBalance),style: textStyleValue)]),
@@ -1052,7 +1047,7 @@ class _CashRegisterState extends State<CashRegister> {
               ComponentApp().divider(thickness:1),
               // view info : monto esperado en la caja
               const SizedBox(height: 12),
-              Row(children: [Text('Monto esperado en la caja',style: textStyleDescription),const Spacer(),Text(Publications.getFormatoPrecio(monto: homeController.cashRegister.getExpectedBalance),style: textStyleValue)]),
+              Row(children: [Text('Balance esperado en la caja',style: textStyleDescription),const Spacer(),Text(Publications.getFormatoPrecio(monto: homeController.cashRegister.getExpectedBalance),style: textStyleValue)]),
               const SizedBox(height: 20),
               // textfield : Monto en caja
               confirmCloseState?TextField(  
@@ -1062,9 +1057,18 @@ class _CashRegisterState extends State<CashRegister> {
                 decoration: const InputDecoration(
                   border: UnderlineInputBorder(),
                   enabledBorder: UnderlineInputBorder(),
-                  labelText: 'Monto actual en caja (opcional)',
+                  labelText: 'Balance real en caja (opcional)',
                 ),
+                onChanged: (value) {
+                  setState(() { 
+                    // get diference
+                    homeController.cashRegister.balance = moneyMaskedTextController.numberValue;
+                  });
+                },
               ):Container(), 
+              // text : diferencia
+              confirmCloseState?const SizedBox(height: 20):Container(),
+              homeController.cashRegister.getDifference==0?Container():confirmCloseState?Row(children: [Text('Diferencia',style: textStyleDescription),const Spacer(),Text(Publications.getFormatoPrecio(monto: homeController.cashRegister.getDifference),style: textStyleValue.copyWith(color: homeController.cashRegister.getDifference<0?Colors.red.shade300:Colors.green.shade300))]):Container(),
             ],
           ),
         ),

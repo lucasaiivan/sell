@@ -1,9 +1,6 @@
- import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:sell/app/core/utils/fuctions.dart';  
-import 'package:sell/app/core/utils/widgets_utils.dart';
-import 'package:sell/app/domain/entities/cashRegister_model.dart';  
+import 'package:get/get.dart'; 
+import 'package:sell/app/core/utils/widgets_utils.dart';  
 import '../controller/historyCashRegister_controller.dart'; 
 
 // ignore: must_be_immutable
