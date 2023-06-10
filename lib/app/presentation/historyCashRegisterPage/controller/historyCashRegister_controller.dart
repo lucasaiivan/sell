@@ -214,9 +214,9 @@ class HistoryCashRegisterController extends GetxController {
           const Opacity(opacity: 0.5,child: Icon(Icons.arrow_forward_ios_rounded,size:16))
         ],
       ),
-      onTap: () {
+      onTap: () {showDialog
         //  showDialog  : muestra el dialogo de detalles
-        showDialog(
+        (
           context: Get.context!,
           builder: (BuildContext context) => viewDetails(cashRegister: cashRegister),
         );
@@ -244,7 +244,7 @@ class HistoryCashRegisterController extends GetxController {
                 // text : titulo de la alerta
                 const Padding(
                   padding: EdgeInsets.only(bottom: 12),
-                  child: Text("Información de transacción",textAlign: TextAlign.center, style: TextStyle(fontSize: 18,fontWeight: FontWeight.w400)),
+                  child: Text("Información de arqueo",textAlign: TextAlign.center, style: TextStyle(fontSize: 18,fontWeight: FontWeight.w400)),
                 ),
                 const SizedBox(height: 20),
                 // view info : descripcion

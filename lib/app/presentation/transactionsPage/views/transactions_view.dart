@@ -1097,8 +1097,9 @@ class StaticsCards extends StatelessWidget {
             backgroundColor: Colors.grey.shade400.withOpacity(0.7),
             icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.point_of_sale_sharp,color: Colors.white,size:14)))),
             titleText: 'Caja ${value['name']}',
-            valueText: Publications.getFormatoPrecio(monto: value['total'] ),
-            description: 'Total',
+            subtitle: 'Balance total',
+            valueText: Publications.getFormatoPrecio(monto: value['total'] ), 
+            description: '${value['sales'].toString()} transacciones',
             ));
     }); 
 

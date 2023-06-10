@@ -506,7 +506,17 @@ class TransactionsController extends GetxController {
       // obtenemos los tickets de las cajas activas actualmente
       for (CashRegister cashRegister in homeController.listCashRegister) {
         if(cashRegister.id == ticketModel.cashRegisterId){
-          getCashAnalysisMap.containsKey(cashRegister.id)? getCashAnalysisMap[cashRegister.id]={'total':(getCashAnalysisMap[cashRegister.id]?['total'] as double) +element.priceTotal,'name':cashRegister.description} : getCashAnalysisMap[cashRegister.id]={'total':element.priceTotal,'name':cashRegister.description};
+          getCashAnalysisMap.containsKey(cashRegister.id) 
+          ? getCashAnalysisMap[cashRegister.id]={
+            'total':(getCashAnalysisMap[cashRegister.id]?['total'] as double) +element.priceTotal,
+            'name':cashRegister.description,
+            'sales':cashRegister.sales,
+            } 
+          : getCashAnalysisMap[cashRegister.id]={
+            'total':element.priceTotal,
+            'name':cashRegister.description,
+            'sales':cashRegister.sales,
+            };
         }
       } 
 
