@@ -62,7 +62,7 @@ class ProductEdit extends StatelessWidget {
         return Material(
           child: AnimatedSwitcher(
           duration: const  Duration(milliseconds: 100),
-            child: controller.getHomeController.getProfileAdminUser.superAdmin==false?noEdit: _.getNewProduct ? const FormCreateProductView()
+            child: controller.getHomeController.getProfileAdminUser.superAdmin==false?noEdit: _.getNewProduct ? FormCreateProductView()
             : OfflineBuilder(
                 child: Container(),
                 connectivityBuilder: (
@@ -150,9 +150,10 @@ class ProductEdit extends StatelessWidget {
   Widget cardFrontProduct(){
 
     // var
+    final Color textDescriptionStyleColor = Get.isDarkMode?Colors.white.withOpacity(0.8):Colors.black.withOpacity(0.8);
     final Color boderLineColor = Get.isDarkMode?Colors.white.withOpacity(0.3):Colors.black.withOpacity(0.3);
     bool enableEdit = controller.getSaveIndicator? false: controller.getEditModerator || controller.getProduct.verified==false;
-    final Color fillColor = Get.isDarkMode?Colors.white.withOpacity(0.03):Colors.black.withOpacity(0.03);
+    final Color fillColor = Get.isDarkMode?Colors.white.withOpacity(0.01):Colors.black.withOpacity(0.01);
     
     
     // view : descripcion del producto
@@ -177,10 +178,10 @@ class ProductEdit extends StatelessWidget {
                   padding: const EdgeInsets.only(left: 24.0),
                   child: textfielBottomSheetListOptions(
                     contentPadding: const EdgeInsets.only(bottom: 12,top: 12,left: 12,right: 12),
-                      stateEdit: controller.getSaveIndicator? false: controller.getEditModerator || controller.getProduct.verified==false,
-                      textValue: controller.getMarkSelected.name,
-                      labelText: controller.getMarkSelected.id == ''? 'Seleccionar una marca': 'Marca',
-                      onTap: controller.getProduct.verified==false || controller.getEditModerator? controller.showModalSelectMarca : () {}
+                    stateEdit: controller.getSaveIndicator? false: controller.getEditModerator || controller.getProduct.verified==false,
+                    textValue: controller.getMarkSelected.name,
+                    labelText: controller.getMarkSelected.id == ''? 'Seleccionar una marca': 'Marca',
+                    onTap: controller.getProduct.verified==false || controller.getEditModerator? controller.showModalSelectMarca : () {}
                   ),
                 ),
               )
@@ -192,13 +193,13 @@ class ProductEdit extends StatelessWidget {
             enabled: enableEdit,
             minLines: 1,
             maxLines: 5,
+            style: TextStyle(height: 2,color: textDescriptionStyleColor),
             keyboardType: TextInputType.multiline,
             onChanged: (value) => controller.setDescription = value,
-            decoration: InputDecoration(
+            decoration: InputDecoration(  
               border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
-              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color:boderLineColor),),
+              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color:boderLineColor),), 
               disabledBorder: UnderlineInputBorder(borderSide: BorderSide(color:!enableEdit?Colors.transparent:boderLineColor)),
-                  
               contentPadding: const EdgeInsets.only(bottom: 12,top: 12,left: 12,right: 12),
               filled: enableEdit,
               fillColor: enableEdit?fillColor:Colors.transparent,
@@ -500,7 +501,7 @@ class ProductEdit extends StatelessWidget {
             controller.itsInTheCatalogue? Container(
                       width: double.infinity,
                       padding: const EdgeInsets.only(bottom: 12, top: 20, left: 0, right: 0),
-                      child: button(padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),colorAccent: Colors.white,colorButton: Colors.red.shade400,icon: const Icon(Icons.delete,color: Colors.white),text: 'Eliminar de mi catálogo', onPressed: controller.showDialogDelete),
+                      child: button(padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),colorAccent: Colors.white,colorButton: Colors.red.shade300,icon: const Icon(Icons.delete,color: Colors.white),text: 'Eliminar de mi catálogo', onPressed: controller.showDialogDelete),
                     )
                   : Container(), 
             const SizedBox(height: 20.0),
@@ -517,95 +518,12 @@ class ProductEdit extends StatelessWidget {
   /* WIDGETS COMPONENT */
 Widget get widgetForModerator{
   // TODO : delete release
-  return Theme(
-    data: ThemeData.dark(),
-    child: Card(
-      elevation: 0,
-      child: Column(
-        children: [
-          //  text : title
-          Container(width: double.infinity,color: Colors.black12,child: const Center(child: Padding(padding: EdgeInsets.all(12.0),child: Text("OPCIONES PARA MODERADOR")))),const SizedBox(height: 20.0),
-          //  content
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              children: [ 
-                SizedBox(height: !controller.getSaveIndicator ? 20.0 : 0.0),
-                CheckboxListTile(
-                  enabled: controller.getEditModerator ? controller.getSaveIndicator? false: true: false,
-                  checkColor: Colors.white,
-                  activeColor: Colors.blue,
-                  value: controller.getProduct.outstanding,
-                  title: const Text('Detacado'),
-                  onChanged: (value) {
-                    if (!controller.getSaveIndicator) {
-                      controller.setOutstanding(value: value ?? false);
-                    }
-                  },
-                ),
-                SizedBox(height: !controller.getSaveIndicator ? 20.0 : 0.0),
-                CheckboxListTile(
-                  enabled: controller.getEditModerator
-                      ? controller.getSaveIndicator
-                          ? false
-                          : true
-                      : false,
-                  checkColor: Colors.white,
-                  activeColor: Colors.blue,
-                  value: controller.getProduct.verified,
-                  title: const Text('Verificado'),
-                  onChanged: (value) {
-                    if (controller.getEditModerator) {
-                      if (!controller.getSaveIndicator) {
-                        controller.setCheckVerified(value: value ?? false);
-                      }
-                    }
-                  },
-                ),
-                SizedBox(height: !controller.getSaveIndicator ? 20.0 : 0.0),
-                controller.getSaveIndicator || controller.getEditModerator
-                    ? Container()
-                    : button(
-                        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
-                        icon:const Icon(Icons.security, color: Colors.white),
-                        onPressed: () {
-                          if (controller.getEditModerator) {controller.save();}
-                          controller.setEditModerator = !controller.getEditModerator;
-                        },
-                        colorAccent: Colors.white,
-                        colorButton: controller.getEditModerator? Colors.green: Colors.orange,
-                        text:  "Editar documento",
-                      ),
-                const SizedBox(height: 20.0),
-                controller.getSaveIndicator || controller.getNewProduct || !controller.getEditModerator
-                    ? Container()
-                    : button(
-                        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
-                        icon:const Icon(Icons.security, color: Colors.white),
-                        onPressed: controller.showDialogDeleteOPTDeveloper,
-                        colorAccent: Colors.white,
-                        colorButton: Colors.red,
-                        text: "Eliminar documento",
-                      ),
-                // text : marca de tiempo de la ultima actualización del documento
-                controller.getNewProduct?Container():Padding(
-                  padding: const EdgeInsets.only(top: 20),
-                  child: Opacity(opacity: 0.5,child: Center(child: Text('Creación ${Publications.getFechaPublicacion(controller.getProduct.documentCreation.toDate(), Timestamp.now().toDate()).toLowerCase()}'))),
-                ), 
-                const SizedBox(height: 30.0),
-              ],
-              // fin widget debug
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
+  return const OptionsModeratorsWidget();
 }
   Widget textfielBottomSheetListOptions({required String labelText,String textValue = '',required Function() onTap,bool stateEdit = true,EdgeInsetsGeometry contentPadding = const EdgeInsets.all(12) }) {
 
     // value
+    final Color textDescriptionStyleColor = Get.isDarkMode?Colors.white.withOpacity(0.7):Colors.black.withOpacity(0.7);
     final Color fillColor = Get.isDarkMode?Colors.white.withOpacity(0.03):Colors.black.withOpacity(0.03);
     Color boderLineColor = Get.isDarkMode?Colors.white.withOpacity(0.3):Colors.black.withOpacity(0.3);
 
@@ -615,6 +533,7 @@ Widget get widgetForModerator{
       child: TextField(
         enabled: false,
         controller: TextEditingController(text: textValue),
+        style: TextStyle(color: textDescriptionStyleColor),
         decoration: InputDecoration( 
           border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
           enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color:boderLineColor),),
@@ -628,8 +547,7 @@ Widget get widgetForModerator{
     );
   }
 
-  Widget button(
-      {double width = double.infinity,
+  Widget button( {double width = double.infinity,
       bool disable = false,
       required Widget icon,
       String text = '',
@@ -845,3 +763,142 @@ class _SelectCategoryState extends State<SelectCategory> {
   }
 }
  
+
+ // class que de StatefulWidget llamada OptionsModeratorsWidget 
+class OptionsModeratorsWidget extends StatefulWidget {
+  const OptionsModeratorsWidget({super.key});
+
+  @override
+  State<OptionsModeratorsWidget> createState() => _OptionsModeratorsWidgetState();
+}
+
+class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
+
+  // controllers
+  final ControllerProductsEdit controller = Get.find();
+  
+  @override
+  Widget build(BuildContext context) {
+    return Theme(
+    data: ThemeData.dark(),
+    child: Card(
+      elevation: 0,
+      child: Column(
+        children: [
+          //  text : title
+          Container(width: double.infinity,color: Colors.black12,child: const Center(child: Padding(padding: EdgeInsets.all(12.0),child: Text("OPCIONES PARA MODERADOR")))),const SizedBox(height: 20.0),
+          //  content
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              children: [ 
+                SizedBox(height: !controller.getSaveIndicator ? 12.0 : 0.0),
+                CheckboxListTile(
+                  enabled: controller.getEditModerator ? controller.getSaveIndicator? false: true: false,
+                  checkColor: Colors.white,
+                  activeColor: Colors.blue,
+                  value: controller.getProduct.outstanding,
+                  title: const Text('Detacado'),
+                  onChanged: (value) {
+                    if (!controller.getSaveIndicator) {
+                      
+                      setState(() {
+                        controller.setOutstanding(value: value ?? false);
+                      });
+                    }
+                  },
+                ),
+                SizedBox(height: !controller.getSaveIndicator ? 12.0 : 0.0),
+                CheckboxListTile(
+                  enabled: controller.getEditModerator
+                      ? controller.getSaveIndicator
+                          ? false
+                          : true
+                      : false,
+                  checkColor: Colors.white,
+                  activeColor: Colors.blue,
+                  value: controller.getProduct.verified,
+                  title: const Text('Verificado'),
+                  onChanged: (value) {
+                    if (controller.getEditModerator) {
+                      if (!controller.getSaveIndicator) {
+                        setState(() {
+                          controller.setCheckVerified(value: value ?? false);
+                        });
+                      }
+                    }
+                  },
+                ),
+                controller.getEditModerator ? Container() :SizedBox(height: !controller.getSaveIndicator ? 12.0 : 0.0),
+                controller.getEditModerator
+                    ? Container()
+                    : button(
+                        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
+                        icon:const Icon(Icons.security, color: Colors.white),
+                        onPressed: () { 
+                          setState(() {
+                            controller.setEditModerator = !controller.getEditModerator;
+                          });
+                        },
+                        colorAccent: Colors.white,
+                        colorButton:  Colors.orange,
+                        text:  "Editar documento",
+                      ),
+                controller.getSaveIndicator || controller.getNewProduct || !controller.getEditModerator
+                    ? Container()
+                    :const SizedBox(height: 12.0),
+                controller.getSaveIndicator || controller.getNewProduct || !controller.getEditModerator
+                    ? Container()
+                    : button(
+                        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
+                        icon:const Icon(Icons.security, color: Colors.white),
+                        onPressed: controller.showDialogDeleteOPTDeveloper,
+                        colorAccent: Colors.white,
+                        colorButton: Colors.red,
+                        text: "Eliminar documento",
+                      ),
+                // text : marca de tiempo de la ultima actualización del documento
+                controller.getNewProduct?Container():Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: Opacity(opacity: 0.5,child: Center(child: Text('Creación ${Publications.getFechaPublicacion(controller.getProduct.documentCreation.toDate(), Timestamp.now().toDate()).toLowerCase()}'))),
+                ), 
+                const SizedBox(height: 30.0),
+              ],
+              // fin widget debug
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+  
+  }
+  Widget button( {double width = double.infinity,
+      bool disable = false,
+      required Widget icon,
+      String text = '',
+      required dynamic onPressed,
+      EdgeInsets padding =
+          const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      Color colorButton = Colors.purple,
+      Color colorAccent = Colors.white}) {
+    return FadeInRight(
+        child: Padding(
+      padding: padding,
+      child: SizedBox(
+        width: width,
+        child: ElevatedButton.icon(
+          onPressed: disable?null:onPressed,
+          style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+              padding: const EdgeInsets.all(16.0),
+              backgroundColor: colorButton,
+              textStyle: TextStyle(color: colorAccent)),
+          icon: icon,
+          label: Text(text, style: TextStyle(color: colorAccent)),
+        ),
+      ),
+    ));
+  }
+}
