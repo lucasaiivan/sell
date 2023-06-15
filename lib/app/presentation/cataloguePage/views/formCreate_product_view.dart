@@ -225,7 +225,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
                   FocusScope.of(context).previousFocus(); // quita el foco 
                   break;
                 case 1 : // descripcion
-                  controller.descriptionTextFormFieldfocus.requestFocus(); // pide el foco
+                  //FocusScope.of(context).previousFocus(); // quita el foco 
                   break;
                 case 2 :  // marca 
                   FocusScope.of(context).previousFocus(); // quita el foco 
@@ -288,6 +288,23 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
     // TextFormField : creamos una entrada númerico
     return Column(
       children: [
+        //TODO: eliminar para desarrrollo
+        TextButton(
+              onPressed: () async {
+                String clave = controller.controllerTextEditDescripcion.text;
+                Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
+                await launchUrl(uri,mode: LaunchMode.externalApplication);
+              },
+              child: const Text('Buscar descripción en Google (moderador)')),
+          TextButton(
+              onPressed: () async {
+                String clave = controller.getProduct.code;
+                Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
+                await launchUrl(uri,mode: LaunchMode.externalApplication);
+              },
+              child: const Text('Buscar en código Google (moderador)')
+          ),
+        // TextFormField : descripción del producto
         Padding(
           padding: const EdgeInsets.symmetric(horizontal:12, vertical: 6),
           child: Form(
@@ -315,21 +332,6 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
             ),
           ),
         ),
-        //TODO: eliminar para desarrrollo
-        /* TextButton(
-              onPressed: () async {
-                String clave = controller.controllerTextEditDescripcion.text;
-                Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
-                await launchUrl(uri,mode: LaunchMode.externalApplication);
-              },
-              child: const Text('Buscar descripción en Google (moderador)')),
-          TextButton(
-              onPressed: () async {
-                String clave = controller.getProduct.code;
-                Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
-                await launchUrl(uri,mode: LaunchMode.externalApplication);
-              },
-              child: const Text('Buscar en código Google (moderador)')), */
 
       ],
     );
@@ -449,6 +451,9 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
                 if( controller.controllerTextEditPrecioVenta.numberValue != 0){
                   controller.setSalePrice = controller.controllerTextEditPrecioVenta.numberValue;
                   controller.formEditing = true;
+                  setState(() {
+                    
+                  });
                 }
               },
               // validator: validamos el texto que el usuario ha ingresado.
@@ -584,8 +589,10 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
             controlAffinity: ListTileControlAffinity.leading,
             title: const Text('Entiendo que no seré el propietario de los datos públicos asociados con el producto, ni podré editarlos después de la verificación. Además, los precios de venta serán públicos',style: TextStyle(fontWeight: FontWeight.w300)),
             value: controller.getUserConsent,
-            onChanged: (value) {
-              controller.setUserConsent = value!;
+            onChanged: (value) { 
+              setState(() {
+                controller.setUserConsent = value!;
+               });
             },
           ),
         ),
@@ -596,7 +603,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
           child: const Text('¡Gracias por hacer que esta aplicación sea aún más útil para más personas! 🚀'),
           ),
           // TODO : Para moderador eliminar para produccion
-          //ProductEdit().widgetForModerator,
+          ProductEdit().widgetForModerator,
       ],
     );
   }
