@@ -872,6 +872,7 @@ class ControllerProductsEdit extends GetxController {
   }
 
   showModalSelectMarca() {
+    // widget
     Widget widget = const WidgetSelectMark();
     // muestre la hoja inferior modal de getx
     Get.bottomSheet(
@@ -1132,10 +1133,10 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         controllerProductsEdit.setMarkSelected = marcaSelect;
         Get.back();
       },
-      /* onLongPress: () {
+      onLongPress: () {
         // TODO : delete fuction
         Get.to(() => CreateMark(mark: marcaSelect));
-      }, */
+      },
     );
   }
 

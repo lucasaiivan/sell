@@ -138,6 +138,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
             ),
           ),
         ),
+        // buttons : back and next
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -197,7 +198,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
 
   //  view : carrusel de textFormField
   Widget textFieldCarrousel() {
-    // var
+    // List : lista de widgets con los textFormField y contenido de cada campo del formulario
     List<Widget> listWidgetss = [
       textButtonAddImage,
       descriptionProductCardTextFormField, 
@@ -222,13 +223,13 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
       
               switch(index){
                 case 0 : // seleccion de una imagen para el producto
-                  FocusScope.of(context).previousFocus(); // quita el foco 
+                  FocusScope.of(context).unfocus(); // quita el foco 
                   break;
                 case 1 : // descripcion
-                  //FocusScope.of(context).previousFocus(); // quita el foco 
+                  controller.descriptionTextFormFieldfocus.requestFocus(); // pide el foco
                   break;
                 case 2 :  // marca 
-                  FocusScope.of(context).previousFocus(); // quita el foco 
+                  FocusScope.of(context).unfocus(); // quita el foco
                   break; 
                 case 3 : // cátegoria
                   FocusScope.of(context).previousFocus(); // quita el foco
@@ -243,8 +244,11 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
                 FocusScope.of(context).previousFocus(); // quita el foco
                   break;
               }
+              // actualiza la vista
               setState(() {});
-            },viewportFraction: 0.95,
+
+            },
+            viewportFraction: 0.95,
             enableInfiniteScroll:false,
             //autoPlay: listWidgetss.length == 1 ? false : true,
             aspectRatio: 2.0,
@@ -602,7 +606,6 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
           padding: EdgeInsets.all(controller.getUserConsent?12.0:0),
           child: const Text('¡Gracias por hacer que esta aplicación sea aún más útil para más personas! 🚀'),
           ),
-          // TODO : Para moderador eliminar para produccion
           ProductEdit().widgetForModerator,
       ],
     );

@@ -62,10 +62,10 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
           final connected = connectivity != ConnectivityResult.none;
 
           if (!connected) {
-            return Center(
+            return const Center(
                 child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: const [
+              children: [
                 Padding(
                   padding: EdgeInsets.all(12.0),
                   child: Icon(Icons.wifi_off_rounded),
@@ -195,9 +195,9 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
             shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            padding: EdgeInsets.all(padding),
-            primary: colorButton,
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)), backgroundColor: colorButton,
+            padding: EdgeInsets.all(
+              padding),
             textStyle: TextStyle(
                 color: colorAccent,
                 fontSize: fontSize == 0.0 ? null : fontSize)),

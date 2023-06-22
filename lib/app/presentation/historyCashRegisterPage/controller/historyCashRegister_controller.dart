@@ -201,8 +201,10 @@ class HistoryCashRegisterController extends GetxController {
   // WIDGETS COMPONENTS
   Widget itemTile({required CashRegister cashRegister}){
 
-    // var 
-    String subtitle ='caja ${Publications.getFormatoPrecio(monto:cashRegister.balance==0?cashRegister.getExpectedBalance:cashRegister.balance)}';
+    // var : tiempo de apertura de caja
+    String time = 'Tiempo ${cashRegister.closure.difference(cashRegister.opening).inHours} horas y ${cashRegister.closure.difference(cashRegister.opening).inMinutes.remainder(60)} minutos';
+    // var : subtitle
+    String subtitle ='Balance: ${Publications.getFormatoPrecio(monto:cashRegister.balance==0?cashRegister.getExpectedBalance:cashRegister.balance)}\n$time';
 
     return ListTile(
       title: Text(Publications.getFechaPublicacionFormating(dateTime:cashRegister.opening)),

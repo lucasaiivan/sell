@@ -450,9 +450,7 @@ class TransactionsController extends GetxController {
 
         
       }
-    }
-    // ordenamiento
-    //--productsList = productsList.entries.toList()..sort((a, b) => b['priceTotal'].compareTo(a['priceTotal']) );
+    } 
     // ordenar los productos en forma descendente
     var sortedByKeyMap = Map.fromEntries( productsList.entries.toList()..sort((e1, e2) => e2.value.revenue.compareTo(e1.value.revenue)));
 
@@ -495,7 +493,7 @@ class TransactionsController extends GetxController {
       }
     }
     
-    void readCashAnalysis( ){
+  void readCashAnalysis( ){
     //obtenemos el monto de cada caja
     setCashAnalysisMap = {}; 
     
@@ -525,7 +523,42 @@ class TransactionsController extends GetxController {
     setCashAnalysisMap = Map.fromEntries( getCashAnalysisMap.entries.toList()..sort((e1, e2) => e1.key.compareTo(e2.key)));
     }
    // FUCTIONS
+  String readBestSellingProduct(){
+    //
+    //  devuelve el producto más vendido
+    //
 
+    // var
+    Map<String,ProductCatalogue> productsList = {}; // en esta lista almacenamos las ganancias de los productos
+
+    // recorremos todos los tickers que se filtraron
+    for (TicketModel ticket in getTransactionsList) {
+      // recorremos los productos de cada ticket
+      for ( Map item in ticket.listPoduct ) {
+
+        // get 
+        final ProductCatalogue productNew = ProductCatalogue.fromMap(item); 
+        bool exist=false;
+        // verificamos si el producto ya existe en la lista
+        productsList.forEach((key, value) {
+          if(productNew.id ==  key){ 
+            // si el producto ya existe en la lista, sumamos la cantidad de productos vendidos
+              productNew.quantity =  value.quantity + productNew.quantity ;
+          }
+        }); 
+        if(exist==false){
+          productsList[productNew.id] = productNew;
+        }
+
+        
+      }
+    }
+    // ordenar los productos en forma descendente
+    var sortedByKeyMap = Map.fromEntries( productsList.entries.toList()..sort((e1, e2) => e2.value.quantity.compareTo(e1.value.quantity)));
+ 
+    //  devolvemos el producto mas vendido
+    return sortedByKeyMap.isNotEmpty ? '${sortedByKeyMap.entries.first.value.description} (${sortedByKeyMap.entries.first.value.quantity} ventas)' : 'No hay productos vendidos';
+  }
   int readTotalProducts(){
     // leemos la cantidad total de productos
 

@@ -845,8 +845,7 @@ class _CashRegisterState extends State<CashRegister> {
   final TextEditingController textEditingController = TextEditingController();
   final FocusNode _amountCashRegisterFocusNode = FocusNode();
   // var
-  String titleAppBar = '';  
-  bool pinUpDescritpion = false;
+  String titleAppBar = '';   
   bool confirmCloseState = false; 
   late Widget view  ;
 
@@ -1142,71 +1141,40 @@ class _CashRegisterState extends State<CashRegister> {
             // textfield : descripcion (opcional)
             const SizedBox(height: 12),
             const Text('Descripción de la caja',style: TextStyle(fontSize: 18,fontWeight: FontWeight.w400)),
-            const SizedBox(height: 5),
-            TextField(  
-              controller: textEditingController,
-              keyboardType: TextInputType.text,
-              maxLength: 7, // Límite de caracteres
-              decoration: const InputDecoration(  
-                border: UnderlineInputBorder(),
-                enabledBorder: UnderlineInputBorder(),
-                labelText: 'Descripción',
-              ),
-            ),
-            // CheckboxListTile : fijar descripcion 
-            CheckboxListTile(
-              title: const Text('Recordar descripción',style: TextStyle(fontSize: 18,fontWeight: FontWeight.w400)),
-              onChanged: (bool? value) {  
-                setState(() {
-                  pinUpDescritpion=!pinUpDescritpion;
-                });
-              }, 
-              value: pinUpDescritpion,
-              ),
-            const SizedBox(height: 12),
-            // obtenemos los datos futuros en un List de salesController.loadFixerDescriotions()
+            const SizedBox(height: 5),  
+            // textfield : descripcion (opcional)
             FutureBuilder<List<String>>(
               future: salesController.loadFixerDescriotions(),
+              initialData: const [],
               builder: (context, snapshot) {
-                if(snapshot.hasData){
-                  // widgets
-                  Widget title = const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Descripciones fijadas'),
-                      Divider(thickness: 0.3),
-                    ],
-                  );
-                  if( snapshot.data!.isEmpty){ title=Container(); }
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      title,
-                      ListView.builder(
-                        padding: const EdgeInsets.all(0),
-                        shrinkWrap: true,
-                        itemCount: snapshot.data!.length,
-                        itemBuilder: (context, index) {
-                          return ListTile(
-                            title: Text(snapshot.data![index]),
-                            // button : delete 
-                            trailing: IconButton(
-                              onPressed: (){
-                                // eliminamos la descripcion
-                                salesController.deleteFixedDescription(description: snapshot.data![index]);
-                                // actualizamos la vista
-                                setState(() {}); 
-                              },
-                              icon: const Icon(Icons.delete),
-                            ),
-                            onTap: (){
-                              textEditingController.text=snapshot.data![index];
-                            },
-                          );
-                        },
+                if(snapshot.hasData){   
+                  // textfield autocomplete
+                  return Autocomplete<String>(
+                    optionsBuilder: (TextEditingValue textEditingValue) {
+                      if (textEditingValue.text == '') {
+                        return const Iterable<String>.empty();
+                      }
+                      return snapshot.data!.where((String option) {
+                        return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
+                      });
+                    },fieldViewBuilder: (context, textEditingAutoCompleteController, focusNode, onFieldSubmitted) => TextField(
+                      controller: textEditingAutoCompleteController,
+                      focusNode: focusNode,
+                      keyboardType: TextInputType.text,
+                      maxLength: 9, // Límite de caracteres
+                      decoration: const InputDecoration(
+                        border: UnderlineInputBorder(),
+                        enabledBorder: UnderlineInputBorder(),
+                        labelText: 'Descripción',
                       ),
-                    ],
-                  );
+                      onChanged: (value) { 
+                        textEditingController.text = value;
+                      },
+                    ), 
+                    onSelected: (String selection) {
+                      textEditingController.text = selection;
+                    },
+                  ); 
                 }else{
                   return const Center(child: CircularProgressIndicator());
                 }
@@ -1222,10 +1190,9 @@ class _CashRegisterState extends State<CashRegister> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () { 
-                if(pinUpDescritpion){
-                  // guardamos la descripcion si el usuario lo desea
-                  salesController.registerFixerDescription(description: textEditingController.text);
-                }
+                // recordamos la descripcion ingresada por el usuario
+                salesController.registerFixerDescription(description: textEditingController.text);
+                // iniciamos la caja
                 salesController.startCashRegister(description: textEditingController.text, initialCash: moneyMaskedTextController.numberValue, expectedBalance: moneyMaskedTextController.numberValue);
                 Get.back();
               },
@@ -1238,3 +1205,4 @@ class _CashRegisterState extends State<CashRegister> {
     );
   }
 }
+

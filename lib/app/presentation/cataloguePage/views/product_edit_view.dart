@@ -505,11 +505,8 @@ class ProductEdit extends StatelessWidget {
                     )
                   : Container(), 
             const SizedBox(height: 20.0),
-          
-          //TODO: eliminar para desarrrollo
-          /* OPCIONES PARA DESARROLLADOR - ELIMINAR ESTE CÓDIGO PARA PRODUCCION */
-          const SizedBox(height:50),
-          widgetForModerator,
+          Center(child: widgetForModerator),
+          //widgetForModerator,
           ]             ,
       ),
     );
@@ -518,7 +515,14 @@ class ProductEdit extends StatelessWidget {
   /* WIDGETS COMPONENT */
 Widget get widgetForModerator{
   // TODO : delete release
-  return const OptionsModeratorsWidget();
+  return TextButton(
+    onPressed: (){
+      Get.bottomSheet(
+        const OptionsModeratorsWidget(),
+      );
+    },
+    child: const Text('opciones para moderadores',style: TextStyle(color: Colors.blue),textAlign: TextAlign.center,),
+  );
 }
   Widget textfielBottomSheetListOptions({required String labelText,String textValue = '',required Function() onTap,bool stateEdit = true,EdgeInsetsGeometry contentPadding = const EdgeInsets.all(12) }) {
 
