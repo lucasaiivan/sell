@@ -1048,7 +1048,7 @@ class StaticsCards extends StatelessWidget {
             icon:  const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.attach_money_rounded,color: Colors.white,size:14)))),
             titleText: 'Facturación',
             valueText: priceTotal,
-            description: '',
+            description: 'Balance total',
             ), 
           CardAnalityc( 
             backgroundColor: Colors.green.shade200.withOpacity(0.7),
@@ -1071,7 +1071,7 @@ class StaticsCards extends StatelessWidget {
             icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.category_rounded,color: Colors.white,size:14)))),
             titleText: 'Productos vendidos',
             valueText: Publications.getFormatAmount(value:transactionsController.readTotalProducts()),
-            description: '',
+            description: transactionsController.readBestSellingProduct(), 
             ), 
           CardAnalityc( 
             backgroundColor: Colors.orangeAccent.shade100.withOpacity(0.7),

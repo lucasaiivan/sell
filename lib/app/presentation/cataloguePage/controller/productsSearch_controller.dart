@@ -142,13 +142,17 @@ class ControllerProductsSearch extends GetxController {
 
   // FUCTIONS
   void queryProduct({required String id}) {
+    // verificamos que el id no este vacio y que no sea -1 (back)
     if (id != '' && id != '-1') {
       // set
       setStateSearch = true;
       update(['updateAll']);
       // query
-      Database.readProductPublicFuture(id: id).then((value) {
+      Future<DocumentSnapshot<Map<String, dynamic>>> documentSnapshot = Database.readProductPublicFuture(id: id);
+      documentSnapshot.then((value) {
+        // obtenemos el obj
         Product product = Product.fromMap(value.data() as Map);
+        // convertimos el obj a product catalogue
         toProductView(porduct: product.convertProductCatalogue());
       }).onError((error, stackTrace) {
         setproductDoesNotExist = true;
