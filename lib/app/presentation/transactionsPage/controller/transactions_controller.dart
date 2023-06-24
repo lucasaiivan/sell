@@ -1,5 +1,4 @@
-
-import 'package:cloud_firestore/cloud_firestore.dart'; 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart';
@@ -10,7 +9,6 @@ import '../../../domain/entities/ticket_model.dart';
 import '../../home/controller/home_controller.dart';
 
 class TransactionsController extends GetxController {
-
   // others controllers
   final HomeController homeController = Get.find();
 
@@ -20,33 +18,43 @@ class TransactionsController extends GetxController {
 
   // obtenemos los modos de pagos y sus respectivas ganancias
   // description : efective (Efectivo) - mercadopago (Mercado Pago) - card (Tarjeta De Crédito/Débito)
-  Map<String,double> _analyticsMeansOfPaymentMap = {}; 
-  Map<String,double> get getAnalyticsMeansOfPayment => _analyticsMeansOfPaymentMap;
-  set setAnalyticsMeansOfPayment(Map<String,double> value) => _analyticsMeansOfPaymentMap = value;
-  Map<String,dynamic>  getPreferredPaymentMethod(){
-
-      // sacar porcetaje de cada medio de pago 
-      double total = 0.0; 
-      for (TicketModel ticket in getTransactionsList) { total += ticket.priceTotal; } 
-      
-      //obtenemos el modo de pago que se utilizo más 
-      List<MapEntry<String, double>> list = getAnalyticsMeansOfPayment.entries.toList();
-      list.sort((a, b) => b.value.compareTo(a.value));
-      if( list.isNotEmpty){
-        return {'name':list[0].key,'value': list[0].value,'porcent': ((list[0].value/total)*100).toInt()};
-      }
-      return {'name':'','value': 0.0,'porcent':0};
+  Map<String, double> _analyticsMeansOfPaymentMap = {};
+  Map<String, double> get getAnalyticsMeansOfPayment =>
+      _analyticsMeansOfPaymentMap;
+  set setAnalyticsMeansOfPayment(Map<String, double> value) =>
+      _analyticsMeansOfPaymentMap = value;
+  Map<String, dynamic> getPreferredPaymentMethod() {
+    // sacar porcetaje de cada medio de pago
+    double total = 0.0;
+    for (TicketModel ticket in getTransactionsList) {
+      total += ticket.priceTotal;
     }
 
+    //obtenemos el modo de pago que se utilizo más
+    List<MapEntry<String, double>> list =
+        getAnalyticsMeansOfPayment.entries.toList();
+    list.sort((a, b) => b.value.compareTo(a.value));
+    if (list.isNotEmpty) {
+      return {
+        'name': list[0].key,
+        'value': list[0].value,
+        'porcent': ((list[0].value / total) * 100).toInt()
+      };
+    }
+    return {'name': '', 'value': 0.0, 'porcent': 0};
+  }
+
   // obtenemos los montos de cada caja
-    Map<String,Map> cashAnalysisMap = {}; 
-    Map<String,Map> get getCashAnalysisMap => cashAnalysisMap;
-    set setCashAnalysisMap(Map<String,Map> value) => cashAnalysisMap = value;
+  Map<String, Map> cashAnalysisMap = {};
+  Map<String, Map> get getCashAnalysisMap => cashAnalysisMap;
+  set setCashAnalysisMap(Map<String, Map> value) => cashAnalysisMap = value;
 
   // producto con más ganancias
   List<ProductCatalogue> bestSellingProductList = [];
-  List<ProductCatalogue> get getBestSellingProductList => bestSellingProductList;
-  set setBestSellingProductList(List<ProductCatalogue> value) => bestSellingProductList = value;
+  List<ProductCatalogue> get getBestSellingProductList =>
+      bestSellingProductList;
+  set setBestSellingProductList(List<ProductCatalogue> value) =>
+      bestSellingProductList = value;
 
   // text filter
   String _filterText = '';
@@ -73,12 +81,15 @@ class TransactionsController extends GetxController {
   // var : lista de productos más vendidos por cantidad
   List<ProductCatalogue> _mostSelledProducts = [];
   List<ProductCatalogue> get getMostSelledProducts => _mostSelledProducts;
-  set setMostSelledProducts(List<ProductCatalogue> value) => _mostSelledProducts = value;
+  set setMostSelledProducts(List<ProductCatalogue> value) =>
+      _mostSelledProducts = value;
 
   // var : productos más vendidpos por precio
   List<ProductCatalogue> _bestSellingProductsByAmount = [];
-  List<ProductCatalogue> get getBestSellingProductsByAmount => _bestSellingProductsByAmount;
-  set setBestSellingProductsByAmount(List<ProductCatalogue> value) => _bestSellingProductsByAmount = value;
+  List<ProductCatalogue> get getBestSellingProductsByAmount =>
+      _bestSellingProductsByAmount;
+  set setBestSellingProductsByAmount(List<ProductCatalogue> value) =>
+      _bestSellingProductsByAmount = value;
 
   @override
   void onInit() async {
@@ -116,7 +127,7 @@ class TransactionsController extends GetxController {
         readLastYearTransactions();
         setFilterText = 'El año pasado';
         break;
-        // 
+      //
     }
   }
 
@@ -126,10 +137,10 @@ class TransactionsController extends GetxController {
     //obtenemos los documentos creados el año pasado
 
     // a la marca de tiempo actual le descontamos dias
-    DateTime getTime = Timestamp.now().toDate(); 
+    DateTime getTime = Timestamp.now().toDate();
     //  a la marca de tiempo actual le descontamos dias del mes
     Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(
-        DateTime(getTime.year-1, 0, 0, 0).millisecondsSinceEpoch);
+        DateTime(getTime.year - 1, 0, 0, 0).millisecondsSinceEpoch);
     // marca de tiempo actual
     Timestamp timeEnd = Timestamp.fromMillisecondsSinceEpoch(
         DateTime(getTime.year, 0, 0, 0).millisecondsSinceEpoch);
@@ -151,12 +162,14 @@ class TransactionsController extends GetxController {
       });
     }
   }
+
   void readTransactionsThisYear() {
     //obtenemos los documentos creados este año
 
     // a la marca de tiempo actual le descontamos dias
     DateTime getTime = Timestamp.now().toDate();
-    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(DateTime(getTime.year, 1, 1, 0).millisecondsSinceEpoch);
+    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(
+        DateTime(getTime.year, 1, 1, 0).millisecondsSinceEpoch);
     // marca de tiempo actual
     Timestamp timeEnd = Timestamp.now();
 
@@ -182,21 +195,25 @@ class TransactionsController extends GetxController {
     // obtenemos los documentos creados en el día
 
     // a la marca de tiempo actual le descontamos las horas del día
-    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(Timestamp.now().toDate().subtract( Duration(hours: Timestamp.now().toDate().hour,minutes: Timestamp.now().toDate().minute ) ).millisecondsSinceEpoch);
+    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(Timestamp.now()
+        .toDate()
+        .subtract(Duration(
+            hours: Timestamp.now().toDate().hour,
+            minutes: Timestamp.now().toDate().minute))
+        .millisecondsSinceEpoch);
     // marca de tiempo actual
     Timestamp timeEnd = Timestamp.now();
 
     // obtenemos los obj(productos) del catalogo de la cuenta del negocio
     if (homeController.getProfileAccountSelected.id != '') {
       // stream var
-      Stream<QuerySnapshot<Map<String, dynamic>>> stream = Database.readTransactionsFilterTimeStream(
+      Stream<QuerySnapshot<Map<String, dynamic>>> stream =
+          Database.readTransactionsFilterTimeStream(
         idAccount: homeController.getProfileAccountSelected.id,
         timeStart: timeStart,
         timeEnd: timeEnd,
       );
       stream.listen((value) {
-
-        
         List<TicketModel> list = [];
         //  get
         for (var element in value.docs) {
@@ -204,31 +221,33 @@ class TransactionsController extends GetxController {
         }
         //  set
         withMoreSales(list: list);
-        setTransactionsList = list; 
+        setTransactionsList = list;
       });
     }
   }
-  void withMoreSales({ required List<TicketModel> list }){
+
+  void withMoreSales({required List<TicketModel> list}) {
     // CARD : PRODUCTOS MÁS VENDIDOS //
     // aqui se actualiza la tarjeta de productos más vendidos
     // obtenemos los primeros 3 productos más vendidos de los tickers que se obtiene por parametro 'list'
 
     // var
-    Map<String,ProductCatalogue> productsList = {}; // en esta lista almacenamos las ganancias de los productos
+    Map<String, ProductCatalogue> productsList =
+        {}; // en esta lista almacenamos las ganancias de los productos
 
     // recorremos todos los tickers que se filtraron
     for (TicketModel ticket in list) {
       // recorremos los productos de cada ticket
-      for ( Map item in ticket.listPoduct ) {
+      for (Map item in ticket.listPoduct) {
+        // get
+        final ProductCatalogue productNew = ProductCatalogue.fromMap(item);
 
-        // get 
-        final ProductCatalogue productNew = ProductCatalogue.fromMap(item); 
-         
         productsList.forEach((key, value) {
-          if(productNew.id ==  key){
-              
-              productNew.quantity = productNew.quantity + value.quantity ;
-              productNew.revenue = value.revenue + ((productNew.salePrice - productNew.purchasePrice ) * productNew.quantity) ;
+          if (productNew.id == key) {
+            productNew.quantity = productNew.quantity + value.quantity;
+            productNew.revenue = value.revenue +
+                ((productNew.salePrice - productNew.purchasePrice) *
+                    productNew.quantity);
           }
         });
 
@@ -238,19 +257,22 @@ class TransactionsController extends GetxController {
     //
     // get  : los productos más vendidos en forma descendente los que tiene más cantidad
     //
-    Map<String,ProductCatalogue> sortMap = Map.fromEntries( (productsList.entries.toList()..sort((a, b)=> b.value.quantity.compareTo(a.value.quantity))) );
+    Map<String, ProductCatalogue> sortMap = Map.fromEntries(
+        (productsList.entries.toList()
+          ..sort((a, b) => b.value.quantity.compareTo(a.value.quantity))));
     // y por ultimo obtenemos los 3 treprimeros productos
-    Map<String,ProductCatalogue> featuredProducts = {}; // limit 3 items
+    Map<String, ProductCatalogue> featuredProducts = {}; // limit 3 items
     int count = 0;
-    for( final item in sortMap.entries){
-      
+    for (final item in sortMap.entries) {
       count++;
       featuredProducts[item.key] = item.value; // add
-      if( count == 5){ break;}
+      if (count == 5) {
+        break;
+      }
     }
     List<ProductCatalogue> listProducts = [];
     for (var element in featuredProducts.entries) {
-      if(element.value.code !=  ''){
+      if (element.value.code != '') {
         listProducts.add(element.value);
       }
     }
@@ -260,32 +282,35 @@ class TransactionsController extends GetxController {
     //
     // get  : obtenemos los productos más vendidos por el precio de venta más alto
     //
-    List<ProductCatalogue> listNew=[];
-    productsList.forEach((key, value) { 
+    List<ProductCatalogue> listNew = [];
+    productsList.forEach((key, value) {
       value.id = key;
       value.quantity = value.quantity;
-      value.priceTotal = value.salePrice*value.quantity; 
-
+      value.priceTotal = value.salePrice * value.quantity;
       listNew.add(value);
     });
-    listNew = listNew..sort((a, b) => b.priceTotal.compareTo(a.priceTotal) ); // ordenamiento
+    // ordenamos la lista de mayor a menor
+    listNew = listNew
+      ..sort((a, b) => b.priceTotal.compareTo(a.priceTotal)); // ordenamiento
     List<ProductCatalogue> listProductBySales = [];
     int count2 = 0;
+    // obtenemos los 3 primeros productos
     for (var data in listNew) {
-      
-      for ( final ProductCatalogue element in homeController.getCataloProducts) {
-
+      for (final ProductCatalogue element in homeController.getCataloProducts) {
+        // get : obtenemos el obj
         final ProductCatalogue item = element;
-        if( data.id== item.id ){ 
-            item.quantity =  data.quantity; 
-            item.salePrice =data.priceTotal; 
-            listProductBySales.add(item); 
-            count2++;
-            break; 
-          }
+        if (data.id == item.id) {
+          item.quantity = data.quantity;
+          item.salePrice = data.priceTotal;
+          listProductBySales.add(item);
+          count2++;
+          break;
+        }
       }
-      if( count2 == 3){ break;}
-     }
+      if (count2 == 3) {
+        break;
+      }
+    }
     // actualizamos lista para mostrar al usuario
     setBestSellingProductsByAmount = listProductBySales;
   }
@@ -410,222 +435,254 @@ class TransactionsController extends GetxController {
     }
   }
 
-  void readProductWithMoreEarnings(){
-
+  void readProductWithMoreEarnings() {
     //
     //  devuelve el producto que se obtubo más ganancias
     //
 
     // var
-    Map<String,ProductCatalogue> productsList = {}; // en esta lista almacenamos las ganancias de los productos
+    Map<String, ProductCatalogue> productsList =
+        {}; // en esta lista almacenamos las ganancias de los productos
 
     // recorremos todos los tickers que se filtraron
     for (TicketModel ticket in getTransactionsList) {
       // recorremos los productos de cada ticket
-      for ( Map item in ticket.listPoduct ) {
+      for (Map item in ticket.listPoduct) {
+        // get
+        final ProductCatalogue productNew = ProductCatalogue.fromMap(item);
+        bool update = false;
 
-        // get 
-        final ProductCatalogue productNew = ProductCatalogue.fromMap(item); 
-        bool update=false;
-         
         productsList.forEach((key, value) {
-          if(productNew.id ==  key){
-            update= true;
-              
-              productNew.revenue =  value.revenue + ((productNew.salePrice - productNew.purchasePrice ) * productNew.quantity) ;
-              productNew.quantity = productNew.quantity + value.quantity ;
+          if (productNew.id == key) {
+            update = true;
+
+            productNew.revenue = value.revenue +
+                ((productNew.salePrice - productNew.purchasePrice) *
+                    productNew.quantity);
+            productNew.quantity = productNew.quantity + value.quantity;
           }
         });
 
-        if(update==false){
-          productNew.revenue +=  ((productNew.salePrice - productNew.purchasePrice ) * productNew.quantity) ;
+        if (update == false) {
+          productNew.revenue +=
+              ((productNew.salePrice - productNew.purchasePrice) *
+                  productNew.quantity);
         }
 
         // si el precio de compra es '0' no se va a tener en cuenta la ganancia de ese producto
-        if( productNew.purchasePrice == 0 ){
+        if (productNew.purchasePrice == 0) {
           productNew.revenue = 0.0;
-        }else{
+        } else {
           productsList[productNew.id] = productNew;
         }
-
-        
       }
-    } 
+    }
     // ordenar los productos en forma descendente
-    var sortedByKeyMap = Map.fromEntries( productsList.entries.toList()..sort((e1, e2) => e2.value.revenue.compareTo(e1.value.revenue)));
+    var sortedByKeyMap = Map.fromEntries(productsList.entries.toList()
+      ..sort((e1, e2) => e2.value.revenue.compareTo(e1.value.revenue)));
 
     //  obtenemos la ganancia
     int count = 0;
     List<ProductCatalogue> newValuesList = [];
-    if( sortedByKeyMap.isNotEmpty){
-      for (var element in sortedByKeyMap.entries) { 
+    if (sortedByKeyMap.isNotEmpty) {
+      for (var element in sortedByKeyMap.entries) {
         // condition  : evaluamos que sea un producto valido
-        if( element.value.code  != '' ){
+        if (element.value.code != '') {
           newValuesList.add(element.value);
           count++;
-          if( count==3) break;
+          if (count == 3) break;
         }
-        
       }
-    } 
+    }
     // set : seteamos los nuevos valores de los productos con mas ganancias
-    setBestSellingProductList =  newValuesList;
+    setBestSellingProductList = newValuesList;
   }
-  void readAnalyticsMeansOfPayment( ){
+
+  void readAnalyticsMeansOfPayment() {
     //obtenemos los modos de pago y sus respecvtivas ganancias
     setAnalyticsMeansOfPayment = {};
 
     for (var element in getTransactionsList) {
       switch (element.payMode) {
         case 'effective':
-          getAnalyticsMeansOfPayment.containsKey('Efectivo') ? getAnalyticsMeansOfPayment['Efectivo']=(getAnalyticsMeansOfPayment['Efectivo'] as double) +element.priceTotal : getAnalyticsMeansOfPayment['Efectivo']=element.priceTotal;
+          getAnalyticsMeansOfPayment.containsKey('Efectivo')
+              ? getAnalyticsMeansOfPayment['Efectivo'] =
+                  (getAnalyticsMeansOfPayment['Efectivo'] as double) +
+                      element.priceTotal
+              : getAnalyticsMeansOfPayment['Efectivo'] = element.priceTotal;
           break;
         case 'mercadopago':
-          getAnalyticsMeansOfPayment.containsKey('Mercado Pago')?getAnalyticsMeansOfPayment['Mercado Pago']= (getAnalyticsMeansOfPayment['Mercado Pago'] as double) + element.priceTotal : getAnalyticsMeansOfPayment['Mercado Pago']= element.priceTotal;
+          getAnalyticsMeansOfPayment.containsKey('Mercado Pago')
+              ? getAnalyticsMeansOfPayment['Mercado Pago'] =
+                  (getAnalyticsMeansOfPayment['Mercado Pago'] as double) +
+                      element.priceTotal
+              : getAnalyticsMeansOfPayment['Mercado Pago'] = element.priceTotal;
           break;
         case 'card':
-          getAnalyticsMeansOfPayment.containsKey('Tarjeta De Crédito/Débito')?getAnalyticsMeansOfPayment['Tarjeta De Crédito/Débito']=(getAnalyticsMeansOfPayment['Tarjeta De Crédito/Débito'] as double) +element.priceTotal : getAnalyticsMeansOfPayment['Tarjeta De Crédito/Débito']=element.priceTotal;
+          getAnalyticsMeansOfPayment.containsKey('Tarjeta De Crédito/Débito')
+              ? getAnalyticsMeansOfPayment['Tarjeta De Crédito/Débito'] =
+                  (getAnalyticsMeansOfPayment['Tarjeta De Crédito/Débito']
+                          as double) +
+                      element.priceTotal
+              : getAnalyticsMeansOfPayment['Tarjeta De Crédito/Débito'] =
+                  element.priceTotal;
           break;
         default:
-          getAnalyticsMeansOfPayment.containsKey('Sin especificar')?getAnalyticsMeansOfPayment['Sin especificar']=(getAnalyticsMeansOfPayment['Sin especificar'] as double) +element.priceTotal : getAnalyticsMeansOfPayment['Sin especificar']=element.priceTotal;
+          getAnalyticsMeansOfPayment.containsKey('Sin especificar')
+              ? getAnalyticsMeansOfPayment['Sin especificar'] =
+                  (getAnalyticsMeansOfPayment['Sin especificar'] as double) +
+                      element.priceTotal
+              : getAnalyticsMeansOfPayment['Sin especificar'] =
+                  element.priceTotal;
           break;
       }
-      }
     }
-    
-  void readCashAnalysis( ){
-    //obtenemos el monto de cada caja
-    setCashAnalysisMap = {}; 
-    
-    for (TicketModel element in getTransactionsList) {
+  }
 
+  void readCashAnalysis() {
+    //obtenemos el monto de cada caja
+    setCashAnalysisMap = {};
+
+    for (TicketModel element in getTransactionsList) {
       // get : obtenemos los datos del ticket
       TicketModel ticketModel = element;
       // obtenemos los tickets de las cajas activas actualmente
       for (CashRegister cashRegister in homeController.listCashRegister) {
-        if(cashRegister.id == ticketModel.cashRegisterId){
-          getCashAnalysisMap.containsKey(cashRegister.id) 
-          ? getCashAnalysisMap[cashRegister.id]={
-            'total':(getCashAnalysisMap[cashRegister.id]?['total'] as double) +element.priceTotal,
-            'name':cashRegister.description,
-            'sales':cashRegister.sales,
-            } 
-          : getCashAnalysisMap[cashRegister.id]={
-            'total':element.priceTotal,
-            'name':cashRegister.description,
-            'sales':cashRegister.sales,
-            };
+        if (cashRegister.id == ticketModel.cashRegisterId) {
+          getCashAnalysisMap.containsKey(cashRegister.id)
+              ? getCashAnalysisMap[cashRegister.id] = {
+                  'total': (getCashAnalysisMap[cashRegister.id]?['total']
+                          as double) +
+                      element.priceTotal,
+                  'name': cashRegister.description,
+                  'sales': cashRegister.sales,
+                }
+              : getCashAnalysisMap[cashRegister.id] = {
+                  'total': element.priceTotal,
+                  'name': cashRegister.description,
+                  'sales': cashRegister.sales,
+                };
         }
-      } 
-
+      }
     }
     // ordenar los productos en forma descendente
-    setCashAnalysisMap = Map.fromEntries( getCashAnalysisMap.entries.toList()..sort((e1, e2) => e1.key.compareTo(e2.key)));
-    }
-   // FUCTIONS
-  String readBestSellingProduct(){
+    setCashAnalysisMap = Map.fromEntries(getCashAnalysisMap.entries.toList()
+      ..sort((e1, e2) => e1.key.compareTo(e2.key)));
+  }
+
+  // FUCTIONS
+  String readBestSellingProduct() {
     //
     //  devuelve el producto más vendido
     //
 
     // var
-    Map<String,ProductCatalogue> productsList = {}; // en esta lista almacenamos las ganancias de los productos
+    Map<String, ProductCatalogue> productsList =
+        {}; // en esta lista almacenamos las ganancias de los productos
 
     // recorremos todos los tickers que se filtraron
     for (TicketModel ticket in getTransactionsList) {
       // recorremos los productos de cada ticket
-      for ( Map item in ticket.listPoduct ) {
-
-        // get 
-        final ProductCatalogue productNew = ProductCatalogue.fromMap(item); 
-        bool exist=false;
+      for (Map item in ticket.listPoduct) {
+        // get
+        final ProductCatalogue productNew = ProductCatalogue.fromMap(item);
+        bool exist = false;
         // verificamos si el producto ya existe en la lista
         productsList.forEach((key, value) {
-          if(productNew.id ==  key){ 
+          if (productNew.id == key) {
             // si el producto ya existe en la lista, sumamos la cantidad de productos vendidos
-              productNew.quantity =  value.quantity + productNew.quantity ;
+            productNew.quantity = value.quantity + productNew.quantity;
           }
-        }); 
-        if(exist==false){
+        });
+        if (exist == false) {
           productsList[productNew.id] = productNew;
         }
-
-        
       }
     }
     // ordenar los productos en forma descendente
-    var sortedByKeyMap = Map.fromEntries( productsList.entries.toList()..sort((e1, e2) => e2.value.quantity.compareTo(e1.value.quantity)));
- 
+    var sortedByKeyMap = Map.fromEntries(productsList.entries.toList()
+      ..sort((e1, e2) => e2.value.quantity.compareTo(e1.value.quantity)));
+
     //  devolvemos el producto mas vendido
-    return sortedByKeyMap.isNotEmpty ? '${sortedByKeyMap.entries.first.value.description} (${sortedByKeyMap.entries.first.value.quantity} ventas)' : 'No hay productos vendidos';
+    return sortedByKeyMap.isNotEmpty
+        ? '${sortedByKeyMap.entries.first.value.description} (${sortedByKeyMap.entries.first.value.quantity} ventas)'
+        : 'No hay productos vendidos';
   }
-  int readTotalProducts(){
+
+  int readTotalProducts() {
     // leemos la cantidad total de productos
 
-    int value  = 0;
+    int value = 0;
     // recorremos la lista de productos que se vendieron
     for (TicketModel ticket in getTransactionsList) {
       for (Map product in ticket.listPoduct) {
-        value=value + (product['quantity'] as int);
+        value = value + (product['quantity'] as int);
       }
     }
     return value;
   }
+
   String readTotalEarnings() {
-  double totalEarnings = 0;
-  String currencySymbol = '\$';
+    double totalEarnings = 0;
+    String currencySymbol = '\$';
 
-  // recorremos la lista de transacciones de venta
-  for (TicketModel ticket in getTransactionsList) {
-    currencySymbol = ticket.currencySymbol;
-    double transactionEarnings = 0;
+    // recorremos la lista de transacciones de venta
+    for (TicketModel ticket in getTransactionsList) {
+      currencySymbol = ticket.currencySymbol;
+      double transactionEarnings = 0;
 
-    // recorremos los productos vendidos en la transacción
-    for (Map item in ticket.listPoduct) {
-      final ProductCatalogue product = ProductCatalogue.fromMap(item);
+      // recorremos los productos vendidos en la transacción
+      for (Map item in ticket.listPoduct) {
+        final ProductCatalogue product = ProductCatalogue.fromMap(item);
 
-      // si el precio de compra es distinto de cero, sumamos las ganancias
-      if (product.purchasePrice != 0) {
-        transactionEarnings += (product.salePrice - product.purchasePrice) * product.quantity;
+        // si el precio de compra es distinto de cero, sumamos las ganancias
+        if (product.purchasePrice != 0) {
+          transactionEarnings +=
+              (product.salePrice - product.purchasePrice) * product.quantity;
+        }
       }
+
+      // sumamos las ganancias de la transacción al total de ganancias
+      totalEarnings += transactionEarnings;
     }
 
-    // sumamos las ganancias de la transacción al total de ganancias
-    totalEarnings += transactionEarnings;
+    // devolvemos el total de ganancias formateado como una cadena de texto
+    return totalEarnings == 0.0
+        ? ''
+        : Publications.getFormatoPrecio(
+            monto: totalEarnings, moneda: currencySymbol);
   }
 
-  // devolvemos el total de ganancias formateado como una cadena de texto
-  return totalEarnings == 0.0 ? '' : Publications.getFormatoPrecio(monto: totalEarnings, moneda: currencySymbol);
-}
-
-  String readEarnings({required TicketModel ticket }){
-    // description : leemos las ganancias de una transacción 
+  String readEarnings({required TicketModel ticket}) {
+    // description : leemos las ganancias de una transacción
 
     // var
     double totalEarnings = 0;
-    String currencySymbol = ticket.currencySymbol; 
+    String currencySymbol = ticket.currencySymbol;
     double transactionEarnings = 0; // ganancias de la transacción
 
     // recorremos la lista de productos que se vendieron
     for (Map item in ticket.listPoduct) {
-
       // var
       ProductCatalogue product = ProductCatalogue.fromMap(item);
 
       // si el precio de compra es distinto de cero, sumamos las ganancias
       if (product.purchasePrice != 0) {
-        transactionEarnings += (product.salePrice - product.purchasePrice) * product.quantity;
+        transactionEarnings +=
+            (product.salePrice - product.purchasePrice) * product.quantity;
       }
-    
-    } 
+    }
     // sumamos las ganancias de la transacción al total de ganancias
     totalEarnings += transactionEarnings;
 
     // devolvemos el total de ganancias formateado como una cadena de texto
-    return totalEarnings == 0.0 ? '' : Publications.getFormatoPrecio(monto: totalEarnings, moneda: currencySymbol);
+    return totalEarnings == 0.0
+        ? ''
+        : Publications.getFormatoPrecio(
+            monto: totalEarnings, moneda: currencySymbol);
   }
-  String getInfoPriceTotal() {
 
+  String getInfoPriceTotal() {
     //  var
     double total = 0.0;
 
@@ -635,6 +692,7 @@ class TransactionsController extends GetxController {
 
     return Publications.getFormatoPrecio(monto: total);
   }
+
   // devuelve el porcentaje de ganancias
   int getPorcentEarningsTotal() {
     //  var
@@ -642,50 +700,60 @@ class TransactionsController extends GetxController {
     double transactionEarnings = 0; // ganancias de la transacción
 
     for (TicketModel ticket in getTransactionsList) {
-
       // sumamos el total de la transacción al total
-      total += ticket.priceTotal; 
+      total += ticket.priceTotal;
 
       // recorremos la lista de productos que se vendieron
       for (Map item in ticket.listPoduct) {
-
         // var
         ProductCatalogue product = ProductCatalogue.fromMap(item);
 
         // si el precio de compra es distinto de cero, sumamos las ganancias
         if (product.purchasePrice != 0) {
           // sumamos las ganancias de la transacción
-          transactionEarnings += (product.salePrice - product.purchasePrice) * product.quantity;
+          transactionEarnings +=
+              (product.salePrice - product.purchasePrice) * product.quantity;
         }
-      
-      } 
-
-    } 
+      }
+    }
     // devolvemos el porcentaje de ganancias
     return (transactionEarnings * 100 / total).round();
   }
 
   Map getPayMode({required String idMode}) {
-
-    if( idMode=='effective' || idMode ==  'Efectivo') return {'name':'Efectivo','color':Colors.green,'iconData':Icons.money};
-    if( idMode=='mercadopago' || idMode ==  'Mercado Pago') return {'name':'Mercado Pago','color':Colors.blue,'iconData':Icons.handshake_outlined};
-    if( idMode=='card' || idMode ==  'Tarjeta De Crédito/Débito') return {'name':'Tarjeta Credito/Debito','color':Colors.orange,'iconData':Icons.credit_card};
-    return {'name':'Sin esprecificar','color':Colors.grey};
-
+    if (idMode == 'effective' || idMode == 'Efectivo')
+      return {
+        'name': 'Efectivo',
+        'color': Colors.green,
+        'iconData': Icons.money
+      };
+    if (idMode == 'mercadopago' || idMode == 'Mercado Pago')
+      return {
+        'name': 'Mercado Pago',
+        'color': Colors.blue,
+        'iconData': Icons.handshake_outlined
+      };
+    if (idMode == 'card' || idMode == 'Tarjeta De Crédito/Débito')
+      return {
+        'name': 'Tarjeta Credito/Debito',
+        'color': Colors.orange,
+        'iconData': Icons.credit_card
+      };
+    return {'name': 'Sin esprecificar', 'color': Colors.grey};
   }
 
-  void deleteTicket({required TicketModel ticketModel}){
+  void deleteTicket({required TicketModel ticketModel}) {
     Database.refFirestoretransactions(
-                      idAccount: homeController.getIdAccountSelected)
-                  .doc(ticketModel.id)
-                  .delete();
+            idAccount: homeController.getIdAccountSelected)
+        .doc(ticketModel.id)
+        .delete();
   }
+
   void deleteSale({required TicketModel ticketModel}) {
     Widget widget = AlertDialog(
-      title: const Text('¿Seguro que quieres eliminar esta venta?',textAlign: TextAlign.center),
-      content: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
+      title: const Text('¿Seguro que quieres eliminar esta venta?',
+          textAlign: TextAlign.center),
+      content: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
         TextButton(
             onPressed: () {
               Get.back();
@@ -704,19 +772,4 @@ class TransactionsController extends GetxController {
     );
     Get.dialog(widget);
   }
- 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

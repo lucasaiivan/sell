@@ -195,6 +195,9 @@ class TransactionsView extends StatelessWidget {
                           ),
                         ],
                       )),
+                    Opacity(opacity:0.3,child: dividerCircle),
+                        // fecha de transacción
+                        Text(Publications.getFechaPublicacion(ticketModel.creation.toDate(), Timestamp.now().toDate()),style: TextStyle(color: primaryTextColor.withOpacity(0.3),fontWeight: FontWeight.w400 )),
                   ],
                 ),
                 Column(
@@ -208,9 +211,7 @@ class TransactionsView extends StatelessWidget {
                         dividerCircle,
                         // text : id del vendedor
                         Text(ticketModel.seller.split('@')[0],style:textStyleSecundary), 
-                        Opacity(opacity:0.3,child: dividerCircle),
-                        // fecha de transacción
-                        Text(Publications.getFechaPublicacion(ticketModel.creation.toDate(), Timestamp.now().toDate()),style: TextStyle(color: primaryTextColor.withOpacity(0.3),fontWeight: FontWeight.w400 )),
+                        
                       ],
                     ), 
                     // segunda fila : cantidad de items, valor del vuelto
@@ -242,8 +243,15 @@ class TransactionsView extends StatelessWidget {
           children: [
             //  text : precio totol del ticket
             Text(Publications.getFormatoPrecio(monto: ticketModel.priceTotal),style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18,color: primaryTextColor)),
-            //  text : ganancias
-            Text(revenue,style: TextStyle(fontWeight: FontWeight.w500,fontSize: 14,color: Colors.green.withOpacity(0.9)  )),
+            //  content : text and icon
+            Row(
+              children: [
+                // icon
+                Icon(Icons.arrow_upward_rounded,size: 14,color: Colors.green.withOpacity(0.9)),
+                // text : ganancias
+                Text(revenue,style: TextStyle(fontWeight: FontWeight.w500,fontSize: 14,color: Colors.green.withOpacity(0.9)  )),
+              ],
+            ),
           ],
         ),
         ],

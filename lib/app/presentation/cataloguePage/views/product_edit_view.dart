@@ -163,7 +163,19 @@ class ProductEdit extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [ 
           // text : codigo del producto
-          controller.getProduct.code != ""?Opacity(opacity: 0.8,child: Text('Código: ${controller.getProduct.code}',style: const TextStyle(height: 1,fontSize: 14,fontWeight: FontWeight.normal))):Container(),
+          Row(
+            children: [
+              controller.getProduct.code != ""?const Opacity(opacity: 0.8,child: Text('Código:',style: TextStyle(height: 1,fontSize: 14,fontWeight: FontWeight.normal))):Container(),
+              // spacer
+              controller.getProduct.code != ""?const SizedBox(width: 8):Container(),
+              // icon : verificacion
+              controller.getProduct.verified?const Icon(Icons.verified_rounded,size: 16,color: Colors.blue):Container(),
+              // spacer si esta verificado
+              controller.getProduct.verified?const SizedBox(width:2):Container(), 
+              // text : codigo
+              controller.getProduct.code != ""?Text(controller.getProduct.code,style: const TextStyle(height: 1,fontSize: 14,fontWeight: FontWeight.w400)):Container(),
+            ],
+          ),
           const SizedBox(height: 12),
           // view : texto y imagen
           Row(

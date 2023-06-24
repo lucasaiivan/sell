@@ -1,4 +1,3 @@
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -7,36 +6,34 @@ import 'app/core/routes/app_pages.dart';
 import 'app/presentation/splash/bindings/splash_binding.dart';
 import 'package:firebase_core/firebase_core.dart';
 
-
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const FirebaseOptions firebaseConfig = FirebaseOptions(
-  apiKey: "AIzaSyAMjGXHafddVhr7NzXp7xI7gq602dCgiq8",
+    apiKey: "AIzaSyAMjGXHafddVhr7NzXp7xI7gq602dCgiq8",
     authDomain: "commer-ef151.firebaseapp.com",
     databaseURL: "https://commer-ef151.firebaseio.com",
     projectId: "commer-ef151",
     storageBucket: "commer-ef151.appspot.com",
     messagingSenderId: "232181553323",
     appId: "1:232181553323:web:e20bbcc40716001c9b3fee",
-    measurementId: "G-8X75V0XVWS"
-);
+    measurementId: "G-8X75V0XVWS");
 
 Future<void> main() async {
-  // Evita errores causados ​​por la actualización de flutter. 
+  // Evita errores causados ​​por la actualización de flutter.
   WidgetsFlutterBinding.ensureInitialized();
   // Initialize Firebase
-  if(kIsWeb){
-    await Firebase.initializeApp(options: firebaseConfig );
-  }else{
+  if (kIsWeb) {
+    await Firebase.initializeApp(options: firebaseConfig);
+  } else {
     await Firebase.initializeApp();
-  }  
+  }
 
   await GetStorage.init();
   SplashBinding().dependencies(); //
-  
+
   // theme
-   bool isDark = false;//(GetStorage().read('isDarkMode') ?? false);
-  
+  bool isDark = false; //(GetStorage().read('isDarkMode') ?? false);
+
   // if (Platform.isAndroid) {
   //
   //   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -89,65 +86,70 @@ Future<void> main() async {
     surfaceTint: Color(0xFF2196F3),
     outlineVariant: Color(0xFFC7C5D0),
     scrim: Color(0xFF000000),
-    
-  );   
+  );
 
-
-ColorScheme darkColorScheme = const ColorScheme(
-  brightness: Brightness.dark,
-  primary: Color(0xFF2196F3),
-  onPrimary: Color(0xFF2196F3),
-  primaryContainer: Color(0xFF2196F3),
-  onPrimaryContainer: Color(0xFFE0E0FF),
-  secondary: Color(0xFFBEC2FF),
-  onSecondary: Color(0xFF2196F3),
-  secondaryContainer: Color(0xFF0000EF),
-  onSecondaryContainer: Color(0xFFE0E0FF),
-  tertiary: Color(0xFF9BCBFF),
-  onTertiary: Color(0xFF003356),
-  tertiaryContainer: Color(0xFF004A79),
-  onTertiaryContainer: Color(0xFFD0E4FF),
-  error: Color(0xFFFFB4AB),
-  errorContainer: Color(0xFF93000A),
-  onError: Color(0xFF690005),
-  onErrorContainer: Color(0xFFFFDAD6),
-  background: Color(0xFF1B1B1F),
-  onBackground: Color(0xFFE5E1E6),
-  surface: Color(0xFF003356),
-  onSurface: Color(0xFFE5E1E6),
-  surfaceVariant: Color(0xFF46464F),
-  onSurfaceVariant: Color(0xFFC7C5D0),
-  outline: Color(0xFF91909A),
-  onInverseSurface: Color(0xFF1B1B1F),
-  inverseSurface: Color(0xFFE5E1E6),
-  inversePrimary: Color(0xFF2196F3),
-  shadow: Color(0xFF000000),
-  surfaceTint: Color(0xFFBEC2FF),
-  outlineVariant: Color(0xFF46464F),
-  scrim: Color(0xFF000000),
-);
-
+  ColorScheme darkColorScheme = const ColorScheme(
+    brightness: Brightness.dark,
+    primary: Color(0xFF2196F3),
+    onPrimary: Color(0xFF2196F3),
+    primaryContainer: Color(0xFF2196F3),
+    onPrimaryContainer: Color(0xFFE0E0FF),
+    secondary: Color(0xFFBEC2FF),
+    onSecondary: Color(0xFF2196F3),
+    secondaryContainer: Color(0xFF0000EF),
+    onSecondaryContainer: Color(0xFFE0E0FF),
+    tertiary: Color(0xFF9BCBFF),
+    onTertiary: Color(0xFF003356),
+    tertiaryContainer: Color(0xFF004A79),
+    onTertiaryContainer: Color(0xFFD0E4FF),
+    error: Color(0xFFFFB4AB),
+    errorContainer: Color(0xFF93000A),
+    onError: Color(0xFF690005),
+    onErrorContainer: Color(0xFFFFDAD6),
+    background: Color(0xFF1B1B1F),
+    onBackground: Color(0xFFE5E1E6),
+    surface: Color(0xFF003356),
+    onSurface: Color(0xFFE5E1E6),
+    surfaceVariant: Color(0xFF46464F),
+    onSurfaceVariant: Color(0xFFC7C5D0),
+    outline: Color(0xFF91909A),
+    onInverseSurface: Color(0xFF1B1B1F),
+    inverseSurface: Color(0xFFE5E1E6),
+    inversePrimary: Color(0xFF2196F3),
+    shadow: Color(0xFF000000),
+    surfaceTint: Color(0xFFBEC2FF),
+    outlineVariant: Color(0xFF46464F),
+    scrim: Color(0xFF000000),
+  );
 
   ThemeData themeData = ThemeData(
-  
     colorScheme: lightColorScheme,
-    dialogTheme:const  DialogTheme(backgroundColor: Color.fromRGBO(249, 242, 237, 1)),
-    popupMenuTheme: const PopupMenuThemeData(color: Color.fromRGBO(249, 242, 237, 1)), 
+    dialogTheme:
+        const DialogTheme(backgroundColor: Color.fromRGBO(249, 242, 237, 1)),
+    popupMenuTheme:
+        const PopupMenuThemeData(color: Color.fromRGBO(249, 242, 237, 1)),
     visualDensity: VisualDensity.adaptivePlatformDensity,
     //brightness: Brightness.light,
-    useMaterial3: true, 
+    useMaterial3: true,
     scaffoldBackgroundColor: colorLight,
     appBarTheme: AppBarTheme(backgroundColor: colorLight),
     drawerTheme: DrawerThemeData(backgroundColor: colorLight),
     canvasColor: colorLight,
     cardColor: colorLight,
     dialogBackgroundColor: colorLight,
-    inputDecorationTheme: InputDecorationTheme(filled: true,fillColor: Colors.black.withOpacity(0.03),border: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black.withOpacity(0.3)))),
+    inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: Colors.black.withOpacity(0.03),
+        border: UnderlineInputBorder(
+            borderSide: BorderSide(color: Colors.black.withOpacity(0.3)))),
   );
   ThemeData themeDataDark = ThemeData(
-    colorScheme: darkColorScheme, 
-    dialogTheme:const  DialogTheme(backgroundColor: Color.fromRGBO(27, 36, 48, 1),),
-    popupMenuTheme: const PopupMenuThemeData(color: Color.fromRGBO(27, 36, 48, 1)),
+    colorScheme: darkColorScheme,
+    dialogTheme: const DialogTheme(
+      backgroundColor: Color.fromRGBO(27, 36, 48, 1),
+    ),
+    popupMenuTheme:
+        const PopupMenuThemeData(color: Color.fromRGBO(27, 36, 48, 1)),
     indicatorColor: Colors.blue,
     visualDensity: VisualDensity.adaptivePlatformDensity,
     //brightness: Brightness.dark,
@@ -159,9 +161,15 @@ ColorScheme darkColorScheme = const ColorScheme(
     canvasColor: colorDark,
     cardColor: colorDark,
     dialogBackgroundColor: colorDark,
-    inputDecorationTheme: InputDecorationTheme(filled: true,fillColor: Colors.white.withOpacity(0.03),border: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),),
-    ), 
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: Colors.white.withOpacity(0.03),
+      border: UnderlineInputBorder(
+        borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+      ),
+    ),
   );
+
   runApp(GetMaterialApp(
     title: "Punto de Venta",
     initialRoute: AppPages.INITIAL,
@@ -172,4 +180,3 @@ ColorScheme darkColorScheme = const ColorScheme(
     darkTheme: themeDataDark,
   ));
 }
- 
