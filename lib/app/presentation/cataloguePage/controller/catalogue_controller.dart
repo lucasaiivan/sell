@@ -127,13 +127,77 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
             list = homeController.getCataloProducts.where((producto) {
               DateTime fechaActualizacion = producto.upgrade.toDate();
               return fechaActualizacion.isBefore( DateTime.now().subtract( const Duration(days: 5 * 30)) );
+            }).toList(); 
+          break; 
+
+          case '6': // mostrar los productos que no estan verificados
+            setTitleAppBar = 'Sin verificar';
+            list = homeController.getCataloProducts.where((producto) {
+              return producto.verified==false;
             }).toList();
+          break;
+          case '7': // obtener los los porductos de la base de datos publica 'Database.readProductsFuture()'
+            setTitleAppBar = 'Base de Datos'; 
+            // obtenemos todos los documentos de la base de datos publica
+            Database.readProductsFuture().then((value) {
+              // obtenemos los productos de la cuenta del negocio  
+              //
+              // condition : si la lista de productos no esta vacia
+              if (value.docs.isNotEmpty) {
+                for (var element in value.docs) {
+                  // condition : si el producto no esta en la lista de productos del negocio
+                  if(element.data().containsKey('id')){ 
+                    // get : object product
+                    ProductCatalogue product = Product.fromMap( element.data() ).convertProductCatalogue();
+                    // add : agrega el producto a la lista  
+                    if(isProductCatalogue(id: product.id) == false){
+                      list.add(product);
+                    }
+                  }
+                  
+                } 
+                update();
+              } 
+            });
+          break;
+          case '8': // obtener los los porductos de la base de datos publica 'Database.readProductsFuture()'
+            setTitleAppBar = 'Productos sin verificar'; 
+            // obtenemos todos los documentos de la base de datos publica
+            Database.readProductsFutureNoVerified().then((value) {
+              // obtenemos los productos de la cuenta del negocio   
+              //
+              // condition : si la lista de productos no esta vacia
+              if (value.docs.isNotEmpty) {
+                for (var element in value.docs) {
+                  // condition : si el producto no esta en la lista de productos del negocio
+                  if(element.data().containsKey('id')){ 
+                    // get : object product
+                    ProductCatalogue product = Product.fromMap( element.data() ).convertProductCatalogue(); 
+                    // add
+                    if(isProductCatalogue(id: product.id) == false){
+                      list.add(product);
+                    } 
+                  }
+                  
+                } 
+                update();
+              } 
+            });
+          break;
           
-            break;
         }
       }
     // set
     setCatalogueProducts = list;
+  }
+  // si el producto esta en el catalogo devuelve el precio de venta
+  bool isProductCatalogue({required String id}) { 
+    for (var element in homeController.getCataloProducts) {
+      if (element.id == id) {
+        return true; 
+      }
+    }
+    return false;
   }
 
   void toProductNew({required String id}) {

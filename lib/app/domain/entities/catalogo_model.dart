@@ -54,20 +54,21 @@ class Product {
 
   factory Product.fromMap(Map data) {
     return Product(
-      id: data['id'] ?? '',
-      idAccount: data.containsKey('idAccount')? data['idAccount']: data['id_negocio'] ?? '',
-      idUserCreation: data['idUserCreation'] ?? '',
-      idUserUpgrade: data['idUserUpgrade'] ?? '',
-      verified: data.containsKey('verified')? data['verified']: data['verificado'] ?? false,
-      outstanding: data['outstanding'] ?? false,
-      idMark:data.containsKey('idMark') ? data['idMark'] : data['id_marca'] ?? '',
-      nameMark: data['nameMark'] ?? '',
-      image:data.containsKey('image') ? data['image'] : data['urlimagen'] ?? '',
-      description: data.containsKey('description')? data['description']: data['descripcion'] ?? '',
-      code: data.containsKey('code') ? data['code'] : data['codigo'] ?? '',
-      upgrade: data.containsKey('upgrade')? data['upgrade']: data['timestamp_actualizacion'] ?? Timestamp.now(),
-      creation: data.containsKey('creation')? data['creation']: data['timestamp_creation'] ?? Timestamp.now(),
+      id: data.containsKey('id')? data['id'] :'',
+      idAccount: data.containsKey('idAccount')? data['idAccount']: '',
+      idUserCreation: data.containsKey('idUserCreation')? data['idUserCreation'] : '',
+      idUserUpgrade: data.containsKey('idUserUpgrade')? data['idUserUpgrade'] : '',
+      verified: data.containsKey('verified')? data['verified']: false,
+      outstanding: data.containsKey('outstanding')? data['outstanding'] : false,
+      idMark: data.containsKey('idMark') ? data['idMark'] : data.containsKey('id_marca') ?data['id_marca'] :'',
+      nameMark: data.containsKey('nameMark') ? data['nameMark'] : '',
+      image: data.containsKey('image') ? data['image'] :  data.containsKey('urlimagen') ? data['urlimagen'] :'',
+      description: data.containsKey('description')? data['description']: data.containsKey('descripcion')?data['descripcion']:'',
+      code: data.containsKey('code') ? data['code'] :  data.containsKey('codigo') ?data['codigo']:'',
+      upgrade: data.containsKey('upgrade')? data['upgrade']: Timestamp.now(),
+      creation: data.containsKey('creation')? data['creation']: Timestamp.now(),
     );
+    
   }
   Product.fromDocumentSnapshot({required DocumentSnapshot documentSnapshot}) {
     // convert

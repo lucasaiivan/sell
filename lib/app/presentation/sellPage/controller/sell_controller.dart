@@ -670,15 +670,23 @@ class SalesController extends GetxController {
 
     //var
     final FocusNode myFocusNode = FocusNode();
-    final ButtonStyle buttonStyle = ButtonStyle(padding: MaterialStateProperty.all(const EdgeInsets.all(12)));
+    final ButtonStyle buttonStyle =  ButtonStyle(padding: MaterialStateProperty.all(const EdgeInsets.all(20)),shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(borderRadius: BorderRadius.circular(2))));
  
     // widgets
     Widget content = Scaffold(
       appBar: AppBar(
         title: const Text('Venta rapida'), 
+        actions: [
+          IconButton(
+            onPressed: () {
+              textEditingControllerAddFlashPrice.text = '';Get.back();
+            },
+            icon: const Icon(Icons.close_rounded),
+          ),
+        ],
         automaticallyImplyLeading: false,
         ),
-        body: Column(
+        body: Column( 
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 24),
@@ -725,59 +733,58 @@ class SalesController extends GetxController {
             ),
             const Spacer(),
             // buttons
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  ElevatedButton(style:  buttonStyle.copyWith(elevation: MaterialStateProperty.all(0)),onPressed: () {textEditingControllerAddFlashPrice.text = '';Get.back();}, child: const Text('Cancelar',textAlign: TextAlign.center)),
-                  ElevatedButton(style:  buttonStyle,onPressed: () {
-                    addSaleFlash();
-                    textEditingControllerAddFlashPrice.clear();
-                    // mostramos la guía del usuario
-                    homeController.showTutorial(targetFocus:[homeController.buttonAddProductTargetFocus],next:(){
-                      selectedProduct(item: homeController.getProductsOutstandingList[0]);
-                      homeController.showTutorial(targetFocus: [homeController.buttonRegisterTransactionTargetFocus],next:(){
-                        setTicketView = true;
-            
-                         // sleep 1 second
-                          Future.delayed(
-                            const Duration(milliseconds: 300),
-                            () {
-            
-                              // mostramos la guía del usuario si el usuario no ha visto la guía de usuario de la pantalla de ventas
-                              homeController.showTutorial(targetFocus: [homeController.buttonsOptionsPaymentMethodTargetFocus],next:(){ 
-                                setPayModeTicket = 'mercadopago'; 
+            SizedBox(
+              width: double.infinity,
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: ElevatedButton(
+                  style:  buttonStyle,
+                onPressed: () {
+                  addSaleFlash();
+                  textEditingControllerAddFlashPrice.clear();
+                  // mostramos la guía del usuario
+                  homeController.showTutorial(targetFocus:[homeController.buttonAddProductTargetFocus],next:(){
+                    selectedProduct(item: homeController.getProductsOutstandingList[0]);
+                    homeController.showTutorial(targetFocus: [homeController.buttonRegisterTransactionTargetFocus],next:(){
+                      setTicketView = true;
+              
+                       // sleep 1 second
+                        Future.delayed(
+                          const Duration(milliseconds: 300),
+                          () {
+              
+                            // mostramos la guía del usuario si el usuario no ha visto la guía de usuario de la pantalla de ventas
+                            homeController.showTutorial(targetFocus: [homeController.buttonsOptionsPaymentMethodTargetFocus],next:(){ 
+                              setPayModeTicket = 'mercadopago'; 
+                              // mostramos la siguiente guía de usuario si el usuario no ha visto la guía de usuario de la pantalla de ventas
+                              homeController.showTutorial(targetFocus: [homeController.buttonsConfirmTransactionTargetFocus],next:() async { 
+                                // confirmamos la venta
+                                confirmedPurchase(); 
+                                // esperar un momento
+                                await Future.delayed(const Duration(milliseconds: 500));
                                 // mostramos la siguiente guía de usuario si el usuario no ha visto la guía de usuario de la pantalla de ventas
-                                homeController.showTutorial(targetFocus: [homeController.buttonsConfirmTransactionTargetFocus],next:() async { 
-                                  // confirmamos la venta
-                                  confirmedPurchase(); 
-                                  // esperar un momento
-                                  await Future.delayed(const Duration(milliseconds: 500));
-                                  // mostramos la siguiente guía de usuario si el usuario no ha visto la guía de usuario de la pantalla de ventas
-                                  homeController.showTutorial(
-                                    targetFocus: [homeController.buttonsScanCodeBarTargetFocusGuideUX],
-                                    next:()async{ 
-                                      // mostramos la siguiente guía de usuario si el usuario no ha visto la guía de usuario de la pantalla de ventas
-                                      homeController.showTutorial(
-                                        targetFocus: [homeController.buttonsNumCajaTargetFocusGuideUX],
-                                        next:(){
-                                          // final de la guia de usuari0
-                                          homeController.disableSalesUserGuide();
-                                          
-                                        },
-                                        alignSkip: Alignment.bottomRight );
-                                    },
-                                    alignSkip: Alignment.topRight );
-                                },alignSkip: Alignment.topRight );
-            
-                                },alignSkip: Alignment.topRight );
-                            }); // mostramos la guía del usuario
-                         
-                         },alignSkip: Alignment.topRight );
-                      } ,alignSkip: Alignment.bottomLeft); // mostramos la guía del usuario
-                    }, child: const Text('Agregar',textAlign: TextAlign.center)),
-                ],
+                                homeController.showTutorial(
+                                  targetFocus: [homeController.buttonsScanCodeBarTargetFocusGuideUX],
+                                  next:()async{ 
+                                    // mostramos la siguiente guía de usuario si el usuario no ha visto la guía de usuario de la pantalla de ventas
+                                    homeController.showTutorial(
+                                      targetFocus: [homeController.buttonsNumCajaTargetFocusGuideUX],
+                                      next:(){
+                                        // final de la guia de usuari0
+                                        homeController.disableSalesUserGuide();
+                                        
+                                      },
+                                      alignSkip: Alignment.bottomRight );
+                                  },
+                                  alignSkip: Alignment.topRight );
+                              },alignSkip: Alignment.topRight );
+              
+                              },alignSkip: Alignment.topRight );
+                          }); // mostramos la guía del usuario
+                       
+                       },alignSkip: Alignment.topRight );
+                    } ,alignSkip: Alignment.bottomLeft); // mostramos la guía del usuario
+                  }, child: const Text('Agregar',textAlign: TextAlign.center)),
               ),
             ),
           ],

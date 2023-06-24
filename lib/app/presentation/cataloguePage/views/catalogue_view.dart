@@ -70,6 +70,10 @@ class CataloguePage extends StatelessWidget {
                         const PopupMenuItem(value: '3', child: Text('Mostrar con stock bajos')),
                         const PopupMenuItem(value: '4', child: Text('Actualizado hace más de 2 meses')),
                         const PopupMenuItem(value: '5', child: Text('Hace más de 5 meses')),
+                        // TODO : delete release
+                        const PopupMenuItem(value: '6', child: Text('Sin verificación')),
+                        const PopupMenuItem(value: '7', child: Text('Cargar toda la Base de Datos')),
+                        const PopupMenuItem(value: '8', child: Text('DB sin verificar')),
                       ]),
             ),
           ),
