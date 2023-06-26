@@ -37,7 +37,8 @@ class HomeView extends GetView<HomeController> {
   Widget build(BuildContext context) { 
      
 
-    // condition : si el usuario no ha seleccionado una cuenta, se muestra la vista por defecto
+    //  condition : si el usuario no ha seleccionado una cuenta, se muestra la vista por defecto 
+    //  para iniciar sesión de una cuenta existente o crear una nueva cuenta
     if (controller.getProfileAccountSelected.id == '' && controller.getFirebaseAuth.currentUser!.isAnonymous == false){return Obx(() => viewDefault());}
 
     // get : nos permite obtener el valor de una variable

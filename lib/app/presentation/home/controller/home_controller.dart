@@ -216,12 +216,17 @@ class HomeController extends GetxController {
     return isSelected;
   }
 
-  // administrator account list
-  final RxList<ProfileAccountModel> _managedAccountsList =
-      <ProfileAccountModel>[].obs;
+  // variable para saber el estado si se cargo la lista de cuenta administradas o si no tiene ningun 
+  RxBool loadedManagedAccountsList = false.obs;
+  set setLoadedManagedAccountsList(bool value) {
+    loadedManagedAccountsList.value = value;
+  }
+  get getLoadedManagedAccountsList => loadedManagedAccountsList.value;
+
+  // administrator account list : managed accounts
+  final RxList<ProfileAccountModel> _managedAccountsList =<ProfileAccountModel>[].obs;
   List<ProfileAccountModel> get getManagedAccountsList => _managedAccountsList;
-  set setManagedAccountsList(List<ProfileAccountModel> value) =>
-      _managedAccountsList.value = value;
+  set setManagedAccountsList(List<ProfileAccountModel> value) => _managedAccountsList.value = value;
   set addManagedAccountsList(ProfileAccountModel profileData) {
     // agregamos la nueva cuenta
     _managedAccountsList.add(profileData);
@@ -945,20 +950,28 @@ class HomeController extends GetxController {
   }
 
   void readUserAccountsList({required String email}) {
-    // obtenemos la lista de cuentas del usuario
+    // firebase : obtenemos la lista de cuentas del usuario
     Database.refFirestoreUserAccountsList(email: email).get().then((value) {
-      //  get
+      //  recorre la lista de cuentas
       for (var element in value.docs) {
+        // condition : si el id de la cuenta es diferente de vacio para evitar errores de consulta inexistentes
         if (element.get('id') != '') {
-          Database.readProfileAccountModelFuture(element.get('id'))
-              .then((value) {
-            ProfileAccountModel profileAccountModel =
-                ProfileAccountModel.fromDocumentSnapshot(
-                    documentSnapshot: value);
-            addManagedAccountsList = profileAccountModel;
+          // firebase : obtenemos los datos de la cuenta
+          Database.readProfileAccountModelFuture(element.get('id')).then((value) {
+            // obtenemos los perfiles de las cuentas administradas
+            ProfileAccountModel profileAccountModel = ProfileAccountModel.fromDocumentSnapshot(documentSnapshot: value);
+            // set
+            addManagedAccountsList = profileAccountModel; 
           });
         }
       }
+      // actualizamos el estado de la lista de cuentas administradas
+      setLoadedManagedAccountsList = true;
+    }).onError((error, stackTrace){
+      setLoadedManagedAccountsList = true;
+    }).catchError((onError) {
+      // error
+      setLoadedManagedAccountsList = true;
     });
   }
 

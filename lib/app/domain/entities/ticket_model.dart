@@ -33,7 +33,7 @@ class TicketModel {
   }
 
   // format : formateo de texto 
-  String get getPayMode{
+  static String getPayMode({String payMode=''}){
     if(payMode == 'effective') return 'Efectivo';
     if(payMode == 'mercadopago') return 'Mercado Pago';
     if(payMode == 'card') return 'Tarjeta De Crédito/Débito';

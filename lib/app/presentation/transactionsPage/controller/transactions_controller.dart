@@ -16,32 +16,37 @@ class TransactionsController extends GetxController {
   final double cardBoderRadius = 20.0;
   double get getCardBoderRadius => cardBoderRadius;
 
-  // obtenemos los modos de pagos y sus respectivas ganancias
+  // obtenemos los medios de pagos y sus respectivas ganancias
   // description : efective (Efectivo) - mercadopago (Mercado Pago) - card (Tarjeta De Crédito/Débito)
-  Map<String, double> _analyticsMeansOfPaymentMap = {};
-  Map<String, double> get getAnalyticsMeansOfPayment =>
-      _analyticsMeansOfPaymentMap;
-  set setAnalyticsMeansOfPayment(Map<String, double> value) =>
-      _analyticsMeansOfPaymentMap = value;
-  Map<String, dynamic> getPreferredPaymentMethod() {
-    // sacar porcetaje de cada medio de pago
-    double total = 0.0;
-    for (TicketModel ticket in getTransactionsList) {
-      total += ticket.priceTotal;
-    }
+  Map<String, int> _analyticsMeansOfPaymentMap = {};
+  Map<String, int> get getAnalyticsMeansOfPayment => _analyticsMeansOfPaymentMap;
+  set setAnalyticsMeansOfPayment(Map<String, int> value) => _analyticsMeansOfPaymentMap = value;
+  Map<String, dynamic> getPreferredPaymentMethod() { 
+ 
 
     //obtenemos el modo de pago que se utilizo más
-    List<MapEntry<String, double>> list =
-        getAnalyticsMeansOfPayment.entries.toList();
+    List<MapEntry<String, int>> list = getAnalyticsMeansOfPayment.entries.toList();
+    // ordenamos la lista de mayor a menor
     list.sort((a, b) => b.value.compareTo(a.value));
+    // condition : si la lista no esta vacia
     if (list.isNotEmpty) {
+
+      // obtenemos el monto tortal de la transacciones en determinado medio 'list[0].key'
+      double totalAmount = 0.0;
+      for (var element in getTransactionsList) {
+        if (element.payMode == list[0].key) {
+          totalAmount += element.priceTotal;
+        }
+      }
+      // retornamos el primer elemento de la lista con el medio de pago que se utilizo más
       return {
-        'name': list[0].key,
+        'name': TicketModel.getPayMode(payMode: list[0].key),
         'value': list[0].value,
-        'porcent': ((list[0].value / total) * 100).toInt()
+        'amount': totalAmount,
+        
       };
     }
-    return {'name': '', 'value': 0.0, 'porcent': 0};
+    return {'name': '', 'value': 0.0, 'amount': 0.0};
   }
 
   // obtenemos los montos de cada caja
@@ -88,8 +93,9 @@ class TransactionsController extends GetxController {
   List<ProductCatalogue> _bestSellingProductsByAmount = [];
   List<ProductCatalogue> get getBestSellingProductsByAmount =>
       _bestSellingProductsByAmount;
-  set setBestSellingProductsByAmount(List<ProductCatalogue> value) =>
-      _bestSellingProductsByAmount = value;
+  set setBestSellingProductsByAmount(List<ProductCatalogue> value) => _bestSellingProductsByAmount = value;
+
+
 
   @override
   void onInit() async {
@@ -499,41 +505,30 @@ class TransactionsController extends GetxController {
   }
 
   void readAnalyticsMeansOfPayment() {
-    //obtenemos los modos de pago y sus respecvtivas ganancias
-    setAnalyticsMeansOfPayment = {};
+    //obtenemos el medios de pago mas usado y sus respecvtivas monto transacciones e
+    setAnalyticsMeansOfPayment = {}; 
 
     for (var element in getTransactionsList) {
       switch (element.payMode) {
-        case 'effective':
-          getAnalyticsMeansOfPayment.containsKey('Efectivo')
-              ? getAnalyticsMeansOfPayment['Efectivo'] =
-                  (getAnalyticsMeansOfPayment['Efectivo'] as double) +
-                      element.priceTotal
-              : getAnalyticsMeansOfPayment['Efectivo'] = element.priceTotal;
+        case 'effective': 
+          getAnalyticsMeansOfPayment.containsKey(element.payMode)
+              ? getAnalyticsMeansOfPayment[element.payMode] =getAnalyticsMeansOfPayment[element.payMode]!+1
+              : getAnalyticsMeansOfPayment[element.payMode] = 1;
           break;
         case 'mercadopago':
-          getAnalyticsMeansOfPayment.containsKey('Mercado Pago')
-              ? getAnalyticsMeansOfPayment['Mercado Pago'] =
-                  (getAnalyticsMeansOfPayment['Mercado Pago'] as double) +
-                      element.priceTotal
-              : getAnalyticsMeansOfPayment['Mercado Pago'] = element.priceTotal;
+          getAnalyticsMeansOfPayment.containsKey(element.payMode)
+              ? getAnalyticsMeansOfPayment[element.payMode] =getAnalyticsMeansOfPayment[element.payMode]!+1
+              : getAnalyticsMeansOfPayment[element.payMode] = 1;
           break;
         case 'card':
-          getAnalyticsMeansOfPayment.containsKey('Tarjeta De Crédito/Débito')
-              ? getAnalyticsMeansOfPayment['Tarjeta De Crédito/Débito'] =
-                  (getAnalyticsMeansOfPayment['Tarjeta De Crédito/Débito']
-                          as double) +
-                      element.priceTotal
-              : getAnalyticsMeansOfPayment['Tarjeta De Crédito/Débito'] =
-                  element.priceTotal;
+          getAnalyticsMeansOfPayment.containsKey(element.payMode)
+              ? getAnalyticsMeansOfPayment[element.payMode] =getAnalyticsMeansOfPayment[element.payMode]!+1
+              : getAnalyticsMeansOfPayment[element.payMode] = 1;
           break;
         default:
           getAnalyticsMeansOfPayment.containsKey('Sin especificar')
-              ? getAnalyticsMeansOfPayment['Sin especificar'] =
-                  (getAnalyticsMeansOfPayment['Sin especificar'] as double) +
-                      element.priceTotal
-              : getAnalyticsMeansOfPayment['Sin especificar'] =
-                  element.priceTotal;
+              ? getAnalyticsMeansOfPayment['sinespecificar'] = getAnalyticsMeansOfPayment['sinespecificar']!+1
+              : getAnalyticsMeansOfPayment['sinespecificar'] =  1;
           break;
       }
     }
