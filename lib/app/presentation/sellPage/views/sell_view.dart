@@ -7,6 +7,7 @@ import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:get/get.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:sell/app/core/utils/widgets_utils.dart';
+import 'package:sell/app/domain/entities/ticket_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../core/utils/dynamicTheme_lb.dart';
@@ -254,7 +255,7 @@ class SalesView extends StatelessWidget {
                                   child: Text('Medio:',
                                       style: textDescrpitionStyle)),
                               const Spacer(),
-                              Text(controller.getTicket.getPayMode,
+                              Text(TicketModel.getPayMode(),
                                   style: textValuesStyle),
                             ],
                           ),
@@ -905,6 +906,7 @@ class SalesView extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
+        
         // FloatingActionButton : efectuar una venta rapida
         FloatingActionButton(
             key: homeController.floatingActionButtonRegisterFlashKeyButton,
@@ -918,20 +920,15 @@ class SalesView extends StatelessWidget {
             child: const Icon(
               Icons.flash_on_rounded,
               color: Colors.white,
-            )),
-        const SizedBox(width: 8),
+            )), 
         // FloatingActionButton : determinar si es un dispositivo movil o web para mostrar este buton
-        kIsWeb
-            ? const Spacer()
-            : FloatingActionButton(
-                key: homeController.floatingActionButtonScanCodeBarKey,
-                backgroundColor: Colors.blue,
-                onPressed: controller.scanBarcodeNormal,
-                child: SizedBox(
-                  width: 30,
-                  height: 30,
-                  child: imageBarCode,
-                )),
+        const SizedBox(width: kIsWeb?0:8), 
+        kIsWeb? const SizedBox(width: kIsWeb?0:8):FloatingActionButton(
+          key: homeController.floatingActionButtonScanCodeBarKey,
+          backgroundColor: Colors.blue,
+          onPressed: controller.scanBarcodeNormal,
+          child: SizedBox(width: 30,height: 30,child: imageBarCode),
+        ),
         const SizedBox(width: 8),
         ElasticIn(
           key: homeController.floatingActionButtonTransacctionRegister,

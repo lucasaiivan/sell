@@ -255,8 +255,8 @@ class ProductCatalogue {
       documentCreation: data['documentCreation'] ?? Timestamp.now(),
       documentUpgrade:  data['documentUpgrade'] ?? Timestamp.now(),
       // valores de la cuenta
-      salePrice: data.containsKey('salePrice') ? data['salePrice'].toDouble()??0.0.toDouble() :(data['precio_venta'].toDouble())??0.0.toDouble(),
-      purchasePrice: data.containsKey('purchasePrice') ? data['purchasePrice'].toDouble()??0.0.toDouble():data['precio_compra'].toDouble()??0.0.toDouble(),
+      salePrice: data.containsKey('salePrice') ? data['salePrice'].toDouble()??0.0.toDouble() :0.0.toDouble(),
+      purchasePrice: data.containsKey('purchasePrice') ? data['purchasePrice'].toDouble()??0.0.toDouble():0.0.toDouble(),
       currencySign: data.containsKey('currencySign')?data['currencySign']:data['signo_moneda'] ?? '',
       quantity: data.containsKey('quantity') ? data['quantity'] : 1,
       quantityStock: data['quantityStock'] ?? 0,
