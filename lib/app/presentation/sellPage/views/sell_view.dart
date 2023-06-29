@@ -1309,10 +1309,7 @@ class _CashRegisterState extends State<CashRegister> {
                 Text('Balance esperado en la caja',
                     style: textStyleDescription),
                 const Spacer(),
-                Text(
-                    Publications.getFormatoPrecio(
-                        monto: homeController.cashRegister.getExpectedBalance),
-                    style: textStyleValue)
+                Text(Publications.getFormatoPrecio(monto: homeController.cashRegister.getExpectedBalance),style: textStyleValue)
               ]),
               const SizedBox(height: 20),
               // textfield : Monto en caja
@@ -1344,16 +1341,8 @@ class _CashRegisterState extends State<CashRegister> {
                       ? Row(children: [
                           Text('Diferencia', style: textStyleDescription),
                           const Spacer(),
-                          Text(
-                              Publications.getFormatoPrecio(
-                                  monto: homeController
-                                      .cashRegister.getDifference),
-                              style: textStyleValue.copyWith(
-                                  color: homeController
-                                              .cashRegister.getDifference <
-                                          0
-                                      ? Colors.red.shade300
-                                      : Colors.green.shade300))
+                          // text : monto de la diferencia
+                          Text(Publications.getFormatoPrecio(monto: homeController.cashRegister.getDifference),style: textStyleValue.copyWith(color: homeController.cashRegister.getDifference<0?Colors.red.shade300: Colors.green.shade300))
                         ])
                       : Container(),
             ],
@@ -1455,29 +1444,23 @@ class _CashRegisterState extends State<CashRegister> {
                                 shrinkWrap: true,
                                 itemCount: options.length,
                                 itemBuilder: (BuildContext context, int index) {
-                                  final String option =
-                                      options.elementAt(index);
+                                  final String option = options.elementAt(index);
                                   return GestureDetector(
-                                    onTap: () {
-                                      onSelected(option);
-                                    },
+                                    onTap: ()=> onSelected(option),
                                     child: ListTile(
                                       visualDensity: VisualDensity.compact,
                                       title: Text(option),
                                       // icon : delete
                                       trailing: Padding(
-                                        padding:
-                                            const EdgeInsets.only(right: 12),
+                                        padding: const EdgeInsets.only(right: 12),
                                         child: IconButton(
-                                          icon: const Icon(Icons.delete),
+                                          icon: const Icon(Icons.clear_rounded),
                                           onPressed: () {
                                             setState(() {
                                               // eliminar de 'snapshot' la descripcion
                                               snapshot.data!.remove(option);
                                               // eliminamos la descripcion de la base de datos
-                                              salesController
-                                                  .deleteFixedDescription(
-                                                      description: option);
+                                              salesController.deleteFixedDescription(description: option);
                                             });
                                           },
                                         ),

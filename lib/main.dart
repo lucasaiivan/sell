@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'app/core/routes/app_pages.dart';
 import 'app/presentation/splash/bindings/splash_binding.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_core/firebase_core.dart';  
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
