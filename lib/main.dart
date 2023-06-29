@@ -49,7 +49,7 @@ Future<void> main() async {
   //         isDark ? ThemesDataApp.colorBlack : ThemesDataApp.colorLight,
   //   ));
   // }
-  Color colorPrimary = const Color.fromARGB(255, 33, 150, 243); // 0xFF2196F3
+// 0xFF2196F3
   // theme
   Color colorDark = const Color.fromRGBO(43, 45, 57, 1);
   Color colorLight = const Color.fromRGBO(247, 245, 242, 1);
