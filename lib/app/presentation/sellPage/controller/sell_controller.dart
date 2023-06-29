@@ -521,7 +521,8 @@ class SalesController extends GetxController {
   void verifyExistenceInCatalogue({required String id}) {
     // verificamos si el producto esta en el catálogo de productos de la cuenta
     bool coincidence = false;
-    for (ProductCatalogue product in homeController.getCataloProducts) {
+    final listCatalogue =  homeController.getCataloProducts.toList();
+    for (final ProductCatalogue product in listCatalogue) {
       // si el producto se encuentra en el cátalgo de la cuenta se agrega a la lista de productos seleccionados
       if (product.id == id) {
         coincidence = true;

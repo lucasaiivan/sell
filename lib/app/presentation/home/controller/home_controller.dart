@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:purchases_flutter/purchases_flutter.dart' as purchases;
 import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
@@ -174,10 +176,8 @@ class HomeController extends GetxController {
   List listProductsSelected = [];
 
   // list products más vendidos
-  final RxList<ProductCatalogue> _productsOutstandingList =
-      <ProductCatalogue>[].obs;
-  List<ProductCatalogue> get getProductsOutstandingList =>
-      _productsOutstandingList;
+  final RxList<ProductCatalogue> _productsOutstandingList = <ProductCatalogue>[].obs;
+  List<ProductCatalogue> get getProductsOutstandingList => _productsOutstandingList;
   set setProductsOutstandingList(List<ProductCatalogue> list) {
     _productsOutstandingList.value = list;
   }
@@ -617,7 +617,7 @@ class HomeController extends GetxController {
         upgrade: Timestamp.now(),
         documentCreation: Timestamp.now(),
         documentUpgrade: Timestamp.now());
-    for (var element in getCataloProducts) {
+    for (final element in getCataloProducts) {
       if (element.id == id) {
         product = element;
       }
@@ -802,12 +802,8 @@ class HomeController extends GetxController {
           stock: true,
           quantityStock: 18),
     ]; // lista de productos del catálogo
-    setProductsOutstandingList =
-        getCataloProducts; // lista de productos destacados
-    setProfileAccountSelected = ProfileAccountModel(
-      creation: Timestamp.now(),
-      name: 'Mi negocio',
-    ); // datos de la cuenta
+    setProductsOutstandingList = getCataloProducts.toList(); // lista de productos destacados
+    setProfileAccountSelected = ProfileAccountModel(creation: Timestamp.now(),name: 'Mi negocio'); // datos de la cuenta
     setManagedAccountsList = []; // lista de cuentas gestionadas
     setProfileAdminUser = UserModel(
         superAdmin: true,
@@ -1208,6 +1204,7 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
         break;
     }
   }
+ 
 
   @override
   Widget build(BuildContext context) {
@@ -1219,7 +1216,7 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
 
     return ListView(
       //crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.start,mainAxisSize: MainAxisSize.max,
-      children: [
+      children: [ 
         Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,

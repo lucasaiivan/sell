@@ -36,7 +36,7 @@ class CashRegister {
   // difference : devuelve la diferencia entre el monto esperado y el monto de cierre
   double get getDifference{
     if(balance == 0){ return 0.0;}
-    return balance - expectedBalance;
+    return  balance - getExpectedBalance;
   }
   // balance : devuelve el balance esperado de la caja
   double get getExpectedBalance{

@@ -47,6 +47,8 @@ dependencies:
   firebase_dynamic_links: ^5.2.0
   # Google Pay
   in_app_review: ^2.0.6
+  # RevanueCat
+  purchases_flutter: ^5.2.2 # Un complemento de Flutter para la API de compras de RevenueCat.
 
 
   # state controller
