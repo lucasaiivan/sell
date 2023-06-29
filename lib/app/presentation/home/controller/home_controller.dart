@@ -457,8 +457,6 @@ class HomeController extends GetxController {
     // style
     const TextStyle titleSTexttyle = TextStyle(
         fontWeight: FontWeight.bold, color: Colors.white, fontSize: 25.0);
-    const TextStyle descriptionTextStyle =
-        TextStyle(color: Colors.white, fontSize: 18.0);
 
     return TargetFocus(
         identify: "button scan bar",
