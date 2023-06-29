@@ -1,6 +1,5 @@
 
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:clipboard/clipboard.dart';
+import 'package:cached_network_image/cached_network_image.dart'; 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
