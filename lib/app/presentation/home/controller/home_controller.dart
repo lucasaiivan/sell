@@ -1,5 +1,4 @@
-import 'dart:io';
-import 'package:audioplayers/audioplayers.dart';
+import 'dart:io'; 
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,8 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:purchases_flutter/purchases_flutter.dart' as purchases;
+import 'package:google_sign_in/google_sign_in.dart'; 
 import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
@@ -403,8 +401,6 @@ class HomeController extends GetxController {
     // style
     const TextStyle titleSTexttyle = TextStyle(
         fontWeight: FontWeight.bold, color: Colors.white, fontSize: 25.0);
-    const TextStyle descriptionTextStyle =
-        TextStyle(color: Colors.white, fontSize: 18.0);
 
     return TargetFocus(
         identify: "metodo de pago",
@@ -507,8 +503,7 @@ class HomeController extends GetxController {
         ]);
   }
 
-  void showTutorial(
-      {required List<TargetFocus> targetFocus,
+  void showTutorial({required List<TargetFocus> targetFocus,
       required void Function() next,
       AlignmentGeometry alignSkip = Alignment.bottomRight,
       String textSkip = "Salir"}) async {
@@ -518,7 +513,7 @@ class HomeController extends GetxController {
     // condition : comprueba si el usaurio inicio por primera vez la app
     // si es asi, se mostrara el tutorial
     //if (salesUserGuideVisibility==true || getUserAnonymous   ){
-    if (false) {
+    if (textSkip=='') {
       // ignore: use_build_context_synchronously
       TutorialCoachMark(
         targets: targetFocus,
