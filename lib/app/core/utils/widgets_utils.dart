@@ -108,58 +108,51 @@ class WidgetButtonListTile extends StatelessWidget {
         onTap: () {
           controller.accountChange(idAccount: perfilNegocio.id);
         },
-        child: Padding(
-          padding: const EdgeInsets.all(2.0),
-          child: SizedBox( 
-            width: 100,
-            height: 150,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max ,
-              children: [ 
-                GestureDetector(
-                  onTap: () {
-                    // condition : si el usuario es superAdmin y el perfil seleccionado es el mismo que el perfil que se esta mostrando
-                    if(homeController.getProfileAdminUser.superAdmin && homeController.getProfileAccountSelected.id == perfilNegocio.id){
-                      Get.back();
-                      Get.toNamed(Routes.ACCOUNT);
-                    }else{
-                      // action : ir a la cuenta seleccionada 
-                      controller.accountChange(idAccount: perfilNegocio.id);
-                    }
-                  },
-                  child: perfilNegocio.image != '' || perfilNegocio.image.isNotEmpty
-                      ? SizedBox(
-                        height: 75,width: 75,
-                        child: CachedNetworkImage(
-                            fadeInDuration: const Duration(milliseconds: 200),
-                            fit: BoxFit.cover,
-                            imageUrl: perfilNegocio.image.contains('https://')? perfilNegocio.image : "https://${perfilNegocio.image}",
-                            placeholder: (context, url) => CircleAvatar(
-                              backgroundColor: Colors.black26,
-                              radius: 100.0,
-                              child: Text(perfilNegocio.name.substring(0, 1),style: const TextStyle( fontSize: 18.0,color: Colors.white,fontWeight: FontWeight.bold)),
-                            ),
-                            imageBuilder: (context, image) => CircleAvatar(backgroundImage: image,radius: 24.0),
-                            errorWidget: (context, url, error) => CircleAvatar(
-                              backgroundColor: Colors.black26,
-                              radius: 100.0,
-                              child: Text(perfilNegocio.name.substring(0, 1),style: const TextStyle( fontSize: 18.0,color: Colors.white,fontWeight: FontWeight.bold)),
-                            ),
-                          ),
-                      )
-                      : CircleAvatar(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min ,
+          children: [ 
+            GestureDetector(
+              onTap: () {
+                // condition : si el usuario es superAdmin y el perfil seleccionado es el mismo que el perfil que se esta mostrando
+                if(homeController.getProfileAdminUser.superAdmin && homeController.getProfileAccountSelected.id == perfilNegocio.id){
+                  Get.back();
+                  Get.toNamed(Routes.ACCOUNT);
+                }else{
+                  // action : ir a la cuenta seleccionada 
+                  controller.accountChange(idAccount: perfilNegocio.id);
+                }
+              },
+              child: SizedBox(
+                height: 75,width: 75,
+                child: perfilNegocio.image != '' || perfilNegocio.image.isNotEmpty
+                    ? CachedNetworkImage(
+                        fadeInDuration: const Duration(milliseconds: 200),
+                        fit: BoxFit.cover,
+                        imageUrl: perfilNegocio.image.contains('https://')? perfilNegocio.image : "https://${perfilNegocio.image}",
+                        placeholder: (context, url) => CircleAvatar(
                           backgroundColor: Colors.black26,
                           radius: 100.0,
                           child: Text(perfilNegocio.name.substring(0, 1),style: const TextStyle( fontSize: 18.0,color: Colors.white,fontWeight: FontWeight.bold)),
                         ),
-                ),
-                const SizedBox(height: 5.0),
-                Text(perfilNegocio.name, style: const TextStyle(overflow: TextOverflow.ellipsis )),
-              ],
+                        imageBuilder: (context, image) => CircleAvatar(backgroundImage: image,radius: 24.0),
+                        errorWidget: (context, url, error) => CircleAvatar(
+                          backgroundColor: Colors.black26,
+                          radius: 100.0,
+                          child: Text(perfilNegocio.name.substring(0, 1),style: const TextStyle( fontSize: 18.0,color: Colors.white,fontWeight: FontWeight.bold)),
+                        ),
+                      )
+                    : CircleAvatar(
+                        backgroundColor: Colors.black26,
+                        radius: 100.0,
+                        child: Text(perfilNegocio.name.substring(0, 1),style: const TextStyle( fontSize: 18.0,color: Colors.white,fontWeight: FontWeight.bold)),
+                      ),
+              ),
             ),
-          ),
+            const SizedBox(height: 5.0),
+            Text(perfilNegocio.name, style: const TextStyle(overflow: TextOverflow.ellipsis )),
+          ],
         ),
       );
 
@@ -665,27 +658,34 @@ Widget viewDefault() {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // text : bienvenida
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20),
                   child: Text('Hola 🖐️\n\nIngresa a tu cuenta para gestionar tu tienda\n',textAlign: TextAlign.center,style: textStyle,),
                 ),
                 const SizedBox(height: 20), 
+                // lista de cuentas administradas o boton para crear una cuenta
                 !homeController.getLoadedManagedAccountsList?const CircularProgressIndicator(): !homeController.checkAccountExistence? WidgetButtonListTile().buttonListTileCrearCuenta()
-                :SizedBox(
-                  height: 150,
-                  child: ListView.builder(
-                    shrinkWrap: true, // la vista se adapta al contenido interno
-                    scrollDirection: Axis.horizontal,
-                    itemCount: homeController.getManagedAccountsList.length,
-                    itemBuilder: (BuildContext context, int index) { 
-                      return WidgetButtonListTile().buttonListTileItemCuenta(perfilNegocio: homeController.getManagedAccountsList[index],row: true);
-                    },
+                :Flexible(  
+                  fit: FlexFit.loose,
+                  child: SizedBox( 
+                    height: 200,  
+                    child: ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      shrinkWrap: true, // la vista se adapta al contenido interno
+                      scrollDirection: Axis.horizontal,
+                      itemCount: homeController.getManagedAccountsList.length,
+                      itemBuilder: (BuildContext context, int index) { 
+                        return WidgetButtonListTile().buttonListTileItemCuenta(perfilNegocio: homeController.getManagedAccountsList[index],row: true);
+                      },
+                    ),
                   ),
                 ),
               ],
             ),
           ),
         ),
+        // textButton : cerrar sesion
         Padding(
           padding: const EdgeInsets.all(20.0),
           child: TextButton(onPressed: homeController.showDialogCerrarSesion, child: const Text('Cerrar sesión')),
@@ -773,7 +773,7 @@ class WidgetSuggestionProduct extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.all(12.0),
-          child: Text("Sugerencias para vos",style: Get.theme.textTheme.subtitle1),
+          child: Text("Sugerencias para vos",style: Get.theme.textTheme.titleMedium),
         ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,

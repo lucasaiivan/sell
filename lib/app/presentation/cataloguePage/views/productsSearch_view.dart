@@ -78,12 +78,15 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                 padding:const EdgeInsets.all(0.0),
                 shrinkWrap: true,
                 children: [
+                  // view : sugerencias de productos
                   controller.getproductDoesNotExist? Container(): WidgetSuggestionProduct(list: controller.getListProductsSuggestions),
+                  // view : content
                   Padding(
                     padding: const EdgeInsets.all(20.0),
                     child: Column(
                       children: [
-                        controller.getWriteCode?textFieldCodeBar():Container(), 
+                        controller.getWriteCode||controller.getproductDoesNotExist?textFieldCodeBar():Container(), 
+                        // textButton : escribir código
                         controller.getWriteCode?Container():TextButton(onPressed: (){ controller.setWriteCode =!controller.getWriteCode;}, child: Text('Escribir código',style: TextStyle(color: controller.getproductDoesNotExist?Colors.white:Colors.blue) ,)),
                         const SizedBox(height: 12.0),
                         Opacity(
@@ -351,9 +354,8 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
     // Escanner Code - Abre en pantalla completa la camara para escanear
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
-      late String barcodeScanRes;
-      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-          "#ff6666", "Cancel", true, ScanMode.BARCODE);
+      late String barcodeScanRes; 
+      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode( "#ff6666", "Cancel", true, ScanMode.BARCODE);
       controller.textEditingController.text = barcodeScanRes;
       controller.queryProduct(id: barcodeScanRes);
     } on PlatformException {

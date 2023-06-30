@@ -120,6 +120,20 @@ class ProductEdit extends StatelessWidget {
           ? Text(controller.getTextAppBar,style: TextStyle(fontSize: 18.0, color: colorText))
           : Text(controller.itsInTheCatalogue ? 'Editar' :'Nuevo producto',style: TextStyle(fontSize: 18.0, color: colorText)),
       actions: <Widget>[
+        // TODO : delete release
+        // iconButton : opciones de moderador
+        controller.getSaveIndicator
+            ? Container()
+            :IconButton(
+              icon: const Icon(Icons.admin_panel_settings_outlined),
+              onPressed: (){
+                Get.bottomSheet(
+                  const OptionsModeratorsWidget(),
+                );
+              },
+            ),
+
+        // iconButton : actualizar producto 
         controller.getSaveIndicator
             ? Container()
             : controller.itsInTheCatalogue?TextButton.icon(onPressed: () => controller.save(), icon:const Icon( Icons.check ), label:const  Text('Actualizar')):Container(),
@@ -517,6 +531,10 @@ class ProductEdit extends StatelessWidget {
                     )
                   : Container(), 
             const SizedBox(height: 20.0),
+            const SizedBox(height: 20.0),
+          Center(child: widgetForModerator),
+          //widgetForModerator,
+            const SizedBox(height: 20.0), 
           Center(child: widgetForModerator),
           //widgetForModerator,
           ]             ,
@@ -524,7 +542,7 @@ class ProductEdit extends StatelessWidget {
     );
   }
 
-  /* WIDGETS COMPONENT */
+  /* WIDGETS COMPONENT */  
 Widget get widgetForModerator{
   // TODO : delete release
   return TextButton(
@@ -795,99 +813,91 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
   
   @override
   Widget build(BuildContext context) {
-    return Theme(
-    data: ThemeData.dark(),
-    child: Card(
-      elevation: 0,
-      child: Column(
-        children: [
-          //  text : title
-          Container(width: double.infinity,color: Colors.black12,child: const Center(child: Padding(padding: EdgeInsets.all(12.0),child: Text("OPCIONES PARA MODERADOR")))),const SizedBox(height: 20.0),
-          //  content
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              children: [ 
-                SizedBox(height: !controller.getSaveIndicator ? 12.0 : 0.0),
-                CheckboxListTile(
-                  enabled: controller.getEditModerator ? controller.getSaveIndicator? false: true: false,
-                  checkColor: Colors.white,
-                  activeColor: Colors.blue,
-                  value: controller.getProduct.outstanding,
-                  title: const Text('Detacado'),
-                  onChanged: (value) {
-                    if (!controller.getSaveIndicator) {
-                      
-                      setState(() {
-                        controller.setOutstanding(value: value ?? false);
-                      });
-                    }
-                  },
-                ),
-                SizedBox(height: !controller.getSaveIndicator ? 12.0 : 0.0),
-                CheckboxListTile(
-                  enabled: controller.getEditModerator
-                      ? controller.getSaveIndicator
-                          ? false
-                          : true
-                      : false,
-                  checkColor: Colors.white,
-                  activeColor: Colors.blue,
-                  value: controller.getProduct.verified,
-                  title: const Text('Verificado'),
-                  onChanged: (value) {
-                    if (controller.getEditModerator) {
-                      if (!controller.getSaveIndicator) {
-                        setState(() {
-                          controller.setCheckVerified(value: value ?? false);
-                        });
-                      }
-                    }
-                  },
-                ),
-                controller.getEditModerator ? Container() :SizedBox(height: !controller.getSaveIndicator ? 12.0 : 0.0),
-                controller.getEditModerator
-                    ? Container()
-                    : button(
-                        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
-                        icon:const Icon(Icons.security, color: Colors.white),
-                        onPressed: () { 
-                          setState(() {
-                            controller.setEditModerator = !controller.getEditModerator;
-                          });
-                        },
-                        colorAccent: Colors.white,
-                        colorButton:  Colors.orange,
-                        text:  "Editar documento",
-                      ),
-                controller.getSaveIndicator || controller.getNewProduct || !controller.getEditModerator
-                    ? Container()
-                    :const SizedBox(height: 12.0),
-                controller.getSaveIndicator || controller.getNewProduct || !controller.getEditModerator
-                    ? Container()
-                    : button(
-                        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
-                        icon:const Icon(Icons.security, color: Colors.white),
-                        onPressed: controller.showDialogDeleteOPTDeveloper,
-                        colorAccent: Colors.white,
-                        colorButton: Colors.red,
-                        text: "Eliminar documento",
-                      ),
-                // text : marca de tiempo de la ultima actualización del documento
-                controller.getNewProduct?Container():Padding(
-                  padding: const EdgeInsets.only(top: 20),
-                  child: Opacity(opacity: 0.5,child: Center(child: Text('Creación ${Publications.getFechaPublicacion(controller.getProduct.documentCreation.toDate(), Timestamp.now().toDate()).toLowerCase()}'))),
-                ), 
-                const SizedBox(height: 30.0),
-              ],
-              // fin widget debug
-            ),
-          ),
-        ],
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Opciones para moderador'),
       ),
-    ),
-  );
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [ 
+            SizedBox(height: !controller.getSaveIndicator ? 12.0 : 0.0),
+            CheckboxListTile(
+              enabled: controller.getEditModerator ? controller.getSaveIndicator? false: true: false,
+              checkColor: Colors.white,
+              activeColor: Colors.blue,
+              value: controller.getProduct.outstanding,
+              title: const Text('Detacado'),
+              onChanged: (value) {
+                if (!controller.getSaveIndicator) {
+                  
+                  setState(() {
+                    controller.setOutstanding(value: value ?? false);
+                  });
+                }
+              },
+            ),
+            SizedBox(height: !controller.getSaveIndicator ? 12.0 : 0.0),
+            CheckboxListTile(
+              enabled: controller.getEditModerator
+                  ? controller.getSaveIndicator
+                      ? false
+                      : true
+                  : false,
+              checkColor: Colors.white,
+              activeColor: Colors.blue,
+              value: controller.getProduct.verified,
+              title: const Text('Verificado'),
+              onChanged: (value) {
+                if (controller.getEditModerator) {
+                  if (!controller.getSaveIndicator) {
+                    setState(() {
+                      controller.setCheckVerified(value: value ?? false);
+                    });
+                  }
+                }
+              },
+            ),
+            controller.getEditModerator ? Container() :SizedBox(height: !controller.getSaveIndicator ? 12.0 : 0.0),
+            controller.getEditModerator
+                ? Container()
+                : button(
+                    padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
+                    icon:const Icon(Icons.security, color: Colors.white),
+                    onPressed: () { 
+                      setState(() {
+                        controller.setEditModerator = !controller.getEditModerator;
+                      });
+                    },
+                    colorAccent: Colors.white,
+                    colorButton:  Colors.orange,
+                    text:  "Editar documento",
+                  ),
+            controller.getSaveIndicator || controller.getNewProduct || !controller.getEditModerator
+                ? Container()
+                :const SizedBox(height: 12.0),
+            controller.getSaveIndicator || controller.getNewProduct || !controller.getEditModerator
+                ? Container()
+                : button(
+                    padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
+                    icon:const Icon(Icons.security, color: Colors.white),
+                    onPressed: controller.showDialogDeleteOPTDeveloper,
+                    colorAccent: Colors.white,
+                    colorButton: Colors.red,
+                    text: "Eliminar documento",
+                  ),
+            // text : marca de tiempo de la ultima actualización del documento
+            controller.getNewProduct?Container():Padding(
+              padding: const EdgeInsets.only(top: 20),
+              child: Opacity(opacity: 0.5,child: Center(child: Text('Creación ${Publications.getFechaPublicacion(controller.getProduct.documentCreation.toDate(), Timestamp.now().toDate()).toLowerCase()}'))),
+            ), 
+            const SizedBox(height: 30.0),
+          ],
+          // fin widget debug
+        ),
+      ),
+    ); 
   
   }
   Widget button( {double width = double.infinity,
