@@ -7,11 +7,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:google_sign_in/google_sign_in.dart'; 
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:purchases_flutter/purchases_flutter.dart'; 
 import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import '../../../core/routes/app_pages.dart';
+import '../../../data/datasource/constant.dart';
 import '../../../domain/entities/cashRegister_model.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../domain/entities/user_model.dart';
@@ -985,7 +987,7 @@ class HomeController extends GetxController {
 
   void addProductToCatalogue({required ProductCatalogue product}) async {
     // values : se obtiene los datos para registrar del precio al publico del producto en una colección publica de la db
-    Price precio = Price(
+    ProductPrice precio = ProductPrice(
       id: getProfileAccountSelected.id,
       idAccount: getProfileAccountSelected.id,
       imageAccount: getProfileAccountSelected.image,
@@ -1075,8 +1077,7 @@ class HomeController extends GetxController {
                 itemBuilder: (BuildContext context, int index) {
                   return Column(
                     children: [
-                      WidgetButtonListTile().buttonListTileItemCuenta(
-                          perfilNegocio: getManagedAccountsList[index]),
+                      WidgetButtonListTile().buttonListTileItemCuenta( perfilNegocio: getManagedAccountsList[index]),
                       ComponentApp().divider(),
                     ],
                   );
@@ -1145,12 +1146,17 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
   final HomeController homeController = Get.find();
 
   // values
+  late Offerings? offerings;
   late double sizePremiumLogo = 16.0;
   Widget icon = Container();
   String title = 'PREMIUM';
   String description = '';
 
   // functions
+  getOfferings() async {
+    offerings = await Purchases.getOfferings();
+    setState(() {});
+  }
   void setData({required String id}) {
     switch (id) {
       case 'premium':
@@ -1197,115 +1203,119 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
         break;
     }
   }
- 
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    super.initState();
+    // get  
+    setData(id: widget.id);
+    // get : obtenemos las ofertas de compra
+    getOfferings();
+  }
+
+
+
+  @override  
+  Widget build(BuildContext context) { 
     // values
     setData(id: widget.id);
 
     // value
     BorderSide side = const BorderSide(color: Colors.transparent);
 
-    return ListView(
-      //crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.start,mainAxisSize: MainAxisSize.max,
-      children: [ 
+    // Get buttonModal : current offering
+    final offering = offerings?.current!; 
+
+    return Column(
+      children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const SizedBox(height: 25),
-            Text(title,
-                textAlign: TextAlign.center,
-                style:
-                    const TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: icon,
-            ),
+            // text : titulo
+            Text(title,textAlign: TextAlign.center,style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
+            // icon 
+            Padding(padding: const EdgeInsets.all(12.0),child: icon),
             const SizedBox(height: 12),
-            Opacity(
-                opacity: 0.7,
-                child: Text(description, textAlign: TextAlign.center)),
-            const SizedBox(height: 25),
-            Container(
-                padding: const EdgeInsets.all(12),
-                color: Colors.teal,
-                width: double.infinity,
-                child: Center(
-                    child: LogoPremium(
-                  personalize: true,
-                  accentColor: Colors.white,
-                  size: sizePremiumLogo,
-                  visible: true,
-                ))),
-            const SizedBox(height: 25),
-            const Text('CARACTERÍSTICAS',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontWeight: FontWeight.w200)),
+            Opacity(opacity: 0.7,child: Text(description, textAlign: TextAlign.center)), 
+            const SizedBox(height: 12),  
+            const Text('CARACTERÍSTICAS',textAlign: TextAlign.center,style: TextStyle(fontWeight: FontWeight.w200)),
             const SizedBox(height: 12),
+            // view : chips de caracteristicas
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 5,
+              children: [
+                Chip(
+                backgroundColor: Colors.transparent,
+                side: side,
+                avatar: const Icon(Icons.check),
+                label: const Text('Control de inventario')), 
             Chip(
                 backgroundColor: Colors.transparent,
                 side: side,
                 avatar: const Icon(Icons.check),
-                label: const Text('Control de inventario')),
-            ComponentApp().divider(),
+                label: const Text('Multi Usuarios')), 
             Chip(
                 backgroundColor: Colors.transparent,
                 side: side,
                 avatar: const Icon(Icons.check),
-                label: const Text('Multi Usuarios')),
-            ComponentApp().divider(),
-            Chip(
-                backgroundColor: Colors.transparent,
-                side: side,
-                avatar: const Icon(Icons.check),
-                label: const Text('Informes y estadísticas')),
-            ComponentApp().divider(),
+                label: const Text('Informes y estadísticas')), 
             Chip(
                 backgroundColor: Colors.transparent,
                 side: side,
                 avatar: const Icon(Icons.check),
                 label: const Text('Sin publicidad')),
-          ],
-        ),
-        const SizedBox(height: 12),
-        // button : adquirir premium
-        /* SizedBox(
-          width: double.infinity,
-          child: ElevatedButton.icon(
-            onPressed: null,/*  (){
-              // actualizamos la subcripción de la cuenta
-              setState(() {
-                homeController.getProfileAccountSelected.subscribed = !homeController.getProfileAccountSelected.subscribed;
-              });
-              if(homeController.getProfileAccountSelected.subscribed){Get.back();}
-            },  */
-            //  style: ButtonStyle(backgroundColor: MaterialStateProperty.all(homeController.getProfileAccountSelected.subscribed?Colors.grey:Colors.blue)),
-            style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.grey.withOpacity(0.1))),
-            icon: const Padding(
-              padding: EdgeInsets.all(8.0),
-              // text : homeController.getProfileAccountSelected.subscribed?'Desuscribirme':'Subcribirme'
-              child: Text('Subcribirme',style: TextStyle(fontSize: 24,color: Colors.white)),
+              ],
             ),
-            // icon : homeController.getProfileAccountSelected.subscribed?Icons.close:Icons.arrow_forward_rounded
-            label: const Icon(Icons.arrow_forward_rounded,color: Colors.white,),
-          ),
-        ), */
-        // text : precio de la versión Premium
-        const SizedBox(height: 50),
-        /* disponible para cuando las subcripciones esten desarrolladas
+          ],
+        ), 
+        const SizedBox(height: 25),
+        // text : 'Elige tu plan'
+        const Text('Elige tu plan',textAlign: TextAlign.center,style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
+        const SizedBox(height: 12),
+        // view : lista de los productos disponibles
+        offering==null?Container():
+        Flexible(
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            itemCount: offering.availablePackages.length,
+            itemBuilder: (BuildContext context, int index) {
 
-        const Text.rich(
-          TextSpan(
-            children: [
-              TextSpan(text: 'US \$6,99',style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold)),
-              TextSpan(text: ' al mes',style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold)),
-            ],
-          ),textAlign: TextAlign.center,
-          textDirection: TextDirection.rtl,
-        ), */
+              // get : obtenemos los productos disponibles
+              List<Package> myProductList =  offering.availablePackages;
+
+              return Card( 
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: side,
+                ),
+                clipBehavior: Clip.antiAliasWithSaveLayer,
+                child: ListTile(
+                  onTap: () async {
+                    try {
+                      CustomerInfo customerInfo = await Purchases.purchasePackage(myProductList[index]);
+                      EntitlementInfo? entitlement = customerInfo.entitlements.all[entitlementID];
+                      // bool activate = entitlement?.isActive ?? false;
+                    }catch (e) { 
+                      // ... handle error
+                    }
+                  },
+                  title: Text(myProductList[index].storeProduct.title,maxLines:3), 
+                  trailing: Text('${myProductList[index].storeProduct.currencyCode} ${myProductList[index].storeProduct.priceString}')),
+              );
+            },
+            shrinkWrap: true,
+            physics: const ClampingScrollPhysics(),
+          ),
+        ),
       ],
     );
   }
 }
+
+
+
+
+

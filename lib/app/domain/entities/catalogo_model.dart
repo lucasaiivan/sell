@@ -356,7 +356,7 @@ class ProductCatalogue {
 
 }
 
-class Price {
+class ProductPrice {
   String id = '';
   double price = 0.0;
   late Timestamp time; // marca de tiempo en la que se registro el precio
@@ -368,7 +368,7 @@ class Price {
   String imageAccount = ''; // imagen de perfil de la cuenta
   String nameAccount = ''; // nombre de la cuenta
 
-  Price({
+  ProductPrice({
     required this.id,
     required this.idAccount,
     required this.imageAccount,
@@ -380,7 +380,7 @@ class Price {
     this.town = '',
   });
 
-  Price.fromMap(Map data) {
+  ProductPrice.fromMap(Map data) {
     id = data['id'] ?? '';
     idAccount = data['idAccount'] ?? '';
     imageAccount = data.containsKey('imageAccount')

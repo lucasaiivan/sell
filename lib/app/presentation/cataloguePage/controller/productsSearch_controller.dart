@@ -79,8 +79,8 @@ class ControllerProductsSearch extends GetxController {
   }
   List<Map<String, dynamic>> get getListExcelToJson => listExcelToJson;
 
-  // write code
-  bool _writeCode = false;
+  // write code : 
+  bool _writeCode = false; 
   set setWriteCode(bool value){
     _writeCode = value;
     update(['updateAll']);
@@ -191,7 +191,7 @@ class ControllerProductsSearch extends GetxController {
 
   void queryProductSuggestion() {
     if (getListProductsSuggestions.isEmpty) {
-      Database.readProductsFuture(limit: 6).then((value) {
+      Database.readProductsFavoritesFuture(limit: 7).then((value) {
 
         // values 
         List<Product> newList = [];

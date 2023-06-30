@@ -1,10 +1,15 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:sell/app/data/datasource/store_config.dart';
 import 'app/core/routes/app_pages.dart';
+import 'app/data/datasource/constant.dart';
 import 'app/presentation/splash/bindings/splash_binding.dart';
-import 'package:firebase_core/firebase_core.dart';  
+import 'package:firebase_core/firebase_core.dart'; 
+import 'package:purchases_flutter/purchases_flutter.dart'; 
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -26,6 +31,19 @@ Future<void> main() async {
     await Firebase.initializeApp(options: firebaseConfig);
   } else {
     await Firebase.initializeApp();
+  }
+
+  // condition : verificamos si estamos en android  
+  if (Platform.isAndroid) { 
+    //PurchasesConfiguration configuration = PurchasesConfiguration( googleApiKey );
+     await Purchases.setLogLevel(LogLevel.debug); // debug : para ver los errores en la consola
+    PurchasesConfiguration configuration = PurchasesConfiguration(googleApiKey)..observerMode = false;   
+    await Purchases.configure(configuration); // configuramos la compra 
+    // StoreConfig : configuración de la tienda
+    /* StoreConfig(
+      store: Store.playStore,  //ctienda de google
+      apiKey: googleApiKey, // api key de google
+    ); */
   }
 
   await GetStorage.init();

@@ -272,7 +272,7 @@ class SalesController extends GetxController {
     }
 
     // Registra el precio en una colección publica
-    Price precio = Price(
+    ProductPrice precio = ProductPrice(
       id: homeController.getProfileAccountSelected.id,
       idAccount: homeController.getProfileAccountSelected.id,
       imageAccount: homeController.getProfileAccountSelected.image,
