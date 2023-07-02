@@ -34,22 +34,26 @@ class SalesView extends StatelessWidget {
       // initState : se activa cuando se crea el widget
       initState: (_) {},
       builder: (controller) {
-        return Obx(() => Scaffold(
-              appBar: appbar(controller: controller),
-              drawer: drawerApp(),
-              body: LayoutBuilder(builder: (context, constraints) {
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Expanded(child: body(controller: controller)),
-                    drawerTicket(controller: controller),
-                  ],
-                );
-              }),
-              floatingActionButton: controller.getTicketView
-                  ? floatingActionButtonTicket(controller: controller)
-                  : floatingActionButton(controller: controller).animate( delay: Duration( milliseconds: homeController.salesUserGuideVisibility ? 500: 0)).fade(),
-            ));
+        return Scaffold(
+          // view : barra de navegacion supeior de la app
+          appBar: appbar(controller: controller),
+          // view : barra de navegacion de la app
+          drawer: drawerApp(),
+          // view : cuerpo de la app
+          body: LayoutBuilder(builder: (context, constraints) {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Expanded(child: body(controller: controller)),
+                drawerTicket(controller: controller),
+              ],
+            );
+          }),
+          // view : barra de navegacion inferior de la app
+          floatingActionButton: controller.getTicketView
+              ? floatingActionButtonTicket(controller: controller)
+              : floatingActionButton(controller: controller).animate( delay: Duration( milliseconds: homeController.salesUserGuideVisibility ? 500: 0)).fade(),
+        );
       },
     );
   }
