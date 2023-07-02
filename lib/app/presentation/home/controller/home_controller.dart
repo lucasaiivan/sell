@@ -1203,10 +1203,20 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
         break;
     }
   }
+  // inicia la identificación de id de usario para revenuecat 
+  void initIdentityRevenueCat() async {
+    //  configure el SDK de RevvenueCat con una ID de usuario de la aplicación personalizada  
+    String clientID = homeController.getIdAccountSelected;
+    LogInResult result = await Purchases.logIn(clientID);
+    result.customerInfo.entitlements.all.forEach((key, value) { 
+      print('+++++++++++++++ key: $key, value: $value');
+    }); 
+  }
 
   @override
   void initState() {
     super.initState();
+    initIdentityRevenueCat();
     // get  
     setData(id: widget.id);
     // get : obtenemos las ofertas de compra
