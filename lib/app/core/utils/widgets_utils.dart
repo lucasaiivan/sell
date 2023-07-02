@@ -108,51 +108,56 @@ class WidgetButtonListTile extends StatelessWidget {
         onTap: () {
           controller.accountChange(idAccount: perfilNegocio.id);
         },
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min ,
-          children: [ 
-            GestureDetector(
-              onTap: () {
-                // condition : si el usuario es superAdmin y el perfil seleccionado es el mismo que el perfil que se esta mostrando
-                if(homeController.getProfileAdminUser.superAdmin && homeController.getProfileAccountSelected.id == perfilNegocio.id){
-                  Get.back();
-                  Get.toNamed(Routes.ACCOUNT);
-                }else{
-                  // action : ir a la cuenta seleccionada 
-                  controller.accountChange(idAccount: perfilNegocio.id);
-                }
-              },
-              child: SizedBox(
-                height: 75,width: 75,
-                child: perfilNegocio.image != '' || perfilNegocio.image.isNotEmpty
-                    ? CachedNetworkImage(
-                        fadeInDuration: const Duration(milliseconds: 200),
-                        fit: BoxFit.cover,
-                        imageUrl: perfilNegocio.image.contains('https://')? perfilNegocio.image : "https://${perfilNegocio.image}",
-                        placeholder: (context, url) => CircleAvatar(
+        // touch round
+        borderRadius: BorderRadius.circular(10.0),
+        child: SizedBox(
+          width: 75.0,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min ,
+            children: [ 
+              GestureDetector(
+                onTap: () {
+                  // condition : si el usuario es superAdmin y el perfil seleccionado es el mismo que el perfil que se esta mostrando
+                  if(homeController.getProfileAdminUser.superAdmin && homeController.getProfileAccountSelected.id == perfilNegocio.id){
+                    Get.back();
+                    Get.toNamed(Routes.ACCOUNT);
+                  }else{
+                    // action : ir a la cuenta seleccionada 
+                    controller.accountChange(idAccount: perfilNegocio.id);
+                  }
+                },
+                child: SizedBox(
+                  height: 75,width: 75,
+                  child: perfilNegocio.image != '' || perfilNegocio.image.isNotEmpty
+                      ? CachedNetworkImage(
+                          fadeInDuration: const Duration(milliseconds: 200),
+                          fit: BoxFit.cover,
+                          imageUrl: perfilNegocio.image.contains('https://')? perfilNegocio.image : "https://${perfilNegocio.image}",
+                          placeholder: (context, url) => CircleAvatar(
+                            backgroundColor: Colors.black26,
+                            radius: 100.0,
+                            child: Text(perfilNegocio.name.substring(0, 1),style: const TextStyle( fontSize: 18.0,color: Colors.white,fontWeight: FontWeight.bold)),
+                          ),
+                          imageBuilder: (context, image) => CircleAvatar(backgroundImage: image,radius: 24.0),
+                          errorWidget: (context, url, error) => CircleAvatar(
+                            backgroundColor: Colors.black26,
+                            radius: 100.0,
+                            child: Text(perfilNegocio.name.substring(0, 1),style: const TextStyle( fontSize: 18.0,color: Colors.white,fontWeight: FontWeight.bold)),
+                          ),
+                        )
+                      : CircleAvatar(
                           backgroundColor: Colors.black26,
                           radius: 100.0,
                           child: Text(perfilNegocio.name.substring(0, 1),style: const TextStyle( fontSize: 18.0,color: Colors.white,fontWeight: FontWeight.bold)),
                         ),
-                        imageBuilder: (context, image) => CircleAvatar(backgroundImage: image,radius: 24.0),
-                        errorWidget: (context, url, error) => CircleAvatar(
-                          backgroundColor: Colors.black26,
-                          radius: 100.0,
-                          child: Text(perfilNegocio.name.substring(0, 1),style: const TextStyle( fontSize: 18.0,color: Colors.white,fontWeight: FontWeight.bold)),
-                        ),
-                      )
-                    : CircleAvatar(
-                        backgroundColor: Colors.black26,
-                        radius: 100.0,
-                        child: Text(perfilNegocio.name.substring(0, 1),style: const TextStyle( fontSize: 18.0,color: Colors.white,fontWeight: FontWeight.bold)),
-                      ),
+                ),
               ),
-            ),
-            const SizedBox(height: 5.0),
-            Text(perfilNegocio.name, style: const TextStyle(overflow: TextOverflow.ellipsis )),
-          ],
+              const SizedBox(height: 5.0),
+              Text(perfilNegocio.name, style: const TextStyle(overflow: TextOverflow.ellipsis )),
+            ],
+          ),
         ),
       );
 
@@ -669,16 +674,14 @@ Widget viewDefault() {
                 :Flexible(  
                   fit: FlexFit.loose,
                   child: SizedBox( 
-                    height: 200,  
-                    child: ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      shrinkWrap: true, // la vista se adapta al contenido interno
-                      scrollDirection: Axis.horizontal,
-                      itemCount: homeController.getManagedAccountsList.length,
-                      itemBuilder: (BuildContext context, int index) { 
-                        return WidgetButtonListTile().buttonListTileItemCuenta(perfilNegocio: homeController.getManagedAccountsList[index],row: true);
-                      },
-                    ),
+                    height: 200,   
+                    child: Wrap( 
+                      runSpacing: 12, // espaciado entre filas
+                      spacing: 12, // espaciado entre columnas
+                      runAlignment: WrapAlignment.center,
+                      alignment: WrapAlignment.center,
+                      children: homeController.getManagedAccountsList.map((e) => WidgetButtonListTile().buttonListTileItemCuenta(perfilNegocio: e,row: true)).toList(),
+                    ), 
                   ),
                 ),
               ],

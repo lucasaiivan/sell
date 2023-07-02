@@ -556,7 +556,7 @@ class SalesController extends GetxController {
         // no se encontro el producto en la base de datos
         //
         // dialog : agregar producto nuevo
-        showDialogAddProductNew(productCatalogue: ProductCatalogue(id: id,description: error.toString(),code: id, creation: Timestamp.now(), documentCreation: Timestamp.now(), upgrade: Timestamp.now(), documentUpgrade: Timestamp.now()));
+        showDialogAddProductNew(productCatalogue: ProductCatalogue(id: id,description:'',code: id, creation: Timestamp.now(), documentCreation: Timestamp.now(), upgrade: Timestamp.now(), documentUpgrade: Timestamp.now()));
       }).catchError((error) {
         // error al consultar db
         Get.snackbar('ah ocurrido algo', 'Fallo el escaneo');
@@ -981,7 +981,7 @@ class _NewProductViewState extends State<NewProductView> {
   // variables
   late Color  colorAccent ;
   late  bool isProductNew ; 
-  bool checkAddCatalogue = false; 
+  bool checkAddCatalogue = true; 
   Color checkActiveColor =  Colors.blue;
   // styles
   late TextStyle hintStyle ;
