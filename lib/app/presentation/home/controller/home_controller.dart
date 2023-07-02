@@ -1145,26 +1145,21 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
   // others controllers
   final HomeController homeController = Get.find();
 
-  // values
-  late Offerings? offerings;
+  // values 
   late double sizePremiumLogo = 16.0;
   Widget icon = Container();
-  String title = 'PREMIUM';
-  String description = '';
+  String title = 'Premium';
+  String description = ''; 
 
-  // functions
-  getOfferings() async {
-    offerings = await Purchases.getOfferings();
-    setState(() {});
-  }
+  // functions 
   void setData({required String id}) {
     switch (id) {
       case 'premium':
-        title = 'PREMIUM';
+        title = 'Premium';
         description =
             'Funcionalidades especiales para profesionalizar tu negocio';
-        icon = const Icon(Icons.workspace_premium_outlined,
-            size: 50, color: Colors.amber);
+        icon = const Icon(Icons.star_rounded,
+            size: 75, color: Colors.amber);
         sizePremiumLogo = 20;
         break;
       case 'stock':
@@ -1174,7 +1169,7 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
         icon = const Padding(
             padding: EdgeInsets.only(right: 5),
             child: Icon(Icons.inventory_rounded));
-        sizePremiumLogo = 12;
+        sizePremiumLogo = 20;
         break;
       case 'analytic':
         title = 'Informes y Estadísticas';
@@ -1183,7 +1178,7 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
         icon = const Padding(
             padding: EdgeInsets.only(right: 5),
             child: Icon(Icons.analytics_outlined));
-        sizePremiumLogo = 12;
+        sizePremiumLogo = 20;
         break;
       case 'multiuser':
         title = 'Multiusuario';
@@ -1192,7 +1187,7 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
         icon = const Padding(
             padding: EdgeInsets.only(right: 5),
             child: Icon(Icons.people_outline));
-        sizePremiumLogo = 12;
+        sizePremiumLogo = 20;
         break;
       default:
         title = '';
@@ -1203,14 +1198,39 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
         break;
     }
   }
+  // var : para el control de la suscripción
+  late LogInResult result;
+  Offerings? offerings; // ofertas de suscripción
+  bool isSubscribedPremium = false;
+  String clientRevenueCatID = ''; // id de la cuenta es la ID personalizada para RevenueCat
+  int cantidad = 0; // cantidad de productos
+ 
+
   // inicia la identificación de id de usario para revenuecat 
   void initIdentityRevenueCat() async {
     //  configure el SDK de RevvenueCat con una ID de usuario de la aplicación personalizada  
-    String clientID = homeController.getIdAccountSelected;
-    LogInResult result = await Purchases.logIn(clientID);
-    result.customerInfo.entitlements.all.forEach((key, value) { 
-      print('+++++++++++++++ key: $key, value: $value');
-    }); 
+    String clientID = homeController.getProfileAccountSelected.id; 
+    
+    // logIn : identificar al usuario con un ID personalizada
+    await Purchases.logOut();
+      result =await Purchases.logIn(clientID).then((value) async{
+        // get : obtenemos las ofertas de compra
+        await Purchases.getOfferings().then((value) {
+          setState(() { 
+            offerings = value;
+          });
+        }); 
+        return value;
+      }); 
+      // get : obtenemos los productos de compra
+      result.customerInfo.entitlements.all.forEach((key, value) { 
+        if(key == entitlementID){
+          setState(() {
+            isSubscribedPremium = value.isActive;
+          });
+        } 
+        print('########################################################### key: $key, value: $value');
+      }); 
   }
 
   @override
@@ -1219,8 +1239,7 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
     initIdentityRevenueCat();
     // get  
     setData(id: widget.id);
-    // get : obtenemos las ofertas de compra
-    getOfferings();
+    
   }
 
 
@@ -1229,98 +1248,167 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
   Widget build(BuildContext context) { 
     // values
     setData(id: widget.id);
+ 
+ 
 
-    // value
-    BorderSide side = const BorderSide(color: Colors.transparent);
-
-    // Get buttonModal : current offering
-    final offering = offerings?.current!; 
-
-    return Column(
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(height: 25),
-            // text : titulo
-            Text(title,textAlign: TextAlign.center,style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
-            // icon 
-            Padding(padding: const EdgeInsets.all(12.0),child: icon),
-            const SizedBox(height: 12),
-            Opacity(opacity: 0.7,child: Text(description, textAlign: TextAlign.center)), 
-            const SizedBox(height: 12),  
-            const Text('CARACTERÍSTICAS',textAlign: TextAlign.center,style: TextStyle(fontWeight: FontWeight.w200)),
-            const SizedBox(height: 12),
-            // view : chips de caracteristicas
-            Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 5,
-              children: [
-                Chip(
-                backgroundColor: Colors.transparent,
-                side: side,
-                avatar: const Icon(Icons.check),
-                label: const Text('Control de inventario')), 
-            Chip(
-                backgroundColor: Colors.transparent,
-                side: side,
-                avatar: const Icon(Icons.check),
-                label: const Text('Multi Usuarios')), 
-            Chip(
-                backgroundColor: Colors.transparent,
-                side: side,
-                avatar: const Icon(Icons.check),
-                label: const Text('Informes y estadísticas')), 
-            Chip(
-                backgroundColor: Colors.transparent,
-                side: side,
-                avatar: const Icon(Icons.check),
-                label: const Text('Sin publicidad')),
-              ],
-            ),
-          ],
-        ), 
-        const SizedBox(height: 25),
-        // text : 'Elige tu plan'
-        const Text('Elige tu plan',textAlign: TextAlign.center,style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
-        const SizedBox(height: 12),
-        // view : lista de los productos disponibles
-        offering==null?Container():
-        Flexible(
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            itemCount: offering.availablePackages.length,
-            itemBuilder: (BuildContext context, int index) {
-
-              // get : obtenemos los productos disponibles
-              List<Package> myProductList =  offering.availablePackages;
-
-              return Card( 
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  side: side,
+    return Card(
+      margin: const EdgeInsets.all(0),
+      elevation: 0,
+      color: Colors.transparent,
+      clipBehavior: Clip.antiAlias,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
+      child: Stack(  
+        children: [
+          // view : vista con el contenido de la suscripción desplazable
+          ListView( 
+            children: [
+              Container( 
+                // color : gradient de un color y transparent 
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.amber.withOpacity(0.1) ,Colors.transparent],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: const [0.0, 0.9],
+                ), 
+              ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [ 
+                    const SizedBox(height: 12),
+                    // icon 
+                    Padding(padding: const EdgeInsets.all(3.0),child: icon),
+                    // text : titulo
+                    Text(title,textAlign: TextAlign.center,style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 12),
+                    // text : descripción
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Opacity(opacity: 0.7,child: Text(description, textAlign: TextAlign.center)),
+                    ), 
+                    
+                  ],
                 ),
-                clipBehavior: Clip.antiAliasWithSaveLayer,
+              ),  
+              const Divider(indent: 50, endIndent: 50, height: 50),
+              // text : caracteristicas de la suscripción
+              const Text('CARACTERÍSTICAS',textAlign: TextAlign.center,style: TextStyle(fontWeight: FontWeight.w200)),
+              const SizedBox(height: 12),
+              // ListTile : caracteristicas de la suscripción 'Control de inventario' 
+              const Opacity(
+                opacity: 0.9,
                 child: ListTile(
-                  onTap: () async {
-                    try {
-                      CustomerInfo customerInfo = await Purchases.purchasePackage(myProductList[index]);
-                      EntitlementInfo? entitlement = customerInfo.entitlements.all[entitlementID];
-                      // bool activate = entitlement?.isActive ?? false;
-                    }catch (e) { 
-                      // ... handle error
-                    }
-                  },
-                  title: Text(myProductList[index].storeProduct.title,maxLines:3), 
-                  trailing: Text('${myProductList[index].storeProduct.currencyCode} ${myProductList[index].storeProduct.priceString}')),
-              );
-            },
-            shrinkWrap: true,
-            physics: const ClampingScrollPhysics(),
+                  leading: Icon(Icons.inventory_outlined ),
+                  title: Text('Control de inventario'),
+                  subtitle: Opacity(opacity: 0.5,child: Text('Maneje el stock de sus productos')), 
+                ),
+              ),
+              const Divider(indent: 50),
+              // ListTile : caracteristicas de la suscripción 'Multi Usuarios'
+              const Opacity(
+                opacity: 0.9,
+                child: ListTile(
+                  leading: Icon(Icons.people_outline),
+                  title: Text('Multi Usuarios'),
+                  subtitle: Opacity(opacity: 0.5,child: Text('Permita que más personas gestionen esta cuenta y con permisos personalizados')), 
+                ),
+              ),
+              const Divider(indent: 50),
+              // ListTile : caracteristicas de la suscripción 'Informes y estadísticas'
+              const Opacity(
+                opacity: 0.9,
+                child: ListTile(
+                  leading: Icon(Icons.analytics_outlined),
+                  title: Text('Informes y estadísticas'),
+                  subtitle: Opacity(opacity: 0.5,child: Text('Obtenga informes y estadísticas de sus ventas')), 
+                ),
+              ),
+              const Divider(indent: 50),
+              // ListTile : caracteristicas de la suscripción 'Sin publicidad'
+              const Opacity(
+                opacity: 0.9,
+                child: ListTile(
+                  leading: Icon(Icons.remove_red_eye_outlined),
+                  title: Text('Sin publicidad'),
+                  subtitle: Opacity(opacity: 0.5,child: Text('Sin publicidad en la aplicación')), 
+                ),
+              ), 
+              const SizedBox(height:150),
+            ],
           ),
-        ),
-      ],
+          // view : buton para subcribirse a Premium en la app
+          // condition : comprobar que 'offerings' esta inicializado
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 100,
+              // color : gradient de un color y transparent 
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.transparent,
+                    Theme.of(context).scaffoldBackgroundColor,
+                  ], 
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+              ),
+              child: offerings==null?const TextButton(onPressed:null, child: Text('Subcribirce a Premium')): ListView.builder(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                itemCount: offerings?.current?.availablePackages.length,
+                itemBuilder: (BuildContext context, int index) {
+              
+                  // get : obtenemos los productos disponibles
+                  List<Package> myProductList =  offerings!.current!.availablePackages;
+                  // retornar un Card con color gradient de tres colores
+                  return Card(  
+                    elevation: 0,
+                    margin: const EdgeInsets.symmetric(horizontal: 30),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      side: BorderSide.none,
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Container( 
+                      decoration:  BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.teal.shade700.withOpacity(0.5),
+                            Colors.green.shade600.withOpacity(0.5),
+                            Colors.green.shade400.withOpacity(0.5),],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                      ),
+                      child: ListTile(
+                        tileColor: Colors.green,
+                        titleTextStyle: const TextStyle(color: Colors.white),
+                        leadingAndTrailingTextStyle:  const TextStyle(color: Colors.white),
+                        onTap: () async {
+                          try {
+                            // purchasePackage :  compra el paquete de la lista de productos disponibles
+                            CustomerInfo customerInfo = await Purchases.purchasePackage(myProductList[index] );
+                            EntitlementInfo? entitlement = customerInfo.entitlements.all[entitlementID];
+                            bool activate = entitlement?.isActive ?? false;
+                          }catch (e) { 
+                            // ... handle error
+                          }
+                        },
+                        title: Text(isSubscribedPremium?'Ya estás subcripto':myProductList[index].storeProduct.title,maxLines:1), 
+                        trailing:isSubscribedPremium?const Icon(Icons.thumb_up,color: Colors.white,): Text('${myProductList[index].storeProduct.currencyCode} ${myProductList[index].storeProduct.priceString}')),
+                    ),
+                  ); 
+                },
+                shrinkWrap: true, 
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

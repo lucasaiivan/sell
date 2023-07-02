@@ -477,8 +477,7 @@ class WidgetDrawer extends StatelessWidget {
 
     // variables
     bool superAdmin = homeController.getProfileAdminUser.superAdmin;
-    homeController.getFirebaseAuth.currentUser!.isAnonymous;
-    Color colorTextVersion = Colors.blue;
+    homeController.getFirebaseAuth.currentUser!.isAnonymous; 
 
     // widgets
     final textButtonLogin = Padding(
@@ -513,78 +512,50 @@ class WidgetDrawer extends StatelessWidget {
             homeController.showModalBottomSheetSelectAccount();
           },
         ), 
-        const SizedBox(height: 12),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: TextButton(onPressed:(){
-            Get.back(); // cierra drawer
-            homeController.showModalBottomSheetSubcription();
-          }, child: RichText(
-            text: TextSpan(
-              style: DefaultTextStyle.of(context).style,
-              children: <TextSpan>[
-                TextSpan(
-                  text: 'Versión en desarrollo gratuita',
-                  style: TextStyle(
-                    color: colorTextVersion,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                TextSpan(
-                  text: ' Nuestro objetivo es hacer las cosas simples y eficientes',
-                  style: TextStyle(
-                    color: colorTextVersion.withOpacity(0.6),
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          )),
-        ),
-        /* Esta version de la app las funciones PREMIUM son gratis
-
-         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: homeController.getProfileAccountSelected.subscribed?LogoPremium(visible: true,):TextButton(onPressed:(){
-            Get.back(); // cierra drawer
-            homeController.showModalBottomSheetSubcription();
-          }, child: const Text('Obten la versión Premium')),
-        ), */
+        const SizedBox(height: 20),
         // others items
-        Expanded(
-          child: ListView(
-            children: [
-              ListTile(
-                  leading: const Icon(Icons.attach_money_rounded),
-                  title: const Text('Vender'),
-                  onTap: () => homeController.setIndexPage = 0),
-              superAdmin?ListTile(
-                  leading: const Icon(Icons.manage_search_rounded),
-                  title: const Text('Historial de caja'),
-                  onTap: () => homeController.setIndexPage = 1):Container(),
-              superAdmin?ListTile(
-                  leading: const Icon(Icons.receipt_long_rounded),
-                  title: const Text('Transacciones'),
-                  onTap: () => homeController.setIndexPage = 2):Container(),
-              superAdmin?ListTile(
-                  leading: const Icon(Icons.apps_rounded),
-                  title: const Text('Catálogo'),
-                  onTap: () => homeController.setIndexPage = 3):Container(),
-              superAdmin?ListTile(
-                  leading: const Icon(Icons.add_moderator_outlined),
-                  title: const Text('Multi Usuario'),
-                  onTap: () {
-                    if( homeController.getProfileAccountSelected.subscribed ){
-                      homeController.setIndexPage = 4;
-                    }else{
-                      Get.back(); // cierra drawer
-                      homeController.showModalBottomSheetSubcription(id: 'multiuser');
-                    }
-                    
-                  }):Container(),
-            ],
-          ),
-        ),
+        ListTile(
+          tileColor: Colors.amber.withOpacity(0.1),
+          iconColor:  Colors.amber, 
+          titleTextStyle: const TextStyle(color: Colors.amber,fontWeight: FontWeight.bold),
+            leading: const Icon(Icons.star_rounded),
+            title: const Text('Funciones Premium'),
+            onTap: (){
+              // action : mostrar modal bottom sheet con 
+              Get.back(); // cierra drawer
+              homeController.showModalBottomSheetSubcription();
+            }),
+        // vender 
+        ListTile(
+            leading: const Icon(Icons.attach_money_rounded),
+            title: const Text('Vender'),
+            onTap: () => homeController.setIndexPage = 0),
+        // historial de caja
+        superAdmin?ListTile(
+            leading: const Icon(Icons.manage_search_rounded),
+            title: const Text('Historial de caja'),
+            onTap: () => homeController.setIndexPage = 1):Container(),
+        // transacciones
+        superAdmin?ListTile(
+            leading: const Icon(Icons.receipt_long_rounded),
+            title: const Text('Transacciones'),
+            onTap: () => homeController.setIndexPage = 2):Container(),
+        superAdmin?ListTile(
+            leading: const Icon(Icons.apps_rounded),
+            title: const Text('Catálogo'),
+            onTap: () => homeController.setIndexPage = 3):Container(),
+        superAdmin?ListTile(
+            leading: const Icon(Icons.add_moderator_outlined),
+            title: const Text('Multi Usuario'),
+            onTap: () {
+              if( homeController.getProfileAccountSelected.subscribed ){
+                homeController.setIndexPage = 4;
+              }else{
+                Get.back(); // cierra drawer
+                homeController.showModalBottomSheetSubcription(id: 'multiuser');
+              }
+              
+            }):Container(),
         /*  ListTile(
           leading: const Icon(Icons.cloud_download_outlined),
           title: const Text('Comprobar actualización'),
@@ -601,18 +572,7 @@ class WidgetDrawer extends StatelessWidget {
             }
           },
         ),  */
-        ListTile(
-          leading: const Icon(Icons.cloud_download_outlined),
-          title: const Text('Comprobar actualización'),
-          subtitle: const Text('Play Store'),
-          onTap: () async {
-            
-            // values
-            Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.logicabooleana.sell');
-            //  redireccionara para la tienda de aplicaciones
-            await launchUrl(uri,mode: LaunchMode.externalApplication);
-          },
-        ), 
+        // ostion : Escríbenos tu opinión
         ListTile(
           contentPadding: const EdgeInsets.symmetric(vertical: 12,horizontal: 12),
           tileColor: Colors.blue.withOpacity(0.1),
@@ -631,6 +591,20 @@ class WidgetDrawer extends StatelessWidget {
 
           },
         ),
+        // option : comprobar actualizacion
+        ListTile(
+          leading: const Icon(Icons.cloud_download_outlined),
+          title: const Text('Comprobar actualización'),
+          subtitle: const Text('Play Store'),
+          onTap: () async {
+            
+            // values
+            Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.logicabooleana.sell');
+            //  redireccionara para la tienda de aplicaciones
+            await launchUrl(uri,mode: LaunchMode.externalApplication);
+          },
+        ), 
+        //  option :  cambiar el brillo del tema de la app
         ListTile(
           leading: const Icon(Icons.color_lens_outlined),
           title: Text(Theme.of(context).brightness==Brightness.dark?'Tema claro':'Tema oscuro'),
