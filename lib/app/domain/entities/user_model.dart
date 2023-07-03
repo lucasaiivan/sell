@@ -130,9 +130,7 @@ class ProfileAccountModel {
     subscribed = true;// data['subscribed']??false;
     image =data.containsKey('image') ? data['image'] : data['imagen_perfil'] ?? '';
     name = data.containsKey('name') ? data['name'] : data['nombre_negocio']; 
-    creation = data.containsKey('creation')
-        ? data['creation']
-        : data['timestamp_creation'];
+    creation = data.containsKey('creation')? data['creation']: data['timestamp_creation']?? Timestamp.now();
     currencySign = data.containsKey('currencySign')
         ? data['currencySign']
         : data['signo_moneda'] ?? "\$";
@@ -172,10 +170,11 @@ class ProfileAccountModel {
 
   ProfileAccountModel.fromDocumentSnapshot( {required DocumentSnapshot documentSnapshot}) {
     // get
-    Map data = documentSnapshot.data() as Map;
+    late Map data= {};
+    if (documentSnapshot.data() != null) {data = documentSnapshot.data() as Map; }
 
     //  set
-    creation = data["creation"];
+    creation = data["creation"]??Timestamp.now();
     // TODO: variable que se tiene que evaluar en cada inicio de la app
     subscribed = true; //data.containsKey('subscribed') ? data['subscribed'] : false;
     id = data.containsKey('id') ? data['id'] : documentSnapshot.id;
@@ -189,7 +188,7 @@ class ProfileAccountModel {
         : data["signo_moneda"] ?? '';
     blockingAccount = data.containsKey('blockingAccount')
         ? data['blockingAccount']
-        : data["bloqueo"] ?? '';
+        : data["bloqueo"] ?? false;
     blockingMessage = data.containsKey('blockingMessage')
         ? data['blockingMessage']
         : data["mensaje_bloqueo"] ?? '';

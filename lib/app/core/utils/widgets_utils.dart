@@ -497,12 +497,18 @@ class WidgetDrawer extends StatelessWidget {
           leading: Container(
             padding: const EdgeInsets.all(0.0),
             child: homeController.getProfileAccountSelected.image == ''
-                ? CircleAvatar(backgroundColor: Get.theme.dividerColor)
+                ? CircleAvatar(backgroundColor: Get.theme.dividerColor,child: Center(child: Text(homeController.getProfileAccountSelected.name.substring( 0,1))),)
                 : CachedNetworkImage(
                     imageUrl:homeController.getProfileAccountSelected.image,
-                    placeholder: (context, url) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
+                    placeholder: (context, url) => CircleAvatar(backgroundColor: Get.theme.dividerColor,child: Center(child: Text(homeController.getProfileAccountSelected.name.substring( 0,1))),),
                     imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: CircleAvatar(backgroundImage: image)),
-                    errorWidget: (context, url, error) => CircleAvatar(backgroundColor: Get.theme.dividerColor),
+                    errorWidget: (context, url, error) {
+                      // return : un circleView con la inicial de nombre como icon 
+                      return CircleAvatar(
+                        backgroundColor: Get.theme.dividerColor,
+                        child: Center(child: Text(homeController.getProfileAccountSelected.name.substring( 0,1))),
+                        );
+                    },
                   ),
           ),
           title: Text(homeController.getIdAccountSelected == ''? 'Seleccionar una cuenta': homeController.getProfileAccountSelected.name,maxLines: 1,overflow: TextOverflow.ellipsis),
@@ -515,11 +521,11 @@ class WidgetDrawer extends StatelessWidget {
         const SizedBox(height: 20),
         // others items
         ListTile(
-          tileColor: Colors.amber.withOpacity(0.1),
+          tileColor: homeController.getIsSubscribedPremium?null:Colors.amber.withOpacity(0.1),
           iconColor:  Colors.amber, 
           titleTextStyle: const TextStyle(color: Colors.amber,fontWeight: FontWeight.bold),
             leading: const Icon(Icons.star_rounded),
-            title: const Text('Funciones Premium'),
+            title: Text(homeController.getIsSubscribedPremium?'Premium':'Funciones Premium'),
             onTap: (){
               // action : mostrar modal bottom sheet con 
               Get.back(); // cierra drawer
@@ -556,23 +562,7 @@ class WidgetDrawer extends StatelessWidget {
               }
               
             }):Container(),
-        /*  ListTile(
-          leading: const Icon(Icons.cloud_download_outlined),
-          title: const Text('Comprobar actualización'),
-          subtitle: const Text('Play Store'),
-          onTap: () async {
-            
-            // values
-            Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.logicabooleana.commer.producto');
-            // primero probamos si podemos abrir la app de lo contrario redireccionara para la tienda de aplicaciones
-            try{
-              await LaunchApp.openApp(androidPackageName: 'com.logicabooleana.commer.producto');
-            }catch(_){
-              if (await canLaunchUrl(uri)) { await launchUrl(uri,mode: LaunchMode.externalApplication);} else {throw 'Could not launch $uri';}
-            }
-          },
-        ),  */
-        // ostion : Escríbenos tu opinión
+        const SizedBox(height: 30),
         ListTile(
           contentPadding: const EdgeInsets.symmetric(vertical: 12,horizontal: 12),
           tileColor: Colors.blue.withOpacity(0.1),
@@ -830,7 +820,7 @@ class LogoPremium extends StatelessWidget {
   late final bool personalize;
   late String id;
 
-  LogoPremium({Key? key,this.personalize=false,this.accentColor=Colors.blue,this.size=12,this.visible=false,this.id='premium'}) : super(key: key);
+  LogoPremium({Key? key,this.personalize=false,this.accentColor=Colors.amber,this.size=12,this.visible=false,this.id='premium'}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -856,7 +846,7 @@ class LogoPremium extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 2),
           decoration: BoxDecoration(border: Border.all(color: accentColor)),
-          child: Text('Gratis temporal',style: TextStyle(fontSize: size,color:accentColor),textAlign: TextAlign.center,overflow: TextOverflow.clip,)
+          child: Text('Funciones Premium',style: TextStyle(fontSize: size,color:accentColor),textAlign: TextAlign.center,overflow: TextOverflow.clip,)
         ),
       ),
     ),

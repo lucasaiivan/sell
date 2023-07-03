@@ -34,25 +34,30 @@ class SalesView extends StatelessWidget {
       // initState : se activa cuando se crea el widget
       initState: (_) {},
       builder: (controller) {
-        return Scaffold(
-          // view : barra de navegacion supeior de la app
-          appBar: appbar(controller: controller),
-          // view : barra de navegacion de la app
-          drawer: drawerApp(),
-          // view : cuerpo de la app
-          body: LayoutBuilder(builder: (context, constraints) {
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Expanded(child: body(controller: controller)),
-                drawerTicket(controller: controller),
-              ],
-            );
-          }),
-          // view : barra de navegacion inferior de la app
-          floatingActionButton: controller.getTicketView
-              ? floatingActionButtonTicket(controller: controller)
-              : floatingActionButton(controller: controller).animate( delay: Duration( milliseconds: homeController.salesUserGuideVisibility ? 500: 0)).fade(),
+        return Expanded(
+          child: Obx(() {
+              return Scaffold(
+                // view : barra de navegacion supeior de la app
+                appBar: appbar(controller: controller),
+                // view : barra de navegacion de la app
+                drawer: drawerApp(),
+                // view : cuerpo de la app
+                body: LayoutBuilder(builder: (context, constraints) {
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Expanded(child: body(controller: controller)),
+                      drawerTicket(controller: controller),
+                    ],
+                  );
+                }),
+                // view : barra de navegacion inferior de la app
+                floatingActionButton: controller.getTicketView
+                    ? floatingActionButtonTicket(controller: controller)
+                    : floatingActionButton(controller: controller).animate( delay: Duration( milliseconds: homeController.salesUserGuideVisibility ? 500: 0)).fade(),
+              );
+            }
+          ),
         );
       },
     );
@@ -157,15 +162,11 @@ class SalesView extends StatelessWidget {
     final TextStyle textValuesStyle = TextStyle(
         fontFamily: 'monospace',
         fontWeight: FontWeight.bold,
-        color: Get.theme.brightness == Brightness.dark
-            ? Colors.white
-            : Colors.black);
+        color: Get.theme.brightness == Brightness.dark? Colors.white: Colors.black);
     final TextStyle textDescrpitionStyle = TextStyle(
         fontFamily: 'monospace',
         fontWeight: FontWeight.bold,
-        color: Get.theme.brightness == Brightness.dark
-            ? Colors.white70
-            : Colors.black87);
+        color: Get.theme.brightness == Brightness.dark ? Colors.white70 : Colors.black87);
 
     // widgets
     Widget dividerLinesWidget = Padding(
@@ -184,11 +185,7 @@ class SalesView extends StatelessWidget {
     final isMobile = screenWidth < 700; // ejemplo: pantalla de teléfono
 
     return AnimatedContainer(
-      width: controller.getTicketView
-          ? isMobile
-              ? screenWidth
-              : 400
-          : 0,
+      width: controller.getTicketView ? isMobile ? screenWidth : 400 : 0,
       curve: Curves.fastOutSlowIn,
       duration: const Duration(milliseconds: 300),
       child: AnimatedOpacity(
@@ -934,10 +931,10 @@ class SalesView extends StatelessWidget {
           child: SizedBox(width: 30,height: 30,child: imageBarCode),
         ),
         const SizedBox(width: 8),
+        // floationActionButton : cobrar
         ElasticIn(
           key: homeController.floatingActionButtonTransacctionRegister,
-          controller: (p0) =>
-              controller.floatingActionButtonAnimateController = p0,
+          controller: (p0) => controller.floatingActionButtonAnimateController = p0,
           child: FloatingActionButton.extended(
               onPressed: controller.getListProductsSelested.isEmpty
                   ? null
