@@ -21,6 +21,7 @@ import '../../../core/utils/widgets_utils.dart';
 import '../../auth/controller/login_controller.dart';
 
 class HomeController extends GetxController {
+
   // var : tutorial para el usuario
   final GlobalKey floatingActionButtonRegisterFlashKeyButton = GlobalKey();
   final GlobalKey itemProductFlashKeyButton = GlobalKey();
@@ -61,6 +62,42 @@ class HomeController extends GetxController {
   late BuildContext _buildContext;
   set setBuildContext(BuildContext context) => _buildContext = context;
   BuildContext get getBuildContext => _buildContext;
+  // var : para el control de la suscripción
+  String clientRevenueCatID = ''; // id de la cuenta es la ID personalizada para RevenueCat
+  late LogInResult result; // LogInResult : resultado de la identificación de usuario
+  Offerings? offerings; // ofertas de suscripción 
+  RxBool isSubscribedPremium = false.obs;
+  set setIsSubscribedPremium(bool value) => isSubscribedPremium.value = value;
+  bool get getIsSubscribedPremium => isSubscribedPremium.value;
+ 
+
+  // inicia la identificación de id de usario para revenuecat 
+  void initIdentityRevenueCat() async {
+    //  configure el SDK de RevvenueCat con una ID de usuario de la aplicación personalizada  
+    String clientID = getProfileAccountSelected.id;  
+    if(clientID == ''){
+      // si no hay una cuenta seleccionada
+      return;
+    }
+    
+    // logIn : identificar al usuario con un ID personalizada
+    // condition : comprobar si en revenuecat se inicio sesion  
+    //await Purchases.logOut();
+    result =await Purchases.logIn(clientID).then((value) async{
+      // get : obtenemos las ofertas de compra
+      await Purchases.getOfferings().then((value) {
+        offerings = value;
+      }); 
+      return value;
+    }); 
+    // get : obtenemos los productos de compra
+    result.customerInfo.entitlements.all.forEach((key, value) { 
+      if(key == entitlementID){
+        setIsSubscribedPremium = value.isActive;
+      } 
+      print('########################################################### key: $key, value: $value');
+    }); 
+  }
 
   // brillo de la pantalla
   bool _darkMode = false;
@@ -820,16 +857,18 @@ class HomeController extends GetxController {
     readUserAccountsList(email: getUserAuth.email ?? '');
     // obtenemos los datos de la cuenta
     if (idAccount != '') {
+      // firebase : obtenemos los datos de la cuenta
       Database.readProfileAccountModelFuture(idAccount).then((value) {
         // ¿El documento existe?
         if (value.exists) {
+          // subcription premium  : inicializamos la identidad de revenue cat
+          initIdentityRevenueCat(); // inicializamos la identidad de revenue cat
+
           //get profile account
-          setProfileAccountSelected =
-              ProfileAccountModel.fromDocumentSnapshot(documentSnapshot: value);
+          setProfileAccountSelected = ProfileAccountModel.fromDocumentSnapshot(documentSnapshot: value);
           // load
           loadCashRegisters();
-          readDataAdminUser(
-              email: getUserAuth.email ?? '', idAccount: idAccount);
+          readDataAdminUser( email: getUserAuth.email ?? '', idAccount: idAccount);
           readProductsCatalogue(idAccount: idAccount);
           readAdminsUsers(idAccount: idAccount);
           readListCategoryListFuture(idAccount: idAccount);
@@ -950,7 +989,7 @@ class HomeController extends GetxController {
           // firebase : obtenemos los datos de la cuenta
           Database.readProfileAccountModelFuture(element.get('id')).then((value) {
             // obtenemos los perfiles de las cuentas administradas
-            ProfileAccountModel profileAccountModel = ProfileAccountModel.fromDocumentSnapshot(documentSnapshot: value);
+            ProfileAccountModel profileAccountModel = ProfileAccountModel.fromDocumentSnapshot(documentSnapshot:value);
             // set
             addManagedAccountsList = profileAccountModel; 
           });
@@ -1146,7 +1185,7 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
   final HomeController homeController = Get.find();
 
   // values 
-  late double sizePremiumLogo = 16.0;
+  double sizePremiumLogo = 75.0;
   Widget icon = Container();
   String title = 'Premium';
   String description = ''; 
@@ -1156,87 +1195,41 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
     switch (id) {
       case 'premium':
         title = 'Premium';
-        description =
-            'Funcionalidades especiales para profesionalizar tu negocio';
-        icon = const Icon(Icons.star_rounded,
-            size: 75, color: Colors.amber);
-        sizePremiumLogo = 20;
+        description = 'Funcionalidades especiales para profesionalizar tu negocio';
+        icon =  Icon(Icons.star_rounded,size: sizePremiumLogo,color: Colors.amber); 
         break;
       case 'stock':
-        title = 'Control de Inventario';
-        description =
-            'Maneje el stock de sus productos, disfruta además de otras características especiales';
-        icon = const Padding(
-            padding: EdgeInsets.only(right: 5),
-            child: Icon(Icons.inventory_rounded));
-        sizePremiumLogo = 20;
+        title = ' Premium\nControl de Inventario';
+        description ='Maneje el stock de sus productos, disfruta además de otras características especiales';
+        icon = Padding(padding:const EdgeInsets.only(right: 5),child: Icon(Icons.inventory_rounded,size: sizePremiumLogo,color: Colors.amber)); 
         break;
       case 'analytic':
-        title = 'Informes y Estadísticas';
-        description =
-            'Obtenga datos sobre el rendimiento de sus transacciones y otras estadísticas importantes';
-        icon = const Padding(
-            padding: EdgeInsets.only(right: 5),
-            child: Icon(Icons.analytics_outlined));
-        sizePremiumLogo = 20;
+        title = 'Premium\nInformes y Estadísticas';
+        description ='Obtenga datos sobre el rendimiento de sus transacciones y otras estadísticas importantes';
+        icon = Padding(
+            padding: const EdgeInsets.only(right: 5),
+            child: Icon(Icons.analytics_outlined,size: sizePremiumLogo,color: Colors.amber)); 
         break;
       case 'multiuser':
-        title = 'Multiusuario';
-        description =
-            'Permita que más personas gestionen esta cuenta y con permisos personalizados. Además también tenes otras características';
-        icon = const Padding(
-            padding: EdgeInsets.only(right: 5),
-            child: Icon(Icons.people_outline));
-        sizePremiumLogo = 20;
+        title = 'Premium\nMultiusuario';
+        description = 'Permita que más personas gestionen esta cuenta y con permisos personalizados. Además también tenes otras características';
+        icon = Padding(
+            padding: const EdgeInsets.only(right: 5),
+            child: Icon(Icons.people_outline,size: sizePremiumLogo,color: Colors.amber));
         break;
       default:
         title = '';
         description =
             'Funcionalidades especiales para profesionalizar tu negocio';
-        icon = Container();
-        sizePremiumLogo = 20;
+        icon = Container(); 
         break;
     }
   }
-  // var : para el control de la suscripción
-  late LogInResult result;
-  Offerings? offerings; // ofertas de suscripción
-  bool isSubscribedPremium = false;
-  String clientRevenueCatID = ''; // id de la cuenta es la ID personalizada para RevenueCat
-  int cantidad = 0; // cantidad de productos
- 
-
-  // inicia la identificación de id de usario para revenuecat 
-  void initIdentityRevenueCat() async {
-    //  configure el SDK de RevvenueCat con una ID de usuario de la aplicación personalizada  
-    String clientID = homeController.getProfileAccountSelected.id; 
-    
-    // logIn : identificar al usuario con un ID personalizada
-    await Purchases.logOut();
-      result =await Purchases.logIn(clientID).then((value) async{
-        // get : obtenemos las ofertas de compra
-        await Purchases.getOfferings().then((value) {
-          setState(() { 
-            offerings = value;
-          });
-        }); 
-        return value;
-      }); 
-      // get : obtenemos los productos de compra
-      result.customerInfo.entitlements.all.forEach((key, value) { 
-        if(key == entitlementID){
-          setState(() {
-            isSubscribedPremium = value.isActive;
-          });
-        } 
-        print('########################################################### key: $key, value: $value');
-      }); 
-  }
+  
 
   @override
   void initState() {
-    super.initState();
-    initIdentityRevenueCat();
+    super.initState(); 
     // get  
     setData(id: widget.id);
     
@@ -1259,7 +1252,7 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
       child: Stack(  
         children: [
-          // view : vista con el contenido de la suscripción desplazable
+          // view : contenido de la suscripción desplazable
           ListView( 
             children: [
               Container( 
@@ -1323,87 +1316,62 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
                   title: Text('Informes y estadísticas'),
                   subtitle: Opacity(opacity: 0.5,child: Text('Obtenga informes y estadísticas de sus ventas')), 
                 ),
-              ),
-              const Divider(indent: 50),
-              // ListTile : caracteristicas de la suscripción 'Sin publicidad'
-              const Opacity(
-                opacity: 0.9,
-                child: ListTile(
-                  leading: Icon(Icons.remove_red_eye_outlined),
-                  title: Text('Sin publicidad'),
-                  subtitle: Opacity(opacity: 0.5,child: Text('Sin publicidad en la aplicación')), 
-                ),
               ), 
               const SizedBox(height:150),
             ],
           ),
-          // view : buton para subcribirse a Premium en la app
-          // condition : comprobar que 'offerings' esta inicializado
+          // view : buton para subcribirse a Premium en la app 
+          //
+          // Positioned : para posicionar el boton en la parte inferior de la pantalla
           Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              height: 100,
+            bottom: 0,left: 0,right: 0,
+            child: Container(   
               // color : gradient de un color y transparent 
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.transparent,
-                    Theme.of(context).scaffoldBackgroundColor,
-                  ], 
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-              ),
-              child: offerings==null?const TextButton(onPressed:null, child: Text('Subcribirce a Premium')): ListView.builder(
+              decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.transparent,Theme.of(context).scaffoldBackgroundColor], begin: Alignment.topCenter,end: Alignment.bottomCenter),),
+              // condition : comprobar que 'offerings' esta inicializado
+              child:  homeController.offerings==null?const TextButton(onPressed:null, child: Text('Subcribirce a Premium')): ListView.builder(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                itemCount: offerings?.current?.availablePackages.length,
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                itemCount: homeController.offerings?.current?.availablePackages.length,
+                shrinkWrap: true,
                 itemBuilder: (BuildContext context, int index) {
               
                   // get : obtenemos los productos disponibles
-                  List<Package> myProductList =  offerings!.current!.availablePackages;
-                  // retornar un Card con color gradient de tres colores
+                  List<Package> myProductList =  homeController.offerings!.current!.availablePackages;
+                  // card : con un color gradient de tres colores y bordes redondeados
                   return Card(  
                     elevation: 0,
-                    margin: const EdgeInsets.symmetric(horizontal: 30),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      side: BorderSide.none,
-                    ),
+                    margin: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8),side: BorderSide.none),
                     clipBehavior: Clip.antiAlias,
+                    // container : aplicamos un gradiente de tres colores
                     child: Container( 
-                      decoration:  BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.teal.shade700.withOpacity(0.5),
-                            Colors.green.shade600.withOpacity(0.5),
-                            Colors.green.shade400.withOpacity(0.5),],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                      ),
+                      decoration:  BoxDecoration(gradient: LinearGradient(colors: [Colors.teal.shade700.withOpacity(0.5),Colors.green.shade600.withOpacity(0.5),Colors.green.shade400.withOpacity(0.5),],begin: Alignment.topLeft,end: Alignment.bottomRight)),
+                      // listTile :  con información del producto y un boton para comprar
                       child: ListTile(
                         tileColor: Colors.green,
                         titleTextStyle: const TextStyle(color: Colors.white),
                         leadingAndTrailingTextStyle:  const TextStyle(color: Colors.white),
-                        onTap: () async {
+                        onTap: ()  {
                           try {
-                            // purchasePackage :  compra el paquete de la lista de productos disponibles
+                            
+                            setState(() async{
+                              // purchasePackage :  compra el paquete de la lista de productos disponibles
+                            await Purchases.purchasePackage(myProductList[index] );
+
                             CustomerInfo customerInfo = await Purchases.purchasePackage(myProductList[index] );
                             EntitlementInfo? entitlement = customerInfo.entitlements.all[entitlementID];
-                            bool activate = entitlement?.isActive ?? false;
+                            homeController.setIsSubscribedPremium = entitlement?.isActive ?? false;
+                            });
                           }catch (e) { 
                             // ... handle error
                           }
                         },
-                        title: Text(isSubscribedPremium?'Ya estás subcripto':myProductList[index].storeProduct.title,maxLines:1), 
-                        trailing:isSubscribedPremium?const Icon(Icons.thumb_up,color: Colors.white,): Text('${myProductList[index].storeProduct.currencyCode} ${myProductList[index].storeProduct.priceString}')),
+                        title: Text(homeController.getIsSubscribedPremium?'Ya estás subcripto':myProductList[index].storeProduct.title,maxLines:1), 
+                        trailing:homeController.getIsSubscribedPremium?const Icon(Icons.thumb_up,color: Colors.white,): Text('${myProductList[index].storeProduct.currencyCode} ${myProductList[index].storeProduct.priceString}')),
                     ),
                   ); 
-                },
-                shrinkWrap: true, 
+                }, 
               ),
             ),
           ),

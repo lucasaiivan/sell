@@ -397,7 +397,7 @@ class ProductEdit extends StatelessWidget {
                     space,
                     //
                     // view : control stock
-                    //
+                    // 
                     AnimatedContainer(
                       width:double.infinity, 
                       duration: const Duration(milliseconds: 500),
@@ -406,15 +406,15 @@ class ProductEdit extends StatelessWidget {
                       children: [
                         CheckboxListTile(
                           contentPadding: const EdgeInsets.symmetric(horizontal:12,vertical: 12),
-                          enabled: controller.getSaveIndicator ? false : true,
+                          enabled: controller.getHomeController.getIsSubscribedPremium?controller.getSaveIndicator ? false : true:false,
                           checkColor: Colors.white,
                           activeColor: Colors.blue,
                           value: controller.getStock,
-                          title: Text(controller.getStock?'Quitar control de stock':'Agregar control de stock'),
+                          title: Text(controller.getHomeController.getIsSubscribedPremium?controller.getStock?'Quitar control de stock':'Agregar control de stock':'Control de stock'),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              LogoPremium(personalize: true),
+                              controller.getHomeController.getIsSubscribedPremium?Container():LogoPremium(personalize: true,id: 'stock'),
                               controller.getStock?Container():const Text('Controlar el inventario de sus productos'),
                             ],
                           ),

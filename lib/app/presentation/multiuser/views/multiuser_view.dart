@@ -51,14 +51,24 @@ class LoadingInitView extends StatelessWidget {
     return AppBar(
       title: const Text('Multiusuario'),
       actions: [
-        IconButton(onPressed: homeController.getUserAnonymous?null:controller.addItem, 
-        icon:  Opacity(
-          opacity: homeController.getUserAnonymous?0.1:1,
-          child: Material(
-              color: homeController.getDarkMode?Colors.white:Colors.black,
-              borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-              child: Icon(Icons.add,color:  homeController.getDarkMode?Colors.black:Colors.white,)),
-        ))
+        // Opcion Premium // 
+        // icon : agregar nuevo usuario administrador para la cuenta
+        IconButton(
+          onPressed: (){
+            // condition :  si la cuenta tiene un subcripcion premium
+            if(homeController.getIsSubscribedPremium){
+              homeController.getUserAnonymous?null:controller.addItem();
+            }else{
+              homeController.showModalBottomSheetSubcription(id: 'multiuser');
+            }
+          },  
+          icon:  Opacity(
+            opacity: homeController.getUserAnonymous?0.1:1,
+            child: Material(
+                color: homeController.getIsSubscribedPremium?homeController.getDarkMode?Colors.white:Colors.black:Colors.amber,
+                borderRadius: const BorderRadius.all(Radius.circular(5.0)),
+                child: Icon(Icons.add,color:  homeController.getDarkMode?Colors.black:Colors.white,)),
+          )),
       ],
     );
   }
