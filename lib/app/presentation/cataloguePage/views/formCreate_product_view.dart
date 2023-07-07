@@ -506,8 +506,9 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
       child: Column(
       children: [
         CheckboxListTile(
-          contentPadding: EdgeInsets.symmetric(horizontal: controller.getProduct.stock?12:0,vertical: 12),
-          enabled: controller.getSaveIndicator ? false : true,
+          // option premium : solo los usuarios premium pueden crear productos
+          enabled: controller.getHomeController.getIsSubscribedPremium ? true : false,
+          contentPadding: EdgeInsets.symmetric(horizontal: controller.getProduct.stock?12:0,vertical: 12), 
           checkColor: Colors.white,
           activeColor: Colors.blue,
           value: controller.getStock,
@@ -519,7 +520,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
             }
           },
         ),
-        LogoPremium(personalize: true),
+        LogoPremium(personalize: true,id: 'stock'),
         controller.getStock  ? space : Container(), 
         AnimatedContainer(
           width: controller.getStock?null:0,
@@ -588,7 +589,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
           decoration: BoxDecoration(
             border: Border.all(width: 1.0, color: Colors.grey),
           ),
-          child: CheckboxListTile(
+          child: CheckboxListTile( 
             contentPadding: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
             controlAffinity: ListTileControlAffinity.leading,
             title: const Text('Entiendo que no seré el propietario de los datos públicos asociados con el producto, ni podré editarlos después de la verificación. Además, los precios de venta serán públicos',style: TextStyle(fontWeight: FontWeight.w300)),

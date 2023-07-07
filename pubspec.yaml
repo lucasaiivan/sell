@@ -80,7 +80,7 @@ dependencies:
   flutter_barcode_scanner: ^2.0.0 # Un complemento para las aplicaciones Flutter que agrega compatibilidad con el escaneo de códigos de barras tanto en Android como en iOS.
   audioplayers: ^3.0.1
   flutter_masked_text2: ^0.9.1 
-  shimmer: ^2.0.0
+  shimmer: ^3.0.0 # Un paquete de Flutter que proporciona un widget de efecto de brillo.
   uuid: ^3.0.6  # Un paquete de Flutter que genera identificadores únicos universales (UUID).
   flutter_offline: ^2.1.0 # Un paquete de Flutter que le permite crear una interfaz de usuario que se adapte a la conexión de Internet del dispositivo.
   file_picker: ^5.2.5 # Un complemento de Flutter para seleccionar archivos desde el almacenamiento local del dispositivo.

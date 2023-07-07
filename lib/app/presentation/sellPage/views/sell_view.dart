@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:sell/app/core/utils/widgets_utils.dart';
 import 'package:sell/app/domain/entities/ticket_model.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../core/utils/dynamicTheme_lb.dart';
@@ -27,37 +28,38 @@ class SalesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // set
-    buildContext = context;
+    buildContext = context; 
 
     return GetBuilder<SalesController>(
       init: SalesController(),
       // initState : se activa cuando se crea el widget
-      initState: (_) {},
+      initState: (_) {
+        // init : inicializamos el controlador
+        Get.put(SalesController());
+      },
       builder: (controller) {
-        return Expanded(
-          child: Obx(() {
-              return Scaffold(
-                // view : barra de navegacion supeior de la app
-                appBar: appbar(controller: controller),
-                // view : barra de navegacion de la app
-                drawer: drawerApp(),
-                // view : cuerpo de la app
-                body: LayoutBuilder(builder: (context, constraints) {
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Expanded(child: body(controller: controller)),
-                      drawerTicket(controller: controller),
-                    ],
-                  );
-                }),
-                // view : barra de navegacion inferior de la app
-                floatingActionButton: controller.getTicketView
-                    ? floatingActionButtonTicket(controller: controller)
-                    : floatingActionButton(controller: controller).animate( delay: Duration( milliseconds: homeController.salesUserGuideVisibility ? 500: 0)).fade(),
-              );
-            }
-          ),
+        return Obx(() {
+            return Scaffold(
+              // view : barra de navegacion supeior de la app
+              appBar: appbar(controller: controller),
+              // view : barra de navegacion de la app
+              drawer: drawerApp(),
+              // view : cuerpo de la app
+              body: LayoutBuilder(builder: (context, constraints) {
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Expanded(child: body(controller: controller)),
+                    drawerTicket(controller: controller),
+                  ],
+                );
+              }),
+              // view : barra de navegacion inferior de la app
+              floatingActionButton: controller.getTicketView
+                  ? floatingActionButtonTicket(controller: controller)
+                  : floatingActionButton(controller: controller).animate( delay: Duration( milliseconds: homeController.salesUserGuideVisibility ? 500: 0)).fade(),
+            );
+          }
         );
       },
     );
@@ -172,7 +174,7 @@ class SalesView extends StatelessWidget {
     Widget dividerLinesWidget = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
       child: CustomDivider(
-        height: 0.3,
+        height: 0.2,
         dashWidth: 10.0,
         dashGap: 5.0,
         color: Get.theme.brightness == Brightness.dark
@@ -289,8 +291,7 @@ class SalesView extends StatelessWidget {
                           ),
                         ),
                         // text : paga con
-                        controller.getValueReceivedTicket == 0 ||
-                                controller.getTicket.payMode != 'effective'
+                        controller.getValueReceivedTicket == 0 || controller.getTicket.payMode != 'effective'
                             ? Container()
                             : Padding(
                                 padding: padding,
@@ -303,23 +304,18 @@ class SalesView extends StatelessWidget {
                                           style: textDescrpitionStyle,
                                         )),
                                     const Spacer(),
-                                    Text(controller.getValueReceived(),
-                                        style: textValuesStyle),
+                                    Text(controller.getValueReceived(),style: textValuesStyle),
                                   ],
                                 ),
                               ),
                         // text : vuelto
-                        controller.getValueReceivedTicket == 0 ||
-                                controller.getTicket.payMode != 'effective'
+                        controller.getValueReceivedTicket == 0 || controller.getTicket.payMode != 'effective'
                             ? Container()
                             : Padding(
                                 padding: padding,
                                 child: Row(
                                   children: [
-                                    Opacity(
-                                        opacity: 0.7,
-                                        child: Text('Vuelto:',
-                                            style: textDescrpitionStyle)),
+                                    Opacity(opacity: 0.7,child: Text('Vuelto:',style: textDescrpitionStyle)),
                                     const Spacer(),
                                     Material(
                                       elevation: 0,
@@ -330,9 +326,7 @@ class SalesView extends StatelessWidget {
                                             horizontal: 5, vertical: 1),
                                         child: Row(
                                           children: [
-                                            Text('Dar vuelto ',
-                                                style: textValuesStyle.copyWith(
-                                                    color: Colors.white)),
+                                            Text('Dar vuelto ', style: textValuesStyle.copyWith(color: Colors.white)),
                                             Text(
                                               controller.getValueChange(),
                                               style: textValuesStyle.copyWith(
@@ -355,8 +349,7 @@ class SalesView extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              Text('El cliente paga con:',
-                                  style: textDescrpitionStyle),
+                              Text('El cliente paga con:',style: textDescrpitionStyle),
                               const SizedBox(height: 12),
                               Container(
                                 key: homeController.buttonsPaymenyMode,
@@ -366,56 +359,26 @@ class SalesView extends StatelessWidget {
                                     //  button : pago con efectivo
                                     Padding(
                                       padding: const EdgeInsets.all(2.0),
-                                      child: ElevatedButton.icon(
-                                        style: ButtonStyle(
-                                            elevation:
-                                                MaterialStateProperty.all(
-                                                    controller.getTicket
-                                                                .payMode ==
-                                                            'effective'
-                                                        ? 5
-                                                        : 0)),
-                                        icon: controller.getTicket.payMode !=
-                                                'effective'
-                                            ? Container()
-                                            : const Icon(Icons.money_rounded),
+                                      child: ElevatedButton.icon( 
+                                        style: ButtonStyle(elevation: MaterialStateProperty.all(controller.getTicket.payMode =='effective'? 5: 0)),
+                                        icon: controller.getTicket.payMode != 'effective'? Container(): const Icon(Icons.money_rounded),
                                         onPressed: () {
-                                          controller.setPayModeTicket =
-                                              'effective'; // se
+                                          controller.setPayModeTicket = 'effective'; 
                                           controller.dialogSelectedIncomeCash();
                                         },
-                                        label: Text(
-                                            controller.getValueReceivedTicket !=
-                                                    0.0
-                                                ? Publications.getFormatoPrecio(
-                                                    monto: controller
-                                                        .getValueReceivedTicket)
-                                                : 'Efectivo'),
+                                        label: Text(controller.getValueReceivedTicket != 0.0 ? Publications.getFormatoPrecio(monto: controller.getValueReceivedTicket): 'Efectivo'),
                                       ),
                                     ),
                                     // button : pago con mercado pago
                                     Padding(
                                       padding: const EdgeInsets.all(2.0),
                                       child: ElevatedButton.icon(
-                                        style: ButtonStyle(
-                                            elevation:
-                                                MaterialStateProperty.all(
-                                                    controller.getTicket
-                                                                .payMode ==
-                                                            'mercadopago'
-                                                        ? 5
-                                                        : 0)),
-                                        icon: controller.getTicket.payMode !=
-                                                'mercadopago'
-                                            ? Container()
-                                            : const Icon(
-                                                Icons.check_circle_rounded),
+                                        style: ButtonStyle(elevation:MaterialStateProperty.all(controller.getTicket.payMode =='mercadopago'? 5: 0)),
+                                        icon: controller.getTicket.payMode != 'mercadopago'?Container(): const Icon(Icons.check_circle_rounded),
                                         onPressed: () {
-                                          controller.setPayModeTicket =
-                                              'mercadopago';
+                                          controller.setPayModeTicket = 'mercadopago';
                                           // default value
-                                          controller.setValueReceivedTicket =
-                                              0.0;
+                                          controller.setValueReceivedTicket = 0.0;
                                         },
                                         label: const Text('Mercado Pago'),
                                       ),
@@ -427,21 +390,14 @@ class SalesView extends StatelessWidget {
                               Padding(
                                 padding: const EdgeInsets.all(2.0),
                                 child: ElevatedButton.icon(
-                                  style: ButtonStyle(
-                                      elevation: MaterialStateProperty.all(
-                                          controller.getTicket.payMode == 'card'
-                                              ? 5
-                                              : 0)),
-                                  icon: controller.getTicket.payMode != 'card'
-                                      ? Container()
-                                      : const Icon(Icons.credit_card_outlined),
+                                  style: ButtonStyle(elevation: MaterialStateProperty.all(controller.getTicket.payMode == 'card'?5:0)),
+                                  icon: controller.getTicket.payMode != 'card'? Container(): const Icon(Icons.credit_card_outlined),
                                   onPressed: () {
                                     controller.setPayModeTicket = 'card';
                                     // default values
                                     controller.setValueReceivedTicket = 0.0;
                                   },
-                                  label:
-                                      const Text('Tarjeta de Debito/Credito'),
+                                  label: const Text('Tarjeta de Debito/Credito'),
                                 ),
                               ),
                               const SizedBox(height: 12),
@@ -459,34 +415,76 @@ class SalesView extends StatelessWidget {
 
   // WIDGETS COMPONENTS
   Widget cashRegisterNumberPopupMenuButton() {
+    // opcion premium : esta funcionalidad de arqueo de caja solo esta disponible en la version premium
+    bool isPremium = homeController.getIsSubscribedPremium;
     // controllers
-    final controller = Get.find<SalesController>();
-
-    if (homeController.cashRegister.id == '') {
-      return PopupMenuButton(
-          icon: Material(
-            color: homeController.getDarkMode ? Colors.white : Colors.black,
-            borderRadius: const BorderRadius.all(Radius.circular(8.0)),
+    final controller = Get.find<SalesController>(); 
+    // condition : si no es premium se muestra el boton de suscribirse a premium 
+    if(homeController.getIsSubscribedPremium==false){ 
+      // condition : si el usuario de la cuenta no es administrador no se muestra el boton de suscribirse a premium
+      if(homeController.getProfileAdminUser.admin == false){
+        return Container();
+      }
+      // button : suscribirse a premium
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+        child: Material(
+          clipBehavior: Clip.antiAlias,
+          color: isPremium?homeController.getDarkMode ? Colors.white : Colors.black:Colors.amber[600],
+          borderRadius: const BorderRadius.all(Radius.circular(8.0)),
+          child: InkWell(
+            onTap: () => homeController.showModalBottomSheetSubcription(id: 'arching'),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
               child: Row(
-                children: [
-                  Text('Iniciar caja', style: TextStyle( color: homeController.getDarkMode ? Colors.black : Colors.white)),
+                children: [ 
+                  Text('Iniciar caja', style: TextStyle( color: isPremium?homeController.getDarkMode ? Colors.black : Colors.white:Colors.white)),
                   const SizedBox(width: 5),
-                  Icon(Icons.keyboard_arrow_down_rounded, color: homeController.getDarkMode ? Colors.black : Colors.white),
+                  Icon(Icons.keyboard_arrow_down_rounded, color: isPremium?homeController.getDarkMode ? Colors.black : Colors.white:Colors.white),
                 ],
               ),
             ),
           ),
-          onSelected: (selectedValue) {
-            if (selectedValue == 'apertura') {
-              // Get : view dialog
-              Get.dialog(CashRegister(id: 'apertura'));
-            } else {
-              controller.upgradeCashRegister(id: selectedValue);
+        ),
+      );
+    }
+    // condition : si no hay caja abierta
+    if (homeController.cashRegister.id == '') {
+      // no hay caja abierta
+      // view : button : iniciar caja
+      return PopupMenuButton(
+          icon: Material(
+            color: isPremium?homeController.getDarkMode ? Colors.white : Colors.black:Colors.amber[600],
+            borderRadius: const BorderRadius.all(Radius.circular(8.0)),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+              child: Row(
+                children: [ 
+                  Text('Iniciar caja', style: TextStyle( color: isPremium?homeController.getDarkMode ? Colors.black : Colors.white:Colors.white)),
+                  const SizedBox(width: 5),
+                  Icon(Icons.keyboard_arrow_down_rounded, color: isPremium?homeController.getDarkMode ? Colors.black : Colors.white:Colors.white),
+                ],
+              ),
+            ),
+          ), 
+          onSelected: (selectedValue) { 
+            // opcion premium : esta funcionalidad de arqueo de caja solo esta disponible en la version premium
+            if(homeController.getIsSubscribedPremium==true){ 
+              // es premium
+              if (selectedValue == 'apertura') {
+                // Get : abrir dialogo de apertura de caja 
+                Get.dialog(CashRegister(id: 'apertura'));
+              } else {
+                // Get : abrir dialogo de apertura de caja
+                controller.upgradeCashRegister(id: selectedValue);
+              }
+            }else{
+              // no es premium 
+              //...
             }
           },
           itemBuilder: (BuildContext ctx) {
+            
             // var : list of items
             List<PopupMenuItem> items = [];
             items.add(const PopupMenuItem(
@@ -515,7 +513,7 @@ class SalesView extends StatelessWidget {
           });
     }
 
-    return PopupMenuButton(
+    return PopupMenuButton( 
         icon: Material(
           color: homeController.getDarkMode ? Colors.white : Colors.black,
           borderRadius: const BorderRadius.all(Radius.circular(8.0)),
@@ -524,10 +522,7 @@ class SalesView extends StatelessWidget {
             child: Row(
               children: [
                 Text('Caja ${homeController.cashRegister.description}',
-                    style: TextStyle(
-                        color: homeController.getDarkMode
-                            ? Colors.black
-                            : Colors.white)),
+                    style: TextStyle(color: homeController.getDarkMode? Colors.black: Colors.white)),
                 const SizedBox(width: 5),
                 Icon(Icons.keyboard_arrow_down_rounded,
                     color: homeController.getDarkMode
@@ -664,6 +659,23 @@ class SalesView extends StatelessWidget {
     const double height = 120;
     final bool viewDefault = controller.getProductsOutstandingList.isEmpty;
     final int itemCount = viewDefault?6:controller.getProductsOutstandingList.length + numItemDefault;
+    // views : load widget mientras se carga la data
+    if(homeController.productsBestSellersLoadComplete.value == false ){
+      return SizedBox(
+        height: 130,
+        width: double.infinity,
+        child: Shimmer.fromColors(
+          baseColor: Colors.grey,
+          highlightColor: Get.theme.scaffoldBackgroundColor,
+              child: ListView.builder(
+                padding: const EdgeInsets.only(left: 10),
+                scrollDirection: Axis.horizontal,
+                itemCount: 15,
+                itemBuilder: (context, index) => circleAvatarSeachAndDefault(context: context),
+              ),
+            ),
+      );
+    }
 
     return Stack(
       children: [
@@ -675,7 +687,7 @@ class SalesView extends StatelessWidget {
             itemCount: itemCount,
             itemBuilder: (context, index) {
               // values
-              Widget widget =index <= (controller.getProductsOutstandingList.length - 1) && index < itemCount - numItemDefault
+              Widget widget = index <= (controller.getProductsOutstandingList.length - 1) && index < itemCount - numItemDefault
                 ? circleAvatarProduct(productCatalogue:controller.getProductsOutstandingList[index])
                 : circleAvatarProduct(productCatalogue: ProductCatalogue(creation: Timestamp.now(),upgrade: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now()));
               // condition : views default
@@ -731,7 +743,7 @@ class SalesView extends StatelessWidget {
 
     // values
     double radius = 40.0;
-    double spaceImageText = 1;
+    double spaceImageText = 1; 
 
     return seach
         ? ElasticIn(
@@ -790,7 +802,7 @@ class SalesView extends StatelessWidget {
                     backgroundColor: Colors.grey.withOpacity(0.1),
                   ),
                 ),
-                const Text(''),
+                Container(margin: const EdgeInsets.only(top:5),width: radius, height: 10.0,color: Colors.grey.withOpacity(0.1),),
               ],
             ),
           );

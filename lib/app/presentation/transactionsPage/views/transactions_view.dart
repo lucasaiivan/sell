@@ -1,4 +1,6 @@
 
+import 'dart:ui';
+
 import 'package:cloud_firestore/cloud_firestore.dart'; 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart'; 
@@ -469,6 +471,7 @@ class _StaticsCardsState extends State<StaticsCards> {
     List<Widget> cards =   [ 
       // card : facturación
       CardAnalityc(
+        isPremium:true, // siempre es visible su contenido
         backgroundColor: Colors.blueGrey.shade200.withOpacity(0.7),
         icon:  const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.attach_money_rounded,color: Colors.white,size:14)))),
         titleText: 'Facturación', 
@@ -477,6 +480,7 @@ class _StaticsCardsState extends State<StaticsCards> {
         ), 
       // card : ganancia 
       CardAnalityc( 
+        isPremium: homeController.getIsSubscribedPremium,
         backgroundColor: Colors.green.shade200.withOpacity(0.7),
         icon:  const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.show_chart_rounded,color: Colors.white,size:14)))),
         subtitle: '%${transactionsController.getPorcentEarningsTotal()}',
@@ -486,6 +490,7 @@ class _StaticsCardsState extends State<StaticsCards> {
         ),    
       // card : transacciones
       CardAnalityc( 
+        isPremium: true, // siempre es visible su contenido
         backgroundColor: Colors.teal.shade200.withOpacity(0.7),
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.receipt,color: Colors.white,size:14)))),
         titleText: 'Transacciones',
@@ -495,6 +500,7 @@ class _StaticsCardsState extends State<StaticsCards> {
         ), 
       // card : productos vendidos
       CardAnalityc( 
+        isPremium: homeController.getIsSubscribedPremium,
         backgroundColor: Colors.blue.shade200.withOpacity(0.7),
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.category_rounded,color: Colors.white,size:14)))),
         titleText: 'Productos vendidos',
@@ -503,6 +509,7 @@ class _StaticsCardsState extends State<StaticsCards> {
         ), 
       // card : clientes
       CardAnalityc( 
+        isPremium: homeController.getIsSubscribedPremium,
         backgroundColor: Colors.orangeAccent.shade100.withOpacity(0.7),
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.payment_rounded,color: Colors.white,size:14)))),
         subtitle: Publications.getFormatoPrecio(monto: transactionsController.getPreferredPaymentMethod()['amount']),
@@ -512,6 +519,7 @@ class _StaticsCardsState extends State<StaticsCards> {
         ),
       // card : rentabilidad
       CardAnalityc( 
+        isPremium: homeController.getIsSubscribedPremium,
         backgroundColor: Colors.cyan.shade200.withOpacity(0.7),
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.query_stats_rounded,color: Colors.white,size:14)))),
         titleText: 'Rentabilidad',
@@ -556,9 +564,10 @@ class CardAnalityc extends StatelessWidget {
   late final String valueText; 
   late final String subtitle;
   late final Widget icon;
+  late final bool isPremium;
 
   // ignore: prefer_const_constructors_in_immutables
-  CardAnalityc({Key? key,this.backgroundColor=Colors.grey,this.titleText='',this.description='',this.valueText='',this.subtitle='' ,required this.icon }) : super(key: key);
+  CardAnalityc({Key? key,this.backgroundColor=Colors.grey,this.isPremium=false,this.titleText='',this.description='',this.valueText='',this.subtitle='' ,required this.icon }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -600,24 +609,40 @@ class CardAnalityc extends StatelessWidget {
     TextStyle valueTextStyle = TextStyle(fontSize: description=='' && subtitle==''? 26: 20, fontWeight: FontWeight.w500,overflow: TextOverflow.ellipsis);
     TextStyle descriptionStyle = const TextStyle(fontSize: 12);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [ 
-        Row(
+    return Stack(
+      children: [
+        // view : contenedor de informacion estadisticos 
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [  
+            const Spacer(),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                subtitle==''?Container(): Opacity(opacity: 0.7, child: Text(subtitle,style: subtitleStyle)),
+                Text(valueText,maxLines:2, textAlign: TextAlign.start, style: valueTextStyle),
+                description==''?Container():Opacity(opacity: 0.7, child: Text(description, style: descriptionStyle)),
+              ],
+            ),
+          ],
+        ),
+        isPremium?Container():
+        BackdropFilter(
+          filter: ImageFilter.blur(sigmaX:5, sigmaY:5),
+          // view :  texto y icon version premium  
+          child: Center(child: LogoPremium(personalize: true,id: 'analytic')),
+          ),
+        // position : posicionar en la parte superior  al inicio  de lado izquierdo
+        Positioned(
+          top: 0,
+          left: 0,
+          child: Row( 
           children: [
             icon,
             Text(titleText,style: const TextStyle(fontWeight: FontWeight.w400),overflow:  TextOverflow.ellipsis,),
           ],
         ),
-        const Spacer(),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            subtitle==''?Container(): Opacity(opacity: 0.7, child: Text(subtitle,style: subtitleStyle)),
-            Text(valueText,maxLines:2, textAlign: TextAlign.start, style: valueTextStyle),
-            description==''?Container():Opacity(opacity: 0.7, child: Text(description, style: descriptionStyle)),
-          ],
-        ),
+        ), 
       ],
     );
   }

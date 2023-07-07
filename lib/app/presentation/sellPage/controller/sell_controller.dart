@@ -253,6 +253,7 @@ class SalesController extends GetxController {
     textEditingControllerAddFlashDescription.dispose();
     textEditingControllerAddFlashPrice.dispose();
     textEditingControllerTicketMount.dispose();
+    super.dispose();
   }
 
 

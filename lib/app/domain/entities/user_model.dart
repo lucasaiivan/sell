@@ -36,7 +36,7 @@ class UserModel {
 
     //  set
     superAdmin = data['superAdmin'] ?? false;
-    admin = data['admin'] ?? false;
+    admin =superAdmin?true:data['admin'] ?? false;
     email = data["email"] ?? '';
   }
 }
