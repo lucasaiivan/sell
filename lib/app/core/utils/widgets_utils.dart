@@ -497,16 +497,16 @@ class WidgetDrawer extends StatelessWidget {
           leading: Container(
             padding: const EdgeInsets.all(0.0),
             child: homeController.getProfileAccountSelected.image == ''
-                ? CircleAvatar(backgroundColor: Get.theme.dividerColor,child: Center(child: Text(homeController.getProfileAccountSelected.name.substring( 0,1))),)
+                ? CircleAvatar(backgroundColor: Get.theme.dividerColor,child: Center(child: Text(homeController.getProfileAccountSelected.name.substring( 0,1),style: const TextStyle(color: Colors.white))),)
                 : CachedNetworkImage(
                     imageUrl:homeController.getProfileAccountSelected.image,
-                    placeholder: (context, url) => CircleAvatar(backgroundColor: Get.theme.dividerColor,child: Center(child: Text(homeController.getProfileAccountSelected.name.substring( 0,1))),),
+                    placeholder: (context, url) => CircleAvatar(backgroundColor: Get.theme.dividerColor,child: Center(child: Text(homeController.getProfileAccountSelected.name.substring( 0,1),style: const TextStyle(color: Colors.white),)),),
                     imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: CircleAvatar(backgroundImage: image)),
                     errorWidget: (context, url, error) {
                       // return : un circleView con la inicial de nombre como icon 
                       return CircleAvatar(
                         backgroundColor: Get.theme.dividerColor,
-                        child: Center(child: Text(homeController.getProfileAccountSelected.name.substring( 0,1))),
+                        child: Center(child: Text(homeController.getProfileAccountSelected.name.substring( 0,1),style: const TextStyle(color: Colors.white))),
                         );
                     },
                   ),
@@ -519,11 +519,13 @@ class WidgetDrawer extends StatelessWidget {
           },
         ), 
         const SizedBox(height: 20),
-        // others items
+        // funciones premium 
+        // condition : si el usuario de la cuenta no es administrador no se muestra el boton de suscribirse a premium
+        homeController.getProfileAdminUser.admin==false?Container():
         ListTile(
           tileColor: homeController.getIsSubscribedPremium?null:Colors.amber.withOpacity(0.1),
           iconColor:  Colors.amber, 
-          titleTextStyle: const TextStyle(color: Colors.amber,fontWeight: FontWeight.bold),
+          //titleTextStyle: const TextStyle(fontWeight: FontWeight.bold),
             leading: const Icon(Icons.star_rounded),
             title: Text(homeController.getIsSubscribedPremium?'Premium':'Funciones Premium'),
             onTap: (){
@@ -569,23 +571,6 @@ class WidgetDrawer extends StatelessWidget {
           leading: const Icon(Icons.messenger_outline_sharp,color: Colors.green),
           title: const Text('Escribenos tu opinión 😃'),
           subtitle: const Text('Tu opinión o sugerencia es importante'),
-          onTap: () async{
-            
-            // abre la app de mensajeria
-            String whatsAppUrl = "";
-            String phoneNumber = '541134862939';
-            String description = "hola, estoy probando la App SELL - Gestiona Tus Ventas y me gustaría compartirte mi opinión";
-            whatsAppUrl ='https://wa.me/+$phoneNumber?text=$description';
-            Uri uri = Uri.parse( whatsAppUrl);
-            await launchUrl(uri,mode: LaunchMode.externalNonBrowserApplication);
-
-          },
-        ),
-        // option : comprobar actualizacion
-        ListTile(
-          leading: const Icon(Icons.cloud_download_outlined),
-          title: const Text('Comprobar actualización'),
-          subtitle: const Text('Play Store'),
           onTap: () async {
             
             // values
@@ -820,7 +805,7 @@ class LogoPremium extends StatelessWidget {
   late final bool personalize;
   late String id;
 
-  LogoPremium({Key? key,this.personalize=false,this.accentColor=Colors.amber,this.size=12,this.visible=false,this.id='premium'}) : super(key: key);
+  LogoPremium({Key? key,this.personalize=false,this.accentColor=Colors.amber,this.size=14,this.visible=false,this.id='premium'}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -835,23 +820,29 @@ class LogoPremium extends StatelessWidget {
     }
 
 
-    return InkWell(
-  onTap: () => homeController.showModalBottomSheetSubcription(id:id ),
-  child: Padding(
-    padding: const EdgeInsets.all(8.0),
-    child: Opacity(
-      opacity: 0.7,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(2),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 2),
-          decoration: BoxDecoration(border: Border.all(color: accentColor)),
-          child: Text('Funciones Premium',style: TextStyle(fontSize: size,color:accentColor),textAlign: TextAlign.center,overflow: TextOverflow.clip,)
-        ),
+    return Padding(
+      padding: const EdgeInsets.all(2.0),
+      child: Material( 
+        clipBehavior: Clip.antiAlias,
+        color: Theme.of(context).brightness==Brightness.dark?Colors.black26:Colors.amber.shade50,
+        borderRadius: const BorderRadius.all(Radius.circular(6.0)),
+        child: InkWell(
+          onTap: () => homeController.showModalBottomSheetSubcription(id:id ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0,vertical: 3.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // icon : corona
+                Icon(Icons.star_rounded,color:accentColor,size: size),
+                // text 
+                Text(' Premium',style: TextStyle(fontSize: size,color:accentColor,fontWeight: FontWeight.w900),textAlign: TextAlign.center,overflow: TextOverflow.clip),
+              ],
+            ),
+          ),
+        )
       ),
-    ),
-  ),
-);
+    );
 
   }
 }

@@ -1,7 +1,6 @@
 
 import 'package:get/get.dart';
-import 'package:sell/app/presentation/auth/bindings/login_binding.dart';
-import 'package:sell/app/presentation/historyCashRegisterPage/views/historyCashRegister_view.dart';
+import 'package:sell/app/presentation/auth/bindings/login_binding.dart'; 
 import 'package:sell/app/presentation/home/bindings/home_binding.dart';
 import 'package:sell/app/presentation/home/views/home_view.dart';
 import 'package:sell/app/presentation/splash/bindings/splash_binding.dart';

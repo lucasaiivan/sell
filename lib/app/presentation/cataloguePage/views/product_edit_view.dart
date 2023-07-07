@@ -524,18 +524,13 @@ class ProductEdit extends StatelessWidget {
 
           // button : elminar el documento
           controller.getSaveIndicator? Container(): 
-            controller.itsInTheCatalogue? Container(
+          controller.itsInTheCatalogue? Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.only(bottom: 12, top: 20, left: 0, right: 0),
-                      child: button(padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),colorAccent: Colors.white,colorButton: Colors.red.shade300,icon: const Icon(Icons.delete,color: Colors.white),text: 'Eliminar de mi catálogo', onPressed: controller.showDialogDelete),
+                      padding: const EdgeInsets.only(bottom: 12, top: 30, left: 0, right: 0),
+                      child: button(padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),colorAccent: Colors.white,colorButton: Colors.red.shade300,icon:   Container(),text: 'Eliminar de mi catálogo', onPressed: controller.showDialogDelete),
                     )
                   : Container(), 
-            const SizedBox(height: 20.0),
-            const SizedBox(height: 20.0),
-          Center(child: widgetForModerator),
-          //widgetForModerator,
             const SizedBox(height: 20.0), 
-          Center(child: widgetForModerator),
           //widgetForModerator,
           ]             ,
       ),

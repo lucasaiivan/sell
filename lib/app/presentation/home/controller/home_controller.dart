@@ -1,4 +1,5 @@
-import 'dart:io'; 
+import 'dart:io';
+import 'dart:ui'; 
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -62,10 +63,11 @@ class HomeController extends GetxController {
   late BuildContext _buildContext;
   set setBuildContext(BuildContext context) => _buildContext = context;
   BuildContext get getBuildContext => _buildContext;
+
   // var : para el control de la suscripción
-  String clientRevenueCatID = ''; // id de la cuenta es la ID personalizada para RevenueCat
-  late LogInResult result; // LogInResult : resultado de la identificación de usuario
+  String clientRevenueCatID = ''; // id de la cuenta es la ID personalizada para RevenueCat 
   Offerings? offerings; // ofertas de suscripción 
+  // var : variable para el control de la suscripción premium
   RxBool isSubscribedPremium = false.obs;
   set setIsSubscribedPremium(bool value) => isSubscribedPremium.value = value;
   bool get getIsSubscribedPremium => isSubscribedPremium.value;
@@ -74,16 +76,17 @@ class HomeController extends GetxController {
   // inicia la identificación de id de usario para revenuecat 
   void initIdentityRevenueCat() async {
     //  configure el SDK de RevvenueCat con una ID de usuario de la aplicación personalizada  
-    String clientID = getProfileAccountSelected.id;  
-    if(clientID == ''){
+    clientRevenueCatID= getProfileAccountSelected.id;  
+    if(clientRevenueCatID == ''){
       // si no hay una cuenta seleccionada
       return;
     }
     
     // logIn : identificar al usuario con un ID personalizada
     // condition : comprobar si en revenuecat se inicio sesion  
-    //await Purchases.logOut();
-    result =await Purchases.logIn(clientID).then((value) async{
+    //await Purchases.logOut(); 
+    // loginResult : resultado de la identificación de usuario
+    LogInResult result =await Purchases.logIn(clientRevenueCatID).then((value) async{
       // get : obtenemos las ofertas de compra
       await Purchases.getOfferings().then((value) {
         offerings = value;
@@ -92,10 +95,8 @@ class HomeController extends GetxController {
     }); 
     // get : obtenemos los productos de compra
     result.customerInfo.entitlements.all.forEach((key, value) { 
-      if(key == entitlementID){
-        setIsSubscribedPremium = value.isActive;
-      } 
-      print('########################################################### key: $key, value: $value');
+      if(key == entitlementID){ setIsSubscribedPremium = value.isActive; } 
+      //print('########################################################### key: $key, value: $value');
     }); 
   }
 
@@ -108,16 +109,14 @@ class HomeController extends GetxController {
   bool salesUserGuideVisibility = false;
   void getSalesUserGuideVisibility() {
     // obtenemos la visibilidad de la guía del usuario de ventas
-    salesUserGuideVisibility =
-        GetStorage().read('salesUserGuideVisibility') ?? true;
+    salesUserGuideVisibility = GetStorage().read('salesUserGuideVisibility') ?? true;
     update();
   }
 
   void disableSalesUserGuide() async {
     // Deshabilitar la guía del usuario de ventas
     salesUserGuideVisibility = false;
-    await GetStorage()
-        .write('salesUserGuideVisibility', salesUserGuideVisibility);
+    await GetStorage().write('salesUserGuideVisibility', salesUserGuideVisibility);
   }
 
   // Guide user : Catalogue
@@ -213,9 +212,11 @@ class HomeController extends GetxController {
   List listProductsSelected = [];
 
   // list products más vendidos
+  RxBool productsBestSellersLoadComplete = false.obs; // loading state
   final RxList<ProductCatalogue> _productsOutstandingList = <ProductCatalogue>[].obs;
   List<ProductCatalogue> get getProductsOutstandingList => _productsOutstandingList;
   set setProductsOutstandingList(List<ProductCatalogue> list) {
+    productsBestSellersLoadComplete.value = true;
     _productsOutstandingList.value = list;
   }
 
@@ -231,14 +232,15 @@ class HomeController extends GetxController {
   //  profile Admin User
   UserModel _adminUser = UserModel();
   UserModel get getProfileAdminUser => _adminUser;
-  set setProfileAdminUser(UserModel user) => _adminUser = user;
+  set setProfileAdminUser(UserModel user) {
+     _adminUser = user;  
+     update();
+  }
 
   // profile account selected
-  ProfileAccountModel _accountProfileSelected =
-      ProfileAccountModel(creation: Timestamp.now());
+  ProfileAccountModel _accountProfileSelected = ProfileAccountModel(creation: Timestamp.now());
   ProfileAccountModel get getProfileAccountSelected => _accountProfileSelected;
-  set setProfileAccountSelected(ProfileAccountModel value) =>
-      _accountProfileSelected = value;
+  set setProfileAccountSelected(ProfileAccountModel value) => _accountProfileSelected = value;
   String get getIdAccountSelected => _accountProfileSelected.id;
   bool isSelected({required String id}) {
     bool isSelected = false;
@@ -969,12 +971,11 @@ class HomeController extends GetxController {
   }
 
   void readDataAdminUser({required String idAccount, required String email}) {
-    // obtenemos los datos del usuario administrador
-    Database.readFutureAdminUser(idAccount: idAccount, email: email)
-        .then((value) {
+    // obtenemos los datos de los permisos del usuario en la cuenta
+    Database.readFutureAdminUser(idAccount: idAccount, email: email).then((value) {
       if (value.exists) {
-        setProfileAdminUser =
-            UserModel.fromDocumentSnapshot(documentSnapshot: value);
+        // set : datos de los permisos del usuario en la cuenta
+        setProfileAdminUser = UserModel.fromDocumentSnapshot(documentSnapshot: value); 
       }
     });
   }
@@ -1198,20 +1199,28 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
         description = 'Funcionalidades especiales para profesionalizar tu negocio';
         icon =  Icon(Icons.star_rounded,size: sizePremiumLogo,color: Colors.amber); 
         break;
+      case 'arching':
+        title = 'Arqueo de caja';
+        description = 'Realiza arqueo de caja, controla el saldo de tu caja al final de cada día';
+        icon = Padding(
+            padding: const EdgeInsets.only(right: 5),
+            // icon : icono de caja registradora 
+            child: Icon(Icons.point_of_sale_rounded,size: sizePremiumLogo,color: Colors.amber));
+        break;
       case 'stock':
-        title = ' Premium\nControl de Inventario';
+        title = 'Control de Inventario';
         description ='Maneje el stock de sus productos, disfruta además de otras características especiales';
         icon = Padding(padding:const EdgeInsets.only(right: 5),child: Icon(Icons.inventory_rounded,size: sizePremiumLogo,color: Colors.amber)); 
         break;
       case 'analytic':
-        title = 'Premium\nInformes y Estadísticas';
+        title = 'Informes y Estadísticas';
         description ='Obtenga datos sobre el rendimiento de sus transacciones y otras estadísticas importantes';
         icon = Padding(
             padding: const EdgeInsets.only(right: 5),
             child: Icon(Icons.analytics_outlined,size: sizePremiumLogo,color: Colors.amber)); 
         break;
       case 'multiuser':
-        title = 'Premium\nMultiusuario';
+        title = 'Multiusuario';
         description = 'Permita que más personas gestionen esta cuenta y con permisos personalizados. Además también tenes otras características';
         icon = Padding(
             padding: const EdgeInsets.only(right: 5),
@@ -1239,7 +1248,9 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
 
   @override  
   Widget build(BuildContext context) { 
+
     // values
+    Color colorCard = Get.isDarkMode?Get.theme.scaffoldBackgroundColor:const Color.fromARGB(255, 243, 238, 228); 
     setData(id: widget.id);
  
  
@@ -1247,77 +1258,102 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
     return Card(
       margin: const EdgeInsets.all(0),
       elevation: 0,
-      color: Colors.transparent,
+      color: colorCard,
       clipBehavior: Clip.antiAlias,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
       child: Stack(  
         children: [
           // view : contenido de la suscripción desplazable
           ListView( 
+            // efecto rebote
+            physics: const BouncingScrollPhysics(),
             children: [
-              Container( 
-                // color : gradient de un color y transparent 
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.amber.withOpacity(0.1) ,Colors.transparent],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  stops: const [0.0, 0.9],
-                ), 
-              ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [ 
-                    const SizedBox(height: 12),
-                    // icon 
-                    Padding(padding: const EdgeInsets.all(3.0),child: icon),
-                    // text : titulo
-                    Text(title,textAlign: TextAlign.center,style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 12),
-                    // text : descripción
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                      child: Opacity(opacity: 0.7,child: Text(description, textAlign: TextAlign.center)),
-                    ), 
-                    
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [ 
+                  const SizedBox(height: 8),
+                  // icon 
+                  Padding(padding: const EdgeInsets.only(top:12),child: icon),
+                  // text : titulo
+                  Text(title,textAlign: TextAlign.center,style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 5),
+                  // text : descripción
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Opacity(opacity: 0.7,child: Text(description, textAlign: TextAlign.center,style: const TextStyle(fontWeight: FontWeight.w300))),
+                  ), 
+                  
+                ],
+              ),  
+              // view : caracteristicas de la suscripción
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Column( 
+                  children: [
+                    const SizedBox(height:12),
+                    // view :   texto de caracteristicas de la suscripción
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 5),
+                      decoration: BoxDecoration(  
+                        gradient: LinearGradient( 
+                          colors: [
+                            colorCard,
+                            Colors.amber.shade200.withOpacity(0.3),
+                            colorCard,
+                          ],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
+                      ),
+                      // text : caracteristicas de la suscripción
+                      child: const Text('CARACTERÍSTICAS PREMIUM',textAlign: TextAlign.center,style: TextStyle(fontWeight: FontWeight.w200)),
+                    ),   
+                    const SizedBox(height:5),
+                    // LisTile : caracteristicas de la suscripción 'Arqueo de caja'
+                    const Opacity(
+                      opacity: 0.9,
+                      child: ListTile(
+                        leading: Icon(Icons.point_of_sale_sharp),
+                        title: Text('Arqueo de caja'),
+                        subtitle: Opacity(opacity: 0.5,child: Text('Realiza arqueo de caja, controla el saldo de tu caja al final de cada día')), 
+                      ),
+                    ),
+                    const Opacity(opacity: 0.5,child: Divider(indent: 50,endIndent:50,thickness:0.5)),
+                    // ListTile : caracteristicas de la suscripción 'Control de inventario' 
+                    const Opacity(
+                      opacity: 0.9,
+                      child: ListTile(
+                        leading: Icon(Icons.inventory_outlined ),
+                        title: Text('Control de inventario'),
+                        subtitle: Opacity(opacity: 0.5,child: Text('Maneje el stock de sus productos')), 
+                      ),
+                    ),
+                    const Opacity(opacity: 0.5,child: Divider(indent: 50,endIndent:50,thickness:0.5)),
+                    // ListTile : caracteristicas de la suscripción 'Multi Usuarios'
+                    const Opacity(
+                      opacity: 0.9,
+                      child: ListTile(
+                        leading: Icon(Icons.people_outline),
+                        title: Text('Multi Usuarios'),
+                        subtitle: Opacity(opacity: 0.5,child: Text('Permita que más personas gestionen esta cuenta y con permisos personalizados')), 
+                      ),
+                    ),
+                    const Opacity(opacity: 0.5,child: Divider(indent: 50,endIndent:50,thickness:0.5)),
+                    // ListTile : caracteristicas de la suscripción 'Informes y estadísticas'
+                    const Opacity(
+                      opacity: 0.9,
+                      child: ListTile(
+                        leading: Icon(Icons.analytics_outlined),
+                        title: Text('Informes y estadísticas'),
+                        subtitle: Opacity(opacity: 0.5,child: Text('Obtenga informes y estadísticas de sus ventas')), 
+                      ),
+                    ),
                   ],
                 ),
-              ),  
-              const Divider(indent: 50, endIndent: 50, height: 50),
-              // text : caracteristicas de la suscripción
-              const Text('CARACTERÍSTICAS',textAlign: TextAlign.center,style: TextStyle(fontWeight: FontWeight.w200)),
-              const SizedBox(height: 12),
-              // ListTile : caracteristicas de la suscripción 'Control de inventario' 
-              const Opacity(
-                opacity: 0.9,
-                child: ListTile(
-                  leading: Icon(Icons.inventory_outlined ),
-                  title: Text('Control de inventario'),
-                  subtitle: Opacity(opacity: 0.5,child: Text('Maneje el stock de sus productos')), 
-                ),
-              ),
-              const Divider(indent: 50),
-              // ListTile : caracteristicas de la suscripción 'Multi Usuarios'
-              const Opacity(
-                opacity: 0.9,
-                child: ListTile(
-                  leading: Icon(Icons.people_outline),
-                  title: Text('Multi Usuarios'),
-                  subtitle: Opacity(opacity: 0.5,child: Text('Permita que más personas gestionen esta cuenta y con permisos personalizados')), 
-                ),
-              ),
-              const Divider(indent: 50),
-              // ListTile : caracteristicas de la suscripción 'Informes y estadísticas'
-              const Opacity(
-                opacity: 0.9,
-                child: ListTile(
-                  leading: Icon(Icons.analytics_outlined),
-                  title: Text('Informes y estadísticas'),
-                  subtitle: Opacity(opacity: 0.5,child: Text('Obtenga informes y estadísticas de sus ventas')), 
-                ),
               ), 
-              const SizedBox(height:150),
+              const SizedBox(height:200),
             ],
           ),
           // view : buton para subcribirse a Premium en la app 
@@ -1327,51 +1363,73 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
             bottom: 0,left: 0,right: 0,
             child: Container(   
               // color : gradient de un color y transparent 
-              decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.transparent,Theme.of(context).scaffoldBackgroundColor], begin: Alignment.topCenter,end: Alignment.bottomCenter),),
+              decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.transparent,Theme.of(context).scaffoldBackgroundColor,Theme.of(context).scaffoldBackgroundColor], begin: Alignment.topCenter,end: Alignment.bottomCenter),),
               // condition : comprobar que 'offerings' esta inicializado
-              child:  homeController.offerings==null?const TextButton(onPressed:null, child: Text('Subcribirce a Premium')): ListView.builder(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                itemCount: homeController.offerings?.current?.availablePackages.length,
-                shrinkWrap: true,
-                itemBuilder: (BuildContext context, int index) {
-              
-                  // get : obtenemos los productos disponibles
-                  List<Package> myProductList =  homeController.offerings!.current!.availablePackages;
-                  // card : con un color gradient de tres colores y bordes redondeados
-                  return Card(  
-                    elevation: 0,
-                    margin: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8),side: BorderSide.none),
-                    clipBehavior: Clip.antiAlias,
-                    // container : aplicamos un gradiente de tres colores
-                    child: Container( 
-                      decoration:  BoxDecoration(gradient: LinearGradient(colors: [Colors.teal.shade700.withOpacity(0.5),Colors.green.shade600.withOpacity(0.5),Colors.green.shade400.withOpacity(0.5),],begin: Alignment.topLeft,end: Alignment.bottomRight)),
-                      // listTile :  con información del producto y un boton para comprar
-                      child: ListTile(
-                        tileColor: Colors.green,
-                        titleTextStyle: const TextStyle(color: Colors.white),
-                        leadingAndTrailingTextStyle:  const TextStyle(color: Colors.white),
-                        onTap: ()  {
-                          try {
-                            
-                            setState(() async{
-                              // purchasePackage :  compra el paquete de la lista de productos disponibles
-                            await Purchases.purchasePackage(myProductList[index] );
-
-                            CustomerInfo customerInfo = await Purchases.purchasePackage(myProductList[index] );
-                            EntitlementInfo? entitlement = customerInfo.entitlements.all[entitlementID];
-                            homeController.setIsSubscribedPremium = entitlement?.isActive ?? false;
-                            });
-                          }catch (e) { 
-                            // ... handle error
-                          }
-                        },
-                        title: Text(homeController.getIsSubscribedPremium?'Ya estás subcripto':myProductList[index].storeProduct.title,maxLines:1), 
-                        trailing:homeController.getIsSubscribedPremium?const Icon(Icons.thumb_up,color: Colors.white,): Text('${myProductList[index].storeProduct.currencyCode} ${myProductList[index].storeProduct.priceString}')),
+              child:  homeController.offerings==null?const TextButton(onPressed:null, child: Text('Subcribirce a Premium'))
+              :Column(
+                children: [
+                  ListView.builder(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    itemCount: homeController.offerings?.current?.availablePackages.length,
+                    shrinkWrap: true,
+                    itemBuilder: (BuildContext context, int index) {
+                  
+                      // get : obtenemos los productos disponibles
+                      List<Package> myProductList =  homeController.offerings!.current!.availablePackages;
+                      // card : con un color gradient de tres colores y bordes redondeados
+                      return Card(  
+                        elevation: 0,
+                        margin: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8),side: BorderSide.none),
+                        clipBehavior: Clip.antiAlias,
+                        // container : aplicamos un gradiente de tres colores
+                        child: Container( 
+                          decoration:  BoxDecoration(gradient: LinearGradient(colors: [Colors.teal.shade700.withOpacity(0.5),Colors.green.shade600.withOpacity(0.5),Colors.green.shade400.withOpacity(0.5),],begin: Alignment.topLeft,end: Alignment.bottomRight)),
+                          // listTile :  con información del producto y un boton para comprar
+                          child: ListTile(
+                            tileColor: Colors.green,
+                            titleTextStyle: const TextStyle(color: Colors.white),
+                            leadingAndTrailingTextStyle:  const TextStyle(color: Colors.white),
+                            onTap: ()  async{
+                              try {
+                                // purchasePackage :  compra el paquete de la lista de productos disponibles 
+                                await Purchases.purchasePackage(myProductList[index]).then((customerInfo) { 
+                                  EntitlementInfo? entitlement = customerInfo.entitlements.all[entitlementID]; //obtenemos la información de la suscripción
+                                  homeController.setIsSubscribedPremium = entitlement?.isActive ?? false; // seteamos el estado de la suscripción
+                                  Get.back(); // volvemos a la pantalla anterior
+                                }); 
+                              }catch (e) { 
+                                // ... handle error
+                              }
+                            },
+                            title: Text(homeController.getIsSubscribedPremium?'Ya estás subcripto':myProductList[index].storeProduct.title,maxLines:1), 
+                            trailing:homeController.getIsSubscribedPremium?const Icon(Icons.thumb_up,color: Colors.white,): Text('${myProductList[index].storeProduct.currencyCode} ${myProductList[index].storeProduct.priceString}')),
+                        ),
+                      ); 
+                    }, 
+                  ),
+                  // view : texto de información de la suscripción y textbuton de condiciones de uso y política de privacidad
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0,top: 0.0,left: 20.0,right: 20.0),
+                    child: Column(  
+                      children: [
+                        // text : cancelar de la suscripción
+                        const Text('Podrá cancelar la suscripción en cualquier momento en su cuenta de Google Play',textAlign: TextAlign.center,style: TextStyle(fontSize:12,fontWeight: FontWeight.w200)),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // text : condiciones de uso
+                            TextButton(onPressed: (){}, child: const Text('Condiciones de uso',style: TextStyle(color: Colors.blue,fontSize: 12))),
+                            // text : política de privacidad
+                            TextButton(onPressed: (){}, child: const Text('Política de privacidad',style: TextStyle(color: Colors.blue,fontSize: 12))),
+                          ],
+                        ),
+                      ],
                     ),
-                  ); 
-                }, 
+                  ),
+
+                ],
               ),
             ),
           ),
