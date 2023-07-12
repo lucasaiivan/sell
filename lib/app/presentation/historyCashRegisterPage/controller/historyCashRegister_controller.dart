@@ -176,6 +176,9 @@ class HistoryCashRegisterController extends GetxController {
   // filter : filtramos los arqueos de caja
   void filterCashRegister({required String filter}) async {
     switch (filter) {
+      case 'premium':
+        homeController.showModalBottomSheetSubcription(id:'analytic');
+        break;
       case 'Hoy':
         loadCashRegisterToday();
         break;

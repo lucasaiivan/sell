@@ -92,6 +92,9 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
         list = homeController.getCataloProducts;
       }else{
         switch(key){
+          case 'premium':
+            homeController.showModalBottomSheetSubcription(id:'analytic');
+            break;
           case '0': // Mostrar todos
             setTitleAppBar = 'Cátalogo';
             list = homeController.getCataloProducts;
@@ -295,7 +298,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
                 padding: const EdgeInsets.all(12.0),
                 child: Row(
                   children: [
-                    ImageAvatarApp(url: product.image,size: 75),
+                    ImageProductAvatarApp(url: product.image,size: 75),
                     // datos del producto
                     Expanded( 
                       child: Padding(

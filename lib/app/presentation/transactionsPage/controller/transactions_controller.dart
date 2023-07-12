@@ -40,7 +40,7 @@ class TransactionsController extends GetxController {
       }
       // retornamos el primer elemento de la lista con el medio de pago que se utilizo más
       return {
-        'name': TicketModel.getPayMode(payMode: list[0].key),
+        'name': TicketModel.getFormatPayMode(id: list[0].key),
         'value': list[0].value,
         'amount': totalAmount,
         
@@ -109,6 +109,9 @@ class TransactionsController extends GetxController {
   // set/get
   void filterList({required String key}) {
     switch (key) {
+      case 'premium': 
+        homeController.showModalBottomSheetSubcription(id:'analytic');
+        break;
       case 'hoy':
         readTransactionsOfTheDay();
         setFilterText = 'El día de hoy';
@@ -546,16 +549,16 @@ class TransactionsController extends GetxController {
         if (cashRegister.id == ticketModel.cashRegisterId) {
           getCashAnalysisMap.containsKey(cashRegister.id)
               ? getCashAnalysisMap[cashRegister.id] = {
-                  'total': (getCashAnalysisMap[cashRegister.id]?['total']
-                          as double) +
-                      element.priceTotal,
+                  'total': (getCashAnalysisMap[cashRegister.id]?['total']as double) +element.priceTotal,
                   'name': cashRegister.description,
-                  'sales': cashRegister.sales,
+                  'sales': cashRegister.sales, 
+                  'opening': '${Publications.getFechaPublicacionFormating(dateTime: cashRegister.opening)}/n',
                 }
               : getCashAnalysisMap[cashRegister.id] = {
                   'total': element.priceTotal,
                   'name': cashRegister.description,
                   'sales': cashRegister.sales,
+                  'opening': Publications.getFechaPublicacionFormating(dateTime: cashRegister.opening),
                 };
         }
       }

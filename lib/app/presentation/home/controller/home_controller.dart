@@ -1,5 +1,4 @@
-import 'dart:io';
-import 'dart:ui'; 
+import 'dart:io'; 
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -82,7 +81,8 @@ class HomeController extends GetxController {
       return;
     }
     
-    // logIn : identificar al usuario con un ID personalizada
+    try{
+      // logIn : identificar al usuario con un ID personalizada
     // condition : comprobar si en revenuecat se inicio sesion  
     //await Purchases.logOut(); 
     // loginResult : resultado de la identificación de usuario
@@ -98,6 +98,9 @@ class HomeController extends GetxController {
       if(key == entitlementID){ setIsSubscribedPremium = value.isActive; } 
       //print('########################################################### key: $key, value: $value');
     }); 
+    }catch(e){
+      print('Error en initIdentityRevenueCat: $e');
+    }
   }
 
   // brillo de la pantalla
@@ -1214,7 +1217,7 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
         break;
       case 'analytic':
         title = 'Informes y Estadísticas';
-        description ='Obtenga datos sobre el rendimiento de sus transacciones y otras estadísticas importantes';
+        description ='Obtenga datos, rendimiento de sus transacciones y otras estadísticas importantes';
         icon = Padding(
             padding: const EdgeInsets.only(right: 5),
             child: Icon(Icons.analytics_outlined,size: sizePremiumLogo,color: Colors.amber)); 
@@ -1347,7 +1350,7 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
                       child: ListTile(
                         leading: Icon(Icons.analytics_outlined),
                         title: Text('Informes y estadísticas'),
-                        subtitle: Opacity(opacity: 0.5,child: Text('Obtenga informes y estadísticas de sus ventas')), 
+                        subtitle: Opacity(opacity: 0.5,child: Text('Obtenga datos, informes y estadísticas de sus transacciones y productos')), 
                       ),
                     ),
                   ],

@@ -50,6 +50,13 @@ class TransactionsView extends StatelessWidget {
     // others controllers
     final TransactionsController transactionsController = Get.find();
 
+    // var
+    bool darkTheme = Get.isDarkMode;
+
+    // style 
+    Color iconColor =  transactionsController.homeController.getIsSubscribedPremium==false?Colors.amber: darkTheme?Colors.white:Colors.black;
+    Color textColor = darkTheme == false || transactionsController.homeController.getIsSubscribedPremium==false?Colors.white:Colors.black;
+    
     return AppBar(
       elevation: 0,
       centerTitle: false,
@@ -59,15 +66,15 @@ class TransactionsView extends StatelessWidget {
         
         PopupMenuButton(
             icon: Material(
-              color: darkTheme?Colors.white:Colors.black,
+              color:iconColor,
               borderRadius: const BorderRadius.all(Radius.circular(8.0)),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Row(
                   children: [
-                    Text(transactionsController.getFilterText,style:TextStyle(color: darkTheme?Colors.black:Colors.white,fontWeight: FontWeight.w400)),
+                    Text(transactionsController.getFilterText,style:TextStyle(color: textColor,fontWeight: FontWeight.w400)),
                     const SizedBox(width: 5),
-                    Icon(Icons.filter_list,color: darkTheme?Colors.black:Colors.white),
+                    Icon(Icons.filter_list,color:textColor),
                   ],
                 ),
               ),
@@ -79,9 +86,12 @@ class TransactionsView extends StatelessWidget {
                   const PopupMenuItem(value: 'hoy', child: Text('Hoy')),
                   const PopupMenuItem(value: 'ayer', child: Text('Ayer')),
                   const PopupMenuItem(value: 'este mes', child: Text('Este mes')),
-                  const PopupMenuItem(value: 'el mes pasado', child: Text('El mes pasado')),
-                  const PopupMenuItem(value: 'este año', child: Text('Este año')),
-                  const PopupMenuItem(value: 'el año pasado', child: Text('El año pasado')),
+                  // opciones premium // 
+                  transactionsController.homeController.getIsSubscribedPremium?const PopupMenuItem(child: null,height: 0)
+                    :const PopupMenuItem(value: 'premium', child: Text('Opciones Premium',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.amber))),
+                  PopupMenuItem(value: 'el mes pasado',enabled: transactionsController.homeController.getIsSubscribedPremium, child: const Text('El mes pasado')),
+                  PopupMenuItem(value: 'este año',enabled: transactionsController.homeController.getIsSubscribedPremium, child: const Text('Este año')),
+                  PopupMenuItem(value: 'el año pasado',enabled: transactionsController.homeController.getIsSubscribedPremium, child: const Text('El año pasado')),
                 ])
       ],
     );
@@ -478,16 +488,6 @@ class _StaticsCardsState extends State<StaticsCards> {
         valueText: priceTotal,
         description: 'Balance total',
         ), 
-      // card : ganancia 
-      CardAnalityc( 
-        isPremium: homeController.getIsSubscribedPremium,
-        backgroundColor: Colors.green.shade200.withOpacity(0.7),
-        icon:  const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.show_chart_rounded,color: Colors.white,size:14)))),
-        subtitle: '%${transactionsController.getPorcentEarningsTotal()}',
-        titleText: 'Ganancia',
-        valueText: revenue,
-        description: '',
-        ),    
       // card : transacciones
       CardAnalityc( 
         isPremium: true, // siempre es visible su contenido
@@ -498,6 +498,16 @@ class _StaticsCardsState extends State<StaticsCards> {
         valueText: transactionsController.getTransactionsList.length.toString(),
         description: '',
         ), 
+      // card : ganancia 
+      CardAnalityc( 
+        isPremium: homeController.getIsSubscribedPremium,
+        backgroundColor: Colors.green.shade200.withOpacity(0.7),
+        icon:  const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.show_chart_rounded,color: Colors.white,size:14)))),
+        subtitle: '%${transactionsController.getPorcentEarningsTotal()}',
+        titleText: 'Ganancia',
+        valueText: revenue,
+        description: '',
+        ),    
       // card : productos vendidos
       CardAnalityc( 
         isPremium: homeController.getIsSubscribedPremium,
@@ -532,13 +542,15 @@ class _StaticsCardsState extends State<StaticsCards> {
     Map.fromEntries(transactionsController.getCashAnalysisMap.entries.toList().reversed) .forEach((key, value) {
       // add : agregamos las tarjetas de las cajas en una posicion especifica
       cards.insert(2,CardAnalityc( 
-            backgroundColor: Colors.grey.shade400.withOpacity(0.7),
-            icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.point_of_sale_sharp,color: Colors.white,size:14)))),
-            titleText: 'Caja ${value['name']}',
-            subtitle: 'Balance',
-            valueText: Publications.getFormatoPrecio(monto: value['total'] ), 
-            description: '${value['sales'].toString()} transacciones',
-            ));
+        isPremium: homeController.getIsSubscribedPremium,
+        backgroundColor: Colors.grey.shade400.withOpacity(0.7),
+        icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.point_of_sale_sharp,color: Colors.white,size:14)))),
+        titleText: 'Caja ${value['name']}',
+        subtitle: 'Balance',
+        valueText: Publications.getFormatoPrecio(monto: value['total'] ), 
+        description: '${value['sales'].toString()} transacciones\n${value['opening'].toString()}',
+
+        ));
     }); 
 
     return Padding(

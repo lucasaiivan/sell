@@ -210,9 +210,16 @@ class SalesController extends GetxController {
   }
  
   // ticket
+  TicketModel _recibeTicket = TicketModel(creation: Timestamp.now(), listPoduct: []);
+  TicketModel get getRecibeTicket => _recibeTicket;
+  set setRecibeTicket(TicketModel value){
+    _recibeTicket = value; 
+  }
   TicketModel ticket = TicketModel(creation: Timestamp.now(), listPoduct: []);
   TicketModel get getTicket => ticket;
-  set setTicket(TicketModel value) => ticket = value;
+  set setTicket(TicketModel value){
+    ticket = value;
+  }
   set setPayModeTicket(String value) {
     ticket.payMode = value;
     update();
@@ -221,8 +228,7 @@ class SalesController extends GetxController {
   // state cofirnm purchase ticket view
   final RxBool _stateConfirmPurchase = false.obs;
   bool get getStateConfirmPurchase => _stateConfirmPurchase.value;
-  set setStateConfirmPurchase(bool value) =>
-      _stateConfirmPurchase.value = value;
+  set setStateConfirmPurchase(bool value) => _stateConfirmPurchase.value = value;
 
   // state ticket view
   final RxBool _ticketView = false.obs;
@@ -399,7 +405,7 @@ class SalesController extends GetxController {
                   crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     // image
-                    ImageAvatarApp(url: product.image,size: 75,favorite:product.favorite),
+                    ImageProductAvatarApp(url: product.image,size: 75,favorite:product.favorite),
                     // text : datos del producto
                     Flexible(
                       child: Padding(
@@ -640,19 +646,12 @@ class SalesController extends GetxController {
       registerTransaction(); 
       } 
     // el usuario confirmo su venta
-    setStateConfirmPurchase = true;
-    // mostramos una vista 'confirm purchase' por 2 segundos
-    Future.delayed(
-      const Duration(milliseconds: 1300),
-      () {
-        // fdefault values
-        setListProductsSelected = [];
-        setTicket = TicketModel(creation: Timestamp.now(), listPoduct: []);
-        //views
-        setStateConfirmPurchase = false;
-        setTicketView = false;
-      },
-    );
+    setStateConfirmPurchase = true; 
+    // set : 
+    setRecibeTicket = getTicket;
+    // fefault values
+    setListProductsSelected = [];
+    setTicket = TicketModel(creation: Timestamp.now(), listPoduct: []);
   }
 
   void showDialogAddProductNew({ required ProductCatalogue productCatalogue}) {

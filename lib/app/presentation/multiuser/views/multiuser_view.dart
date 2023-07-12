@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart'; 
 import 'package:sell/app/presentation/home/controller/home_controller.dart';
 import 'package:sell/app/presentation/splash/controllers/splash_controller.dart';
 import '../../../domain/entities/user_model.dart';
@@ -18,21 +18,15 @@ class MultiUser extends GetView<SplashController> {
 class LoadingInitView extends StatelessWidget {
   const LoadingInitView({Key? key}) : super(key: key);
 
-  @override
-  // ignore: avoid_renaming_method_parameters
-  Widget build(BuildContext buildContext) {
-
-    //  var 
-    Color color = Get.theme.brightness == Brightness.dark?Get.theme.scaffoldBackgroundColor:Colors.white;
-
+  @override 
+  Widget build(BuildContext context) { 
 
     return GetBuilder<MultiUserController>(
       init: MultiUserController(),
       initState: (_) {},
       builder: (controller) {
 
-        return Scaffold(
-          backgroundColor: color,
+        return Scaffold( 
           appBar: appbar,
           drawer: drawerApp(),
           body: body,
@@ -47,6 +41,14 @@ class LoadingInitView extends StatelessWidget {
     // controllers
     final MultiUserController controller = Get.find();
     final HomeController homeController = Get.find();
+
+    // var
+    final bool darkTheme = Get.isDarkMode;
+
+    // style 
+    Color iconColor =  homeController.getIsSubscribedPremium==false?Colors.amber: darkTheme?Colors.white:Colors.black;
+    Color textColor = darkTheme == false || homeController.getIsSubscribedPremium==false?Colors.white:Colors.black;
+   
 
     return AppBar(
       title: const Text('Multiusuario'),
@@ -65,9 +67,17 @@ class LoadingInitView extends StatelessWidget {
           icon:  Opacity(
             opacity: homeController.getUserAnonymous?0.1:1,
             child: Material(
-                color: homeController.getIsSubscribedPremium?homeController.getDarkMode?Colors.white:Colors.black:Colors.amber,
-                borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-                child: Icon(Icons.add,color:  homeController.getDarkMode?Colors.black:Colors.white,)),
+                color:iconColor,
+                borderRadius: const BorderRadius.all(Radius.circular(8.0)),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal:8),
+                  child: Row(
+                    children: [
+                      Text('Crear',style:TextStyle(color: textColor,fontWeight: FontWeight.w700)),
+                      Icon(Icons.add,color:textColor),
+                    ],
+                  ),
+                )),
           )),
       ],
     );
@@ -92,12 +102,19 @@ class LoadingInitView extends StatelessWidget {
     // controllers
     final MultiUserController controller = Get.find();
 
-    return ListTile(
-      contentPadding:  const EdgeInsets.symmetric(horizontal: 20,vertical: 12),
-      title: Text(user.email),
-      subtitle: Text( user.superAdmin ? 'Super administrador' : user.admin ? 'Administrador':'Estandar'),
-      onLongPress: () => controller.deleteItem(user: user),
-      onTap: null,
+    return Column(
+      children: [
+        ListTile( 
+          contentPadding:  const EdgeInsets.symmetric(horizontal: 20,vertical: 12),
+          leading: ComponentApp().userAvatarCircle(),
+          title: Text(user.email,style: const TextStyle(fontSize: 14)),
+          subtitle: Text( user.superAdmin ? 'Super administrador' : user.admin ? 'Administrador':'Estandar',style: const TextStyle(fontWeight: FontWeight.w500)),
+          onLongPress: () => controller.deleteItem(user: user),
+          onTap: null,
+          trailing: user.superAdmin?null:IconButton(onPressed: () => controller.deleteItem(user: user),icon: const Icon(Icons.close)),
+        ),
+        ComponentApp().divider(),
+      ],
     );
   }
 

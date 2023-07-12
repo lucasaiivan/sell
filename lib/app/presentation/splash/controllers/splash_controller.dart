@@ -9,6 +9,7 @@ import '../../../core/routes/app_pages.dart';
 // manejador de estados: GetX
 
 class SplashController extends GetxController {
+  
   // FirebaseAuth and GoogleSignIn instances
   late final GoogleSignIn googleSign = GoogleSignIn();
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
