@@ -36,7 +36,10 @@ class HistoryCashRegisterView extends StatelessWidget {
 
     // var
     bool darkTheme = Get.isDarkMode;
-
+    // style 
+    Color iconColor =  historyCashRegisterController.homeController.getIsSubscribedPremium==false?Colors.amber: darkTheme?Colors.white:Colors.black;
+    Color textColor = darkTheme ==false || historyCashRegisterController.homeController.getIsSubscribedPremium==false?Colors.white:Colors.black;
+   
     return AppBar(
       elevation: 0,
       centerTitle: false,
@@ -45,38 +48,32 @@ class HistoryCashRegisterView extends StatelessWidget {
       actions: [
         PopupMenuButton(
             icon: Material(
-              color: darkTheme ? Colors.white : Colors.black,
+              color: iconColor,
               borderRadius: const BorderRadius.all(Radius.circular(8.0)),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Row(
                   children: [
-                    Text(historyCashRegisterController.getTextFilter,
-                        style: TextStyle(
-                            color: darkTheme ? Colors.black : Colors.white,
-                            fontWeight: FontWeight.w400)),
+                    Text(historyCashRegisterController.getTextFilter,style: TextStyle(color:textColor,fontWeight: FontWeight.w400)),
                     const SizedBox(width: 5),
-                    Icon(Icons.filter_list,
-                        color: darkTheme ? Colors.black : Colors.white),
+                    Icon(Icons.filter_list,color:textColor),
                   ],
                 ),
               ),
             ),
             onSelected: (selectedValue) {
-              historyCashRegisterController.filterCashRegister(
-                  filter: selectedValue.toString());
+              historyCashRegisterController.filterCashRegister( filter: selectedValue.toString());
             },
             itemBuilder: (BuildContext ctx) => [
                   const PopupMenuItem(value: 'Hoy', child: Text('Hoy')),
                   const PopupMenuItem(value: 'Ayer', child: Text('Ayer')),
-                  const PopupMenuItem(
-                      value: 'Últimos 30 Días', child: Text('Últimos 30 Días')),
-                  const PopupMenuItem(
-                      value: 'Este mes', child: Text('Este mes')),
-                  const PopupMenuItem(
-                      value: 'El mes pasado', child: Text('El mes pasado')),
-                  const PopupMenuItem(
-                      value: 'Este año', child: Text('Este año')),
+                  // opciones premium //
+                  historyCashRegisterController.homeController.getIsSubscribedPremium?const PopupMenuItem(value: '', child:null)
+                    :const PopupMenuItem(value: 'premium', child: Text('Opciones Premium',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.amber))),
+                  PopupMenuItem(value: 'Últimos 30 Días',enabled: historyCashRegisterController.homeController.getIsSubscribedPremium, child: const Text('Últimos 30 Días')),
+                  PopupMenuItem(value: 'Este mes', enabled: historyCashRegisterController.homeController.getIsSubscribedPremium,child: const Text('Este mes')),
+                  PopupMenuItem(value: 'El mes pasado',enabled: historyCashRegisterController.homeController.getIsSubscribedPremium, child: const Text('El mes pasado')),
+                  PopupMenuItem(value: 'Este año',enabled: historyCashRegisterController.homeController.getIsSubscribedPremium, child: const Text('Este año')),
                 ])
       ],
     );

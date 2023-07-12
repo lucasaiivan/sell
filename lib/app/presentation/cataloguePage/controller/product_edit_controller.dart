@@ -793,15 +793,15 @@ class ControllerProductsEdit extends GetxController {
     // devuelve la imagen del product
     if (getXFileImage.path != '') {
       // el usuario cargo un nueva imagen externa 
-      return ImageAvatarApp( path: getXFileImage.path,size: size,onTap: getProduct.verified==false || getEditModerator? showModalBottomSheetCambiarImagen : null );
+      return ImageProductAvatarApp( path: getXFileImage.path,size: size,onTap: getProduct.verified==false || getEditModerator? showModalBottomSheetCambiarImagen : null );
     } else { 
 
       // si no contiene ningun dato la imagen del producto se visualiza una imagen con un icon para agregar foto
       if(getProduct.image == ''){
-        return ImageAvatarApp( iconAdd: true,path: '',size: size,onTap: getProduct.verified==false || getEditModerator? showModalBottomSheetCambiarImagen : null );
+        return ImageProductAvatarApp( iconAdd: true,path: '',size: size,onTap: getProduct.verified==false || getEditModerator? showModalBottomSheetCambiarImagen : null );
       }
       // se visualiza la imagen del producto
-      return ImageAvatarApp(url: getProduct.image ,size: size,onTap: getProduct.verified==false || getEditModerator? showModalBottomSheetCambiarImagen : null );
+      return ImageProductAvatarApp(url: getProduct.image ,size: size,onTap: getProduct.verified==false || getEditModerator? showModalBottomSheetCambiarImagen : null );
     }
   }
 
@@ -1122,7 +1122,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
   Widget listTile({required Mark marcaSelect, bool icon = true}) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      trailing:!icon? null  :marcaSelect.image==''?null: ImageAvatarApp(url: marcaSelect.image,size: 50,description:marcaSelect.name),
+      trailing:!icon? null  :marcaSelect.image==''?null: ImageProductAvatarApp(url: marcaSelect.image,size: 50,description:marcaSelect.name),
       dense: true,
       title: Text(marcaSelect.name,overflow: TextOverflow.ellipsis,style: const TextStyle(fontWeight: FontWeight.w400,fontSize: 18),),
       subtitle: marcaSelect.description == ''

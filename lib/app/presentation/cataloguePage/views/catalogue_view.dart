@@ -35,7 +35,12 @@ class CataloguePage extends StatelessWidget {
     // controllers
     final CataloguePageController controller = Get.find();
     final HomeController homeController = Get.find();
+    final bool darkTheme = Theme.of(context).brightness == Brightness.dark;
 
+    // style 
+    Color iconTextColor =  homeController.getIsSubscribedPremium==false?Colors.amber: darkTheme?Colors.white:Colors.black;
+    Color textColor = darkTheme == false || homeController.getIsSubscribedPremium==false?Colors.white:Colors.black;
+    
     return AppBar(
       elevation: 0,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -47,7 +52,7 @@ class CataloguePage extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 5),
           child: Material(
-            color: homeController.getDarkMode?Colors.white:Colors.black,
+            color: iconTextColor,
             borderRadius: const BorderRadius.all(Radius.circular(8.0)),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 1),
@@ -55,9 +60,9 @@ class CataloguePage extends StatelessWidget {
                   //icon: const Icon(Icons.filter_list),
                   child: Row(
                     children: [
-                      Text('Filtrar',style:TextStyle(color: homeController.getDarkMode?Colors.black:Colors.white,fontWeight: FontWeight.w400)),
+                      Text('Filtrar',style:TextStyle(color:textColor,fontWeight: FontWeight.w400)),
                       const SizedBox(width: 5),
-                    Icon(Icons.filter_list,color: homeController.getDarkMode?Colors.black:Colors.white),
+                    Icon(Icons.filter_list,color: textColor),
                     ],
                   ),
                   onSelected: (selectedValue) {
@@ -65,11 +70,12 @@ class CataloguePage extends StatelessWidget {
                   },
                   itemBuilder: (BuildContext ctx) => [
                         const PopupMenuItem(value: '0', child: Text('Mostrar todos')),
-                        const PopupMenuItem(value: '1', child: Text('Mostrar con stock')),
                         const PopupMenuItem(value: '2', child: Text('Mostrar favoritos')),
-                        const PopupMenuItem(value: '3', child: Text('Mostrar con stock bajos')),
-                        const PopupMenuItem(value: '4', child: Text('Actualizado hace más de 2 meses')),
                         const PopupMenuItem(value: '5', child: Text('Hace más de 5 meses')),
+                        const PopupMenuItem(value: 'premium', child: Text('Opciones Premium',style: TextStyle(color: Colors.amber,fontWeight: FontWeight.w600),)),
+                        PopupMenuItem(value: '1',enabled: controller.homeController.getIsSubscribedPremium, child: const Text('Mostrar con stock')),
+                        PopupMenuItem(value: '3',enabled: controller.homeController.getIsSubscribedPremium, child: const Text('Mostrar con stock bajos')),
+                        PopupMenuItem(value: '4',enabled: controller.homeController.getIsSubscribedPremium, child: const Text('Actualizado hace más de 2 meses')),
                         // TODO : delete release
                         const PopupMenuItem(value: '6', child: Text('Sin verificación')),
                         const PopupMenuItem(value: '7', child: Text('Cargar toda la Base de Datos')),
@@ -140,13 +146,13 @@ class CataloguePage extends StatelessWidget {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  homeController.getProfileAccountSelected.subscribed?controller.viewStockAlert:Padding(
+                  homeController.getIsSubscribedPremium?controller.viewStockAlert:Padding(
                     padding: const EdgeInsets.all(20.0),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        TextButton(onPressed:()=>homeController.showModalBottomSheetSubcription(id: 'stock'), child: const  Text('Control del inventario')),
-                        LogoPremium(personalize: true,accentColor: Colors.amber),
+                        TextButton(onPressed:()=>homeController.showModalBottomSheetSubcription(id: 'stock'), child: const  Text('Controla tu inventario')),
+                        LogoPremium(id: 'stock',personalize: true,accentColor: Colors.amber),
                       ],
                     ),
                   ),
@@ -259,6 +265,8 @@ class CataloguePage extends StatelessWidget {
             overflow: TextOverflow.clip,
             style: TextStyle(color: item.verified?Colors.blue:null),
           ), 
+        // view : texts
+        homeController.getIsSubscribedPremium==false?Container():
         Wrap(
           children: [
             // text : fecha de la ultima actualización
@@ -272,7 +280,7 @@ class CataloguePage extends StatelessWidget {
             ):Container(),
           ],
         ),
-        // text : favorito y control de stock
+        // text : favorito
         Row(
           children: [
             item.favorite? Text('Favorito',style: TextStyle(color: Colors.yellow.shade800)):Container(),
@@ -317,7 +325,7 @@ class CataloguePage extends StatelessWidget {
                 children: [
                   Hero(
                     tag: 'avatarProduct',
-                    child: ImageAvatarApp(url: item.image,size: 80,favorite: item.favorite)),
+                    child: ImageProductAvatarApp(url: item.image,size: 80,favorite: item.favorite)),
                   Flexible( 
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),

@@ -7,7 +7,7 @@ import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:get/get.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:sell/app/core/utils/widgets_utils.dart';
-import 'package:sell/app/domain/entities/ticket_model.dart';
+import 'package:sell/app/domain/entities/ticket_model.dart'; 
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../domain/entities/catalogo_model.dart';
@@ -157,18 +157,13 @@ class SalesView extends StatelessWidget {
 
   Widget drawerTicket({required SalesController controller}) {
     // values
-    const EdgeInsets padding =
-        EdgeInsets.symmetric(horizontal: 20, vertical: 2);
+    const EdgeInsets padding = EdgeInsets.symmetric(horizontal: 20, vertical: 2);
+    final TicketModel ticket = controller.getTicket;
+    ticket.priceTotal = 500.0;
 
     // style
-    final TextStyle textValuesStyle = TextStyle(
-        fontFamily: 'monospace',
-        fontWeight: FontWeight.bold,
-        color: Get.theme.brightness == Brightness.dark? Colors.white: Colors.black);
-    final TextStyle textDescrpitionStyle = TextStyle(
-        fontFamily: 'monospace',
-        fontWeight: FontWeight.bold,
-        color: Get.theme.brightness == Brightness.dark ? Colors.white70 : Colors.black87);
+    final TextStyle textValuesStyle = TextStyle(fontFamily: 'monospace',fontWeight: FontWeight.bold,color: Get.theme.brightness == Brightness.dark? Colors.white: Colors.black);
+    final TextStyle textDescrpitionStyle = TextStyle(fontFamily: 'monospace',fontWeight: FontWeight.bold,color: Get.theme.brightness == Brightness.dark ? Colors.white38 : Colors.black45);
 
     // widgets
     Widget dividerLinesWidget = Padding(
@@ -177,183 +172,149 @@ class SalesView extends StatelessWidget {
         height: 0.2,
         dashWidth: 10.0,
         dashGap: 5.0,
-        color: Get.theme.brightness == Brightness.dark
-            ? Colors.white
-            : Colors.black,
+        color: Get.theme.brightness == Brightness.dark?Colors.white:Colors.black,
       ),
     );
+
     // var : logica de la vista para la web
     final screenWidth = Get.size.width;
     final isMobile = screenWidth < 700; // ejemplo: pantalla de teléfono
 
     return AnimatedContainer(
       width: controller.getTicketView ? isMobile ? screenWidth : 400 : 0,
-      curve: Curves.fastOutSlowIn,
+      curve: Curves.fastOutSlowIn, // Curva de animación
       duration: const Duration(milliseconds: 300),
       child: AnimatedOpacity(
         opacity: controller.getTicketView ? 1 : 0,
         duration: Duration(milliseconds: controller.getTicketView ? 1500 : 100),
-        child: Material(
-          borderRadius: const BorderRadius.all(Radius.circular(12)),
-          color: Get.theme.brightness == Brightness.dark
-              ? Colors.white10
-              : Colors.white,
-          child: Drawer(
-            elevation: 0,
-            backgroundColor: Colors.transparent,
-            child: Center(
-              child: controller.getStateConfirmPurchase
-                  ? widgetConfirmedPurchase()
-                  : ListView(
-                      key: const Key('ticket'),
-                      shrinkWrap: false,
-                      children: [
-                        const SizedBox(height: 20),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text('Ticket',
-                              textAlign: TextAlign.center,
-                              style: textDescrpitionStyle.copyWith(
-                                  fontSize: 30, fontWeight: FontWeight.bold)),
-                        ),
-                        Material(
-                            color: Colors
-                                .transparent, //Colors.blueGrey.withOpacity(0.1),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                  homeController.getProfileAccountSelected.name,
-                                  textAlign: TextAlign.center,
-                                  style: textValuesStyle.copyWith(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold)),
-                            )),
-                        // view : lines ------
-                        dividerLinesWidget,
-                        const SizedBox(height: 20),
-                        // text : cantidad de elementos 'productos' seleccionados
-                        Padding(
-                          padding: padding,
-                          child: Row(
-                            children: [
-                              Opacity(
-                                  opacity: 0.7,
-                                  child: Text('Productos:',
-                                      style: textDescrpitionStyle)),
-                              const Spacer(),
-                              Text(
-                                  controller.getListProductsSelestedLength
-                                      .toString(),
-                                  style: textValuesStyle),
-                            ],
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Material(
+            clipBehavior: Clip.antiAlias,
+            borderRadius: const BorderRadius.all(Radius.circular(8)),
+            color: Get.theme.brightness == Brightness.dark?Colors.white10: const Color.fromARGB(255, 231, 238, 244),
+            child: Drawer(
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+              child: Center(
+                child: controller.getStateConfirmPurchase
+                    ? widgetConfirmedPurchase()
+                    : ListView(
+                        key: const Key('ticket'),
+                        shrinkWrap: false,
+                        children: [
+                          const SizedBox(height: 20),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text('Ticket',textAlign: TextAlign.center,style: textDescrpitionStyle.copyWith(fontSize: 30, fontWeight: FontWeight.bold))),
+                          Material(
+                              color: Colors.transparent, //Colors.blueGrey.withOpacity(0.1),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(homeController.getProfileAccountSelected.name,textAlign: TextAlign.center,style: textValuesStyle.copyWith(fontSize: 18,fontWeight: FontWeight.bold)),
+                              )),
+                          // view : lines ------
+                          dividerLinesWidget,
+                          const SizedBox(height: 20),
+                          // text : cantidad de elementos 'productos' seleccionados
+                          Padding(
+                            padding: padding,
+                            child: Row(
+                              children: [
+                                Opacity(opacity: 0.7,child: Text('Productos:',style: textDescrpitionStyle)),
+                                const Spacer(),
+                                Text(controller.getListProductsSelestedLength.toString(),style: textValuesStyle),
+                              ],
+                            ),
                           ),
-                        ),
-                        // text : medio de pago
-                        Padding(
-                          padding: padding,
-                          child: Row(
-                            children: [
-                              Opacity(
-                                  opacity: 0.7,
-                                  child: Text('Medio:',
-                                      style: textDescrpitionStyle)),
-                              const Spacer(),
-                              Text(TicketModel.getPayMode(),
-                                  style: textValuesStyle),
-                            ],
+                          // text : medio de pago
+                          Padding(
+                            padding: padding,
+                            child: Row(
+                              children: [
+                                Opacity(opacity: 0.7,child: Text('Medio:',style: textDescrpitionStyle)),
+                                const Spacer(),
+                                Text(controller.getTicket.getNamePayMode,style: textValuesStyle),
+                              ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 20),
-                        // view : lines ------
-                        dividerLinesWidget,
-                        // text : el monto total de la transacción
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Row(
-                            children: [
-                              Opacity(
-                                  opacity: 0.7,
-                                  child: Text('Total',
-                                      style: textDescrpitionStyle.copyWith(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w900,
-                                        color: Colors.blue,
-                                      ))),
-                              const Spacer(),
-                              Text(
-                                  Publications.getFormatoPrecio(
-                                      monto: controller.getCountPriceTotal()),
-                                  style: textValuesStyle.copyWith(
-                                      color: Colors.blue,
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.w900)),
-                            ],
+                          const SizedBox(height: 20),
+                          // view : lines ------
+                          dividerLinesWidget,
+                          // text : el monto total de la transacción
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Row(
+                              children: [
+                                Opacity(opacity: 0.7,child: Text('Total',style: textDescrpitionStyle.copyWith(fontSize: 20,fontWeight: FontWeight.w900,color: Colors.blue))),
+                                const Spacer(),
+                                Text(Publications.getFormatoPrecio(monto: controller.getCountPriceTotal()),style: textValuesStyle.copyWith(color: Colors.blue,fontSize: 24,fontWeight: FontWeight.w900)),
+                              ],
+                            ),
                           ),
-                        ),
-                        // text : paga con
-                        controller.getValueReceivedTicket == 0 || controller.getTicket.payMode != 'effective'
-                            ? Container()
-                            : Padding(
-                                padding: padding,
-                                child: Row(
-                                  children: [
-                                    Opacity(
-                                        opacity: 0.7,
-                                        child: Text(
-                                          'Pago con:',
-                                          style: textDescrpitionStyle,
-                                        )),
-                                    const Spacer(),
-                                    Text(controller.getValueReceived(),style: textValuesStyle),
-                                  ],
+                          // text : paga con
+                          controller.getValueReceivedTicket == 0 || controller.getTicket.payMode != 'effective'
+                              ? Container()
+                              : Padding(
+                                  padding: padding,
+                                  child: Row(
+                                    children: [
+                                      Opacity(
+                                          opacity: 0.7,
+                                          child: Text(
+                                            'Pago con:',
+                                            style: textDescrpitionStyle,
+                                          )),
+                                      const Spacer(),
+                                      Text(controller.getValueReceived(),style: textValuesStyle),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                        // text : vuelto
-                        controller.getValueReceivedTicket == 0 || controller.getTicket.payMode != 'effective'
-                            ? Container()
-                            : Padding(
-                                padding: padding,
-                                child: Row(
-                                  children: [
-                                    Opacity(opacity: 0.7,child: Text('Vuelto:',style: textDescrpitionStyle)),
-                                    const Spacer(),
-                                    Material(
-                                      elevation: 0,
-                                      color: Colors.green.shade300,
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 5, vertical: 1),
-                                        child: Row(
-                                          children: [
-                                            Text('Dar vuelto ', style: textValuesStyle.copyWith(color: Colors.white)),
-                                            Text(
-                                              controller.getValueChange(),
-                                              style: textValuesStyle.copyWith(
-                                                  color: Colors.white,
-                                                  fontSize: 16),
-                                            ),
-                                          ],
+                          // text : vuelto
+                          controller.getValueReceivedTicket == 0 || controller.getTicket.payMode != 'effective'
+                              ? Container()
+                              : Padding(
+                                  padding: padding,
+                                  child: Row(
+                                    children: [
+                                      Opacity(opacity: 0.7,child: Text('Vuelto:',style: textDescrpitionStyle)),
+                                      const Spacer(),
+                                      Material(
+                                        elevation: 0,
+                                        color: Colors.green.shade300,
+                                        borderRadius: BorderRadius.circular(8.0),
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 5, vertical: 1),
+                                          child: Row(
+                                            children: [
+                                              Text('Dar vuelto ', style: textValuesStyle.copyWith(color: Colors.white)),
+                                              Text(
+                                                controller.getValueChange(),
+                                                style: textValuesStyle.copyWith(
+                                                    color: Colors.white,
+                                                    fontSize: 16),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                        // view : lines ------
-                        dividerLinesWidget,
-                        // view 2
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 24, top: 24),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Text('El cliente paga con:',style: textDescrpitionStyle),
-                              const SizedBox(height: 12),
-                              Container(
-                                key: homeController.buttonsPaymenyMode,
-                                child: Row(
+                          // view : lines ------
+                          dividerLinesWidget,
+                          // view 2
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 24, top: 24),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Text('El cliente paga con:',style: textDescrpitionStyle),
+                                const SizedBox(height: 12),
+                                Row(
+                                  key: homeController.buttonsPaymenyMode,
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     //  button : pago con efectivo
@@ -385,27 +346,27 @@ class SalesView extends StatelessWidget {
                                     ),
                                   ],
                                 ),
-                              ),
-                              //  button : pago con tarjeta de credito/debito
-                              Padding(
-                                padding: const EdgeInsets.all(2.0),
-                                child: ElevatedButton.icon(
-                                  style: ButtonStyle(elevation: MaterialStateProperty.all(controller.getTicket.payMode == 'card'?5:0)),
-                                  icon: controller.getTicket.payMode != 'card'? Container(): const Icon(Icons.credit_card_outlined),
-                                  onPressed: () {
-                                    controller.setPayModeTicket = 'card';
-                                    // default values
-                                    controller.setValueReceivedTicket = 0.0;
-                                  },
-                                  label: const Text('Tarjeta de Debito/Credito'),
+                                //  button : pago con tarjeta de credito/debito
+                                Padding(
+                                  padding: const EdgeInsets.all(2.0),
+                                  child: ElevatedButton.icon(
+                                    style: ButtonStyle(elevation: MaterialStateProperty.all(controller.getTicket.payMode == 'card'?5:0)),
+                                    icon: controller.getTicket.payMode != 'card'? Container(): const Icon(Icons.credit_card_outlined),
+                                    onPressed: () {
+                                      controller.setPayModeTicket = 'card';
+                                      // default values
+                                      controller.setValueReceivedTicket = 0.0;
+                                    },
+                                    label: const Text('Tarjeta de Debito/Credito'),
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 12),
-                            ],
+                                const SizedBox(height: 12),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
+              ),
             ),
           ),
         ),
@@ -879,31 +840,74 @@ class SalesView extends StatelessWidget {
   Widget widgetConfirmedPurchase() {
     //----------------------//
     // Slpach view : hecho! //
-    //----------------------//
+    //----------------------//  
 
+    // controllers
+    final SalesController salesController = Get.find();
     // values
     const Color accentColor = Colors.white;
-    Color? background = Colors.green[400];
+    Color? background = Colors.green.shade300;
+    
 
     return Theme(
       data: ThemeData(brightness: Brightness.dark),
       child: ElasticIn(
         child: Material(
-          borderRadius: const BorderRadius.all(Radius.circular(12)),
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
           color: background,
-          child: const Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.check_rounded, size: 200, color: accentColor),
-                SizedBox(height: 25),
-                Text('Hecho',
-                    style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                        color: accentColor)),
-              ],
-            ),
+          child: Column(
+            children: [
+              Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.check_outlined, size: 100, color: accentColor),
+                      const SizedBox(height: 25),
+                      const Text('Hecho',style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold,color: accentColor)),
+                      // text : monto del precio total del ticket
+                      Text( Publications.getFormatoPrecio(monto: salesController.getRecibeTicket.priceTotal),style: const TextStyle(fontSize: 20,fontWeight: FontWeight.w300,color: accentColor)),
+                    ],
+                  ),
+                ),
+              ),
+              //view : buttons
+              Column( 
+                children: [
+                  // elevateButton : boton con un icon y un texto  que diga 'Recibo'
+                  /* ComponentApp().button( 
+                    text: 'Recibo',
+                    colorAccent: Colors.black,
+                    padding: const EdgeInsets.symmetric(horizontal: 12,vertical:5),
+                    icon: Icon(salesController.homeController.getIsSubscribedPremium==false?Icons.star_rounded:Icons.receipt_long_outlined,color: Colors.black),
+                    colorButton: Colors.white,  
+                    onPressed: () {
+                      if(salesController.homeController.getIsSubscribedPremium==false){
+                        homeController.showModalBottomSheetSubcription();
+                      }else{
+                        //views 
+                        salesController.setStateConfirmPurchase = false;
+                        salesController.setTicketView = false; 
+                      }
+                    },
+                  ),  */
+                  // elevateButton : boton con un icon y un texto  que diga 'ok'
+                  ComponentApp().button(
+                    padding: const EdgeInsets.symmetric(horizontal: 12,vertical:5),
+                    icon: const Text('Ok',style:TextStyle(color: Colors.white)),
+                    colorButton: Colors.blue,  
+                    onPressed: () {
+                      //views
+                      salesController.setStateConfirmPurchase = false;
+                      salesController.setTicketView = false;
+                      // default values
+                      salesController.setTicket = TicketModel(creation: Timestamp.now(), listPoduct: []);
+                    },
+                  ), 
+                ],
+              ),
+            const SizedBox(height: 20), 
+            ],
           ),
         ),
       ),

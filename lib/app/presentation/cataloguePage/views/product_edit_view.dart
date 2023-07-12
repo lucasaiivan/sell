@@ -401,31 +401,39 @@ class ProductEdit extends StatelessWidget {
                     AnimatedContainer(
                       width:double.infinity, 
                       duration: const Duration(milliseconds: 500),
-                      decoration: BoxDecoration(color: controller.getStock?Colors.grey.withOpacity(0.1):null,border: Border.all(color: controller.getStock?Colors.grey:boderLineColor,width: 0.5,),),
+                      decoration: BoxDecoration(color: controller.getStock?Colors.grey.withOpacity(0.05):null,border: Border.all(color: controller.getStock?Colors.grey:boderLineColor,width: 0.5,),),
                       child: Column(
                       children: [
                         CheckboxListTile(
                           contentPadding: const EdgeInsets.symmetric(horizontal:12,vertical: 12),
-                          enabled: controller.getHomeController.getIsSubscribedPremium?controller.getSaveIndicator ? false : true:false,
+                          //enabled: controller.getHomeController.getIsSubscribedPremium?controller.getSaveIndicator ? false : true:false,
                           checkColor: Colors.white,
                           activeColor: Colors.blue,
-                          value: controller.getStock,
+                          value: controller.homeController.getIsSubscribedPremium?controller.getStock:false,
                           title: Text(controller.getHomeController.getIsSubscribedPremium?controller.getStock?'Quitar control de stock':'Agregar control de stock':'Control de stock'),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               controller.getHomeController.getIsSubscribedPremium?Container():LogoPremium(personalize: true,id: 'stock'),
-                              controller.getStock?Container():const Text('Controlar el inventario de sus productos'),
+                              controller.getStock?Container():const Text('Controlar el inventario de este producto'),
                             ],
-                          ),
+                          ), 
                           onChanged: (value) {
-                            if (!controller.getSaveIndicator) {
-                              controller.setStock = value ?? false;
+                            if(controller.homeController.getIsSubscribedPremium){
+                              // esta subscripcion es premium
+                              // condition : si el usuario no esta guardando el producto
+                              if (!controller.getSaveIndicator) {
+                                controller.setStock = value ?? false;
+                              }
+                            }else{
+                              // no esta subscripcion 
+                              controller.homeController.showModalBottomSheetSubcription(id: 'stock');
                             }
+                            
                           },
                         ),  
-                        controller.getStock ? space : Container(), 
-                        controller.getStock?Column(
+                        controller.getStock && controller.homeController.getIsSubscribedPremium? space : Container(), 
+                        controller.getStock && controller.homeController.getIsSubscribedPremium?Column(
                           children: [
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 12,),
@@ -510,7 +518,7 @@ class ProductEdit extends StatelessWidget {
                       child: const Text('¡Gracias por hacer que esta aplicación sea aún más útil para más personas! 🚀'),
                       ),
                     //  button : guardar el producto
-                    button(
+                    ComponentApp().button(
                       disable:controller.getSaveIndicator == true || (controller.getNewProduct && !controller.getUserConsent)  ,
                       onPressed: controller.save,
                       icon: Container(),
@@ -527,7 +535,7 @@ class ProductEdit extends StatelessWidget {
           controller.itsInTheCatalogue? Container(
                       width: double.infinity,
                       padding: const EdgeInsets.only(bottom: 12, top: 30, left: 0, right: 0),
-                      child: button(padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),colorAccent: Colors.white,colorButton: Colors.red.shade300,icon:   Container(),text: 'Eliminar de mi catálogo', onPressed: controller.showDialogDelete),
+                      child: ComponentApp().button(padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),colorAccent: Colors.white,colorButton: Colors.red.shade300,icon:   Container(),text: 'Eliminar de mi catálogo', onPressed: controller.showDialogDelete),
                     )
                   : Container(), 
             const SizedBox(height: 20.0), 
@@ -576,33 +584,7 @@ Widget get widgetForModerator{
     );
   }
 
-  Widget button( {double width = double.infinity,
-      bool disable = false,
-      required Widget icon,
-      String text = '',
-      required dynamic onPressed,
-      EdgeInsets padding =
-          const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      Color colorButton = Colors.purple,
-      Color colorAccent = Colors.white}) {
-    return FadeInRight(
-        child: Padding(
-      padding: padding,
-      child: SizedBox(
-        width: width,
-        child: ElevatedButton.icon(
-          onPressed: disable?null:onPressed,
-          style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-              padding: const EdgeInsets.all(16.0),
-              backgroundColor: colorButton,
-              textStyle: TextStyle(color: colorAccent)),
-          icon: icon,
-          label: Text(text, style: TextStyle(color: colorAccent)),
-        ),
-      ),
-    ));
-  }
+  
 }
 
 // category

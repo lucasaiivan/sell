@@ -110,7 +110,8 @@ class WidgetButtonListTile extends StatelessWidget {
         },
         // touch round
         borderRadius: BorderRadius.circular(10.0),
-        child: SizedBox(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
           width: 75.0,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -496,20 +497,7 @@ class WidgetDrawer extends StatelessWidget {
         :ListTile(
           leading: Container(
             padding: const EdgeInsets.all(0.0),
-            child: homeController.getProfileAccountSelected.image == ''
-                ? CircleAvatar(backgroundColor: Get.theme.dividerColor,child: Center(child: Text(homeController.getProfileAccountSelected.name.substring( 0,1),style: const TextStyle(color: Colors.white))),)
-                : CachedNetworkImage(
-                    imageUrl:homeController.getProfileAccountSelected.image,
-                    placeholder: (context, url) => CircleAvatar(backgroundColor: Get.theme.dividerColor,child: Center(child: Text(homeController.getProfileAccountSelected.name.substring( 0,1),style: const TextStyle(color: Colors.white),)),),
-                    imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: CircleAvatar(backgroundImage: image)),
-                    errorWidget: (context, url, error) {
-                      // return : un circleView con la inicial de nombre como icon 
-                      return CircleAvatar(
-                        backgroundColor: Get.theme.dividerColor,
-                        child: Center(child: Text(homeController.getProfileAccountSelected.name.substring( 0,1),style: const TextStyle(color: Colors.white))),
-                        );
-                    },
-                  ),
+              child: ComponentApp().userAvatarCircle(urlImage: homeController.getProfileAccountSelected.image),
           ),
           title: Text(homeController.getIdAccountSelected == ''? 'Seleccionar una cuenta': homeController.getProfileAccountSelected.name,maxLines: 1,overflow: TextOverflow.ellipsis),
           subtitle: homeController.getIdAccountSelected == ''? null: Text( superAdmin? 'Administrador': 'Usuario estandar'),
@@ -517,13 +505,12 @@ class WidgetDrawer extends StatelessWidget {
           onTap: () {
             homeController.showModalBottomSheetSelectAccount();
           },
-        ), 
-        const SizedBox(height: 20),
-        // funciones premium 
+        ),  
+        // funciones premium //
         // condition : si el usuario de la cuenta no es administrador no se muestra el boton de suscribirse a premium
         homeController.getProfileAdminUser.admin==false?Container():
         ListTile(
-          tileColor: homeController.getIsSubscribedPremium?null:Colors.amber.withOpacity(0.1),
+          tileColor: homeController.getIsSubscribedPremium?null:Colors.amber.withOpacity(0.05),
           iconColor:  Colors.amber, 
           //titleTextStyle: const TextStyle(fontWeight: FontWeight.bold),
             leading: const Icon(Icons.star_rounded),
@@ -533,41 +520,48 @@ class WidgetDrawer extends StatelessWidget {
               Get.back(); // cierra drawer
               homeController.showModalBottomSheetSubcription();
             }),
+        const Opacity(opacity: 0.3,child: Divider(height:0)),
+        const SizedBox(height: 20),
         // vender 
         ListTile(
+          selected: homeController.getIndexPage == 0,
             leading: const Icon(Icons.attach_money_rounded),
             title: const Text('Vender'),
             onTap: () => homeController.setIndexPage = 0),
         // historial de caja
         superAdmin?ListTile(
-            leading: const Icon(Icons.manage_search_rounded),
-            title: const Text('Historial de caja'),
-            onTap: () => homeController.setIndexPage = 1):Container(),
+          selected: homeController.getIndexPage == 1,
+          leading: const Icon(Icons.manage_search_rounded),
+          title: const Text('Historial de caja'),
+          onTap: () => homeController.setIndexPage = 1):Container(),
         // transacciones
         superAdmin?ListTile(
-            leading: const Icon(Icons.receipt_long_rounded),
-            title: const Text('Transacciones'),
-            onTap: () => homeController.setIndexPage = 2):Container(),
+          selected: homeController.getIndexPage == 2,
+          leading: const Icon(Icons.receipt_long_rounded),
+          title: const Text('Transacciones'),
+          onTap: () => homeController.setIndexPage = 2):Container(),
         superAdmin?ListTile(
-            leading: const Icon(Icons.apps_rounded),
-            title: const Text('Catálogo'),
-            onTap: () => homeController.setIndexPage = 3):Container(),
+          selected: homeController.getIndexPage == 3,
+          leading: const Icon(Icons.apps_rounded),
+          title: const Text('Catálogo'),
+          onTap: () => homeController.setIndexPage = 3):Container(),
         superAdmin?ListTile(
-            leading: const Icon(Icons.add_moderator_outlined),
-            title: const Text('Multi Usuario'),
-            onTap: () {
-              if( homeController.getProfileAccountSelected.subscribed ){
-                homeController.setIndexPage = 4;
-              }else{
-                Get.back(); // cierra drawer
-                homeController.showModalBottomSheetSubcription(id: 'multiuser');
-              }
-              
-            }):Container(),
-        const SizedBox(height: 30),
+          selected: homeController.getIndexPage == 4,
+          leading: const Icon(Icons.add_moderator_outlined),
+          title: const Text('Multi Usuario'),
+          onTap: () {
+            if( homeController.getProfileAccountSelected.subscribed ){
+              homeController.setIndexPage = 4;
+            }else{
+              Get.back(); // cierra drawer
+              homeController.showModalBottomSheetSubcription(id: 'multiuser');
+            }
+            
+          }):Container(),
+        const SizedBox(height: 20),
         ListTile(
-          contentPadding: const EdgeInsets.symmetric(vertical: 12,horizontal: 12),
-          tileColor: Colors.blue.withOpacity(0.1),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+          tileColor: Colors.blue.withOpacity(0.05),
           leading: const Icon(Icons.messenger_outline_sharp,color: Colors.green),
           title: const Text('Escribenos tu opinión 😃'),
           subtitle: const Text('Tu opinión o sugerencia es importante'),
@@ -581,9 +575,9 @@ class WidgetDrawer extends StatelessWidget {
         ), 
         //  option :  cambiar el brillo del tema de la app
         ListTile(
-          leading: const Icon(Icons.color_lens_outlined),
+          leading: Icon(Theme.of(context).brightness==Brightness.dark?Icons.light_mode_outlined:Icons.mode_night_outlined),
           title: Text(Theme.of(context).brightness==Brightness.dark?'Tema claro':'Tema oscuro'),
-          onTap: ThemeService.switchTheme,
+          onTap: ()=> ThemeService.switchTheme,
         ),
       const SizedBox(height: 20)
       ],
@@ -646,8 +640,7 @@ Widget viewDefault() {
     )),
   );
 }
-
-
+ 
 
 // notification
 void showMessageAlertApp({required String title, required String message}) {
@@ -677,7 +670,7 @@ class ComponentApp extends StatelessWidget {
     darkMode = Get.theme.brightness == Brightness.dark;
     return Container();
   }
-
+  // view : grafico de barra para mostrar el progreso de carga de la app
   PreferredSize linearProgressBarApp({Color color = Colors.purple}) {
     return PreferredSize(
         preferredSize: const Size.fromHeight(0.0),
@@ -686,12 +679,66 @@ class ComponentApp extends StatelessWidget {
             backgroundColor: Colors.white.withOpacity(0.3),
             valueColor: AlwaysStoppedAnimation<Color>(color)));
   }
-
+  // view : grafico divisor estandar de la app 
   Divider divider({double thickness = 0.1}) {
     return Divider(
       thickness: thickness,height: 0,
       color: Get.isDarkMode?Colors.white30:Colors.black38,
     );
+  }
+  // view : imagen avatar del usuario
+  Widget userAvatarCircle({String urlImage='',String text = '', double radius = 20.0}) {
+    
+    // style
+    Color backgroundColor = Get.theme.dividerColor.withOpacity(0.5);
+    // widgets
+    late Widget avatar;
+    Widget iconDedault = Icon(Icons.person_outline_rounded,color: Colors.white,size: radius*1.5,);
+
+    if(urlImage == '' && text == ''){
+      iconDedault = Icon(Icons.person_outline_rounded,color: Colors.white,size: radius*1 );
+    }else if(urlImage == '' && text != ''){
+      iconDedault = Text( text.substring( 0,1),style: const TextStyle(color: Colors.white));
+    }
+    
+    // crear avatar
+    avatar = urlImage == ''
+      ? CircleAvatar(backgroundColor:backgroundColor,child: Center(child: iconDedault))
+        : CachedNetworkImage(
+          imageUrl: urlImage,
+          placeholder: (context, url) => CircleAvatar(backgroundColor:backgroundColor,child:iconDedault),
+          imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: CircleAvatar(backgroundImage: image)),
+          errorWidget: (context, url, error) {
+            // return : un circleView con la inicial de nombre como icon 
+            return CircleAvatar(
+              backgroundColor: backgroundColor,
+              child: Center(child: iconDedault),
+              );
+          },
+    );
+
+    return avatar;
+  }
+  // BUTTONS 
+  Widget button( {double width = double.infinity,bool disable = false,required Widget icon,String text = '',required dynamic onPressed,EdgeInsets padding =const EdgeInsets.symmetric(horizontal: 12, vertical: 12),Color colorButton = Colors.purple,Color colorAccent = Colors.white}) {
+    // button : personalizado
+    return FadeInRight(
+        child: Padding(
+      padding: padding,
+      child: SizedBox(
+        width: width,
+        child: ElevatedButton.icon(
+          onPressed: disable?null:onPressed,
+          style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+              padding: const EdgeInsets.all(16.0),
+              backgroundColor: colorButton,
+              textStyle: TextStyle(color: colorAccent,fontWeight: FontWeight.w700)),
+          icon: icon,
+          label: Text(text, style: TextStyle(color: colorAccent)),
+        ),
+      ),
+    ));
   }
 }
 
@@ -847,7 +894,8 @@ class LogoPremium extends StatelessWidget {
   }
 }
 
-class ImageAvatarApp extends StatelessWidget {
+class ImageProductAvatarApp extends StatelessWidget {
+  late final bool productAvatar;
   late final bool iconAdd;
   late final bool favorite;
   late final String url;
@@ -858,7 +906,7 @@ class ImageAvatarApp extends StatelessWidget {
   final VoidCallback?  onTap;
   late final Color canvasColor;
   // ignore: prefer_const_constructors_in_immutables
-  ImageAvatarApp({Key? key,this.iconAdd=false,this.canvasColor=Colors.black12,this.favorite=false,this.url='',this.size=50,this.radius=12,this.description='',this.path='', this.onTap }) : super(key: key);
+  ImageProductAvatarApp({Key? key,this.iconAdd=false,this.productAvatar=false,this.canvasColor=Colors.black12,this.favorite=false,this.url='',this.size=50,this.radius=12,this.description='',this.path='', this.onTap }) : super(key: key);
 
   // avatar que se va usar en toda la app, especialemnte en los 'ListTile'
 
@@ -868,14 +916,24 @@ class ImageAvatarApp extends StatelessWidget {
 
      // var
      final bool darkMode = Theme.of(context).brightness==Brightness.dark;
+     // style 
+     Color iconColor = darkMode?Colors.white:Colors.black;
 
 
     /// widgets
-    Widget imageDefault = AnimatedContainer(
+    Widget imageDefault=Container();
+    if(iconAdd){
+      imageDefault = AnimatedContainer(
       duration: const Duration(milliseconds: 500),
-      color: darkMode?Colors.black12:Colors.black12,
-      child:iconAdd?const Opacity(opacity: 0.5,child: Icon(Icons.add_a_photo)): Image.asset('assets/default_image.png',fit: BoxFit.cover,color: darkMode?Colors.white12 :Colors.grey.shade200,));
- 
+      color: iconColor,
+      child: const Opacity(opacity: 0.5,child: Icon( Icons.add_a_photo)));
+    }
+    if(productAvatar){
+      imageDefault = AnimatedContainer(
+      duration: const Duration(milliseconds: 500),
+      color: iconColor,
+      child: Image.asset('assets/default_image.png',fit: BoxFit.cover,color: darkMode?Colors.white12 :Colors.grey.shade200,));
+    }
     return SizedBox(
       width: size,height: size,
       child: path =='' ?InkWell(
