@@ -38,7 +38,7 @@ class HomeController extends GetxController {
   set setUserAnonymous(bool value) => _userAnonymous = value;
   bool get getUserAnonymous => _userAnonymous;
 
-  // Firebase
+  // Firebase : auth 
   late FirebaseAuth _firebaseAuth;
   set setFirebaseAuth(FirebaseAuth value) => _firebaseAuth = value;
   get getFirebaseAuth => _firebaseAuth;
@@ -55,23 +55,20 @@ class HomeController extends GetxController {
     _updateApp = value;
     update();
   }
-
   bool get getUpdateApp => _updateApp;
 
   // buildContext : // buildContext : obtenemos el context de la vista
-  late BuildContext _buildContext;
-  set setBuildContext(BuildContext context) => _buildContext = context;
-  BuildContext get getBuildContext => _buildContext;
+  late BuildContext _homeBuildContext;
+  set setHomeBuildContext(BuildContext context) => _homeBuildContext = context;
+  BuildContext get getHomeBuildContext => _homeBuildContext;
 
   // var : para el control de la suscripción
   String clientRevenueCatID = ''; // id de la cuenta es la ID personalizada para RevenueCat 
-  Offerings? offerings; // ofertas de suscripción 
-  // var : variable para el control de la suscripción premium
-  RxBool isSubscribedPremium = false.obs;
+  Offerings? offerings; // ofertas de suscripción  
+  RxBool isSubscribedPremium = false.obs; // control la suscripción premium
   set setIsSubscribedPremium(bool value) => isSubscribedPremium.value = value;
   bool get getIsSubscribedPremium => isSubscribedPremium.value;
  
-
   // inicia la identificación de id de usario para revenuecat 
   void initIdentityRevenueCat() async {
     //  configure el SDK de RevvenueCat con una ID de usuario de la aplicación personalizada  
@@ -83,22 +80,21 @@ class HomeController extends GetxController {
     
     try{
       // logIn : identificar al usuario con un ID personalizada
-    // condition : comprobar si en revenuecat se inicio sesion  
-    //await Purchases.logOut(); 
-    // loginResult : resultado de la identificación de usuario
-    LogInResult result =await Purchases.logIn(clientRevenueCatID).then((value) async{
-      // get : obtenemos las ofertas de compra
-      await Purchases.getOfferings().then((value) {
-        offerings = value;
+      // condition : comprobar si en revenuecat se inicio sesion  
+      //await Purchases.logOut(); 
+      // loginResult : resultado de la identificación de usuario
+      LogInResult result =await Purchases.logIn(clientRevenueCatID).then((value) async{
+        // get : obtenemos las ofertas de compra
+        await Purchases.getOfferings().then((value) => offerings = value ); 
+        return value;
       }); 
-      return value;
-    }); 
-    // get : obtenemos los productos de compra
-    result.customerInfo.entitlements.all.forEach((key, value) { 
-      if(key == entitlementID){ setIsSubscribedPremium = value.isActive; } 
-      //print('########################################################### key: $key, value: $value');
-    }); 
+      // get : obtenemos los productos de compra
+      result.customerInfo.entitlements.all.forEach((key, value) { 
+        // conditionm : si la subcripcion es premium esta activa
+        if(key == entitlementID){ setIsSubscribedPremium = value.isActive; }  
+      }); 
     }catch(e){
+      // ignore: avoid_print
       print('Error en initIdentityRevenueCat: $e');
     }
   }
@@ -127,23 +123,20 @@ class HomeController extends GetxController {
   get getCatalogUserHuideVisibility => catalogUserHuideVisibility;
   void getTheVisibilityOfTheCatalogueUserGuide() {
     // obtenemos la visibilidad de la guía del usuario del catálogo
-    catalogUserHuideVisibility =
-        GetStorage().read('catalogUserHuideVisibility') ?? true;
+    catalogUserHuideVisibility = GetStorage().read('catalogUserHuideVisibility') ?? true;
     update();
   }
 
   void disableCatalogUserGuide() async {
     // Deshabilitar la guía del usuario del catálogo
     catalogUserHuideVisibility = false;
-    await GetStorage()
-        .write('catalogUserHuideVisibility', catalogUserHuideVisibility);
+    await GetStorage().write('catalogUserHuideVisibility', catalogUserHuideVisibility);
   }
 
   // list admins users
   final RxList<UserModel> _adminsUsersList = <UserModel>[].obs;
   List<UserModel> get getAdminsUsersList => _adminsUsersList;
-  set setAdminsUsersList(List<UserModel> list) {
-    _adminsUsersList.value = list;
+  set setAdminsUsersList(List<UserModel> list) { _adminsUsersList.value = list;
     //...filter
   }
 
@@ -293,24 +286,24 @@ class HomeController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
+    
     // inicialización de la variable
-    setFirebaseAuth = FirebaseAuth.instance;
+    setFirebaseAuth = FirebaseAuth.instance; // inicializamos la autenticación de firebase
     isAppUpdated(); // verificamos si la app esta actualizada
     getSalesUserGuideVisibility(); // obtenemos la visibilidad de la guía del usuario de ventas
     getTheVisibilityOfTheCatalogueUserGuide(); // obtenemos la visibilidad de la guía del usuario del catálogo
 
-    // condition : si el usuario es anonimo, se porporcionara algunos datos para que pueda probar la app sin autenticarse
-    if (getFirebaseAuth.currentUser!.isAnonymous) {
+    // condition : comprobamos si el usuario esta autenticado o es un usuario anonimo
+    if (getFirebaseAuth.currentUser.isAnonymous) {
+      // obtenemos datos de prueba para que el usaurio pueda probar la app sin autenticarse
       readAccountsInviteData();
     } else {
-      // obtenemos por parametro los datos de la cuenta de atentificación
-      Map map = Get.arguments as Map;
+      // GetX : obtenemos por parametro los datos de la cuenta de atentificación
+      Map arguments = Get.arguments;
       // verificamos y obtenemos los datos pasados por parametro
-      setUserAuth = map['currentUser'];
-      // obtenemos el id de la cuenta seleccionada si es que existe
-      map.containsKey('idAccount')
-          ? readAccountsData(idAccount: map['idAccount'])
-          : readAccountsData(idAccount: '');
+      setUserAuth = arguments['currentUser'];
+      // obtenemos el id de la cuenta seleccionada si es que existe 
+      readAccountsData(idAccount: arguments['idAccount']);
     }
   }
 
@@ -594,7 +587,7 @@ class HomeController extends GetxController {
           // ignore: avoid_print
           print("finish");
         },
-      ).show(context: getBuildContext);
+      ).show(context: getHomeBuildContext);
     }
   }
 
@@ -850,21 +843,22 @@ class HomeController extends GetxController {
   }
 
   void readAccountsData({required String idAccount}) {
+
     //default values'
     setUserAnonymous = false;
     setCatalogueCategoryList = [];
     setCatalogueProducts = [];
     setProductsOutstandingList = [];
     setProfileAccountSelected = ProfileAccountModel(creation: Timestamp.now());
-    getProfileAccountSelected.id = idAccount;
+    getProfileAccountSelected.id = idAccount; // asignamos el id de la cuenta
 
     // obtenemos las cuentas asociada a este email
     readUserAccountsList(email: getUserAuth.email ?? '');
     // obtenemos los datos de la cuenta
-    if (idAccount != '') {
+    if (idAccount!= '') {
       // firebase : obtenemos los datos de la cuenta
       Database.readProfileAccountModelFuture(idAccount).then((value) {
-        // ¿El documento existe?
+        // condition : ¿El documento existe?
         if (value.exists) {
           // subcription premium  : inicializamos la identidad de revenue cat
           initIdentityRevenueCat(); // inicializamos la identidad de revenue cat
@@ -872,11 +866,11 @@ class HomeController extends GetxController {
           //get profile account
           setProfileAccountSelected = ProfileAccountModel.fromDocumentSnapshot(documentSnapshot: value);
           // load
-          loadCashRegisters();
-          readDataAdminUser( email: getUserAuth.email ?? '', idAccount: idAccount);
-          readProductsCatalogue(idAccount: idAccount);
-          readAdminsUsers(idAccount: idAccount);
-          readListCategoryListFuture(idAccount: idAccount);
+          loadCashRegisters(); // obtenemos las cajas registradoras
+          readProductsCatalogue(idAccount: idAccount); // obtenemos los productos del catálogo
+          readListCategoryListFuture(idAccount: idAccount); // obtenemos las categorias creadas por el usuario
+          readDataAdminUser( email: getUserAuth.email ?? '', idAccount: idAccount); // obtenemos los datos del usuario administrador de la cuenta
+          readAdminsUsers(idAccount: idAccount);  // obtenemos los usuarios administradores de la cuenta
         }
       });
     }
