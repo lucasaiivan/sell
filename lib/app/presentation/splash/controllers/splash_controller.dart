@@ -26,8 +26,8 @@ class SplashController extends GetxController {
 
     /// Workers
     // Los trabajadores lo ayudarán y activarán devoluciones de llamadas específicas cuando ocurra un evento.
-    // ever - se llama cada vez que la variable Rx emite un nuevo valor.
-    // Se llama cada vez que cambia es estado la variable rx 'isSignIn'
+    // ever() - es un método de la librería GetX de Flutter que permite escuchar un observable 
+    //  y ejecutar una función (handleAuthStateChanged) cada vez que el valor del observable (isSignIn) cambia
     ever(isSignIn, handleAuthStateChanged);
 
     // StreamSubscription
