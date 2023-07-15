@@ -206,18 +206,7 @@ class AccountView extends GetView<AccountController> {
                   }
                   return null;
                 },
-              ),
-              // textfiel: username
-              /*TextField(
-                enabled: !controller.getSavingIndicator,
-                minLines: 1,
-                maxLines: 5,
-                keyboardType: TextInputType.multiline,
-                onChanged: (value) => controller.profileAccount.username = value,
-                decoration: const InputDecoration(filled: true,labelText: "Nombre de usuario"),
-                controller: TextEditingController(text: controller.profileAccount.username),
-                textInputAction: TextInputAction.next,
-              ), */ 
+              ), 
               divider,
               // textfiel: signo de moneda
               InkWell(

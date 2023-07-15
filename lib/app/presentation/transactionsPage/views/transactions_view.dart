@@ -33,7 +33,10 @@ class TransactionsView extends StatelessWidget {
 
     return GetBuilder<TransactionsController>(
       init: TransactionsController(),
-      initState: (_) {},
+      initState: (_) {
+        // init : inicializamos el controlador
+        Get.put(TransactionsController());
+      },
       builder: (_) {
         return Scaffold( 
           appBar: appbar(context: context),

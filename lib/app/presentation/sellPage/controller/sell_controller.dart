@@ -54,25 +54,25 @@ class SalesController extends GetxController {
     if(description==''){description=(homeController.listCashRegister.length+1).toString();}
     // set
     String uniqueId = Publications.generateUid(); // genera un id unico
-    homeController.cashRegister.id=uniqueId; // asigna el id unico a la caja
-    homeController.cashRegister.description=description; // asigna la descripcion a la caja 
-    homeController.cashRegister.initialCash = initialCash; // asigna el dinero inicial a la caja
-    homeController.cashRegister.expectedBalance += expectedBalance;  // asigna el dinero esperado a la caja al iniciar
+    homeController.cashRegisterActive.id=uniqueId; // asigna el id unico a la caja
+    homeController.cashRegisterActive.description=description; // asigna la descripcion a la caja 
+    homeController.cashRegisterActive.initialCash = initialCash; // asigna el dinero inicial a la caja
+    homeController.cashRegisterActive.expectedBalance += expectedBalance;  // asigna el dinero esperado a la caja al iniciar
     cashRegisterLocalSave(); // guarda el id de la caja en el dispositivo
     // firebase : guarda un documento de la caja registradora
-    Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(uniqueId).set(homeController.cashRegister.toJson());
+    Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(uniqueId).set(homeController.cashRegisterActive.toJson());
     update(); // actualiza la vista
   }  
   void closeCashRegisterDefault() {
     // cierre de la caja seleccionada
-    homeController.cashRegister.closure = DateTime.now(); // asigna la fecha de cierre
-    homeController.cashRegister.expectedBalance = homeController.cashRegister.getExpectedBalance; // actualizamos el balance de la caja actual 
+    homeController.cashRegisterActive.closure = DateTime.now(); // asigna la fecha de cierre
+    homeController.cashRegisterActive.expectedBalance = homeController.cashRegisterActive.getExpectedBalance; // actualizamos el balance de la caja actual 
     // firebase : guardamos un copia del documento de la caja en la colección de cajas cerradas
-    Database.refFirestoreRecords(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegister.id).set(homeController.cashRegister.toJson());
+    Database.refFirestoreRecords(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegisterActive.id).set(homeController.cashRegisterActive.toJson());
     // firebase : eliminamos el documento de la caja de la colección de cajas abiertas
-    Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegister.id).delete();
+    Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegisterActive.id).delete();
     // default values
-    homeController.cashRegister = CashRegister.initialData();
+    homeController.cashRegisterActive = CashRegister.initialData();
     update();
   }
   void cashRegisterOutFlow({required double amount,String description = ''}){
@@ -82,7 +82,7 @@ class SalesController extends GetxController {
     FirebaseFirestore  firebaseFirestoreInstance  = FirebaseFirestore.instance;
     firebaseFirestoreInstance.runTransaction((transaction) async {
       // Obtiene el documento actual
-      DocumentReference documentRef = Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegister.id);
+      DocumentReference documentRef = Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegisterActive.id);
       // creamos una transacción de firebase 
       DocumentSnapshot snapshot = await transaction.get(documentRef);
       // Verifica si el documento existe y contiene un campo 'numero'
@@ -105,7 +105,7 @@ class SalesController extends GetxController {
     FirebaseFirestore  firebaseFirestoreInstance  = FirebaseFirestore.instance;
     firebaseFirestoreInstance.runTransaction((transaction) async {
       // Obtiene el documento actual
-      DocumentReference documentRef = Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegister.id);
+      DocumentReference documentRef = Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegisterActive.id);
       // creamos una transacción de firebase 
       DocumentSnapshot snapshot = await transaction.get(documentRef);
       // Verifica si el documento existe y contiene un campo 'numero'
@@ -125,11 +125,11 @@ class SalesController extends GetxController {
     // incrementar monto de transaccion de caja
     //
     // firebase
-    if(homeController.cashRegister.id!=''){
+    if(homeController.cashRegisterActive.id!=''){
       FirebaseFirestore  firebaseFirestoreInstance  = FirebaseFirestore.instance;
       firebaseFirestoreInstance.runTransaction((transaction) async {
         // Obtiene el documento actual
-        DocumentReference documentRef = Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegister.id);
+        DocumentReference documentRef = Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegisterActive.id);
         // creamos una transacción de firebase 
         DocumentSnapshot snapshot = await transaction.get(documentRef);
         // Verifica si el documento existe y contiene un campo 'numero'
@@ -147,7 +147,7 @@ class SalesController extends GetxController {
     }
   } 
 
-  void cashRegisterLocalSave()async{  await GetStorage().write('cashRegisterID', homeController.cashRegister.id);}
+  void cashRegisterLocalSave()async{  await GetStorage().write('cashRegisterID', homeController.cashRegisterActive.id);}
   void upgradeCashRegister({required String id})async{
     await homeController.upgradeCashRegister(id: id);
     cashRegisterLocalSave();
@@ -333,8 +333,8 @@ class SalesController extends GetxController {
       listIdsProducts.add(element.toJson());
     }
     //  set values
-    getTicket.cashRegisterName = homeController.cashRegister.description.toString(); // nombre de la caja registradora
-    getTicket.cashRegisterId = homeController.cashRegister.id; // id de la caja registradora
+    getTicket.cashRegisterName = homeController.cashRegisterActive.description.toString(); // nombre de la caja registradora
+    getTicket.cashRegisterId = homeController.cashRegisterActive.id; // id de la caja registradora
     getTicket.id = id;
     getTicket.seller = homeController.getUserAuth.email!;
     getTicket.listPoduct = listIdsProducts;
