@@ -17,7 +17,10 @@ class CataloguePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<CataloguePageController>(
       init: CataloguePageController(),
-      initState: (_) {},
+      initState: (_) {
+        // init : inicializamos el controlador
+        Get.put(CataloguePageController());
+      },
       builder: (controller) {
         return Obx(() => Scaffold(
               appBar: appbar(context: context),

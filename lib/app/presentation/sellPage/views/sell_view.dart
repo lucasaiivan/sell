@@ -410,7 +410,7 @@ class SalesView extends StatelessWidget {
       );
     }
     // condition : si no hay caja abierta
-    if (homeController.cashRegister.id == '') {
+    if (homeController.cashRegisterActive.id == '') {
       // no hay caja abierta
       // view : button : iniciar caja
       return PopupMenuButton(
@@ -482,7 +482,7 @@ class SalesView extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
             child: Row(
               children: [
-                Text('Caja ${homeController.cashRegister.description}',
+                Text('Caja ${homeController.cashRegisterActive.description}',
                     style: TextStyle(color: homeController.getDarkMode? Colors.black: Colors.white)),
                 const SizedBox(width: 5),
                 Icon(Icons.keyboard_arrow_down_rounded,
@@ -529,7 +529,7 @@ class SalesView extends StatelessWidget {
                         TextSpan(
                           text: Publications.getFormatoPrecio(
                               monto: homeController
-                                  .cashRegister.getExpectedBalance),
+                                  .cashRegisterActive.getExpectedBalance),
                           style: const TextStyle(
                               fontWeight: FontWeight.w600, fontSize: 18),
                         ),
@@ -551,12 +551,12 @@ class SalesView extends StatelessWidget {
                               color: Colors.green.shade400,
                               fontSize: 18,
                               fontWeight: FontWeight.w600),
-                          children: homeController.cashRegister.cashInFlow == 0
+                          children: homeController.cashRegisterActive.cashInFlow == 0
                               ? null
                               : <TextSpan>[
                                   TextSpan(
                                     text:
-                                        '\n${Publications.getFormatoPrecio(monto: homeController.cashRegister.cashInFlow)}',
+                                        '\n${Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.cashInFlow)}',
                                     style: TextStyle(
                                         fontWeight: FontWeight.w600,
                                         fontSize: 12,
@@ -583,12 +583,12 @@ class SalesView extends StatelessWidget {
                               color: Colors.red.shade400,
                               fontSize: 18,
                               fontWeight: FontWeight.w600),
-                          children: homeController.cashRegister.cashOutFlow == 0
+                          children: homeController.cashRegisterActive.cashOutFlow == 0
                               ? null
                               : <TextSpan>[
                                   TextSpan(
                                     text:
-                                        '\n${Publications.getFormatoPrecio(monto: homeController.cashRegister.cashOutFlow)}',
+                                        '\n${Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.cashOutFlow)}',
                                     style: TextStyle(
                                         fontWeight: FontWeight.w600,
                                         fontSize: 12,
@@ -1096,7 +1096,7 @@ class _CashRegisterState extends State<CashRegister> {
   void initState() {
     super.initState();
     //  set : values
-    homeController.cashRegister.balance =
+    homeController.cashRegisterActive.balance =
         0; // reseteamos el balance  para evitar que se acumule
   }
 
@@ -1255,7 +1255,7 @@ class _CashRegisterState extends State<CashRegister> {
               Row(children: [
                 Text('Descripción', style: textStyleDescription),
                 const Spacer(),
-                Text(homeController.cashRegister.description,
+                Text(homeController.cashRegisterActive.description,
                     style: textStyleValue)
               ]),
 
@@ -1266,7 +1266,7 @@ class _CashRegisterState extends State<CashRegister> {
                 const Spacer(),
                 Text(
                     Publications.getFechaPublicacionFormating(
-                        dateTime: homeController.cashRegister.opening),
+                        dateTime: homeController.cashRegisterActive.opening),
                     style: textStyleValue)
               ]),
               // view info : efectivo incial
@@ -1276,7 +1276,7 @@ class _CashRegisterState extends State<CashRegister> {
                 const Spacer(),
                 Text(
                     Publications.getFormatoPrecio(
-                        monto: homeController.cashRegister.expectedBalance),
+                        monto: homeController.cashRegisterActive.expectedBalance),
                     style: textStyleValue)
               ]),
               // view info : cantidad de ventas
@@ -1284,7 +1284,7 @@ class _CashRegisterState extends State<CashRegister> {
               Row(children: [
                 Text('Ventas', style: textStyleDescription),
                 const Spacer(),
-                Text(homeController.cashRegister.sales.toString(),
+                Text(homeController.cashRegisterActive.sales.toString(),
                     style: textStyleValue)
               ]),
               // view info : facturacion
@@ -1294,7 +1294,7 @@ class _CashRegisterState extends State<CashRegister> {
                 const Spacer(),
                 Text(
                     Publications.getFormatoPrecio(
-                        monto: homeController.cashRegister.billing),
+                        monto: homeController.cashRegisterActive.billing),
                     style: textStyleValue)
               ]),
               // view info : egresos
@@ -1304,7 +1304,7 @@ class _CashRegisterState extends State<CashRegister> {
                 const Spacer(),
                 Text(
                     Publications.getFormatoPrecio(
-                        monto: homeController.cashRegister.cashOutFlow),
+                        monto: homeController.cashRegisterActive.cashOutFlow),
                     style: textStyleValue.copyWith(color: Colors.red.shade300))
               ]),
               // view info : ingresos
@@ -1314,7 +1314,7 @@ class _CashRegisterState extends State<CashRegister> {
                 const Spacer(),
                 Text(
                     Publications.getFormatoPrecio(
-                        monto: homeController.cashRegister.cashInFlow),
+                        monto: homeController.cashRegisterActive.cashInFlow),
                     style: textStyleValue)
               ]),
               // divider
@@ -1326,7 +1326,7 @@ class _CashRegisterState extends State<CashRegister> {
                 Text('Balance esperado en la caja',
                     style: textStyleDescription),
                 const Spacer(),
-                Text(Publications.getFormatoPrecio(monto: homeController.cashRegister.getExpectedBalance),style: textStyleValue)
+                Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.getExpectedBalance),style: textStyleValue)
               ]),
               const SizedBox(height: 20),
               // textfield : Monto en caja
@@ -1344,7 +1344,7 @@ class _CashRegisterState extends State<CashRegister> {
                       onChanged: (value) {
                         setState(() {
                           // get diference
-                          homeController.cashRegister.balance =
+                          homeController.cashRegisterActive.balance =
                               moneyMaskedTextController.numberValue;
                         });
                       },
@@ -1352,14 +1352,14 @@ class _CashRegisterState extends State<CashRegister> {
                   : Container(),
               // text : diferencia
               confirmCloseState ? const SizedBox(height: 20) : Container(),
-              homeController.cashRegister.getDifference == 0
+              homeController.cashRegisterActive.getDifference == 0
                   ? Container()
                   : confirmCloseState
                       ? Row(children: [
                           Text('Diferencia', style: textStyleDescription),
                           const Spacer(),
                           // text : monto de la diferencia
-                          Text(Publications.getFormatoPrecio(monto: homeController.cashRegister.getDifference),style: textStyleValue.copyWith(color: homeController.cashRegister.getDifference<0?Colors.red.shade300: Colors.green.shade300))
+                          Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.getDifference),style: textStyleValue.copyWith(color: homeController.cashRegisterActive.getDifference<0?Colors.red.shade300: Colors.green.shade300))
                         ])
                       : Container(),
             ],
@@ -1376,7 +1376,7 @@ class _CashRegisterState extends State<CashRegister> {
                 if (confirmCloseState) {
                   // comprobamos si el usuario ingreso un monto en caja
                   if (moneyMaskedTextController.numberValue != 0) {
-                    homeController.cashRegister.balance =
+                    homeController.cashRegisterActive.balance =
                         moneyMaskedTextController.numberValue;
                   }
                   // cerramos la caja

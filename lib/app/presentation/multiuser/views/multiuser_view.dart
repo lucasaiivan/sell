@@ -23,7 +23,10 @@ class LoadingInitView extends StatelessWidget {
 
     return GetBuilder<MultiUserController>(
       init: MultiUserController(),
-      initState: (_) {},
+      initState: (_) {
+        // init : inicializamos el controlador
+        Get.put(MultiUserController());
+      },
       builder: (controller) {
 
         return Scaffold( 

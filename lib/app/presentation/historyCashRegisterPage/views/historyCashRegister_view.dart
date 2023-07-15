@@ -18,7 +18,10 @@ class HistoryCashRegisterView extends StatelessWidget {
 
     return GetBuilder<HistoryCashRegisterController>(
       init: HistoryCashRegisterController(),
-      initState: (_) {},
+      initState: (_) {
+        // init : inicializamos el controlador
+        Get.put(HistoryCashRegisterController());
+      },
       builder: (_) {
         return Scaffold(
           appBar: appbar(context: context),

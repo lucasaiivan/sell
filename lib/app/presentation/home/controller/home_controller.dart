@@ -148,7 +148,7 @@ class HomeController extends GetxController {
   }
 
   // cash register  //
-  CashRegister cashRegister = CashRegister(
+  CashRegister cashRegisterActive = CashRegister(
       id: '',
       sales: 0,
       description: '',
@@ -161,35 +161,36 @@ class HomeController extends GetxController {
       balance: 0.0,
       cashInFlowList: [],
       cashOutFlowList: [],
-      initialCash: 0.0);
+      initialCash: 0.0,
+    );
   List<CashRegister> listCashRegister = [];
   void loadCashRegisters() {
+    // description : carga las cajas registradoras activas de la cuenta seleccionada
     // firebase : create 'Stream' de la  collecion de cajas registradoras
-    Stream<QuerySnapshot<Map<String, dynamic>>> db =
-        Database.readCashRegistersStream(
-            idAccount: getProfileAccountSelected.id);
+    Stream<QuerySnapshot<Map<String, dynamic>>> db = Database.readCashRegistersStream(idAccount: getProfileAccountSelected.id);
     db.listen((event) {
+      // default values
       listCashRegister.clear(); // limpiamos la lista de cajas
-
+      // condition : si hay cajas registradoras
       if (event.docs.isNotEmpty) {
         // añadimos las cajas disponibles
-        for (var element in event.docs) {
+        for (var element in event.docs) { 
           listCashRegister.add(CashRegister.fromMap(element.data()));
         }
-        upgradeCashRegister();
+        upgradeCashRegister(); // actualizamos el arqueo de caja actual activo
       }
     });
   }
 
   upgradeCashRegister({String id = ''}) async {
-    // description : busca un coincidencia con la id de la caja seleccionada que se guardo para que persista en el dispositivo en la lista de cajas 'getListCashRegister'
-    // y la actualiza con la caja actual
+    // description : si se selecciono una, actualiza el arqueo de caja actual 
+    // condition : si no se actualiza el arqueo de caja actual verificamos si hay un arqueo de caja seleccionada 
     if (id == '') {
       id = GetStorage().read('cashRegisterID') ?? '';
     }
     for (CashRegister item in listCashRegister) {
       if (item.id == id) {
-        cashRegister = item;
+        cashRegisterActive = item; // actualizamos el arqueo de caja actual activo
         update();
         break;
       }
@@ -866,7 +867,7 @@ class HomeController extends GetxController {
           //get profile account
           setProfileAccountSelected = ProfileAccountModel.fromDocumentSnapshot(documentSnapshot: value);
           // load
-          loadCashRegisters(); // obtenemos las cajas registradoras
+          loadCashRegisters(); // obtenemos las cajas registradoras activas
           readProductsCatalogue(idAccount: idAccount); // obtenemos los productos del catálogo
           readListCategoryListFuture(idAccount: idAccount); // obtenemos las categorias creadas por el usuario
           readDataAdminUser( email: getUserAuth.email ?? '', idAccount: idAccount); // obtenemos los datos del usuario administrador de la cuenta
@@ -924,6 +925,7 @@ class HomeController extends GetxController {
       //  set values
       setProductsOutstandingList = finalList;
       try {
+        // actualizamos la vista de ventas
         SalesController salesController = Get.find();
         salesController.update();
       } catch (_) {}
@@ -932,8 +934,7 @@ class HomeController extends GetxController {
 
   void readProductsCatalogue({required String idAccount}) {
     // obtenemos los obj(productos) del catalogo de la cuenta del negocio
-    Stream<QuerySnapshot<Map<String, dynamic>>> streamSubscription =
-        Database.readProductsCatalogueStream(id: idAccount);
+    Stream<QuerySnapshot<Map<String, dynamic>>> streamSubscription = Database.readProductsCatalogueStream(id: idAccount);
     streamSubscription.listen((value) {
       //  values
       List<ProductCatalogue> list = [];
@@ -946,6 +947,7 @@ class HomeController extends GetxController {
       //  obtenemos los productos más vendidos
       getTheBestSellingProducts(idAccount: idAccount);
       setCatalogueProducts = list;
+
     }).onError((error) {
       // error
       setCatalogueProducts = [];
@@ -1090,8 +1092,7 @@ class HomeController extends GetxController {
     // save key/values Storage
     GetStorage().write('idAccount', idAccount);
     // navegar hacia otra pantalla
-    Get.offAllNamed(Routes.HOME,
-        arguments: {'currentUser': getUserAuth, 'idAccount': idAccount});
+    Get.offAllNamed(Routes.HOME,arguments: {'currentUser': getUserAuth, 'idAccount': idAccount});
   }
 
   // BottomSheet - Getx

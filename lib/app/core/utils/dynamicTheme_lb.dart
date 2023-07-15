@@ -13,10 +13,10 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 export 'package:animate_do/animate_do.dart';
 
-class ThemesDataApp {
-
-  Color colorDark = const Color.fromRGBO(43, 45, 57, 1);
-  Color colorLight = const Color.fromRGBO(247, 245, 242, 1); 
+class ThemesDataApp { 
+  // get static
+  static Color colorDark = const Color.fromRGBO(43, 45, 57, 1);
+  static Color colorLight = const Color.fromRGBO(247, 245, 242, 1);
 
   final ColorScheme lightColorScheme = const ColorScheme(
     brightness: Brightness.light,

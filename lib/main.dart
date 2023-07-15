@@ -1,6 +1,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart'; 
 import 'app/core/routes/app_pages.dart';
@@ -34,6 +35,14 @@ Future<void> main() async {
 
   // var : theme
   bool isDark = ThemeService.loadisDArkMode();  
+
+  // style : setSystemUIOverlayStyle
+  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    statusBarColor: isDark ? ThemesDataApp.colorDark : ThemesDataApp.colorLight,
+    statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+    systemNavigationBarColor: isDark ? ThemesDataApp.colorDark : ThemesDataApp.colorLight,
+    systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+  ));
 
   runApp(GetMaterialApp(
     title: "Punto de Venta",
