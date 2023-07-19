@@ -29,9 +29,9 @@ Future<void> main() async {
     PurchasesConfiguration configuration = PurchasesConfiguration(googleApiKey)..observerMode = false;
     await Purchases.configure(configuration); // configuramos la compra
   }
-
-  await GetStorage.init();
-  SplashBinding().dependencies();
+  // GetStorage : local storage
+  await GetStorage.init(); 
+  SplashBinding().dependencies(); 
 
   // var : theme
   bool isDark = ThemeService.loadisDArkMode();  
