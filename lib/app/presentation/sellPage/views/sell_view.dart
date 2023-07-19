@@ -383,7 +383,7 @@ class SalesView extends StatelessWidget {
     // condition : si no es premium se muestra el boton de suscribirse a premium 
     if(homeController.getIsSubscribedPremium==false){ 
       // condition : si el usuario de la cuenta no es administrador no se muestra el boton de suscribirse a premium
-      if(homeController.getProfileAdminUser.admin == false){
+      if(homeController.getProfileAdminUser.email !='' && homeController.getProfileAdminUser.admin == false){
         return Container();
       }
       // button : suscribirse a premium
@@ -847,69 +847,85 @@ class SalesView extends StatelessWidget {
     // values
     const Color accentColor = Colors.white;
     Color? background = Colors.green.shade300;
-    
+    Color buttomReceiptAccentColor = salesController.homeController.getIsSubscribedPremium?Colors.black:Colors.amber;
+    Color buttomReceiptColor = salesController.homeController.getIsSubscribedPremium?Colors.blue.shade100:Colors.amber.shade100;
 
     return Theme(
       data: ThemeData(brightness: Brightness.dark),
-      child: ElasticIn(
-        child: Material(
-          borderRadius: const BorderRadius.all(Radius.circular(8)),
-          color: background,
-          child: Column(
-            children: [
-              Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.check_outlined, size: 100, color: accentColor),
-                      const SizedBox(height: 25),
-                      const Text('Hecho',style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold,color: accentColor)),
-                      // text : monto del precio total del ticket
-                      Text( Publications.getFormatoPrecio(monto: salesController.getRecibeTicket.priceTotal),style: const TextStyle(fontSize: 20,fontWeight: FontWeight.w300,color: accentColor)),
-                    ],
-                  ),
+      child: Column(
+        children: [
+          Expanded(
+            child: ElasticIn(
+              child: Material(
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                color: Colors.white,
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        width: double.infinity,
+                        color: background,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const SizedBox(height: 50),
+                            const Icon(Icons.check_circle_outline, size: 100, color: accentColor),
+                            const SizedBox(height: 12),
+                            const Text('Hecho',style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold,color: accentColor)),
+                            // text : monto del precio total del ticket 
+                            Expanded(child: Center( child: Text( 'Total ${Publications.getFormatoPrecio(monto: salesController.getRecibeTicket.priceTotal)}',style: const TextStyle(fontSize: 30,fontWeight: FontWeight.w300)))),
+                          ],
+                        ),
+                      ),
+                    ), 
+                    //view : buttons
+                    Container(
+                      color: background.withOpacity(0.0),
+                      child: Column( 
+                        children: [
+                          const SizedBox(height: 20),
+                          // elevateButton : boton con un icon y un texto  que diga 'Recibo'
+                          /* ComponentApp().button( 
+                            elevation: 0,
+                            text: 'Recibo',
+                            colorAccent: buttomReceiptAccentColor,
+                            padding: const EdgeInsets.symmetric(horizontal: 12,vertical:5),
+                            icon: Icon(salesController.homeController.getIsSubscribedPremium==false?Icons.star_rounded:Icons.receipt_long_outlined,color: buttomReceiptAccentColor),
+                            colorButton: buttomReceiptColor,  
+                            onPressed: () {
+                              if(salesController.homeController.getIsSubscribedPremium==false){
+                                homeController.showModalBottomSheetSubcription();
+                              }else{
+                                //views 
+                                salesController.setStateConfirmPurchase = false;
+                                salesController.setTicketView = false; 
+                              }
+                            },
+                          ),   */
+                          // elevateButton : boton con un icon y un texto  que diga 'ok'
+                          ComponentApp().button(
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(horizontal: 12,vertical:5),
+                            icon: const Text('Ok',style:TextStyle(color: Colors.white)),
+                            colorButton: Colors.blue,  
+                            onPressed: () {
+                              //views
+                              salesController.setStateConfirmPurchase = false;
+                              salesController.setTicketView = false;
+                              // default values
+                              salesController.setTicket = TicketModel(creation: Timestamp.now(), listPoduct: []);
+                            },
+                          ), 
+                        const SizedBox(height: 20), 
+                        ],
+                      ),
+                    ), 
+                  ],
                 ),
               ),
-              //view : buttons
-              Column( 
-                children: [
-                  // elevateButton : boton con un icon y un texto  que diga 'Recibo'
-                  /* ComponentApp().button( 
-                    text: 'Recibo',
-                    colorAccent: Colors.black,
-                    padding: const EdgeInsets.symmetric(horizontal: 12,vertical:5),
-                    icon: Icon(salesController.homeController.getIsSubscribedPremium==false?Icons.star_rounded:Icons.receipt_long_outlined,color: Colors.black),
-                    colorButton: Colors.white,  
-                    onPressed: () {
-                      if(salesController.homeController.getIsSubscribedPremium==false){
-                        homeController.showModalBottomSheetSubcription();
-                      }else{
-                        //views 
-                        salesController.setStateConfirmPurchase = false;
-                        salesController.setTicketView = false; 
-                      }
-                    },
-                  ),  */
-                  // elevateButton : boton con un icon y un texto  que diga 'ok'
-                  ComponentApp().button(
-                    padding: const EdgeInsets.symmetric(horizontal: 12,vertical:5),
-                    icon: const Text('Ok',style:TextStyle(color: Colors.white)),
-                    colorButton: Colors.blue,  
-                    onPressed: () {
-                      //views
-                      salesController.setStateConfirmPurchase = false;
-                      salesController.setTicketView = false;
-                      // default values
-                      salesController.setTicket = TicketModel(creation: Timestamp.now(), listPoduct: []);
-                    },
-                  ), 
-                ],
-              ),
-            const SizedBox(height: 20), 
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -934,10 +950,8 @@ class SalesView extends StatelessWidget {
               controller.textEditingControllerAddFlashDescription.text = '';
               controller.showDialogQuickSale();
             },
-            child: const Icon(
-              Icons.flash_on_rounded,
-              color: Colors.white,
-            )), 
+            child: const Icon(Icons.flash_on_rounded,color: Colors.white),
+        ), 
         // FloatingActionButton : determinar si es un dispositivo movil o web para mostrar este buton
         const SizedBox(width: kIsWeb?0:8), 
         kIsWeb? const SizedBox(width: kIsWeb?0:8):FloatingActionButton(

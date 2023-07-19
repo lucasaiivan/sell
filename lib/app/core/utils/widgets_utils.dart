@@ -720,7 +720,7 @@ class ComponentApp extends StatelessWidget {
     return avatar;
   }
   // BUTTONS 
-  Widget button( {double width = double.infinity,bool disable = false,required Widget icon,String text = '',required dynamic onPressed,EdgeInsets padding =const EdgeInsets.symmetric(horizontal: 12, vertical: 12),Color colorButton = Colors.purple,Color colorAccent = Colors.white}) {
+  Widget button( {double elevation=2,double width = double.infinity,bool disable = false,required Widget icon,String text = '',required dynamic onPressed,EdgeInsets padding =const EdgeInsets.symmetric(horizontal: 12, vertical: 12),Color colorButton = Colors.purple,Color colorAccent = Colors.white}) {
     // button : personalizado
     return FadeInRight(
         child: Padding(
@@ -730,6 +730,7 @@ class ComponentApp extends StatelessWidget {
         child: ElevatedButton.icon(
           onPressed: disable?null:onPressed,
           style: ElevatedButton.styleFrom(
+            elevation: elevation,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
               padding: const EdgeInsets.all(16.0),
               backgroundColor: colorButton,
