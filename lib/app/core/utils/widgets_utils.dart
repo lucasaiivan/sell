@@ -100,6 +100,10 @@ class WidgetButtonListTile extends StatelessWidget {
     // others controllers
     final HomeController homeController = Get.find();
 
+    // var 
+    bool editAccount =  homeController.getProfileAdminUser.editAccount && homeController.getProfileAccountSelected.id == perfilNegocio.id;
+
+    // condition : si el perfil de negocio no tiene id no se muestra
     if (perfilNegocio.id == '') { return Container(); }
 
     // row : si la vista es en forma de lista horizontal , se muesta una vista reducida de el avatar y el nombre debajo
@@ -195,8 +199,8 @@ class WidgetButtonListTile extends StatelessWidget {
           ),
           dense: true,
           title: Text(perfilNegocio.name),
-          subtitle: homeController.getProfileAccountSelected.id != perfilNegocio.id ? null  : Text( homeController.getProfileAdminUser.superAdmin && homeController.getProfileAccountSelected.id == perfilNegocio.id?'Administrador':'Tienes que ser administrador para editar esta cuenta'  ),
-          trailing: homeController.getProfileAdminUser.superAdmin && homeController.getProfileAccountSelected.id == perfilNegocio.id ? TextButton(onPressed: (){
+          subtitle: homeController.getProfileAccountSelected.id != perfilNegocio.id ? null  : Text( editAccount ?'Administrador':'Tienes que ser administrador para editar esta cuenta'  ),
+          trailing:  editAccount ? TextButton(onPressed: (){
               Get.back();
               Get.toNamed(Routes.ACCOUNT);
           }, child: const Text('Editar')): Radio(
@@ -477,7 +481,7 @@ class WidgetDrawer extends StatelessWidget {
     final HomeController homeController = Get.find<HomeController>();
 
     // variables
-    bool superAdmin = homeController.getProfileAdminUser.superAdmin;
+    UserModel user = homeController.getProfileAdminUser.copyWith();
     homeController.getFirebaseAuth.currentUser!.isAnonymous; 
 
     // widgets
@@ -500,7 +504,7 @@ class WidgetDrawer extends StatelessWidget {
               child: ComponentApp().userAvatarCircle(urlImage: homeController.getProfileAccountSelected.image),
           ),
           title: Text(homeController.getIdAccountSelected == ''? 'Seleccionar una cuenta': homeController.getProfileAccountSelected.name,maxLines: 1,overflow: TextOverflow.ellipsis),
-          subtitle: homeController.getIdAccountSelected == ''? null: Text( superAdmin? 'Administrador': 'Usuario estandar'),
+          subtitle: homeController.getIdAccountSelected == ''? null: Text( user.admin? 'Administrador': 'Usuario estandar'),
           trailing: const Icon(Icons.arrow_right_rounded),
           onTap: () {
             homeController.showModalBottomSheetSelectAccount();
@@ -508,7 +512,7 @@ class WidgetDrawer extends StatelessWidget {
         ),  
         // funciones premium //
         // condition : si el usuario de la cuenta no es administrador no se muestra el boton de suscribirse a premium
-        homeController.getProfileAdminUser.admin==false?Container():
+        user.admin==false?Container():
         ListTile(
           tileColor: homeController.getIsSubscribedPremium?null:Colors.amber.withOpacity(0.05),
           iconColor:  Colors.amber, 
@@ -529,23 +533,23 @@ class WidgetDrawer extends StatelessWidget {
             title: const Text('Vender'),
             onTap: () => homeController.setIndexPage = 0),
         // historial de caja
-        superAdmin?ListTile(
+        user.historyArqueo?ListTile(
           selected: homeController.getIndexPage == 1,
           leading: const Icon(Icons.manage_search_rounded),
           title: const Text('Historial de caja'),
           onTap: () => homeController.setIndexPage = 1):Container(),
         // transacciones
-        superAdmin?ListTile(
+        user.transactions?ListTile(
           selected: homeController.getIndexPage == 2,
           leading: const Icon(Icons.receipt_long_rounded),
           title: const Text('Transacciones'),
           onTap: () => homeController.setIndexPage = 2):Container(),
-        superAdmin?ListTile(
+        user.catalogue?ListTile(
           selected: homeController.getIndexPage == 3,
           leading: const Icon(Icons.apps_rounded),
           title: const Text('Catálogo'),
           onTap: () => homeController.setIndexPage = 3):Container(),
-        superAdmin?ListTile(
+        user.multiuser?ListTile(
           selected: homeController.getIndexPage == 4,
           leading: const Icon(Icons.add_moderator_outlined),
           title: const Text('Multi Usuario'),
@@ -895,8 +899,7 @@ class LogoPremium extends StatelessWidget {
   }
 }
 
-class ImageProductAvatarApp extends StatelessWidget {
-  late final bool productAvatar;
+class ImageProductAvatarApp extends StatelessWidget { 
   late final bool iconAdd;
   late final bool favorite;
   late final String url;
@@ -907,7 +910,7 @@ class ImageProductAvatarApp extends StatelessWidget {
   final VoidCallback?  onTap;
   late final Color canvasColor;
   // ignore: prefer_const_constructors_in_immutables
-  ImageProductAvatarApp({Key? key,this.iconAdd=false,this.productAvatar=false,this.canvasColor=Colors.black12,this.favorite=false,this.url='',this.size=50,this.radius=12,this.description='',this.path='', this.onTap }) : super(key: key);
+  ImageProductAvatarApp({Key? key,this.iconAdd=false,this.canvasColor=Colors.black12,this.favorite=false,this.url='',this.size=50,this.radius=12,this.description='',this.path='', this.onTap }) : super(key: key);
 
   // avatar que se va usar en toda la app, especialemnte en los 'ListTile'
 
@@ -918,7 +921,8 @@ class ImageProductAvatarApp extends StatelessWidget {
      // var
      final bool darkMode = Theme.of(context).brightness==Brightness.dark;
      // style 
-     Color iconColor = darkMode?Colors.white:Colors.black;
+     Color backgroundColor = Colors.grey.withOpacity(0.2);
+     Color iconColor = darkMode?Colors.white38 :Colors.white70;
 
 
     /// widgets
@@ -926,14 +930,13 @@ class ImageProductAvatarApp extends StatelessWidget {
     if(iconAdd){
       imageDefault = AnimatedContainer(
       duration: const Duration(milliseconds: 500),
-      color: iconColor,
-      child: const Opacity(opacity: 0.5,child: Icon( Icons.add_a_photo)));
-    }
-    if(productAvatar){
+      color: backgroundColor,
+      child: Icon( Icons.add_a_photo,color: iconColor,));
+    }else {
       imageDefault = AnimatedContainer(
       duration: const Duration(milliseconds: 500),
-      color: iconColor,
-      child: Image.asset('assets/default_image.png',fit: BoxFit.cover,color: darkMode?Colors.white12 :Colors.grey.shade200,));
+      color: backgroundColor,
+      child: Image.asset('assets/default_image.png',fit: BoxFit.cover,color: iconColor,));
     }
     return SizedBox(
       width: size,height: size,

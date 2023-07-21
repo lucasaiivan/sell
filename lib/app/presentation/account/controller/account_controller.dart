@@ -151,7 +151,7 @@ class AccountController extends GetxController {
       homeController.setProfileAccountSelected = profileAccount.copyWith();
 
       // si la cuenta no existe, se crea una nueva de lo contrario de actualiza los datos
-      newAccount? createAccount(data: profileAccount.toJson()): updateAccount(data: profileAccount.toJson());
+      newAccount? createAccount(data: profileAccount ): updateAccount(data: profileAccount.toJson());
     }
   }
 
@@ -174,27 +174,36 @@ class AccountController extends GetxController {
     }
   }
 
-  Future<void> createAccount({required Map<String, dynamic> data}) async {
+  Future<void> createAccount({required ProfileAccountModel data}) async {
     // Esto guarda un documento con los datos de la cuenta por crear
 
     // vales
     UserModel user = UserModel(
+        account: data.id,
         email: homeController.getUserAuth.email ?? 'null',
         superAdmin: true,
         admin: true,
+        arqueo: true,
+        catalogue: true,
+        editAccount: true,
+        historyArqueo: true,
+        multiuser: true,
+        personalized: false, 
+        transactions: true,
+
       );
     //...
-    if (data['id'] != '') {
+    if (data.id != '') {
       // referencias
-      var documentReferencer = Database.refFirestoreAccount().doc(data['id']);
-      var refFirestoreUserAccountsList = Database.refFirestoreUserAccountsList(email: user.email).doc(data['id']);
-      var refFirestoreAccountsUsersList = Database.refFirestoreAccountsUsersList(idAccount: data['id']) .doc(user.email);
+      var documentReferencer = Database.refFirestoreAccount().doc(data.id);
+      var refFirestoreUserAccountsList = Database.refFirestoreUserAccountsList(email: user.email).doc(data.id);
+      var refFirestoreAccountsUsersList = Database.refFirestoreAccountsUsersList(idAccount: data.id) .doc(user.email);
 
       // se crea un nuevo documento
       await documentReferencer.set(data).whenComplete(() {
         refFirestoreAccountsUsersList.set(user.toJson(),SetOptions(merge: true));
-        refFirestoreUserAccountsList.set(Map<String, dynamic>.from({'id':data['id'],'superAdmin':true}),SetOptions(merge: true));
-        homeController.accountChange(idAccount: data['id']);
+        refFirestoreUserAccountsList.set(user.toJson(),SetOptions(merge: true));
+        homeController.accountChange(idAccount: data.id);
         Get.back();
       }).catchError((e) {
         setSavingIndicator = false;
