@@ -2,42 +2,136 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserModel {
   UserModel({
+    this.account = "", // el ID de la cuenta administrada por defecto es el ID del usuario quien lo creo
+    this.email = '', // email del usuario
     this.superAdmin = false, // Super administrador es el usaurio que creo la cuenta
     this.admin = false, // permiso de administrador del usuario para administrar la cuenta
-    this.email = '',
+    this.personalized = false, // permisos personalizado para el usuario
+    // ... 
+    this.arqueo = false, // crear arqueo de caja
+    this.historyArqueo = false, // ver y eliminar registros de arqueo de caja
+    this.transactions = false, // ver y eliminar registros de transacciones
+    this.catalogue = false, // ver, editar y eliminar productos del catalogo
+    this.multiuser = false, // ver, editar y eliminar usuarios de la cuenta
+    this.editAccount = false, // editar la cuenta
   });
 
-  bool superAdmin = false;
-  bool admin = false;
-  String email = '';
+  String account = ""; // el ID de la cuenta administrada por defecto es el ID del usuario quien lo creo
+  String email = ''; // email del usuario
+  bool superAdmin = false; // Super administrador es el usaurio que creo la cuenta
+  bool admin = false; // permiso de administrador 
+  // permisos personalizados
+  bool personalized = false;
+  // ...  
+  bool arqueo = false; // crear arqueo de caja
+  bool historyArqueo = false; // ver y eliminar registros de arqueo de caja
+  bool transactions = false; // ver y eliminar registros de transacciones
+  bool catalogue = false;  // ver, editar y eliminar productos del catalogo
+  bool multiuser = false;  // ver, editar y eliminar usuarios de la cuenta
+  bool editAccount = false; // editar la cuenta
+
 
   factory UserModel.fromDocument(DocumentSnapshot doc) {
     Map data = doc.data() as Map;
     return UserModel(
+      account: doc["account"],
+      email: data.containsKey("email") ? doc["email"] : '',
       superAdmin: data.containsKey("superAdmin") ? doc["superAdmin"] : false,
       admin: data.containsKey("admin") ? doc["admin"] : false,
-      email: data.containsKey("email") ? doc["email"] : '',
+      personalized: data.containsKey("personalized") ? doc["personalized"] : false,
+      // ... 
+      arqueo: data.containsKey("arqueo") ? doc["arqueo"] : false,
+      historyArqueo: data.containsKey("historyArqueo") ? doc["historyArqueo"] : false,
+      transactions: data.containsKey("transactions") ? doc["transactions"] : false,
+      catalogue: data.containsKey("catalogue") ? doc["catalogue"] : false,
+      multiuser: data.containsKey("multiuser") ? doc["multiuser"] : false,
+      editAccount: data.containsKey("editAccount") ? doc["editAccount"] : false,
+
     );
+    
   }
 
-  Map<String, dynamic> toJson() => {"superAdmin": superAdmin,"email": email};
+  Map<String, dynamic> toJson() => {
+        "account": account,
+        "email": email,
+        "superAdmin": superAdmin,
+        "admin": admin,
+        // permisos personalizados
+        "personalized": personalized, 
+        "arqueo": arqueo,
+        "historyArqueo": historyArqueo,
+        "transactions": transactions,
+        "catalogue": catalogue,
+        "multiuser": multiuser,
+        "editAccount": editAccount,
+    };
 
   factory UserModel.fromMap(Map data) {
     return UserModel(
+      account: data['account'] ?? '',
+      email: data['email'] ?? '',
       superAdmin: data['superAdmin'] ?? false,
       admin: data['admin'] ?? false,
-      email: data['email'] ?? '',
+      personalized: data['personalized'] ?? false,
+      // ... 
+      arqueo: data['arqueo'] ?? false,
+      historyArqueo: data['historyArqueo'] ?? false,
+      transactions: data['transactions'] ?? false,
+      catalogue: data['catalogue'] ?? false,
+      multiuser: data['multiuser'] ?? false,
+      editAccount: data['editAccount'] ?? false,
     );
   }
 
-  UserModel.fromDocumentSnapshot({required DocumentSnapshot documentSnapshot}) {
+  UserModel.fromDocumentSnapshot({required DocumentSnapshot documentSnapshot}) { 
     // get
-    Map data = documentSnapshot.data() as Map;
+    late Map data= {};
+    if (documentSnapshot.data() != null) {data = documentSnapshot.data() as Map; }
 
     //  set
-    superAdmin = data['superAdmin'] ?? false;
-    admin =superAdmin?true:data['admin'] ?? false;
-    email = data["email"] ?? '';
+    account = data.containsKey('account') ? data['account'] : documentSnapshot.id;
+    email = data.containsKey('email') ? data['email'] : '';
+    superAdmin = data.containsKey('superAdmin') ? data['superAdmin'] : false;
+    admin = data.containsKey('admin') ? data['admin'] : false;
+    personalized = data.containsKey('personalized') ? data['personalized'] : false;
+    // ... 
+    arqueo = data.containsKey('arqueo') ? data['arqueo'] : false;
+    historyArqueo = data.containsKey('historyArqueo') ? data['historyArqueo'] : false;
+    transactions = data.containsKey('transactions') ? data['transactions'] : false;
+    catalogue = data.containsKey('catalogue') ? data['catalogue'] : false;
+    multiuser = data.containsKey('multiuser') ? data['multiuser'] : false;
+    editAccount = data.containsKey('editAccount') ? data['editAccount'] : false;
+  }
+
+  UserModel copyWith({
+    String? id,
+    String? email,
+    bool? superAdmin,
+    bool? admin,
+    bool? personalized,
+    // ...
+    bool? sell,
+    bool? arqueo,
+    bool? historyArqueo,
+    bool? transactions,
+    bool? catalogue,
+    bool? multiuser,
+    bool? editAccount,
+  }) {
+    return UserModel(
+      account: id ?? account,
+      email: email ?? this.email,
+      superAdmin: superAdmin ?? this.superAdmin,
+      admin: admin ?? this.admin,
+      personalized: personalized ?? this.personalized,
+      // ... 
+      arqueo: arqueo ?? this.arqueo,
+      historyArqueo: historyArqueo ?? this.historyArqueo,
+      transactions: transactions ?? this.transactions,
+      catalogue: catalogue ?? this.catalogue,
+      multiuser: multiuser ?? this.multiuser,
+      editAccount: editAccount ?? this.editAccount,
+    );
   }
 }
 

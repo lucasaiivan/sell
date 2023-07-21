@@ -75,6 +75,8 @@ class HomeController extends GetxController {
     clientRevenueCatID= getProfileAccountSelected.id;  
     if(clientRevenueCatID == ''){
       // si no hay una cuenta seleccionada
+      setIsSubscribedPremium = false;
+      // si no hay una cuenta seleccionada
       return;
     }
     
@@ -226,7 +228,7 @@ class HomeController extends GetxController {
   User get getUserAuth => _userFirebaseAuth;
   set setUserAuth(User user) => _userFirebaseAuth = user;
 
-  //  profile Admin User
+  //  perfil de usuario administrador actual de la cuenta
   UserModel _adminUser = UserModel();
   UserModel get getProfileAdminUser => _adminUser;
   set setProfileAdminUser(UserModel user) {
@@ -286,8 +288,7 @@ class HomeController extends GetxController {
 
   @override
   void onInit() async {
-    super.onInit();
-    
+    super.onInit(); 
     // inicialización de la variable
     setFirebaseAuth = FirebaseAuth.instance; // inicializamos la autenticación de firebase
     isAppUpdated(); // verificamos si la app esta actualizada
@@ -309,7 +310,10 @@ class HomeController extends GetxController {
   }
 
   @override
-  void onClose() {}
+  void onClose() { 
+    // ...
+    super.onClose(); 
+  }
 
   // TUTORIAL PARA EL USUARIO
   TargetFocus get buttonAddItemFlashTargetFocus {
