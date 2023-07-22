@@ -1,10 +1,9 @@
 
-import 'dart:async';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async'; 
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../core/utils/widgets_utils.dart';
 import '../../../domain/entities/user_model.dart';
 import '../../../data/datasource/database_cloud.dart';
 import '../../home/controller/home_controller.dart';
@@ -42,6 +41,27 @@ class MultiUserController extends GetxController {
   @override
   void onClose() { 
     _periodicTimer.cancel();
+  }
+
+  // crear nuevo usaurio
+  void createNewUser({required UserModel user}) {
+    // Firebase : refencia de la base de datos 
+    var refFirestoreUserAccountsList = Database.refFirestoreUserAccountsList(email: user.email).doc( homeController.getIdAccountSelected );
+    var refFirestoreAccountsUsersList = Database.refFirestoreAccountsUsersList(idAccount: homeController.getIdAccountSelected ).doc(user.email);
+    // Firebase : agrega o actualiza el documento en la coleccion de usuarios en la cuenta
+    refFirestoreAccountsUsersList.set(user.toJson());
+    // Firebase : agrega o actualiza el documento en la coleccion de cuentas administradas del usuario
+    refFirestoreUserAccountsList.set(Map<String, dynamic>.from(user.toJson()));
+  }
+  void updateUser({required UserModel user}) {
+    // Firebase reference: lista de cuenta administradas por el usuario
+    var refFirestoreUserAccountsList = Database.refFirestoreUserAccountsList(email: user.email).doc( homeController.getIdAccountSelected );
+    // Firebase reference: lista de usuarios administradores de la cuenta
+    var refFirestoreAccountsUsersList = Database.refFirestoreAccountsUsersList(idAccount: homeController.getIdAccountSelected ).doc(user.email);
+    // Firebase :  actualiza el documento en la coleccion de usuarios en la cuenta
+    refFirestoreAccountsUsersList.update(user.toJson());
+    // Firebase :  actualiza el documento en la coleccion de cuentas administradas del usuario
+    refFirestoreUserAccountsList.update(Map<String, dynamic>.from(user.toJson()));
   }
 
 
@@ -117,7 +137,7 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
 
   // controllers
   final HomeController homeController = Get.find();
-  final MultiUserController controller = Get.find();
+  final MultiUserController multiUserController = Get.find();
   final TextEditingController _textFieldController = TextEditingController();
 
   // var  
@@ -128,6 +148,7 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
     setState(() { 
       widget.user.admin = true;
       widget.user.personalized = false; 
+      // ...
       widget.user.arqueo = true;
       widget.user.historyArqueo = true;
       widget.user.catalogue = true;
@@ -136,9 +157,16 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
       widget.user.editAccount = true;
     });
   }
-  void setPersonalized(){
-    widget.user.admin = false;
-    widget.user.personalized = true; 
+  void setPersonalized(){ 
+    if(widget.user.arqueo && widget.user.historyArqueo && widget.user.catalogue && widget.user.transactions && widget.user.multiuser && widget.user.editAccount){
+      // si todos los permisos estan activados
+      widget.user.admin = true;
+      widget.user.personalized = false; 
+    }else{
+      // si algun permiso esta desactivado
+      widget.user.admin = false;
+      widget.user.personalized = true; 
+    }
   }
 
   @override
@@ -156,6 +184,9 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
 
   @override
   Widget build(BuildContext context) { 
+
+    // widgets
+    Widget divider = ComponentApp().divider();
 
     return Scaffold(
       appBar: AppBar(
@@ -225,7 +256,7 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
                   ), 
                   // checkbox : arqueo
                   CheckboxListTile(
-                    title:const Text('arqueo de caja'),
+                    title:const Text('Arqueo de caja'),
                     subtitle: const Opacity(opacity: 0.5,child: Text('Permite crear y cerrar arqueos de caja')),
                     value: widget.user.arqueo, 
                     onChanged: (value){
@@ -233,11 +264,12 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
                         widget.user.arqueo=value!; 
                         setPersonalized();
                       });
-                    },
+                    }, 
                   ),
+                  divider,
                   // checkbox : historial de arqueos
                   CheckboxListTile(
-                    title:const Text('historial de arqueos'),
+                    title:const Text('Historial de arqueos'),
                     subtitle: const Opacity(opacity: 0.5,child: Text('Permite ver y eliminar registros de arqueos')),
                     value: widget.user.historyArqueo, 
                     onChanged: (value){
@@ -247,6 +279,7 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
                       });
                     },
                   ),
+                  divider,
                   // checkbox : transacciones
                   CheckboxListTile(
                     title:const Text('Transacciones de ventas'),
@@ -259,6 +292,7 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
                       });
                     },
                   ),
+                  divider,
                   // checkbox : catalogo
                   CheckboxListTile(
                     title:const Text('Catalogo'),
@@ -271,6 +305,7 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
                       });
                     },
                   ),
+                  divider,
                   // checkbox : multiusuario
                   CheckboxListTile(
                     title:const Text('Multiusuario'),
@@ -283,6 +318,7 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
                       });
                     },
                   ),
+                  divider,
                   // checkbox : editar cuenta
                   CheckboxListTile(
                     title:const Text('Editar cuenta'),
@@ -308,30 +344,31 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
               TextButton(
                   onPressed: () { 
 
-                    if(EmailValidator.validate(widget.user.email) ){
-
-                      // verificamos que el email no exista en la lista de usuarios existentes 
-                      for (var user in controller.getUsersList) {
-                        if(user.email == widget.user.email){
-                          Get.snackbar('Email invalido','El email ya existe en la lista de usuarios');
-                          return; // detenemos el proceso
-                        }
-                      }
-
-
+                    if(EmailValidator.validate(widget.user.email) ){ 
+                      // condition : nos aseguramos que se haya seleccionado un tipo de permiso
                       if( widget.user.admin==true || widget.user.personalized==true){ 
+
+                        // verificamos que el email no exista en la lista de usuarios existentes 
+                        if(newUser){
+                          for (var user in multiUserController.getUsersList) {
+                            if(user.email == widget.user.email){
+                              Get.snackbar('Email invalido','El email ya existe en la lista de usuarios');
+                              return; // detenemos el proceso
+                            }
+                          }
+                        }
 
                         // set 
                         widget.user.account = homeController.getIdAccountSelected; // seteamos el id de la cuenta
-
-                        // Firebase : ref 
-                        var refFirestoreUserAccountsList = Database.refFirestoreUserAccountsList(email: widget.user.email).doc( homeController.getIdAccountSelected );
-                        var refFirestoreAccountsUsersList = Database.refFirestoreAccountsUsersList(idAccount: homeController.getIdAccountSelected ).doc(widget.user.email);
-                        // Firebase : agrega o actualiza el documento en la coleccion de usuarios en la cuenta
-                        refFirestoreAccountsUsersList.set(widget.user.toJson(),SetOptions(merge: true));
-                        // Firebase : agrega o actualiza el documento en la coleccion de cuentas administradas del usuario
-                        refFirestoreUserAccountsList.set(Map<String, dynamic>.from(widget.user.toJson()),SetOptions(merge: true));
-
+ 
+                        if(newUser){
+                          // creamos un nuevo usuario
+                          multiUserController.createNewUser(user: widget.user.copyWith());
+                        }else{
+                          // actualizamos el usuario
+                          multiUserController.updateUser(user: widget.user.copyWith());
+                        }
+                        
                         Get.back();
                       }else{
                         Get.snackbar('Permiso del usuario','Elige qué tipo de permisos tiene este usuario');

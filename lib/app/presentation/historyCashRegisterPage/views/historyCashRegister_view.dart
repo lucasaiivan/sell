@@ -71,8 +71,7 @@ class HistoryCashRegisterView extends StatelessWidget {
                   const PopupMenuItem(value: 'Hoy', child: Text('Hoy')),
                   const PopupMenuItem(value: 'Ayer', child: Text('Ayer')),
                   // opciones premium //
-                  historyCashRegisterController.homeController.getIsSubscribedPremium?const PopupMenuItem(value: '', child:null)
-                    :const PopupMenuItem(value: 'premium', child: Text('Opciones Premium',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.amber))),
+                  historyCashRegisterController.homeController.getIsSubscribedPremium?const PopupMenuItem(child: null,height: 0):const PopupMenuItem(value: 'premium', child: Text('Opciones Premium',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.amber))),
                   PopupMenuItem(value: 'Últimos 30 Días',enabled: historyCashRegisterController.homeController.getIsSubscribedPremium, child: const Text('Últimos 30 Días')),
                   PopupMenuItem(value: 'Este mes', enabled: historyCashRegisterController.homeController.getIsSubscribedPremium,child: const Text('Este mes')),
                   PopupMenuItem(value: 'El mes pasado',enabled: historyCashRegisterController.homeController.getIsSubscribedPremium, child: const Text('El mes pasado')),

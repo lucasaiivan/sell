@@ -90,8 +90,7 @@ class TransactionsView extends StatelessWidget {
                   const PopupMenuItem(value: 'ayer', child: Text('Ayer')),
                   const PopupMenuItem(value: 'este mes', child: Text('Este mes')),
                   // opciones premium // 
-                  transactionsController.homeController.getIsSubscribedPremium?const PopupMenuItem(child: null,height: 0)
-                    :const PopupMenuItem(value: 'premium', child: Text('Opciones Premium',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.amber))),
+                  transactionsController.homeController.getIsSubscribedPremium?const PopupMenuItem(child: null,height: 0):const PopupMenuItem(value: 'premium', child: Text('Opciones Premium',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.amber))),
                   PopupMenuItem(value: 'el mes pasado',enabled: transactionsController.homeController.getIsSubscribedPremium, child: const Text('El mes pasado')),
                   PopupMenuItem(value: 'este año',enabled: transactionsController.homeController.getIsSubscribedPremium, child: const Text('Este año')),
                   PopupMenuItem(value: 'el año pasado',enabled: transactionsController.homeController.getIsSubscribedPremium, child: const Text('El año pasado')),

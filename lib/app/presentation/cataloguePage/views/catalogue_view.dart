@@ -75,7 +75,7 @@ class CataloguePage extends StatelessWidget {
                         const PopupMenuItem(value: '0', child: Text('Mostrar todos')),
                         const PopupMenuItem(value: '2', child: Text('Mostrar favoritos')),
                         const PopupMenuItem(value: '5', child: Text('Hace más de 5 meses')),
-                        const PopupMenuItem(value: 'premium', child: Text('Opciones Premium',style: TextStyle(color: Colors.amber,fontWeight: FontWeight.w600),)),
+                        homeController.getIsSubscribedPremium?const PopupMenuItem(child: null,height: 0): const PopupMenuItem(value: 'premium',child: Text('Opciones Premium',style: TextStyle(color: Colors.amber,fontWeight: FontWeight.w600),)),
                         PopupMenuItem(value: '1',enabled: controller.homeController.getIsSubscribedPremium, child: const Text('Mostrar con stock')),
                         PopupMenuItem(value: '3',enabled: controller.homeController.getIsSubscribedPremium, child: const Text('Mostrar con stock bajos')),
                         PopupMenuItem(value: '4',enabled: controller.homeController.getIsSubscribedPremium, child: const Text('Actualizado hace más de 2 meses')),
