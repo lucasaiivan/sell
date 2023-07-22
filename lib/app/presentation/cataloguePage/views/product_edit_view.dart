@@ -245,6 +245,8 @@ class ProductEdit extends StatelessWidget {
     // var
     final Color boderLineColor = Get.isDarkMode?Colors.white.withOpacity(0.3):Colors.black.withOpacity(0.3);
     final Color fillColor = Get.isDarkMode?Colors.white.withOpacity(0.03):Colors.black.withOpacity(0.03);
+    // style 
+    TextStyle valueTextStyle = TextStyle(color: Get.isDarkMode?Colors.white:Colors.black,fontSize: 18,fontWeight: FontWeight.w400);
 
     return Container(
       padding: const EdgeInsets.all(12.0),
@@ -272,23 +274,23 @@ class ProductEdit extends StatelessWidget {
           !controller.getAccountAuth? Container():const Text('Personaliza tu producto',style: TextStyle(fontSize: 18.0)),
           space,
           // textfield : seleccionar cátegoria
-            !controller.getAccountAuth? Container(): GestureDetector(
-              onTap: SelectCategory.show,
-              // TODO : RangeError TextFormField : cuando el usuario mantiene presionado el boton de borrar > 'RangeError : Invalid value: only valid value is 0: -1'
+          !controller.getAccountAuth? Container(): GestureDetector(
+              onTap: SelectCategory.show, 
               child: TextFormField(
                 autofocus: false,
                 focusNode:null,
-                controller: controller.controllerTextEditCategory,
+                controller: controller.controllerTextEditCategory, 
+                style: valueTextStyle,
                 enabled: false,
                 autovalidateMode: AutovalidateMode.onUserInteraction, 
                 keyboardType: TextInputType.name,
                 decoration: InputDecoration(
                   filled: true,
-                  fillColor: fillColor,
+                  fillColor: fillColor, 
                   labelText: controller.controllerTextEditCategory.text==''?'Seleccionar una cátegoria':'Cátegoria',
                   border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
-                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
-                  disabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
+                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                  disabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                 ),  
                 onChanged: (value) => controller.formEditing = true,  // validamos que el usuario ha modificado el formulario
                 // validator: validamos el texto que el usuario ha ingresado.
@@ -308,7 +310,7 @@ class ProductEdit extends StatelessWidget {
                     Form(
                       key: controller.purchasePriceFormKey,
                       child: TextFormField(
-                        style: const TextStyle(fontSize: 18),
+                        style: valueTextStyle,
                         autofocus: false,
                         focusNode:controller.purchasePriceTextFormFieldfocus,
                         controller: controller.controllerTextEditPrecioCosto,
@@ -352,7 +354,7 @@ class ProductEdit extends StatelessWidget {
                       key: controller.salePriceFormKey,
                       // TODO : RangeError TextFormField : cuando el usuario mantiene presionado el boton de borrar > 'RangeError : Invalid value: only valid value is 0: -1'
                       child: TextFormField(
-                        style: const TextStyle(fontSize: 18),
+                        style: valueTextStyle,
                         autofocus: false,
                         focusNode:controller.salePriceTextFormFieldfocus,
                         controller: controller.controllerTextEditPrecioVenta,
@@ -388,7 +390,7 @@ class ProductEdit extends StatelessWidget {
                         value: controller.getFavorite,
                         tileColor: controller.getFavorite?Colors.amber.withOpacity(0.1):null,
                         title: Text(controller.getFavorite?'Quitar de favorito':'Agregar a favorito'),
-                        subtitle: controller.getFavorite?null: const Text('Accede rápidamente a tus productos favoritos'),
+                        subtitle: controller.getFavorite?null: const Opacity(opacity: 0.5,child: Text('Accede rápidamente a tus productos favoritos')),
                         onChanged: (value) {
                           if (!controller.getSaveIndicator) { controller.setFavorite = value ?? false; }
                         },
@@ -415,7 +417,7 @@ class ProductEdit extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               controller.getHomeController.getIsSubscribedPremium?Container():LogoPremium(personalize: true,id: 'stock'),
-                              controller.getStock?Container():const Text('Controlar el inventario de este producto'),
+                              controller.getStock?Container():const Opacity(opacity: 0.5,child: Text('Controla el inventario de este producto')),
                             ],
                           ), 
                           onChanged: (value) {
@@ -432,14 +434,21 @@ class ProductEdit extends StatelessWidget {
                             
                           },
                         ),  
+                        ComponentApp().divider(),
                         controller.getStock && controller.homeController.getIsSubscribedPremium? space : Container(), 
                         controller.getStock && controller.homeController.getIsSubscribedPremium?Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            const Padding(
+                              padding: EdgeInsets.only(left: 12.0,bottom: 12),
+                              child: Opacity(opacity: 0.5,child: Text('Controla el inventario de este producto')),
+                            ),
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 12,),
                               child: Form(
                                 key: controller.quantityStockFormKey,
                                 child: TextFormField(
+                                  style: valueTextStyle,
                                   enabled: !controller.getSaveIndicator,
                                   keyboardType: TextInputType.number,
                                   onChanged: (value) => controller.setQuantityStock =int.parse(controller.controllerTextEditQuantityStock .text),
@@ -465,6 +474,7 @@ class ProductEdit extends StatelessWidget {
                             Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
                                   child: TextField(
+                                    style: valueTextStyle,
                                     enabled: !controller.getSaveIndicator,
                                     keyboardType: TextInputType.number,
                                     onChanged: (value) =>controller.setAlertStock = int.parse(controller.controllerTextEditAlertStock.text),
