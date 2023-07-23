@@ -26,9 +26,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
 
 
 // controllers
-  ControllerProductsEdit  controller = Get.find();
- 
-
+  ControllerProductsEdit  controller = Get.find(); 
   
   @override
   void initState() {
@@ -82,7 +80,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
     // values
     Color boderLineColor = Get.theme.textTheme.bodyMedium!.color ?? Colors.black;
     RoundedRectangleBorder shape  = RoundedRectangleBorder(borderRadius: BorderRadius.circular(6),side: BorderSide(color:boderLineColor,style: BorderStyle.none),);
-    
+     
     // SingleChildScrollView : Un cuadro en el que se puede desplazar un solo widget
     // Este widget es útil cuando tiene un solo cuadro que normalmente será completamente visible, por ejemplo,la aparición del teclado del sistema, pero debe asegurarse de que se pueda desplazar si el contenedor se vuelve demasiado pequeño en un eje (la dirección de desplazamiento )
     return Column(
@@ -280,7 +278,13 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
           padding: const EdgeInsets.all(8.0),
           child: TextButton(
             onPressed: () => controller.showModalBottomSheetCambiarImagen(),
-            child: Text('Cargar foto',style: TextStyle(color: controller.colorButton,fontSize: 18,fontWeight: FontWeight.w400)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text('Cargar foto',style: TextStyle(color: controller.colorButton,fontSize: 18,fontWeight: FontWeight.w400)),
+                Opacity(opacity: 0.5,child: Text('visibilidad publica',style: TextStyle(color: controller.colorButton,fontSize: 12,fontWeight: FontWeight.w300))),
+              ],
+            ),
           ),
         ),
         const Spacer(),
@@ -313,7 +317,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
           padding: const EdgeInsets.symmetric(horizontal:12, vertical: 6),
           child: Form(
             key: controller.descriptionFormKey,
-            child: TextFormField( 
+            child: TextFormField(  
               controller: controller.controllerTextEditDescripcion,
               enabled: true ,
               autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -322,7 +326,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
               minLines: 1,
               maxLines:2, 
               inputFormatters: [ FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\- .³%]')) ],
-              decoration: const InputDecoration(border: UnderlineInputBorder(),labelText: 'Descripción del producto'),
+              decoration: const InputDecoration(border: UnderlineInputBorder(),labelText: 'Descripción del producto',helperText: 'Visibilidad pública'),
               onChanged: (value) {
                 controller.formEditing = true; // validamos que el usuario ha modificado el formulario
                 controller.setDescription=value;  //  actualizamos el valor de la descripcion del producto
@@ -359,6 +363,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
                 keyboardType: TextInputType.name,
                 decoration: InputDecoration(border: const UnderlineInputBorder(),
                 labelText: controller.controllerTextEditMark.text=='' ? 'Seleccionar marca' : 'Marca',
+                helperText: 'Visibilidad pública',
                 ),  
                 onChanged: (value) => controller.formEditing = true, // validamos que el usuario ha modificado el formulario
                 // validator: validamos el texto que el usuario ha ingresado. 
@@ -394,6 +399,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
               keyboardType: TextInputType.name,
               decoration: InputDecoration(
                   labelText: controller.controllerTextEditCategory.text==''?'Seleccionar una cátegoria':'Cátegoria',
+                  helperText: 'Visibilidad privada',
                   border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                   enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
                   disabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
@@ -418,7 +424,8 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
           autovalidateMode: AutovalidateMode.onUserInteraction,
           maxLength: 15, 
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration: const InputDecoration(border: UnderlineInputBorder(),labelText: 'Precio de compra'),   
+          decoration: const InputDecoration(border: UnderlineInputBorder(),labelText: 'Precio de compra',helperText: 'Visibilidad privada'),
+          
           onChanged: (value){
             if( controller.controllerTextEditPrecioCosto.numberValue != 0){
               controller.setPurchasePrice = controller.controllerTextEditPrecioCosto.numberValue;
@@ -450,7 +457,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
               autovalidateMode: AutovalidateMode.onUserInteraction,
               maxLength: 15, 
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(border: UnderlineInputBorder(),labelText: 'Precio de venta al público'),  
+              decoration: const InputDecoration(border: UnderlineInputBorder(),labelText: 'Precio de venta al público',helperText: 'Visibilidad pública'),  
               onChanged: (value){
                 if( controller.controllerTextEditPrecioVenta.numberValue != 0){
                   controller.setSalePrice = controller.controllerTextEditPrecioVenta.numberValue;
@@ -592,7 +599,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
           child: CheckboxListTile( 
             contentPadding: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
             controlAffinity: ListTileControlAffinity.leading,
-            title: const Text('Entiendo que no seré el propietario de los datos públicos asociados con el producto, ni podré editarlos después de la verificación. Además, los precios de venta serán públicos',style: TextStyle(fontWeight: FontWeight.w300)),
+            title: const Text('Importante!\nAl crear un producto, entiendo y acepto lo siguiente: los datos básicos (descripción, imagen, marca) serán visibles para todos y podrían ser modificados por otros usuarios hasta que un moderador los verifique. Una vez verificados, no podré cambiar estos datos. El (precio de venta al público) también será visible para todos. Además, es importante tener en cuenta que una vez creada, la referencia del producto no podrá eliminarse',style: TextStyle(fontWeight: FontWeight.w200)),
             value: controller.getUserConsent,
             onChanged: (value) { 
               setState(() {
@@ -607,7 +614,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
           padding: EdgeInsets.all(controller.getUserConsent?12.0:0),
           child: const Text('¡Gracias por hacer que esta aplicación sea aún más útil para más personas! 🚀'),
           ),
-          ProductEdit().widgetForModerator,
+        ProductEdit().widgetForModerator,
       ],
     );
   }
