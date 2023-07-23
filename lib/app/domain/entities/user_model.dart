@@ -2,22 +2,26 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserModel {
   UserModel({
-    this.account = "", // el ID de la cuenta administrada por defecto es el ID del usuario quien lo creo
-    this.email = '', // email del usuario
-    this.superAdmin = false, // Super administrador es el usaurio que creo la cuenta
-    this.admin = false, // permiso de administrador del usuario para administrar la cuenta
-    this.personalized = false, // permisos personalizado para el usuario
+    this.inactivate = false,
+    this.account = "", 
+    this.email = '',  
+    this.name='', 
+    this.superAdmin = false,  
+    this.admin = false,  
+    this.personalized = false, 
     // ... 
-    this.arqueo = false, // crear arqueo de caja
-    this.historyArqueo = false, // ver y eliminar registros de arqueo de caja
-    this.transactions = false, // ver y eliminar registros de transacciones
-    this.catalogue = false, // ver, editar y eliminar productos del catalogo
-    this.multiuser = false, // ver, editar y eliminar usuarios de la cuenta
-    this.editAccount = false, // editar la cuenta
+    this.arqueo = false,  
+    this.historyArqueo = false, 
+    this.transactions = false, 
+    this.catalogue = false,  
+    this.multiuser = false,  
+    this.editAccount = false, 
   });
 
+  bool inactivate = false; // inactivar usuario
   String account = ""; // el ID de la cuenta administrada por defecto es el ID del usuario quien lo creo
   String email = ''; // email del usuario
+  String name=''; // nombre del usuario (opcaional)
   bool superAdmin = false; // Super administrador es el usaurio que creo la cuenta
   bool admin = false; // permiso de administrador 
   // permisos personalizados
@@ -34,8 +38,10 @@ class UserModel {
   factory UserModel.fromDocument(DocumentSnapshot doc) {
     Map data = doc.data() as Map;
     return UserModel(
+      inactivate: data.containsKey("inactivate") ? doc["inactivate"] : false,
       account: doc["account"],
       email: data.containsKey("email") ? doc["email"] : '',
+      name: data.containsKey('name') ? doc['name'] : '',
       superAdmin: data.containsKey("superAdmin") ? doc["superAdmin"] : false,
       admin: data.containsKey("admin") ? doc["admin"] : false,
       personalized: data.containsKey("personalized") ? doc["personalized"] : false,
@@ -52,24 +58,28 @@ class UserModel {
   }
 
   Map<String, dynamic> toJson() => {
-        "account": account,
-        "email": email,
-        "superAdmin": superAdmin,
-        "admin": admin,
-        // permisos personalizados
-        "personalized": personalized, 
-        "arqueo": arqueo,
-        "historyArqueo": historyArqueo,
-        "transactions": transactions,
-        "catalogue": catalogue,
-        "multiuser": multiuser,
-        "editAccount": editAccount,
-    };
+    "inactivate": inactivate,
+    "account": account,
+    "email": email,
+    'name':name,
+    "superAdmin": superAdmin,
+    "admin": admin,
+    // permisos personalizados
+    "personalized": personalized, 
+    "arqueo": arqueo,
+    "historyArqueo": historyArqueo,
+    "transactions": transactions,
+    "catalogue": catalogue,
+    "multiuser": multiuser,
+    "editAccount": editAccount,
+  };
 
   factory UserModel.fromMap(Map data) {
     return UserModel(
+      inactivate: data['inactivate'] ?? false,
       account: data['account'] ?? '',
       email: data['email'] ?? '',
+      name:data['name'] ?? '',
       superAdmin: data['superAdmin'] ?? false,
       admin: data['admin'] ?? false,
       personalized: data['personalized'] ?? false,
@@ -89,8 +99,10 @@ class UserModel {
     if (documentSnapshot.data() != null) {data = documentSnapshot.data() as Map; }
 
     //  set
+    inactivate = data.containsKey('inactivate') ? data['inactivate'] : false;
     account = data.containsKey('account') ? data['account'] : documentSnapshot.id;
     email = data.containsKey('email') ? data['email'] : '';
+    name = data.containsKey('name') ? data['name'] : '';
     superAdmin = data.containsKey('superAdmin') ? data['superAdmin'] : false;
     admin = data.containsKey('admin') ? data['admin'] : false;
     personalized = data.containsKey('personalized') ? data['personalized'] : false;
@@ -104,8 +116,10 @@ class UserModel {
   }
 
   UserModel copyWith({
+    bool? inactivate,
     String? id,
     String? email,
+    String? name,
     bool? superAdmin,
     bool? admin,
     bool? personalized,
@@ -119,8 +133,10 @@ class UserModel {
     bool? editAccount,
   }) {
     return UserModel(
+      inactivate: inactivate ?? this.inactivate,
       account: id ?? account,
       email: email ?? this.email,
+      name: name ?? this.name,
       superAdmin: superAdmin ?? this.superAdmin,
       admin: admin ?? this.admin,
       personalized: personalized ?? this.personalized,

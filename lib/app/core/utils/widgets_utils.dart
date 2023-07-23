@@ -657,8 +657,7 @@ void showMessageAlertApp({required String title, required String message}) {
           ? Colors.white
           : Colors.black);
 }
- 
- 
+  
 
 // ignore: must_be_immutable
 class ComponentApp extends StatelessWidget {
@@ -724,9 +723,9 @@ class ComponentApp extends StatelessWidget {
     return avatar;
   }
   // BUTTONS 
-  Widget button( {double elevation=2,double width = double.infinity,bool disable = false,required Widget icon,String text = '',required dynamic onPressed,EdgeInsets padding =const EdgeInsets.symmetric(horizontal: 12, vertical: 12),Color colorButton = Colors.purple,Color colorAccent = Colors.white}) {
+  Widget button( {bool defaultStyle = true,double elevation=0,double width = double.infinity,bool disable = false,required Widget icon,String text = '',required dynamic onPressed,EdgeInsets padding =const EdgeInsets.symmetric(horizontal: 12, vertical: 12),Color colorButton = Colors.purple,Color colorAccent = Colors.white}) {
     // button : personalizado
-    return FadeInRight(
+    return FadeIn(
         child: Padding(
       padding: padding,
       child: SizedBox(
@@ -734,13 +733,13 @@ class ComponentApp extends StatelessWidget {
         child: ElevatedButton.icon(
           onPressed: disable?null:onPressed,
           style: ElevatedButton.styleFrom(
-            elevation: elevation,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-              padding: const EdgeInsets.all(16.0),
-              backgroundColor: colorButton,
+            elevation:defaultStyle?null: elevation,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+              padding: const EdgeInsets.all(20.0),
+              backgroundColor:defaultStyle?null: colorButton,
               textStyle: TextStyle(color: colorAccent,fontWeight: FontWeight.w700)),
           icon: icon,
-          label: Text(text, style: TextStyle(color: colorAccent)),
+          label: Text(text, style:defaultStyle?null: TextStyle(color: colorAccent)),
         ),
       ),
     ));

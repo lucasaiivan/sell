@@ -68,11 +68,7 @@ class MultiUserController extends GetxController {
 
   // WIDGETS DIALOG
   void editItem({required UserModel user}) {
-    if(user.superAdmin){
-      Get.snackbar('Super administrador','No se puede editar');
-    }else{
-      dialogUserAdmin( user: user );
-    } 
+    dialogUserAdmin( user: user );
   }
   void addItem() { 
 
@@ -88,14 +84,15 @@ class MultiUserController extends GetxController {
         TextButton(
             onPressed: () {
 
-              // Firebase : ref 
+              // Firebase : referencias de la base de datos
               var refFirestoreUserAccountsList = Database.refFirestoreUserAccountsList(email: user.email).doc( homeController.getIdAccountSelected );
               var refFirestoreAccountsUsersList = Database.refFirestoreAccountsUsersList(idAccount: homeController.getIdAccountSelected ) .doc(user.email);
 
-              // Firebase : delete
+              // firebase : se elimina el documento de la lista de usuarios administradores de la cuenta
               refFirestoreUserAccountsList.delete();
+              // firebase : se elimina el documento de la lista de cuentas administradas por el usuario
               refFirestoreAccountsUsersList.delete();
-
+    
               Get.back();
             },
             child: const Text('si, eliminar')),
@@ -138,7 +135,10 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
   // controllers
   final HomeController homeController = Get.find();
   final MultiUserController multiUserController = Get.find();
-  final TextEditingController _textFieldController = TextEditingController();
+  final TextEditingController _nameTextFieldController = TextEditingController();
+  final TextEditingController _emailTextFieldController = TextEditingController();
+
+  
 
   // var  
   bool newUser = true;
@@ -175,7 +175,8 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
 
     if(widget.user.email.isNotEmpty){
       newUser = false; // no es un nuevo usuario
-      _textFieldController.text = widget.user.email; // seteamos el email del usuario
+      _emailTextFieldController.text = widget.user.email; // seteamos el email del usuario
+      _nameTextFieldController.text = widget.user.name; // seteamos el nombre del usuario
       enableEmailTextField = false; // deshabilitamos el campo de texto
      
 
@@ -187,6 +188,9 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
 
     // widgets
     Widget divider = ComponentApp().divider();
+    // style  
+    final Color textDescriptionStyleColor = Get.isDarkMode?Colors.white:Colors.black ;
+    TextStyle valueTextStyle= TextStyle(height:2,color: textDescriptionStyleColor); 
 
     return Scaffold(
       appBar: AppBar(
@@ -203,28 +207,64 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
         ],
         ),
 
-      body: Column(
+      body: Stack(
         children: [
-          Expanded( 
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: ListView( 
-                children: [
-
-                  TextField(
-                    enabled: enableEmailTextField,
-                    controller: _textFieldController,
-                    decoration: const InputDecoration(hintText: "Email"),
-                    onChanged: (value) {
-                      widget.user.email = value;
-                    },
+          Expanded(
+            child: ListView( 
+              children: [
+                // view : datos del usuario
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Column(
+                    children: [
+                      const SizedBox(height:20),
+                      // textfield : nombre
+                      TextField( 
+                        style: valueTextStyle,
+                        controller: _nameTextFieldController,
+                        decoration: const InputDecoration(labelText: "Nombre (opcional))" ),
+                        onChanged: (value) {
+                          widget.user.name = value;
+                        },
+                      ),
+                      const SizedBox(height:12),
+                      // textfield : email
+                      TextField( 
+                        style: valueTextStyle,
+                        enabled: enableEmailTextField,
+                        controller: _emailTextFieldController,
+                        decoration: const InputDecoration(labelText: "Email" ),
+                        onChanged: (value) {
+                          widget.user.email = value;
+                        },
+                      ),
+                      
+                    ],
                   ),
-                  const Padding(
-                    padding: EdgeInsets.only(top:20),
-                    child: Opacity(opacity: 0.7,child: Text('Permisos')),
-                  ),
-                  // view : butones de categorias de permisos 
-                  Row(
+                ), 
+                const SizedBox(height:12),
+                // CheckboxListTile : opcipn de inactivar el usuario
+                CheckboxListTile(  
+                  enabled: !widget.user.superAdmin,
+                  title:const Text('Inactivar usuario'),
+                  subtitle: const Opacity(opacity: 0.5,child: Text('Permite bloquear el usuario')),
+                  value: widget.user.inactivate, 
+                  onChanged: (value){ 
+                    setState(() {
+                      widget.user.inactivate = value!;
+                    });
+                  },
+                ),
+                const Divider(thickness: 8),
+                // text : permisos
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12,vertical: 12),
+                  child: Opacity(opacity: 0.7,child: Text('Permisos',style:TextStyle(fontSize: 16,fontWeight: FontWeight.w700))),
+                ),
+                // view : butones de categorias de permisos 
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal:12),
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [ 
                       // button : permiso administrador
@@ -234,16 +274,17 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
                           style: ButtonStyle(elevation:MaterialStateProperty.all(widget.user.admin? 5: 0)),
                           icon: widget.user.admin? const Icon(Icons.check_circle_rounded) : Container(),
                           onPressed: setAdmin,
-                          label: const Text('Administrador'),
+                          label: Text(widget.user.superAdmin?'Super administrador':'Administrador'),
                         ),
                       ),
                       // button : permiso personalizados 
                       Padding(
                         padding: const EdgeInsets.all(2.0),
                         child: ElevatedButton.icon(
+                          
                           style: ButtonStyle(elevation:MaterialStateProperty.all(widget.user.personalized? 5: 0)),
                           icon: widget.user.personalized? const Icon(Icons.check_circle_rounded) : Container(),
-                          onPressed: () { 
+                          onPressed: widget.user.superAdmin?null: () { 
                             setState(() {
                               widget.user.personalized = !widget.user.personalized;
                               widget.user.admin = false;
@@ -253,101 +294,113 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
                         ),
                       ),
                     ],
-                  ), 
-                  // checkbox : arqueo
-                  CheckboxListTile(
-                    title:const Text('Arqueo de caja'),
-                    subtitle: const Opacity(opacity: 0.5,child: Text('Permite crear y cerrar arqueos de caja')),
-                    value: widget.user.arqueo, 
-                    onChanged: (value){
-                      setState(() {
-                        widget.user.arqueo=value!; 
-                        setPersonalized();
-                      });
-                    }, 
                   ),
-                  divider,
-                  // checkbox : historial de arqueos
-                  CheckboxListTile(
-                    title:const Text('Historial de arqueos'),
-                    subtitle: const Opacity(opacity: 0.5,child: Text('Permite ver y eliminar registros de arqueos')),
-                    value: widget.user.historyArqueo, 
-                    onChanged: (value){
-                      setState(() {
-                        widget.user.historyArqueo=value!; 
-                        setPersonalized();
-                      });
-                    },
-                  ),
-                  divider,
-                  // checkbox : transacciones
-                  CheckboxListTile(
-                    title:const Text('Transacciones de ventas'),
-                    subtitle: const Opacity(opacity: 0.5,child: Text('Permite ver y eliminar registros de ventas')),
-                    value: widget.user.transactions, 
-                    onChanged: (value){
-                      setState(() {
-                        widget.user.transactions=value!; 
-                        setPersonalized();
-                      });
-                    },
-                  ),
-                  divider,
-                  // checkbox : catalogo
-                  CheckboxListTile(
-                    title:const Text('Catalogo'),
-                    subtitle: const Opacity(opacity: 0.5,child: Text('Permite ver y eliminar productos')),
-                    value: widget.user.catalogue, 
-                    onChanged: (value){
-                      setState(() {
-                        widget.user.catalogue=value!; 
-                        setPersonalized();
-                      });
-                    },
-                  ),
-                  divider,
-                  // checkbox : multiusuario
-                  CheckboxListTile(
-                    title:const Text('Multiusuario'),
-                    subtitle: const Opacity(opacity: 0.5,child: Text('Permite crear y eliminar usuarios')),
-                    value: widget.user.multiuser, 
-                    onChanged: (value){
-                      setState(() {
-                        widget.user.multiuser=value!; 
-                        setPersonalized();
-                      });
-                    },
-                  ),
-                  divider,
-                  // checkbox : editar cuenta
-                  CheckboxListTile(
-                    title:const Text('Editar cuenta'),
-                    subtitle: const Opacity(opacity: 0.5,child: Text('Permite editar la cuenta')),
-                    value: widget.user.editAccount, 
-                    onChanged: (value){
-                      setState(() {
-                        widget.user.editAccount=value!; 
-                        setPersonalized();
-                      });
-                    },
-                  ),
-
-
-                ],
-              ),
+                ), 
+                // checkbox : arqueo
+                CheckboxListTile(
+                  enabled: !widget.user.superAdmin,
+                  title:const Text('Arqueo de caja'),
+                  subtitle: const Opacity(opacity: 0.5,child: Text('Permite crear y cerrar arqueos de caja')),
+                  value: widget.user.arqueo, 
+                  onChanged: (value){
+                    setState(() {
+                      widget.user.arqueo=value!; 
+                      setPersonalized();
+                    });
+                  }, 
+                ),
+                divider,
+                // checkbox : historial de arqueos
+                CheckboxListTile(
+                  enabled: !widget.user.superAdmin,
+                  title:const Text('Historial de arqueos'),
+                  subtitle: const Opacity(opacity: 0.5,child: Text('Permite ver y eliminar registros de arqueos')),
+                  value: widget.user.historyArqueo, 
+                  onChanged: (value){
+                    setState(() {
+                      widget.user.historyArqueo=value!; 
+                      setPersonalized();
+                    });
+                  },
+                ),
+                divider,
+                // checkbox : transacciones
+                CheckboxListTile(
+                  enabled: !widget.user.superAdmin,
+                  title:const Text('Transacciones de ventas'),
+                  subtitle: const Opacity(opacity: 0.5,child: Text('Permite ver y eliminar registros de ventas')),
+                  value: widget.user.transactions, 
+                  onChanged: (value){
+                    setState(() {
+                      widget.user.transactions=value!; 
+                      setPersonalized();
+                    });
+                  },
+                ),
+                divider,
+                // checkbox : catalogo
+                CheckboxListTile(
+                  enabled: !widget.user.superAdmin,
+                  title:const Text('Catálogo'),
+                  subtitle: const Opacity(opacity: 0.5,child: Text('Permite registrar, editar y eliminar productos')),
+                  value: widget.user.catalogue, 
+                  onChanged: (value){
+                    setState(() {
+                      widget.user.catalogue=value!; 
+                      setPersonalized();
+                    });
+                  },
+                ),
+                divider,
+                // checkbox : multiusuario
+                CheckboxListTile(
+                  enabled: !widget.user.superAdmin,
+                  title:const Text('Multiusuario'),
+                  subtitle: const Opacity(opacity: 0.5,child: Text('Permite crear, modificar y eliminar usuarios')),
+                  value: widget.user.multiuser, 
+                  onChanged: (value){
+                    setState(() {
+                      widget.user.multiuser=value!; 
+                      setPersonalized();
+                    });
+                  },
+                ),
+                divider,
+                // checkbox : editar cuenta
+                CheckboxListTile(
+                  enabled: !widget.user.superAdmin,
+                  title:const Text('Editar cuenta'),
+                  subtitle: const Opacity(opacity: 0.5,child: Text('Permite editar o eliminar los datos de la cuenta para siempre')),
+                  value: widget.user.editAccount, 
+                  onChanged: (value){
+                    setState(() {
+                      widget.user.editAccount=value!; 
+                      setPersonalized();
+                    });
+                  },
+                ), 
+                const SizedBox(height: 100),
+              ],
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              TextButton(onPressed: Get.back,child: const Text('Cancelar')),
-              TextButton(
-                  onPressed: () { 
-
+          // elevateButton : crear o actualizar
+          //
+          // Positioned : para posicionar el boton en la parte inferior de la pantalla
+          Positioned(
+            bottom: 0,left: 0,right: 0,
+            child: Container(   
+              // color : gradient de un color y transparent 
+              decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.transparent,Theme.of(context).scaffoldBackgroundColor.withOpacity(0.3),Theme.of(context).scaffoldBackgroundColor], begin: Alignment.topCenter,end: Alignment.bottomCenter),),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: ComponentApp().button(
+                  defaultStyle: true,
+                  icon: Text(newUser?'Crear usuario':'Actualizar'),
+                  onPressed: (){
                     if(EmailValidator.validate(widget.user.email) ){ 
                       // condition : nos aseguramos que se haya seleccionado un tipo de permiso
                       if( widget.user.admin==true || widget.user.personalized==true){ 
-
+    
                         // verificamos que el email no exista en la lista de usuarios existentes 
                         if(newUser){
                           for (var user in multiUserController.getUsersList) {
@@ -357,10 +410,10 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
                             }
                           }
                         }
-
+    
                         // set 
                         widget.user.account = homeController.getIdAccountSelected; // seteamos el id de la cuenta
- 
+      
                         if(newUser){
                           // creamos un nuevo usuario
                           multiUserController.createNewUser(user: widget.user.copyWith());
@@ -376,13 +429,47 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
                     }else{
                       Get.snackbar('E-mail invalido','Debe proporcionar un correo electrónico válido, asegúrese de que no contenga espacios vacios');
                     }
-
-                    // Firebase : delete
-                    //Database.refFirestoreAccountsUsersList(idAccount: homeController.getIdAccountSelected).doc(user.email).delete();
-                    //Get.back();
-                  },
-                  child: Text( newUser?'Crear usuario':'Actualizar')),
-            ],
+                    }, 
+                ),
+                /* child: ElevatedButton( 
+                  onPressed: (){
+                    if(EmailValidator.validate(widget.user.email) ){ 
+                      // condition : nos aseguramos que se haya seleccionado un tipo de permiso
+                      if( widget.user.admin==true || widget.user.personalized==true){ 
+    
+                        // verificamos que el email no exista en la lista de usuarios existentes 
+                        if(newUser){
+                          for (var user in multiUserController.getUsersList) {
+                            if(user.email == widget.user.email){
+                              Get.snackbar('Email invalido','El email ya existe en la lista de usuarios');
+                              return; // detenemos el proceso
+                            }
+                          }
+                        }
+    
+                        // set 
+                        widget.user.account = homeController.getIdAccountSelected; // seteamos el id de la cuenta
+      
+                        if(newUser){
+                          // creamos un nuevo usuario
+                          multiUserController.createNewUser(user: widget.user.copyWith());
+                        }else{
+                          // actualizamos el usuario
+                          multiUserController.updateUser(user: widget.user.copyWith());
+                        }
+                        
+                        Get.back();
+                      }else{
+                        Get.snackbar('Permiso del usuario','Elige qué tipo de permisos tiene este usuario');
+                      }
+                    }else{
+                      Get.snackbar('E-mail invalido','Debe proporcionar un correo electrónico válido, asegúrese de que no contenga espacios vacios');
+                    }
+                    }, 
+                    child: Text(newUser?'Crear usuario':'Actualizar'),
+                    ), */
+              ),
+            ),
           ),
         ],
       ), 
