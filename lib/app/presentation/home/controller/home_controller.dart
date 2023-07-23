@@ -1365,7 +1365,7 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
             bottom: 0,left: 0,right: 0,
             child: Container(   
               // color : gradient de un color y transparent 
-              decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.transparent,Theme.of(context).scaffoldBackgroundColor,Theme.of(context).scaffoldBackgroundColor], begin: Alignment.topCenter,end: Alignment.bottomCenter),),
+              decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.transparent,Theme.of(context).scaffoldBackgroundColor.withOpacity(0.9),Theme.of(context).scaffoldBackgroundColor], begin: Alignment.topCenter,end: Alignment.bottomCenter),),
               // condition : comprobar que 'offerings' esta inicializado
               child:  homeController.offerings==null?const TextButton(onPressed:null, child: Text('Subcribirce a Premium'))
               :Column(

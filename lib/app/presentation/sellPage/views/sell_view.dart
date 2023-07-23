@@ -849,9 +849,7 @@ class SalesView extends StatelessWidget {
     final SalesController salesController = Get.find();
     // values
     const Color accentColor = Colors.white;
-    Color? background = Colors.green.shade300;
-    Color buttomReceiptAccentColor = salesController.homeController.getIsSubscribedPremium?Colors.black:Colors.amber;
-    Color buttomReceiptColor = salesController.homeController.getIsSubscribedPremium?Colors.blue.shade100:Colors.amber.shade100;
+    Color? background = Colors.green.shade300; 
     Color colorText = Colors.white;
 
     return Theme(
@@ -1542,7 +1540,8 @@ class _CashRegisterState extends State<CashRegister> {
           padding: const EdgeInsets.only(bottom: 20),
           child: SizedBox(
             width: double.infinity,
-            child: ElevatedButton(
+            child: ComponentApp().button(
+              icon: const Text('Inciar caja'),
               onPressed: () {
                 // recordamos la descripcion ingresada por el usuario
                 salesController.registerFixerDescription(
@@ -1553,10 +1552,7 @@ class _CashRegisterState extends State<CashRegister> {
                     initialCash: moneyMaskedTextController.numberValue,
                     expectedBalance: moneyMaskedTextController.numberValue);
                 Get.back();
-              },
-              style: ButtonStyle(padding: MaterialStateProperty.all(const EdgeInsets.all(20)),shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)))),
-              child: const Text('Iniciar caja'),
-            ),
+              },),
           ),
         ),
       ],

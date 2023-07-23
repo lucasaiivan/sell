@@ -245,7 +245,7 @@ class ProductEdit extends StatelessWidget {
     // var
     final Color boderLineColor = Get.isDarkMode?Colors.white.withOpacity(0.3):Colors.black.withOpacity(0.3);
     final Color fillColor = Get.isDarkMode?Colors.white.withOpacity(0.03):Colors.black.withOpacity(0.03);
-    // style 
+    // style  
     TextStyle valueTextStyle = TextStyle(color: Get.isDarkMode?Colors.white:Colors.black,fontSize: 18,fontWeight: FontWeight.w400);
 
     return Container(
@@ -300,254 +300,254 @@ class ProductEdit extends StatelessWidget {
                 },
               ),
             ),
-          space,
-          // textfield : precio de compra
+          space, 
           !controller.getAccountAuth
-              ? Container()
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [ 
-                    Form(
-                      key: controller.purchasePriceFormKey,
-                      child: TextFormField(
-                        style: valueTextStyle,
-                        autofocus: false,
-                        focusNode:controller.purchasePriceTextFormFieldfocus,
-                        controller: controller.controllerTextEditPrecioCosto,
-                        enabled: true,
-                        autovalidateMode: AutovalidateMode.onUserInteraction, 
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        decoration: InputDecoration( 
-                          filled: true,
-                          fillColor: fillColor,
-                          labelText: 'Precio de costo',
-                          border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
-                          enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
-                          ),    
-                        onChanged: (value) { 
-                          controller.formEditing = true;  
-                          controller.updateAll(); 
-                        } ,  
-                        onEditingComplete: (){
-                          controller.updateAll();
-                          FocusScope.of(controller.getContext).previousFocus();
-                        },
-                        // validator: validamos el texto que el usuario ha ingresado.
-                        validator: (value) {
-                          // if (value == null || value.isEmpty) { return 'Por favor, escriba un precio de compra'; }
-                          return null; 
-                        },
-                      ),
-                    ),
-                    controller.getPorcentage == '' ? Container():space,
-                    // text and button : modificar porcentaje de ganancia
-                    controller.getPorcentage == '' ? Container():Row(
-                      children: [
-                        TextButton(onPressed: controller.showDialogAddProfitPercentage, child: Text( controller.getPorcentage )),
-                        const Spacer(),
-                        TextButton(onPressed: controller.showDialogAddProfitPercentage , child: const Text( 'Modificar porcentaje' )),
-                      ],
-                    ),
-                    space,
-                    // precio de venta al público
-                    Form(
-                      key: controller.salePriceFormKey,
-                      // TODO : RangeError TextFormField : cuando el usuario mantiene presionado el boton de borrar > 'RangeError : Invalid value: only valid value is 0: -1'
-                      child: TextFormField(
-                        style: valueTextStyle,
-                        autofocus: false,
-                        focusNode:controller.salePriceTextFormFieldfocus,
-                        controller: controller.controllerTextEditPrecioVenta,
-                        enabled: true,
-                        autovalidateMode: AutovalidateMode.onUserInteraction, 
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: fillColor,
-                          labelText: 'Precio de venta al público',
-                          border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
-                          enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
-                        ),  
-                        onChanged: (value) => controller.formEditing = true,
-                        // validator: validamos el texto que el usuario ha ingresado.
-                        validator: (value) {
-                          if ( controller.controllerTextEditPrecioVenta.numberValue == 0.0) { return 'Por favor, escriba un precio de venta'; }
-                          return null;
-                        },
-                      ),
-                    ), 
-                    space,
-                    // view : control de stock
-                    AnimatedContainer(
-                      width:double.infinity, 
-                      duration: const Duration(milliseconds: 500),
-                      decoration: BoxDecoration(border: Border.all(color: controller.getFavorite?Colors.amber :boderLineColor,width: 0.5,),),
-                      child: CheckboxListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal:12, vertical: 12),
-                        enabled: controller.getSaveIndicator ? false : true,
-                        checkColor: Colors.white,
-                        activeColor: Colors.amber,
-                        value: controller.getFavorite,
-                        tileColor: controller.getFavorite?Colors.amber.withOpacity(0.1):null,
-                        title: Text(controller.getFavorite?'Quitar de favorito':'Agregar a favorito'),
-                        subtitle: controller.getFavorite?null: const Opacity(opacity: 0.5,child: Text('Accede rápidamente a tus productos favoritos')),
-                        onChanged: (value) {
-                          if (!controller.getSaveIndicator) { controller.setFavorite = value ?? false; }
-                        },
-                      ),
-                    ),
-                    space,
-                    //
-                    // view : control stock
-                    // 
-                    AnimatedContainer(
-                      width:double.infinity, 
-                      duration: const Duration(milliseconds: 500),
-                      decoration: BoxDecoration(color: controller.getStock?Colors.grey.withOpacity(0.05):null,border: Border.all(color: controller.getStock?Colors.grey:boderLineColor,width: 0.5,),),
-                      child: Column(
-                      children: [
-                        CheckboxListTile(
-                          contentPadding: const EdgeInsets.symmetric(horizontal:12,vertical: 12),
-                          //enabled: controller.getHomeController.getIsSubscribedPremium?controller.getSaveIndicator ? false : true:false,
-                          checkColor: Colors.white,
-                          activeColor: Colors.blue,
-                          value: controller.homeController.getIsSubscribedPremium?controller.getStock:false,
-                          title: Text(controller.getHomeController.getIsSubscribedPremium?controller.getStock?'Quitar control de stock':'Agregar control de stock':'Control de stock'),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              controller.getHomeController.getIsSubscribedPremium?Container():LogoPremium(personalize: true,id: 'stock'),
-                              controller.getStock?Container():const Opacity(opacity: 0.5,child: Text('Controla el inventario de este producto')),
-                            ],
-                          ), 
-                          onChanged: (value) {
-                            if(controller.homeController.getIsSubscribedPremium){
-                              // esta subscripcion es premium
-                              // condition : si el usuario no esta guardando el producto
-                              if (!controller.getSaveIndicator) {
-                                controller.setStock = value ?? false;
-                              }
-                            }else{
-                              // no esta subscripcion 
-                              controller.homeController.showModalBottomSheetSubcription(id: 'stock');
-                            }
-                            
-                          },
-                        ),  
-                        ComponentApp().divider(),
-                        controller.getStock && controller.homeController.getIsSubscribedPremium? space : Container(), 
-                        controller.getStock && controller.homeController.getIsSubscribedPremium?Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Padding(
-                              padding: EdgeInsets.only(left: 12.0,bottom: 12),
-                              child: Opacity(opacity: 0.5,child: Text('Controla el inventario de este producto')),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12,),
-                              child: Form(
-                                key: controller.quantityStockFormKey,
-                                child: TextFormField(
-                                  style: valueTextStyle,
-                                  enabled: !controller.getSaveIndicator,
-                                  keyboardType: TextInputType.number,
-                                  onChanged: (value) => controller.setQuantityStock =int.parse(controller.controllerTextEditQuantityStock .text),
-                                  decoration: InputDecoration(
-                                    filled: true,fillColor: fillColor,hoverColor: Colors.blue,
-                                    disabledBorder: InputBorder.none,
-                                    labelText: "Stock", 
-                                    border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
-                                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
-                                  ),
-                                  textInputAction: TextInputAction.done,
-                                  //style: textStyle,
-                                  controller: controller.controllerTextEditQuantityStock,
-                                  // validator: validamos el texto que el usuario ha ingresado.
-                                  validator: (value) {
-                                    if ( int.parse(controller.controllerTextEditQuantityStock.text )== 0) { return 'Por favor, escriba una cantidad'; }
-                                    return null;
-                                  },
-                                ),
-                              ),
-                            ),
-                            space,
-                            Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
-                                  child: TextField(
-                                    style: valueTextStyle,
-                                    enabled: !controller.getSaveIndicator,
-                                    keyboardType: TextInputType.number,
-                                    onChanged: (value) =>controller.setAlertStock = int.parse(controller.controllerTextEditAlertStock.text),
-                                    decoration: InputDecoration(
-                                      filled: true,fillColor: fillColor,hoverColor: Colors.blue,
-                                      disabledBorder: InputBorder.none,
-                                      labelText: "Alerta de stock (opcional)", 
-                                      border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
-                                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
-                                    ),
-                                    textInputAction: TextInputAction.done,
-                                    //style: textStyle,
-                                    controller: controller.controllerTextEditAlertStock,
-                                  ),
-                                ) ,
-                          ],
-                        ):Container(),
-                      ],
-                      ),
-                    ),
-
-                    // text : marca de tiempo de la ultima actualización del documento
-                    controller.getNewProduct || !controller.itsInTheCatalogue ? Container() :  Padding(
-                      padding: const EdgeInsets.only(top: 50),
-                      //child: Text('Actualizado ${}'),
-                      child: Opacity(opacity: 0.5,child: Center(child: Text('Actualizado ${Publications.getFechaPublicacion(controller.getProduct.upgrade.toDate(), Timestamp.now().toDate()).toLowerCase()}'))),
-                    ),
-                    // button : guardar
-                    const SizedBox(height:50),
-                    // CheckboxListTile : consentimiento de usuario para crear un producto
-                    !controller.getNewProduct ? Container() :
-                    Container(
-                      margin:  const EdgeInsets.only(bottom: 20,top: 12),
-                      decoration: BoxDecoration(
-                        border: Border.all(width: 1.0, color: Colors.grey),
-                      ),
-                      child: CheckboxListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
-                        controlAffinity: ListTileControlAffinity.leading,
-                        title: const Text('Entiendo que no seré el propietario de los datos públicos asociados con el producto, ni podré editarlos después de la verificación. Además, los precios de venta serán públicos',style: TextStyle(fontWeight: FontWeight.w300)),
-                        value: controller.getUserConsent,
-                        onChanged: (value) {
-                          controller.setUserConsent = value!;
-                        },
-                      ),
-                    ),
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 500),
-                      height: controller.getUserConsent?null:0,
-                      padding: EdgeInsets.all(controller.getUserConsent?30.0:0),
-                      child: const Text('¡Gracias por hacer que esta aplicación sea aún más útil para más personas! 🚀'),
-                      ),
-                    //  button : guardar el producto
-                    ComponentApp().button(
-                      disable:controller.getSaveIndicator == true || (controller.getNewProduct && !controller.getUserConsent)  ,
-                      onPressed: controller.save,
-                      icon: Container(),
-                      colorButton: Colors.blue,
-                      padding:const EdgeInsets.all(0),
-                      colorAccent: Colors.white,
-                      text: controller.itsInTheCatalogue?'Actualizar':'Agregar a mi cátalogo',
-                    ),
+          ? Container()
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [ 
+                // textfield : precio de costo
+                Form(
+                  key: controller.purchasePriceFormKey,
+                  child: TextFormField(
+                    style: valueTextStyle,
+                    autofocus: false,
+                    focusNode:controller.purchasePriceTextFormFieldfocus,
+                    controller: controller.controllerTextEditPrecioCosto,
+                    enabled: true,
+                    autovalidateMode: AutovalidateMode.onUserInteraction, 
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration( 
+                      filled: true,
+                      fillColor: fillColor,
+                      labelText: 'Precio de costo',
+                      border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                      ),    
+                    onChanged: (value) { 
+                      controller.formEditing = true;  
+                      controller.updateAll(); 
+                    } ,  
+                    onEditingComplete: (){
+                      controller.updateAll();
+                      FocusScope.of(controller.getContext).previousFocus();
+                    },
+                    // validator: validamos el texto que el usuario ha ingresado.
+                    validator: (value) {
+                      // if (value == null || value.isEmpty) { return 'Por favor, escriba un precio de compra'; }
+                      return null; 
+                    },
+                  ),
+                ),
+                controller.getPorcentage == '' ? Container():space,
+                // text and button : modificar porcentaje de ganancia
+                controller.getPorcentage == '' ? Container():Row(
+                  children: [
+                    TextButton(onPressed: controller.showDialogAddProfitPercentage, child: Text( controller.getPorcentage )),
+                    const Spacer(),
+                    TextButton(onPressed: controller.showDialogAddProfitPercentage , child: const Text( 'Modificar porcentaje' )),
                   ],
                 ),
+                space,
+                // precio de venta al público
+                Form(
+                  key: controller.salePriceFormKey,
+                  // TODO : RangeError TextFormField : cuando el usuario mantiene presionado el boton de borrar > 'RangeError : Invalid value: only valid value is 0: -1'
+                  child: TextFormField(
+                    style: valueTextStyle,
+                    autofocus: false,
+                    focusNode:controller.salePriceTextFormFieldfocus,
+                    controller: controller.controllerTextEditPrecioVenta,
+                    enabled: true,
+                    autovalidateMode: AutovalidateMode.onUserInteraction, 
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: fillColor,
+                      labelText: 'Precio de venta al público',
+                      border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
+                    ),  
+                    onChanged: (value) => controller.formEditing = true,
+                    // validator: validamos el texto que el usuario ha ingresado.
+                    validator: (value) {
+                      if ( controller.controllerTextEditPrecioVenta.numberValue == 0.0) { return 'Por favor, escriba un precio de venta'; }
+                      return null;
+                    },
+                  ),
+                ), 
+                space,
+                // view : control de stock
+                AnimatedContainer(
+                  width:double.infinity, 
+                  duration: const Duration(milliseconds: 500),
+                  decoration: BoxDecoration(border: Border.all(color: controller.getFavorite?Colors.amber :boderLineColor,width: 0.5,),),
+                  child: CheckboxListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal:12, vertical: 12),
+                    enabled: controller.getSaveIndicator ? false : true,
+                    checkColor: Colors.white,
+                    activeColor: Colors.amber,
+                    value: controller.getFavorite,
+                    tileColor: controller.getFavorite?Colors.amber.withOpacity(0.1):null,
+                    title: Text(controller.getFavorite?'Quitar de favorito':'Agregar a favorito'),
+                    subtitle: controller.getFavorite?null: const Opacity(opacity: 0.5,child: Text('Accede rápidamente a tus productos favoritos')),
+                    onChanged: (value) {
+                      if (!controller.getSaveIndicator) { controller.setFavorite = value ?? false; }
+                    },
+                  ),
+                ),
+                space,
+                //
+                // view : control stock
+                // 
+                AnimatedContainer(
+                  width:double.infinity, 
+                  duration: const Duration(milliseconds: 500),
+                  decoration: BoxDecoration(color: controller.getStock?Colors.grey.withOpacity(0.05):null,border: Border.all(color: controller.getStock?Colors.grey:boderLineColor,width: 0.5,),),
+                  child: Column(
+                  children: [
+                    CheckboxListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal:12,vertical: 12),
+                      //enabled: controller.getHomeController.getIsSubscribedPremium?controller.getSaveIndicator ? false : true:false,
+                      checkColor: Colors.white,
+                      activeColor: Colors.blue,
+                      value: controller.homeController.getIsSubscribedPremium?controller.getStock:false,
+                      title: Text(controller.getHomeController.getIsSubscribedPremium?controller.getStock?'Quitar control de stock':'Agregar control de stock':'Control de stock'),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          controller.getHomeController.getIsSubscribedPremium?Container():LogoPremium(personalize: true,id: 'stock'),
+                          controller.getStock?Container():const Opacity(opacity: 0.5,child: Text('Controla el inventario de este producto')),
+                        ],
+                      ), 
+                      onChanged: (value) {
+                        if(controller.homeController.getIsSubscribedPremium){
+                          // esta subscripcion es premium
+                          // condition : si el usuario no esta guardando el producto
+                          if (!controller.getSaveIndicator) {
+                            controller.setStock = value ?? false;
+                          }
+                        }else{
+                          // no esta subscripcion 
+                          controller.homeController.showModalBottomSheetSubcription(id: 'stock');
+                        }
+                        
+                      },
+                    ),  
+                    ComponentApp().divider(),
+                    controller.getStock && controller.homeController.getIsSubscribedPremium? space : Container(), 
+                    controller.getStock && controller.homeController.getIsSubscribedPremium?Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.only(left: 12.0,bottom: 12),
+                          child: Opacity(opacity: 0.5,child: Text('Controla el inventario de este producto')),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12,),
+                          child: Form(
+                            key: controller.quantityStockFormKey,
+                            child: TextFormField(
+                              style: valueTextStyle,
+                              enabled: !controller.getSaveIndicator,
+                              keyboardType: TextInputType.number,
+                              onChanged: (value) => controller.setQuantityStock =int.parse(controller.controllerTextEditQuantityStock .text),
+                              decoration: InputDecoration(
+                                filled: true,fillColor: fillColor,hoverColor: Colors.blue,
+                                disabledBorder: InputBorder.none,
+                                labelText: "Stock", 
+                                border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
+                              ),
+                              textInputAction: TextInputAction.done,
+                              //style: textStyle,
+                              controller: controller.controllerTextEditQuantityStock,
+                              // validator: validamos el texto que el usuario ha ingresado.
+                              validator: (value) {
+                                if ( int.parse(controller.controllerTextEditQuantityStock.text )== 0) { return 'Por favor, escriba una cantidad'; }
+                                return null;
+                              },
+                            ),
+                          ),
+                        ),
+                        space,
+                        Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
+                              child: TextField(
+                                style: valueTextStyle,
+                                enabled: !controller.getSaveIndicator,
+                                keyboardType: TextInputType.number,
+                                onChanged: (value) =>controller.setAlertStock = int.parse(controller.controllerTextEditAlertStock.text),
+                                decoration: InputDecoration(
+                                  filled: true,fillColor: fillColor,hoverColor: Colors.blue,
+                                  disabledBorder: InputBorder.none,
+                                  labelText: "Alerta de stock (opcional)", 
+                                  border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
+                                ),
+                                textInputAction: TextInputAction.done,
+                                //style: textStyle,
+                                controller: controller.controllerTextEditAlertStock,
+                              ),
+                            ) ,
+                      ],
+                    ):Container(),
+                  ],
+                  ),
+                ),
 
-          // button : elminar el documento
-          controller.getSaveIndicator? Container(): 
-          controller.itsInTheCatalogue? Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.only(bottom: 12, top: 30, left: 0, right: 0),
-                      child: ComponentApp().button(padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),colorAccent: Colors.white,colorButton: Colors.red.shade300,icon:   Container(),text: 'Eliminar de mi catálogo', onPressed: controller.showDialogDelete),
-                    )
-                  : Container(), 
+                // text : marca de tiempo de la ultima actualización del documento
+                controller.getNewProduct || !controller.itsInTheCatalogue ? Container() :  Padding(
+                  padding: const EdgeInsets.only(top: 50),
+                  //child: Text('Actualizado ${}'),
+                  child: Opacity(opacity: 0.5,child: Center(child: Text('Actualizado ${Publications.getFechaPublicacion(controller.getProduct.upgrade.toDate(), Timestamp.now().toDate()).toLowerCase()}'))),
+                ),
+                // button : guardar
+                const SizedBox(height:50),
+                // CheckboxListTile : consentimiento de usuario para crear un producto
+                !controller.getNewProduct ? Container() :
+                Container(
+                  margin:  const EdgeInsets.only(bottom: 20,top: 12),
+                  decoration: BoxDecoration(
+                    border: Border.all(width: 1.0, color: Colors.grey),
+                  ),
+                  child: CheckboxListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    title: const Text('Entiendo que no seré el propietario de los datos públicos asociados con el producto, ni podré editarlos después de la verificación. Además, los precios de venta serán públicos',style: TextStyle(fontWeight: FontWeight.w300)),
+                    value: controller.getUserConsent,
+                    onChanged: (value) {
+                      controller.setUserConsent = value!;
+                    },
+                  ),
+                ),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 500),
+                  height: controller.getUserConsent?null:0,
+                  padding: EdgeInsets.all(controller.getUserConsent?30.0:0),
+                  child: const Text('¡Gracias por hacer que esta aplicación sea aún más útil para más personas! 🚀'),
+                  ),
+                //  button : guardar el producto
+                ComponentApp().button(
+                  defaultStyle: true, 
+                  disable:controller.getSaveIndicator == true || (controller.getNewProduct && !controller.getUserConsent)  ,
+                  onPressed: controller.save,
+                  icon: Container(),
+                  colorButton: Colors.blue,
+                  padding:const EdgeInsets.all(0),
+                  colorAccent: Colors.white,
+                  text: controller.itsInTheCatalogue?'Actualizar':'Agregar a mi cátalogo',
+                ), 
+                // button : elminar el documento
+                controller.getSaveIndicator? Container(): 
+                controller.itsInTheCatalogue? Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.only(bottom: 12, top: 30, left: 0, right: 0),
+                  child: TextButton(onPressed: controller.showDialogDelete,child: Text('Eliminar de mi cátalogo',style: TextStyle(color: Colors.red.shade300),)),
+                )
+              : Container(), 
+              ],
+            ), 
             const SizedBox(height: 20.0), 
           //widgetForModerator,
           ]             ,

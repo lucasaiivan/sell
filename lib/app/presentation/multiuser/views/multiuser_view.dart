@@ -109,9 +109,15 @@ class LoadingInitView extends StatelessWidget {
       children: [
         ListTile( 
           contentPadding:  const EdgeInsets.symmetric(horizontal: 20,vertical: 12),
-          leading: ComponentApp().userAvatarCircle(),
-          title: Text(user.email,style: const TextStyle(fontSize: 14)),
-          subtitle: Text( user.superAdmin ? 'Super administrador' : user.admin ? 'Administrador':'Permisos personalizado',style: const TextStyle(fontWeight: FontWeight.w500)),
+          leading:  ComponentApp().userAvatarCircle(),
+          title: Text(user.name==''?user.email:user.name,style: const TextStyle(fontSize: 14,fontWeight: FontWeight.w500)),
+          subtitle: Opacity(opacity: 0.5,child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              user.name==''?Container():Text(user.email),
+              Text( user.superAdmin ? 'Super administrador' : user.admin ? 'Administrador':'Permisos personalizado' ),
+            ],
+          )),
           onLongPress: () => controller.deleteItem(user: user),
           onTap: () => controller.editItem(user: user.copyWith()),
           trailing: user.superAdmin?null:IconButton(onPressed: () => controller.deleteItem(user: user),icon: const Icon(Icons.close)),
