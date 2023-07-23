@@ -209,7 +209,8 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
 
       body: Stack(
         children: [
-          Expanded(
+          Flexible( 
+            fit: FlexFit.tight, // ajustamos el contenido al espacio disponible
             child: ListView( 
               children: [
                 // view : datos del usuario

@@ -504,8 +504,16 @@ class WidgetDrawer extends StatelessWidget {
               child: ComponentApp().userAvatarCircle(urlImage: homeController.getProfileAccountSelected.image),
           ),
           title: Text(homeController.getIdAccountSelected == ''? 'Seleccionar una cuenta': homeController.getProfileAccountSelected.name,maxLines: 1,overflow: TextOverflow.ellipsis),
-          subtitle: homeController.getIdAccountSelected == ''? null: Text( user.admin? 'Administrador': 'Usuario estandar'),
-          trailing: const Icon(Icons.arrow_right_rounded),
+          subtitle: homeController.getIdAccountSelected == ''? null: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment:  MainAxisAlignment.start,
+            children: [
+              user.name==''?Container():Text( user.name,overflow: TextOverflow.ellipsis,maxLines: 1),
+              // view : punto de seracion
+              user.name==''?Container():const Icon(Icons.arrow_right_rounded), 
+              Text( user.admin? 'Administrador': 'Usuario estandar',overflow: TextOverflow.ellipsis,maxLines: 1),
+            ],
+          ),
+          trailing: const Icon(Icons.arrow_forward_ios_rounded),
           onTap: () {
             homeController.showModalBottomSheetSelectAccount();
           },
