@@ -494,6 +494,15 @@ class Mark {
         "creation": creation,
         "upgrade": upgrade,
       };
+
+  // Sobreescribir el operador ==
+  @override
+  bool operator ==(other) {
+    return other is Mark && other.id == id && other.name == name;
+  }
+  // Sobreescribir el metodo hashCode
+  @override
+  int get hashCode => id.hashCode ^ name.hashCode;
 }
 
 class ReportProduct {

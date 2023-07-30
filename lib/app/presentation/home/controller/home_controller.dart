@@ -210,6 +210,22 @@ class HomeController extends GetxController {
   // lista de porductos seleccionados por el usuario para la venta
   List listProductsSelected = [];
 
+  // list : marcas de productos disponibles en el catálogo
+  final List<Mark> _markList = [];
+  List<Mark> get getMarkList => _markList; 
+  void loadMarkCatalogue(){
+    // obtenemos las marcas de los productos disponibles en el catálogo
+    _markList.clear(); 
+    for (ProductCatalogue item in _catalogueBusiness) {
+      // object : obtenemos los datos de la marca
+      Mark mark = Mark(id: item.idMark, name: item.nameMark,creation: Timestamp.now(),upgrade: Timestamp.now());
+      // condition : si la marca no esta en la lista la añadimos
+      if(!_markList.contains(mark)){
+        _markList.add(mark);
+      }
+    }  
+  }
+
   // list products más vendidos
   RxBool productsBestSellersLoadComplete = false.obs; // loading state
   final RxList<ProductCatalogue> _productsOutstandingList = <ProductCatalogue>[].obs;
@@ -217,6 +233,7 @@ class HomeController extends GetxController {
   set setProductsOutstandingList(List<ProductCatalogue> list) {
     productsBestSellersLoadComplete.value = true;
     _productsOutstandingList.value = list;
+    loadMarkCatalogue();
   }
 
   addToListProductSelecteds({required ProductCatalogue item}) {
