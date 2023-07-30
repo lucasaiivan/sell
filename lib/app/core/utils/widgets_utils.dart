@@ -265,23 +265,25 @@ class _ProductoItemState extends State<ProductoItem> {
       child: Stack(
         children: [
           // image and description  to product
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              alertStockText == ''
-                  ? Container()
-                  : Container(
-                      width: double.infinity,
-                      color: Colors.red,
-                      child: Center(
-                          child: Padding(
-                        padding: const EdgeInsets.all(2.0),
-                        child: Text(alertStockText,style: const TextStyle(color: Colors.white,fontSize: 10,fontWeight: FontWeight.bold)),
-                      )),
-                    ),
-              Expanded(child: contentImage()),
-              contentInfo(),
-            ],
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                alertStockText == ''
+                    ? Container()
+                    : Container(
+                        width: double.infinity,
+                        color: Colors.red,
+                        child: Center(
+                            child: Padding(
+                          padding: const EdgeInsets.all(2.0),
+                          child: Text(alertStockText,style: const TextStyle(color: Colors.white,fontSize: 10,fontWeight: FontWeight.bold)),
+                        )),
+                      ),
+                Expanded(child: contentImage()),
+                contentInfo(),
+              ],
+            ),
           ),
           // selected
           Positioned.fill(
@@ -741,7 +743,7 @@ class ComponentApp extends StatelessWidget {
         child: ElevatedButton.icon(
           onPressed: disable?null:onPressed,
           style: ElevatedButton.styleFrom(
-            elevation:defaultStyle?null: elevation,
+            elevation:defaultStyle?0: elevation,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
               padding: const EdgeInsets.all(20.0),
               backgroundColor:defaultStyle?null: colorButton,
