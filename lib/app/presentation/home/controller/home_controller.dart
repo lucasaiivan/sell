@@ -1369,6 +1369,16 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
                         subtitle: Opacity(opacity: 0.5,child: Text('Obtenga datos, informes y estadísticas de sus transacciones y productos')), 
                       ),
                     ),
+                    const Opacity(opacity: 0.5,child: Divider(indent: 50,endIndent:50,thickness:0.5)),
+                    // ListTile : Version web y para windows proximamente
+                    const Opacity(
+                      opacity: 0.9,
+                      child: ListTile(
+                        leading: Icon(Icons.web),
+                        title: Text('Versión Web y para Windows (proximamente)'),
+                        subtitle: Opacity(opacity: 0.5,child: Text('Accede cualquier navegador web o desde tu computadora')), 
+                      ),
+                    ),
                   ],
                 ),
               ), 

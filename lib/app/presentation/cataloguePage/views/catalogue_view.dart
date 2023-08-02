@@ -50,7 +50,7 @@ class CataloguePage extends StatelessWidget {
       title: Text(controller.getTextTitleAppBar),
       actions: [
         // iconButton : buscar un producto del cátalogo
-        IconButton(icon: const Icon(Icons.search),onPressed: (() => controller.seach(context: context))),
+        IconButton(icon: const Icon(Icons.search),onPressed: (() => controller.showSeach(context: context))),
         // buttons : filter list
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 5),

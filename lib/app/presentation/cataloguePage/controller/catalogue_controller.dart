@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:search_page/search_page.dart';
 import 'package:sell/app/presentation/home/controller/home_controller.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart';
+import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart';
 import '../../../core/routes/app_pages.dart';
 import '../../../core/utils/widgets_utils.dart';
 import '../../../domain/entities/catalogo_model.dart';
@@ -233,118 +234,13 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     Get.toNamed(Routes.EDITPRODUCT, arguments: {'product': productCatalogue.copyWith()});
   }
 
-  void seach({required BuildContext context}) {
+  void showSeach({required BuildContext context}) {
     // Busca entre los productos de mi catálogo 
-
-    // styles
-    final Color primaryTextColor  = Get.isDarkMode?Colors.white70:Colors.black87; 
-    final TextStyle textStylePrimery = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
-    final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w200);
-    // widgets
-    final Widget dividerCircle = Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child: Icon(Icons.circle,size: 4, color: primaryTextColor.withOpacity(0.5)));
-    Widget divider = ComponentApp().divider();
-    
-
-    
-
     showSearch(
-      context: context, 
-      delegate: SearchPage<ProductCatalogue>(
-        
-        items: homeController.getCataloProducts,
-        searchLabel: 'Buscar',
-        searchStyle: TextStyle(color: primaryTextColor),
-        barTheme: Get.theme.copyWith(hintColor: primaryTextColor, highlightColor: primaryTextColor,inputDecorationTheme: const InputDecorationTheme(filled: false)),
-        suggestion: const Center(child: Text('ej. alfajor')),
-        failure: const Center(child: Text('No se encontro en tu cátalogo:(')),
-        filter: (product) => [product.description, product.nameMark],
-        
-        builder: (product) {
-
-          // var  
-          String valueDataUpdate ='Actualizado ${Publications.getFechaPublicacion(product.upgrade.toDate(), Timestamp.now().toDate())}';
-          valueDataUpdate = valueDataUpdate.substring(0, 1).toUpperCase() + valueDataUpdate.substring(1).toLowerCase();
-
-          dynamic priceWidget = Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              // text : precio de venta
-              Text(Publications.getFormatoPrecio(monto: product.salePrice),style: TextStyle(fontWeight:FontWeight.w600,color: homeController.getDarkMode?Colors.white:Colors.black )),
-              const SizedBox(width: 5),
-              // text : porcentaje de ganancia
-              product.getPorcentage==''?Container():Opacity(opacity:0.7,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.arrow_upward_rounded,size: 14,color: Colors.green),
-                    Text(product.getPorcentage,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w500)),
-                  ],
-                )),
-              // text : monto de la ganancia
-              product.getBenefits==''?Container():Text(product.getBenefits,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w500)),
-              
-            ],
-          );
-
-          return Column(
-          children: [
-            InkWell(
-              onTap: () {
-                Get.back();
-                homeController.getUserAnonymous?null:toProductEdit(productCatalogue: product);
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Row(
-                  children: [
-                    ImageProductAvatarApp(url: product.image,size: 75),
-                    // datos del producto
-                    Expanded( 
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Column( 
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            // text : nombre del producto
-                            Text(product.description,maxLines: 1),
-                            // text : marca del producto
-                            product.nameMark==''?Container():Text('${product.nameMark} ',maxLines: 2,overflow: TextOverflow.clip,style: const TextStyle(color: Colors.blue)),
-                            // text components : fecha de creacion y ventas
-                            Wrap(
-                              children: [ 
-                                // text : fecha de creacion
-                                Text( valueDataUpdate ,style: textStyleSecundary,),
-                                // text : stock
-                                product.stock
-                                  ?Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      product.stock == false ? Container(): dividerCircle, 
-                                      Text('stock ${product.quantityStock.toString()}',style: textStylePrimery.copyWith(color: getStockColor(productCatalogue: product,color: textStyleSecundary.color as Color)),), 
-                                    ],
-                                  ):Container(),
-                              ],
-                            ), 
-                            // favorite
-                            product.favorite?Text('favorito',maxLines: 2,overflow: TextOverflow.clip,style: TextStyle(color: Colors.yellow.shade800)):Container(),
-                          ],
-                        ),
-                      ),
-                    ),
-                    // content view : precio
-                    priceWidget,
-                  ],
-                ),
-              ),
-            ), 
-            divider
-          ],
-        );
-        },
-      ),
+      context: context,
+      delegate: CustomSearchDelegate(items: homeController.getCataloProducts),
     );
+
   }
 
   void filterAlertStock() {
@@ -422,4 +318,273 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     return Container();
   }
 
+}
+
+
+
+// search delegate : implementar el buscador de productos
+class CustomSearchDelegate<T> extends SearchDelegate<T> {
+
+  // vars
+  final List<ProductCatalogue> items; 
+  final Color primaryTextColor  = Get.isDarkMode?Colors.white70:Colors.black87;
+
+  CustomSearchDelegate({
+    required this.items, 
+  });
+
+  // controllers
+  HomeController homeController = Get.find<HomeController>();
+  CataloguePageController catalogueController = Get.find<CataloguePageController>();
+
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: const Icon(Icons.clear),
+        onPressed: () {
+          if(query.isEmpty){
+            Get.back();
+          }else{
+            query = '';
+          } 
+        },
+      ),
+    ];
+  } 
+  // estilo de la barra de busqueda
+  @override
+  ThemeData appBarTheme(BuildContext context) {
+    return Get.theme.copyWith(hintColor: primaryTextColor, highlightColor: primaryTextColor,inputDecorationTheme: const InputDecorationTheme(filled: false));
+  } 
+  // texto de ayuda del textfield de busqueda
+  @override
+  String get searchFieldLabel => 'Buscar';
+
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.arrow_back),
+      onPressed: () { 
+        Get.back();
+      },
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    return ListView.builder(
+      itemCount: _filteredItems.length, 
+      itemBuilder: (context, index) { 
+        // Aquí puedes construir el diseño de cada resultado.
+        // Por ejemplo: ListTile, Container, Card, etc.
+        return item(product:_filteredItems[index]);
+      },
+    );
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+
+    // styles
+    final Color primaryTextColor  = Get.isDarkMode?Colors.white70:Colors.black87;
+    final TextStyle textStylePrimary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400,fontSize: 16);
+    final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
+    // widgets 
+    final Widget viewMarks = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        homeController.getMarkList.isEmpty?Container(): Text('Marcas',style: textStylePrimary),
+        const SizedBox(height: 5), 
+        Wrap(
+          children: [
+            for (Mark element in homeController.getMarkList)
+              // chip
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal:3),
+                child: GestureDetector(
+                  onTap: (){
+                    // set query
+                    query = element.name;
+                  },
+                  child: Chip( 
+                    label: Text(element.name,style: textStyleSecundary), 
+                    shape: RoundedRectangleBorder(side: BorderSide(color: primaryTextColor.withOpacity(0.5)),borderRadius: BorderRadius.circular(5)),
+                    backgroundColor: Colors.transparent,   
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+    final Widget viewCategories = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        homeController.getCatalogueCategoryList.isEmpty?Container():Text('Categorías',style: textStylePrimary),
+        const SizedBox(height: 5),
+        Wrap(
+          children: [
+            for (Category element in homeController.getCatalogueCategoryList)
+              // chip
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal:3),
+                child: GestureDetector(
+                  onTap: (){
+                    // set query
+                    query = element.name;
+                  },
+                  child: Chip( 
+                    label: Text(element.name,style: textStyleSecundary), 
+                    shape: RoundedRectangleBorder(side: BorderSide(color: primaryTextColor.withOpacity(0.5)),borderRadius: BorderRadius.circular(5)),
+                    backgroundColor: Colors.transparent,   
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+    
+    /// Filtra una lista de elementos [ProductCatalogue] basándose en el criterio de búsqueda [query]. 
+    final filteredSuggestions = _filteredItems;
+
+    // condition : si no hay query entonces mostramos las categorias
+    if(query.isEmpty){
+      return Padding(
+        padding: const EdgeInsets.only(top: 20,left: 12,right: 12),
+        child: ListView(
+            children: [
+              viewCategories, 
+              viewMarks,
+            ],
+          ),
+      );
+    }
+    // condition : si se consulto pero no se obtuvieron resultados
+    if(filteredSuggestions.isEmpty && query.isNotEmpty){
+      return const Center(child: Text('No se encontraron resultados'));
+    }
+
+
+    return ListView.builder(
+      itemCount: filteredSuggestions.length,
+      itemBuilder: (context, index) { 
+        // values
+        ProductCatalogue product = filteredSuggestions[index]; 
+        return item(product:product); 
+      },
+    );
+  }
+
+  List<ProductCatalogue> get _filteredItems {
+    /// Filtra una lista de elementos [ProductCatalogue] basándose en el criterio de búsqueda [query].
+    /// Los elementos se filtran de acuerdo a coincidencias encontradas en los atributos
+    /// 'description', 'nombre de la marca' y 'codigo' de cada elemento.
+    return query.isEmpty
+    ? items
+    : items.where((item) {
+        // Convertimos la descripción, marca y código del elemento y el query a minúsculas
+        final description = item.description.toLowerCase();
+        final brand = item.nameMark.toLowerCase();
+        final code = item.code.toLowerCase();
+        final category = item.nameCategory.toLowerCase();
+        final lowerCaseQuery = query.toLowerCase();
+
+        // Dividimos el query en palabras individuales
+        final queryWords = lowerCaseQuery.split(' ');
+
+        // Verificamos que todas las palabras del query estén presentes en la descripción, marca código
+        return queryWords.every((word) => description.contains(word) || brand.contains(word) || code.contains(word) || category.contains(word));
+      }).toList();
+  }
+
+  // WIDGETS
+  Widget item({required ProductCatalogue product}){
+
+    // styles
+    final Color highlightColor = Get.isDarkMode?Colors.white:Colors.black;
+    final Color primaryTextColor  = Get.isDarkMode?Colors.white54:Colors.black45;
+    final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
+    // widgets
+    final Widget dividerCircle = Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child:Icon(Icons.circle,size: 4, color: primaryTextColor.withOpacity(0.5)));
+
+    // var
+    String alertStockText =product.stock ? (product.quantityStock == 0 ? 'Sin stock' : '{product.quantityStock} en stock') : '';
+          
+    return Column(
+      children: [
+        InkWell(
+          // color del cliqueable
+          splashColor: Colors.blue, 
+          highlightColor: highlightColor.withOpacity(0.1),
+
+          onTap: () { 
+            Get.back();
+            homeController.getUserAnonymous?null:catalogueController.toProductEdit(productCatalogue: product);
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                // image
+                ImageProductAvatarApp(url: product.image,size: 75,favorite:product.favorite),
+                // text : datos del producto
+                Flexible(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal:12),
+                    child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(product.description,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(fontWeight: FontWeight.w500)),
+                      product.nameMark==''?Container():Text(product.nameMark,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(color: Colors.blue)),
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.start,
+                        direction: Axis.horizontal,
+                        children: <Widget>[
+                          // text : code
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                dividerCircle,
+                                Text(product.code,style: textStyleSecundary),
+                              ],
+                            ),
+                            // favorite
+                            product.favorite?Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                dividerCircle,
+                                Text('Favorito',style: textStyleSecundary),
+                              ],
+                            ):Container(),
+                          //  text : alert stock
+
+                            alertStockText != ''?Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                dividerCircle,
+                                Text(alertStockText,style: textStyleSecundary),
+                              ],
+                            ):Container(),
+                        ],
+                      ),
+                              
+                    ],
+                                  ),
+                  ),
+                ),
+                // text : precio
+                Text(Publications.getFormatoPrecio(monto: product.salePrice),style: const  TextStyle(fontSize: 18,fontWeight: FontWeight.w300),)
+              ],
+            ),
+          ),
+        ), 
+      ComponentApp().divider(), 
+      ],
+    );
+  }
 }
