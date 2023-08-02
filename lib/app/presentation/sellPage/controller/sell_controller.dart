@@ -1104,7 +1104,8 @@ class _NewProductViewState extends State<NewProductView> {
     );
   }
 }
-
+ 
+// search delegate : implementar el buscador de productos
 class CustomSearchDelegate<T> extends SearchDelegate<T> {
 
   // vars
@@ -1177,7 +1178,7 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
     final Widget viewMarks = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Marcas',style: textStylePrimary),
+        homeController.getMarkList.isEmpty?Container(): Text('Marcas',style: textStylePrimary),
         const SizedBox(height: 5), 
         Wrap(
           children: [
@@ -1204,7 +1205,7 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
     final Widget viewCategories = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Categorias',style: textStylePrimary),
+        homeController.getCatalogueCategoryList.isEmpty?Container():Text('Categorías',style: textStylePrimary),
         const SizedBox(height: 5),
         Wrap(
           children: [
@@ -1286,7 +1287,8 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
   Widget item({required ProductCatalogue product}){
 
     // styles
-    final Color primaryTextColor  = Get.isDarkMode?Colors.white70:Colors.black87;
+    final Color highlightColor = Get.isDarkMode?Colors.white:Colors.black;
+    final Color primaryTextColor  = Get.isDarkMode?Colors.white54:Colors.black45;
     final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
     // widgets
     final Widget dividerCircle = Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child:Icon(Icons.circle,size: 4, color: primaryTextColor.withOpacity(0.5)));
@@ -1297,6 +1299,10 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
     return Column(
       children: [
         InkWell(
+          // color del cliqueable
+          splashColor: Colors.blue, 
+          highlightColor: highlightColor.withOpacity(0.1),
+
           onTap: () {
             salesController.selectedProduct(item: product);
             Get.back();

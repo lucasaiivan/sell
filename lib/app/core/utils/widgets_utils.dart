@@ -262,28 +262,26 @@ class _ProductoItemState extends State<ProductoItem> {
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       clipBehavior: Clip.antiAlias,
-      child: Stack(
+      child: Stack(  
         children: [
           // image and description  to product
-          Flexible(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                alertStockText == ''
-                    ? Container()
-                    : Container(
-                        width: double.infinity,
-                        color: Colors.red,
-                        child: Center(
-                            child: Padding(
-                          padding: const EdgeInsets.all(2.0),
-                          child: Text(alertStockText,style: const TextStyle(color: Colors.white,fontSize: 10,fontWeight: FontWeight.bold)),
-                        )),
-                      ),
-                Expanded(child: contentImage()),
-                contentInfo(),
-              ],
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              alertStockText == ''
+                  ? Container()
+                  : Container(
+                      width: double.infinity,
+                      color: Colors.red,
+                      child: Center(
+                          child: Padding(
+                        padding: const EdgeInsets.all(2.0),
+                        child: Text(alertStockText,style: const TextStyle(color: Colors.white,fontSize: 10,fontWeight: FontWeight.bold)),
+                      )),
+                    ),
+              Flexible(child: contentImage()),
+              contentInfo(),
+            ],
           ),
           // selected
           Positioned.fill(
@@ -540,28 +538,33 @@ class WidgetDrawer extends StatelessWidget {
         ListTile(
           selected: homeController.getIndexPage == 0,
             leading: const Icon(Icons.attach_money_rounded),
+            trailing: homeController.getIndexPage != 0 ? null : const Icon(Icons.circle,size: 8),
             title: const Text('Vender'),
             onTap: () => homeController.setIndexPage = 0),
         // historial de caja
         user.historyArqueo?ListTile(
           selected: homeController.getIndexPage == 1,
           leading: const Icon(Icons.manage_search_rounded),
+          trailing: homeController.getIndexPage != 1 ? null : const Icon(Icons.circle,size: 8),
           title: const Text('Historial de caja'),
           onTap: () => homeController.setIndexPage = 1):Container(),
         // transacciones
         user.transactions?ListTile(
           selected: homeController.getIndexPage == 2,
           leading: const Icon(Icons.receipt_long_rounded),
+          trailing: homeController.getIndexPage != 2 ? null : const Icon(Icons.circle,size: 8),
           title: const Text('Transacciones'),
           onTap: () => homeController.setIndexPage = 2):Container(),
         user.catalogue?ListTile(
           selected: homeController.getIndexPage == 3,
           leading: const Icon(Icons.apps_rounded),
+          trailing: homeController.getIndexPage != 3 ? null : const Icon(Icons.circle,size: 8),
           title: const Text('Catálogo'),
           onTap: () => homeController.setIndexPage = 3):Container(),
         user.multiuser?ListTile(
           selected: homeController.getIndexPage == 4,
           leading: const Icon(Icons.add_moderator_outlined),
+          trailing: homeController.getIndexPage != 4 ? null : const Icon(Icons.circle,size: 8),
           title: const Text('Multi Usuario'),
           onTap: () {
             if( homeController.getProfileAccountSelected.subscribed ){
