@@ -236,10 +236,11 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
 
   void showSeach({required BuildContext context}) {
     // Busca entre los productos de mi catálogo 
-    showSearch(
+    Get.dialog( const ViewSeachProductsCataloguie());
+    /* showSearch(
       context: context,
-      delegate: CustomSearchDelegate(items: homeController.getCataloProducts),
-    );
+      delegate: CustomSearchDelegate(itemsList: homeController.getCataloProducts),
+    ); */
 
   }
 
@@ -323,19 +324,22 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
 
 
 // search delegate : implementar el buscador de productos
-class CustomSearchDelegate<T> extends SearchDelegate<T> {
+class CustomSearchDelegate<T> extends SearchDelegate<T>  {
 
   // vars
-  final List<ProductCatalogue> items; 
+  final List<ProductCatalogue> itemsSelectedList = [];
+  final List<ProductCatalogue> itemsList; 
   final Color primaryTextColor  = Get.isDarkMode?Colors.white70:Colors.black87;
 
   CustomSearchDelegate({
-    required this.items, 
+    required this.itemsList, 
   });
 
   // controllers
   HomeController homeController = Get.find<HomeController>();
   CataloguePageController catalogueController = Get.find<CataloguePageController>();
+  // context
+  BuildContext? buildContext;
 
   @override
   List<Widget> buildActions(BuildContext context) {
@@ -344,7 +348,7 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
         icon: const Icon(Icons.clear),
         onPressed: () {
           if(query.isEmpty){
-            Get.back();
+            Get.back(); 
           }else{
             query = '';
           } 
@@ -360,6 +364,7 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
   // texto de ayuda del textfield de busqueda
   @override
   String get searchFieldLabel => 'Buscar';
+ 
 
 
   @override
@@ -383,9 +388,12 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
       },
     );
   }
-
+ 
   @override
   Widget buildSuggestions(BuildContext context) {
+
+    // get values
+    buildContext = context;
 
     // styles
     final Color primaryTextColor  = Get.isDarkMode?Colors.white70:Colors.black87;
@@ -477,14 +485,19 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
       },
     );
   }
+  // fuction : isSelectedProduct
+  bool  isSelectedProduct({required ProductCatalogue product}){
+    return itemsSelectedList.contains(product);
+  }
 
+  // get : filter
   List<ProductCatalogue> get _filteredItems {
     /// Filtra una lista de elementos [ProductCatalogue] basándose en el criterio de búsqueda [query].
     /// Los elementos se filtran de acuerdo a coincidencias encontradas en los atributos
     /// 'description', 'nombre de la marca' y 'codigo' de cada elemento.
     return query.isEmpty
-    ? items
-    : items.where((item) {
+    ? itemsList
+    : itemsList.where((item) {
         // Convertimos la descripción, marca y código del elemento y el query a minúsculas
         final description = item.description.toLowerCase();
         final brand = item.nameMark.toLowerCase();
@@ -515,71 +528,81 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
           
     return Column(
       children: [
-        InkWell(
+        InkWell( 
           // color del cliqueable
           splashColor: Colors.blue, 
           highlightColor: highlightColor.withOpacity(0.1),
-
-          onTap: () { 
-            Get.back();
-            homeController.getUserAnonymous?null:catalogueController.toProductEdit(productCatalogue: product);
+          onLongPress: () {
+            itemsSelectedList.add(product);
+            // actualizar la vista  con didUpdateWidget  
+            showSuggestions(buildContext!); 
           },
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                // image
-                ImageProductAvatarApp(url: product.image,size: 75,favorite:product.favorite),
-                // text : datos del producto
-                Flexible(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal:12),
-                    child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(product.description,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(fontWeight: FontWeight.w500)),
-                      product.nameMark==''?Container():Text(product.nameMark,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(color: Colors.blue)),
-                      Wrap(
-                        crossAxisAlignment: WrapCrossAlignment.start,
-                        direction: Axis.horizontal,
-                        children: <Widget>[
-                          // text : code
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                dividerCircle,
-                                Text(product.code,style: textStyleSecundary),
-                              ],
-                            ),
-                            // favorite
-                            product.favorite?Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                dividerCircle,
-                                Text('Favorito',style: textStyleSecundary),
-                              ],
-                            ):Container(),
-                          //  text : alert stock
-
-                            alertStockText != ''?Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                dividerCircle,
-                                Text(alertStockText,style: textStyleSecundary),
-                              ],
-                            ):Container(),
-                        ],
-                      ),
-                              
-                    ],
-                                  ),
+          onTap: () { 
+            itemsSelectedList.add(product);
+            // actualizar la vista  con didUpdateWidget  
+            showSuggestions(buildContext!); 
+            //Get.back();
+            //homeController.getUserAnonymous?null:catalogueController.toProductEdit(productCatalogue: product);
+          },
+          child: Container(
+            color: isSelectedProduct(product: product)?Colors.blue.withOpacity(0.1):Colors.transparent,
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  // image
+                  ImageProductAvatarApp(url: product.image,size: 75,favorite:product.favorite),
+                  // text : datos del producto
+                  Flexible(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal:12),
+                      child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(product.description,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(fontWeight: FontWeight.w500)),
+                        product.nameMark==''?Container():Text(product.nameMark,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(color: Colors.blue)),
+                        Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.start,
+                          direction: Axis.horizontal,
+                          children: <Widget>[
+                            // text : code
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  dividerCircle,
+                                  Text(product.code,style: textStyleSecundary),
+                                ],
+                              ),
+                              // favorite
+                              product.favorite?Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  dividerCircle,
+                                  Text('Favorito',style: textStyleSecundary),
+                                ],
+                              ):Container(),
+                            //  text : alert stock
+          
+                              alertStockText != ''?Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  dividerCircle,
+                                  Text(alertStockText,style: textStyleSecundary),
+                                ],
+                              ):Container(),
+                          ],
+                        ),
+                                
+                      ],
+                                    ),
+                    ),
                   ),
-                ),
-                // text : precio
-                Text(Publications.getFormatoPrecio(monto: product.salePrice),style: const  TextStyle(fontSize: 18,fontWeight: FontWeight.w300),)
-              ],
+                  // text : precio
+                  Text(Publications.getFormatoPrecio(monto: product.salePrice),style: const  TextStyle(fontSize: 18,fontWeight: FontWeight.w300),)
+                ],
+              ),
             ),
           ),
         ), 
@@ -587,4 +610,64 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
       ],
     );
   }
+}
+
+
+
+class ViewSeachProductsCataloguie extends StatefulWidget {
+  const ViewSeachProductsCataloguie({super.key});
+
+  @override
+  State<ViewSeachProductsCataloguie> createState() => _ViewSeachProductsCataloguieState();
+}
+
+class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCataloguie> {
+
+
+  // values
+  String query = '';
+
+  // controllers
+  final TextEditingController _searchQueryController = TextEditingController();
+  
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: appBar,
+
+    );
+  }
+  // WIDGETS VIEW
+  PreferredSizeWidget get appBar{
+    return AppBar(
+      // title : textfield search con estilo simple  y fondo transparente  con un iconbutton de clean 
+      title: TextField(
+        controller: _searchQueryController,
+        autofocus: true, 
+        style: const TextStyle(fontSize: 20),
+        decoration: const InputDecoration(
+          fillColor: Colors.transparent,
+          hintText: 'Buscar producto',  
+        ), 
+        onChanged: (value) {
+          setState(() {
+            query = value;
+          });
+        },
+      ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.clear),
+          onPressed: () { 
+            if(query==''){Get.back();return;}
+            setState(() {
+              query = '';
+              _searchQueryController.clear();
+            });
+          },
+        ),
+      ],
+    );
+  }
+  
 }

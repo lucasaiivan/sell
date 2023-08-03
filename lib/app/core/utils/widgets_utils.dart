@@ -657,20 +657,7 @@ Widget viewDefault() {
     )),
   );
 }
- 
 
-// notification
-void showMessageAlertApp({required String title, required String message}) {
-  Get.snackbar(title, message,
-      margin: const EdgeInsets.all(12),
-      backgroundColor: Get.theme.brightness == Brightness.dark
-          ? Colors.transparent
-          : Colors.white,
-      colorText: Get.theme.brightness == Brightness.dark
-          ? Colors.white
-          : Colors.black);
-}
-  
 
 // ignore: must_be_immutable
 class ComponentApp extends StatelessWidget {
@@ -756,6 +743,18 @@ class ComponentApp extends StatelessWidget {
         ),
       ),
     ));
+  }
+
+  // notification
+  void showMessageAlertApp({required String title, required String message}) {
+    Get.snackbar(title, message,
+        margin: const EdgeInsets.all(12),
+        backgroundColor: Get.theme.brightness == Brightness.dark
+            ? Colors.transparent
+            : Colors.white,
+        colorText: Get.theme.brightness == Brightness.dark
+            ? Colors.white
+            : Colors.black);
   }
 }
 
