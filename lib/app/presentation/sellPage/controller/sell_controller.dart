@@ -384,7 +384,9 @@ class SalesController extends GetxController {
         true,
         ScanMode.BARCODE,
       );
-      if(barcodeScanRes == '-1'){return;}
+      if(barcodeScanRes == '-1'){ 
+        return;
+        }
       playSoundScan();
       verifyExistenceInSelectedScanResult(id:barcodeScanRes);
     } on PlatformException {
@@ -532,7 +534,7 @@ class SalesController extends GetxController {
       update();
       Get.back();
     } else {
-      showMessageAlertApp(title: '😔No se puedo agregar 😔',message: 'Debe ingresar un valor distinto a 0');
+      ComponentApp().showMessageAlertApp(title: '😔No se puedo agregar 😔',message: 'Debe ingresar un valor distinto a 0');
     }
   }
 
@@ -579,9 +581,8 @@ class SalesController extends GetxController {
     // Dialog view : Hacer una venta rapida 
 
     //var
-    final FocusNode myFocusNode = FocusNode();
-    final ButtonStyle buttonStyle =  ButtonStyle(padding: MaterialStateProperty.all(const EdgeInsets.all(20)),shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(borderRadius: BorderRadius.circular(2))));
- 
+    final FocusNode myFocusNode = FocusNode(); 
+
     // widgets
     Widget content = Scaffold(
       appBar: AppBar(
@@ -737,7 +738,7 @@ class SalesController extends GetxController {
                       setPayModeTicket = 'effective';
                       Get.back();
                 } else {
-                  showMessageAlertApp( title: '😔', message: 'Tiene que ingresar un monto valido');
+                  ComponentApp().showMessageAlertApp( title: '😔', message: 'Tiene que ingresar un monto valido');
                 }
               },
               child: const Text('aceptar')),
@@ -844,7 +845,7 @@ class SalesController extends GetxController {
                       setPayModeTicket = 'effective';
                       Get.back();
                     } else {
-                      showMessageAlertApp( title: '😔', message: 'Tiene que ingresar un monto valido');
+                      ComponentApp().showMessageAlertApp( title: '😔', message: 'Tiene que ingresar un monto valido');
                     }
                   },
                 ),
@@ -900,7 +901,7 @@ class _NewProductViewState extends State<NewProductView> {
     super.initState();
 
     // set
-    isProductNew = widget.productCatalogue.description==''?true:false;
+    isProductNew = widget.productCatalogue.description=='' || widget.productCatalogue.salePrice==0.0 ? true : false;
     colorAccent = Get.isDarkMode?Colors.white:Colors.black;
     hintStyle = TextStyle(color: colorAccent.withOpacity(0.3));
     labelStyle = TextStyle(color: colorAccent.withOpacity(0.9));
@@ -943,6 +944,7 @@ class _NewProductViewState extends State<NewProductView> {
       padding: padding,
       child: // text :  crear un rich text para poder darle estilo al texto
         RichText(
+          maxLines: 2,
           text: TextSpan( 
             style: textStyle,
             children: <TextSpan>[
@@ -1075,7 +1077,14 @@ class _NewProductViewState extends State<NewProductView> {
     
     return Scaffold(
       appBar: AppBar( 
-        title: Text(isProductNew?'Nuevo Producto':'Producto'), 
+        title: Row(
+          children: [
+            widget.productCatalogue.image==''?Container():
+            ImageProductAvatarApp(url: widget.productCatalogue.image, size: 35),
+            const SizedBox(width: 12),
+            Text(isProductNew?'Nuevo producto':'Producto'),
+          ],
+        ), 
         backgroundColor: Colors.transparent, 
         automaticallyImplyLeading: false,
         actions: [
@@ -1086,9 +1095,9 @@ class _NewProductViewState extends State<NewProductView> {
         padding: const EdgeInsets.symmetric(vertical: 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // listtile : datos del producto
-            listtileCode, 
+          children: [  
+            // text : codigo del producto
+            listtileCode,  
             // textfield : descripcion del producto
             widgetTextFieldDescription,
             const SizedBox(height: 12),

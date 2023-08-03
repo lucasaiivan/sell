@@ -882,11 +882,10 @@ class HomeController extends GetxController {
       Database.readProfileAccountModelFuture(idAccount).then((value) {
         // condition : ¿El documento existe?
         if (value.exists) {
-          // subcription premium  : inicializamos la identidad de revenue cat
-          initIdentityRevenueCat(); // inicializamos la identidad de revenue cat
-
           //get profile account
           setProfileAccountSelected = ProfileAccountModel.fromDocumentSnapshot(documentSnapshot: value);
+          // subcription premium  : inicializamos la identidad de revenue cat
+          initIdentityRevenueCat(); // inicializamos la identidad de revenue cat
           // load
           loadCashRegisters(); // obtenemos las cajas registradoras activas
           readProductsCatalogue(idAccount: idAccount); // obtenemos los productos del catálogo
