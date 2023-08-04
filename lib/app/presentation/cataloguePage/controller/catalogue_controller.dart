@@ -1,15 +1,12 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:search_page/search_page.dart';
+import 'package:get/get.dart'; 
 import 'package:sell/app/presentation/home/controller/home_controller.dart';
-import 'package:sell/app/data/datasource/database_cloud.dart';
-import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart';
-import '../../../core/routes/app_pages.dart';
-import '../../../core/utils/widgets_utils.dart';
-import '../../../domain/entities/catalogo_model.dart';
-import '../../../core/utils/fuctions.dart';
+import 'package:sell/app/data/datasource/database_cloud.dart'; 
+import '../../../core/routes/app_pages.dart'; 
+import '../../../domain/entities/catalogo_model.dart'; 
+import '../views/catalogueSeach_view.dart';
 
 class CataloguePageController extends GetxController with GetSingleTickerProviderStateMixin {
   
@@ -51,6 +48,9 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     _catalogueBusiness.value = products;
     //...filter
   }
+  // items seleccionados del cátalogo
+  final List<ProductCatalogue> itemsSelectedList = []; 
+
 
   @override
   void onInit() async {
@@ -209,8 +209,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     ProductCatalogue productCatalogue = ProductCatalogue(
         id: id, code: id, creation: Timestamp.now(), upgrade: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now());
     // navega hacia una nueva vista para crear un nuevo producto
-    Get.toNamed(Routes.EDITPRODUCT,
-        arguments: {'new': true, 'product': productCatalogue});
+    Get.toNamed(Routes.EDITPRODUCT,arguments: {'new': true, 'product': productCatalogue});
   }
 
   void toSeachProduct() {
@@ -229,21 +228,16 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     documentReferencer.set(Map<String, dynamic>.from(categoria.toJson()),SetOptions(merge: true));
   }
 
-  // navigator
-  void toProductEdit({required ProductCatalogue productCatalogue}) {
+  // 
+  // FUCTIONS CATALOGUE VIEW
+  //
+  void toNavigationProductEdit({required ProductCatalogue productCatalogue}) {
     Get.toNamed(Routes.EDITPRODUCT, arguments: {'product': productCatalogue.copyWith()});
   }
-
   void showSeach({required BuildContext context}) {
-    // Busca entre los productos de mi catálogo 
-    Get.dialog( const ViewSeachProductsCataloguie());
-    /* showSearch(
-      context: context,
-      delegate: CustomSearchDelegate(itemsList: homeController.getCataloProducts),
-    ); */
-
+    // dialog : Busca entre los productos de mi catálogo 
+    Get.dialog( const ViewSeachProductsCataloguie()); 
   }
-
   void filterAlertStock() {
 
     // obtenemos una lista nueva con los productos que tienen un stock
@@ -275,7 +269,55 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     // actualizamos la lista para mostrar al usuario
     setCatalogueProducts = newFilterList;
   }
+  //
+  // FUCTIONS CATALOGUE SEARCH VIEW
+  //  
+  void selectedProduct({required ProductCatalogue product}){
+    // description : selecciona un producto
+    if(isSelectedProduct(code: product.code)){
+      deleteProductSelected(code: product.code);
+    }else{
+      addProductSelected(product: product);
+    }
+    update();
+  }
+  void addProductSelected({required ProductCatalogue product}){
+    // description : agrega un producto a la lista de seleccionados
+    itemsSelectedList.add(product);
+  }
+  bool  isSelectedProduct({required String code}){
+    // description : verifica si un producto esta seleccionado
+    return itemsSelectedList.where((element) => element.code == code).isNotEmpty;
+  }
+  void deleteProductSelected({required String code}){
+    // description : elimina un producto de la lista de seleccionados
+    itemsSelectedList.removeWhere((element) => element.code == code);
+  }
+  // get : filter
+  List<ProductCatalogue> filteredItems({required String query}) {
+    // description : Filtra una lista de elementos [ProductCatalogue] basándose en el criterio de búsqueda [query].
+    // Los elementos se filtran de acuerdo a coincidencias encontradas en los atributos
+    // 'description', 'nombre de la marca' y 'codigo' de cada elemento.
+    return query.isEmpty
+    ? getCataloProducts
+    : getCataloProducts.where((item) {
+        // Convertimos la descripción, marca y código del elemento y el query a minúsculas
+        final description = item.description.toLowerCase();
+        final brand = item.nameMark.toLowerCase();
+        final code = item.code.toLowerCase();
+        final category = item.nameCategory.toLowerCase();
+        final lowerCaseQuery = query.toLowerCase();
 
+        // Dividimos el query en palabras individuales
+        final queryWords = lowerCaseQuery.split(' ');
+
+        // Verificamos que todas las palabras del query estén presentes en la descripción, marca código
+        return queryWords.every((word) => description.contains(word) || brand.contains(word) || code.contains(word) || category.contains(word));
+      }).toList();
+  }
+ //
+ // WIDGETS
+ //
   Widget get viewStockAlert {
     // buscamos los productos que tengan un stock vacio o bajo
     int countProducts = 0;
@@ -297,8 +339,6 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
       );
     }
   }
-
-
   Widget get widgetSuggestionProduct{
     // widget : este texto se va a mostrar en la primera venta
 
@@ -318,356 +358,102 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     // si no es la primera ves que se inicica la aplicación devuelve una vistra vacia
     return Container();
   }
-
-}
-
-
-
-// search delegate : implementar el buscador de productos
-class CustomSearchDelegate<T> extends SearchDelegate<T>  {
-
-  // vars
-  final List<ProductCatalogue> itemsSelectedList = [];
-  final List<ProductCatalogue> itemsList; 
-  final Color primaryTextColor  = Get.isDarkMode?Colors.white70:Colors.black87;
-
-  CustomSearchDelegate({
-    required this.itemsList, 
-  });
-
-  // controllers
-  HomeController homeController = Get.find<HomeController>();
-  CataloguePageController catalogueController = Get.find<CataloguePageController>();
-  // context
-  BuildContext? buildContext;
-
-  @override
-  List<Widget> buildActions(BuildContext context) {
-    return [
-      IconButton(
-        icon: const Icon(Icons.clear),
-        onPressed: () {
-          if(query.isEmpty){
-            Get.back(); 
-          }else{
-            query = '';
-          } 
-        },
-      ),
-    ];
-  } 
-  // estilo de la barra de busqueda
-  @override
-  ThemeData appBarTheme(BuildContext context) {
-    return Get.theme.copyWith(hintColor: primaryTextColor, highlightColor: primaryTextColor,inputDecorationTheme: const InputDecorationTheme(filled: false));
-  } 
-  // texto de ayuda del textfield de busqueda
-  @override
-  String get searchFieldLabel => 'Buscar';
- 
-
-
-  @override
-  Widget buildLeading(BuildContext context) {
-    return IconButton(
-      icon: const Icon(Icons.arrow_back),
-      onPressed: () { 
-        Get.back();
-      },
-    );
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    return ListView.builder(
-      itemCount: _filteredItems.length, 
-      itemBuilder: (context, index) { 
-        // Aquí puedes construir el diseño de cada resultado.
-        // Por ejemplo: ListTile, Container, Card, etc.
-        return item(product:_filteredItems[index]);
-      },
-    );
-  }
- 
-  @override
-  Widget buildSuggestions(BuildContext context) {
-
-    // get values
-    buildContext = context;
-
-    // styles
-    final Color primaryTextColor  = Get.isDarkMode?Colors.white70:Colors.black87;
-    final TextStyle textStylePrimary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400,fontSize: 16);
-    final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
-    // widgets 
-    final Widget viewMarks = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        homeController.getMarkList.isEmpty?Container(): Text('Marcas',style: textStylePrimary),
-        const SizedBox(height: 5), 
-        Wrap(
-          children: [
-            for (Mark element in homeController.getMarkList)
-              // chip
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal:3),
-                child: GestureDetector(
-                  onTap: (){
-                    // set query
-                    query = element.name;
-                  },
-                  child: Chip( 
-                    label: Text(element.name,style: textStyleSecundary), 
-                    shape: RoundedRectangleBorder(side: BorderSide(color: primaryTextColor.withOpacity(0.5)),borderRadius: BorderRadius.circular(5)),
-                    backgroundColor: Colors.transparent,   
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ],
-    );
-    final Widget viewCategories = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        homeController.getCatalogueCategoryList.isEmpty?Container():Text('Categorías',style: textStylePrimary),
-        const SizedBox(height: 5),
-        Wrap(
-          children: [
-            for (Category element in homeController.getCatalogueCategoryList)
-              // chip
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal:3),
-                child: GestureDetector(
-                  onTap: (){
-                    // set query
-                    query = element.name;
-                  },
-                  child: Chip( 
-                    label: Text(element.name,style: textStyleSecundary), 
-                    shape: RoundedRectangleBorder(side: BorderSide(color: primaryTextColor.withOpacity(0.5)),borderRadius: BorderRadius.circular(5)),
-                    backgroundColor: Colors.transparent,   
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ],
-    );
-    
-    /// Filtra una lista de elementos [ProductCatalogue] basándose en el criterio de búsqueda [query]. 
-    final filteredSuggestions = _filteredItems;
-
-    // condition : si no hay query entonces mostramos las categorias
-    if(query.isEmpty){
-      return Padding(
-        padding: const EdgeInsets.only(top: 20,left: 12,right: 12),
-        child: ListView(
+  PreferredSizeWidget get buttonAppBar{
+    // bottom : vista de productos seleccionados con un [TextButton] que diga cuantos productos seleccionados hay con opciones para cancelar y actualizar precio de venta
+    return  itemsSelectedList.isEmpty?PreferredSize(preferredSize: const Size.fromHeight(0),child: Container(),): PreferredSize(
+        preferredSize: const Size.fromHeight(50),
+        child: Container(
+          color: Colors.blue.withOpacity(0.1),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              viewCategories, 
-              viewMarks,
+              // text : cantidad de productos seleccionados
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: TextButton(
+                  onPressed: () { 
+                    Get.dialog(
+                      AlertDialog(
+                        title: const Text('Productos seleccionados'),
+                        // content : lista simple de productos seleccionados con opcion de eliminar un producto de la lista
+                        content: SizedBox(
+                          height: 300,
+                          width: 300,
+                          child: ListView.builder(
+                            itemCount: itemsSelectedList.length,
+                            itemBuilder: (context, index) {
+                              return ListTile(
+                                title: Text('${itemsSelectedList[index].description}',maxLines: 1,),
+                                subtitle: Text('${itemsSelectedList[index].nameMark}',maxLines: 1,),
+                                trailing: IconButton(
+                                  onPressed: (){
+                                    deleteProductSelected(code: itemsSelectedList[index].code);
+                                    update();
+                                  },
+                                  icon: const Icon(Icons.close),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        actions: [
+                          TextButton(onPressed: (){Get.back();}, child: const Text('Cerrar')),
+                      
+                        ],
+                      )
+                    );
+                  },
+                  child: Text( itemsSelectedList.length==1?'${ itemsSelectedList.length } seleccionado':'${ itemsSelectedList.length } seleccionados'),
+                ),
+              ),
+              // textbutton : cancelar
+              TextButton(
+                onPressed: () {
+                  itemsSelectedList.clear(); 
+                  update();
+                },
+                child: const Text('Cancelar',style: TextStyle(color: Colors.red)),
+              ),
+              // textbutton : actualizar precio de venta
+              TextButton(
+                onPressed: () { 
+                  
+                  Get.dialog(
+                    AlertDialog(
+                      title: const Text('Actualización cátalogo'), 
+                      // content : opciones con el componente [TextButton] y las opciones [actualizar precio de compra, actualizar precio de venta, actualizar stock]
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // text : texto informativo de la cantidad de productos seleccionados
+                          Text(itemsSelectedList.length==1?'${ itemsSelectedList.length} producto seleccionado':'${ itemsSelectedList.length} productos seleccionados' ,style: const TextStyle(fontWeight: FontWeight.w400)),
+                          // textbutton : actualizar precio de compra
+                          TextButton(onPressed: () { },child: const Text('Actualizar precio de compra')),
+                          // textbutton : actualizar precio de venta al público
+                          TextButton(onPressed: () { },child: const Text('Actualizar precio de venta al público')), 
+                          // textbutton : eliminar productos seleccionados de mi catálogo
+                          TextButton(onPressed: () { },child: Text('Eliminar de mi catálogo',style: TextStyle(color: Colors.red.shade400),)),
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Get.back();
+                          },
+                          child: const Text('Cerrar'),
+                        ),
+                      ],
+                    )
+                  );
+
+                },
+                child: const Text('Actualizar',style: TextStyle(color: Colors.blue)),
+              ),
             ],
           ),
-      );
-    }
-    // condition : si se consulto pero no se obtuvieron resultados
-    if(filteredSuggestions.isEmpty && query.isNotEmpty){
-      return const Center(child: Text('No se encontraron resultados'));
-    }
-
-
-    return ListView.builder(
-      itemCount: filteredSuggestions.length,
-      itemBuilder: (context, index) { 
-        // values
-        ProductCatalogue product = filteredSuggestions[index]; 
-        return item(product:product); 
-      },
-    );
-  }
-  // fuction : isSelectedProduct
-  bool  isSelectedProduct({required ProductCatalogue product}){
-    return itemsSelectedList.contains(product);
-  }
-
-  // get : filter
-  List<ProductCatalogue> get _filteredItems {
-    /// Filtra una lista de elementos [ProductCatalogue] basándose en el criterio de búsqueda [query].
-    /// Los elementos se filtran de acuerdo a coincidencias encontradas en los atributos
-    /// 'description', 'nombre de la marca' y 'codigo' de cada elemento.
-    return query.isEmpty
-    ? itemsList
-    : itemsList.where((item) {
-        // Convertimos la descripción, marca y código del elemento y el query a minúsculas
-        final description = item.description.toLowerCase();
-        final brand = item.nameMark.toLowerCase();
-        final code = item.code.toLowerCase();
-        final category = item.nameCategory.toLowerCase();
-        final lowerCaseQuery = query.toLowerCase();
-
-        // Dividimos el query en palabras individuales
-        final queryWords = lowerCaseQuery.split(' ');
-
-        // Verificamos que todas las palabras del query estén presentes en la descripción, marca código
-        return queryWords.every((word) => description.contains(word) || brand.contains(word) || code.contains(word) || category.contains(word));
-      }).toList();
-  }
-
-  // WIDGETS
-  Widget item({required ProductCatalogue product}){
-
-    // styles
-    final Color highlightColor = Get.isDarkMode?Colors.white:Colors.black;
-    final Color primaryTextColor  = Get.isDarkMode?Colors.white54:Colors.black45;
-    final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
-    // widgets
-    final Widget dividerCircle = Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child:Icon(Icons.circle,size: 4, color: primaryTextColor.withOpacity(0.5)));
-
-    // var
-    String alertStockText =product.stock ? (product.quantityStock == 0 ? 'Sin stock' : '{product.quantityStock} en stock') : '';
-          
-    return Column(
-      children: [
-        InkWell( 
-          // color del cliqueable
-          splashColor: Colors.blue, 
-          highlightColor: highlightColor.withOpacity(0.1),
-          onLongPress: () {
-            itemsSelectedList.add(product);
-            // actualizar la vista  con didUpdateWidget  
-            showSuggestions(buildContext!); 
-          },
-          onTap: () { 
-            itemsSelectedList.add(product);
-            // actualizar la vista  con didUpdateWidget  
-            showSuggestions(buildContext!); 
-            //Get.back();
-            //homeController.getUserAnonymous?null:catalogueController.toProductEdit(productCatalogue: product);
-          },
-          child: Container(
-            color: isSelectedProduct(product: product)?Colors.blue.withOpacity(0.1):Colors.transparent,
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  // image
-                  ImageProductAvatarApp(url: product.image,size: 75,favorite:product.favorite),
-                  // text : datos del producto
-                  Flexible(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal:12),
-                      child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(product.description,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(fontWeight: FontWeight.w500)),
-                        product.nameMark==''?Container():Text(product.nameMark,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(color: Colors.blue)),
-                        Wrap(
-                          crossAxisAlignment: WrapCrossAlignment.start,
-                          direction: Axis.horizontal,
-                          children: <Widget>[
-                            // text : code
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  dividerCircle,
-                                  Text(product.code,style: textStyleSecundary),
-                                ],
-                              ),
-                              // favorite
-                              product.favorite?Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  dividerCircle,
-                                  Text('Favorito',style: textStyleSecundary),
-                                ],
-                              ):Container(),
-                            //  text : alert stock
-          
-                              alertStockText != ''?Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  dividerCircle,
-                                  Text(alertStockText,style: textStyleSecundary),
-                                ],
-                              ):Container(),
-                          ],
-                        ),
-                                
-                      ],
-                                    ),
-                    ),
-                  ),
-                  // text : precio
-                  Text(Publications.getFormatoPrecio(monto: product.salePrice),style: const  TextStyle(fontSize: 18,fontWeight: FontWeight.w300),)
-                ],
-              ),
-            ),
-          ),
-        ), 
-      ComponentApp().divider(), 
-      ],
-    );
-  }
-}
-
-
-
-class ViewSeachProductsCataloguie extends StatefulWidget {
-  const ViewSeachProductsCataloguie({super.key});
-
-  @override
-  State<ViewSeachProductsCataloguie> createState() => _ViewSeachProductsCataloguieState();
-}
-
-class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCataloguie> {
-
-
-  // values
-  String query = '';
-
-  // controllers
-  final TextEditingController _searchQueryController = TextEditingController();
-  
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: appBar,
-
-    );
-  }
-  // WIDGETS VIEW
-  PreferredSizeWidget get appBar{
-    return AppBar(
-      // title : textfield search con estilo simple  y fondo transparente  con un iconbutton de clean 
-      title: TextField(
-        controller: _searchQueryController,
-        autofocus: true, 
-        style: const TextStyle(fontSize: 20),
-        decoration: const InputDecoration(
-          fillColor: Colors.transparent,
-          hintText: 'Buscar producto',  
-        ), 
-        onChanged: (value) {
-          setState(() {
-            query = value;
-          });
-        },
-      ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.clear),
-          onPressed: () { 
-            if(query==''){Get.back();return;}
-            setState(() {
-              query = '';
-              _searchQueryController.clear();
-            });
-          },
         ),
-      ],
-    );
+      );
   }
-  
 }
+

@@ -36,7 +36,7 @@ class CataloguePage extends StatelessWidget {
   PreferredSizeWidget appbar({required BuildContext context}) {
 
     // controllers
-    final CataloguePageController controller = Get.find();
+    final CataloguePageController catalogueController = Get.find();
     final HomeController homeController = Get.find();
     final bool darkTheme = Theme.of(context).brightness == Brightness.dark;
 
@@ -47,10 +47,12 @@ class CataloguePage extends StatelessWidget {
     return AppBar(
       elevation: 0,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      title: Text(controller.getTextTitleAppBar),
+      title: Text(catalogueController.getTextTitleAppBar),
+      // bottom : vista de productos seleccionados
+      bottom: catalogueController.buttonAppBar,
       actions: [
         // iconButton : buscar un producto del cátalogo
-        IconButton(icon: const Icon(Icons.search),onPressed: (() => controller.showSeach(context: context))),
+        IconButton(icon: const Icon(Icons.search),onPressed: (() => catalogueController.showSeach(context: context))),
         // buttons : filter list
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 5),
@@ -69,16 +71,16 @@ class CataloguePage extends StatelessWidget {
                     ],
                   ),
                   onSelected: (selectedValue) {
-                    controller.catalogueFilter(key: selectedValue);
+                    catalogueController.catalogueFilter(key: selectedValue);
                   },
                   itemBuilder: (BuildContext ctx) => [
                         const PopupMenuItem(value: '0', child: Text('Mostrar todos')),
                         const PopupMenuItem(value: '2', child: Text('Mostrar favoritos')),
                         const PopupMenuItem(value: '5', child: Text('Hace más de 5 meses')),
                         homeController.getIsSubscribedPremium?const PopupMenuItem(child: null,height: 0): const PopupMenuItem(value: 'premium',child: Text('Opciones Premium',style: TextStyle(color: Colors.amber,fontWeight: FontWeight.w600),)),
-                        PopupMenuItem(value: '1',enabled: controller.homeController.getIsSubscribedPremium, child: const Text('Mostrar con stock')),
-                        PopupMenuItem(value: '3',enabled: controller.homeController.getIsSubscribedPremium, child: const Text('Mostrar con stock bajos')),
-                        PopupMenuItem(value: '4',enabled: controller.homeController.getIsSubscribedPremium, child: const Text('Actualizado hace más de 2 meses')),
+                        PopupMenuItem(value: '1',enabled: catalogueController.homeController.getIsSubscribedPremium, child: const Text('Mostrar con stock')),
+                        PopupMenuItem(value: '3',enabled: catalogueController.homeController.getIsSubscribedPremium, child: const Text('Mostrar con stock bajos')),
+                        PopupMenuItem(value: '4',enabled: catalogueController.homeController.getIsSubscribedPremium, child: const Text('Actualizado hace más de 2 meses')),
                         // TODO : delete release
                         const PopupMenuItem(value: '6', child: Text('Sin verificación')),
                         const PopupMenuItem(value: '7', child: Text('Cargar toda la Base de Datos')),
@@ -241,7 +243,7 @@ class CataloguePage extends StatelessWidget {
     // description : ListTile con detalles del producto
 
     //  controller
-    final CataloguePageController cataloguePageController = Get.find(); 
+    final CataloguePageController catalogueController = Get.find(); 
     final HomeController homeController = Get.find();
     
     // values
@@ -277,8 +279,8 @@ class CataloguePage extends StatelessWidget {
             // text : disponibilidad de stock
             item.stock?Row(
               children: [
-                Text(item.quantityStock.toString(),style: textStylePrimery.copyWith(color: cataloguePageController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
-                Text(' Disponible ',style: textStylePrimery.copyWith(color: cataloguePageController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
+                Text(item.quantityStock.toString(),style: textStylePrimery.copyWith(color: catalogueController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
+                Text(' Disponible ',style: textStylePrimery.copyWith(color: catalogueController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
               ],
             ):Container(),
           ],
@@ -317,39 +319,45 @@ class CataloguePage extends StatelessWidget {
 
     return ElasticIn(
       child: InkWell(
-        onTap: homeController.getUserAnonymous?null: () => cataloguePageController.toProductEdit(productCatalogue: item),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Hero(
-                    tag: 'avatarProduct',
-                    child: ImageProductAvatarApp(url: item.image,size: 80,favorite: item.favorite)),
-                  Flexible( 
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start, 
-                        children: [
-                          Text(item.description, maxLines: 1,style: textStyleSecundary.copyWith(fontWeight: FontWeight.w600,fontSize: titleSize)),
-                          description,
-                        ],
+        onTap: homeController.getUserAnonymous?null: () => catalogueController.toNavigationProductEdit(productCatalogue: item),
+        onLongPress: (){
+          catalogueController.selectedProduct(product: item);
+        },
+        child: Container(
+          color: catalogueController.isSelectedProduct(code: item.code)?Colors.blue.withOpacity(0.1):Colors.transparent,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Hero(
+                      tag: 'avatarProduct',
+                      child: ImageProductAvatarApp(url: item.image,size: 80,favorite: item.favorite)),
+                    Flexible( 
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start, 
+                          children: [
+                            Text(item.description, maxLines: 1,style: textStyleSecundary.copyWith(fontWeight: FontWeight.w600,fontSize: titleSize)),
+                            description,
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 10),
-                    child: priceWidget,
-                  ),
-                ],
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10),
+                      child: priceWidget,
+                    ),
+                  ],
+                ),
               ),
-            ),
-            divider,
-          ],
+              divider,
+            ],
+          ),
         ),
       ),
     );
