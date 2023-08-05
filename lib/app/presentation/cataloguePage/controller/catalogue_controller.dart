@@ -1,6 +1,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:get/get.dart';
 import 'package:sell/app/core/utils/widgets_utils.dart'; 
 import 'package:sell/app/presentation/home/controller/home_controller.dart';
@@ -293,22 +294,24 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     getProductsSelectedList.removeWhere((element) => element.code == code);
   }
   void deleteProductList({required List<ProductCatalogue> list}){
-    // description : elimina todos los productos de la lista pasado por parametro de la base de datos del catalogo
+    // firebase : elimina todos los productos de la lista pasado por parametro de la base de datos del catalogo
     for (var element in list) {
       Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(element.id).delete();
     }
   }
   void updateSalesPriceProducts({required List<ProductCatalogue> list,required double price}){
-    // description : actualiza el precio de venta de todos los productos de la lista pasado por parametro
+    // firebase : actualiza el precio de venta de todos los productos de la lista pasado por parametro
     for (var element in list) {
-      element.salePrice = price;
+      element.salePrice = price; // actualizamos el precio de venta
+      element.upgrade = Timestamp.now(); // actualizamos la fecha de actualizacion
       Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(element.id).set(element.toJson());
     }
   }
   void updatePurchasePriceProducts({required List<ProductCatalogue> list,required double price}){
-    // description : actualiza el precio de compra de todos los productos de la lista pasado por parametro
+    // firebase : actualiza el precio de compra de todos los productos de la lista pasado por parametro
     for (var element in list) {
-      element.purchasePrice = price;
+      element.purchasePrice = price; // actualizamos el precio de compra
+      element.upgrade = Timestamp.now(); // actualizamos la fecha de actualizacion
       Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(element.id).set(element.toJson());
     }
   }
@@ -462,14 +465,25 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
             },
           ),
         ),
+        // button : abre un dialog para actualizar el precio de venta de los productos seleccionados
         ComponentApp().button(icon: const Text('Actualizar'), onPressed: (){
           Get.back();
           updateDialog();
         }),
+        // button : abre un dialog para eliminar los productos seleccionados
+        ComponentApp().button(
+          defaultStyle: false,
+          icon: const Text('Eliminar de mi catálogo',style: TextStyle(color: Colors.white)), 
+          colorButton: Colors.red.withOpacity(0.5),
+        onPressed: (){ 
+          // dialog : confirmar la eliminación de los productos seleccionados
+          confirmDeleteProductDialog();
+        }),
+        // textButton : descartar los productos seleccionados
         TextButton(onPressed: (){ 
           catalogueController.getProductsSelectedList.clear();
           Get.back();
-          }, child: Text('Descartar todo',style: TextStyle(color: Colors.red.shade400))),
+          }, child: Text('Descartar',style: TextStyle(color: Colors.red.shade400))),
       ],
     );
   }
@@ -540,17 +554,12 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
             TextButton(onPressed: () { 
               Get.back();
               updatePricePurchaseDialog();
-            },child: const Text('Actualizar precio de compra')),
+            },child: const Text('Actualizar precio de costo')),
             // textbutton : actualizar precio de venta al público
             TextButton(onPressed: () {
               Get.back();
               updateSalesPriceDialog();
-             },child: const Text('Actualizar precio de venta al público')), 
-            // textbutton : eliminar productos seleccionados de mi catálogo
-            TextButton(onPressed: () {
-              catalogueController.deleteProductList(list: catalogueController.getProductsSelectedList);
-              Get.back();
-              },child: Text('Eliminar de mi catálogo',style: TextStyle(color: Colors.red.shade400),)),
+            },child: const Text('Actualizar precio de venta al público')), 
           ],
         ),
         actions: [
@@ -566,7 +575,7 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
   }
   void updateSalesPriceDialog(){
     // controllers
-    TextEditingController priceSaleController = TextEditingController();
+    MoneyMaskedTextController priceSaleController = MoneyMaskedTextController();
 
     Get.dialog(
       AlertDialog(
@@ -577,14 +586,14 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
           children: [
             // text : texto informativo de la cantidad de productos seleccionados
             Text( catalogueController.getProductsSelectedList.length==1?'${ catalogueController.getProductsSelectedList.length} producto seleccionado':'${ catalogueController.getProductsSelectedList.length} productos seleccionados' ,style: const TextStyle(fontWeight: FontWeight.w400)),
+            const SizedBox(height: 10),
             // textfield : precio de venta
-            TextField(
+            TextField( 
+              autofocus: false,
               controller: priceSaleController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Precio de venta',
-                hintText: 'Precio de venta',
-              ),
+              enabled: true, 
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(filled: true,labelText: 'Precio de venta'),  
             ),
           ],
         ),
@@ -597,8 +606,15 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
           ),
           TextButton(
             onPressed: () {
+              if(priceSaleController.numberValue==0){
+                Get.snackbar('Error', 'El precio de venta no puede ser 0');
+                return;
+              }
+              // function : actualizar precio de venta de los productos seleccionados 
+              catalogueController.updateSalesPriceProducts( list: catalogueController.getProductsSelectedList,price: priceSaleController.numberValue);
+              // despues de actualizar los precios de compra de los productos seleccionados, se limpia la lista de productos seleccionados
+              catalogueController.getProductsSelectedList.clear(); 
               Get.back();
-              catalogueController.updateSalesPriceProducts( list: catalogueController.getProductsSelectedList,price: double.parse(priceSaleController.text));
             },
             child: const Text('Actualizar'),
           ),
@@ -608,25 +624,25 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
   }
   void updatePricePurchaseDialog(){
     // controllers
-    TextEditingController pricePurchaseController = TextEditingController();
+    MoneyMaskedTextController controllerTextEditPrecioCosto = MoneyMaskedTextController(leftSymbol: '\$');
 
     Get.dialog(
       AlertDialog(
-        title: const Text('Actualizar precio de compra'),  
+        title: const Text('Actualizar precio de costo'),  
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // text : texto informativo de la cantidad de productos seleccionados
             Text( catalogueController.getProductsSelectedList.length==1?'${ catalogueController.getProductsSelectedList.length} producto seleccionado':'${ catalogueController.getProductsSelectedList.length} productos seleccionados' ,style: const TextStyle(fontWeight: FontWeight.w400)),
-            // textfield : precio de compra
-            TextField(
-              controller: pricePurchaseController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Precio de compra',
-                hintText: 'Precio de compra',
-              ),
+            const SizedBox(height: 10),
+            // textfield : precio de costo
+            TextField( 
+              autofocus: false,
+              controller: controllerTextEditPrecioCosto,
+              enabled: true, 
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(filled: true,labelText: 'Precio de costo'),  
             ),
           ],
         ),
@@ -639,8 +655,16 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
           ),
           TextButton(
             onPressed: () {
+              // condition : precio de compra no puede ser 0
+              if(controllerTextEditPrecioCosto.numberValue==0){
+                Get.snackbar('Error', 'El precio de compra no puede ser 0');
+                return;
+              }
+              // function : actualizar precio de compra de los productos seleccionados
+              catalogueController.updatePurchasePriceProducts(list: catalogueController.getProductsSelectedList,price: controllerTextEditPrecioCosto.numberValue);
+              // despues de actualizar los precios de compra de los productos seleccionados, se limpia la lista de productos seleccionados
+              catalogueController.getProductsSelectedList.clear();
               Get.back();
-              catalogueController.updatePurchasePriceProducts(list: catalogueController.getProductsSelectedList,price: double.parse(pricePurchaseController.text));
             },
             child: const Text('Actualizar'),
           ),
@@ -648,5 +672,37 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
       )
     );
   }
-
+  void confirmDeleteProductDialog(){
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Eliminar de mi catálogo'),  
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [ 
+            const SizedBox(height: 10),
+            // text : texto informativo de la cantidad de productos seleccionados 
+            Text('¿Está seguro que desea eliminar ${ catalogueController.getProductsSelectedList.length==1?'este producto':'${ catalogueController.getProductsSelectedList.length} productos'}?',style: const TextStyle(fontWeight: FontWeight.w400)),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: const Text('Cerrar'),
+          ),
+          TextButton(
+            onPressed: () {
+              // function : eliminar producto de la lista de productos seleccionados
+              catalogueController.deleteProductList(list: catalogueController.getProductsSelectedList); 
+              catalogueController.getProductsSelectedList.clear(); // limpiar lista de productos seleccionados
+              Get.back();
+            },
+            child: const Text('Eliminar'),
+          ),
+        ],
+      )
+    );
+  }
 }
