@@ -319,11 +319,22 @@ class CataloguePage extends StatelessWidget {
 
     return ElasticIn(
       child: InkWell(
-        onTap: homeController.getUserAnonymous?null: () => catalogueController.toNavigationProductEdit(productCatalogue: item),
+        onTap: homeController.getUserAnonymous?null: (){
+          // condition : si no hay productos seleccionados
+          if(catalogueController.getProductsSelectedList.isEmpty){
+            // navigation : editar producto
+            catalogueController.toNavigationProductEdit(productCatalogue: item); 
+          }else{ 
+            // selecciona el producto
+            catalogueController.selectedProduct(product: item); 
+          } 
+
+        },
         onLongPress: (){
           catalogueController.selectedProduct(product: item);
         },
         child: Container(
+          // style : color de fondo si el producto esta seleccionado o no
           color: catalogueController.isSelectedProduct(code: item.code)?Colors.blue.withOpacity(0.1):Colors.transparent,
           child: Column(
             children: [

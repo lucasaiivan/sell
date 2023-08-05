@@ -1,10 +1,12 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart'; 
+import 'package:get/get.dart';
+import 'package:sell/app/core/utils/widgets_utils.dart'; 
 import 'package:sell/app/presentation/home/controller/home_controller.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart'; 
 import '../../../core/routes/app_pages.dart'; 
+import '../../../core/utils/fuctions.dart';
 import '../../../domain/entities/catalogo_model.dart'; 
 import '../views/catalogueSeach_view.dart';
 
@@ -49,7 +51,8 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     //...filter
   }
   // items seleccionados del cátalogo
-  final List<ProductCatalogue> itemsSelectedList = []; 
+  final RxList<ProductCatalogue> _productsSelectedList = <ProductCatalogue>[].obs;
+  List<ProductCatalogue> get getProductsSelectedList => _productsSelectedList; 
 
 
   @override
@@ -283,15 +286,35 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
   }
   void addProductSelected({required ProductCatalogue product}){
     // description : agrega un producto a la lista de seleccionados
-    itemsSelectedList.add(product);
-  }
-  bool  isSelectedProduct({required String code}){
-    // description : verifica si un producto esta seleccionado
-    return itemsSelectedList.where((element) => element.code == code).isNotEmpty;
+    getProductsSelectedList.add(product); 
   }
   void deleteProductSelected({required String code}){
     // description : elimina un producto de la lista de seleccionados
-    itemsSelectedList.removeWhere((element) => element.code == code);
+    getProductsSelectedList.removeWhere((element) => element.code == code);
+  }
+  void deleteProductList({required List<ProductCatalogue> list}){
+    // description : elimina todos los productos de la lista pasado por parametro de la base de datos del catalogo
+    for (var element in list) {
+      Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(element.id).delete();
+    }
+  }
+  void updateSalesPriceProducts({required List<ProductCatalogue> list,required double price}){
+    // description : actualiza el precio de venta de todos los productos de la lista pasado por parametro
+    for (var element in list) {
+      element.salePrice = price;
+      Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(element.id).set(element.toJson());
+    }
+  }
+  void updatePurchasePriceProducts({required List<ProductCatalogue> list,required double price}){
+    // description : actualiza el precio de compra de todos los productos de la lista pasado por parametro
+    for (var element in list) {
+      element.purchasePrice = price;
+      Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(element.id).set(element.toJson());
+    }
+  }
+  bool  isSelectedProduct({required String code}){
+    // description : verifica si un producto esta seleccionado
+    return getProductsSelectedList.where((element) => element.code == code).isNotEmpty;
   }
   // get : filter
   List<ProductCatalogue> filteredItems({required String query}) {
@@ -360,7 +383,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
   }
   PreferredSizeWidget get buttonAppBar{
     // bottom : vista de productos seleccionados con un [TextButton] que diga cuantos productos seleccionados hay con opciones para cancelar y actualizar precio de venta
-    return  itemsSelectedList.isEmpty?PreferredSize(preferredSize: const Size.fromHeight(0),child: Container(),): PreferredSize(
+    return  getProductsSelectedList.isEmpty?PreferredSize(preferredSize: const Size.fromHeight(0),child: Container(),): PreferredSize(
         preferredSize: const Size.fromHeight(50),
         child: Container(
           color: Colors.blue.withOpacity(0.1),
@@ -372,84 +395,19 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: TextButton(
                   onPressed: () { 
-                    Get.dialog(
-                      AlertDialog(
-                        title: const Text('Productos seleccionados'),
-                        // content : lista simple de productos seleccionados con opcion de eliminar un producto de la lista
-                        content: SizedBox(
-                          height: 300,
-                          width: 300,
-                          child: ListView.builder(
-                            itemCount: itemsSelectedList.length,
-                            itemBuilder: (context, index) {
-                              return ListTile(
-                                title: Text('${itemsSelectedList[index].description}',maxLines: 1,),
-                                subtitle: Text('${itemsSelectedList[index].nameMark}',maxLines: 1,),
-                                trailing: IconButton(
-                                  onPressed: (){
-                                    deleteProductSelected(code: itemsSelectedList[index].code);
-                                    update();
-                                  },
-                                  icon: const Icon(Icons.close),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        actions: [
-                          TextButton(onPressed: (){Get.back();}, child: const Text('Cerrar')),
-                      
-                        ],
-                      )
-                    );
+                    // dialog : vista de productos seleccionados
+                    Get.dialog( const ViewProductsSelected());
                   },
-                  child: Text( itemsSelectedList.length==1?'${ itemsSelectedList.length } seleccionado':'${ itemsSelectedList.length } seleccionados'),
+                  child: Text( getProductsSelectedList.length==1?'${ getProductsSelectedList.length } seleccionado':'${ getProductsSelectedList.length } seleccionados'),
                 ),
               ),
               // textbutton : cancelar
               TextButton(
                 onPressed: () {
-                  itemsSelectedList.clear(); 
-                  update();
+                  getProductsSelectedList.clear();  
                 },
-                child: const Text('Cancelar',style: TextStyle(color: Colors.red)),
-              ),
-              // textbutton : actualizar precio de venta
-              TextButton(
-                onPressed: () { 
-                  
-                  Get.dialog(
-                    AlertDialog(
-                      title: const Text('Actualización cátalogo'), 
-                      // content : opciones con el componente [TextButton] y las opciones [actualizar precio de compra, actualizar precio de venta, actualizar stock]
-                      content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // text : texto informativo de la cantidad de productos seleccionados
-                          Text(itemsSelectedList.length==1?'${ itemsSelectedList.length} producto seleccionado':'${ itemsSelectedList.length} productos seleccionados' ,style: const TextStyle(fontWeight: FontWeight.w400)),
-                          // textbutton : actualizar precio de compra
-                          TextButton(onPressed: () { },child: const Text('Actualizar precio de compra')),
-                          // textbutton : actualizar precio de venta al público
-                          TextButton(onPressed: () { },child: const Text('Actualizar precio de venta al público')), 
-                          // textbutton : eliminar productos seleccionados de mi catálogo
-                          TextButton(onPressed: () { },child: Text('Eliminar de mi catálogo',style: TextStyle(color: Colors.red.shade400),)),
-                        ],
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Get.back();
-                          },
-                          child: const Text('Cerrar'),
-                        ),
-                      ],
-                    )
-                  );
-
-                },
-                child: const Text('Actualizar',style: TextStyle(color: Colors.blue)),
-              ),
+                child: const Text('Descartar',style: TextStyle(color: Colors.red)),
+              ), 
             ],
           ),
         ),
@@ -457,3 +415,238 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
   }
 }
 
+// StatelessWidget : lista de productos seleccionados con opcion de eliminar de la lista
+class ViewProductsSelected extends StatefulWidget {
+  const ViewProductsSelected({super.key});
+
+  @override
+  State<ViewProductsSelected> createState() => _ViewProductsSelectedState();
+}
+
+class _ViewProductsSelectedState extends State<ViewProductsSelected> {
+
+  // controllers
+  final CataloguePageController catalogueController = Get.find<CataloguePageController>();
+
+  // Widget
+  Widget circleDivider = Padding(padding: const EdgeInsets.symmetric(horizontal: 4),child: Icon(Icons.circle,size: 5, color: Get.theme.dividerColor));
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      borderRadius: const BorderRadius.only(topLeft: Radius.circular(20),topRight: Radius.circular(20)),
+      clipBehavior: Clip.antiAlias,
+      child: Scaffold(
+        appBar: appbar,
+        body: body,
+      ),
+    );
+  }
+
+  //
+  // WIDGETS VIEW
+  //
+  PreferredSizeWidget get appbar{
+    return AppBar(
+      title: const Text('Productos seleccionados'), 
+    );
+  }
+  Widget get body{ 
+    return Column(
+      children: [
+        Flexible(
+          child: ListView.builder(
+            itemCount: catalogueController.getProductsSelectedList.length,
+            itemBuilder: (context, index) {
+              return itemProduct(product: catalogueController.getProductsSelectedList[index] );
+            },
+          ),
+        ),
+        ComponentApp().button(icon: const Text('Actualizar'), onPressed: (){
+          Get.back();
+          updateDialog();
+        }),
+        TextButton(onPressed: (){ 
+          catalogueController.getProductsSelectedList.clear();
+          Get.back();
+          }, child: Text('Descartar todo',style: TextStyle(color: Colors.red.shade400))),
+      ],
+    );
+  }
+
+  // 
+  // WIDGETS COMPONENTS
+  //
+  Widget itemProduct({required ProductCatalogue product}){
+
+    return Column(
+      children: [
+        ListTile(
+          title: Text(product.description,maxLines: 1,),
+          // subtitle: un Wrap con la marca en color azul si esta verificado, codigo del producto, precio de venta y precio de compra con un icon de circulo pequeño como dividor
+          subtitle: Column(
+            children: [
+              Row(
+                children: [
+                  // text : marca del producto 
+                  product.nameMark==''?Container():Text(product.nameMark,style: TextStyle(color: product.verified?Colors.blue:Colors.grey.shade400)),
+                  product.nameMark==''?Container():circleDivider,
+                  // text : codigo del producto
+                  Text(product.code), 
+                  
+                ],
+              ),
+              // text : precio de venta
+              Row(
+                children: [
+                  // text : precio de compra
+                  product.purchasePrice==0?Container():Text('compra ${Publications.getFormatoPrecio(monto: product.purchasePrice)}'),
+                  // text : precio de venta
+                  product.salePrice==0?Container():circleDivider,
+                  product.salePrice==0?Container():Text('venta ${Publications.getFormatoPrecio(monto: product.salePrice)}'),
+                ],
+              ),
+            ],
+          ),
+          trailing: IconButton(
+            onPressed: (){
+              setState(() {
+                // fuction : eliminar producto de la lista de productos seleccionados
+                catalogueController.deleteProductSelected(code: product.code);
+              });
+            },
+            icon: const Icon(Icons.close),
+          ),
+        ),
+        ComponentApp().divider(),
+      ],
+    );
+  }
+
+  // 
+  // DIALOG
+  //
+  void updateDialog(){
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Actualización cátalogo'),  
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // text : texto informativo de la cantidad de productos seleccionados
+            Text( catalogueController.getProductsSelectedList.length==1?'${ catalogueController.getProductsSelectedList.length} producto seleccionado':'${ catalogueController.getProductsSelectedList.length} productos seleccionados' ,style: const TextStyle(fontWeight: FontWeight.w400)),
+            // textbutton : actualizar precio de compra
+            TextButton(onPressed: () { 
+              Get.back();
+              updatePricePurchaseDialog();
+            },child: const Text('Actualizar precio de compra')),
+            // textbutton : actualizar precio de venta al público
+            TextButton(onPressed: () {
+              Get.back();
+              updateSalesPriceDialog();
+             },child: const Text('Actualizar precio de venta al público')), 
+            // textbutton : eliminar productos seleccionados de mi catálogo
+            TextButton(onPressed: () {
+              catalogueController.deleteProductList(list: catalogueController.getProductsSelectedList);
+              Get.back();
+              },child: Text('Eliminar de mi catálogo',style: TextStyle(color: Colors.red.shade400),)),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: const Text('Cerrar'),
+          ),
+        ],
+      )
+    );
+  }
+  void updateSalesPriceDialog(){
+    // controllers
+    TextEditingController priceSaleController = TextEditingController();
+
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Actualizar precio de venta al público'),  
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // text : texto informativo de la cantidad de productos seleccionados
+            Text( catalogueController.getProductsSelectedList.length==1?'${ catalogueController.getProductsSelectedList.length} producto seleccionado':'${ catalogueController.getProductsSelectedList.length} productos seleccionados' ,style: const TextStyle(fontWeight: FontWeight.w400)),
+            // textfield : precio de venta
+            TextField(
+              controller: priceSaleController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Precio de venta',
+                hintText: 'Precio de venta',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: const Text('Cerrar'),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+              catalogueController.updateSalesPriceProducts( list: catalogueController.getProductsSelectedList,price: double.parse(priceSaleController.text));
+            },
+            child: const Text('Actualizar'),
+          ),
+        ],
+      )
+    );
+  }
+  void updatePricePurchaseDialog(){
+    // controllers
+    TextEditingController pricePurchaseController = TextEditingController();
+
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Actualizar precio de compra'),  
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // text : texto informativo de la cantidad de productos seleccionados
+            Text( catalogueController.getProductsSelectedList.length==1?'${ catalogueController.getProductsSelectedList.length} producto seleccionado':'${ catalogueController.getProductsSelectedList.length} productos seleccionados' ,style: const TextStyle(fontWeight: FontWeight.w400)),
+            // textfield : precio de compra
+            TextField(
+              controller: pricePurchaseController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Precio de compra',
+                hintText: 'Precio de compra',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: const Text('Cerrar'),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+              catalogueController.updatePurchasePriceProducts(list: catalogueController.getProductsSelectedList,price: double.parse(pricePurchaseController.text));
+            },
+            child: const Text('Actualizar'),
+          ),
+        ],
+      )
+    );
+  }
+
+}
