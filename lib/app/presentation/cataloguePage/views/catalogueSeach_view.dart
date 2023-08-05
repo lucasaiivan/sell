@@ -49,17 +49,7 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
           ),
         ));
       },
-    );
-    
-    return Material( 
-      borderRadius: const BorderRadius.only(topLeft: Radius.circular(20),topRight: Radius.circular(20)),
-      clipBehavior: Clip.antiAlias,
-      child: Scaffold(
-        appBar: appBar,
-        body: body,  
-
-      ),
-    );
+    ); 
   }
   //
   // WIDGETS VIEW
@@ -222,9 +212,17 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
               
             });
           },
-          onTap: () { 
-            Get.back();
-            homeController.getUserAnonymous?null:catalogueController.toNavigationProductEdit(productCatalogue: product);
+          onTap: () {
+            // condition : si no hay productos seleccionados
+            if(catalogueController.getProductsSelectedList.isEmpty){ 
+              Get.back(); // cierra el dialogo
+              // navigation : editar producto
+              homeController.getUserAnonymous?null:catalogueController.toNavigationProductEdit(productCatalogue: product);
+            }else{ 
+              // selecciona el producto
+              catalogueController.selectedProduct(product: product); 
+            } 
+          
           },
           child: Container(
             color: catalogueController.isSelectedProduct(code: product.code)?Colors.blue.withOpacity(0.1):Colors.transparent,
