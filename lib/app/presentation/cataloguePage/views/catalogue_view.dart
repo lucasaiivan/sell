@@ -54,25 +54,23 @@ class CataloguePage extends StatelessWidget {
         // iconButton : buscar un producto del cátalogo
         IconButton(icon: const Icon(Icons.search),onPressed: (() => catalogueController.showSeach(context: context))),
         // buttons : filter list
-        Padding(
+        catalogueController.filterState?IconButton(onPressed: catalogueController.catalogueFilter, icon: Icon(Icons.close),padding: EdgeInsets.all(0))
+        : Padding(
           padding: const EdgeInsets.symmetric(horizontal: 5),
           child: Material(
             color: iconTextColor,
             borderRadius: const BorderRadius.all(Radius.circular(8.0)),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 1),
-              child: PopupMenuButton(
-                  //icon: const Icon(Icons.filter_list),
+              child: PopupMenuButton( 
                   child: Row(
                     children: [
                       Text('Filtrar',style:TextStyle(color:textColor,fontWeight: FontWeight.w400)),
                       const SizedBox(width: 5),
                     Icon(Icons.filter_list,color: textColor),
                     ],
-                  ),
-                  onSelected: (selectedValue) {
-                    catalogueController.catalogueFilter(key: selectedValue);
-                  },
+                  ), 
+                  onSelected: (selectedValue) => catalogueController.popupMenuButtonCatalogueFilter(key: selectedValue),
                   itemBuilder: (BuildContext ctx) => [
                         const PopupMenuItem(value: '0', child: Text('Mostrar todos')),
                         const PopupMenuItem(value: '2', child: Text('Mostrar favoritos')),
@@ -106,6 +104,7 @@ class CataloguePage extends StatelessWidget {
               controller: controller.tabController,
               labelColor: Get.theme.textTheme.bodyMedium?.color,
               tabs: [
+                // tab : productos
                 Tab(child: Row(children: [
                   const Text("Productos"),
                   controller.getCataloProducts.isEmpty?Container():Padding(
@@ -113,13 +112,17 @@ class CataloguePage extends StatelessWidget {
                     child: Container(padding: const EdgeInsets.symmetric(horizontal:3,vertical: 1),decoration: BoxDecoration(borderRadius: BorderRadius.circular(5), color: Colors.blue.withOpacity(0.1)), child: Text(controller.getCataloProducts.length.toString(), style: const TextStyle(color: Colors.blue, fontSize: 12),)),
                   ),
                 ],)),
+                // tab : categorias
                 const Tab(text: "Cátegorias"),
+                // tab : proveedores
+                const Tab(text: "Proveedores"),
               ]),
         ),
-        Expanded(
+        Flexible(
           child: TabBarView(controller: controller.tabController, children: [
             viewCatalogueProductsVerticalList(),
             viewCategory(),
+            viewSupplier(),
           ]),
         )
       ],
@@ -169,7 +172,7 @@ class CataloguePage extends StatelessWidget {
           },
         ));
   }
-
+ // view : vista de la lista de categorias 
   Widget viewCategory() {
 
     // controllers
@@ -225,18 +228,78 @@ class CataloguePage extends StatelessWidget {
       ),
     );
   }
+  // view : vista de la lista de proveedores
+  Widget viewSupplier() {
+    // controllers
+    final HomeController controller = Get.find(); 
+    //var
+    double titleSize = 18;
+    Color dividerColor = controller.getDarkMode?Colors.white.withOpacity(0.5):Colors.black.withOpacity(0.5);
+    Widget divider = Divider(color: dividerColor,thickness: 0.2,height: 0,);
 
+    if (controller.getProviderList.isEmpty) {
+      return const Center(
+        child: Text('Sin proveedores'),
+      );
+    }
+    return Obx(
+      () => ListView.builder(
+        padding: const EdgeInsets.symmetric(vertical: 15.0),
+        shrinkWrap: true,
+        itemCount: controller.getProviderList.length,
+        itemBuilder: (BuildContext context, int index) {
+          
+          //get
+          Provider supplier = controller.getProviderList[index]; 
+      
+          return index == 0
+              ? Column(
+                  children: <Widget>[
+                    controller.getProviderList.isNotEmpty
+                        ? ListTile(
+                            contentPadding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
+                            dense: true,
+                            title: Text("Mostrar todos",style: TextStyle(fontSize: titleSize,fontWeight: FontWeight.w400)),
+                            onTap: () {
+                              
+                            },
+                          )
+                        : Container(),
+                    divider,
+                    listTileSupplierItem(supplier: supplier),
+                    divider,
+                  ],
+                )
+              : Column(
+                  children: <Widget>[
+                    listTileSupplierItem(supplier: supplier),
+                    divider,
+                  ],
+                );
+        },
+      ),
+    );
+  }
   // WIDGETS COMPONENTS
   Widget floatingActionButton({required CataloguePageController controller}) {
     return FloatingActionButton(
         backgroundColor: controller.homeController.getUserAnonymous?Colors.grey:Colors.blue,
-        onPressed: controller.homeController.getUserAnonymous?null: () => controller.tabController.index == 0
-            ? controller.toSeachProduct()
-            : showDialogSetCategoria(categoria: Category()),
-        child: const Icon(
-          Icons.add,
-          color: Colors.white,
-        ));
+        onPressed: (){ 
+
+          switch (controller.tabController.index) {
+            case 0:
+              controller.toSeachProduct();
+              break;
+            case 1:
+              showDialogSetCategoria(categoria: Category());
+              break;
+            case 2:
+              showDialogSetSupplier(supplier: Provider());
+              break;
+            default:
+          }
+        },
+        child: const Icon(Icons.add,color: Colors.white));
   }
 
   Widget listTileProduct({required ProductCatalogue item}) {
@@ -375,6 +438,7 @@ class CataloguePage extends StatelessWidget {
   }
 
   Widget listTileCategoryItem({required Category categoria}) {
+
     // controllers
     final CataloguePageController controller = Get.find();
 
@@ -392,8 +456,73 @@ class CataloguePage extends StatelessWidget {
       trailing: dropdownButtonCategory(categoria: categoria),
     );
   }
+  Widget listTileSupplierItem({required Provider supplier}) { 
 
+    // controllers
+    final CataloguePageController controller = Get.find();
+
+    //  values
+    String title = supplier.description.substring(0, 1).toUpperCase() + supplier.description.substring(1);
+
+    return ListTile(
+      contentPadding: const EdgeInsets.all(12),
+      dense: true,
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w300,fontSize: 18)),
+      onTap: () { 
+        controller.setSelectedSupplier = supplier;
+        controller.tabController.animateTo(0);
+      },  
+      trailing: dropdownButtonSupplier(supplier: supplier),
+    );
+  }
   // menu options
+  Widget dropdownButtonSupplier({required Provider supplier}) {
+    final CataloguePageController controller = Get.find();
+
+    return DropdownButton<String>(
+      icon: const Icon(Icons.more_vert),
+      value: null,
+      elevation: 10,
+      underline: Container(),
+      dropdownColor: Get.theme.popupMenuTheme.color,
+      items: const [
+        DropdownMenuItem(
+          value: 'editar',
+          child: Text("Editar"),
+        ),
+        DropdownMenuItem(
+          value: 'eliminar',
+          child: Text("Eliminar"),
+        ),
+      ],
+      onChanged: (value) async {
+        switch (value) {
+          case "editar":
+            showDialogSetSupplier(supplier: supplier);
+            break;
+          case "eliminar":
+            Get.defaultDialog(
+              title: 'Alerta',
+              middleText: '¿Desea continuar eliminando este proveedor?',
+              confirm: TextButton.icon(
+                  onPressed: () async {
+                    controller.providerDelete(idSupplier: supplier.id);
+                    Get.back();
+                  },
+                  icon: const Icon(Icons.check),
+                  label: const Text('Aceptar')),
+              cancel: TextButton.icon(
+                  onPressed: () {
+                    Get.back();
+                  },
+                  icon: const Icon(Icons.close),
+                  label: const Text('Cancelar')),
+            );
+            break;
+        }
+      },
+    );
+  }
   Widget dropdownButtonCategory({required Category categoria}) {
     final CataloguePageController controller = Get.find();
 
@@ -439,7 +568,47 @@ class CataloguePage extends StatelessWidget {
       },
     );
   }
+  showDialogSetSupplier({required Provider supplier}) async {
+    
+    // controllers
+    final CataloguePageController cataloguePageController = Get.find();
+    TextEditingController textEditingController = TextEditingController(text: supplier.description);
+    // var
+    bool loadSave = false; 
 
+    if (supplier.id == '') { 
+      supplier = Provider();
+      supplier.id = DateTime.now().millisecondsSinceEpoch.toString();
+    }
+
+    await Get.dialog(AlertDialog(
+      contentPadding: const EdgeInsets.all(16.0),
+      content: Row(
+        children: <Widget>[
+          Expanded(
+            child: TextField(
+              controller: textEditingController,
+              autofocus: true,
+              decoration: const InputDecoration( labelText: 'Proveedor', hintText: 'Ej. Proveedor de bebidas'),
+            ),
+          )
+        ],
+      ),
+      actions: <Widget>[
+        TextButton(child: const Text('CANCEL'),onPressed: () {Get.back();}),
+        TextButton(
+            child: loadSave == false?const Text('SAVE'):const CircularProgressIndicator(),
+            onPressed: () async {
+              if (loadSave == false) {
+                loadSave = true;
+                supplier.description = textEditingController.text;
+                await cataloguePageController.providerSave(provider: supplier);
+                Get.back();
+              }
+            })
+      ],
+    ));
+  }
   showDialogSetCategoria({required Category categoria}) async {
     final CataloguePageController controller = Get.find();
     bool loadSave = false;

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:get/get.dart';
+import 'package:sell/app/presentation/cataloguePage/controller/catalogue_controller.dart';
 import 'package:sell/app/presentation/cataloguePage/views/formCreate_product_view.dart';
 import 'package:url_launcher/url_launcher.dart'; 
 import '../../../domain/entities/catalogo_model.dart'; 
@@ -62,7 +63,7 @@ class ProductEdit extends StatelessWidget {
         return Material(
           child: AnimatedSwitcher(
           duration: const  Duration(milliseconds: 100),
-            child: controller.getHomeController.getProfileAdminUser.superAdmin==false?noEdit: _.getNewProduct ? FormCreateProductView()
+            child: controller.getHomeController.getProfileAdminUser.superAdmin==false? noEdit : _.getNewProduct ? FormCreateProductView()
             : OfflineBuilder(
                 child: Container(),
                 connectivityBuilder: (
@@ -272,6 +273,30 @@ class ProductEdit extends StatelessWidget {
               child: const Text('Buscar en código Google (moderador)')),
           // fin : contenido para desarrollo
           !controller.getAccountAuth? Container():const Text('Personaliza tu producto',style: TextStyle(fontSize: 18.0)),
+          space,
+          // textfield : seleccionar proveedor
+          !controller.getAccountAuth? Container(): GestureDetector(
+              onTap: SelectProvider.show, 
+              child: TextFormField(
+                autofocus: false,
+                focusNode:null,
+                controller: controller.controllerTextEditProvider, 
+                style: valueTextStyle,
+                enabled: false,
+                autovalidateMode: AutovalidateMode.onUserInteraction, 
+                keyboardType: TextInputType.name,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: fillColor, 
+                  labelText: controller.controllerTextEditProvider.text==''?'Seleccionar un proveedor':'Proveedor',
+                  border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                  disabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                ),  
+                onChanged: (value) => controller.formEditing = true,  // validamos que el usuario ha modificado el formulario
+                // validator: validamos el texto que el usuario
+              ),
+            ),
           space,
           // textfield : seleccionar cátegoria
           !controller.getAccountAuth? Container(): GestureDetector(
@@ -597,7 +622,7 @@ Widget get widgetForModerator{
   
 }
 
-// category
+// class : vista para seleccionar categoria de producto y eliminar o editar las categorias
 class SelectCategory extends StatefulWidget {
   // ignore: prefer_const_constructors_in_immutables
   SelectCategory({super.key});
@@ -618,7 +643,6 @@ class SelectCategory extends StatefulWidget {
     );
   }
 }
-
 class _SelectCategoryState extends State<SelectCategory> {
   _SelectCategoryState();
 
@@ -645,7 +669,7 @@ class _SelectCategoryState extends State<SelectCategory> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Categoría'),
+        title: const Text('Categorías'),
         actions: [
           IconButton(icon: const Icon(Icons.add),onPressed: () => showDialogSetCategoria(categoria: Category())),
         ],
@@ -783,7 +807,192 @@ class _SelectCategoryState extends State<SelectCategory> {
     );
   }
 }
- 
+// class : vista para seleccionar el proveedor del producto y eliminar o editar los proveedores
+class SelectProvider extends StatefulWidget {
+  // ignore: prefer_const_constructors_in_immutables
+  SelectProvider({super.key});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _SelectProviderState createState() => _SelectProviderState();
+
+  static void show() {
+    Widget widget = SelectProvider();
+    // muestre la hoja inferior modal de getx
+    Get.bottomSheet(
+      widget,
+      backgroundColor: Get.theme.scaffoldBackgroundColor,
+      enableDrag: true,
+      isDismissible: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
+    );
+  }
+}
+class _SelectProviderState extends State<SelectProvider> {
+  _SelectProviderState();
+
+  // Variables
+  final Provider providerSelected = Provider();
+  bool createProvider = false, loadSave = false;
+  final HomeController welcomeController = Get.find();
+  final ControllerProductsEdit controllerProductsEdit = Get.find();
+
+  @override
+  void initState() {
+    createProvider = false;
+    loadSave = false;
+    super.initState();
+  } 
+
+  @override
+  Widget build(BuildContext buildContext) {
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Proveedor'),
+        actions: [
+          IconButton(icon: const Icon(Icons.add),onPressed: () => showDialogSetProvider(provider: Provider())),
+        ],
+      ),
+      body:welcomeController.getProviderList.isEmpty?const Center(child: Text('Sin proveedores'),): ListView.builder(
+        padding: const EdgeInsets.symmetric(vertical: 15.0),
+        shrinkWrap: true,
+        itemCount: welcomeController.getProviderList.length,
+        itemBuilder: (BuildContext context, int index) {
+          //  values
+          Provider provider =welcomeController.getProviderList[index];
+          
+          return Column(
+                  children: <Widget>[
+                    ListTile(
+                      contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                      dense: true,
+                      title: Text(provider.description.substring(0, 1).toUpperCase() + provider.description.substring(1)),
+                      onTap: () {
+                        controllerProductsEdit.setProvider = provider;
+                        Get.back();
+                      },
+                      trailing: popupMenuItemProvider(provider: provider),
+                    ),
+                    const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
+                  ],
+                );
+        },
+      ),
+    );
+
+  }
+
+  Widget popupMenuItemProvider({required Provider provider}) {
+    final HomeController controller = Get.find();
+
+    return PopupMenuButton(
+      icon: const Icon(Icons.more_vert),
+      itemBuilder: (_) => <PopupMenuItem<String>>[
+        const PopupMenuItem<String>(value: 'editar', child: Text('Editar')),
+        const PopupMenuItem<String>(value: 'eliminar', child: Text('Eliminar')),
+      ],
+      onSelected: (value) async {
+        switch (value) {
+          case "editar":
+            showDialogSetProvider(provider: provider);
+            break;
+          case "eliminar":
+            await showDialog<String>(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  contentPadding: const EdgeInsets.all(16.0),
+                  content: const Row(
+                    children: <Widget>[
+                      Expanded(child:Text("¿Desea continuar eliminando esta categoría?"))
+                    ],
+                  ),
+                  actions: <Widget>[
+                    TextButton(
+                        child: const Text('CANCEL'),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        }),
+                    TextButton(
+                        child: loadSave == false? const Text("ELIMINAR"): const CircularProgressIndicator(),
+                        onPressed: () async {
+                          controller.categoryDelete(idCategory: provider.id).then((value) {
+                              setState(() {
+                                Get.back();
+                              });
+                            });
+                        })
+                  ],
+                );
+              },
+            );
+            break;
+        }
+      },
+    );
+  }
+
+  showDialogSetProvider({required Provider provider}) async {
+
+    // controllers 
+    final CataloguePageController cataloguePageController = Get.find(); 
+
+    // var
+    bool loadSave = false;
+    bool newProvider = false;
+    TextEditingController textEditingController = TextEditingController(text: provider.description);
+
+    if (provider.id == '') {
+      newProvider = true;
+      provider =  Provider();
+      provider.id =  DateTime.now().millisecondsSinceEpoch.toString();
+    }
+
+    await showDialog<String>(
+      context: context,
+      builder: (context) {
+        return  AlertDialog(
+          contentPadding: const EdgeInsets.all(16.0),
+          content:  Row(
+            children: <Widget>[
+              Expanded(
+                child:  TextField(
+                  controller: textEditingController,
+                  autofocus: true,
+                  decoration: const InputDecoration( labelText: 'Proveedor', hintText: 'Ej. proveedor bebidas'),
+                ),
+              )
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+                child: const Text('CANCEL'),
+                onPressed: () {
+                  Get.back();
+                }),
+            TextButton( child: loadSave == false? Text(newProvider ? 'GUARDAR' : "ACTUALIZAR"): const CircularProgressIndicator(),
+                onPressed: () async {
+                  if (textEditingController.text != '') {
+                    // set
+                    provider.description = textEditingController.text;
+                    setState(() => loadSave = true);
+                    // save
+                    await cataloguePageController.providerSave(provider: provider).whenComplete(() {
+                      welcomeController.getProviderList.add(provider);
+                      setState(() {Get.back();});
+                    }).catchError((error, stackTrace) =>setState(() => loadSave = false));
+                  }
+                })
+          ],
+        );
+      },
+    );
+  }
+}
+
+
+
 
  // class que de StatefulWidget llamada OptionsModeratorsWidget 
 class OptionsModeratorsWidget extends StatefulWidget {

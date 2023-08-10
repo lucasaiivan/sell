@@ -118,6 +118,7 @@ class ProductCatalogue {
   String description = ""; // Información
   String code = "";
   String category = ""; // ID de la categoria del producto
+  String provider = ""; // ID del proveedor del producto
   String nameCategory = ""; // name category
   String subcategory = ""; // ID de la subcategoria del producto
   String nameSubcategory = ""; // name subcategory
@@ -149,6 +150,7 @@ class ProductCatalogue {
     this.image = "",
     this.description = "",
     this.code = "",
+    this.provider = "",
     this.category = "",
     this.nameCategory = '',
     this.subcategory = "",
@@ -182,6 +184,7 @@ class ProductCatalogue {
   String? image,
   String? description,
   String? code,
+  String? provider,
   String? category,
   String? nameCategory,
   String? subcategory,
@@ -211,6 +214,7 @@ class ProductCatalogue {
     image: image ?? this.image,
     description: description ?? this.description,
     code: code ?? this.code,
+    provider: provider ?? this.provider,
     category: category ?? this.category,
     nameCategory: nameCategory ?? this.nameCategory,
     subcategory: subcategory ?? this.subcategory,
@@ -246,6 +250,7 @@ class ProductCatalogue {
       image: data.containsKey('image')? data['image']: data['urlimagen'] ?? 'https://default',
       description: data.containsKey('description')?data['description']: data['descripcion'] ?? '',
       code: data.containsKey('code') ? data['code'] : data['codigo'] ?? '',
+      provider: data['provider'] ?? '',
       category: data.containsKey('category')?data['category']:data['categoria'] ?? '',
       nameCategory: data.containsKey('nameCategory')?data['nameCategory']:data['categoriaName'] ?? '',
       subcategory: data.containsKey('subcategory')?data['subcategory']:data['subcategoria'] ?? '',
@@ -278,6 +283,7 @@ class ProductCatalogue {
         "image": image,
         "description": description,
         "code": code,
+        "provider": provider,
         "category": category,
         "nameCategory": nameCategory,
         "subcategory": subcategory,
@@ -545,4 +551,29 @@ class ReportProduct {
     description = data['description'] ?? '';
     time = data['time'];
   }
+}
+
+// class Supplier: proveedor de productos  
+class Provider {
+  String id = ""; 
+  String description = ""; 
+  Provider({
+    this.id = "", 
+    this.description = "", 
+  });
+  Provider.fromMap(Map data) {
+    id = data['id'] ?? ''; 
+    description = data['description'] ?? ''; 
+  }
+  Map<String, dynamic> toJson() => {
+        "id": id, 
+        "description": description, 
+      }; 
+  Provider.fromDocumentSnapshot({required DocumentSnapshot documentSnapshot}) {
+    Map data = documentSnapshot.data() as Map;
+
+    id = data['id'] ?? ''; 
+    description = data['description'] ?? ''; 
+  }
+ 
 }
