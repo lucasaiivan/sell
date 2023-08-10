@@ -148,6 +148,12 @@ class HomeController extends GetxController {
   set setCatalogueCategoryList(List<Category> value) {
     _categoryList.value = value;
   }
+  // provider list
+  final RxList<Provider> _providerList = <Provider>[].obs;
+  List<Provider> get getProviderList => _providerList;
+  set setProviderList(List<Provider> value) {
+    _providerList.value = value;
+  }
 
   // cash register  //
   CashRegister cashRegisterActive = CashRegister(
@@ -890,6 +896,7 @@ class HomeController extends GetxController {
           loadCashRegisters(); // obtenemos las cajas registradoras activas
           readProductsCatalogue(idAccount: idAccount); // obtenemos los productos del catálogo
           readListCategoryListFuture(idAccount: idAccount); // obtenemos las categorias creadas por el usuario
+          readSupplierListFuture(idAccount: idAccount); // obtenemos los proveedores creados por el usuario
           readDataAdminUser( email: getUserAuth.email ?? '', idAccount: idAccount); // obtenemos los datos del usuario administrador de la cuenta
           readAdminsUsers(idAccount: idAccount);  // obtenemos los usuarios administradores de la cuenta
         }
@@ -905,6 +912,16 @@ class HomeController extends GetxController {
         list.add(Category.fromMap(element.data()));
       }
       setCatalogueCategoryList = list;
+    });
+  }
+  void readSupplierListFuture({required String idAccount}) {
+    // obtenemos la categorias creadas por el usuario
+    Database.readProvidersQueryStream(idAccount: idAccount).listen((event) {
+      List<Provider> list = [];
+      for (var element in event.docs) {
+        list.add(Provider.fromMap(element.data()));
+      }
+      setProviderList = list;
     });
   }
 

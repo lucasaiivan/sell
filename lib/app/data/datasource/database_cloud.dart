@@ -37,6 +37,7 @@ class Database {
   static Stream<QuerySnapshot<Map<String, dynamic>>>readTransactionsStream({required String idAccount}) =>FirebaseFirestore.instance.collection('ACCOUNTS/$idAccount/TRANSACTIONS').orderBy("creation", descending: true).snapshots();
   static Stream<QuerySnapshot<Map<String, dynamic>>>readProductsCatalogueStream({required String id}) =>FirebaseFirestore.instance.collection('ACCOUNTS/$id/CATALOGUE').orderBy('upgrade', descending: true).snapshots();
   static Stream<QuerySnapshot<Map<String, dynamic>>> readCategoriesQueryStream({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/CATEGORY') .snapshots();
+  static Stream<QuerySnapshot<Map<String, dynamic>>> readProvidersQueryStream({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/PROVIDER') .snapshots();
   static Stream<QuerySnapshot<Map<String, dynamic>>> readQueryStreamAdminsUsers({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/USERS') .snapshots();
   static Stream<QuerySnapshot<Map<String, dynamic>>>readCashRegistersStream({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/CASHREGISTERS/').snapshots();
   // STORAGE reference
@@ -49,6 +50,7 @@ class Database {
   static CollectionReference refFirestoretransactions({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/TRANSACTIONS');
   static CollectionReference refFirestoreAccount() => FirebaseFirestore.instance.collection('/ACCOUNTS/');
   static CollectionReference refFirestoreCategory({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/CATEGORY/');
+  static CollectionReference refFirestoreProvider({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/PROVIDER');
   static CollectionReference refFirestoreCatalogueProduct({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/CATALOGUE/');
   static CollectionReference refFirestoreRecords({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/RECORDS/'); // registros de los arqueos de caja
   static CollectionReference refFirestoreCashRegisters({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/CASHREGISTERS/'); // cajas registradoras activas

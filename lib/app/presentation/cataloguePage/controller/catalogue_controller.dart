@@ -32,15 +32,25 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
 
     return color;
   }
+  // titulo del appbar
+  String _titleAppBar = 'Cátalogo';
+  String get getTextTitleAppBar => _titleAppBar;
+  set setTitleAppBar(String value) => _titleAppBar = value;
 
-  // text titleBar
-  Category _selectedCategory = Category(name: 'Cátalogo');
-  String get getTextTitleAppBar => _selectedCategory.name;
-  Category get getSelectedCategory => _selectedCategory;
-  set setTitleAppBar(String value) => _selectedCategory.name = value;
-  set setSelectedCategory(Category value) {
-    _selectedCategory = value;
-    catalogueCategoryFilter();
+  // state filter activado 
+  bool filterState = false;
+
+  // proveedor seleccionado para filtrar en el cátalogo 
+  set setSelectedSupplier(Provider value) { 
+    setTitleAppBar  = value.description;
+    catalogueFilter(filter: value.id);
+    update();
+  }
+
+  // categoria seleccionada para filtrar en el cátalogo 
+  set setSelectedCategory(Category value) { 
+    setTitleAppBar = value.name;
+    catalogueFilter(filter: value.id);
     update();
   }
 
@@ -55,11 +65,12 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
   final RxList<ProductCatalogue> _productsSelectedList = <ProductCatalogue>[].obs;
   List<ProductCatalogue> get getProductsSelectedList => _productsSelectedList; 
 
-
+  
+  
   @override
   void onInit() async {
     super.onInit();
-    tabController = TabController(vsync: this, length: 2);
+    tabController = TabController(vsync: this, length:3);
     readProductsCatalogue();
   }
 
@@ -71,29 +82,35 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     // obtenemos los obj(productos) del catalogo de la cuenta del negocio
     setCatalogueProducts = homeController.getCataloProducts;
   }
+  //
+  // FUCTIONS CATALOGUE VIEW 
+  //
+  void catalogueFilter({String filter = ''}) {
 
-  // FUCTIONS
-  void catalogueCategoryFilter() {
     List<ProductCatalogue> list = [];
 
     //filter
-    if (getSelectedCategory.id != '') {
+    if (filter != '') {
+      filterState = true;
       for (var element in homeController.getCataloProducts) {
-        if (getSelectedCategory.id == element.category) {
+        if (filter == element.category || filter == element.provider) {
           list.add(element);
         }
       }
     } else {
+      setTitleAppBar = 'Cátalogo';
+      filterState = false;
       list = homeController.getCataloProducts;
     }
     // set
     setCatalogueProducts = list;
   }
-  void catalogueFilter({required String key}) {
+  void popupMenuButtonCatalogueFilter({required String key}) {
     List<ProductCatalogue> list = [];
 
     //filter
     if( key==''){
+        setTitleAppBar = 'Cátalogo';
         list = homeController.getCataloProducts;
       }else{
         switch(key){
@@ -210,8 +227,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
 
   void toProductNew({required String id}) {
     //values default
-    ProductCatalogue productCatalogue = ProductCatalogue(
-        id: id, code: id, creation: Timestamp.now(), upgrade: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now());
+    ProductCatalogue productCatalogue = ProductCatalogue(id: id, code: id, creation: Timestamp.now(), upgrade: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now());
     // navega hacia una nueva vista para crear un nuevo producto
     Get.toNamed(Routes.EDITPRODUCT,arguments: {'new': true, 'product': productCatalogue});
   }
@@ -231,10 +247,13 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     // firestore : Actualizamos los datos
     documentReferencer.set(Map<String, dynamic>.from(categoria.toJson()),SetOptions(merge: true));
   }
-
-  // 
-  // FUCTIONS CATALOGUE VIEW
-  //
+  Future<void> providerDelete({required String idSupplier}) async => await Database.refFirestoreProvider(idAccount: homeController.getProfileAccountSelected.id).doc(idSupplier).delete();
+  Future<void> providerSave({required Provider provider}) async {
+    // firestore : reference
+    var documentReferencer = Database.refFirestoreProvider(idAccount: homeController.getProfileAccountSelected.id).doc(provider.id);
+    // firestore : Actualizamos los datos
+    documentReferencer.set(Map<String, dynamic>.from(provider.toJson()),SetOptions(merge: true));
+  }
   void toNavigationProductEdit({required ProductCatalogue productCatalogue}) {
     Get.toNamed(Routes.EDITPRODUCT, arguments: {'product': productCatalogue.copyWith()});
   }
@@ -287,7 +306,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
   }
   void addProductSelected({required ProductCatalogue product}){
     // description : agrega un producto a la lista de seleccionados
-    getProductsSelectedList.add(product); 
+    getProductsSelectedList.add(product);  
   }
   void deleteProductSelected({required String code}){
     // description : elimina un producto de la lista de seleccionados
@@ -298,6 +317,17 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     for (var element in list) {
       Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(element.id).delete();
     }
+    getProductsSelectedList.clear();
+  }
+  void updatePricePurchaseAndSales({required List<ProductCatalogue> list,required double pricePurchase,required double priceSales}){
+    // firebase : actualiza el precio de compra y venta de todos los productos de la lista pasado por parametro
+    for (var element in list) {
+      element.purchasePrice = pricePurchase; // actualizamos el precio de compra
+      element.salePrice = priceSales; // actualizamos el precio de venta
+      element.upgrade = Timestamp.now(); // actualizamos la fecha de actualizacion
+      Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(element.id).set(element.toJson());
+    } 
+    getProductsSelectedList.clear();
   }
   void updateSalesPriceProducts({required List<ProductCatalogue> list,required double price}){
     // firebase : actualiza el precio de venta de todos los productos de la lista pasado por parametro
@@ -306,6 +336,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
       element.upgrade = Timestamp.now(); // actualizamos la fecha de actualizacion
       Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(element.id).set(element.toJson());
     }
+    getProductsSelectedList.clear();
   }
   void updatePurchasePriceProducts({required List<ProductCatalogue> list,required double price}){
     // firebase : actualiza el precio de compra de todos los productos de la lista pasado por parametro
@@ -314,6 +345,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
       element.upgrade = Timestamp.now(); // actualizamos la fecha de actualizacion
       Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(element.id).set(element.toJson());
     }
+    getProductsSelectedList.clear();
   }
   bool  isSelectedProduct({required String code}){
     // description : verifica si un producto esta seleccionado
@@ -474,7 +506,7 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
         ComponentApp().button(
           defaultStyle: false,
           icon: const Text('Eliminar de mi catálogo',style: TextStyle(color: Colors.white)), 
-          colorButton: Colors.red.withOpacity(0.5),
+          colorButton: Colors.red.withOpacity(0.4),
         onPressed: (){ 
           // dialog : confirmar la eliminación de los productos seleccionados
           confirmDeleteProductDialog();
@@ -560,6 +592,11 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
               Get.back();
               updateSalesPriceDialog();
             },child: const Text('Actualizar precio de venta al público')), 
+            // textButton : actualizar ambos precios
+            TextButton(onPressed: () {
+              Get.back();
+              updatePricePurchaseAndSalesDialog(); 
+            },child: const Text('Actualizar ambos precios')),
           ],
         ),
         actions: [
@@ -568,6 +605,59 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
               Get.back();
             },
             child: const Text('Cerrar'),
+          ),
+        ],
+      )
+    );
+  }
+  void updatePricePurchaseAndSalesDialog(){
+    // controllers
+    MoneyMaskedTextController pricePurchaseController = MoneyMaskedTextController();
+    MoneyMaskedTextController priceSaleController = MoneyMaskedTextController();
+
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Actualizar precios'),  
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // text : texto informativo de la cantidad de productos seleccionados
+            Text( catalogueController.getProductsSelectedList.length==1?'${ catalogueController.getProductsSelectedList.length} producto seleccionado':'${ catalogueController.getProductsSelectedList.length} productos seleccionados' ,style: const TextStyle(fontWeight: FontWeight.w400)),
+            const SizedBox(height: 10),
+            // textfield : precio de compra
+            TextField( 
+              autofocus: false,
+              controller: pricePurchaseController,
+              enabled: true, 
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(filled: true,labelText: 'Precio de costo'),
+            ),
+            const SizedBox(height: 10),
+            // textfield : precio de venta
+            TextField( 
+              autofocus: false,
+              controller: priceSaleController,
+              enabled: true, 
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(filled: true,labelText: 'Precio de venta al público'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () {
+              // fuction : actualizar precios de los productos seleccionados
+              catalogueController.updatePricePurchaseAndSales(list:catalogueController.getProductsSelectedList,pricePurchase: pricePurchaseController.numberValue,priceSales: priceSaleController.numberValue);
+              Get.back();
+            },
+            child: const Text('Actualizar'),
           ),
         ],
       )
@@ -611,9 +701,7 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
                 return;
               }
               // function : actualizar precio de venta de los productos seleccionados 
-              catalogueController.updateSalesPriceProducts( list: catalogueController.getProductsSelectedList,price: priceSaleController.numberValue);
-              // despues de actualizar los precios de compra de los productos seleccionados, se limpia la lista de productos seleccionados
-              catalogueController.getProductsSelectedList.clear(); 
+              catalogueController.updateSalesPriceProducts( list: catalogueController.getProductsSelectedList,price: priceSaleController.numberValue); 
               Get.back();
             },
             child: const Text('Actualizar'),
@@ -662,8 +750,6 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
               }
               // function : actualizar precio de compra de los productos seleccionados
               catalogueController.updatePurchasePriceProducts(list: catalogueController.getProductsSelectedList,price: controllerTextEditPrecioCosto.numberValue);
-              // despues de actualizar los precios de compra de los productos seleccionados, se limpia la lista de productos seleccionados
-              catalogueController.getProductsSelectedList.clear();
               Get.back();
             },
             child: const Text('Actualizar'),
@@ -696,7 +782,7 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
             onPressed: () {
               // function : eliminar producto de la lista de productos seleccionados
               catalogueController.deleteProductList(list: catalogueController.getProductsSelectedList); 
-              catalogueController.getProductsSelectedList.clear(); // limpiar lista de productos seleccionados
+              
               Get.back();
             },
             child: const Text('Eliminar'),

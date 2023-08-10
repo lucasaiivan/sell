@@ -61,33 +61,13 @@ class ControllerProductsEdit extends GetxController {
   final HomeController homeController = Get.find();
   HomeController get getHomeController => homeController;
 
-  Future<void> categoryDelete({required String idCategory}) async => await Database.refFirestoreCategory(idAccount: homeController.getProfileAccountSelected.id).doc(idCategory).delete();
-  Future<void> categoryUpdate({required Category categoria}) async {
-    // ref
-    var documentReferencer = Database.refFirestoreCategory(idAccount: homeController.getProfileAccountSelected.id).doc(categoria.id);
-    // Actualizamos los datos
-    documentReferencer.set(Map<String, dynamic>.from(categoria.toJson()),SetOptions(merge: true))
-        .whenComplete(() {
-      print("######################## FIREBASE updateAccount whenComplete");
-    }).catchError((e) => print(
-            "######################## FIREBASE updateAccount catchError: $e"));
-  }
-
   // concentimiento del usuario
   bool _userConsent = false;
   set setUserConsent(bool value) {
     _userConsent = value;
     update(['updateAll']);
   }
-  bool get getUserConsent => _userConsent;
-
-  // category list
-  final RxList<Category> _categoryList = <Category>[].obs;
-  List<Category> get getCatalogueCategoryList => _categoryList;
-  set setCatalogueCategoryList(List<Category> value) {
-    _categoryList.value = value;
-    update(['tab']);
-  }
+  bool get getUserConsent => _userConsent; 
 
   // state internet
   bool connected = false;
@@ -147,7 +127,8 @@ class ControllerProductsEdit extends GetxController {
 
   // TextEditingController
   TextEditingController controllerTextEditDescripcion = TextEditingController();
-  TextEditingController controllerTextEditMark = TextEditingController();
+  TextEditingController controllerTextEditMark = TextEditingController(); 
+  TextEditingController controllerTextEditProvider = TextEditingController();
   TextEditingController controllerTextEditCategory = TextEditingController();
   TextEditingController controllerTextEditQuantityStock = TextEditingController();
   TextEditingController controllerTextEditAlertStock = TextEditingController();
@@ -176,6 +157,15 @@ class ControllerProductsEdit extends GetxController {
   List<Mark> _marks = [];
   set setMarks(List<Mark> value) => _marks = value;
   List<Mark> get getMarks => _marks;
+
+  // supplier
+  Provider _provider = Provider();
+  set setProvider(Provider value) {
+    _provider = value;
+    controllerTextEditProvider.text = value.description; // actualizamos el textfield porque no se actualiza solo al cambiar el valor en un dialog
+    update(['updateAll']);
+  }
+  Provider get getProvider => _provider;
 
   //  category
   Category _category = Category();
@@ -288,6 +278,7 @@ class ControllerProductsEdit extends GetxController {
   void onClose() {
     // llamado justo antes de que el controlador se elimine de la memoria - ej. closeStream(); //
     controllerTextEditAlertStock.dispose();
+    controllerTextEditProvider.dispose();
     controllerTextEditCategory.dispose();
     controllerTextEditDescripcion.dispose();
     controllerTextEditMark.dispose();
@@ -418,6 +409,7 @@ class ControllerProductsEdit extends GetxController {
               getProduct.favorite = getFavorite;
               getProduct.stock = getStock;
               if(controllerTextEditQuantityStock.text!=''){getProduct.quantityStock = int.parse( controllerTextEditQuantityStock.text );}
+              getProduct.provider = getProvider.id;
               getProduct.category = getCategory.id; 
               getProduct.nameCategory = getCategory.name;
               if(controllerTextEditAlertStock.text!=''){getProduct.alertStock  = int.parse( controllerTextEditAlertStock.text );}
@@ -562,7 +554,8 @@ class ControllerProductsEdit extends GetxController {
     setStock = getProduct.stock;
     setDescription= getProduct.description;
     setMarkSelected = Mark(id: getProduct.idMark, name: getProduct.nameMark, creation: Timestamp.now(), upgrade: Timestamp.now());
-    setCategory = Category(id: getProduct.category, name: getProduct.nameCategory);
+    setCategory = Category(id: getProduct.category, name: getProduct.nameCategory); 
+    setProvider = Provider(id: getProduct.provider);
     
     // set : controles de las entradas de texto
     controllerTextEditDescripcion =TextEditingController(text: getDescription);
@@ -575,9 +568,10 @@ class ControllerProductsEdit extends GetxController {
     // primero verificamos que no tenga el metadato del dato de la marca para hacer un consulta inecesaria
     if (getProduct.idMark != ''){readMarkProducts();}
     if (getProduct.category != ''){readCategory();} 
+    if (getProduct.provider != ''){readSupplier();}
     setSaveIndicator = false; // desactivamos el indicador de carga
   }
-
+  // read : obtiene los datos de la maraca del producto
   void readMarkProducts() {
     //  function : lee la marca del producto
     if (getProduct.idMark.isNotEmpty) {
@@ -594,7 +588,7 @@ class ControllerProductsEdit extends GetxController {
       });
     }
   }
-
+  // read : obtiene los datos de la categoria del producto
   void readCategory() {
     //  function : lee la categoria del producto
     Database.readCategotyCatalogueFuture(idAccount: homeController.getProfileAccountSelected.id, idCategory: getProduct.category)
@@ -604,6 +598,17 @@ class ControllerProductsEdit extends GetxController {
       setCategory = Category(id: '0000', name: '');
     }).catchError((_) {
       setCategory = Category(id: '0000', name: '');
+    });
+  }
+  // read : obtiene los datos del proveedor del producto
+  void readSupplier() {
+    //  function : lee el proveedor del producto
+    Database.refFirestoreProvider(idAccount:homeController.getIdAccountSelected).doc(getProduct.provider).get().then((value) {
+      setProvider = Provider.fromDocumentSnapshot(documentSnapshot: value);
+    }).onError((error, stackTrace) {
+      setProvider = Provider(id: '', description: '');
+    }).catchError((_) {
+      setProvider = Provider(id: '', description: '');
     });
   }
 
