@@ -42,7 +42,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
 
   // proveedor seleccionado para filtrar en el cátalogo 
   set setSelectedSupplier(Provider value) { 
-    setTitleAppBar  = value.description;
+    setTitleAppBar  = value.name;
     catalogueFilter(filter: value.id);
     update();
   }
@@ -365,12 +365,13 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
         final code = item.code.toLowerCase();
         final category = item.nameCategory.toLowerCase();
         final lowerCaseQuery = query.toLowerCase();
+        final provider = item.nameProvider.toLowerCase();
 
         // Dividimos el query en palabras individuales
         final queryWords = lowerCaseQuery.split(' ');
 
         // Verificamos que todas las palabras del query estén presentes en la descripción, marca código
-        return queryWords.every((word) => description.contains(word) || brand.contains(word) || code.contains(word) || category.contains(word));
+        return queryWords.every((word) => description.contains(word) || brand.contains(word) || code.contains(word) || category.contains(word) || provider.contains(word) );
       }).toList();
   }
  //

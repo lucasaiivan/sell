@@ -28,9 +28,7 @@ class ControllerProductsEdit extends GetxController {
 
   // var style
   Color colorLoading = Colors.blue; 
-  final Color colorButton = Colors.blue;
-  Color cardProductDetailColor = Colors.grey.withOpacity(0.2);
-  Color dominateColorProduct = Colors.grey.withOpacity(0.2); 
+  final Color colorButton = Colors.blue; 
   bool darkMode = false;
   // var logic
   bool _onBackPressed = false;
@@ -162,7 +160,7 @@ class ControllerProductsEdit extends GetxController {
   Provider _provider = Provider();
   set setProvider(Provider value) {
     _provider = value;
-    controllerTextEditProvider.text = value.description; // actualizamos el textfield porque no se actualiza solo al cambiar el valor en un dialog
+    controllerTextEditProvider.text = value.name; // actualizamos el textfield porque no se actualiza solo al cambiar el valor en un dialog
     update(['updateAll']);
   }
   Provider get getProvider => _provider;
@@ -227,17 +225,57 @@ class ControllerProductsEdit extends GetxController {
   set setXFileImage(XFile value) => _xFileImage = value;
   XFile get getXFileImage => _xFileImage;
 
-  // indicardor para cuando se guarde los datos
-  bool _saveIndicador = false;
-  set setSaveIndicator(bool value) => _saveIndicador = value;
-  bool get getSaveIndicator => _saveIndicador;
+  // estado de carga de datos
+  bool _dataUploadStatus = false;
+  set setDataUploadStatus(bool value){
+    _dataUploadStatus = value; 
+  }
+  bool get getDataUploadStatus => _dataUploadStatus;
+  // estado de carga de datos del producto
+  bool _dataUploadStatusProduct = false;
+  set setDataUploadStatusProduct(bool value){
+    _dataUploadStatusProduct = value;
+    checkDataUploadStatus();
+  }
+  bool get getDataUploadStatusProduct => _dataUploadStatusProduct;
+  // estado de carga de datos de la marca 
+  bool _dataUploadStatusMark = false; 
+  set setDataUploadStatusMark(bool value){
+    _dataUploadStatusMark = value;
+    checkDataUploadStatus();
+  }
+  bool get getDataUploadStatusMark => _dataUploadStatusMark;
+  // estado de carga de datos del proveedor 
+  bool _dataUploadStatusProvider = false;
+  set setDataUploadStatusProvider(bool value){
+    _dataUploadStatusProvider = value;
+    checkDataUploadStatus();
+  }
+  bool get getDataUploadStatusProvider => _dataUploadStatusProvider;
+  // estado de carga de datos de la categoria 
+  bool _dataUploadStatusCategory = false;
+  set setDataUploadStatusCategory(bool value){
+    _dataUploadStatusCategory = value;
+    checkDataUploadStatus();
+  }
+  bool get getDataUploadStatusCategory => _dataUploadStatusCategory;
+
+  // void : comprobar si se cargaron los datos del producto,de la marca, proveedor y categoria
+  void checkDataUploadStatus() {
+    if (getDataUploadStatusProduct && getDataUploadStatusMark && getDataUploadStatusProvider && getDataUploadStatusCategory) {
+      setDataUploadStatus = false;
+    }else{
+      setDataUploadStatus = true;
+    }
+  }
+
 
   @override
   void onInit() {
     // llamado inmediatamente después de que se asigna memoria al widget
 
-    // anim load anim 
-    setSaveIndicator = true;
+    // anim : carga de datos 
+    setDataUploadStatus = true;
 
     // state account auth
     setAccountAuth = homeController.getIdAccountSelected != '';
@@ -327,18 +365,7 @@ class ControllerProductsEdit extends GetxController {
         update(['updateAll']);
       }
     }
-  }
-   Future<void> _getImageColors({required String url}) async {
-    final response = await http.get(Uri.parse(url));
-    final bytes = response.bodyBytes;
-    final image = MemoryImage(bytes);
-    final paletteGenerator = await PaletteGenerator.fromImageProvider(
-      image,
-      size: const Size(256, 256),
-    );
-    dominateColorProduct = paletteGenerator.dominantColor!.color; 
-    update();
-  }
+  } 
   Future<bool> onBackPressed({required BuildContext context})async{
     // fuction : si _onBackPressed es false no se puede salir de la app
 
@@ -395,7 +422,7 @@ class ControllerProductsEdit extends GetxController {
               homeController.disableCatalogUserGuide();
               
               // update view
-              setSaveIndicator = true;
+              setDataUploadStatus = true;
               setTextAppBar = getNewProduct?'Publicando...':'Espere por favor...';
               updateAll();
 
@@ -410,6 +437,7 @@ class ControllerProductsEdit extends GetxController {
               getProduct.stock = getStock;
               if(controllerTextEditQuantityStock.text!=''){getProduct.quantityStock = int.parse( controllerTextEditQuantityStock.text );}
               getProduct.provider = getProvider.id;
+              getProduct.nameProvider = getProvider.name;
               getProduct.category = getCategory.id; 
               getProduct.nameCategory = getCategory.name;
               if(controllerTextEditAlertStock.text!=''){getProduct.alertStock  = int.parse( controllerTextEditAlertStock.text );}
@@ -448,8 +476,8 @@ class ControllerProductsEdit extends GetxController {
                 Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id)
                   .set(getProduct.toJson())
                   .whenComplete(() async {
-                    await Future.delayed(const Duration(seconds: 3)).then((value) {setSaveIndicator = false; Get.back(); });
-                }).onError((error, stackTrace) => setSaveIndicator = false).catchError((_) => setSaveIndicator = false);
+                    await Future.delayed(const Duration(seconds: 3)).then((value) {setDataUploadStatus = false; Get.back(); });
+                }).onError((error, stackTrace) => setDataUploadStatus = false).catchError((_) => setDataUploadStatus = false);
 
 
             } else {
@@ -498,7 +526,7 @@ class ControllerProductsEdit extends GetxController {
 
   void deleteProducPublic() async {
     // activate indicator load
-    setSaveIndicator = true;
+    setDataUploadStatus = true;
     setTextAppBar = 'Eliminando...';
     updateAll();
 
@@ -525,12 +553,12 @@ class ControllerProductsEdit extends GetxController {
         Product product = Product.fromMap(value.data() as Map);
         //  set
         setProduct = getProduct.updateData(product: product);
-        loadDataFormProduct();
-        setSaveIndicator = false;
+        setDataUploadStatusProduct = true;
+        loadDataFormProduct(); // carga los datos del producto en el formulario
         
       }).catchError((error) {
         printError(info: error.toString());
-        setSaveIndicator = false;
+        setDataUploadStatus = false;
       }).onError((error, stackTrace) {
         loadDataFormProduct();
         printError(info: error.toString()); 
@@ -538,13 +566,9 @@ class ControllerProductsEdit extends GetxController {
     }
   }
 
+  // fuction : carga los datos del producto en el formulario una ves que se obtienen de la base de datos
   void loadDataFormProduct() {
-    // fuction : carga los datos del producto en el formulario una ves que se obtienen de la base de datos
-
-    // obtenemos los colores de la imagen del producto
-    if (getProduct.image != '') {
-      _getImageColors(url: getProduct.image);
-    }
+ 
     // set : datos del producto para validar 
     setFavorite = getProduct.favorite;
     setPurchasePrice = getProduct.purchasePrice;
@@ -566,10 +590,9 @@ class ControllerProductsEdit extends GetxController {
     controllerTextEditCategory = TextEditingController(text: getCategory.name);
 
     // primero verificamos que no tenga el metadato del dato de la marca para hacer un consulta inecesaria
-    if (getProduct.idMark != ''){readMarkProducts();}
-    if (getProduct.category != ''){readCategory();} 
-    if (getProduct.provider != ''){readSupplier();}
-    setSaveIndicator = false; // desactivamos el indicador de carga
+    if (getProduct.idMark != ''){readMarkProducts();} else{ setDataUploadStatusMark = true; }
+    if (getProduct.category != ''){readCategory();} else{ setDataUploadStatusCategory = true; }
+    if (getProduct.provider != ''){readProvider();} else{ setDataUploadStatusProvider = true; }
   }
   // read : obtiene los datos de la maraca del producto
   void readMarkProducts() {
@@ -578,13 +601,13 @@ class ControllerProductsEdit extends GetxController {
       Database.readMarkFuture(id: getProduct.idMark).then((value) {
         setMarkSelected = Mark.fromMap(value.data() as Map);
         getProduct.nameMark = getMarkSelected.name; // guardamos un metadato
-        update(['updateAll']);
+        setDataUploadStatusMark = true; 
       }).onError((error, stackTrace) {
-        setMarkSelected =
-            Mark(upgrade: Timestamp.now(), creation: Timestamp.now());
+        setMarkSelected = Mark(upgrade: Timestamp.now(), creation: Timestamp.now());
+        setDataUploadStatusMark = true;
       }).catchError((_) {
-        setMarkSelected =
-            Mark(upgrade: Timestamp.now(), creation: Timestamp.now());
+        setMarkSelected = Mark(upgrade: Timestamp.now(), creation: Timestamp.now());
+        setDataUploadStatusMark = true;
       });
     }
   }
@@ -594,21 +617,27 @@ class ControllerProductsEdit extends GetxController {
     Database.readCategotyCatalogueFuture(idAccount: homeController.getProfileAccountSelected.id, idCategory: getProduct.category)
         .then((value) {
       setCategory = Category.fromDocumentSnapshot(documentSnapshot: value);
-    }).onError((error, stackTrace) {
-      setCategory = Category(id: '0000', name: '');
-    }).catchError((_) {
-      setCategory = Category(id: '0000', name: '');
-    });
+      setDataUploadStatusCategory = true;
+      }).onError((error, stackTrace) {
+        setCategory = Category(id: '', name: '');
+        setDataUploadStatusCategory = true;
+      }).catchError((_) {
+        setCategory = Category(id: '', name: '');
+        setDataUploadStatusCategory = true;
+      });
   }
   // read : obtiene los datos del proveedor del producto
-  void readSupplier() {
+  void readProvider() {
     //  function : lee el proveedor del producto
     Database.refFirestoreProvider(idAccount:homeController.getIdAccountSelected).doc(getProduct.provider).get().then((value) {
       setProvider = Provider.fromDocumentSnapshot(documentSnapshot: value);
+      setDataUploadStatusProvider = true;
     }).onError((error, stackTrace) {
-      setProvider = Provider(id: '', description: '');
+      setProvider = Provider(id: '', name: '');
+      setDataUploadStatusProvider = true;
     }).catchError((_) {
-      setProvider = Provider(id: '', description: '');
+      setProvider = Provider(id: '', name: '');
+      setDataUploadStatusProvider = true;
     });
   }
 

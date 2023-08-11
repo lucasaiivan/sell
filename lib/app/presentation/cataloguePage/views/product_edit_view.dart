@@ -32,8 +32,7 @@ class ProductEdit extends StatelessWidget {
     // get : obtenemos los valores 
     controller.setContext = context;
     controller.colorLoading = Get.theme.primaryColor;
-    controller.darkMode = Get.isDarkMode;
-    controller.cardProductDetailColor = controller.darkMode ? Colors.blueGrey.withOpacity(0.2) : Colors.brown.shade100.withOpacity(0.6);
+    controller.darkMode = Get.isDarkMode; 
 
     Widget noEdit = Column(
       mainAxisSize: MainAxisSize.min,
@@ -63,7 +62,7 @@ class ProductEdit extends StatelessWidget {
         return Material(
           child: AnimatedSwitcher(
           duration: const  Duration(milliseconds: 100),
-            child: controller.getHomeController.getProfileAdminUser.superAdmin==false? noEdit : _.getNewProduct ? FormCreateProductView()
+            child: controller.getHomeController.getProfileAdminUser.superAdmin==false? noEdit : _.getNewProduct ? const FormCreateProductView()
             : OfflineBuilder(
                 child: Container(),
                 connectivityBuilder: (
@@ -117,13 +116,13 @@ class ProductEdit extends StatelessWidget {
       backgroundColor: Get.theme.scaffoldBackgroundColor,
       iconTheme:
           Theme.of(contextPrincipal).iconTheme.copyWith(color: colorText),
-      title: controller.getSaveIndicator
+      title: controller.getDataUploadStatus
           ? Text(controller.getTextAppBar,style: TextStyle(fontSize: 18.0, color: colorText))
           : Text(controller.itsInTheCatalogue ? 'Editar' :'Nuevo producto',style: TextStyle(fontSize: 18.0, color: colorText)),
       actions: <Widget>[
         // TODO : delete release
         // iconButton : opciones de moderador
-        controller.getSaveIndicator
+        controller.getDataUploadStatus
             ? Container()
             :IconButton(
               icon: const Icon(Icons.admin_panel_settings_outlined),
@@ -135,11 +134,11 @@ class ProductEdit extends StatelessWidget {
             ),
 
         // iconButton : actualizar producto 
-        controller.getSaveIndicator
+        controller.getDataUploadStatus
             ? Container()
             : controller.itsInTheCatalogue?TextButton.icon(onPressed: () => controller.save(), icon:const Icon( Icons.check ), label:const  Text('Actualizar')):Container(),
       ],
-      bottom: controller.getSaveIndicator? ComponentApp().linearProgressBarApp(color: controller.colorLoading):null,
+      bottom: controller.getDataUploadStatus? ComponentApp().linearProgressBarApp(color: controller.colorLoading):null,
     );
   }
 
@@ -156,7 +155,7 @@ class ProductEdit extends StatelessWidget {
               widgetFormEdit2(),
             ],
           ),
-          controller.getSaveIndicator?Container(color: Colors.black12.withOpacity(0.3)):Container()
+          controller.getDataUploadStatus?Container(color: Colors.black12.withOpacity(0.3)):Container()
         ],
       ),
     );
@@ -167,7 +166,7 @@ class ProductEdit extends StatelessWidget {
     // var
     final Color textDescriptionStyleColor = Get.isDarkMode?Colors.white.withOpacity(0.8):Colors.black.withOpacity(0.8);
     final Color boderLineColor = Get.isDarkMode?Colors.white.withOpacity(0.3):Colors.black.withOpacity(0.3);
-    bool enableEdit = controller.getSaveIndicator? false: controller.getEditModerator || controller.getProduct.verified==false;
+    bool enableEdit = controller.getDataUploadStatus? false: controller.getEditModerator || controller.getProduct.verified==false;
     final Color fillColor = Get.isDarkMode?Colors.white.withOpacity(0.01):Colors.black.withOpacity(0.01);
     
     
@@ -205,7 +204,7 @@ class ProductEdit extends StatelessWidget {
                   padding: const EdgeInsets.only(left: 24.0),
                   child: textfielBottomSheetListOptions(
                     contentPadding: const EdgeInsets.only(bottom: 12,top: 12,left: 12,right: 12),
-                    stateEdit: controller.getSaveIndicator? false: controller.getEditModerator || controller.getProduct.verified==false,
+                    stateEdit: controller.getDataUploadStatus? false: controller.getEditModerator || controller.getProduct.verified==false,
                     textValue: controller.getMarkSelected.name,
                     labelText: controller.getMarkSelected.id == ''? 'Seleccionar una marca': 'Marca',
                     onTap: controller.getProduct.verified==false || controller.getEditModerator? controller.showModalSelectMarca : () {}
@@ -409,7 +408,7 @@ class ProductEdit extends StatelessWidget {
                   decoration: BoxDecoration(border: Border.all(color: controller.getFavorite?Colors.amber :boderLineColor,width: 0.5,),),
                   child: CheckboxListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal:12, vertical: 12),
-                    enabled: controller.getSaveIndicator ? false : true,
+                    enabled: controller.getDataUploadStatus ? false : true,
                     checkColor: Colors.white,
                     activeColor: Colors.amber,
                     value: controller.getFavorite,
@@ -417,7 +416,7 @@ class ProductEdit extends StatelessWidget {
                     title: Text(controller.getFavorite?'Quitar de favorito':'Agregar a favorito'),
                     subtitle: controller.getFavorite?null: const Opacity(opacity: 0.5,child: Text('Accede rápidamente a tus productos favoritos')),
                     onChanged: (value) {
-                      if (!controller.getSaveIndicator) { controller.setFavorite = value ?? false; }
+                      if (!controller.getDataUploadStatus) { controller.setFavorite = value ?? false; }
                     },
                   ),
                 ),
@@ -449,7 +448,7 @@ class ProductEdit extends StatelessWidget {
                         if(controller.homeController.getIsSubscribedPremium){
                           // esta subscripcion es premium
                           // condition : si el usuario no esta guardando el producto
-                          if (!controller.getSaveIndicator) {
+                          if (!controller.getDataUploadStatus) {
                             controller.setStock = value ?? false;
                           }
                         }else{
@@ -474,7 +473,7 @@ class ProductEdit extends StatelessWidget {
                             key: controller.quantityStockFormKey,
                             child: TextFormField(
                               style: valueTextStyle,
-                              enabled: !controller.getSaveIndicator,
+                              enabled: !controller.getDataUploadStatus,
                               keyboardType: TextInputType.number,
                               onChanged: (value) => controller.setQuantityStock =int.parse(controller.controllerTextEditQuantityStock .text),
                               decoration: InputDecoration(
@@ -500,7 +499,7 @@ class ProductEdit extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
                               child: TextField(
                                 style: valueTextStyle,
-                                enabled: !controller.getSaveIndicator,
+                                enabled: !controller.getDataUploadStatus,
                                 keyboardType: TextInputType.number,
                                 onChanged: (value) =>controller.setAlertStock = int.parse(controller.controllerTextEditAlertStock.text),
                                 decoration: InputDecoration(
@@ -555,7 +554,7 @@ class ProductEdit extends StatelessWidget {
                 //  button : guardar el producto
                 ComponentApp().button(
                   defaultStyle: true, 
-                  disable:controller.getSaveIndicator == true || (controller.getNewProduct && !controller.getUserConsent)  ,
+                  disable:controller.getDataUploadStatus == true || (controller.getNewProduct && !controller.getUserConsent)  ,
                   onPressed: controller.save,
                   icon: Container(),
                   colorButton: Colors.blue,
@@ -564,7 +563,7 @@ class ProductEdit extends StatelessWidget {
                   text: controller.itsInTheCatalogue?'Actualizar':'Agregar a mi cátalogo',
                 ), 
                 // button : elminar el documento
-                controller.getSaveIndicator? Container(): 
+                controller.getDataUploadStatus? Container(): 
                 controller.itsInTheCatalogue? Container(
                   width: double.infinity,
                   padding: const EdgeInsets.only(bottom: 12, top: 30, left: 0, right: 0),
@@ -867,7 +866,7 @@ class _SelectProviderState extends State<SelectProvider> {
                     ListTile(
                       contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
                       dense: true,
-                      title: Text(provider.description.substring(0, 1).toUpperCase() + provider.description.substring(1)),
+                      title: Text(provider.name.substring(0, 1).toUpperCase() + provider.name.substring(1)),
                       onTap: () {
                         controllerProductsEdit.setProvider = provider;
                         Get.back();
@@ -941,7 +940,7 @@ class _SelectProviderState extends State<SelectProvider> {
     // var
     bool loadSave = false;
     bool newProvider = false;
-    TextEditingController textEditingController = TextEditingController(text: provider.description);
+    TextEditingController textEditingController = TextEditingController(text: provider.name);
 
     if (provider.id == '') {
       newProvider = true;
@@ -975,7 +974,7 @@ class _SelectProviderState extends State<SelectProvider> {
                 onPressed: () async {
                   if (textEditingController.text != '') {
                     // set
-                    provider.description = textEditingController.text;
+                    provider.name = textEditingController.text;
                     setState(() => loadSave = true);
                     // save
                     await cataloguePageController.providerSave(provider: provider).whenComplete(() {
@@ -1018,15 +1017,15 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
         child: Column(
           mainAxisSize: MainAxisSize.max,
           children: [ 
-            SizedBox(height: !controller.getSaveIndicator ? 12.0 : 0.0),
+            SizedBox(height: !controller.getDataUploadStatus ? 12.0 : 0.0),
             CheckboxListTile(
-              enabled: controller.getEditModerator ? controller.getSaveIndicator? false: true: false,
+              enabled: controller.getEditModerator ? controller.getDataUploadStatus? false: true: false,
               checkColor: Colors.white,
               activeColor: Colors.blue,
               value: controller.getProduct.outstanding,
               title: const Text('Detacado'),
               onChanged: (value) {
-                if (!controller.getSaveIndicator) {
+                if (!controller.getDataUploadStatus) {
                   
                   setState(() {
                     controller.setOutstanding(value: value ?? false);
@@ -1034,10 +1033,10 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
                 }
               },
             ),
-            SizedBox(height: !controller.getSaveIndicator ? 12.0 : 0.0),
+            SizedBox(height: !controller.getDataUploadStatus ? 12.0 : 0.0),
             CheckboxListTile(
               enabled: controller.getEditModerator
-                  ? controller.getSaveIndicator
+                  ? controller.getDataUploadStatus
                       ? false
                       : true
                   : false,
@@ -1047,7 +1046,7 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
               title: const Text('Verificado'),
               onChanged: (value) {
                 if (controller.getEditModerator) {
-                  if (!controller.getSaveIndicator) {
+                  if (!controller.getDataUploadStatus) {
                     setState(() {
                       controller.setCheckVerified(value: value ?? false);
                     });
@@ -1055,7 +1054,7 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
                 }
               },
             ),
-            controller.getEditModerator ? Container() :SizedBox(height: !controller.getSaveIndicator ? 12.0 : 0.0),
+            controller.getEditModerator ? Container() :SizedBox(height: !controller.getDataUploadStatus ? 12.0 : 0.0),
             controller.getEditModerator
                 ? Container()
                 : button(
@@ -1070,10 +1069,10 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
                     colorButton:  Colors.orange,
                     text:  "Editar documento",
                   ),
-            controller.getSaveIndicator || controller.getNewProduct || !controller.getEditModerator
+            controller.getDataUploadStatus || controller.getNewProduct || !controller.getEditModerator
                 ? Container()
                 :const SizedBox(height: 12.0),
-            controller.getSaveIndicator || controller.getNewProduct || !controller.getEditModerator
+            controller.getDataUploadStatus || controller.getNewProduct || !controller.getEditModerator
                 ? Container()
                 : button(
                     padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),

@@ -120,16 +120,16 @@ class CataloguePage extends StatelessWidget {
         ),
         Flexible(
           child: TabBarView(controller: controller.tabController, children: [
-            viewCatalogueProductsVerticalList(),
+            viewCatalogue(),
             viewCategory(),
-            viewSupplier(),
+            viewProvider(),
           ]),
         )
       ],
     );
   }
 
-  Widget viewCatalogueProductsVerticalList() {
+  Widget viewCatalogue() {
     // controllers
     final CataloguePageController controller = Get.find();
     final HomeController homeController = Get.find();
@@ -229,9 +229,10 @@ class CataloguePage extends StatelessWidget {
     );
   }
   // view : vista de la lista de proveedores
-  Widget viewSupplier() {
+  Widget viewProvider() {
     // controllers
-    final HomeController controller = Get.find(); 
+    final HomeController controller = Get.find();
+    final CataloguePageController cataloguePageController = Get.find(); 
     //var
     double titleSize = 18;
     Color dividerColor = controller.getDarkMode?Colors.white.withOpacity(0.5):Colors.black.withOpacity(0.5);
@@ -250,32 +251,35 @@ class CataloguePage extends StatelessWidget {
         itemBuilder: (BuildContext context, int index) {
           
           //get
-          Provider supplier = controller.getProviderList[index]; 
+          Provider provider = controller.getProviderList[index]; 
       
           return index == 0
-              ? Column(
-                  children: <Widget>[
-                    controller.getProviderList.isNotEmpty
-                        ? ListTile(
-                            contentPadding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
-                            dense: true,
-                            title: Text("Mostrar todos",style: TextStyle(fontSize: titleSize,fontWeight: FontWeight.w400)),
-                            onTap: () {
-                              
-                            },
-                          )
-                        : Container(),
-                    divider,
-                    listTileSupplierItem(supplier: supplier),
-                    divider,
-                  ],
-                )
-              : Column(
-                  children: <Widget>[
-                    listTileSupplierItem(supplier: supplier),
-                    divider,
-                  ],
-                );
+            ? Column(
+                children: <Widget>[
+                  controller.getProviderList.isNotEmpty
+                      ? ListTile(
+                          contentPadding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
+                          dense: true,
+                          title: Text("Mostrar todos",style: TextStyle(fontSize: titleSize,fontWeight: FontWeight.w400)),
+                          onTap: () { 
+                            
+                            cataloguePageController.catalogueFilter();  // mostramos todos los productos 
+                            cataloguePageController.tabController.animateTo(0); // desplaza la vista a la lista de los productos
+
+                          },
+                        )
+                      : Container(),
+                  divider,
+                  listTileProviderItem(provider: provider),
+                  divider,
+                ],
+              )
+            :Column(
+              children: <Widget>[
+                listTileProviderItem(provider: provider),
+                divider,
+              ],
+            );
         },
       ),
     );
@@ -294,7 +298,7 @@ class CataloguePage extends StatelessWidget {
               showDialogSetCategoria(categoria: Category());
               break;
             case 2:
-              showDialogSetSupplier(supplier: Provider());
+              showDialogSetProvider(supplier: Provider());
               break;
             default:
           }
@@ -305,34 +309,50 @@ class CataloguePage extends StatelessWidget {
   Widget listTileProduct({required ProductCatalogue item}) {
     // description : ListTile con detalles del producto
 
-    //  controller
+    //  controllers
     final CataloguePageController catalogueController = Get.find(); 
     final HomeController homeController = Get.find();
     
-    // values
+    // var
     double titleSize = 16; 
     String alertStockText = item.stock ? (item.quantityStock == 0 ? 'Sin stock' : '') : ''; 
     String valueDataUpdate ='Actualizado ${Publications.getFechaPublicacion(item.upgrade.toDate(), Timestamp.now().toDate())}';
     valueDataUpdate = valueDataUpdate.substring(0, 1).toUpperCase() + valueDataUpdate.substring(1).toLowerCase();
 
     // styles
-    final Color primaryTextColor  = Get.isDarkMode?Colors.white70:Colors.black87;
+    final Color primaryTextColor  = Get.isDarkMode?Colors.white:Colors.black;
+    final Color secundayTextColor = Get.isDarkMode?Colors.white.withOpacity(0.5):Colors.black.withOpacity(0.5);
     final TextStyle textStylePrimery = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
-    final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w200);
+    final TextStyle textStyleSecundary = TextStyle(color: secundayTextColor,fontWeight: FontWeight.w400);
     // widgets
+    final Widget dividerCircle = ComponentApp().dividerDot(color: secundayTextColor);
     Widget divider = ComponentApp().divider();
 
     // widgets 
     Widget description = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // text : nombre de la marca
-        item.nameMark==''?Container():Text(
-            item.nameMark,
-            maxLines: 2,
-            overflow: TextOverflow.clip,
-            style: TextStyle(color: item.verified?Colors.blue:null),
-          ), 
+        // view : marca del producto y proveedor
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            //text : nombre de la marca
+            item.nameMark==''?Container():Text(
+                item.nameMark,
+                maxLines: 2,
+                overflow: TextOverflow.clip,
+                style: TextStyle(color: item.verified?Colors.blue:null),
+              ),
+            //text : nombre del proveedor
+            item.nameProvider==''?Container(): dividerCircle,
+            item.nameProvider==''?Container():Text(
+                item.nameProvider,
+                maxLines: 2,
+                overflow: TextOverflow.clip,
+                style: textStyleSecundary,
+              ),
+          ],
+        ), 
         // view : texts
         homeController.getIsSubscribedPremium==false?Container():
         Wrap(
@@ -352,7 +372,7 @@ class CataloguePage extends StatelessWidget {
         Row(
           children: [
             item.favorite? Text('Favorito',style: TextStyle(color: Colors.yellow.shade800)):Container(),
-            item.favorite && alertStockText != ''? Padding(padding: const EdgeInsets.symmetric(horizontal: 5),child: Icon(Icons.circle,size: 8, color: Get.theme.dividerColor)):Container(),
+            item.favorite && alertStockText != ''? dividerCircle:Container(),
             alertStockText == '' ? Container() : Text(alertStockText),
           ],
         ),
@@ -363,7 +383,7 @@ class CataloguePage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         // text : precio de venta
-        Text(Publications.getFormatoPrecio(monto: item.salePrice),style: TextStyle(fontSize: 18,fontWeight:FontWeight.w500,color: homeController.getDarkMode?Colors.white:Colors.black )),
+        Text(Publications.getFormatoPrecio(monto: item.salePrice),style: TextStyle(fontSize: 18,color: homeController.getDarkMode?Colors.white:Colors.black )),
         const SizedBox(width: 5),
         // text : porcentaje de ganancia
         item.getPorcentage==''?Container():Opacity(opacity:0.7,
@@ -416,7 +436,7 @@ class CataloguePage extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start, 
                           children: [
-                            Text(item.description, maxLines: 1,style: textStyleSecundary.copyWith(fontWeight: FontWeight.w600,fontSize: titleSize)),
+                            Text(item.description, maxLines: 1,style: textStylePrimery.copyWith( fontSize: titleSize)),
                             description,
                           ],
                         ),
@@ -456,23 +476,23 @@ class CataloguePage extends StatelessWidget {
       trailing: dropdownButtonCategory(categoria: categoria),
     );
   }
-  Widget listTileSupplierItem({required Provider supplier}) { 
+  Widget listTileProviderItem({required Provider provider}) { 
 
     // controllers
     final CataloguePageController controller = Get.find();
 
     //  values
-    String title = supplier.description.substring(0, 1).toUpperCase() + supplier.description.substring(1);
+    String title = provider.name==''?'': provider.name.substring(0, 1).toUpperCase() + provider.name.substring(1);
 
     return ListTile(
       contentPadding: const EdgeInsets.all(12),
       dense: true,
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.w300,fontSize: 18)),
       onTap: () { 
-        controller.setSelectedSupplier = supplier;
+        controller.setSelectedSupplier = provider;
         controller.tabController.animateTo(0);
       },  
-      trailing: dropdownButtonSupplier(supplier: supplier),
+      trailing: dropdownButtonSupplier(supplier: provider),
     );
   }
   // menu options
@@ -498,7 +518,7 @@ class CataloguePage extends StatelessWidget {
       onChanged: (value) async {
         switch (value) {
           case "editar":
-            showDialogSetSupplier(supplier: supplier);
+            showDialogSetProvider(supplier: supplier);
             break;
           case "eliminar":
             Get.defaultDialog(
@@ -568,11 +588,11 @@ class CataloguePage extends StatelessWidget {
       },
     );
   }
-  showDialogSetSupplier({required Provider supplier}) async {
+  showDialogSetProvider({required Provider supplier}) async {
     
     // controllers
     final CataloguePageController cataloguePageController = Get.find();
-    TextEditingController textEditingController = TextEditingController(text: supplier.description);
+    TextEditingController textEditingController = TextEditingController(text: supplier.name);
     // var
     bool loadSave = false; 
 
@@ -601,7 +621,7 @@ class CataloguePage extends StatelessWidget {
             onPressed: () async {
               if (loadSave == false) {
                 loadSave = true;
-                supplier.description = textEditingController.text;
+                supplier.name = textEditingController.text;
                 await cataloguePageController.providerSave(provider: supplier);
                 Get.back();
               }

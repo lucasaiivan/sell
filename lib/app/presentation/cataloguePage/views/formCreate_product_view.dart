@@ -41,9 +41,8 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
   Widget build(BuildContext context) {
 
     // set : obtenemos los nuevos valores 
-    controller.darkMode = Theme.of(context).brightness == Brightness.dark;
-    controller.cardProductDetailColor = controller.darkMode ?controller.formEditing?Colors.blueGrey.withOpacity(0.2):Colors.blueGrey.withOpacity(0.1) : Colors.grey.shade200;
-
+    controller.darkMode = Theme.of(context).brightness == Brightness.dark; 
+    
     //  AnnotatedRegion : proporciona un valor a sus widgets hijos
     // SystemUiOverlayStyle : Especifica una preferencia para el estilo de la barra de estado del sistema
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -95,7 +94,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
             child: Column(
               children: [
                 appbar,
-                controller.getSaveIndicator? ComponentApp().linearProgressBarApp(color: controller.colorLoading):lineProgressIndicator,
+                controller.getDataUploadStatus? ComponentApp().linearProgressBarApp(color: controller.colorLoading):lineProgressIndicator,
                 // view : tarjeta animada
                 cardFront,
                 // chips : chips de información
@@ -131,7 +130,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
                   ),
                 ),
                 // formTexts
-                controller.getSaveIndicator? Container():textFieldCarrousel(),
+                controller.getDataUploadStatus? Container():textFieldCarrousel(),
               ],
             ),
           ),
@@ -142,7 +141,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
           children: [
             // button : back
             TextButton(
-              onPressed: controller.getSaveIndicator?null:controller.currentSlide==0?null:(){
+              onPressed: controller.getDataUploadStatus?null:controller.currentSlide==0?null:(){
               controller.previousPage();
               }, 
               child: Text('Anterior',style: TextStyle(color: controller.currentSlide==0?Colors.grey:null),),
@@ -150,7 +149,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
             // button : next o save
             Center(
               child: TextButton( 
-                onPressed: controller.getSaveIndicator?null:controller.currentSlide == 8?controller.getUserConsent?controller.save:null :() => controller.next(),
+                onPressed: controller.getDataUploadStatus?null:controller.currentSlide == 8?controller.getUserConsent?controller.save:null :() => controller.next(),
                 child: Text( controller.currentSlide == 8  ?'Publicar':'Siguiente')),
             ),
           ],
@@ -485,13 +484,13 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
       children: [
         CheckboxListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal:12, vertical: 12),
-          enabled: controller.getSaveIndicator ? false : true,
+          enabled: controller.getDataUploadStatus ? false : true,
           checkColor: Colors.white,
           activeColor: Colors.amber,
           value: controller.getFavorite,
           title: Text(controller.getProduct.favorite?'Quitar de favorito':'Agregar a favorito'),subtitle: const Text('Accede rápidamente a tus productos favoritos'),
           onChanged: (value) {
-            if (!controller.getSaveIndicator) { controller.setFavorite = value ?? false; }
+            if (!controller.getDataUploadStatus) { controller.setFavorite = value ?? false; }
           },
         ),
         const Spacer(),
@@ -522,7 +521,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
           title: Text(controller.getProduct.stock?'Quitar control de stock':'Agregar control de stock'),
           subtitle: const Text('Controlar el inventario de sus productos'),
           onChanged: (value) {
-            if (!controller.getSaveIndicator) {
+            if (!controller.getDataUploadStatus) {
               controller.setStock = value ?? false;
             }
           },
@@ -542,7 +541,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
                 child: Form(
                   key: controller.quantityStockFormKey,
                   child: TextFormField(
-                    enabled: !controller.getSaveIndicator,
+                    enabled: !controller.getDataUploadStatus,
                     keyboardType: TextInputType.number,
                     onChanged: (value) => controller.setQuantityStock =int.parse(controller.controllerTextEditQuantityStock .text),
                     decoration: const InputDecoration(
@@ -565,7 +564,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
               Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
                     child: TextField(
-                      enabled: !controller.getSaveIndicator,
+                      enabled: !controller.getDataUploadStatus,
                       keyboardType: TextInputType.number,
                       onChanged: (value) =>controller.setAlertStock = int.parse(controller.controllerTextEditAlertStock.text),
                       decoration: const InputDecoration(
@@ -625,8 +624,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
     return AnimatedContainer(
       margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 24.0),
         duration: const Duration(milliseconds: 500),
-        decoration: BoxDecoration(color: controller.cardProductDetailColor,
-        borderRadius: BorderRadius.circular(12.0)),
+        decoration: BoxDecoration( borderRadius: BorderRadius.circular(12.0)),
         padding: const EdgeInsets.all(24.0),
         child: Column(
           mainAxisSize: MainAxisSize.max,

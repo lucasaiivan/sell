@@ -93,7 +93,7 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
     final TextStyle textStylePrimary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400,fontSize: 16);
     final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
 
-    // widgets  
+    // widgets : chips de marcas
     final Widget viewMarks = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -121,6 +121,7 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
         ),
       ],
     );
+    // widgets : chips de categorias
     final Widget viewCategories = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -129,6 +130,34 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
         Wrap(
           children: [
             for (Category element in homeController.getCatalogueCategoryList)
+              // chip
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal:3),
+                child: GestureDetector(
+                  onTap: (){
+                    // set query
+                    setQuery = element.name;
+                  },
+                  child: Chip( 
+                    label: Text(element.name,style: textStyleSecundary), 
+                    shape: RoundedRectangleBorder(side: BorderSide(color: primaryTextColor.withOpacity(0.5)),borderRadius: BorderRadius.circular(5)),
+                    backgroundColor: Colors.transparent,   
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+    // widget : chips de proveedores
+    final Widget viewProviders = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        homeController.getProviderList.isEmpty?Container():Text('Proveedores',style: textStylePrimary),
+        const SizedBox(height: 5),
+        Wrap(
+          children: [
+            for (Provider element in homeController.getProviderList)
               // chip
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal:3),
@@ -158,6 +187,7 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
         padding: const EdgeInsets.only(top: 0,left: 12,right: 12),
         child: ListView(
             children: [
+              viewProviders,
               viewCategories, 
               viewMarks,
             ],
@@ -191,7 +221,7 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
     final Color primaryTextColor  = Get.isDarkMode?Colors.white54:Colors.black45;
     final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
     // widgets
-    final Widget dividerCircle = Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child:Icon(Icons.circle,size: 4, color: primaryTextColor.withOpacity(0.5)));
+    final Widget dividerCircle = ComponentApp().dividerDot(color: primaryTextColor);
 
     // var
     String alertStockText = product.stock ? (product.quantityStock == 0 ? 'Sin stock' : '${product.quantityStock} en stock') : '';
@@ -242,7 +272,27 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(product.description,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(fontWeight: FontWeight.w500)),
-                        product.nameMark==''?Container():Text(product.nameMark,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(color: Colors.blue)),
+                        // view : marca del producto y proveedor
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          //text : nombre de la marca
+                          product.nameMark==''?Container():Text(
+                              product.nameMark,
+                              maxLines: 2,
+                              overflow: TextOverflow.clip,
+                              style: TextStyle(color: product.verified?Colors.blue:null),
+                            ),
+                          //text : nombre del proveedor
+                          product.nameProvider==''?Container(): dividerCircle,
+                          product.nameProvider==''?Container():Text(
+                              product.nameProvider,
+                              maxLines: 2,
+                              overflow: TextOverflow.clip,
+                              style: textStyleSecundary,
+                            ),
+                        ],
+                      ), 
                         Wrap(
                           crossAxisAlignment: WrapCrossAlignment.start,
                           direction: Axis.horizontal,
