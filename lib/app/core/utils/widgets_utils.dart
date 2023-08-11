@@ -689,6 +689,10 @@ class ComponentApp extends StatelessWidget {
       color: Get.isDarkMode?Colors.white30:Colors.black38,
     );
   }
+  // view : grafico punto divisor estandar de la app
+  Widget dividerDot({double size = 4.0,Color color = Colors.black}) {
+    return Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child:Icon(Icons.circle,size:size, color: color.withOpacity(0.4)));
+  }
   // view : imagen avatar del usuario
   Widget userAvatarCircle({String urlImage='',String text = '', double radius = 20.0}) {
     
