@@ -108,7 +108,7 @@ class SalesView extends StatelessWidget {
           SliverList(
               delegate: SliverChildListDelegate([
                 updateview,
-                widgeSuggestedProducts(context: context, controller1: controller)
+                widgeSuggestedProducts(context: context )
               ])
           ),
         ];
@@ -612,9 +612,10 @@ class SalesView extends StatelessWidget {
             ]);
   }
 
-  Widget widgeSuggestedProducts({required SalesController controller1, required BuildContext context}) {
+  Widget widgeSuggestedProducts({required BuildContext context}) {
+    
     // controllers
-    HomeController controller = Get.find();
+    HomeController controller = Get.find(); 
 
     // values
     int numItemDefault = 5;
@@ -650,7 +651,7 @@ class SalesView extends StatelessWidget {
             itemBuilder: (context, index) {
               // values
               Widget widget = index <= (controller.getProductsOutstandingList.length - 1) && index < itemCount - numItemDefault
-                ? circleAvatarProduct(productCatalogue:controller.getProductsOutstandingList[index])
+                ? circleAvatarProduct(productCatalogue:controller.getProductsOutstandingList[index].copyWith())
                 : circleAvatarProduct(productCatalogue: ProductCatalogue(creation: Timestamp.now(),upgrade: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now()));
               // condition : views default
               if (viewDefault) {

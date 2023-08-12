@@ -580,7 +580,7 @@ class ProductEdit extends StatelessWidget {
   }
 
   /* WIDGETS COMPONENT */  
-Widget get widgetForModerator{
+  Widget get widgetForModerator{
   // TODO : delete release
   return TextButton(
     onPressed: (){
@@ -990,17 +990,13 @@ class _SelectProviderState extends State<SelectProvider> {
   }
 }
 
-
-
-
- // class que de StatefulWidget llamada OptionsModeratorsWidget 
+ // class : vista de opciones para moderador
 class OptionsModeratorsWidget extends StatefulWidget {
   const OptionsModeratorsWidget({super.key});
 
   @override
   State<OptionsModeratorsWidget> createState() => _OptionsModeratorsWidgetState();
 }
-
 class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
 
   // controllers

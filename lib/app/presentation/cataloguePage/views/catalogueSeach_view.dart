@@ -204,7 +204,7 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
       itemCount: filteredSuggestions.length,
       itemBuilder: (context, index) { 
         // values
-        ProductCatalogue product = filteredSuggestions[index]; 
+        ProductCatalogue product = filteredSuggestions[index];  
         return item(product:product); 
       },
     ); 
