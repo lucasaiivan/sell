@@ -90,6 +90,7 @@ class CataloguePage extends StatelessWidget {
       ],
     );
   }
+  
 
   Widget body({required BuildContext context}) {
     // controllers

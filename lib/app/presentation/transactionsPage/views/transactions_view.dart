@@ -208,8 +208,8 @@ class TransactionsView extends StatelessWidget {
                         ],
                       )),
                     Opacity(opacity:0.3,child: dividerCircle),
-                        // fecha de transacción
-                        Text(Publications.getFechaPublicacion(ticketModel.creation.toDate(), Timestamp.now().toDate()),style: TextStyle(color: primaryTextColor.withOpacity(0.3),fontWeight: FontWeight.w400 )),
+                    // fecha de transacción
+                    Text(Publications.getFechaPublicacion(ticketModel.creation.toDate(), Timestamp.now().toDate()),style: TextStyle(color: primaryTextColor.withOpacity(0.3),fontWeight: FontWeight.w400 )),
                   ],
                 ),
                 Column(
@@ -283,8 +283,8 @@ class TransactionsView extends StatelessWidget {
           );
         },
         child: InkWell(
-          onLongPress: () =>  showAlertDialogTransactionInformation(buildContext,ticketModel.toJson()),
-          onTap: () => showAlertDialogTransactionInformation(buildContext,ticketModel.toJson()),
+          onLongPress: () =>  showAlertDialogTransactionInformation(buildContext,ticketModel),
+          onTap: () => showAlertDialogTransactionInformation(buildContext,ticketModel),
           child: listTile,
           ),
       ),
@@ -292,17 +292,16 @@ class TransactionsView extends StatelessWidget {
   }
 
   // DIALOG : mostrar detalles de la transacción
-  void showAlertDialogTransactionInformation(BuildContext context, Map<dynamic, dynamic> transactionData) {
-    String id = transactionData['id'].toString();
-    String seller = transactionData['seller'].toString();
-    String cashRegister = transactionData['cashRegisterName'].toString();
-    String payMode = transactionData['payMode'].toString();
-    double priceTotal = transactionData['priceTotal'];
-    double valueReceived = transactionData['valueReceived'];
+  void showAlertDialogTransactionInformation(BuildContext context, TicketModel ticket) {
+    String id = ticket.id;
+    String seller = ticket.seller;
+    String cashRegister = ticket.cashRegisterName;
+    String payMode = ticket.payMode;
+    double priceTotal = ticket.priceTotal;
+    double valueReceived = ticket.valueReceived;
     double changeAmount = valueReceived==0?0.0: valueReceived - priceTotal;
-    String currencySymbol = transactionData['currencySymbol'].toString();
-    List<dynamic> listProduct = transactionData['listPoduct'];
-    Timestamp creation = transactionData['creation'];
+    String currencySymbol = ticket.currencySymbol; 
+    Timestamp creation = ticket.creation;
 
     // controllers
     final TransactionsController transactionsController = Get.find();
@@ -310,6 +309,7 @@ class TransactionsView extends StatelessWidget {
     // Formatear marca de tiempo como fecha
     var formatter = DateFormat('dd/MM/yyyy  HH:mm');
     var formattedCreationDate = formatter.format(creation.toDate());
+ 
 
     // var 
     Map payModeMap =transactionsController.getPayMode(idMode: payMode);
@@ -383,7 +383,7 @@ class TransactionsView extends StatelessWidget {
                       children: <Widget>[
                         Opacity(opacity:opacity,child: Text("Cantidad de artículos: ",style: textStyleDescription)),
                         const Spacer(),
-                        Text("${listProduct.length}",style: textStyleValue),
+                        Text("${ticket.getLengh()}",style: textStyleValue),
                       ],
                     ),
                     spacer,
@@ -431,7 +431,7 @@ class TransactionsView extends StatelessWidget {
               child: Text("Eliminar",style: TextStyle(color: Colors.red.shade400),),
               onPressed: () {
                 Navigator.of(context).pop();
-                transactionsController.deleteSale(ticketModel: TicketModel.fromMap(transactionData));
+                transactionsController.deleteSale(ticketModel: ticket);
               },
             ),
             TextButton(

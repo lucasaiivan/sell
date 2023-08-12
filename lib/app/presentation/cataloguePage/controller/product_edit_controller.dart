@@ -869,7 +869,7 @@ class ControllerProductsEdit extends GetxController {
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
     );
   }
-
+  // dialog : muestra el dialogo para eliminar el producto
   void showDialogDelete() {
     Widget widget = AlertDialog(
       title: const Text(
@@ -904,8 +904,8 @@ class ControllerProductsEdit extends GetxController {
 
     Get.dialog(widget);
   }
-
-  showModalSelectMarca() {
+  // bottomSheet : muestra el modal para seleccionar la categoria
+  void showModalSelectMarca() {
     // widget
     Widget widget = const WidgetSelectMark();
     // muestre la hoja inferior modal de getx
@@ -1036,7 +1036,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
                     children: [
                       getWidgetOptionOther(),
                       ComponentApp().divider(),
-                      controllerProductsEdit.getUltimateSelectionMark.id == '' || controllerProductsEdit.getUltimateSelectionMark.id == 'other'? Container(): listTile( marcaSelect: controllerProductsEdit.getUltimateSelectionMark),
+                      controllerProductsEdit.getUltimateSelectionMark.id == '' || controllerProductsEdit.getUltimateSelectionMark.id == 'other'? Container() : listTile( marcaSelect: controllerProductsEdit.getUltimateSelectionMark),
                       ComponentApp().divider(),
                       listTile(marcaSelect: marcaSelect),
                       ComponentApp().divider(),
@@ -1134,6 +1134,8 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
 
     // var
     Color colorAccent = Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
+
+     getWidgetOptionOther();
 
     showSearch(
       context: context,

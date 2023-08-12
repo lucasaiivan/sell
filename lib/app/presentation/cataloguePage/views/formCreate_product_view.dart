@@ -31,6 +31,8 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
   @override
   void initState() {
     super.initState();
+
+    controller.setDataUploadStatus = false; // establecemos la animacion del estado de carga en falso
   }
   @override
   void dispose() {
@@ -57,6 +59,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
         onWillPop: () => controller.onBackPressed(context: context),
         //  Scaffold : proporciona una estructura visual básica para la aplicación
           child: Scaffold(
+            appBar: appbar,
             body: body(context: context),),
         ),
       ),
@@ -72,6 +75,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
       systemOverlayStyle: controller.darkMode?SystemUiOverlayStyle.light:SystemUiOverlayStyle.dark,
       iconTheme: IconThemeData(color: colorAccent),
       title: Text(controller.getTextAppBar,style: TextStyle(  color: colorAccent,fontSize: 18 )),
+      bottom: controller.getDataUploadStatus? PreferredSize(preferredSize: const Size.fromHeight(4), child: ComponentApp().linearProgressBarApp(color: controller.colorLoading)):PreferredSize(preferredSize: const Size.fromHeight(4), child: lineProgressIndicator),
     );
   }
   Widget body({required BuildContext context}){
@@ -92,9 +96,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             // Form : Crea un contenedor para campos de formulario
             child: Column(
-              children: [
-                appbar,
-                controller.getDataUploadStatus? ComponentApp().linearProgressBarApp(color: controller.colorLoading):lineProgressIndicator,
+              children: [ 
                 // view : tarjeta animada
                 cardFront,
                 // chips : chips de información
@@ -490,7 +492,12 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
           value: controller.getFavorite,
           title: Text(controller.getProduct.favorite?'Quitar de favorito':'Agregar a favorito'),subtitle: const Text('Accede rápidamente a tus productos favoritos'),
           onChanged: (value) {
-            if (!controller.getDataUploadStatus) { controller.setFavorite = value ?? false; }
+            if (!controller.getDataUploadStatus) { 
+                setState(() {
+                  controller.setFavorite = value ?? false; 
+
+                });
+              }
           },
         ),
         const Spacer(),
@@ -598,7 +605,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
           child: CheckboxListTile( 
             contentPadding: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
             controlAffinity: ListTileControlAffinity.leading,
-            title: const Text('Importante!\nAl crear un producto, entiendo y acepto lo siguiente: los datos básicos (descripción, imagen, marca) serán visibles para todos y podrían ser modificados por otros usuarios hasta que un moderador los verifique. Una vez verificados, no podré cambiar estos datos. El (precio de venta al público) también será visible para todos. Además, es importante tener en cuenta que una vez creada, la referencia del producto no podrá eliminarse',style: TextStyle(fontWeight: FontWeight.w200)),
+            title: const Text('Importante!\nAl crear un producto, entiendo y acepto lo siguiente: los datos básicos (descripción, imagen, marca) serán visibles para todos y podrían ser modificados por otros usuarios hasta que un moderador los verifique. Una vez verificados, no podré cambiar estos datos. El (precio de venta al público) también será visible para todos.',style: TextStyle(fontWeight: FontWeight.w200)),
             value: controller.getUserConsent,
             onChanged: (value) { 
               setState(() {
