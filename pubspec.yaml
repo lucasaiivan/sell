@@ -59,8 +59,7 @@ dependencies:
   flutter_secure_storage: ^8.0.0
   # app info 
   package_info_plus: ^3.0.3 # Un complemento de Flutter para obtener información sobre el paquete actual, como el nombre, la versión y el número de compilación.
-  # others 
-  fl_chart: ^0.62.0 # Un paquete de Flutter que proporciona una implementación de gráficos de datos.
+  # others  
   fast_cached_network_image: ^1.1.1 
   cached_network_image: ^3.2.3 # Un paquete de Flutter que proporciona una implementación de red de imágenes que se almacenan en caché.
   tutorial_coach_mark: ^1.2.8 # Un paquete de Flutter que le permite crear tutoriales de aplicación de forma fácil y rápida.
@@ -90,7 +89,7 @@ dependencies:
   carousel_slider: ^4.1.1 # Un widget deslizante de carrusel
   email_validator: ^2.1.17
   blur: ^3.0.0  # Un paquete de Flutter que proporciona un widget de enfoque de desenfoque.
-
+  fl_chart: ^0.63.0 # Un paquete de Flutter que proporciona un widget de gráfico de datos.
   
 flutter_icons:
   android: true
