@@ -1,12 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:sell/app/core/utils/widgets_utils.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:sell/app/domain/entities/catalogo_model.dart';
 import '../../../domain/entities/cashRegister_model.dart';
 import '../../../domain/entities/ticket_model.dart';
 import '../../home/controller/home_controller.dart';
+import 'package:fl_chart/fl_chart.dart';
+
 
 class TransactionsController extends GetxController {
   // others controllers
@@ -770,4 +773,269 @@ class TransactionsController extends GetxController {
     );
     Get.dialog(widget);
   }
+
+  // WIDGETS COMPONENTS
+  Widget getPieChartView({required List chartData, double size = 100 }){
+
+    // var
+    Map data = {};
+    double radius = size / 2;
+    TextStyle textStyle = TextStyle(fontSize: radius / 4,fontWeight: FontWeight.bold,color: Colors.white );
+
+    // add data test
+    chartData.add({'description' : 'Mercado Pago','value': 259.0,'color':Colors.blue});
+    chartData.add({'description' : 'Efectivo','value': 500.0,'color':Colors.green});
+    chartData.add({'description' : 'Tarjeta De Crédito/Débito','value': 300.0,'color':Colors.orange});
+    chartData.add({'description' : 'Sin esprecificar','value': 100.0,'color':Colors.grey}); 
+
+    // agrega el key description y value 
+    for (var item in chartData) { data[item['description']] = item['value']; }
+
+    // calcular el total de los valores de [data]
+    double total = 0.0;
+    for (var item in data.values) {
+      total += item;
+    }
+    // convertir los valores de [data] en porcentajes
+    for (var item in data.keys) {
+      data[item] = (data[item] * 100 / total).roundToDouble();
+    }
+
+    // crear una lista de PieChartSectionData
+    List<PieChartSectionData> sections = [];
+    for (var item in data.entries) {
+
+      sections.add(PieChartSectionData(
+        value: item.value, 
+        title: item.value % 1 == 0 ? '${item.value.round()}%' : '${item.value}%',
+        titleStyle: textStyle,
+        color: getPayMode(idMode: item.key)['color'],
+        radius: radius,
+      ));
+    }
+    // generar List de chip con los datos de [data]
+    List<Widget> listChip = [];
+    for (var item in chartData ) {
+      listChip.add(
+        Padding(
+          padding: const EdgeInsets.all(2.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ComponentApp().dividerDot(),
+              Text('${item['description']}', style:textStyle.copyWith(color: item['color'] ) ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // PieChart : muestra el grafico de torta
+    return Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: SizedBox( 
+          height: size*2,
+          width: double.infinity,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: PieChart(PieChartData(
+                    centerSpaceRadius: 5,
+                    borderData: FlBorderData(show: false),
+                    sectionsSpace: 2,
+                    sections: sections,
+                  )
+                ),
+              ),
+            const SizedBox(height:5),
+            SizedBox(
+              width:size*2,
+              child: Wrap( 
+                runSpacing: 2, 
+                alignment: WrapAlignment.center,
+                children: listChip,
+              ),
+            ),
+            ],
+          ),
+        ),
+      );
+
+
+  }
+ 
+  // void : devolver una lista de [double] con el porcentaje en el rango de [0.0 al 9.9] de cada monto [double] de la lista[double] que se obtiene por parametro
+  List<double> getPorcentList({required List<double> list}){
+ 
+
+    // var
+    List<double> listPorcent = [];
+    double value = 0;
+    // calcular el precio mas alto
+    for (var item in list) {
+      if(item > value) value = item;
+    }
+    // convertir los valores de [list] en porcentajes  expresados en el rango de [0.0 al 9.9]
+    for (var item in list) {
+      listPorcent.add((item * 10 / value)); 
+    } 
+    return listPorcent;
+  }
+
+  Widget viewBarChartData({required List<Map> chartData, double size = 100 }){
+    
+    // var
+    bool isDarkMode = Theme.of(Get.context!).brightness == Brightness.dark;
+    Map data = {};
+    double radius = size / 2;
+    TextStyle textStyle = TextStyle(fontSize: radius / 5,fontWeight: FontWeight.bold,color: Colors.white );
+
+     // add data test
+    chartData.add({'name' : 'Mercado Pago','value': 2859.0,'color':Colors.blue});
+    chartData.add({'name' : 'Efectivo','value': 1500.0,'color':Colors.green});
+    chartData.add({'name' : 'Tarjeta De Crédito/Débito','value': 3300.0,'color':Colors.orange});
+    chartData.add({'name' : 'Sin esprecificar','value': 800.0,'color':Colors.grey});  
+
+
+    // agrega el key description y value 
+    for (var item in chartData) { data[item['name']] = item['value']; }
+
+    // calcular el total de los valores de [data]
+    double total = 0.0;
+    for (var item in data.values) {
+      total += item;
+    }
+    // convertir los valores de [data] en porcentajes
+    for (var item in data.keys) {
+      data[item] = (data[item] * 100 / total).roundToDouble();
+    }
+
+    // crear una lista de PieChartSectionData
+    List<PieChartSectionData> sections = [];
+    for (var item in data.entries) {
+
+      sections.add(PieChartSectionData(
+        value: item.value, 
+        title: item.value % 1 == 0 ? '${item.value.round()}%' : '${item.value}%',
+        titleStyle: textStyle,
+        color: getPayMode(idMode: item.key)['color'],
+        radius: radius,
+      ));
+    }
+    // generar List de chip con los datos de [data]
+    List<Widget> listChip = [];
+    for (var item in chartData ) {
+      listChip.add(
+        Padding(
+          padding: const EdgeInsets.all(1.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ComponentApp().dividerDot(color: item['color'],size: 8),
+              Text('${item['name']}', style:textStyle.copyWith(color: isDarkMode?null:item['color'],fontWeight: FontWeight.w700 ) ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    BarChartGroupData makeGroupData(
+    int x,
+    double y, {
+    bool isTouched = false,
+    Color? barColor,
+    double width = 22,
+    List<int> showTooltips = const [],
+  }) {
+    return BarChartGroupData(
+      x: x,  
+      barRods: [
+        BarChartRodData(
+          toY: isTouched ? y + 1 : y,
+          color: barColor,
+          width: width,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(6),
+            topRight: Radius.circular(6),
+            bottomLeft: Radius.circular(6),
+            bottomRight: Radius.circular(6),
+          ), 
+          borderSide: isTouched ? const BorderSide(color:Colors.black12) : const BorderSide(color: Colors.white, width: 0),
+          backDrawRodData: BackgroundBarChartRodData(show: true,toY: 10,color: Colors.black12),
+        ),
+      ],
+      showingTooltipIndicators: showTooltips,
+    );
+    }
+    List<BarChartGroupData> showingGroup(){
+
+      // crear lista de valores [el monto] a una lista de valores en porcentajes
+      List<double> listPorcent = getPorcentList(list: List.generate(chartData.length, (index) => chartData[index]['value'] ));
+
+      return List.generate(listPorcent.length, (index) => makeGroupData(index,listPorcent[index],barColor: chartData[index]['color'] ));
+
+    }
+    
+      // BarChart : muestra el grafico de barras
+      return Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            // view : grafico de barras
+            Flexible(
+              child: BarChart(  
+                BarChartData(
+                  barGroups: showingGroup(),
+                  gridData: const FlGridData(show: false),
+                  borderData: FlBorderData(show: false),  
+                  // desabilitar el eje de las x
+                  titlesData: FlTitlesData(
+                  show: true,
+                  rightTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  topTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: false,
+                      getTitlesWidget:(value, title){  
+                        // obtener primer caracter de la chartData['description'] de la lista
+                        String firstLetter = chartData[value.toInt()]['name'].toString().substring(0,1);
+ 
+                        return Text(firstLetter,style: textStyle);
+                      } ,
+                      reservedSize: 25,
+                    ),
+                  ),
+                  leftTitles: const AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: false,
+                    ),
+                  ),
+                ),
+                  
+                ), 
+              
+              swapAnimationDuration: const Duration(milliseconds: 150), // Optional
+              swapAnimationCurve: Curves.bounceIn, // Optional
+                ),
+            ),
+            // view : lista de chips con un Wrap
+            Wrap( 
+              runSpacing: 0, 
+              alignment: WrapAlignment.center,
+              children: listChip,
+            ),
+          ],
+        ),
+      ); 
+
+
+  }
+ 
+
 }

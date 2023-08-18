@@ -524,10 +524,17 @@ class _StaticsCardsState extends State<StaticsCards> {
         isPremium: homeController.getIsSubscribedPremium,
         backgroundColor: Colors.orangeAccent.shade100.withOpacity(0.7),
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.payment_rounded,color: Colors.white,size:14)))),
-        subtitle: Publications.getFormatoPrecio(monto: transactionsController.getPreferredPaymentMethod()['amount']),
+        //subtitle: Publications.getFormatoPrecio(monto: transactionsController.getPreferredPaymentMethod()['amount']),
+        content: SizedBox(
+          width: double.infinity,
+          height: 110,
+          child: transactionsController.viewBarChartData(  
+            chartData: [],  
+            ),
+        ),
         titleText: 'Medio de pago',
-        valueText: '${transactionsController.getPreferredPaymentMethod()['name']} más usado',
-        description:'${transactionsController.getPreferredPaymentMethod()['value'].toString()} veces',
+        //valueText: '${transactionsController.getPreferredPaymentMethod()['name']} más usado',
+        //description:'${transactionsController.getPreferredPaymentMethod()['value'].toString()} veces',
         ),
       // card : rentabilidad
       CardAnalityc( 
@@ -554,6 +561,7 @@ class _StaticsCardsState extends State<StaticsCards> {
 
         ));
     }); 
+ 
 
     return Padding(
       padding: const EdgeInsets.only(left: 12),
@@ -572,6 +580,9 @@ class _StaticsCardsState extends State<StaticsCards> {
 // CLASS : una simple clase llamada 'CardAnalityc' de un tarjeta [Card] vacia con fondo gris con un aspecto de relacion aspecto cuadrado
 class CardAnalityc extends StatelessWidget {
 
+  // controllers
+  TransactionsController transactionsController = Get.find();
+  // var
   late final dynamic backgroundColor;
   late final String titleText;
   late final String description;
@@ -579,9 +590,10 @@ class CardAnalityc extends StatelessWidget {
   late final String subtitle;
   late final Widget icon;
   late final bool isPremium;
+  late final Widget content;
 
   // ignore: prefer_const_constructors_in_immutables
-  CardAnalityc({Key? key,this.backgroundColor=Colors.grey,this.isPremium=false,this.titleText='',this.description='',this.valueText='',this.subtitle='' ,required this.icon }) : super(key: key);
+  CardAnalityc({Key? key,this.backgroundColor=Colors.grey,this.isPremium=false,this.titleText='',this.description='',this.valueText='',this.subtitle='' ,this.content = const SizedBox(),required this.icon }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -607,21 +619,21 @@ class CardAnalityc extends StatelessWidget {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           child: Padding(
             padding: const EdgeInsets.all(12.0),
-            child: content,
+            child: viewContent,
           ),
         ),
       ),
     );
   }
   // WIDGETS VIEWS
-  Widget get content {
+  Widget get viewContent {
 
 
 
     // style  
     TextStyle subtitleStyle = const TextStyle(fontSize: 18,fontWeight: FontWeight.w300);
     TextStyle valueTextStyle = TextStyle(fontSize: description=='' && subtitle==''? 26: 20, fontWeight: FontWeight.w500,overflow: TextOverflow.ellipsis);
-    TextStyle descriptionStyle = const TextStyle(fontSize: 12);
+    TextStyle descriptionStyle = const TextStyle(fontSize: 12);  
 
     return Stack(
       children: [
@@ -629,18 +641,20 @@ class CardAnalityc extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [  
-            const Spacer(),
+            const Spacer(), 
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+              children: [ 
+                content,
                 subtitle==''?Container(): Opacity(opacity: 0.7, child: Text(subtitle,style: subtitleStyle)),
-                Text(valueText,maxLines:2, textAlign: TextAlign.start, style: valueTextStyle),
+                valueText==''?Container():Text(valueText,maxLines:2, textAlign: TextAlign.start, style: valueTextStyle),
                 description==''?Container():Opacity(opacity: 0.7, child: Text(description, style: descriptionStyle)),
               ],
             ),
           ],
         ),
         isPremium?Container():
+        
         BackdropFilter(
           filter: ImageFilter.blur(sigmaX:5, sigmaY:5),
           // view :  texto y icon version premium  
@@ -656,7 +670,7 @@ class CardAnalityc extends StatelessWidget {
             Text(titleText,style: const TextStyle(fontWeight: FontWeight.w400),overflow:  TextOverflow.ellipsis,),
           ],
         ),
-        ), 
+        ),  
       ],
     );
   }
