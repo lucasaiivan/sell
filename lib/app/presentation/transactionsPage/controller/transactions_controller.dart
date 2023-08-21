@@ -21,14 +21,12 @@ class TransactionsController extends GetxController {
 
   // obtenemos los medios de pagos y sus respectivas ganancias
   // description : efective (Efectivo) - mercadopago (Mercado Pago) - card (Tarjeta De Crédito/Débito)
-  Map<String, int> _analyticsMeansOfPaymentMap = {};
-  Map<String, int> get getAnalyticsMeansOfPayment => _analyticsMeansOfPaymentMap;
-  set setAnalyticsMeansOfPayment(Map<String, int> value) => _analyticsMeansOfPaymentMap = value;
-  Map<String, dynamic> getPreferredPaymentMethod() { 
- 
-
+  Map<String, double> _analyticsMeansOfPaymentMap = {};
+  Map<String, double> get getAnalyticsMeansOfPayment => _analyticsMeansOfPaymentMap;
+  set setAnalyticsMeansOfPayment(Map<String, double> value) => _analyticsMeansOfPaymentMap = value;
+  Map<String, dynamic> getPreferredPaymentMethod() {   
     //obtenemos el modo de pago que se utilizo más
-    List<MapEntry<String, int>> list = getAnalyticsMeansOfPayment.entries.toList();
+    List<MapEntry<String, double>> list = getAnalyticsMeansOfPayment.entries.toList();
     // ordenamos la lista de mayor a menor
     list.sort((a, b) => b.value.compareTo(a.value));
     // condition : si la lista no esta vacia
@@ -73,11 +71,11 @@ class TransactionsController extends GetxController {
   List<TicketModel> _listTransactions = [];
   List<TicketModel> get getTransactionsList => _listTransactions;
   set setTransactionsList(List<TicketModel> value) {
-    withMoreSales(list: value);
-    _listTransactions = value;
-    readProductWithMoreEarnings();
-    readAnalyticsMeansOfPayment();
-    readCashAnalysis();
+    withMoreSales(list: value); // actualizamos los productos más vendidos
+    _listTransactions = value; 
+    readProductWithMoreEarnings(); // actualizamos el producto con más ganancias
+    readAnalyticsMeansOfPayment(); // actualizamos los medios de pago
+    readCashAnalysis(); // actualizamos los montos de cada caja
     update();
   }
 
@@ -219,8 +217,7 @@ class TransactionsController extends GetxController {
     // obtenemos los obj(productos) del catalogo de la cuenta del negocio
     if (homeController.getProfileAccountSelected.id != '') {
       // stream var
-      Stream<QuerySnapshot<Map<String, dynamic>>> stream =
-          Database.readTransactionsFilterTimeStream(
+      Stream<QuerySnapshot<Map<String, dynamic>>> stream = Database.readTransactionsFilterTimeStream(
         idAccount: homeController.getProfileAccountSelected.id,
         timeStart: timeStart,
         timeEnd: timeEnd,
@@ -513,28 +510,28 @@ class TransactionsController extends GetxController {
   void readAnalyticsMeansOfPayment() {
     //obtenemos el medios de pago mas usado y sus respecvtivas monto transacciones e
     setAnalyticsMeansOfPayment = {}; 
-
+    // recorremos todos los tickers
     for (var element in getTransactionsList) {
       switch (element.payMode) {
         case 'effective': 
           getAnalyticsMeansOfPayment.containsKey(element.payMode)
-              ? getAnalyticsMeansOfPayment[element.payMode] =getAnalyticsMeansOfPayment[element.payMode]!+1
-              : getAnalyticsMeansOfPayment[element.payMode] = 1;
+              ? getAnalyticsMeansOfPayment[element.payMode] =getAnalyticsMeansOfPayment[element.payMode]!+element.priceTotal
+              : getAnalyticsMeansOfPayment[element.payMode] = element.priceTotal; 
           break;
         case 'mercadopago':
           getAnalyticsMeansOfPayment.containsKey(element.payMode)
-              ? getAnalyticsMeansOfPayment[element.payMode] =getAnalyticsMeansOfPayment[element.payMode]!+1
-              : getAnalyticsMeansOfPayment[element.payMode] = 1;
+              ? getAnalyticsMeansOfPayment[element.payMode] =getAnalyticsMeansOfPayment[element.payMode]!+element.priceTotal
+              : getAnalyticsMeansOfPayment[element.payMode] = element.priceTotal;
           break;
         case 'card':
           getAnalyticsMeansOfPayment.containsKey(element.payMode)
-              ? getAnalyticsMeansOfPayment[element.payMode] =getAnalyticsMeansOfPayment[element.payMode]!+1
-              : getAnalyticsMeansOfPayment[element.payMode] = 1;
+              ? getAnalyticsMeansOfPayment[element.payMode] =getAnalyticsMeansOfPayment[element.payMode]!+element.priceTotal
+              : getAnalyticsMeansOfPayment[element.payMode] = element.priceTotal;
           break;
         default:
-          getAnalyticsMeansOfPayment.containsKey('Sin especificar')
-              ? getAnalyticsMeansOfPayment['sinespecificar'] = getAnalyticsMeansOfPayment['sinespecificar']!+1
-              : getAnalyticsMeansOfPayment['sinespecificar'] =  1;
+          getAnalyticsMeansOfPayment.containsKey('sinespecificar')
+              ? getAnalyticsMeansOfPayment['sinespecificar'] = getAnalyticsMeansOfPayment['sinespecificar']!+element.priceTotal
+              : getAnalyticsMeansOfPayment['sinespecificar'] =  element.priceTotal;
           break;
       }
     }
@@ -578,8 +575,7 @@ class TransactionsController extends GetxController {
     //
 
     // var
-    Map<String, ProductCatalogue> productsList =
-        {}; // en esta lista almacenamos las ganancias de los productos
+    Map<String, ProductCatalogue> productsList = {}; // en esta lista almacenamos las ganancias de los productos
 
     // recorremos todos los tickers que se filtraron
     for (TicketModel ticket in getTransactionsList) {
@@ -650,9 +646,9 @@ class TransactionsController extends GetxController {
     // devolvemos el total de ganancias formateado como una cadena de texto
     return totalEarnings == 0.0
         ? ''
-        : Publications.getFormatoPrecio(
-            monto: totalEarnings, moneda: currencySymbol);
+        : Publications.getFormatoPrecio( monto: totalEarnings, moneda: currencySymbol);
   }
+
 
   String readEarnings({required TicketModel ticket}) {
     // description : leemos las ganancias de una transacción
@@ -679,30 +675,24 @@ class TransactionsController extends GetxController {
     // devolvemos el total de ganancias formateado como una cadena de texto
     return totalEarnings == 0.0
         ? ''
-        : Publications.getFormatoPrecio(
-            monto: totalEarnings, moneda: currencySymbol);
+        : Publications.getFormatoPrecio( monto: totalEarnings, moneda: currencySymbol);
   }
 
-  String getInfoPriceTotal() {
-    //  var
+  double get getAmountTotalFilter{
+    // var
     double total = 0.0;
-
-    for (TicketModel ticket in getTransactionsList) {
-      total += ticket.priceTotal;
-    }
-
-    return Publications.getFormatoPrecio(monto: total);
+    // recorremos la lista de transacciones de venta
+    for (TicketModel ticket in getTransactionsList) { total += ticket.priceTotal;  }
+    return total;
   }
-
-  // devuelve el porcentaje de ganancias
-  int getPorcentEarningsTotal() {
-    //  var
-    double total = 0.0;
+  String get getInfoAmountTotalFilter{  
+    return Publications.getFormatoPrecio(monto: getAmountTotalFilter);
+  }
+  double get getEarningsTotal{ 
+    // var 
     double transactionEarnings = 0; // ganancias de la transacción
 
-    for (TicketModel ticket in getTransactionsList) {
-      // sumamos el total de la transacción al total
-      total += ticket.priceTotal;
+    for (TicketModel ticket in getTransactionsList) { 
 
       // recorremos la lista de productos que se vendieron
       for (Map item in ticket.listPoduct) {
@@ -712,34 +702,41 @@ class TransactionsController extends GetxController {
         // si el precio de compra es distinto de cero, sumamos las ganancias
         if (product.purchasePrice != 0) {
           // sumamos las ganancias de la transacción
-          transactionEarnings +=
-              (product.salePrice - product.purchasePrice) * product.quantity;
+          transactionEarnings += (product.salePrice - product.purchasePrice) * product.quantity;
         }
       }
     }
+    // devolvemos el total de ganancias
+    return transactionEarnings;
+  }
+  // devuelve el porcentaje de ganancias
+  int getPercentEarningsTotal() { 
     // devolvemos el porcentaje de ganancias
-    return (transactionEarnings * 100 / total).round();
+    return (getEarningsTotal * 100 / getAmountTotalFilter).round();
   }
 
   Map getPayMode({required String idMode}) {
-    if (idMode == 'effective' || idMode == 'Efectivo')
+    if (idMode == 'effective' || idMode == 'Efectivo') {
       return {
         'name': 'Efectivo',
         'color': Colors.green,
         'iconData': Icons.money
       };
-    if (idMode == 'mercadopago' || idMode == 'Mercado Pago')
+    }
+    if (idMode == 'mercadopago' || idMode == 'Mercado Pago') {
       return {
         'name': 'Mercado Pago',
         'color': Colors.blue,
         'iconData': Icons.handshake_outlined
       };
-    if (idMode == 'card' || idMode == 'Tarjeta De Crédito/Débito')
+    }
+    if (idMode == 'card' || idMode == 'Tarjeta De Crédito/Débito') {
       return {
-        'name': 'Tarjeta Credito/Debito',
+        'name': 'Tarjeta Cred/Deb',
         'color': Colors.orange,
         'iconData': Icons.credit_card
       };
+    }
     return {'name': 'Sin esprecificar', 'color': Colors.grey};
   }
 
@@ -775,7 +772,7 @@ class TransactionsController extends GetxController {
   }
 
   // WIDGETS COMPONENTS
-  Widget getPieChartView({required List chartData, double size = 100 }){
+  Widget getPieChartView({required List chartData  , double size = 100 }){
 
     // var
     Map data = {};
@@ -884,6 +881,120 @@ class TransactionsController extends GetxController {
     return listPorcent;
   }
 
+  Widget viewPercentageBarValue({String text='',required double value,required double total}){
+    // description : muestra una barra con un texto y el porcentaje coloreado de un valor en relacion a un total
+
+    // var
+    double porcent = value * 100 / total;
+    double radius = 100 / 2;
+    TextStyle textStyle = TextStyle(fontSize: radius / 5,fontWeight: FontWeight.bold,color: Colors.white );
+
+    // crear la barra de porsentaje de fondo con color gris
+    Widget percentageBarBackground = Material( 
+      borderRadius: BorderRadius.circular(3),
+      color: Colors.black12,
+      child: const SizedBox(height:20,width: double.infinity,),
+    );
+    // crear un [Material] con el color del 'chartData[index]['color']'  y pintado segun el porcentaje
+    Widget percentageBar = Material( 
+      borderRadius: BorderRadius.circular(3),
+      color: Colors.green,
+      child: FractionallySizedBox(
+        widthFactor: porcent / 100,  
+        child:  Container(height:20),
+      ),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 5.0),
+      child: Stack(  
+        alignment: Alignment.centerLeft, // centrar contenido
+        children: [
+          percentageBarBackground,
+          percentageBar,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 5.0), 
+            child: Text(text,style: textStyle,overflow: TextOverflow.ellipsis),
+          ),
+        ],
+      ),
+    );
+
+  }
+
+  Widget viewPercentageBarCharTextDataHorizontal({required List<MapEntry<dynamic, dynamic>> chartData, double size = 100 }){
+      // description : muestra una lista con barra de porcentajes coloreada en forma horizontal
+      // 
+      // var
+      double radius = size / 2;
+      TextStyle textStyle = TextStyle(fontSize: radius / 5,fontWeight: FontWeight.w900,color: Colors.white );
+
+      // converit chartData en una nuevo Map
+      List<Map> map = [];
+      for (var item in chartData) {
+        map.add({'name':getPayMode(idMode: item.key)['name'],'value':item.value,'priceTotal':Publications.getFormatoPrecio(monto: item.value),'color':getPayMode(idMode: item.key)['color']});
+      } 
+      
+      // var
+      List<int> listPorcent = [];
+      double value = 0;
+      // obtener el total de los valores 
+      for (Map item in map){
+        value += item['value'];
+      }
+      // convertir los valores de [list] en porcentajes  expresados en el rango de [0 al 100]
+      for (Map item in map) {
+        listPorcent.add((item['value'] * 100 / value).round());
+      } 
+
+      // agregar el nuevo campor 'porcent' a chartData en su respectivas posisicon
+      for (var i = 0; i < chartData.length; i++) {
+        map[i]['porcent'] = listPorcent[i];
+      }
+  
+
+      return ListView(
+        shrinkWrap: true,
+        children: List.generate(chartData.length, (index) {
+
+          // obtener el porcentaje formateado  redondeado sin reciduo
+          String porcent = map[index]['porcent'] % 1 == 0 ? '${map[index]['porcent'].round()}%' : '${map[index]['porcent']}%';
+          String priceTotal = map[index]['priceTotal'];
+          // crear la barra de porsentaje de fondo con color gris
+          Widget percentageBarBackground = Material( 
+            borderRadius: BorderRadius.circular(3),
+            color: Colors.black12,
+            child: const SizedBox(height:20,width: double.infinity,),
+          );
+          // crear un [Material] con el color del 'chartData[index]['color']'  y pintado segun el porcentaje 
+          Widget percentageBar = Material( 
+            borderRadius: BorderRadius.circular(3),
+            color: map[index]['color'],
+            child: FractionallySizedBox(
+              widthFactor: map[index]['porcent'] / 100,  
+              child:  Container(height:20),
+            ),
+          );
+
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 5.0),
+            child: Stack(  
+              alignment: Alignment.centerLeft, // centrar contenido
+              children: [
+                percentageBarBackground,
+                percentageBar,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                  child: Text(map[index]['name']+' '+porcent+' '+priceTotal,style: textStyle,overflow: TextOverflow.ellipsis),
+                ),
+              ],
+            ),
+          );
+        }
+        
+        ),
+      );
+  }
   Widget viewBarChartData({required List<Map> chartData, double size = 100 }){
     
     // var

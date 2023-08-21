@@ -326,6 +326,8 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
       element.salePrice = priceSales; // actualizamos el precio de venta
       element.upgrade = Timestamp.now(); // actualizamos la fecha de actualizacion
       Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(element.id).set(element.toJson());
+      // publicamos el precio de venta
+      publishSalePricePublic(productCatalogue: element);
     } 
     getProductsSelectedList.clear();
   }
@@ -335,17 +337,38 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
       element.salePrice = price; // actualizamos el precio de venta
       element.upgrade = Timestamp.now(); // actualizamos la fecha de actualizacion
       Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(element.id).set(element.toJson());
+      // publicamos el precio de venta
+      publishSalePricePublic(productCatalogue: element);
     }
     getProductsSelectedList.clear();
   }
   void updatePurchasePriceProducts({required List<ProductCatalogue> list,required double price}){
     // firebase : actualiza el precio de compra de todos los productos de la lista pasado por parametro
-    for (var element in list) {
+    for (ProductCatalogue element in list) {
       element.purchasePrice = price; // actualizamos el precio de compra
       element.upgrade = Timestamp.now(); // actualizamos la fecha de actualizacion
       Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(element.id).set(element.toJson());
+
+    
     }
     getProductsSelectedList.clear();
+  }
+  void publishSalePricePublic({ required ProductCatalogue productCatalogue}){
+    // description : publica el precio de venta de un producto en la base de datos publica
+    // Registra el precio en una colección publica
+    ProductPrice precio = ProductPrice(
+      id: homeController.getProfileAccountSelected.id,
+      idAccount: homeController.getProfileAccountSelected.id,
+      imageAccount: homeController.getProfileAccountSelected.image,
+      nameAccount: homeController.getProfileAccountSelected.name,
+      price: productCatalogue.salePrice, // precio de venta
+      currencySign: productCatalogue.currencySign, // signo de la moneda
+      province: homeController.getProfileAccountSelected.province,
+      town: homeController.getProfileAccountSelected.town,
+      time: Timestamp.fromDate(DateTime.now()),
+    );
+    // Firebase set : se crea un documento con la referencia del precio del producto
+    Database.refFirestoreRegisterPrice(idProducto: productCatalogue.id, isoPAis: 'ARG').doc(precio.id).set(precio.toJson());
   }
   bool  isSelectedProduct({required String code}){
     // description : verifica si un producto esta seleccionado
@@ -751,6 +774,7 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
               }
               // function : actualizar precio de compra de los productos seleccionados
               catalogueController.updatePurchasePriceProducts(list: catalogueController.getProductsSelectedList,price: controllerTextEditPrecioCosto.numberValue);
+            
               Get.back();
             },
             child: const Text('Actualizar'),
@@ -792,4 +816,5 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
       )
     );
   }
+ 
 }
