@@ -473,12 +473,6 @@ class _StaticsCardsState extends State<StaticsCards> {
   @override
   Widget build(BuildContext context) {
 
-    // get
-    priceTotal = transactionsController.getInfoPriceTotal();
-    revenue  = transactionsController.readTotalEarnings(); 
-
-
-
     // widgets
     List<Widget> cards =   [ 
       // card : facturación
@@ -505,7 +499,7 @@ class _StaticsCardsState extends State<StaticsCards> {
         isPremium: homeController.getIsSubscribedPremium,
         backgroundColor: Colors.green.shade200.withOpacity(0.7),
         icon:  const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.show_chart_rounded,color: Colors.white,size:14)))),
-        subtitle: '%${transactionsController.getPorcentEarningsTotal()}',
+        content: transactionsController.viewPercentageBarValue(text:'%${transactionsController.getPercentEarningsTotal()}',value: transactionsController.getEarningsTotal,total: transactionsController.getAmountTotalFilter),
         titleText: 'Ganancia',
         valueText: revenue,
         description: '',
@@ -515,7 +509,7 @@ class _StaticsCardsState extends State<StaticsCards> {
         isPremium: homeController.getIsSubscribedPremium,
         backgroundColor: Colors.blue.shade200.withOpacity(0.7),
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.category_rounded,color: Colors.white,size:14)))),
-        titleText: 'Productos vendidos',
+        titleText: 'Productos vendidos', 
         valueText: Publications.getFormatAmount(value:transactionsController.readTotalProducts()),
         description: transactionsController.readBestSellingProduct(), 
         ), 
@@ -524,17 +518,9 @@ class _StaticsCardsState extends State<StaticsCards> {
         isPremium: homeController.getIsSubscribedPremium,
         backgroundColor: Colors.orangeAccent.shade100.withOpacity(0.7),
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.payment_rounded,color: Colors.white,size:14)))),
-        //subtitle: Publications.getFormatoPrecio(monto: transactionsController.getPreferredPaymentMethod()['amount']),
-        content: SizedBox(
-          width: double.infinity,
-          height: 110,
-          child: transactionsController.viewBarChartData(  
-            chartData: [],  
-            ),
-        ),
-        titleText: 'Medio de pago',
-        //valueText: '${transactionsController.getPreferredPaymentMethod()['name']} más usado',
-        //description:'${transactionsController.getPreferredPaymentMethod()['value'].toString()} veces',
+        content: transactionsController.viewPercentageBarCharTextDataHorizontal(chartData:  transactionsController.getAnalyticsMeansOfPayment.entries.toList()),
+        titleText: 'Medio de pago', 
+        description:'${transactionsController.getPreferredPaymentMethod()['name']} más usado',
         ),
       // card : rentabilidad
       CardAnalityc( 

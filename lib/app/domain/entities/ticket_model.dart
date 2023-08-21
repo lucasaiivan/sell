@@ -6,7 +6,7 @@ class TicketModel {
   String cashRegisterName = '1'; // nombre o numero de caja que se efectuo la venta
   String cashRegisterId = ''; // id de la caja que se efectuo la venta
   String payMode = ''; // efective (Efectivo) - mercadopago (Mercado Pago) - card (Tarjeta De Crédito/Débito)
-  double priceTotal = 0.0;
+  double priceTotal = 0.0; // precio total de la venta
   double valueReceived = 0.0;
   String currencySymbol = '\$';
   List<dynamic> listPoduct= [];
