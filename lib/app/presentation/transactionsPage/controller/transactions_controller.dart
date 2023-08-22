@@ -569,7 +569,7 @@ class TransactionsController extends GetxController {
   }
 
   // FUCTIONS
-  String readBestSellingProduct() {
+  Map get getReadBestSellingProduct{
     //
     //  devuelve el producto más vendido
     //
@@ -597,16 +597,21 @@ class TransactionsController extends GetxController {
       }
     }
     // ordenar los productos en forma descendente
-    var sortedByKeyMap = Map.fromEntries(productsList.entries.toList()
-      ..sort((e1, e2) => e2.value.quantity.compareTo(e1.value.quantity)));
+    var sortedByKeyMap = Map.fromEntries(productsList.entries.toList()..sort((e1, e2) => e2.value.quantity.compareTo(e1.value.quantity)));
 
-    //  devolvemos el producto mas vendido
-    return sortedByKeyMap.isNotEmpty
+    //  devolvemos un map con los datos
+    return {
+      'name': sortedByKeyMap.isNotEmpty ? sortedByKeyMap.entries.first.value.description: '',
+      'quantity': sortedByKeyMap.isNotEmpty ? sortedByKeyMap.entries.first.value.quantity: 0,
+      'price': sortedByKeyMap.isNotEmpty ? sortedByKeyMap.entries.first.value.salePrice: 0,
+      'image': sortedByKeyMap.isNotEmpty ? sortedByKeyMap.entries.first.value.image: '',
+    };
+   /*  return sortedByKeyMap.isNotEmpty
         ? '${sortedByKeyMap.entries.first.value.description} (${sortedByKeyMap.entries.first.value.quantity} ventas)'
-        : 'No hay productos vendidos';
+        : 'No hay productos vendidos'; */
   }
 
-  int readTotalProducts() {
+  int get readTotalProducts{
     // leemos la cantidad total de productos
 
     int value = 0;
@@ -689,6 +694,7 @@ class TransactionsController extends GetxController {
     return Publications.getFormatoPrecio(monto: getAmountTotalFilter);
   }
   double get getEarningsTotal{ 
+    // description : leemos las ganancias de una transacción
     // var 
     double transactionEarnings = 0; // ganancias de la transacción
 
@@ -708,6 +714,9 @@ class TransactionsController extends GetxController {
     }
     // devolvemos el total de ganancias
     return transactionEarnings;
+  }
+  String get getEarningsTotalFormat{ 
+    return Publications.getFormatoPrecio(monto: getEarningsTotal);
   }
   // devuelve el porcentaje de ganancias
   int getPercentEarningsTotal() { 
