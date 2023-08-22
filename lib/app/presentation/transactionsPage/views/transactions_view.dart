@@ -1,6 +1,7 @@
 
 import 'dart:ui';
 
+import 'package:avatar_view/avatar_view.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart'; 
@@ -464,11 +465,7 @@ class _StaticsCardsState extends State<StaticsCards> {
   final TransactionsController transactionsController = Get.find();
 
   final HomeController homeController = Get.find<HomeController>();
-
-  // variables
-  late String priceTotal;
-
-  late String revenue;
+ 
 
   @override
   Widget build(BuildContext context) {
@@ -481,7 +478,7 @@ class _StaticsCardsState extends State<StaticsCards> {
         backgroundColor: Colors.blueGrey.shade200.withOpacity(0.7),
         icon:  const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.attach_money_rounded,color: Colors.white,size:14)))),
         titleText: 'Facturación', 
-        valueText: priceTotal,
+        valueText: transactionsController.getInfoAmountTotalFilter,
         description: 'Balance total',
         ), 
       // card : transacciones
@@ -491,7 +488,8 @@ class _StaticsCardsState extends State<StaticsCards> {
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.receipt,color: Colors.white,size:14)))),
         titleText: 'Transacciones',
         subtitle: '',
-        valueText: transactionsController.getTransactionsList.length.toString(),
+        content: Text(transactionsController.getTransactionsList.length.toString(),style: const TextStyle(fontSize: 50,fontWeight: FontWeight.w500)),
+        //valueText: transactionsController.getTransactionsList.length.toString(),
         description: '',
         ), 
       // card : ganancia 
@@ -499,9 +497,10 @@ class _StaticsCardsState extends State<StaticsCards> {
         isPremium: homeController.getIsSubscribedPremium,
         backgroundColor: Colors.green.shade200.withOpacity(0.7),
         icon:  const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.show_chart_rounded,color: Colors.white,size:14)))),
-        content: transactionsController.viewPercentageBarValue(text:'%${transactionsController.getPercentEarningsTotal()}',value: transactionsController.getEarningsTotal,total: transactionsController.getAmountTotalFilter),
+        //content: transactionsController.viewPercentageBarValue(text:'%${transactionsController.getPercentEarningsTotal()}',value: transactionsController.getEarningsTotal,total: transactionsController.getAmountTotalFilter),
         titleText: 'Ganancia',
-        valueText: revenue,
+        subtitle: '%${transactionsController.getPercentEarningsTotal()}',
+        valueText:  transactionsController.getEarningsTotalFormat,
         description: '',
         ),    
       // card : productos vendidos
@@ -510,8 +509,21 @@ class _StaticsCardsState extends State<StaticsCards> {
         backgroundColor: Colors.blue.shade200.withOpacity(0.7),
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.category_rounded,color: Colors.white,size:14)))),
         titleText: 'Productos vendidos', 
-        valueText: Publications.getFormatAmount(value:transactionsController.readTotalProducts()),
-        description: transactionsController.readBestSellingProduct(), 
+        subtitle: 'Total',
+        valueText: Publications.getFormatAmount(value:transactionsController.readTotalProducts ),
+        description: 'Mejor vendido con ${Publications.getFormatAmount(value: transactionsController.getReadBestSellingProduct['quantity'])} ventas', 
+        widgetDescription: Padding(
+          padding: const EdgeInsets.only(top: 5),
+          child: Row(
+            children: [ 
+              // imagen del producto
+              ImageProductAvatarApp(size: 24,url:transactionsController.getReadBestSellingProduct['image']),
+              const SizedBox(width: 5),
+              // text : nombre
+              Flexible(child: Text(transactionsController.getReadBestSellingProduct['name'],style: const TextStyle(fontSize: 12,fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines: 1)),
+            ],
+          ),
+        ),
         ), 
       // card : clientes
       CardAnalityc( 
@@ -572,6 +584,7 @@ class CardAnalityc extends StatelessWidget {
   late final dynamic backgroundColor;
   late final String titleText;
   late final String description;
+  late final Widget widgetDescription;
   late final String valueText; 
   late final String subtitle;
   late final Widget icon;
@@ -579,7 +592,7 @@ class CardAnalityc extends StatelessWidget {
   late final Widget content;
 
   // ignore: prefer_const_constructors_in_immutables
-  CardAnalityc({Key? key,this.backgroundColor=Colors.grey,this.isPremium=false,this.titleText='',this.description='',this.valueText='',this.subtitle='' ,this.content = const SizedBox(),required this.icon }) : super(key: key);
+  CardAnalityc({Key? key,this.backgroundColor=Colors.grey,this.isPremium=false,this.titleText='',this.description='',this.valueText='',this.subtitle='' ,this.content = const SizedBox(),required this.icon,this.widgetDescription= const SizedBox() }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -618,7 +631,7 @@ class CardAnalityc extends StatelessWidget {
 
     // style  
     TextStyle subtitleStyle = const TextStyle(fontSize: 18,fontWeight: FontWeight.w300);
-    TextStyle valueTextStyle = TextStyle(fontSize: description=='' && subtitle==''? 26: 20, fontWeight: FontWeight.w500,overflow: TextOverflow.ellipsis);
+    TextStyle valueTextStyle = TextStyle(fontSize: description=='' && subtitle==''? 30: 24, fontWeight: FontWeight.w500,overflow: TextOverflow.ellipsis);
     TextStyle descriptionStyle = const TextStyle(fontSize: 12);  
 
     return Stack(
@@ -629,12 +642,14 @@ class CardAnalityc extends StatelessWidget {
           children: [  
             const Spacer(), 
             Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [ 
                 content,
-                subtitle==''?Container(): Opacity(opacity: 0.7, child: Text(subtitle,style: subtitleStyle)),
-                valueText==''?Container():Text(valueText,maxLines:2, textAlign: TextAlign.start, style: valueTextStyle),
-                description==''?Container():Opacity(opacity: 0.7, child: Text(description, style: descriptionStyle)),
+                subtitle==''?Container(): Opacity(opacity: 0.7, child: Flexible(child: Text(subtitle,style: subtitleStyle))),
+                valueText==''?Container():Flexible(child: Text(valueText,maxLines:2, textAlign: TextAlign.start, style: valueTextStyle)),
+                description==''?Container():Opacity(opacity: 0.7, child: Flexible(child: Text(description, style: descriptionStyle))),
+                widgetDescription,
               ],
             ),
           ],
