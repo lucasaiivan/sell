@@ -646,10 +646,10 @@ class CardAnalityc extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [ 
                 content,
-                subtitle==''?Container(): Opacity(opacity: 0.7, child: Flexible(child: Text(subtitle,style: subtitleStyle))),
+                subtitle==''?Container(): Flexible(child: Opacity(opacity: 0.7, child: Text(subtitle,style: subtitleStyle))),
                 valueText==''?Container():Flexible(child: Text(valueText,maxLines:2, textAlign: TextAlign.start, style: valueTextStyle)),
-                description==''?Container():Opacity(opacity: 0.7, child: Flexible(child: Text(description, style: descriptionStyle))),
-                widgetDescription,
+                description==''?Container():Flexible(child: Opacity(opacity: 0.7, child: Text(description, style: descriptionStyle))),
+                Flexible(child: widgetDescription),
               ],
             ),
           ],
