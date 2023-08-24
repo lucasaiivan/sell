@@ -552,7 +552,7 @@ class TransactionsController extends GetxController {
                   'total': (getCashAnalysisMap[cashRegister.id]?['total']as double) +element.priceTotal,
                   'name': cashRegister.description,
                   'sales': cashRegister.sales, 
-                  'opening': '${Publications.getFechaPublicacionFormating(dateTime: cashRegister.opening)}/n',
+                  'opening': Publications.getFechaPublicacionFormating(dateTime: cashRegister.opening),
                 }
               : getCashAnalysisMap[cashRegister.id] = {
                   'total': element.priceTotal,
@@ -564,8 +564,7 @@ class TransactionsController extends GetxController {
       }
     }
     // ordenar los productos en forma descendente
-    setCashAnalysisMap = Map.fromEntries(getCashAnalysisMap.entries.toList()
-      ..sort((e1, e2) => e1.key.compareTo(e2.key)));
+    setCashAnalysisMap = Map.fromEntries(getCashAnalysisMap.entries.toList() ..sort((e1, e2) => e1.key.compareTo(e2.key)));
   }
 
   // FUCTIONS
@@ -931,12 +930,11 @@ class TransactionsController extends GetxController {
 
   }
 
-  Widget viewPercentageBarCharTextDataHorizontal({required List<MapEntry<dynamic, dynamic>> chartData, double size = 100 }){
+  Widget viewPercentageBarCharTextDataHorizontal({required List<MapEntry<dynamic, dynamic>> chartData, double height = 22 }){
       // description : muestra una lista con barra de porcentajes coloreada en forma horizontal
       // 
-      // var
-      double radius = size / 2;
-      TextStyle textStyle = TextStyle(fontSize: radius / 5,fontWeight: FontWeight.w900,color: Colors.white );
+      // var 
+      TextStyle textStyle = TextStyle(fontSize: height*0.5,fontWeight: FontWeight.w900,color: Colors.white );
 
       // converit chartData en una nuevo Map
       List<Map> map = [];
@@ -973,7 +971,7 @@ class TransactionsController extends GetxController {
           Widget percentageBarBackground = Material( 
             borderRadius: BorderRadius.circular(3),
             color: Colors.black12,
-            child: const SizedBox(height:20,width: double.infinity,),
+            child: SizedBox(height:height,width: double.infinity,),
           );
           // crear un [Material] con el color del 'chartData[index]['color']'  y pintado segun el porcentaje 
           Widget percentageBar = Material( 
@@ -981,7 +979,7 @@ class TransactionsController extends GetxController {
             color: map[index]['color'],
             child: FractionallySizedBox(
               widthFactor: map[index]['porcent'] / 100,  
-              child:  Container(height:20),
+              child:  Container(height:height),
             ),
           );
 
