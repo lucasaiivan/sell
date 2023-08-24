@@ -512,6 +512,7 @@ class _StaticsCardsState extends State<StaticsCards> {
         subtitle: 'Total',
         valueText: Publications.getFormatAmount(value:transactionsController.readTotalProducts ),
         description: 'Mejor vendido con ${Publications.getFormatAmount(value: transactionsController.getReadBestSellingProduct['quantity'])} ventas', 
+        // view : item del producto con mayor cantidad de ventas
         widgetDescription: Padding(
           padding: const EdgeInsets.only(top: 5),
           child: Row(
@@ -532,7 +533,7 @@ class _StaticsCardsState extends State<StaticsCards> {
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.payment_rounded,color: Colors.white,size:14)))),
         content: transactionsController.viewPercentageBarCharTextDataHorizontal(chartData:  transactionsController.getAnalyticsMeansOfPayment.entries.toList()),
         titleText: 'Medio de pago', 
-        description:'${transactionsController.getPreferredPaymentMethod()['name']} más usado',
+        //description:'${transactionsController.getPreferredPaymentMethod()['name']} más usado',
         ),
       // card : rentabilidad
       CardAnalityc( 
@@ -540,11 +541,36 @@ class _StaticsCardsState extends State<StaticsCards> {
         backgroundColor: Colors.cyan.shade200.withOpacity(0.7),
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.query_stats_rounded,color: Colors.white,size:14)))),
         titleText: 'Rentabilidad',
-        subtitle: '${transactionsController.getBestSellingProductList.isNotEmpty?transactionsController.getBestSellingProductList[0].quantity:''} ventas',
-        valueText:transactionsController.getBestSellingProductList.isNotEmpty? transactionsController.getBestSellingProductList[0].description:'Sin datos',
+        // view : item del producto con mayor rentabilidad
+        content: transactionsController.getBestSellingProductList.isEmpty?Container(): Padding(
+          padding: const EdgeInsets.only(top: 5,bottom: 5),
+          child: Row(
+            children: [ 
+              // imagen del producto
+              ImageProductAvatarApp(size: 35,url:transactionsController.getBestSellingProductList[0].image),
+              const SizedBox(width:8),
+              // text : nombre
+              Flexible(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(transactionsController.getBestSellingProductList[0].description,textAlign: TextAlign.center,style: const TextStyle(fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1),
+                    // text : codigo
+                    const SizedBox(width:2),
+                    Text(transactionsController.getBestSellingProductList[0].code,textAlign: TextAlign.center,style: const TextStyle(fontSize: 10,fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1),
+                  ],
+                ),
+              ),
+
+            ],
+          ),
+        ),
+        valueText: '${transactionsController.getBestSellingProductList.isNotEmpty?transactionsController.getBestSellingProductList[0].quantity:''} ventas',
         description: 'Ganancias ${transactionsController.getBestSellingProductList.isNotEmpty?Publications.getFormatoPrecio(monto: transactionsController.getBestSellingProductList[0].revenue ):'Sin datos'}',
         ), 
     ]; 
+    // description : añadimos las tarjetas de las cajas si es que existen
     // reversed : primero revertimos el orden de las cajas y luego las agregamos a la lista de tarjetas 
     Map.fromEntries(transactionsController.getCashAnalysisMap.entries.toList().reversed) .forEach((key, value) {
       // add : agregamos las tarjetas de las cajas en una posicion especifica
@@ -555,7 +581,7 @@ class _StaticsCardsState extends State<StaticsCards> {
         titleText: 'Caja ${value['name']}',
         subtitle: 'Balance',
         valueText: Publications.getFormatoPrecio(monto: value['total'] ), 
-        description: '${value['sales'].toString()} transacciones\n${value['opening'].toString()}',
+        description: '${value['sales'].toString()} transacciones\nApertura: ${value['opening'].toString()}',
 
         ));
     }); 
@@ -576,6 +602,7 @@ class _StaticsCardsState extends State<StaticsCards> {
 }
 
 // CLASS : una simple clase llamada 'CardAnalityc' de un tarjeta [Card] vacia con fondo gris con un aspecto de relacion aspecto cuadrado
+// ignore: must_be_immutable
 class CardAnalityc extends StatelessWidget {
 
   // controllers
@@ -616,9 +643,43 @@ class CardAnalityc extends StatelessWidget {
           elevation: 0,
           margin: const EdgeInsets.all(0),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: viewContent,
+          child: InkWell(
+            onTap: !isPremium?null: () { 
+              // Get : mostrar una vista previa de la tarjeta en pantalla completa
+              Get.dialog(
+                Material(
+                  clipBehavior: Clip.antiAlias,
+                  // desing : esquinas superiores redondeadas
+                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(12),topRight: Radius.circular(12)),
+                  child: Scaffold(
+                    appBar: AppBar(
+                      elevation: 0,
+                      title: Text(titleText,style: const TextStyle(fontWeight: FontWeight.w400)),
+                      ), 
+                    body: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [ 
+                          content,
+                          subtitle==''?Container(): Flexible(child: Opacity(opacity: 0.7, child: Text(subtitle))),
+                          valueText==''?Container():Flexible(child: Text(valueText,maxLines:2, textAlign: TextAlign.start)),
+                          description==''?Container():Flexible(child: Opacity(opacity: 0.7, child: Text(description))),
+                          Flexible(child: widgetDescription),
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+                
+                );
+              
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: viewContent,
+            ),
           ),
         ),
       ),
