@@ -55,12 +55,21 @@ class TransactionsController extends GetxController {
   Map<String, Map> get getCashAnalysisMap => cashAnalysisMap;
   set setCashAnalysisMap(Map<String, Map> value) => cashAnalysisMap = value;
 
+  // productos más vendidos
+  List<ProductCatalogue> mostSelledProducts = [];
+  List<ProductCatalogue> get getMostSelledProducts => mostSelledProducts;
+  set setMostSelledProducts(List<ProductCatalogue> value) => mostSelledProducts = value;
+
+  // var : productos más vendidos con mayor beneficio
+  List<ProductCatalogue> _bestSellingProductWithHighestProfit = [];
+  List<ProductCatalogue> get getBestSellingProductWithHighestProfit => _bestSellingProductWithHighestProfit;
+  set setBestSellingProductWithHighestProfit(List<ProductCatalogue> value) => _bestSellingProductWithHighestProfit = value;
+
+
   // producto con más ganancias
   List<ProductCatalogue> bestSellingProductList = [];
-  List<ProductCatalogue> get getBestSellingProductList =>
-      bestSellingProductList;
-  set setBestSellingProductList(List<ProductCatalogue> value) =>
-      bestSellingProductList = value;
+  List<ProductCatalogue> get getBestSellingProductList => bestSellingProductList;
+  set setBestSellingProductList(List<ProductCatalogue> value) => bestSellingProductList = value;
 
   // text filter
   String _filterText = '';
@@ -71,11 +80,12 @@ class TransactionsController extends GetxController {
   List<TicketModel> _listTransactions = [];
   List<TicketModel> get getTransactionsList => _listTransactions;
   set setTransactionsList(List<TicketModel> value) {
-    withMoreSales(list: value); // actualizamos los productos más vendidos
     _listTransactions = value; 
+    readBestSellingProductWithHighestProfit(); // actualizamos los productos más vendidos
     readProductWithMoreEarnings(); // actualizamos el producto con más ganancias
     readAnalyticsMeansOfPayment(); // actualizamos los medios de pago
     readCashAnalysis(); // actualizamos los montos de cada caja
+    readBestSellingProduct(); // actualizamos los productos más vendidos por cantidad
     update();
   }
 
@@ -83,18 +93,6 @@ class TransactionsController extends GetxController {
   final RxBool _ticketView = false.obs;
   bool get getTicketView => _ticketView.value;
   set setTicketView(bool value) => _ticketView.value = value;
-
-  // var : lista de productos más vendidos por cantidad
-  List<ProductCatalogue> _mostSelledProducts = [];
-  List<ProductCatalogue> get getMostSelledProducts => _mostSelledProducts;
-  set setMostSelledProducts(List<ProductCatalogue> value) =>
-      _mostSelledProducts = value;
-
-  // var : productos más vendidpos por precio
-  List<ProductCatalogue> _bestSellingProductsByAmount = [];
-  List<ProductCatalogue> get getBestSellingProductsByAmount =>
-      _bestSellingProductsByAmount;
-  set setBestSellingProductsByAmount(List<ProductCatalogue> value) => _bestSellingProductsByAmount = value;
 
 
 
@@ -229,99 +227,60 @@ class TransactionsController extends GetxController {
           list.add(TicketModel.fromMap(element.data()));
         }
         //  set
-        withMoreSales(list: list);
         setTransactionsList = list;
       });
     }
   }
 
-  void withMoreSales({required List<TicketModel> list}) {
-    // CARD : PRODUCTOS MÁS VENDIDOS //
-    // aqui se actualiza la tarjeta de productos más vendidos
-    // obtenemos los primeros 3 productos más vendidos de los tickers que se obtiene por parametro 'list'
+  void readBestSellingProductWithHighestProfit() {
+    // description : obtener los producto más vendido con mayor beneficio
 
     // var
-    Map<String, ProductCatalogue> productsList =
-        {}; // en esta lista almacenamos las ganancias de los productos
+    Map<String, ProductCatalogue> productsList = {}; // en esta lista almacenamos las ganancias de los productos
 
     // recorremos todos los tickers que se filtraron
-    for (TicketModel ticket in list) {
+    for (TicketModel ticket in getTransactionsList) {
       // recorremos los productos de cada ticket
       for (Map item in ticket.listPoduct) {
         // get
-        final ProductCatalogue productNew = ProductCatalogue.fromMap(item);
-
+        final ProductCatalogue productNew = ProductCatalogue.fromMap(item); 
+        // var
+        bool exist = false;
+        // verificamos si el producto ya existe en la lista
         productsList.forEach((key, value) {
+          // condition :  si el producto ya existe en la lista
           if (productNew.id == key) {
-            productNew.quantity = productNew.quantity + value.quantity;
-            productNew.revenue = value.revenue +
-                ((productNew.salePrice - productNew.purchasePrice) *
-                    productNew.quantity);
+            exist = true;
+            // primero obtenmos la ganancia
+            if(productNew.purchasePrice!=0){ 
+              productNew.revenue = value.revenue + ((productNew.salePrice - productNew.purchasePrice) * productNew.quantity);
+            }
+            // sumamos la cantidad de productos vendidos
+            productNew.quantity = value.quantity + productNew.quantity;
           }
         });
-
-        productsList[productNew.id] = productNew;
-      }
-    }
-    //
-    // get  : los productos más vendidos en forma descendente los que tiene más cantidad
-    //
-    Map<String, ProductCatalogue> sortMap = Map.fromEntries(
-        (productsList.entries.toList()
-          ..sort((a, b) => b.value.quantity.compareTo(a.value.quantity))));
-    // y por ultimo obtenemos los 3 treprimeros productos
-    Map<String, ProductCatalogue> featuredProducts = {}; // limit 3 items
-    int count = 0;
-    for (final item in sortMap.entries) {
-      count++;
-      featuredProducts[item.key] = item.value; // add
-      if (count == 5) {
-        break;
-      }
-    }
-    List<ProductCatalogue> listProducts = [];
-    for (var element in featuredProducts.entries) {
-      if (element.value.code != '') {
-        listProducts.add(element.value);
-      }
-    }
-    // actualizamos lista para mostrar al usuario
-    setMostSelledProducts = listProducts;
-
-    //
-    // get  : obtenemos los productos más vendidos por el precio de venta más alto
-    //
-    List<ProductCatalogue> listNew = [];
-    productsList.forEach((key, value) {
-      value.id = key;
-      value.quantity = value.quantity;
-      value.priceTotal = value.salePrice * value.quantity;
-      listNew.add(value);
-    });
-    // ordenamos la lista de mayor a menor
-    listNew = listNew
-      ..sort((a, b) => b.priceTotal.compareTo(a.priceTotal)); // ordenamiento
-    List<ProductCatalogue> listProductBySales = [];
-    int count2 = 0;
-    // obtenemos los 3 primeros productos
-    for (var data in listNew) {
-      for (final ProductCatalogue element in homeController.getCataloProducts) {
-        // get : obtenemos el obj
-        final ProductCatalogue item = element;
-        if (data.id == item.id) {
-          item.quantity = data.quantity;
-          item.salePrice = data.priceTotal;
-          listProductBySales.add(item);
-          count2++;
-          break;
+        if(exist){
+          productsList[productNew.id] = productNew;
+        }else{
+          // primero obtenmos la ganancia
+          if(productNew.purchasePrice!=0){ 
+            productNew.revenue = ((productNew.salePrice - productNew.purchasePrice) * productNew.quantity);
+          }
+          productsList[productNew.id] = productNew;
         }
       }
-      if (count2 == 3) {
-        break;
-      }
     }
-    // actualizamos lista para mostrar al usuario
-    setBestSellingProductsByAmount = listProductBySales;
+    // ordenar los productos en forma descendente
+    var sortedByKeyMap = Map.fromEntries(productsList.entries.toList()..sort((e1, e2) => e2.value.revenue.compareTo(e1.value.revenue)));
+
+    // obtenemos una nueva list<ProductCatalogue>
+    setBestSellingProductWithHighestProfit = [];
+    for (ProductCatalogue element  in sortedByKeyMap.values) {
+      // condition  : evaluamos que sea un producto valido
+      if (element.code != '') {
+        getBestSellingProductWithHighestProfit.add(element);
+      }
+    }  
   }
 
   void readTransactionsYesterday() {
@@ -568,10 +527,8 @@ class TransactionsController extends GetxController {
   }
 
   // FUCTIONS
-  Map get getReadBestSellingProduct{
-    //
-    //  devuelve el producto más vendido
-    //
+  void readBestSellingProduct(){
+    // description : obtenemos los productos más vendidos  por cantidad  
 
     // var
     Map<String, ProductCatalogue> productsList = {}; // en esta lista almacenamos las ganancias de los productos
@@ -581,8 +538,7 @@ class TransactionsController extends GetxController {
       // recorremos los productos de cada ticket
       for (Map item in ticket.listPoduct) {
         // get
-        final ProductCatalogue productNew = ProductCatalogue.fromMap(item);
-        bool exist = false;
+        final ProductCatalogue productNew = ProductCatalogue.fromMap(item);  
         // verificamos si el producto ya existe en la lista
         productsList.forEach((key, value) {
           if (productNew.id == key) {
@@ -590,24 +546,22 @@ class TransactionsController extends GetxController {
             productNew.quantity = value.quantity + productNew.quantity;
           }
         });
-        if (exist == false) {
-          productsList[productNew.id] = productNew;
-        }
+         
+        productsList[productNew.id] = productNew;
+         
       }
     }
     // ordenar los productos en forma descendente
     var sortedByKeyMap = Map.fromEntries(productsList.entries.toList()..sort((e1, e2) => e2.value.quantity.compareTo(e1.value.quantity)));
 
-    //  devolvemos un map con los datos
-    return {
-      'name': sortedByKeyMap.isNotEmpty ? sortedByKeyMap.entries.first.value.description: '',
-      'quantity': sortedByKeyMap.isNotEmpty ? sortedByKeyMap.entries.first.value.quantity: 0,
-      'price': sortedByKeyMap.isNotEmpty ? sortedByKeyMap.entries.first.value.salePrice: 0,
-      'image': sortedByKeyMap.isNotEmpty ? sortedByKeyMap.entries.first.value.image: '',
-    };
-   /*  return sortedByKeyMap.isNotEmpty
-        ? '${sortedByKeyMap.entries.first.value.description} (${sortedByKeyMap.entries.first.value.quantity} ventas)'
-        : 'No hay productos vendidos'; */
+    // obtenemos una nueva list<ProductCatalogue>
+    setMostSelledProducts = [];
+    for (ProductCatalogue element  in sortedByKeyMap.values) {
+      // condition  : evaluamos que sea un producto valido
+      if (element.code != '') {
+        getMostSelledProducts.add(element);
+      }
+    } 
   }
 
   int get readTotalProducts{
@@ -889,47 +843,6 @@ class TransactionsController extends GetxController {
     return listPorcent;
   }
 
-  Widget viewPercentageBarValue({String text='',required double value,required double total}){
-    // description : muestra una barra con un texto y el porcentaje coloreado de un valor en relacion a un total
-
-    // var
-    double porcent = value * 100 / total;
-    double radius = 100 / 2;
-    TextStyle textStyle = TextStyle(fontSize: radius / 5,fontWeight: FontWeight.bold,color: Colors.white );
-
-    // crear la barra de porsentaje de fondo con color gris
-    Widget percentageBarBackground = Material( 
-      borderRadius: BorderRadius.circular(3),
-      color: Colors.black12,
-      child: const SizedBox(height:20,width: double.infinity,),
-    );
-    // crear un [Material] con el color del 'chartData[index]['color']'  y pintado segun el porcentaje
-    Widget percentageBar = Material( 
-      borderRadius: BorderRadius.circular(3),
-      color: Colors.green,
-      child: FractionallySizedBox(
-        widthFactor: porcent / 100,  
-        child:  Container(height:20),
-      ),
-    );
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 5.0),
-      child: Stack(  
-        alignment: Alignment.centerLeft, // centrar contenido
-        children: [
-          percentageBarBackground,
-          percentageBar,
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 5.0), 
-            child: Text(text,style: textStyle,overflow: TextOverflow.ellipsis),
-          ),
-        ],
-      ),
-    );
-
-  }
-
   Widget viewPercentageBarCharTextDataHorizontal({required List<MapEntry<dynamic, dynamic>> chartData, double height = 22 }){
       // description : muestra una lista con barra de porcentajes coloreada en forma horizontal
       // 
@@ -1009,14 +922,7 @@ class TransactionsController extends GetxController {
     Map data = {};
     double radius = size / 2;
     TextStyle textStyle = TextStyle(fontSize: radius / 5,fontWeight: FontWeight.bold,color: Colors.white );
-
-     // add data test
-    chartData.add({'name' : 'Mercado Pago','value': 2859.0,'color':Colors.blue});
-    chartData.add({'name' : 'Efectivo','value': 1500.0,'color':Colors.green});
-    chartData.add({'name' : 'Tarjeta De Crédito/Débito','value': 3300.0,'color':Colors.orange});
-    chartData.add({'name' : 'Sin esprecificar','value': 800.0,'color':Colors.grey});  
-
-
+ 
     // agrega el key description y value 
     for (var item in chartData) { data[item['name']] = item['value']; }
 
