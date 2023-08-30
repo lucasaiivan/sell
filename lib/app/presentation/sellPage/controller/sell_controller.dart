@@ -263,62 +263,7 @@ class SalesController extends GetxController {
 
 
   // FIREBASE
- 
-  Future<void> save({required ProductCatalogue product}) async {
-    //  fuction : comprobamos los datos necesarios para proceder publicar el producto
-    
-    // actualización de la imagen del producto si existe una imagen nueva
-    if (getXFileImage.path != '') {
-      // image - Si el "path" es distinto '' quiere decir que ahi una nueva imagen para actualizar
-      // si es asi procede a guardar la imagen en la base de la app
-      Reference ref = Database.referenceStorageProductPublic(id: product.id); // obtenemos la referencia en el storage
-      UploadTask uploadTask = ref.putFile(File(getXFileImage.path)); // cargamos la imagen
-      await uploadTask; // esperamos a que se suba la imagen 
-      await ref.getDownloadURL().then((value) => product.image = value); // obtenemos la url de la imagen
-    }
-
-    // Registra el precio en una colección publica
-    ProductPrice precio = ProductPrice(
-      id: homeController.getProfileAccountSelected.id,
-      idAccount: homeController.getProfileAccountSelected.id,
-      imageAccount: homeController.getProfileAccountSelected.image,
-      nameAccount: homeController.getProfileAccountSelected.name,
-      price: product.salePrice,
-      currencySign: product.currencySign,
-      province: homeController.getProfileAccountSelected.province,
-      town: homeController.getProfileAccountSelected.town,
-      time: Timestamp.fromDate(DateTime.now()),
-    );
-    // Firebase set : se guarda un documento con la referencia del precio del producto
-    Database.refFirestoreRegisterPrice(idProducto: product.id, isoPAis: 'ARG').doc(precio.id).set(precio.toJson());
-    // Firebase set : se guarda un documento con la referencia del producto en el cátalogo de la cuenta
-    Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(product.id).set(product.toJson());
-
-    setProductPublicFirestore(product: product.convertProductoDefault(),isNew: true);
-
-  }
-  void setProductPublicFirestore({required Product product,required bool isNew})  {
-    // esta función procede a guardar el documento de una colleción publica
-    
-    //  set : id de la cuenta desde la cual se creo el producto
-    product.idAccount = homeController.getProfileAccountSelected.id; 
-    //  set : marca de tiempo que se creo el documenti por primera vez
-    if(isNew) { product.creation = Timestamp.fromDate(DateTime.now()); } 
-    //  set : marca de tiempo que se actualizo el documenti
-    product.upgrade = Timestamp.fromDate(DateTime.now());
-    //  set : id del usuario que creo el documentoi 
-    if(isNew) { product.idUserCreation = homeController.getProfileAdminUser.email;}
-    //  set : id del usuario que actualizo el documento
-    product.idUserUpgrade = homeController.getProfileAdminUser.email;
-
-    // set firestore - save product public
-    if(isNew){
-      Database.refFirestoreProductPublic().doc(product.id).set(product.toJson());
-    }else{
-      Database.refFirestoreProductPublic().doc(product.id).update(product.toJson());
-    }
-  }
-
+  
   void registerTransaction() {
 
     // Procederemos a guardar un documento con la transacción
@@ -1058,7 +1003,7 @@ class _NewProductViewState extends State<NewProductView> {
               //
               if(checkAddCatalogue && homeController.getUserAnonymous == false){
                 // add product to catalogue
-                homeController.addProductToCatalogue(product: widget.productCatalogue);
+                homeController.addProductToCatalogue(product: widget.productCatalogue,isProductNew: isProductNew);
               }
               // add : agregamos el producto a la lista de productos seleccionados
               salesController.addProductsSelected(product: widget.productCatalogue);

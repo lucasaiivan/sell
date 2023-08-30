@@ -51,9 +51,9 @@ class TransactionsController extends GetxController {
   }
 
   // obtenemos los montos de cada caja
-  Map<String, Map> cashAnalysisMap = {};
-  Map<String, Map> get getCashAnalysisMap => cashAnalysisMap;
-  set setCashAnalysisMap(Map<String, Map> value) => cashAnalysisMap = value;
+  Map<String, Map> _cashiersList = {};
+  Map<String, Map> get getCashiersList => _cashiersList;
+  set setCashiersList(Map<String, Map> value) => _cashiersList = value;
 
   // productos más vendidos
   List<ProductCatalogue> mostSelledProducts = [];
@@ -498,7 +498,7 @@ class TransactionsController extends GetxController {
 
   void readCashAnalysis() {
     //obtenemos el monto de cada caja
-    setCashAnalysisMap = {};
+    setCashiersList = {};
 
     for (TicketModel element in getTransactionsList) {
       // get : obtenemos los datos del ticket
@@ -506,24 +506,27 @@ class TransactionsController extends GetxController {
       // obtenemos los tickets de las cajas activas actualmente
       for (CashRegister cashRegister in homeController.listCashRegister) {
         if (cashRegister.id == ticketModel.cashRegisterId) {
-          getCashAnalysisMap.containsKey(cashRegister.id)
-              ? getCashAnalysisMap[cashRegister.id] = {
-                  'total': (getCashAnalysisMap[cashRegister.id]?['total']as double) +element.priceTotal,
+
+          getCashiersList.containsKey(cashRegister.id)
+              ? getCashiersList[cashRegister.id] = {
+                  'total': (getCashiersList[cashRegister.id]?['total'] as double) +element.priceTotal,
                   'name': cashRegister.description,
                   'sales': cashRegister.sales, 
                   'opening': Publications.getFechaPublicacionFormating(dateTime: cashRegister.opening),
+                  //'object': cashRegister.toJson(),
                 }
-              : getCashAnalysisMap[cashRegister.id] = {
+              : getCashiersList[cashRegister.id] = {
                   'total': element.priceTotal,
                   'name': cashRegister.description,
                   'sales': cashRegister.sales,
                   'opening': Publications.getFechaPublicacionFormating(dateTime: cashRegister.opening),
+                  //'object': cashRegister.toJson(),
                 };
         }
       }
     }
-    // ordenar los productos en forma descendente
-    setCashAnalysisMap = Map.fromEntries(getCashAnalysisMap.entries.toList() ..sort((e1, e2) => e1.key.compareTo(e2.key)));
+    // ordenar las cajas en forma ascendente
+    setCashiersList = Map.fromEntries( getCashiersList.entries.toList() ..sort((e1, e2) => e1.key.compareTo(e2.key)));
   }
 
   // FUCTIONS
@@ -867,7 +870,7 @@ class TransactionsController extends GetxController {
         listPorcent.add((item['value'] * 100 / value).round());
       } 
 
-      // agregar el nuevo campor 'porcent' a chartData en su respectivas posisicon
+      // agregar el nuevo campo 'porcent' a chartData en su respectivas posisicon
       for (var i = 0; i < chartData.length; i++) {
         map[i]['porcent'] = listPorcent[i];
       }

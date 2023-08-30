@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 
 import '../../../core/utils/fuctions.dart';
 import '../../../core/utils/widgets_utils.dart';
+import '../../../domain/entities/cashRegister_model.dart';
 import '../../home/controller/home_controller.dart';
 import '../controller/transactions_controller.dart';
 
@@ -134,7 +135,7 @@ class _StaticsCardsState extends State<StaticsCards> {
     ]; 
     // description : añadimos las tarjetas de las cajas si es que existen
     // reversed : primero revertimos el orden de las cajas y luego las agregamos a la lista de tarjetas 
-    Map.fromEntries(transactionsController.getCashAnalysisMap.entries.toList().reversed) .forEach((key, value) {
+    Map.fromEntries(transactionsController.getCashiersList.entries.toList().reversed) .forEach((key, value) {
       // add : agregamos las tarjetas de las cajas en una posicion especifica
       cards.insert(2,CardAnalityc( 
         isPremium: homeController.getIsSubscribedPremium,
@@ -142,9 +143,10 @@ class _StaticsCardsState extends State<StaticsCards> {
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.point_of_sale_sharp,color: Colors.white,size:14)))),
         titleText: 'Caja ${value['name']}',
         subtitle: 'Balance',
+        //modalContent: CashRegisterView(cashRegister: CashRegister()),
         valueText: Publications.getFormatoPrecio(monto: value['total'] ), 
         description: '${value['sales'].toString()} transacciones\nApertura: ${value['opening'].toString()}',
-
+        //modalContent:  CashRegisterView(cashRegister: CashRegister()),
         ));
     }); 
  
@@ -290,7 +292,7 @@ class CardAnalityc extends StatelessWidget {
   }
 }
 
-// class : Productos Vendidos
+// class : analiticas de productos Vendidos
 class SoldProductsView extends StatelessWidget {
   SoldProductsView({super.key});
 
@@ -328,9 +330,9 @@ class SoldProductsView extends StatelessWidget {
   // Widget : total de productos vendidos
   Widget get totalProducts => Row(
     children: [ 
-      const Text('Total de productos vendidos',style: TextStyle( fontWeight: FontWeight.w300)),
+      const Text('Total de productos',style: TextStyle( fontWeight: FontWeight.w300)),
       const Spacer(),
-      Text(transactionsController.readTotalProducts.toString(),style: const TextStyle(fontWeight: FontWeight.w300)),
+      Text( Publications.getFormatAmount(value: transactionsController.readTotalProducts),style: const TextStyle(fontWeight: FontWeight.bold)),
     ],
   );
   // widget : obtener un maximo de productos vendidos`
@@ -342,28 +344,37 @@ class SoldProductsView extends StatelessWidget {
         list.add(
           Padding(
             padding: const EdgeInsets.only(top: 5,bottom: 5),
-            child: Row(
-              children: [ 
-                // imagen del producto
-                ImageProductAvatarApp(size: 35,url:transactionsController.getMostSelledProducts[i].image),
-                const SizedBox(width:8),
-                // text : nombre
-                Flexible(
-                  fit: FlexFit.tight,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(transactionsController.getMostSelledProducts[i].description,textAlign: TextAlign.center,style: const TextStyle(fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1),
-                      // text : codigo
-                      const SizedBox(width:2),
-                      Text(transactionsController.getMostSelledProducts[i].code,textAlign: TextAlign.center,style: const TextStyle(fontSize: 10,fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1),
-                    ],
-                  ),
+            child: Column(
+              children: [
+                // view : item del producto
+                Row(
+                  children: [ 
+                    // imagen del producto
+                    ImageProductAvatarApp(size: 35,url:transactionsController.getMostSelledProducts[i].image),
+                    const SizedBox(width:8),
+                    // text : nombre
+                    Flexible(
+                      fit: FlexFit.tight,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.max,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(transactionsController.getMostSelledProducts[i].description,textAlign: TextAlign.center,style: const TextStyle(fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1),
+                          // text : codigo
+                          const SizedBox(width:2),
+                          Text(transactionsController.getMostSelledProducts[i].code,textAlign: TextAlign.center,style: const TextStyle(fontSize: 10,fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1),
+                        ],
+                      ),
+                    ),
+                    const Spacer(),
+                    // text : cantidad
+                    Text('x${transactionsController.getMostSelledProducts[i].quantity.toString()}',style: const TextStyle(fontWeight: FontWeight.bold)),
+                  ],
                 ),
-                const Spacer(),
-                // text : cantidad
-                Text(transactionsController.getMostSelledProducts[i].quantity.toString(),style: const TextStyle(fontWeight: FontWeight.w300)),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: ComponentApp().divider(),
+                ),
               ],
             ),
           ),
@@ -373,7 +384,7 @@ class SoldProductsView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [ 
-        const Text('Más vendidos',style: TextStyle( fontWeight: FontWeight.w300)),
+        Text( list.length==1?'El más vendido':'Los ${list.length} más vendidos por cantidad',style: const TextStyle( fontWeight: FontWeight.w300)),
         const SizedBox(height: 12),
         ...list,
       ],
@@ -382,7 +393,7 @@ class SoldProductsView extends StatelessWidget {
 
 
 }
-// class : rentabilidad de productos
+// class : analiticas de rentabilidad de productos
 class ProfitabilityProductsView extends StatelessWidget {
   ProfitabilityProductsView({super.key});
 
@@ -424,49 +435,63 @@ class ProfitabilityProductsView extends StatelessWidget {
         list.add(
           Padding(
             padding: const EdgeInsets.only(top: 5,bottom: 5),
-            child: Row(
-              children: [ 
-                // imagen del producto
-                ImageProductAvatarApp(size: 35,url:transactionsController.getBestSellingProductWithHighestProfit[i].image),
-                const SizedBox(width:8),
-                // text : nombre
-                Flexible(
-                  fit: FlexFit.tight,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(transactionsController.getBestSellingProductWithHighestProfit[i].description,textAlign: TextAlign.center,style: const TextStyle(fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1),
-                      // text : codigo
-                      const SizedBox(width:2),
-                      Text(transactionsController.getBestSellingProductWithHighestProfit[i].code,textAlign: TextAlign.center,style: const TextStyle(fontSize: 10,fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1),
-                    ],
-                  ),
-                ),
-                const Spacer(),
-                // view : monto total y ganancia
-                Column(
-                  mainAxisAlignment:  MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    // text : cantidad y monto total
-                    Text('x${transactionsController.getBestSellingProductWithHighestProfit[i].quantity} ${Publications.getFormatoPrecio(monto: priceTotal)}',style: const TextStyle(fontWeight: FontWeight.w500)),
-                    // view : en un row el monto total de la ganancia y el porcentaje de ganancia de color verde
-                    Row(
+            child: Column(
+              children: [
+                Row(
+                  children: [ 
+                    // imagen del producto
+                    ImageProductAvatarApp(size: 35,url:transactionsController.getBestSellingProductWithHighestProfit[i].image),
+                    const SizedBox(width:8),
+                    // text : nombre
+                    Flexible(
+                      fit: FlexFit.tight,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.max,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(transactionsController.getBestSellingProductWithHighestProfit[i].description,textAlign: TextAlign.center,style: const TextStyle(fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1),
+                          // text : codigo
+                          const SizedBox(width:2),
+                          Text(transactionsController.getBestSellingProductWithHighestProfit[i].code,textAlign: TextAlign.center,style: const TextStyle(fontSize: 10,fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1),
+                        ],
+                      ),
+                    ),
+                    const Spacer(),
+                    // view : monto total y ganancia
+                    Column(
                       mainAxisAlignment:  MainAxisAlignment.end,
-
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        // text : monto total de la ganancia
-                        Text(Publications.getFormatoPrecio(monto: revenue),style: const TextStyle(fontWeight: FontWeight.w300,color: Colors.green)),
-                        const SizedBox(width: 5),
-                        // text : porcentaje de ganancia
-                        Text('%$percentage',style: const TextStyle(fontWeight: FontWeight.w300,color: Colors.green)),
-                        
+                        // text : cantidad y monto total
+                        Text('x${transactionsController.getBestSellingProductWithHighestProfit[i].quantity} ${Publications.getFormatoPrecio(monto: priceTotal)}',style: const TextStyle(fontWeight: FontWeight.bold)),
+                        // view : en un row el monto total de la ganancia y el porcentaje de ganancia de color verde
+                        revenue==0?Container():Row(
+                          mainAxisAlignment:  MainAxisAlignment.end,
+
+                          children: [
+                            // text : monto total de la ganancia
+                            Text(Publications.getFormatoPrecio(monto: revenue),style: const TextStyle(fontWeight: FontWeight.bold,color: Colors.green)),
+                            const SizedBox(width: 5),
+                            // text : porcentaje de ganancia
+                            Row(
+                              children: [
+                                const Icon(Icons.arrow_outward_rounded,size: 14,color: Colors.green),
+                                const SizedBox(width: 2),
+                                Text('%$percentage',style: const TextStyle(fontWeight: FontWeight.bold,color: Colors.green)),
+                              ],
+                            ),
+                            
+                          ],
+                        ),
                       ],
                     ),
+                    
                   ],
                 ),
-                
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: ComponentApp().divider(),
+                ),
               ],
             ),
           ),
@@ -476,7 +501,7 @@ class ProfitabilityProductsView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [  
-        const Text('Con mayor beneficio',style: TextStyle( fontWeight: FontWeight.w300)),
+        Text(list.length==1?'Con mayor beneficio':'Los ${list.length} productos con mayor ganancia',style: const TextStyle( fontWeight: FontWeight.w300)),
         const SizedBox(height: 12),
         ...list,
       ],
@@ -484,7 +509,7 @@ class ProfitabilityProductsView extends StatelessWidget {
   }
 
 }
-// class : analitica de medio de pago
+// class : analiticas de medio de pago
 class PaymentMethodView extends StatelessWidget {
   PaymentMethodView({super.key});
 
@@ -504,65 +529,137 @@ class PaymentMethodView extends StatelessWidget {
   PreferredSizeWidget get appbar => AppBar(
     title: const Text('Medio de pago'), 
   );
-  Widget get body {
-    // usar transactionsController.getAnalyticsMeansOfPayment.entries.toList(); 
-    // para obtener la lista de los medios de pago
-    return Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // view : porcentaje de medio de pago
-          transactionsController.viewPercentageBarCharTextDataHorizontal(chartData:  transactionsController.getAnalyticsMeansOfPayment.entries.toList()),
-          const SizedBox(height: 12),
-          // text : el mas vendido
-          Text('${transactionsController.getPreferredPaymentMethod()['name']} más usado',style: const TextStyle(fontWeight: FontWeight.w300)),
-         
-        ],
+  Widget get body { 
+    // scrollview : para que se pueda desplazar el contenido
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // view : porcentaje de medio de pago
+            viewPercentageBarCharTextDataHorizontal(height: 28,chartData:  transactionsController.getAnalyticsMeansOfPayment.entries.toList()),
+            const SizedBox(height: 12),
+            // text : el mas vendido
+            Text('${transactionsController.getPreferredPaymentMethod()['name']} más usado',style: const TextStyle(fontWeight: FontWeight.w300)),
+          ],
+        ),
       ),
     );
 
   }
 
-  // WIDGETS COMPONENTS
-  Widget viewPercentageBarValue({String text='',required double value,required double total}){
-    // description : muestra una barra con un texto y el porcentaje coloreado de un valor en relacion a un total
+  Widget viewPercentageBarCharTextDataHorizontal({required List<MapEntry<dynamic, dynamic>> chartData, double height = 24 }){
+      // description : muestra una lista con barra de porcentajes coloreada en forma horizontal
+      // 
+      // var 
+      TextStyle textStyle = TextStyle(fontSize: height*0.5,fontWeight: FontWeight.w900,color: Colors.white );
 
-    // var
-    double porcent = value * 100 / total;
-    double radius = 100 / 2;
-    TextStyle textStyle = TextStyle(fontSize: radius / 5,fontWeight: FontWeight.bold,color: Colors.white );
+      // converit chartData en una nuevo Map
+      List<Map> map = [];
+      for (var item in chartData) {
+        map.add({'name':transactionsController.getPayMode(idMode: item.key)['name'],'value':item.value,'priceTotal':Publications.getFormatoPrecio(monto: item.value),'color':transactionsController.getPayMode(idMode: item.key)['color']});
+      } 
+      
+      // var
+      List<int> listPorcent = [];
+      double value = 0;
+      // obtener el total de los valores 
+      for (Map item in map){
+        value += item['value'];
+      }
+      // convertir los valores de [list] en porcentajes  expresados en el rango de [0 al 100]
+      for (Map item in map) {
+        listPorcent.add((item['value'] * 100 / value).round());
+      } 
 
-    // crear la barra de porsentaje de fondo con color gris
-    Widget percentageBarBackground = Material( 
-      borderRadius: BorderRadius.circular(3),
-      color: Colors.black12,
-      child: const SizedBox(height:20,width: double.infinity,),
+      // agregar el nuevo campo 'porcent' a chartData en su respectivas posisicon
+      for (var i = 0; i < chartData.length; i++) {
+        map[i]['porcent'] = listPorcent[i];
+      }
+  
+
+      return ListView( 
+        physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+        children: List.generate(chartData.length, (index) {
+
+          // obtener el porcentaje formateado  redondeado sin reciduo
+          String porcent = map[index]['porcent'] % 1 == 0 ? '${map[index]['porcent'].round()}%' : '${map[index]['porcent']}%';
+          String priceTotal = map[index]['priceTotal'];
+          // crear la barra de porsentaje de fondo con color gris
+          Widget percentageBarBackground = Material( 
+            borderRadius: BorderRadius.circular(3),
+            color: Colors.black12,
+            child: SizedBox(height:height,width: double.infinity,),
+          );
+          // crear un [Material] con el color del 'chartData[index]['color']'  y pintado segun el porcentaje 
+          Widget percentageBar = Material( 
+            borderRadius: BorderRadius.circular(3),
+            color: map[index]['color'],
+            child: FractionallySizedBox(
+              widthFactor: map[index]['porcent'] / 100,  
+              child:  Container(height:height),
+            ),
+          );
+
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 5.0 ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5.0,vertical:5),
+                  child: Text(map[index]['name'] ,style: textStyle,overflow: TextOverflow.ellipsis),
+                ),
+                Stack(  
+                  alignment: Alignment.centerLeft, // centrar contenido
+                  children: [
+                    percentageBarBackground,
+                    percentageBar,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                      child: Text( '$porcent $priceTotal',style: textStyle,overflow: TextOverflow.ellipsis),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        }
+        
+        ),
+      );
+  }
+}
+// class : analiticas de caja registradora
+class CashRegisterView extends StatelessWidget {
+  final CashRegister cashRegister;
+  const CashRegisterView({required this.cashRegister,super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: appbar,
+      body: body,
     );
-    // crear un [Material] con el color del 'chartData[index]['color']'  y pintado segun el porcentaje
-    Widget percentageBar = Material( 
-      borderRadius: BorderRadius.circular(3),
-      color: Colors.green,
-      child: FractionallySizedBox(
-        widthFactor: porcent / 100,  
-        child:  Container(height:20),
+  }
+  // WIDGETS VIEWS
+  PreferredSizeWidget get appbar => AppBar(
+    title: const Text('Caja registradora'), 
+  );
+  Widget get body { 
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [ 
+            // text : nombre de la caja
+            Text(cashRegister.description,style: const TextStyle(fontWeight: FontWeight.w300)),
+          ],
+        ),
       ),
     );
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 5.0),
-      child: Stack(  
-        alignment: Alignment.centerLeft, // centrar contenido
-        children: [
-          percentageBarBackground,
-          percentageBar,
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 5.0), 
-            child: Text(text,style: textStyle,overflow: TextOverflow.ellipsis),
-          ),
-        ],
-      ),
-    );
-
   }
 }

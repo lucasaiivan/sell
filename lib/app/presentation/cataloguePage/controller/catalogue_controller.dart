@@ -82,6 +82,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     // obtenemos los obj(productos) del catalogo de la cuenta del negocio
     setCatalogueProducts = homeController.getCataloProducts;
   }
+   
   //
   // FUCTIONS CATALOGUE VIEW 
   //
@@ -313,9 +314,17 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     getProductsSelectedList.removeWhere((element) => element.code == code);
   }
   void deleteProductList({required List<ProductCatalogue> list}){
-    // firebase : elimina todos los productos de la lista pasado por parametro de la base de datos del catalogo
+    // recorremos los productos seleccionados
     for (var element in list) {
+      // firebase : elimina el producto del catalogo de la cuenta
       Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(element.id).delete();
+      // firebase : elimina el registro del precio de la base de datos publica
+      Database.refFirestoreRegisterPrice(idProducto: element.id, isoPAis: 'ARG').doc(homeController.getProfileAccountSelected.id).delete();
+      // condition : si el producto tiene seguidores
+      if(element.followers>0){
+        // firebase : descontamos un seguirdor del producto de la base de datos publica
+        Database.refFirestoreProductPublic().doc(element.id).update({'followers': FieldValue.increment(-1)});
+      }
     }
     getProductsSelectedList.clear();
   }
