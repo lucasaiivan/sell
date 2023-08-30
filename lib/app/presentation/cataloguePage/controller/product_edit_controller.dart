@@ -7,8 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:palette_generator/palette_generator.dart';
+import 'package:image_picker/image_picker.dart'; 
 import 'package:search_page/search_page.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:shimmer/shimmer.dart';
@@ -102,7 +101,7 @@ class ControllerProductsEdit extends GetxController {
   // variable para saber si el producto ya esta o no en el cátalogo
   bool _itsInTheCatalogue = false;
   set setItsInTheCatalogue(bool value) => _itsInTheCatalogue = value;
-  bool get itsInTheCatalogue => _itsInTheCatalogue;
+  bool get getItsInTheCatalogue => _itsInTheCatalogue;
 
   // variable para mostrar al usuario una viste para editar o crear un nuevo producto
   bool _newProduct = true;
@@ -469,6 +468,13 @@ class ControllerProductsEdit extends GetxController {
                   town: homeController.getProfileAccountSelected.town,
                   time: Timestamp.fromDate(DateTime.now()),
                 );
+
+                // condition : si el producto no existe en el cátalogo
+                if (getItsInTheCatalogue == false) {
+                  // Firebase set : incrementamos el valor de los seguidores del producto
+                  Database.refFirestoreProductPublic().doc(getProduct.id).update({'followers': FieldValue.increment(1)});
+                }
+
                 // Firebase set : se crea un documento con la referencia del precio del producto
                 Database.refFirestoreRegisterPrice(idProducto: getProduct.id, isoPAis: 'ARG').doc(precio.id).set(precio.toJson());
 
@@ -503,43 +509,66 @@ class ControllerProductsEdit extends GetxController {
 
   void setProductPublicFirestore({required Product product,required bool newProduct})  {
     // esta función procede a guardar el documento de una colleción publica
-     
+    
     // condition : si el producto es nuevo se le asigna los valores de creación
     if( newProduct ){
       product.idAccount = homeController.getProfileAccountSelected.id;
       product.idUserCreation = homeController.getProfileAdminUser.email;
       product.creation = Timestamp.fromDate(DateTime.now());
-     } 
+    } 
     //  set : marca de tiempo que se actualizo el documenti
     product.upgrade = Timestamp.fromDate(DateTime.now()); 
     //  set : id del usuario que actualizo el documento
     product.idUserUpgrade = homeController.getProfileAdminUser.email;
-     
 
-    // set firestore - save product public
+    // condition : si el producto es nuevo se le asigna los valores de creación
     if(newProduct){
+      // incrementar el valor 'followers' del producto publico
+      product.followers++; 
+      // crear el documento del producto publico
       Database.refFirestoreProductPublic().doc(product.id).set(product.toJson());
     }else{
+      // si el producto solo se actualiza se le asigna los valores de creación
+      //
+      // firebase: actualizar el documento del producto publico
       Database.refFirestoreProductPublic().doc(product.id).update(product.toJson());
     }
   }
-
+  void deleteProductInCatalogue() async{
+    // activate indicator load
+    setDataUploadStatus = true;
+    setTextAppBar = 'Eliminando...';
+    updateAll();
+    
+    // firebase : eliminar registro de precio de la base de datos publica
+    await Database.refFirestoreRegisterPrice(idProducto: getProduct.id, isoPAis: 'ARG').doc(homeController.getProfileAccountSelected.id).delete();
+    // firebase : elimina el producto del cátalogo de la cuenta
+    await Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id)
+      .doc(getProduct.id)
+      .delete()
+      .whenComplete(() {
+        // Firebase : descontamos el valor de los seguidores del producto
+        if (getProduct.followers > 0){
+          Database.refFirestoreProductPublic().doc(getProduct.id).update({'followers': FieldValue.increment(-1)});
+        }
+        Get.back();
+        Get.back();
+      })
+      .onError((error, stackTrace) => Get.back())
+      .catchError((ex) => Get.back());
+  }
   void deleteProducPublic() async {
     // activate indicator load
     setDataUploadStatus = true;
     setTextAppBar = 'Eliminando...';
     updateAll();
 
-    // delete doc product in catalogue account
-    await Database.refFirestoreCatalogueProduct(
-            idAccount: homeController.getProfileAccountSelected.id)
-        .doc(getProduct.id)
-        .delete();
-    // delete doc product
-    await Database.refFirestoreProductPublic()
-        .doc(getProduct.id)
-        .delete()
-        .whenComplete(() {
+    // firebase : delete doc product in catalogue account
+    await Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id).delete();
+    // firebase : eliminar registro de precio de la base de datos publica
+    await Database.refFirestoreRegisterPrice(idProducto: getProduct.id, isoPAis: 'ARG').doc(homeController.getProfileAccountSelected.id).delete();
+    // firebase : delete doc product
+    await Database.refFirestoreProductPublic().doc(getProduct.id).delete().whenComplete(() {
       Get.back();
       Get.back();
     });
@@ -640,7 +669,7 @@ class ControllerProductsEdit extends GetxController {
       setDataUploadStatusProvider = true;
     });
   }
-
+ 
 
   // read XFile image
   void getLoadImageGalery() {
@@ -885,19 +914,8 @@ class ControllerProductsEdit extends GetxController {
           },
         ),
         TextButton(
+          onPressed: ()=> deleteProductInCatalogue(),
           child: const Text('Si, eliminar'),
-          onPressed: () {
-            Database.refFirestoreCatalogueProduct(
-                    idAccount: homeController.getProfileAccountSelected.id)
-                .doc(getProduct.id)
-                .delete()
-                .whenComplete(() {
-                  Get.back();
-                  Get.back();
-                })
-                .onError((error, stackTrace) => Get.back())
-                .catchError((ex) => Get.back());
-          },
         ),
       ],
     );

@@ -107,7 +107,7 @@ class CataloguePage extends StatelessWidget {
               tabs: [
                 // tab : productos
                 Tab(child: Row(children: [
-                  const Text("Productos"),
+                  const Flexible(child: Text("Productos",overflow: TextOverflow.ellipsis)),
                   controller.getCataloProducts.isEmpty?Container():Padding(
                     padding: const EdgeInsets.only(left: 5                                                                                                                                                                                                                ),
                     child: Container(padding: const EdgeInsets.symmetric(horizontal:3,vertical: 1),decoration: BoxDecoration(borderRadius: BorderRadius.circular(5), color: Colors.blue.withOpacity(0.1)), child: Text(controller.getCataloProducts.length.toString(), style: const TextStyle(color: Colors.blue, fontSize: 12),)),

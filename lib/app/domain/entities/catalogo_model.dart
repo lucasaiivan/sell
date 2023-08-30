@@ -10,6 +10,7 @@ class Product {
   String image = ""; // URL imagen
   String code = "";
 
+  int followers = 0; // seguidores
   bool outstanding = false; // producto destacado
   bool verified = false; // estado de verificación  al un moderador
   Timestamp creation =Timestamp.now(); // Marca de tiempo ( hora en que se creo el producto )
@@ -22,6 +23,7 @@ class Product {
 
   Product({
     this.id = "",
+    this.followers = 0,
     this.idUserCreation = '',
     this.idAccount = '',
     this.idUserUpgrade = '',
@@ -38,6 +40,7 @@ class Product {
 
   Map<String, dynamic> toJson() => {
         "id": id,
+        'followers':followers,
         'idAccount': idAccount,
         'idUserCreation': idUserCreation,
         'idUserUpgrade': idUserUpgrade,
@@ -55,6 +58,7 @@ class Product {
   factory Product.fromMap(Map data) {
     return Product(
       id: data.containsKey('id')? data['id'] :'',
+      followers: data.containsKey('followers')? data['followers'] : 0,
       idAccount: data.containsKey('idAccount')? data['idAccount']: '',
       idUserCreation: data.containsKey('idUserCreation')? data['idUserCreation'] : '',
       idUserUpgrade: data.containsKey('idUserUpgrade')? data['idUserUpgrade'] : '',
@@ -75,6 +79,7 @@ class Product {
     Map data = documentSnapshot.data() as Map;
     // set
     id = data['id'] ?? '';
+    followers = data.containsKey('followers')? data['followers'] : 0;
     idAccount = data.containsKey('idAccount')? data['idAccount']: data['id_negocio'] ?? '';
     idUserCreation = data['idUserCreation'] ?? '';
     idUserUpgrade = data['idUserUpgrade'] ?? '';
@@ -93,6 +98,7 @@ class Product {
     ProductCatalogue productCatalogue =   ProductCatalogue(upgrade: Timestamp.now(), creation: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now());
     //  set
     productCatalogue.id = id;
+    productCatalogue.followers = followers;
     productCatalogue.image = image;
     productCatalogue.verified = verified;
     productCatalogue.outstanding = outstanding;
@@ -110,6 +116,8 @@ class Product {
 class ProductCatalogue {
   // valores del producto
   String id = "";
+  bool verified = false; // estado de verificación por un moderador
+  int followers = 0; // seguidores
   bool outstanding = false; // producto destacado
   bool favorite = false;
   String idMark = ""; // ID de la marca por defecto esta vacia
@@ -127,7 +135,6 @@ class ProductCatalogue {
   Timestamp upgrade = Timestamp.now(); // Marca de tiempo ( hora en que se actualizo el documento )
   Timestamp documentCreation =Timestamp.now(); // Marca de tiempo ( hora en que se creo el producto publico )
   Timestamp documentUpgrade =Timestamp.now();// Marca de tiempo ( hora en que se actualizo el producto publico )
-  bool verified = false; // estado de verificación por un moderador
   int quantityStock = 0;
   int sales = 0;
   bool stock = false;
@@ -146,6 +153,7 @@ class ProductCatalogue {
     // Valores del producto
     this.id = "",
     this.verified = false,
+    this.followers = 0,
     this.favorite = false,
     this.outstanding = false,
     this.image = "",
@@ -181,6 +189,7 @@ class ProductCatalogue {
   ProductCatalogue copyWith({
   String? id,
   bool? verified,
+  int? followers,
   bool? favorite,
   bool? outstanding,
   String? image,
@@ -212,6 +221,7 @@ class ProductCatalogue {
   return ProductCatalogue(
     id: id ?? this.id,
     verified: verified ?? this.verified,
+    followers: followers ?? this.followers,
     favorite: favorite ?? this.favorite,
     outstanding: outstanding ?? this.outstanding,
     image: image ?? this.image,
@@ -247,6 +257,7 @@ class ProductCatalogue {
       // Valores del producto
       id: data['id'] ?? '',
       verified: data.containsKey('verified')? data['verified']: data['verificado'] ?? false,
+      followers: data['followers'] ?? 0,
       outstanding:  data['outstanding'] ?? false,
       favorite: data.containsKey('favorite')? data['favorite']: data['favorito'] ?? false,
       idMark:data.containsKey('idMark') ? data['idMark'] : data['id_marca'] ?? '',
@@ -280,8 +291,9 @@ class ProductCatalogue {
 
   Map<String, dynamic> toJson() => {
         "id": id,
-        'outstanding':outstanding,
         "verified": verified,
+        'followers':followers,
+        'outstanding':outstanding,
         "favorite": favorite,
         "idMark": idMark,
         "nameMark": nameMark,
@@ -312,6 +324,7 @@ class ProductCatalogue {
     // convertimos en el modelo para producto global
     Product productoDefault = Product(upgrade: Timestamp.now(), creation: Timestamp.now());
     productoDefault.id = id;
+    productoDefault.followers = followers;
     productoDefault.image = image;
     productoDefault.verified = verified;
     productoDefault.outstanding = outstanding;
@@ -325,6 +338,7 @@ class ProductCatalogue {
   ProductCatalogue updateData({required Product product}) {
     // actualizamos los datos del documento publico
     id = product.id;
+    followers = product.followers;
     image = product.image;
     verified = product.verified;
     outstanding = product.outstanding;

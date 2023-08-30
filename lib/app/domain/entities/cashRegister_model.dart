@@ -76,6 +76,8 @@ class CashRegister {
         "cashInFlowList": cashInFlowList,
         "cashOutFlowList": cashOutFlowList,
       }; 
+
+      
   // fromjson : convierte el json en un objeto
   factory CashRegister.fromMap(Map  data) {
     return CashRegister(
@@ -94,6 +96,7 @@ class CashRegister {
       cashOutFlowList: data['cashOutFlowList'] ?? [],
     );
   }
+
 
   fromDocumentSnapshot( {required DocumentSnapshot documentSnapshot}) { 
     id = documentSnapshot.id;

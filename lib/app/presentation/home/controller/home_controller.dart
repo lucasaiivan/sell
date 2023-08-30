@@ -1062,48 +1062,44 @@ class HomeController extends GetxController {
         Map<String, dynamic>.from(categoria.toJson()), SetOptions(merge: true));
   }
 
-  void addProductToCatalogue({required ProductCatalogue product}) async {
-    // values : se obtiene los datos para registrar del precio al publico del producto en una colección publica de la db
-    ProductPrice precio = ProductPrice(
-      id: getProfileAccountSelected.id,
-      idAccount: getProfileAccountSelected.id,
-      imageAccount: getProfileAccountSelected.image,
-      nameAccount: getProfileAccountSelected.name,
-      price: product.salePrice,
-      currencySign: product.currencySign,
-      province: getProfileAccountSelected.province,
-      town: getProfileAccountSelected.town,
-      time: Timestamp.fromDate(DateTime.now()),
-    );
-
-    // Firebase set : se crea un documento con la referencia del precio del producto
-    Database.refFirestoreRegisterPrice(idProducto: product.id, isoPAis: 'ARG')
-        .doc(precio.id)
-        .set(precio.toJson());
-    // Firebase set : se actualiza el documento del producto del cátalogo
-    Database.refFirestoreCatalogueProduct(
-            idAccount: getProfileAccountSelected.id)
-        .doc(product.id)
-        .set(product.toJson())
-        .whenComplete(() async {})
-        .onError((error, stackTrace) => null)
-        .catchError((_) => null);
+  void addProductToCatalogue({required ProductCatalogue product,required isProductNew}) async {
+    // obj : se obtiene los datos para registrar del precio al publico del producto en una colección publica de la db
+    ProductPrice precio = ProductPrice(id: getProfileAccountSelected.id,idAccount: getProfileAccountSelected.id,imageAccount: getProfileAccountSelected.image,nameAccount: getProfileAccountSelected.name,price: product.salePrice,currencySign: product.currencySign,province: getProfileAccountSelected.province,town: getProfileAccountSelected.town,time: Timestamp.fromDate(DateTime.now()));
+    // condition : si el producto es nuevo se le asigna los valores de creación
+    if(isProductNew){   
+      product.creation = Timestamp.fromDate(DateTime.now()); // fecha de creación del producto
+      product.followers++; // incrementamos el contador de los seguidores del producto publico 
+      }
+    // set : fecha de actualización del producto
+    product.upgrade = Timestamp.fromDate(DateTime.now()); 
+    
+    // Firebase : se crea un registro de precio al publico del producto en una colección publica de la db
+    Database.refFirestoreRegisterPrice(idProducto: product.id, isoPAis: 'ARG').doc(precio.id).set(precio.toJson());
+    
+    // Firebase : se actualiza el documento del producto del cátalogo
+    Database.refFirestoreCatalogueProduct(idAccount: getProfileAccountSelected.id).doc(product.id).set(product.toJson())
+      .whenComplete((){
+        // condition : si el producto no existe en la colección publica se procede a incrementar los seguidores del producto publico
+        if( isProductNew == false ){
+          // firebase : acutalizamos los seguidores del producto publico
+          Database.refFirestoreProductPublic().doc(product.id).update({'followers': FieldValue.increment(1)});
+        }
+      })
+      .onError((error, stackTrace) => null)
+      .catchError((_) => null);
     // condition : si el producto no esta verificado se procede a crear un documento en la colección publica
     if (product.verified == false) {
-      addProductToCollectionPublic(
-          isNew: true, product: product.convertProductoDefault());
+      addProductToCollectionPublic(isNew: isProductNew, product: product.convertProductoDefault());
     }
   }
 
-  void addProductToCollectionPublic(
-      {required bool isNew, required Product product}) {
-    // esta función procede a guardar el documento de una colleción publica
-
-    // var
-    bool isNew = product.idUserCreation == '';
+  void addProductToCollectionPublic({required bool isNew, required Product product}) {
+    // description : esta función procede a guardar el documento de una colleción publica
+ 
 
     // condition : si el producto es nuevo se le asigna los valores de creación
-    if (isNew) {
+    if (isNew && product.verified == false) {
+      // datos de creación por primera vez
       product.idAccount = getProfileAccountSelected.id;
       product.idUserCreation = getProfileAdminUser.email;
       product.creation = Timestamp.fromDate(DateTime.now());
@@ -1114,14 +1110,12 @@ class HomeController extends GetxController {
     product.idUserUpgrade = getProfileAdminUser.email;
 
     // dondition : si el producto es nuevo se crea un documento, si no se actualiza
-    if (isNew) {
-      Database.refFirestoreProductPublic()
-          .doc(product.id)
-          .set(product.toJson());
+    if (isNew && product.verified == false) { 
+      // firebase : se crea un documento en la colección publica
+      Database.refFirestoreProductPublic().doc(product.id).set(product.toJson());
     } else {
-      Database.refFirestoreProductPublic()
-          .doc(product.id)
-          .update(product.toJson());
+      // firebase : se actualiza un documento en la colección publica
+      Database.refFirestoreProductPublic().doc(product.id).update(product.toJson());
     }
   }
 

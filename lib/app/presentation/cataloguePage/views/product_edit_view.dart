@@ -118,7 +118,7 @@ class ProductEdit extends StatelessWidget {
           Theme.of(contextPrincipal).iconTheme.copyWith(color: colorText),
       title: controller.getDataUploadStatus
           ? Text(controller.getTextAppBar,style: TextStyle(fontSize: 18.0, color: colorText))
-          : Text(controller.itsInTheCatalogue ? 'Editar' :'Nuevo producto',style: TextStyle(fontSize: 18.0, color: colorText)),
+          : Text(controller.getItsInTheCatalogue ? 'Editar' :'Nuevo producto',style: TextStyle(fontSize: 18.0, color: colorText)),
       actions: <Widget>[
         // TODO : delete release
         // iconButton : opciones de moderador
@@ -136,7 +136,7 @@ class ProductEdit extends StatelessWidget {
         // iconButton : actualizar producto 
         controller.getDataUploadStatus
             ? Container()
-            : controller.itsInTheCatalogue?TextButton.icon(onPressed: () => controller.save(), icon:const Icon( Icons.check ), label:const  Text('Actualizar')):Container(),
+            : controller.getItsInTheCatalogue?TextButton.icon(onPressed: () => controller.save(), icon:const Icon( Icons.check ), label:const  Text('Actualizar')):Container(),
       ],
       bottom: controller.getDataUploadStatus? ComponentApp().linearProgressBarApp(color: controller.colorLoading):null,
     );
@@ -151,8 +151,8 @@ class ProductEdit extends StatelessWidget {
             scrollDirection: Axis.vertical,
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             children: [
-              cardFrontProduct(),
-              widgetFormEdit2(),
+              productDataView(),
+              productFromView(),
             ],
           ),
           controller.getDataUploadStatus?Container(color: Colors.black12.withOpacity(0.3)):Container()
@@ -161,7 +161,7 @@ class ProductEdit extends StatelessWidget {
     );
   } 
   // view  : descripcion del producto en una tarjeta con un icono de verificacion,  codigo, descripcion y marca
-  Widget cardFrontProduct(){
+  Widget productDataView(){
 
     // var
     final Color textDescriptionStyleColor = Get.isDarkMode?Colors.white.withOpacity(0.8):Colors.black.withOpacity(0.8);
@@ -175,19 +175,26 @@ class ProductEdit extends StatelessWidget {
       padding: const EdgeInsets.all(12.0),
       child: Column( 
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [ 
-          // text : codigo del producto
+        children: [  
+          // view : codigo del producto
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+
             children: [
-              controller.getProduct.code != ""?const Opacity(opacity: 0.8,child: Text('Código:',style: TextStyle(height: 1,fontSize: 14,fontWeight: FontWeight.normal))):Container(),
+              //controller.getProduct.code != ""?const Opacity(opacity: 0.8,child: Text('Código:',style: TextStyle(height: 1,fontSize: 14,fontWeight: FontWeight.normal))):Container(),
               // spacer
-              controller.getProduct.code != ""?const SizedBox(width: 8):Container(),
+              //controller.getProduct.code != ""?const SizedBox(width: 8):Container(),
               // icon : verificacion
               controller.getProduct.verified?const Icon(Icons.verified_rounded,size: 16,color: Colors.blue):Container(),
               // spacer si esta verificado
               controller.getProduct.verified?const SizedBox(width:2):Container(), 
               // text : codigo
               controller.getProduct.code != ""?Text(controller.getProduct.code,style: const TextStyle(height: 1,fontSize: 14,fontWeight: FontWeight.w400)):Container(),
+              // barra separadora 
+              const Opacity(opacity: 0.4,child: Text(' | ',style: TextStyle(height: 1,fontSize: 14,fontWeight: FontWeight.w400))) ,
+              // text : cantidad de comercios que tienen el producto
+              Opacity(opacity: 0.4,child: Text('${Publications.getFormatAmount(value: controller.getProduct.followers)} ${controller.getProduct.followers == 1 ? 'comercio' : 'comercios'}')),
             ],
           ),
           const SizedBox(height: 12),
@@ -200,16 +207,16 @@ class ProductEdit extends StatelessWidget {
               controller.loadImage(size:100),
               // view : codigo,icon de verificaciones, descripcion y marca del producto
               Flexible(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 24.0),
-                  child: textfielBottomSheetListOptions(
-                    contentPadding: const EdgeInsets.only(bottom: 12,top: 12,left: 12,right: 12),
-                    stateEdit: controller.getDataUploadStatus? false: controller.getEditModerator || controller.getProduct.verified==false,
-                    textValue: controller.getMarkSelected.name,
-                    labelText: controller.getMarkSelected.id == ''? 'Seleccionar una marca': 'Marca',
-                    onTap: controller.getProduct.verified==false || controller.getEditModerator? controller.showModalSelectMarca : () {}
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 12.0),
+                    child: textfielBottomSheetListOptions(
+                      contentPadding: const EdgeInsets.only(bottom: 12,top: 12,left: 12,right: 12),
+                      stateEdit: controller.getDataUploadStatus? false: controller.getEditModerator || controller.getProduct.verified==false,
+                      textValue: controller.getMarkSelected.name,
+                      labelText: controller.getMarkSelected.id == ''? 'Seleccionar una marca': 'Marca',
+                      onTap: controller.getProduct.verified==false || controller.getEditModerator? controller.showModalSelectMarca : () {}
+                                  ),
                   ),
-                ),
               )
             ],
           ),
@@ -240,7 +247,7 @@ class ProductEdit extends StatelessWidget {
     );
   }
   //  view : datos para el cátalogo con formulario de edicion
-  Widget widgetFormEdit2(){
+  Widget productFromView(){
 
     // var
     final Color boderLineColor = Get.isDarkMode?Colors.white.withOpacity(0.3):Colors.black.withOpacity(0.3);
@@ -392,7 +399,10 @@ class ProductEdit extends StatelessWidget {
                       border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                       enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
                     ),  
-                    onChanged: (value) => controller.formEditing = true,
+                    onChanged: (value) {
+                      controller.formEditing = true;
+                      controller.updateAll();
+                    },
                     // validator: validamos el texto que el usuario ha ingresado.
                     validator: (value) {
                       if ( controller.controllerTextEditPrecioVenta.numberValue == 0.0) { return 'Por favor, escriba un precio de venta'; }
@@ -521,7 +531,7 @@ class ProductEdit extends StatelessWidget {
                 ),
 
                 // text : marca de tiempo de la ultima actualización del documento
-                controller.getNewProduct || !controller.itsInTheCatalogue ? Container() :  Padding(
+                controller.getNewProduct || !controller.getItsInTheCatalogue ? Container() :  Padding(
                   padding: const EdgeInsets.only(top: 50),
                   //child: Text('Actualizado ${}'),
                   child: Opacity(opacity: 0.5,child: Center(child: Text('Actualizado ${Publications.getFechaPublicacion(controller.getProduct.upgrade.toDate(), Timestamp.now().toDate()).toLowerCase()}'))),
@@ -560,11 +570,11 @@ class ProductEdit extends StatelessWidget {
                   colorButton: Colors.blue,
                   padding:const EdgeInsets.all(0),
                   colorAccent: Colors.white,
-                  text: controller.itsInTheCatalogue?'Actualizar':'Agregar a mi cátalogo',
+                  text: controller.getItsInTheCatalogue?'Actualizar':'Agregar a mi cátalogo',
                 ), 
                 // button : elminar el documento
                 controller.getDataUploadStatus? Container(): 
-                controller.itsInTheCatalogue? Container(
+                controller.getItsInTheCatalogue? Container(
                   width: double.infinity,
                   padding: const EdgeInsets.only(bottom: 12, top: 30, left: 0, right: 0),
                   child: TextButton(onPressed: controller.showDialogDelete,child: Text('Eliminar de mi cátalogo',style: TextStyle(color: Colors.red.shade300),)),
