@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -142,11 +143,10 @@ class _StaticsCardsState extends State<StaticsCards> {
         backgroundColor: Colors.grey.shade400.withOpacity(0.7),
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.point_of_sale_sharp,color: Colors.white,size:14)))),
         titleText: 'Caja ${value['name']}',
-        subtitle: 'Balance',
-        //modalContent: CashRegisterView(cashRegister: CashRegister()),
+        subtitle: 'Facturación',
+        modalContent: CashRegisterView(cashRegister: value['object']),
         valueText: Publications.getFormatoPrecio(monto: value['total'] ), 
-        description: '${value['sales'].toString()} transacciones\nApertura: ${value['opening'].toString()}',
-        //modalContent:  CashRegisterView(cashRegister: CashRegister()),
+        description: 'Transacciones: ${value['sales'].toString()}\nApertura: ${value['opening'].toString()}',
         ));
     }); 
  
@@ -553,7 +553,7 @@ class PaymentMethodView extends StatelessWidget {
       // description : muestra una lista con barra de porcentajes coloreada en forma horizontal
       // 
       // var 
-      TextStyle textStyle = TextStyle(fontSize: height*0.5,fontWeight: FontWeight.w900,color: Colors.white );
+      TextStyle textStyle = TextStyle(fontSize: height*0.5,fontWeight: FontWeight.w900 );
 
       // converit chartData en una nuevo Map
       List<Map> map = [];
@@ -619,7 +619,7 @@ class PaymentMethodView extends StatelessWidget {
                     percentageBar,
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                      child: Text( '$porcent $priceTotal',style: textStyle,overflow: TextOverflow.ellipsis),
+                      child: Text( '$porcent $priceTotal',style: textStyle.copyWith(color: Colors.white),overflow: TextOverflow.ellipsis),
                     ),
                   ],
                 ),
@@ -637,8 +637,17 @@ class CashRegisterView extends StatelessWidget {
   final CashRegister cashRegister;
   const CashRegisterView({required this.cashRegister,super.key});
 
+  // var : tiempo transcurrido
+  String get timeElapsed {
+    // var : tiempo de apertura de caja
+    int hour = Timestamp.now().toDate().difference(cashRegister.opening).inHours;
+    int minutes = Timestamp.now().toDate().difference(cashRegister.opening).inMinutes.remainder(60);
+    String time = hour==0?'$minutes minutos':'$hour horas y $minutes minutos';
+    return time;
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) { 
     return Scaffold(
       appBar: appbar,
       body: body,
@@ -655,8 +664,117 @@ class CashRegisterView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [ 
-            // text : nombre de la caja
-            Text(cashRegister.description,style: const TextStyle(fontWeight: FontWeight.w300)),
+            // view : descripcion
+            Row(
+              children: [
+                // text : descripcion
+                const Text('Descripción:'),
+                const Spacer(),
+                // text : estado de la caja
+                Text(cashRegister.description,style: const TextStyle(fontWeight: FontWeight.w300)),
+
+              ],
+            ),
+          Padding(padding: const EdgeInsets.symmetric(vertical:8),child: ComponentApp().divider()),
+          // view : apertura
+            Row(
+              children: [
+                // text : apertura
+                const Text('Apertura:'),
+                const Spacer(),
+                // text : fecha de apertura
+                Text(Publications.getFechaPublicacionFormating(dateTime: cashRegister.opening),style: const TextStyle(fontWeight: FontWeight.w300)),
+
+              ],
+            ),
+            Padding(padding: const EdgeInsets.symmetric(vertical:8),child: ComponentApp().divider()),
+            // view : tiempo transcurrido
+            Row(
+              children: [
+                // text : tiempo transcurrido
+                const Text('Tiempo transcurrido:'),
+                const Spacer(),
+                Text(timeElapsed,style: const TextStyle(fontWeight: FontWeight.w300)),
+              ],
+            ),
+
+            Padding(padding: const EdgeInsets.symmetric(vertical:8),child: ComponentApp().divider()),
+            // view : efectivo inicial
+            Row(
+              children: [
+                // text : efectivo inicial
+                const Text('Efectivo inicial:'),
+                const Spacer(),
+                // text : monto de efectivo inicial
+                Text(Publications.getFormatoPrecio(monto: cashRegister.initialCash),style: const TextStyle(fontWeight: FontWeight.w300)),
+
+              ],
+            ),    
+            Padding(padding: const EdgeInsets.symmetric(vertical:8),child: ComponentApp().divider()),
+            // view : Ingresos
+            Row(
+              children: [
+                // text : Ingresos
+                const Text('Ingresos:'),
+                const Spacer(),
+                // text : cantidad de Ingresos
+                Text(Publications.getFormatoPrecio(monto: cashRegister.cashInFlow),style: const TextStyle(fontWeight: FontWeight.w300, color: Colors.green)),
+
+              ],
+            ), 
+            // view : Egresos
+            Padding(padding: const EdgeInsets.symmetric(vertical:8),child: ComponentApp().divider()),
+            // view : Egresos
+            Row(
+              children: [
+                // text : Egresos
+                const Text('Egresos:'),
+                const Spacer(),
+                // text : cantidad de Egresos
+                Text(Publications.getFormatoPrecio(monto: cashRegister.cashOutFlow),style: const TextStyle(fontWeight: FontWeight.w300, color: Colors.red)),
+
+              ],
+            ), 
+            Padding(padding: const EdgeInsets.symmetric(vertical:8),child: ComponentApp().divider()),
+            // view : transacciones
+            Row(
+              children: [
+                // text : transacciones
+                const Text('transacciones:'),
+                const Spacer(),
+                // text : cantidad de transacciones
+                Text(cashRegister.sales.toString(),style: const TextStyle(fontWeight: FontWeight.w300)),
+
+              ],
+            ), 
+            // view : Facturación
+            Padding(padding: const EdgeInsets.symmetric(vertical:8),child: ComponentApp().divider()),
+            Row(
+              children: [
+                // text : facturación total
+                const Text('Facturación:'),
+                const Spacer(),
+                // text : monto de facturación total
+                Text(Publications.getFormatoPrecio(monto: cashRegister.billing),style: const TextStyle(fontWeight: FontWeight.w300)),
+
+              ],
+            ),
+            // view : Balance esperado en la caja
+            Padding(padding: const EdgeInsets.symmetric(vertical:8),child: ComponentApp().divider()),
+            Row(
+              children: [
+                // text : Balance esperado en la caja
+                const Text('Balance esperado en la caja:'),
+                const Spacer(),
+                // text : monto de Balance esperado en la caja
+                Text(Publications.getFormatoPrecio(monto: cashRegister.getExpectedBalance),style: const TextStyle(fontWeight: FontWeight.w500,fontSize: 18)),
+
+              ],
+            ),
+
+            
+          
+        
           ],
         ),
       ),

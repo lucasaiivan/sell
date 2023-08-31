@@ -346,12 +346,14 @@ class CataloguePage extends StatelessWidget {
               ),
             //text : nombre del proveedor
             item.nameProvider==''?Container(): dividerCircle,
-            item.nameProvider==''?Container():Text(
-                item.nameProvider,
-                maxLines: 2,
-                overflow: TextOverflow.clip,
-                style: textStyleSecundary,
-              ),
+            item.nameProvider==''?Container():Flexible(
+              child: Text(
+                  item.nameProvider,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: textStyleSecundary,
+                ),
+            ),
           ],
         ), 
         // view : texts
