@@ -151,7 +151,7 @@ class ProductEdit extends StatelessWidget {
             scrollDirection: Axis.vertical,
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             children: [
-              productDataView(),
+              productDataView(), 
               productFromView(),
             ],
           ),
@@ -256,11 +256,10 @@ class ProductEdit extends StatelessWidget {
     TextStyle valueTextStyle = TextStyle(color: Get.isDarkMode?Colors.white:Colors.black,fontSize: 18,fontWeight: FontWeight.w400);
 
     return Container(
-      padding: const EdgeInsets.all(12.0),
+      padding: const EdgeInsets.only(left: 12.0,right: 12.0,top: 0.0,bottom: 50.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-
+        children: <Widget>[ 
           //TODO: eliminar para desarrrollo
           // inicio : contenido para desarrollo
           TextButton(

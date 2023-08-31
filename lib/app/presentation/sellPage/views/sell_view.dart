@@ -1309,10 +1309,7 @@ class _CashRegisterState extends State<CashRegister> {
               Row(children: [
                 Text('Egresos', style: textStyleDescription),
                 const Spacer(),
-                Text(
-                    Publications.getFormatoPrecio(
-                        monto: homeController.cashRegisterActive.cashOutFlow),
-                    style: textStyleValue.copyWith(color: Colors.red.shade300))
+                Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.cashOutFlow),style: textStyleValue.copyWith(color: Colors.red.shade300))
               ]),
               // view info : ingresos
               const SizedBox(height: 12),
@@ -1330,8 +1327,7 @@ class _CashRegisterState extends State<CashRegister> {
               // view info : monto esperado en la caja
               const SizedBox(height: 12),
               Row(children: [
-                Text('Balance esperado en la caja',
-                    style: textStyleDescription),
+                Text('Balance esperado en la caja', style: textStyleDescription),
                 const Spacer(),
                 Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.getExpectedBalance),style: textStyleValue)
               ]),

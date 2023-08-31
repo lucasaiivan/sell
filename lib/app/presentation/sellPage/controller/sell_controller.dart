@@ -833,7 +833,7 @@ class _NewProductViewState extends State<NewProductView> {
 
   // variables
   late Color  colorAccent ;
-  late  bool isProductNew ; 
+  bool isProductNew = true ; 
   bool checkAddCatalogue = true; 
   Color checkActiveColor =  Colors.blue;
   // styles
@@ -846,7 +846,7 @@ class _NewProductViewState extends State<NewProductView> {
     super.initState();
 
     // set
-    isProductNew = widget.productCatalogue.description=='' || widget.productCatalogue.salePrice==0.0 ? true : false;
+    isProductNew = widget.productCatalogue.description=='' &&  widget.productCatalogue.salePrice==0.0 ;
     colorAccent = Get.isDarkMode?Colors.white:Colors.black;
     hintStyle = TextStyle(color: colorAccent.withOpacity(0.3));
     labelStyle = TextStyle(color: colorAccent.withOpacity(0.9));
@@ -1027,7 +1027,7 @@ class _NewProductViewState extends State<NewProductView> {
             widget.productCatalogue.image==''?Container():
             ImageProductAvatarApp(url: widget.productCatalogue.image, size: 35),
             const SizedBox(width: 12),
-            Text(isProductNew?'Nuevo producto':'Producto'),
+            const Text('Nuevo producto'),
           ],
         ), 
         backgroundColor: Colors.transparent, 

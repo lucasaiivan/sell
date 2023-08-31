@@ -499,11 +499,11 @@ class TransactionsController extends GetxController {
   void readCashAnalysis() {
     //obtenemos el monto de cada caja
     setCashiersList = {};
-
+    // recorremos todos los tickers
     for (TicketModel element in getTransactionsList) {
       // get : obtenemos los datos del ticket
       TicketModel ticketModel = element;
-      // obtenemos los tickets de las cajas activas actualmente
+      // recorremos todas las cajas
       for (CashRegister cashRegister in homeController.listCashRegister) {
         if (cashRegister.id == ticketModel.cashRegisterId) {
 
@@ -513,14 +513,14 @@ class TransactionsController extends GetxController {
                   'name': cashRegister.description,
                   'sales': cashRegister.sales, 
                   'opening': Publications.getFechaPublicacionFormating(dateTime: cashRegister.opening),
-                  //'object': cashRegister.toJson(),
+                  'object': cashRegister ,
                 }
               : getCashiersList[cashRegister.id] = {
                   'total': element.priceTotal,
                   'name': cashRegister.description,
                   'sales': cashRegister.sales,
                   'opening': Publications.getFechaPublicacionFormating(dateTime: cashRegister.opening),
-                  //'object': cashRegister.toJson(),
+                  'object': cashRegister,
                 };
         }
       }

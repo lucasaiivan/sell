@@ -1066,10 +1066,16 @@ class HomeController extends GetxController {
     // obj : se obtiene los datos para registrar del precio al publico del producto en una colección publica de la db
     ProductPrice precio = ProductPrice(id: getProfileAccountSelected.id,idAccount: getProfileAccountSelected.id,imageAccount: getProfileAccountSelected.image,nameAccount: getProfileAccountSelected.name,price: product.salePrice,currencySign: product.currencySign,province: getProfileAccountSelected.province,town: getProfileAccountSelected.town,time: Timestamp.fromDate(DateTime.now()));
     // condition : si el producto es nuevo se le asigna los valores de creación
-    if(isProductNew){   
+    if(isProductNew){  
+      // el producto no existe 
       product.creation = Timestamp.fromDate(DateTime.now()); // fecha de creación del producto
       product.followers++; // incrementamos el contador de los seguidores del producto publico 
-      }
+    }else{
+      // el producto ya existe
+      //
+      // firebase : acutalizamos los seguidores del producto publico 
+      Database.refFirestoreProductPublic().doc(product.id).update({'followers': FieldValue.increment(1)});
+    }
     // set : fecha de actualización del producto
     product.upgrade = Timestamp.fromDate(DateTime.now()); 
     
@@ -1077,16 +1083,8 @@ class HomeController extends GetxController {
     Database.refFirestoreRegisterPrice(idProducto: product.id, isoPAis: 'ARG').doc(precio.id).set(precio.toJson());
     
     // Firebase : se actualiza el documento del producto del cátalogo
-    Database.refFirestoreCatalogueProduct(idAccount: getProfileAccountSelected.id).doc(product.id).set(product.toJson())
-      .whenComplete((){
-        // condition : si el producto no existe en la colección publica se procede a incrementar los seguidores del producto publico
-        if( isProductNew == false ){
-          // firebase : acutalizamos los seguidores del producto publico
-          Database.refFirestoreProductPublic().doc(product.id).update({'followers': FieldValue.increment(1)});
-        }
-      })
-      .onError((error, stackTrace) => null)
-      .catchError((_) => null);
+    Database.refFirestoreCatalogueProduct(idAccount: getProfileAccountSelected.id).doc(product.id).set(product.toJson());
+    
     // condition : si el producto no esta verificado se procede a crear un documento en la colección publica
     if (product.verified == false) {
       addProductToCollectionPublic(isNew: isProductNew, product: product.convertProductoDefault());
