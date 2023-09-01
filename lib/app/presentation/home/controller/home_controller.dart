@@ -33,6 +33,11 @@ class HomeController extends GetxController {
   final List<TargetFocus> targets = List<TargetFocus>.empty(growable: true);
   late final TutorialCoachMark tutorialCoachMark;
 
+  // estado de la conexión a internet
+  bool _internetConnection = false;
+  set setInternetConnection(bool value) => _internetConnection = value;
+  bool get getInternetConnection => _internetConnection;
+
   // user anonymous
   bool _userAnonymous = false;
   set setUserAnonymous(bool value) => _userAnonymous = value;
@@ -49,7 +54,7 @@ class HomeController extends GetxController {
   get getUrlPlayStore {
     return _urlPlayStore == '' ? '' : _urlPlayStore;
   }
-
+ // estado de actualización de la app
   bool _updateApp = false;
   set setUpdateApp(bool value) {
     _updateApp = value;
@@ -1403,7 +1408,9 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
               // color : gradient de un color y transparent 
               decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.transparent,Theme.of(context).scaffoldBackgroundColor.withOpacity(0.9),Theme.of(context).scaffoldBackgroundColor], begin: Alignment.topCenter,end: Alignment.bottomCenter),),
               // condition : comprobar que 'offerings' esta inicializado
-              child:  homeController.offerings==null?const TextButton(onPressed:null, child: Text('Subcribirce a Premium'))
+              child:  homeController.offerings==null? TextButton(onPressed:(){
+                homeController.setIsSubscribedPremium = true;
+              }, child: const Text('Subcribirce a Premium'))
               :Column(
                 children: [
                   ListView.builder(

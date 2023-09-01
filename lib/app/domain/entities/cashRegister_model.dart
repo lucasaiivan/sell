@@ -113,6 +113,39 @@ class CashRegister {
     cashInFlowList = documentSnapshot['cashInFlowList'];
     cashOutFlowList = documentSnapshot['cashOutFlowList'];
   }
+  // update : actualiza los valores individualmente de la caja 
+  CashRegister update({
+    String? id,
+    String? description,
+    double? initialCash,
+    DateTime? opening,
+    DateTime? closure,
+    int? sales,
+    double? billing,
+    double? cashInFlow,
+    double? cashOutFlow,
+    double? expectedBalance,
+    double? balance,
+    List<dynamic>? cashInFlowList,
+    List<dynamic>? cashOutFlowList,
+  }) {
+    return CashRegister(
+      id: id ?? this.id,
+      description: description ?? this.description,
+      initialCash: initialCash ?? this.initialCash,
+      opening: opening ?? this.opening,
+      closure: closure ?? this.closure,
+      sales: sales ?? this.sales,
+      billing: billing ?? this.billing,
+      cashInFlow: cashInFlow ?? this.cashInFlow,
+      cashOutFlow: cashOutFlow ?? this.cashOutFlow,
+      expectedBalance: expectedBalance ?? this.expectedBalance,
+      balance: balance ?? this.balance,
+      cashInFlowList: cashInFlowList ?? this.cashInFlowList,
+      cashOutFlowList: cashOutFlowList ?? this.cashOutFlowList,
+    );
+  }
+
  
 }
 
