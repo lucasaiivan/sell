@@ -2,11 +2,9 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_offline/flutter_offline.dart';
+import 'package:flutter/services.dart'; 
 import 'package:get/get.dart';
-import 'package:sell/app/presentation/cataloguePage/controller/catalogue_controller.dart';
-import 'package:sell/app/presentation/cataloguePage/views/formCreate_product_view.dart';
+import 'package:sell/app/presentation/cataloguePage/controller/catalogue_controller.dart'; 
 import 'package:url_launcher/url_launcher.dart'; 
 import '../../../domain/entities/catalogo_model.dart'; 
 import '../../../core/utils/fuctions.dart';
@@ -21,6 +19,7 @@ class ProductEdit extends StatelessWidget {
   final ControllerProductsEdit controller = Get.find();
 
   // var 
+  Color? appBarTextColor = Get.theme.textTheme.bodyMedium!.color;
   final Widget space = const SizedBox(
     height: 16.0,
     width: 16.0,
@@ -51,7 +50,7 @@ class ProductEdit extends StatelessWidget {
         ), 
         TextButton.icon(onPressed: Get.back, icon: const Icon(Icons.close_rounded), label: const Text('Cerrar')),
       ],
-    );
+    ); 
 
     // GetBuilder - refresh all the views
     return GetBuilder<ControllerProductsEdit>(
@@ -62,26 +61,14 @@ class ProductEdit extends StatelessWidget {
         return Material(
           child: AnimatedSwitcher(
           duration: const  Duration(milliseconds: 100),
-            child: controller.getHomeController.getProfileAdminUser.superAdmin==false? noEdit : _.getNewProduct ? const FormCreateProductView()
-            : OfflineBuilder(
-                child: Container(),
-                connectivityBuilder: (
-                  BuildContext context,
-                  ConnectivityResult connectivity,
-                  Widget child,
-                ) {
-                  final connected = connectivity != ConnectivityResult.none;
-                  
-                  if (!connected) {
-                    Color? colorAccent = Get.theme.textTheme.bodyMedium!.color;
-                    return Scaffold(
+            child: controller.homeController.getInternetConnection ? scaffold(context: context): Scaffold(
                       appBar: AppBar(
                         elevation: 0.0,
                         backgroundColor: Get.theme.scaffoldBackgroundColor,
                         iconTheme: Theme.of(context)
                             .iconTheme
-                            .copyWith(color: colorAccent),
-                        title: Text(controller.getTextAppBar,style: TextStyle(  color: colorAccent,fontSize: 18 )),
+                            .copyWith(color: appBarTextColor),
+                        title: Text(controller.getTextAppBar,style: TextStyle(  color: appBarTextColor,fontSize: 18 )),
                       ),
                       body: const Center(
                           child: Column(
@@ -94,11 +81,7 @@ class ProductEdit extends StatelessWidget {
                           Text('No hay internet'),
                         ],
                       )),
-                    );
-                  }
-                  
-                  return scaffold(context: context);
-                }),
+                    ),
           ),
         );
       },
@@ -107,18 +90,15 @@ class ProductEdit extends StatelessWidget {
 
   // WIDGETS VIEWS
   PreferredSizeWidget appBar({required BuildContext contextPrincipal}) {
-
-    // value
-    Color? colorText = Get.theme.textTheme.bodyMedium!.color;
-
+ 
     return AppBar(
       elevation: 0.0,
       backgroundColor: Get.theme.scaffoldBackgroundColor,
       iconTheme:
-          Theme.of(contextPrincipal).iconTheme.copyWith(color: colorText),
+          Theme.of(contextPrincipal).iconTheme.copyWith(color: appBarTextColor),
       title: controller.getDataUploadStatus
-          ? Text(controller.getTextAppBar,style: TextStyle(fontSize: 18.0, color: colorText))
-          : Text(controller.getItsInTheCatalogue ? 'Editar' :'Nuevo producto',style: TextStyle(fontSize: 18.0, color: colorText)),
+          ? Text(controller.getTextAppBar,style: TextStyle(fontSize: 18.0, color: appBarTextColor))
+          : Text(controller.getItsInTheCatalogue ? 'Editar' :'Nuevo producto',style: TextStyle(fontSize: 18.0, color: appBarTextColor)),
       actions: <Widget>[
         // TODO : delete release
         // iconButton : opciones de moderador

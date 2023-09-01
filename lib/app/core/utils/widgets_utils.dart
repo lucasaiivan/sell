@@ -492,8 +492,7 @@ class WidgetDrawer extends StatelessWidget {
 
 
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return ListView( 
       children: [
         const SizedBox(height: 50),
         homeController.getFirebaseAuth.currentUser!.isAnonymous?textButtonLogin

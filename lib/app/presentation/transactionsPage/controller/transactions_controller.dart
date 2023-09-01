@@ -511,16 +511,16 @@ class TransactionsController extends GetxController {
               ? getCashiersList[cashRegister.id] = {
                   'total': (getCashiersList[cashRegister.id]?['total'] as double) +element.priceTotal,
                   'name': cashRegister.description,
-                  'sales': cashRegister.sales, 
+                  'sales': getCashiersList[cashRegister.id]?['sales'] +1, 
                   'opening': Publications.getFechaPublicacionFormating(dateTime: cashRegister.opening),
-                  'object': cashRegister ,
+                  'object': cashRegister.update(sales: getCashiersList[cashRegister.id]?['sales'] +1) ,
                 }
               : getCashiersList[cashRegister.id] = {
                   'total': element.priceTotal,
                   'name': cashRegister.description,
-                  'sales': cashRegister.sales,
+                  'sales': 1, 
                   'opening': Publications.getFechaPublicacionFormating(dateTime: cashRegister.opening),
-                  'object': cashRegister,
+                  'object': cashRegister.update(sales: 1),
                 };
         }
       }

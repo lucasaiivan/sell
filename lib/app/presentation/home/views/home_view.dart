@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:observe_internet_connectivity/observe_internet_connectivity.dart';
 import 'package:sell/app/presentation/historyCashRegisterPage/views/historyCashRegister_view.dart';
 import 'package:sell/app/presentation/sellPage/views/sell_view.dart';
 import 'package:sell/app/presentation/cataloguePage/views/catalogue_view.dart';
@@ -15,6 +16,7 @@ class HomeView extends GetView<HomeController> {
   HomeView({Key? key}) : super(key: key);
 
   // var 
+  InternetConnectivity internetConnectivity = InternetConnectivity();
   Widget getView({required index}) {
     switch (index) {
       case 0:
@@ -53,7 +55,36 @@ class HomeView extends GetView<HomeController> {
       return WillPopScope(
         onWillPop: () => controller.onBackPressed(context: context), 
         // getView : nos permite crear una vista con un diseño predefinido
-        child: getView(index: controller.getIndexPage),
+        child: InternetConnectivityBuilder(
+      connectivityBuilder: (BuildContext context, bool hasInternetAccess, Widget? child) { 
+        if(hasInternetAccess) {
+          // con conexión a internet
+          controller.setInternetConnection = hasInternetAccess;
+          return getView(index: controller.getIndexPage);
+        } else {
+          // sin conexión a internet
+          controller.setInternetConnection = hasInternetAccess;
+          return Scaffold(
+            appBar: AppBar(
+              // quitar margen
+              toolbarHeight: 20,
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.wifi_off,color: Colors.red.shade300,size: 20),
+                  const SizedBox(width: 10),
+                  Text('Sin conexión a internet',style: TextStyle(fontSize: 16,color: Colors.red.shade300)),
+                ],
+              ),
+              centerTitle: true, 
+              automaticallyImplyLeading: false,
+            ),
+            body: getView(index: controller.getIndexPage),
+          );
+        }
+      },
+      child: getView(index: controller.getIndexPage),
+      ),
       );
     });
   }
