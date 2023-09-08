@@ -136,6 +136,7 @@ class ControllerProductsEdit extends GetxController {
   String _description = '';
   set setDescription(String value) {
     _description = value;
+    getProduct.description = value;
     update(['updateAll']);
   }
   get getDescription => _description;
@@ -145,6 +146,8 @@ class ControllerProductsEdit extends GetxController {
   set setMarkSelected(Mark value) {
     controllerTextEditMark.text = value.name;
     _markSelected = value;
+    getProduct.idMark = value.id;
+    getProduct.nameMark = value.name;
     update(['updateAll']);
   }
 
@@ -453,7 +456,7 @@ class ControllerProductsEdit extends GetxController {
               // procede agregrar el producto en el cátalogo
               // Mods - save data product global
               if ( getProduct.verified==false || getEditModerator) {
-                  setProductPublicFirestore(newProduct: getNewProduct,product: getProduct.convertProductoDefault());
+                  setProductPublicFirestore( );
               }
               
               // Registra el precio en una colección publica
@@ -507,22 +510,55 @@ class ControllerProductsEdit extends GetxController {
             'se produjo un error');}
   }
 
-  void setProductPublicFirestore({required Product product,required bool newProduct})  {
+  void setProductPublicFirestore()  { 
     // esta función procede a guardar el documento de una colleción publica
+
+    // valores
+    Product product = getProduct.convertProductoDefault();
     
     // condition : si el producto es nuevo se le asigna los valores de creación
-    if( newProduct ){
+    if( getNewProduct ){
       product.idAccount = homeController.getProfileAccountSelected.id;
       product.idUserCreation = homeController.getProfileAdminUser.email;
       product.creation = Timestamp.fromDate(DateTime.now());
     } 
-    //  set : marca de tiempo que se actualizo el documenti
+    //  set : marca de tiempo que se actualizo el documento
     product.upgrade = Timestamp.fromDate(DateTime.now()); 
     //  set : id del usuario que actualizo el documento
     product.idUserUpgrade = homeController.getProfileAdminUser.email;
 
     // condition : si el producto es nuevo se le asigna los valores de creación
-    if(newProduct){
+    if(getNewProduct){
+      // incrementar el valor 'followers' del producto publico
+      product.followers++; 
+      // crear el documento del producto publico
+      Database.refFirestoreProductPublic().doc(product.id).set(product.toJson());
+    }else{
+      // si el producto solo se actualiza se le asigna los valores de creación
+      //
+      // firebase: actualizar el documento del producto publico
+      Database.refFirestoreProductPublic().doc(product.id).update(product.toJson());
+    } 
+  }
+  void setProductPublicFirestoreAndBack() { 
+    // esta función procede a guardar el documento de una colleción publica
+
+    // valores
+    Product product = getProduct.convertProductoDefault();
+    
+    // condition : si el producto es nuevo se le asigna los valores de creación
+    if( getNewProduct ){
+      product.idAccount = homeController.getProfileAccountSelected.id;
+      product.idUserCreation = homeController.getProfileAdminUser.email;
+      product.creation = Timestamp.fromDate(DateTime.now());
+    } 
+    //  set : marca de tiempo que se actualizo el documento
+    product.upgrade = Timestamp.fromDate(DateTime.now()); 
+    //  set : id del usuario que actualizo el documento
+    product.idUserUpgrade = homeController.getProfileAdminUser.email;
+
+    // condition : si el producto es nuevo se le asigna los valores de creación
+    if(getNewProduct){
       // incrementar el valor 'followers' del producto publico
       product.followers++; 
       // crear el documento del producto publico
@@ -533,6 +569,9 @@ class ControllerProductsEdit extends GetxController {
       // firebase: actualizar el documento del producto publico
       Database.refFirestoreProductPublic().doc(product.id).update(product.toJson());
     }
+    // actualizar vista
+    updateAll();
+    Get.back();
   }
   void deleteProductInCatalogue() async{
     // activate indicator load
@@ -573,28 +612,6 @@ class ControllerProductsEdit extends GetxController {
       Get.back();
     });
   }
-
-  void getDataProduct({required String id}) {
-    // function : obtiene los datos del producto de la base de datos y los carga en el formulario de edición 
-    if (id != '') {
-      Database.readProductPublicFuture(id: id).then((value) {
-        //  get
-        Product product = Product.fromMap(value.data() as Map);
-        //  set
-        setProduct = getProduct.updateData(product: product);
-        setDataUploadStatusProduct = true;
-        loadDataFormProduct(); // carga los datos del producto en el formulario
-        
-      }).catchError((error) {
-        printError(info: error.toString());
-        setDataUploadStatus = false;
-      }).onError((error, stackTrace) {
-        loadDataFormProduct();
-        printError(info: error.toString()); 
-      });
-    }
-  }
-
   // fuction : carga los datos del producto en el formulario una ves que se obtienen de la base de datos
   void loadDataFormProduct() {
  
@@ -970,7 +987,33 @@ class ControllerProductsEdit extends GetxController {
       ],
     ));
   }
-
+  void getDataProduct({required String id}) {
+    // function : obtiene los datos del producto de la base de datos y los carga en el formulario de edición 
+    if (id != '') {
+      Database.readProductPublicFuture(id: id).then((value) {
+        //  get
+        Product product = Product.fromMap(value.data() as Map);
+        //  set
+        setProduct = getProduct.updateData(product: product);
+        setDataUploadStatusProduct = true;
+        loadDataFormProduct(); // carga los datos del producto en el formulario
+        
+      }).catchError((error) {
+        printError(info: error.toString());
+        setDataUploadStatus = false;
+      }).onError((error, stackTrace) {
+        loadDataFormProduct();
+        printError(info: error.toString()); 
+      });
+    }
+  }
+  void increaseFollowersProductPublic() {
+    // function : aumenta el valor de los seguidores del producto publico
+    Database.refFirestoreProductPublic().doc(getProduct.id).update({'followers': FieldValue.increment(1)});
+    // actualizamos el valor de los seguidores del producto
+    getProduct.followers++;
+    update(['updateAll']);
+  }
   void showDialogSaveOPTDeveloper() {
     Get.dialog(AlertDialog(
       title:

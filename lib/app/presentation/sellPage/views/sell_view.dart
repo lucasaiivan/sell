@@ -98,6 +98,7 @@ class SalesView extends StatelessWidget {
           ),
         )
       : Container();
+    // view : cuerpo de la app
     return NestedScrollView(
       /* le permite crear una lista de elementos que se desplazarían hasta que el cuerpo alcanzara la parte superior */
       floatHeaderSlivers: true,

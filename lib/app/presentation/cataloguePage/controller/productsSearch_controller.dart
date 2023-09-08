@@ -107,10 +107,8 @@ class ControllerProductsSearch extends GetxController {
   
 
   // color component textfield
-  ButtonData _buttonData =
-      ButtonData(colorButton: Get.theme.primaryColor, colorText: Colors.white);
-  setButtonData({required Color colorButton, required Color colorText}) =>
-      _buttonData = ButtonData(colorButton: colorButton, colorText: colorText);
+  ButtonData _buttonData = ButtonData(colorButton: Get.theme.primaryColor, colorText: Colors.white);
+  setButtonData({required Color colorButton, required Color colorText}) => _buttonData = ButtonData(colorButton: colorButton, colorText: colorText);
   ButtonData get getButtonData => _buttonData;
 
   // state search : estado de la busqueda

@@ -1,8 +1,10 @@
 
 import 'dart:async'; 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:sell/app/core/utils/fuctions.dart';
 import '../../../core/utils/widgets_utils.dart';
 import '../../../domain/entities/user_model.dart';
 import '../../../data/datasource/database_cloud.dart';
@@ -44,7 +46,10 @@ class MultiUserController extends GetxController {
   }
 
   // crear nuevo usaurio
-  void createNewUser({required UserModel user}) {
+  void createNewUser({required UserModel user}) { 
+
+    // set : values
+    user.email;
     // Firebase : refencia de la base de datos 
     var refFirestoreUserAccountsList = Database.refFirestoreUserAccountsList(email: user.email).doc( homeController.getIdAccountSelected );
     var refFirestoreAccountsUsersList = Database.refFirestoreAccountsUsersList(idAccount: homeController.getIdAccountSelected ).doc(user.email);
@@ -72,7 +77,7 @@ class MultiUserController extends GetxController {
   }
   void addItem() { 
 
-    dialogUserAdmin(user: UserModel() );
+    dialogUserAdmin(user: UserModel(creation:Timestamp.now(),lastUpdate:Timestamp.now()) );
   }
   void deleteItem({required UserModel user}) {
     Widget widget = AlertDialog(
@@ -123,7 +128,7 @@ class MultiUserController extends GetxController {
 
 // ignore: must_be_immutable
 class UserAdminAlertDialog extends StatefulWidget {
-  UserModel user = UserModel();
+  UserModel user = UserModel(creation:Timestamp.now(),lastUpdate:Timestamp.now());
   UserAdminAlertDialog({Key? key,required this.user}) : super(key: key);
 
   @override
@@ -304,7 +309,7 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
                 subtitle: const Opacity(opacity: 0.5,child: Text('Permite crear y cerrar arqueos de caja')),
                 value: widget.user.arqueo, 
                 onChanged: (value){
-                  setState(() {
+                  setState(() { 
                     widget.user.arqueo=value!; 
                     setPersonalized();
                   });
@@ -421,11 +426,13 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
     
                         // set 
                         widget.user.account = homeController.getIdAccountSelected; // seteamos el id de la cuenta
-      
+                        // condition : si es un nuevo usuario o se esta actualizando
                         if(newUser){
+                          widget.user.creation = Timestamp.now(); // seteamos la fecha de creacion 
                           // creamos un nuevo usuario
                           multiUserController.createNewUser(user: widget.user.copyWith());
-                        }else{
+                        }else{ 
+                        widget.user.lastUpdate = Timestamp.now(); // seteamos la fecha de actualizacion 
                           // actualizamos el usuario
                           multiUserController.updateUser(user: widget.user.copyWith());
                         }

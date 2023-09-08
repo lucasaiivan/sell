@@ -317,7 +317,7 @@ class CataloguePage extends StatelessWidget {
     // var
     double titleSize = 16; 
     String alertStockText = item.stock ? (item.quantityStock == 0 ? 'Sin stock' : '') : ''; 
-    String valueDataUpdate ='Actualizado ${Publications.getFechaPublicacion(item.upgrade.toDate(), Timestamp.now().toDate())}';
+    String valueDataUpdate ='Actualizado ${Publications.getFechaPublicacion(fechaActual:item.upgrade.toDate(),fechaPublicacion:  Timestamp.now().toDate())}';
     valueDataUpdate = valueDataUpdate.substring(0, 1).toUpperCase() + valueDataUpdate.substring(1).toLowerCase();
 
     // styles
@@ -385,9 +385,8 @@ class CataloguePage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        // text : precio de venta
-        Text(Publications.getFormatoPrecio(monto: item.salePrice),style: TextStyle(fontSize: 18,color: homeController.getDarkMode?Colors.white:Colors.black )),
-        const SizedBox(width: 5),
+        // text : monto de la ganancia
+        item.getBenefits==''?Container():Text(item.getBenefits,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w300)),
         // text : porcentaje de ganancia
         item.getPorcentage==''?Container():Opacity(opacity:0.7,
           child: Row(
@@ -397,8 +396,9 @@ class CataloguePage extends StatelessWidget {
               Text(item.getPorcentage,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w300)),
             ],
           )),
-        // text : monto de la ganancia
-        item.getBenefits==''?Container():Text(item.getBenefits,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w300)),
+        // text : precio de venta
+        Text(Publications.getFormatoPrecio(monto: item.salePrice),style: TextStyle(fontSize: 18,color: homeController.getDarkMode?Colors.white:Colors.black )),
+        const SizedBox(width: 5),
         
       ],
     );
@@ -469,7 +469,18 @@ class CataloguePage extends StatelessWidget {
     return ListTile(
       contentPadding: const EdgeInsets.all(12),
       dense: true,
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w300,fontSize: 18)),
+      // view : texto del nombre de la categoria y cantidad de productos que coinciden con este id
+      title: Row(
+        children: [
+          // text : nombre de la categoria
+          Flexible(child: Text(title ,maxLines: 2, style: const TextStyle(fontWeight: FontWeight.w300,fontSize: 18))),
+          // view : burbuja de cantidad de productos del catalgoue que coinciden con este id
+          controller.readCoincidencesToCatalogue(idCategory: categoria.id) == 0 ?Container():Padding(
+            padding: const EdgeInsets.only(left: 5                                                                                                                                                                                                                ),
+            child: Container(padding: const EdgeInsets.symmetric(horizontal:3,vertical: 1),decoration: BoxDecoration(borderRadius: BorderRadius.circular(5), color: Colors.blue.withOpacity(0.1)), child: Text(controller.readCoincidencesToCatalogue(idCategory: categoria.id).toString(), style: const TextStyle(color: Colors.blue, fontSize: 12),)),
+          ),
+        ],
+      ),
       onTap: () {
         controller.setSelectedCategory = categoria;
         controller.tabController.animateTo(0);
@@ -488,7 +499,18 @@ class CataloguePage extends StatelessWidget {
     return ListTile(
       contentPadding: const EdgeInsets.all(12),
       dense: true,
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w300,fontSize: 18)),
+      // view : texto del nombre del proveedor y cantidad de productos que coinciden con este id
+      title: Row(
+        children: [
+          // text : nombre del proveedor
+          Flexible(child: Text(title, style: const TextStyle(fontWeight: FontWeight.w300,fontSize: 18))),
+          // view : burbuja de cantidad de productos del catalgoue que coinciden con este id
+          controller.readCoincidencesToCatalogue(idProvider: provider.id) == 0 ?Container():Padding(
+            padding: const EdgeInsets.only(left: 5                                                                                                                                                                                                                ),
+            child: Container(padding: const EdgeInsets.symmetric(horizontal:3,vertical: 1),decoration: BoxDecoration(borderRadius: BorderRadius.circular(5), color: Colors.blue.withOpacity(0.1)), child: Text(controller.readCoincidencesToCatalogue(idProvider: provider.id).toString(), style: const TextStyle(color: Colors.blue, fontSize: 12),)),
+          ),
+        ],
+      ),
       onTap: () { 
         controller.setSelectedSupplier = provider;
         controller.tabController.animateTo(0);

@@ -258,7 +258,7 @@ class HomeController extends GetxController {
   set setUserAuth(User user) => _userFirebaseAuth = user;
 
   //  perfil de usuario administrador actual de la cuenta
-  UserModel _adminUser = UserModel();
+  UserModel _adminUser = UserModel(creation: Timestamp.now(),lastUpdate: Timestamp.now());
   UserModel get getProfileAdminUser => _adminUser;
   set setProfileAdminUser(UserModel user) {
      _adminUser = user;  
@@ -864,7 +864,8 @@ class HomeController extends GetxController {
           purchasePrice: 80,
           sales: 7,
           stock: true,
-          quantityStock: 18),
+          quantityStock: 18,
+          ),
     ]; // lista de productos del catálogo
     setProductsOutstandingList = getCataloProducts.toList(); // lista de productos destacados
     setProfileAccountSelected = ProfileAccountModel(creation: Timestamp.now(),name: 'Mi negocio'); // datos de la cuenta
@@ -872,7 +873,10 @@ class HomeController extends GetxController {
     setProfileAdminUser = UserModel(
         superAdmin: true,
         admin: true,
-        email: 'userInvite@correo.com'); // datos del usuario
+        email: 'userInvite@correo.com',
+        creation: Timestamp.now(),
+        lastUpdate: Timestamp.now(),
+        ); // datos del usuario
     setAdminsUsersList = []; // lista de usuarios administradores
   }
 
@@ -1005,6 +1009,8 @@ class HomeController extends GetxController {
       for (var element in value.docs) {
         list.add(UserModel.fromMap(element.data()));
       }
+      // ordenamos la lista por fecha de actualizacion
+      list.sort((a, b) => b.lastUpdate.compareTo(a.lastUpdate));
       //  set values
       setAdminsUsersList = list;
     }).onError((error) {

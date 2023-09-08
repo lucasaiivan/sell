@@ -383,6 +383,37 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     // description : verifica si un producto esta seleccionado
     return getProductsSelectedList.where((element) => element.code == code).isNotEmpty;
   }
+  int readCoincidencesToCatalogue({String idCategory ='', String idProvider='', String idMark=''}) {
+    // read : devuelve una cantidad [int] de coincidencias a partir un ID [idCategory,idProvider,idMark] pasado por parametro
+    //
+    //  function : lee la categoria del producto
+    int coincidences = 0;
+    //  condition : si el id de la categoria es distinto de '' se procede a buscar coincidencias
+    if (idCategory != '') {
+      for (var element in homeController.getCataloProducts) {
+        if (element.category == idCategory) {
+          coincidences++;
+        }
+      }
+    }
+    //  condition : si el id del proveedor es distinto de '' se procede a buscar coincidencias
+    if (idProvider != '') {
+      for (var element in homeController.getCataloProducts) {
+        if (element.provider == idProvider) {
+          coincidences++;
+        }
+      }
+    }
+    //  condition : si el id de la marca es distinto de '' se procede a buscar coincidencias
+    if (idMark != '') {
+      for (var element in homeController.getCataloProducts) {
+        if (element.idMark == idMark) {
+          coincidences++;
+        }
+      }
+    }
+    return coincidences;
+  }
   // get : filter
   List<ProductCatalogue> filteredItems({required String query}) {
     // description : Filtra una lista de elementos [ProductCatalogue] basándose en el criterio de búsqueda [query].

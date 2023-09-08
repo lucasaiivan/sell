@@ -129,23 +129,17 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                           ), */
                         )
                       : Container(),
-                      //  button : crear producto
+                  //  button : crear producto
                   controller.getproductDoesNotExist
                       ? FadeInRight(
                           child: button(
                             fontSize: 16,
                             padding: 16,
                             icon: Icon(Icons.add,color: controller.getButtonData.colorText,),
-                            onPressed: () {
-                              controller.toProductNew(
-                                  id: controller
-                                      .textEditingController.text);
-                            },
+                            onPressed: () {controller.toProductNew(id: controller.textEditingController.text);},
                             text: "Crear producto",
-                            colorAccent:
-                                controller.getButtonData.colorText,
-                            colorButton:
-                                controller.getButtonData.colorButton,
+                            colorAccent: controller.getButtonData.colorText,
+                            colorButton: controller.getButtonData.colorButton,
                           ),
                         )
                       : Container(),
