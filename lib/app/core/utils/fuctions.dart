@@ -71,7 +71,7 @@ class Publications {
     return 'Hoy';
   }
 } 
-static String getFechaPublicacion(DateTime fechaPublicacion, DateTime fechaActual) {
+static String getFechaPublicacion({required DateTime fechaPublicacion, required DateTime fechaActual}) {
   /** 
     Obtiene la fecha de publicación en formato legible para el usuario.
     @param fechaPublicacion La fecha de publicación del contenido.

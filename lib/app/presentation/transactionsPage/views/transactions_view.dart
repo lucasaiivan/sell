@@ -208,7 +208,7 @@ class TransactionsView extends StatelessWidget {
                       )),
                     Opacity(opacity:0.3,child: dividerCircle),
                     // fecha de transacción
-                    Text(Publications.getFechaPublicacion(ticketModel.creation.toDate(), Timestamp.now().toDate()),style: TextStyle(color: primaryTextColor.withOpacity(0.3),fontWeight: FontWeight.w400 )),
+                    Text(Publications.getFechaPublicacion(fechaActual: ticketModel.creation.toDate(),fechaPublicacion: Timestamp.now().toDate()),style: TextStyle(color: primaryTextColor.withOpacity(0.3),fontWeight: FontWeight.w400 )),
                   ],
                 ),
                 Column(

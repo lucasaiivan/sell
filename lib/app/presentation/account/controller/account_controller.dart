@@ -130,7 +130,7 @@ class AccountController extends GetxController {
       // get : obtenemos los datos de los campos de texto
       profileAccount.province = getControllerTextEditProvincia.text;
       profileAccount.country = getControllerTextEditPais.text;
-      profileAccount.currencySign = getControllerTextEditSignoMoneda.text;
+      profileAccount.currencySign = getControllerTextEditSignoMoneda.text; 
       setSavingIndicator = true;
 
       // comprobar existencia de creacion de cuenta
@@ -190,6 +190,8 @@ class AccountController extends GetxController {
         multiuser: true,
         personalized: false, 
         transactions: true,
+        creation: Timestamp.now(),
+        lastUpdate: Timestamp.now(),
 
       );
     //...

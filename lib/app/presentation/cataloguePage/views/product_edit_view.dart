@@ -4,13 +4,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; 
 import 'package:get/get.dart';
-import 'package:sell/app/presentation/cataloguePage/controller/catalogue_controller.dart'; 
-import 'package:url_launcher/url_launcher.dart'; 
+import 'package:sell/app/presentation/cataloguePage/controller/catalogue_controller.dart';
+import 'package:url_launcher/url_launcher.dart';  
 import '../../../domain/entities/catalogo_model.dart'; 
 import '../../../core/utils/fuctions.dart';
 import '../../../core/utils/widgets_utils.dart';
 import '../../home/controller/home_controller.dart';
 import '../controller/product_edit_controller.dart';
+import 'formCreate_product_view.dart';
 
 class ProductEdit extends StatelessWidget {
   ProductEdit({Key? key}) : super(key: key);
@@ -51,7 +52,7 @@ class ProductEdit extends StatelessWidget {
         TextButton.icon(onPressed: Get.back, icon: const Icon(Icons.close_rounded), label: const Text('Cerrar')),
       ],
     ); 
-
+    
     // GetBuilder - refresh all the views
     return GetBuilder<ControllerProductsEdit>(
       id: 'updateAll',
@@ -61,7 +62,7 @@ class ProductEdit extends StatelessWidget {
         return Material(
           child: AnimatedSwitcher(
           duration: const  Duration(milliseconds: 100),
-            child: controller.homeController.getInternetConnection ? scaffold(context: context): Scaffold(
+            child: controller.homeController.getInternetConnection ? scaffold(context: context) : Scaffold(
                       appBar: AppBar(
                         elevation: 0.0,
                         backgroundColor: Get.theme.scaffoldBackgroundColor,
@@ -101,6 +102,15 @@ class ProductEdit extends StatelessWidget {
           : Text(controller.getItsInTheCatalogue ? 'Editar' :'Nuevo producto',style: TextStyle(fontSize: 18.0, color: appBarTextColor)),
       actions: <Widget>[
         // TODO : delete release
+        // 
+        // estart : contenido para desarrollo (debug)
+        // iconButton  : aumentar seguidor del producto publico
+        IconButton(
+          icon: const Icon(Icons.add_business_outlined),
+          onPressed: () async {
+            controller.increaseFollowersProductPublic(); 
+          },
+        ), 
         // iconButton : opciones de moderador
         controller.getDataUploadStatus
             ? Container()
@@ -111,18 +121,25 @@ class ProductEdit extends StatelessWidget {
                   const OptionsModeratorsWidget(),
                 );
               },
-            ),
-
+            ), 
+        // fin contentido para desarrollo (debug)
+        //
         // iconButton : actualizar producto 
         controller.getDataUploadStatus
             ? Container()
-            : controller.getItsInTheCatalogue?TextButton.icon(onPressed: () => controller.save(), icon:const Icon( Icons.check ), label:const  Text('Actualizar')):Container(),
+            :TextButton.icon(onPressed: () => controller.save(), icon:const Icon( Icons.check ), label: Text( controller.getItsInTheCatalogue?'Actualizar':'Agregar')) ,
       ],
       bottom: controller.getDataUploadStatus? ComponentApp().linearProgressBarApp(color: controller.colorLoading):null,
     );
   }
 
   Widget scaffold({required BuildContext context}) {
+
+    // view : form new product
+    if (controller.getNewProduct) {
+      return const FormCreateProductView();
+    }
+    // view : form edit product
     return Scaffold(
       appBar: appBar(contextPrincipal: context),
       body: Stack(
@@ -132,6 +149,7 @@ class ProductEdit extends StatelessWidget {
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             children: [
               productDataView(), 
+              ComponentApp().divider(),
               productFromView(),
             ],
           ),
@@ -152,7 +170,7 @@ class ProductEdit extends StatelessWidget {
     
     // view : descripcion del producto
     return Padding(
-      padding: const EdgeInsets.all(12.0),
+      padding: const EdgeInsets.only(left: 12.0,right: 12.0,top: 12.0,bottom: 12.0),
       child: Column( 
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [  
@@ -209,13 +227,15 @@ class ProductEdit extends StatelessWidget {
             style: TextStyle(height: 2,color: textDescriptionStyleColor),
             keyboardType: TextInputType.multiline,
             onChanged: (value) => controller.setDescription = value,
-            decoration: InputDecoration(  
+            // desabilitar autofocus
+            autofocus: false,
+            decoration: InputDecoration(   
               border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
               enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color:boderLineColor),), 
               disabledBorder: UnderlineInputBorder(borderSide: BorderSide(color:!enableEdit?Colors.transparent:boderLineColor)),
               contentPadding: const EdgeInsets.only(bottom: 12,top: 12,left: 12,right: 12),
               filled: enableEdit,
-              fillColor: enableEdit?fillColor:Colors.transparent,
+              fillColor: enableEdit?null:Colors.transparent,
               hoverColor: Colors.blue, 
               labelText: "Descripción del producto"),
               inputFormatters: [ FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\- .³%]')) ],
@@ -236,7 +256,7 @@ class ProductEdit extends StatelessWidget {
     TextStyle valueTextStyle = TextStyle(color: Get.isDarkMode?Colors.white:Colors.black,fontSize: 18,fontWeight: FontWeight.w400);
 
     return Container(
-      padding: const EdgeInsets.only(left: 12.0,right: 12.0,top: 0.0,bottom: 50.0),
+      padding: const EdgeInsets.only(left: 12.0,right: 12.0,top: 12.0,bottom: 50.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[ 
@@ -513,7 +533,7 @@ class ProductEdit extends StatelessWidget {
                 controller.getNewProduct || !controller.getItsInTheCatalogue ? Container() :  Padding(
                   padding: const EdgeInsets.only(top: 50),
                   //child: Text('Actualizado ${}'),
-                  child: Opacity(opacity: 0.5,child: Center(child: Text('Actualizado ${Publications.getFechaPublicacion(controller.getProduct.upgrade.toDate(), Timestamp.now().toDate()).toLowerCase()}'))),
+                  child: Opacity(opacity: 0.5,child: Center(child: Text('Actualizado ${Publications.getFechaPublicacion(fechaActual: controller.getProduct.upgrade.toDate(), fechaPublicacion: Timestamp.now().toDate()).toLowerCase()}'))),
                 ),
                 // button : guardar
                 const SizedBox(height:50),
@@ -999,8 +1019,7 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
+        child: ListView( 
           children: [ 
             SizedBox(height: !controller.getDataUploadStatus ? 12.0 : 0.0),
             CheckboxListTile(
@@ -1053,25 +1072,37 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
                     colorAccent: Colors.white,
                     colorButton:  Colors.orange,
                     text:  "Editar documento",
-                  ),
+                  ), 
+            // button : actualizar documento
             controller.getDataUploadStatus || controller.getNewProduct || !controller.getEditModerator
                 ? Container()
-                :const SizedBox(height: 12.0),
+                : Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: button(
+                      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
+                      icon:const Icon(Icons.security, color: Colors.white),
+                      onPressed: controller.setProductPublicFirestoreAndBack,
+                      colorAccent: Colors.white,
+                      colorButton: Colors.green.shade400,
+                      text: "Actualizar documento",
+                    ),
+                ),
+            // button : eliminar documento
             controller.getDataUploadStatus || controller.getNewProduct || !controller.getEditModerator
                 ? Container()
-                : button(
-                    padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
-                    icon:const Icon(Icons.security, color: Colors.white),
-                    onPressed: controller.showDialogDeleteOPTDeveloper,
-                    colorAccent: Colors.white,
-                    colorButton: Colors.red,
-                    text: "Eliminar documento",
-                  ),
+                : Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: button(
+                      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
+                      icon:const Icon(Icons.security, color: Colors.white),
+                      onPressed: controller.showDialogDeleteOPTDeveloper,
+                      colorAccent: Colors.white,
+                      colorButton: Colors.red,
+                      text: "Eliminar documento",
+                    ),
+                ),
             // text : marca de tiempo de la ultima actualización del documento
-            controller.getNewProduct?Container():Padding(
-              padding: const EdgeInsets.only(top: 20),
-              child: Opacity(opacity: 0.5,child: Center(child: Text('Creación ${Publications.getFechaPublicacion(controller.getProduct.documentCreation.toDate(), Timestamp.now().toDate()).toLowerCase()}'))),
-            ), 
+            controller.getNewProduct?Container():Opacity(opacity: 0.5,child: Center(child: Text('Creación ${Publications.getFechaPublicacion( fechaActual: controller.getProduct.documentCreation.toDate(),fechaPublicacion:  Timestamp.now().toDate()).toLowerCase()}'))), 
             const SizedBox(height: 30.0),
           ],
           // fin widget debug

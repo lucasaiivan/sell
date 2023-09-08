@@ -8,7 +8,9 @@ class UserModel {
     this.name='', 
     this.superAdmin = false,  
     this.admin = false,  
-    this.personalized = false, 
+    this.personalized = false,  
+    required this.creation,
+    required this.lastUpdate,
     // ... 
     this.arqueo = false,  
     this.historyArqueo = false, 
@@ -24,6 +26,8 @@ class UserModel {
   String name=''; // nombre del usuario (opcaional)
   bool superAdmin = false; // Super administrador es el usaurio que creo la cuenta
   bool admin = false; // permiso de administrador 
+  Timestamp creation = Timestamp.now(); // Fecha en la que se creo la cuenta
+  Timestamp lastUpdate = Timestamp.now(); // Fecha en la que se actualizo la cuenta
   // permisos personalizados
   bool personalized = false;
   // ...  
@@ -45,6 +49,8 @@ class UserModel {
       superAdmin: data.containsKey("superAdmin") ? doc["superAdmin"] : false,
       admin: data.containsKey("admin") ? doc["admin"] : false,
       personalized: data.containsKey("personalized") ? doc["personalized"] : false,
+      creation: data.containsKey("creation") ? doc["creation"] : Timestamp.now(),
+      lastUpdate: data.containsKey("lastUpdate") ? doc["lastUpdate"] : Timestamp.now(),
       // ... 
       arqueo: data.containsKey("arqueo") ? doc["arqueo"] : false,
       historyArqueo: data.containsKey("historyArqueo") ? doc["historyArqueo"] : false,
@@ -64,6 +70,8 @@ class UserModel {
     'name':name,
     "superAdmin": superAdmin,
     "admin": admin,
+    'creation': creation,
+    'lastUpdate': lastUpdate,
     // permisos personalizados
     "personalized": personalized, 
     "arqueo": arqueo,
@@ -83,6 +91,8 @@ class UserModel {
       superAdmin: data['superAdmin'] ?? false,
       admin: data['admin'] ?? false,
       personalized: data['personalized'] ?? false,
+      creation: data['creation'] ?? Timestamp.now(),
+      lastUpdate: data['lastUpdate'] ?? Timestamp.now(),
       // ... 
       arqueo: data['arqueo'] ?? false,
       historyArqueo: data['historyArqueo'] ?? false,
@@ -106,6 +116,8 @@ class UserModel {
     superAdmin = data.containsKey('superAdmin') ? data['superAdmin'] : false;
     admin = data.containsKey('admin') ? data['admin'] : false;
     personalized = data.containsKey('personalized') ? data['personalized'] : false;
+    creation = data.containsKey('creation') ? data['creation'] : Timestamp.now();
+    lastUpdate = data.containsKey('lastUpdate') ? data['lastUpdate'] : Timestamp.now();
     // ... 
     arqueo = data.containsKey('arqueo') ? data['arqueo'] : false;
     historyArqueo = data.containsKey('historyArqueo') ? data['historyArqueo'] : false;
@@ -123,6 +135,8 @@ class UserModel {
     bool? superAdmin,
     bool? admin,
     bool? personalized,
+    Timestamp? creation,
+    Timestamp? lastUpdate,
     // ...
     bool? sell,
     bool? arqueo,
@@ -140,6 +154,8 @@ class UserModel {
       superAdmin: superAdmin ?? this.superAdmin,
       admin: admin ?? this.admin,
       personalized: personalized ?? this.personalized,
+      creation: creation ?? this.creation,
+      lastUpdate: lastUpdate ?? this.lastUpdate,
       // ... 
       arqueo: arqueo ?? this.arqueo,
       historyArqueo: historyArqueo ?? this.historyArqueo,

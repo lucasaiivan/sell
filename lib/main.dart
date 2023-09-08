@@ -12,7 +12,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:purchases_flutter/purchases_flutter.dart'; 
 
 
-
 Future<void> main() async {
   // Evita errores causados ​​por la actualización de flutter.
   WidgetsFlutterBinding.ensureInitialized();

@@ -1,7 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart'; 
 import 'package:sell/app/presentation/home/controller/home_controller.dart';
 import 'package:sell/app/presentation/splash/controllers/splash_controller.dart';
+import '../../../core/utils/fuctions.dart';
 import '../../../domain/entities/user_model.dart';
 import '../../../core/utils/widgets_utils.dart';
 import '../controllers/multiuser_controller.dart';
@@ -102,8 +104,8 @@ class LoadingInitView extends StatelessWidget {
   // WIDGETS COMPONENTS
   Widget listTile ({required UserModel user}){
 
-    // controllers
-    final MultiUserController controller = Get.find();
+    // controllers 
+    final MultiUserController controller = Get.find();  
 
     return Column(
       children: [
@@ -114,8 +116,10 @@ class LoadingInitView extends StatelessWidget {
           subtitle: Opacity(opacity: 0.5,child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              user.name==''?Container():Text(user.email),
-              Text( user.superAdmin ? 'Super administrador' : user.admin ? 'Administrador':'Permisos personalizado' ),
+              // text : email
+              user.name==''?Container():Text(user.email),Text( user.superAdmin ? 'Super administrador' : user.admin ? 'Administrador':'Permisos personalizado' ),
+              // text : fecha de fecha de actualización 
+              Text('Actualizado ${Publications.getFechaPublicacion(fechaActual: user.creation.toDate(),fechaPublicacion: Timestamp.now().toDate()) }'),
             ],
           )),
           onLongPress: () => controller.deleteItem(user: user),
