@@ -13,7 +13,7 @@ import 'package:purchases_flutter/purchases_flutter.dart';
 
 
 Future<void> main() async {
-  // Evita errores causados ​​por la actualización de flutter.
+  // Evita errores causados por la actualización de flutter.
   WidgetsFlutterBinding.ensureInitialized();
   // Initialize Firebase
   if (kIsWeb) {

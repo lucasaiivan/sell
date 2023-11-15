@@ -1,4 +1,5 @@
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart'; 
 import 'package:get/get.dart';
 import '../../../core/utils/fuctions.dart';
@@ -216,6 +217,9 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
   //
   Widget item({required ProductCatalogue product}){
 
+    // var 
+    String valueDataUpdate ='Actualizado ${Publications.getFechaPublicacion(fechaActual:product.upgrade.toDate(),fechaPublicacion:  Timestamp.now().toDate())}';
+
     // styles
     final Color highlightColor = Get.isDarkMode?Colors.white:Colors.black;
     final Color primaryTextColor  = Get.isDarkMode?Colors.white54:Colors.black45;
@@ -321,6 +325,14 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
                                   Text(alertStockText,style: textStyleSecundary),
                                 ],
                               ):Container(),
+                            // text : fecha de actualizacion
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  dividerCircle,
+                                  Text(valueDataUpdate,style: textStyleSecundary),
+                                ],
+                              ),
                           ],
                         ),
                                 

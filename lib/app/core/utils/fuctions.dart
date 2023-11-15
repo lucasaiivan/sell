@@ -78,9 +78,11 @@ static String getFechaPublicacion({required DateTime fechaPublicacion, required 
     @param fechaActual La fecha actual del sistema.
     @return La fecha en formato legible para el usuario.
   */
+
+  // condition : si el año de la publicacion es diferente al año actual
   if (fechaPublicacion.year != fechaActual.year) {
     // Si la publicación es de un año diferente, muestra la fecha completa
-    return DateFormat('dd MMM. yyyy HH:mm').format(fechaPublicacion);
+    return DateFormat('dd MMM. yyyy').format(fechaPublicacion);
   } else if (fechaPublicacion.month != fechaActual.month || fechaPublicacion.day != fechaActual.day) {
     // Si la publicación no es del mismo día de hoy
     if (fechaPublicacion.year == fechaActual.year &&
@@ -90,7 +92,7 @@ static String getFechaPublicacion({required DateTime fechaPublicacion, required 
       return 'Ayer ${DateFormat('HH:mm').format(fechaPublicacion)}';
     }else {
       // Si la publicación no es del día anterior, muestra la fecha sin el año
-      return DateFormat('dd MMM. HH:mm').format(fechaPublicacion);
+      return DateFormat('dd MMM.').format(fechaPublicacion);
     }
   } else {
     // Si la publicación es del mismo día de hoy

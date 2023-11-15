@@ -210,7 +210,7 @@ class ProductEdit extends StatelessWidget {
                     child: textfielBottomSheetListOptions(
                       contentPadding: const EdgeInsets.only(bottom: 12,top: 12,left: 12,right: 12),
                       stateEdit: controller.getDataUploadStatus? false: controller.getEditModerator || controller.getProduct.verified==false,
-                      textValue: controller.getMarkSelected.name,
+                      textValue: controller.getMarkSelected.name ,
                       labelText: controller.getMarkSelected.id == ''? 'Seleccionar una marca': 'Marca',
                       onTap: controller.getProduct.verified==false || controller.getEditModerator? controller.showModalSelectMarca : () {}
                                   ),
