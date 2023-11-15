@@ -688,115 +688,111 @@ class SalesController extends GetxController {
               },
               child: const Text('aceptar')),
         ),
-        content: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20, left: 12, right: 12),
-                child: Wrap(
-                  //mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TextButton(
-                        onPressed: getCountPriceTotal() > 100
-                            ? null
-                            : () {
-                                setPayModeTicket = 'effective';
-                                setValueReceivedTicket = 100;
-                                Get.back();
-                              },
-                        child:
-                            const Text('100', style: TextStyle(fontSize: 24))),
-                    TextButton(
-                        onPressed: getCountPriceTotal() > 200
-                            ? null
-                            : () {
-                                setPayModeTicket = 'effective';
-                                setValueReceivedTicket = 200;
-                                Get.back();
-                              },
-                        child:
-                            const Text('200', style: TextStyle(fontSize: 24))),
-                    TextButton(
-                        onPressed: getCountPriceTotal() > 500
-                            ? null
-                            : () {
-                                setPayModeTicket = 'effective';
-                                setValueReceivedTicket = 500;
-                                Get.back();
-                              },
-                        child:
-                            const Text('500', style: TextStyle(fontSize: 24))),
-                    TextButton(
-                        onPressed: getCountPriceTotal() > 1000 
-                          ? null
-                            : () {
-                                setPayModeTicket = 'effective';
-                                setValueReceivedTicket = 1000;
-                                Get.back();
-                              },
-                        child:const Text('1000', style: TextStyle(fontSize: 24))
-                    ),
-                    TextButton(
-                        onPressed: getCountPriceTotal() > 1500 
-                          ? null
-                            : () {
-                                setPayModeTicket = 'effective';
-                                setValueReceivedTicket = 1500;
-                                Get.back();
-                              },
-                        child:const Text('1500', style: TextStyle(fontSize: 24))
-                    ),
-                    TextButton(
-                        onPressed: getCountPriceTotal() > 2000 
-                          ? null
-                            : () {
-                                setPayModeTicket = 'effective';
-                                setValueReceivedTicket = 2000;
-                                Get.back();
-                              },
-                        child:const Text('2000', style: TextStyle(fontSize: 24))
-                    ),
-
-                  ],
-                ),
-              ),
-              // mount textfield
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: TextField(
-                  autofocus: true,
-                  controller: textEditingControllerTicketMount,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: false),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp('[1234567890]'))
-                  ],
-                  decoration: const InputDecoration(
-                    hintText: '\$',
-                    labelText: "Escribe el monto",
-                  ),
-                  style: const TextStyle(fontSize: 20.0),
-                  textInputAction: TextInputAction.done,
-                  onSubmitted: (value) {
-                    //var
-                    double valueReceived = textEditingControllerTicketMount.text ==''
-                        ? 0.0
-                        : double.parse(textEditingControllerTicketMount.text);
-                    // condition : verificar si el usaurio ingreso un monto valido y que sea mayor al monto total del ticket
-                    if (valueReceived >= getCountPriceTotal() && textEditingControllerTicketMount.text != '') {
-                      setValueReceivedTicket = double.parse(textEditingControllerTicketMount.text);
-                      textEditingControllerTicketMount.text = '';
+        content: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12, left: 12, right: 12),
+              child: Wrap(
+                spacing: 5.0,
+                children: [
+                  // chip : efectivo '100'
+                  getCountPriceTotal() > 100 ? Container() :ChoiceChip(
+                    label: const Text('100'),
+                    selected: false,
+                    onSelected: (bool value) {
                       setPayModeTicket = 'effective';
+                      setValueReceivedTicket = 100;
                       Get.back();
-                    } else {
-                      ComponentApp().showMessageAlertApp( title: '😔', message: 'Tiene que ingresar un monto valido');
-                    }
-                  },
-                ),
+                    },
+                  ),   
+                  // chip : efectivo '200'
+                  getCountPriceTotal() > 200 ? Container() :ChoiceChip(
+                    label: const Text('200'),
+                    selected: false,
+                    onSelected: (bool value) {
+                      setPayModeTicket = 'effective';
+                      setValueReceivedTicket = 200;
+                      Get.back();
+                    },
+                  ), 
+                  // chip : efectivo '500'
+                  getCountPriceTotal() > 500 ? Container() :ChoiceChip(
+                    label: const Text('500'),
+                    selected: false,
+                    onSelected: (bool value) {
+                      setPayModeTicket = 'effective';
+                      setValueReceivedTicket = 500;
+                      Get.back();
+                    },
+                  ), 
+                  // chip : efectivo '1000'
+                  getCountPriceTotal() > 1000 ? Container() :ChoiceChip(
+                    label: const Text('1000'),
+                    selected: false,
+                    onSelected: (bool value) {
+                      setPayModeTicket = 'effective';
+                      setValueReceivedTicket = 1000;
+                      Get.back();
+                    },
+                  ), 
+                  // chip : efectivo '1500'
+                  getCountPriceTotal() > 1500 ? Container() :ChoiceChip(
+                    label: const Text('1500'),
+                    selected: false,
+                    onSelected: (bool value) {
+                      setPayModeTicket = 'effective';
+                      setValueReceivedTicket = 1500;
+                      Get.back();
+                    },
+                  ),
+                  // chip : efectivo '2000'
+                  getCountPriceTotal() > 2000 ? Container() :ChoiceChip(
+                    label: const Text('2000'),
+                    selected: false,
+                    onSelected: (bool value) {
+                      setPayModeTicket = 'effective';
+                      setValueReceivedTicket = 2000;
+                      Get.back();
+                    },
+                  ), 
+                ],
               ),
-            ],
-          ),
+            ),
+            // mount textfield
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: TextField(
+                autofocus: true,
+                controller: textEditingControllerTicketMount,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: false),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp('[1234567890]'))
+                ],
+                decoration: const InputDecoration(
+                  hintText: '\$',
+                  labelText: "Escribe el monto",
+                ),
+                style: const TextStyle(fontSize: 20.0),
+                textInputAction: TextInputAction.done,
+                onSubmitted: (value) {
+                  //var
+                  double valueReceived = textEditingControllerTicketMount.text ==''
+                      ? 0.0
+                      : double.parse(textEditingControllerTicketMount.text);
+                  // condition : verificar si el usaurio ingreso un monto valido y que sea mayor al monto total del ticket
+                  if (valueReceived >= getCountPriceTotal() && textEditingControllerTicketMount.text != '') {
+                    setValueReceivedTicket = double.parse(textEditingControllerTicketMount.text);
+                    textEditingControllerTicketMount.text = '';
+                    setPayModeTicket = 'effective';
+                    Get.back();
+                  } else {
+                    ComponentApp().showMessageAlertApp( title: '😔', message: 'Tiene que ingresar un monto valido');
+                  }
+                },
+              ),
+            ),
+          ],
         ));
   }
 }

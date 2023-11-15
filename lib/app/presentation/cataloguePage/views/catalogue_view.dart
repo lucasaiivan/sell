@@ -54,7 +54,7 @@ class CataloguePage extends StatelessWidget {
         // iconButton : buscar un producto del cátalogo
         IconButton(icon: const Icon(Icons.search),onPressed: (() => catalogueController.showSeach(context: context))),
         // buttons : filter list
-        catalogueController.filterState?IconButton(onPressed: catalogueController.catalogueFilter, icon: Icon(Icons.close),padding: EdgeInsets.all(0))
+        catalogueController.filterState?IconButton(onPressed: catalogueController.catalogueFilter, icon: const Icon(Icons.close),padding: const EdgeInsets.all(0))
         : Padding(
           padding: const EdgeInsets.symmetric(horizontal: 5),
           child: Material(

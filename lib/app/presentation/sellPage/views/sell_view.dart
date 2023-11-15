@@ -154,19 +154,20 @@ class SalesView extends StatelessWidget {
     ticket.priceTotal = 500.0;
 
     // style
-    const Color dividerColor = Colors.white;
-    const TextStyle textValuesStyle = TextStyle(fontFamily: 'monospace',fontWeight: FontWeight.bold,color:  Colors.white );
-    const TextStyle textDescrpitionStyle = TextStyle(fontFamily: 'monospace',fontWeight: FontWeight.bold,color:  Colors.white );
+    Color borderColor = Get.isDarkMode ? Colors.white : Colors.black;
+    Color backgroundColor = Get.isDarkMode ? Get.theme.scaffoldBackgroundColor : Colors.white; 
+    const TextStyle textValuesStyle = TextStyle(fontFamily: 'monospace',fontWeight: FontWeight.bold );
+    const TextStyle textDescrpitionStyle = TextStyle(fontFamily: 'monospace',fontWeight: FontWeight.bold );
     TextStyle textDescrpitionDesing2Style = TextStyle(fontFamily: 'monospace',fontWeight: FontWeight.bold,color: Get.isDarkMode?Colors.white:Colors.black );
 
     // widgets
-    Widget dividerLinesWidget = const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+    Widget dividerLinesWidget = Padding(
+      padding: const EdgeInsets.symmetric(horizontal:20, vertical: 5),
       child: CustomDivider(
-        height: 0.2,
+        color: borderColor,
+        height: 0.5,
         dashWidth: 10.0,
-        dashGap: 5.0,
-        color:dividerColor,
+        dashGap: 5.0, 
       ),
     );
 
@@ -175,200 +176,189 @@ class SalesView extends StatelessWidget {
     final isMobile = screenWidth < 700; // ejemplo: pantalla de teléfono
  
     
-    return AnimatedContainer(
+    return AnimatedContainer( 
       width: controller.getTicketView ? isMobile ? screenWidth : 400 : 0,
       curve: Curves.fastOutSlowIn, // Curva de animación
-      duration: const Duration(milliseconds: 300),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Material(
-          elevation: 0,
-          clipBehavior: Clip.antiAlias,
-          borderRadius: const BorderRadius.all(Radius.circular(8)),
-          color: Get.isDarkMode? Colors.black26: const Color.fromARGB(255, 226, 236, 244),
-          child: Center(
-            // View : muestra la informacion del ticket de compra o un pantallaso la compra realizada
-            child: controller.getStateConfirmPurchase
-                ? widgetConfirmedPurchase()
-                : ListView(
-                    key: const Key('ticket'),
-                    shrinkWrap: false,
-                    children: [ 
-
-                      // view : informacion del ticket
-                      Container( 
-                        color: Colors.green.shade400,
-                        child: Column(
+      duration: const Duration(milliseconds: 300),   
+      child:  Card(
+        clipBehavior: Clip.antiAlias,
+        margin: const EdgeInsets.symmetric(horizontal: 8),
+        elevation: 0, 
+        color: backgroundColor,
+        shape:  RoundedRectangleBorder(
+          side: BorderSide(color: borderColor.withOpacity(0.7), width: 0.5),
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: controller.getStateConfirmPurchase
+            ? widgetConfirmedPurchase()
+            : ListView(
+                key: const Key('ticket'),
+                shrinkWrap: false,
+                children: [ 
+      
+                  // view : informacion del ticket
+                  Column(
+                    children: [
+                      const SizedBox(height: 20),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text('Ticket',textAlign: TextAlign.center,style: textDescrpitionStyle.copyWith(fontSize: 30, fontWeight: FontWeight.bold))),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const SizedBox(height: 20),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text('Ticket',textAlign: TextAlign.center,style: textDescrpitionStyle.copyWith(fontSize: 30, fontWeight: FontWeight.bold))),
-                            Material(
-                                color: Colors.transparent, //Colors.blueGrey.withOpacity(0.1),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(homeController.getProfileAccountSelected.name,textAlign: TextAlign.center,style: textValuesStyle.copyWith(fontSize: 18,fontWeight: FontWeight.bold)),
-                                )),
-                            // view : lines ------
-                            dividerLinesWidget,
-                            const SizedBox(height: 20),
-                            // text : cantidad de elementos 'productos' seleccionados
-                            Padding(
-                              padding: padding,
-                              child: Row(
-                                children: [
-                                  const Opacity(opacity: 0.7,child: Text('Productos:',style: textDescrpitionStyle)),
-                                  const Spacer(),
-                                  Text(controller.getListProductsSelestedLength.toString(),style: textValuesStyle),
-                                ],
-                              ),
-                            ),
-                            // text : medio de pago
-                            Padding(
-                              padding: padding,
-                              child: Row(
-                                children: [
-                                  const Opacity(opacity: 0.7,child: Text('Medio de pago:',style: textDescrpitionStyle)),
-                                  const Spacer(),
-                                  Text(controller.getTicket.getNamePayMode,style: textValuesStyle),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            // view : lines ------
-                            dividerLinesWidget,
-                            // text : el monto total de la transacción
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 20),
-                              child: Row(
-                                children: [
-                                  Text('Total a cobrar',style: textDescrpitionStyle.copyWith(fontSize: 20,fontWeight: FontWeight.w900)),
-                                  const Spacer(),
-                                  Text(Publications.getFormatoPrecio(monto: controller.getCountPriceTotal()),style: textValuesStyle.copyWith(fontSize: 24,fontWeight: FontWeight.w900)),
-                                ],
-                              ),
-                            ),
-                            // text : paga con
-                            controller.getValueReceivedTicket == 0 || controller.getTicket.payMode != 'effective'
-                                ? Container()
-                                : Padding(
-                                    padding: padding,
-                                    child: Row(
-                                      children: [
-                                        const Opacity(
-                                            opacity: 0.7,
-                                            child: Text(
-                                              'Pago con:',
-                                              style: textDescrpitionStyle,
-                                            )),
-                                        const Spacer(),
-                                        Text(controller.getValueReceived(),style: textValuesStyle),
-                                      ],
-                                    ),
-                                  ),
-                            // text : vuelto
-                            controller.getValueReceivedTicket == 0 || controller.getTicket.payMode != 'effective'
-                                ? Container()
-                                : Padding(
-                                    padding: padding,
-                                    child: Row(
-                                      children: [
-                                        const Opacity(opacity: 0.7,child: Text('Vuelto:',style: textDescrpitionStyle)),
-                                        const Spacer(),
-                                        Material(
-                                          elevation: 0,
-                                          color: Colors.green.shade300,
-                                          borderRadius: BorderRadius.circular(8.0),
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric( horizontal: 12, vertical: 1),
-                                            child: Row(
-                                              children: [
-                                                Text('Dar vuelto ', style: textValuesStyle.copyWith(color: Colors.white)),
-                                                Text(
-                                                  controller.getValueChange(),
-                                                  style: textValuesStyle.copyWith(
-                                                      color: Colors.white,
-                                                      fontSize: 16),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ), 
-                            const SizedBox(height: 20),
+                            // image : avatar del usuario
+                            ComponentApp().userAvatarCircle(urlImage: homeController.getProfileAccountSelected.image),
+                            const SizedBox(width: 5),
+                            // text : name 
+                            Text(homeController.getProfileAccountSelected.name,textAlign: TextAlign.center,style: textValuesStyle.copyWith(fontSize: 18,fontWeight: FontWeight.bold)),
                           ],
                         ),
-                      ), 
-                      // view 2
-                      Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 24, top: 24),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Text('El cliente paga con:',style: textDescrpitionDesing2Style ),
-                                const SizedBox(height: 12),
-                                Wrap(
-                                  key: homeController.buttonsPaymenyMode, 
-                                  children: [
-                                    //  button : pago con efectivo
-                                    Padding(
-                                      padding: const EdgeInsets.all(2.0),
-                                      child: ElevatedButton.icon( 
-                                        style: ButtonStyle(elevation: MaterialStateProperty.all(controller.getTicket.payMode =='effective'? 5: 0)),
-                                        icon: controller.getTicket.payMode != 'effective'? Container(): const Icon(Icons.money_rounded),
-                                        onPressed: () {
-                                          controller.setPayModeTicket = 'effective'; 
-                                          controller.dialogSelectedIncomeCash();
-                                        },
-                                        label: Text(controller.getValueReceivedTicket != 0.0 ? Publications.getFormatoPrecio(monto: controller.getValueReceivedTicket): 'Efectivo'),
-                                      ),
-                                    ),
-                                    // button : pago con mercado pago
-                                    Padding(
-                                      padding: const EdgeInsets.all(2.0),
-                                      child: ElevatedButton.icon(
-                                        style: ButtonStyle(elevation:MaterialStateProperty.all(controller.getTicket.payMode =='mercadopago'? 5: 0)),
-                                        icon: controller.getTicket.payMode != 'mercadopago'?Container(): const Icon(Icons.check_circle_rounded),
-                                        onPressed: () {
-                                          controller.setPayModeTicket = 'mercadopago';
-                                          // default value
-                                          controller.setValueReceivedTicket = 0.0;
-                                        },
-                                        label: const Text('Mercado Pago'),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                //  button : pago con tarjeta de credito/debito
-                                Padding(
-                                  padding: const EdgeInsets.all(2.0),
-                                  child: ElevatedButton.icon(
-                                    style: ButtonStyle(elevation: MaterialStateProperty.all(controller.getTicket.payMode == 'card'?5:0)),
-                                    icon: controller.getTicket.payMode != 'card'? Container(): const Icon(Icons.credit_card_outlined),
-                                    onPressed: () {
-                                      controller.setPayModeTicket = 'card';
-                                      // default values
-                                      controller.setValueReceivedTicket = 0.0;
-                                    },
-                                    label: const Text('Tarjeta de Debito/Credito'),
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                              ],
-                            ),
+                      ),
+                      // view : lines ------
+                      dividerLinesWidget,
+                      const SizedBox(height: 20),
+                      // text : cantidad de elementos 'productos' seleccionados
+                      Padding(
+                        padding: padding,
+                        child: Row(
+                          children: [
+                            const Opacity(opacity: 0.7,child: Text('Productos:',style: textDescrpitionStyle)),
+                            const Spacer(),
+                            Text(controller.getListProductsSelestedLength.toString(),style: textValuesStyle),
+                          ],
+                        ),
+                      ),
+                      // text : medio de pago
+                      Padding(
+                        padding: padding,
+                        child: Row(
+                          children: [
+                            const Opacity(opacity: 0.7,child: Text('Medio de pago:',style: textDescrpitionStyle)),
+                            const Spacer(),
+                            Text(controller.getTicket.getNamePayMode,style: textValuesStyle),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20), 
+                      // text : el monto total de la transacción
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 20, vertical:0),
+                        color: Colors.green,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Row(
+                            children: [
+                              Text('Total a cobrar',style: textDescrpitionStyle.copyWith(fontSize: 20,fontWeight: FontWeight.w900,color: Colors.white)),
+                              const Spacer(),
+                              Text(Publications.getFormatoPrecio(monto: controller.getCountPriceTotal()),style: textValuesStyle.copyWith(fontSize: 24,fontWeight: FontWeight.w900,color: Colors.white)),
+                            ],
                           ),
-                        ],
+                        ),
+                      ),
+                      // spacer
+                      const SizedBox(height: 20),
+                      // text : paga con
+                      controller.getValueReceivedTicket == 0 || controller.getTicket.payMode != 'effective'
+                          ? Container()
+                          : Padding(
+                              padding: padding,
+                              child: Row(
+                                children: [
+                                  const Opacity(
+                                      opacity: 0.7,
+                                      child: Text(
+                                        'Pago con:',
+                                        style: textDescrpitionStyle,
+                                      )),
+                                  const Spacer(),
+                                  Text(controller.getValueReceived(),style: textValuesStyle),
+                                ],
+                              ),
+                            ),
+                      // text : vuelto
+                      controller.getValueReceivedTicket == 0 || controller.getTicket.payMode != 'effective'
+                          ? Container()
+                          : Padding(
+                              padding: padding,
+                              child: Row(
+                                children: [
+                                  const Opacity(opacity: 0.7,child: Text('Vuelto:',style: textDescrpitionStyle)),
+                                  const Spacer(),
+                                  Container( 
+                                    color: Colors.black26, 
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric( horizontal: 12, vertical: 1),
+                                      child: Row(
+                                        children: [
+                                          const Text('Dar vuelto ', style: textValuesStyle ),
+                                          Text(controller.getValueChange(),style: textValuesStyle.copyWith(fontSize: 16)),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),  
+                    ],
+                  ), 
+                  // spacer
+                  const SizedBox(height: 24),
+                  // view 2
+                  Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12, top: 0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text('El cliente paga con:',style: textDescrpitionDesing2Style ),
+                            const SizedBox(height: 12),
+      
+                            Wrap(
+                              spacing: 5,
+                              children: [
+                                // choiceChip : pago con efectivo
+                                ChoiceChip( 
+                                  label: const Text('Efectivo'),
+                                  selected: controller.getTicket.payMode == 'effective',
+                                  onSelected: (bool selected) {
+                                    controller.setPayModeTicket = 'effective'; 
+                                    controller.dialogSelectedIncomeCash(); 
+                                  }, 
+                                ),
+                                // choiceChip : pago con mercado pago
+                                ChoiceChip(
+                                  label: const Text('Mercado Pago'),
+                                  selected: controller.getTicket.payMode == 'mercadopago',
+                                  onSelected: (bool selected) { 
+                                    controller.setPayModeTicket = 'mercadopago';
+                                      // default value
+                                      controller.setValueReceivedTicket = 0.0;
+                                  },
+                                ),
+                                // choiceChip : pago con tarjeta de credito/debito
+                                ChoiceChip(
+                                  label: const Text('Tarjeta de Debito/Credito'),
+                                  selected: controller.getTicket.payMode == 'card',
+                                  onSelected: (bool selected) { 
+                                    controller.setPayModeTicket = 'card';
+                                  // default values
+                                  controller.setValueReceivedTicket = 0.0;
+                                  },
+                                ),
+                              ],
+                            ), 
+                            const SizedBox(height: 12),
+                          ],
+                        ),
                       ),
                     ],
                   ),
-          ),
-        ),
+                ],
+              ),
       ),
     );
   }
