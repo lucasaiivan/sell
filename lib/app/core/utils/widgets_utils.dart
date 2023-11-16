@@ -488,20 +488,15 @@ class WidgetDrawer extends StatelessWidget {
     final textButtonLogin = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: SizedBox(width: double.infinity,child: FloatingActionButton(onPressed: homeController.signOutFirebase,elevation: 0,child: const Text('Iniciar sesión',style: TextStyle(color: Colors.white),))),
-    );
-
-
-
+    ); 
+    
     return ListView( 
       children: [
         const SizedBox(height: 50),
         homeController.getFirebaseAuth.currentUser!.isAnonymous?textButtonLogin
         //  avatar de la cuenta
         :ListTile(
-          leading: Container(
-            padding: const EdgeInsets.all(0.0),
-              child: ComponentApp().userAvatarCircle(urlImage: homeController.getProfileAccountSelected.image),
-          ),
+          leading: Container(padding: const EdgeInsets.all(0.0),child: ComponentApp().userAvatarCircle(urlImage: homeController.getProfileAccountSelected.image)),
           title: Text(homeController.getIdAccountSelected == ''? 'Seleccionar una cuenta': homeController.getProfileAccountSelected.name,maxLines: 1,overflow: TextOverflow.ellipsis),
           subtitle: homeController.getIdAccountSelected == ''? null: Row(
             crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment:  MainAxisAlignment.start,

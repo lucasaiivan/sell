@@ -218,7 +218,8 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
   Widget item({required ProductCatalogue product}){
 
     // var 
-    String valueDataUpdate ='Actualizado ${Publications.getFechaPublicacion(fechaActual:product.upgrade.toDate(),fechaPublicacion:  Timestamp.now().toDate())}';
+    String valueDataUpdate ='Actualizado ${Publications.getFechaPublicacion(fechaPublicacion:product.upgrade.toDate(),fechaActual:  Timestamp.now().toDate() )}'; 
+
 
     // styles
     final Color highlightColor = Get.isDarkMode?Colors.white:Colors.black;

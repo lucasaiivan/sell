@@ -90,7 +90,7 @@ class HomeController extends GetxController {
       // condition : comprobar si en revenuecat se inicio sesion  
       //await Purchases.logOut(); 
       // loginResult : resultado de la identificación de usuario
-      LogInResult result =await Purchases.logIn(clientRevenueCatID).then((value) async{
+      LogInResult result = await Purchases.logIn(clientRevenueCatID).then((value) async{
         // get : obtenemos las ofertas de compra
         await Purchases.getOfferings().then((value) => offerings = value ); 
         return value;
@@ -261,8 +261,8 @@ class HomeController extends GetxController {
   UserModel _adminUser = UserModel(creation: Timestamp.now(),lastUpdate: Timestamp.now());
   UserModel get getProfileAdminUser => _adminUser;
   set setProfileAdminUser(UserModel user) {
-     _adminUser = user;  
-     update();
+    _adminUser = user;  
+    update();
   }
 
   // profile account selected
@@ -318,6 +318,7 @@ class HomeController extends GetxController {
   @override
   void onInit() async {
     super.onInit(); 
+  
     // inicialización de la variable
     setFirebaseAuth = FirebaseAuth.instance; // inicializamos la autenticación de firebase
     isAppUpdated(); // verificamos si la app esta actualizada
@@ -1128,42 +1129,44 @@ class HomeController extends GetxController {
     }
   }
 
-  // Cambiar de cuenta
+  // void : funcion para cambiar de cuenta en la app
   void accountChange({required String idAccount}) {
     // save key/values Storage
     GetStorage().write('idAccount', idAccount);
     // navegar hacia otra pantalla
-    Get.offAllNamed(Routes.HOME,arguments: {'currentUser': getUserAuth, 'idAccount': idAccount});
+    Get.offAllNamed(Routes.HOME,arguments: {'currentUser': getUserAuth, 'idAccount': idAccount} );
   }
 
   // BottomSheet - Getx
   void showModalBottomSheetSelectAccount() {
     // muestra las cuentas en el que el usuario tiene accesos
+
+    // widgets
     Widget widget = !checkAccountExistence
-        ? WidgetButtonListTile().buttonListTileCrearCuenta()
-        : Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Padding(
-                padding:
-                    EdgeInsets.only(bottom: 12, left: 12, right: 12, top: 20),
-                child: Text('Tienes acceso a estas cuentas'),
-              ),
-              ListView.builder(
-                padding: const EdgeInsets.symmetric(),
-                shrinkWrap: true,
-                itemCount: getManagedAccountsList.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return Column(
-                    children: [
-                      WidgetButtonListTile().buttonListTileItemCuenta( perfilNegocio: getManagedAccountsList[index]),
-                      ComponentApp().divider(),
-                    ],
-                  );
-                },
-              ),
-            ],
-          );
+      ? WidgetButtonListTile().buttonListTileCrearCuenta()
+      : Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(bottom: 12, left: 12, right: 12, top: 20),
+            child: Text('Tienes acceso a estas cuentas'),
+          ),
+          ListView.builder(
+            padding: const EdgeInsets.symmetric(),
+            shrinkWrap: true,
+            itemCount: getManagedAccountsList.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Column(
+                children: [
+                  WidgetButtonListTile().buttonListTileItemCuenta( perfilNegocio: getManagedAccountsList[index]),
+                  ComponentApp().divider(),
+                ],
+              );
+            },
+          ),
+        ],
+      );
+
     // muestre la hoja inferior modal de getx
     Get.bottomSheet(
       ListView(
@@ -1173,7 +1176,7 @@ class HomeController extends GetxController {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              // cerrar sesion
+              // button : cerrar sesion
               ListTile(
                 title: const Text('Cerrar sesión'),
                 subtitle: Text(getUserAuth.email.toString(),
@@ -1190,9 +1193,7 @@ class HomeController extends GetxController {
       backgroundColor: Get.theme.scaffoldBackgroundColor,
       enableDrag: true,
       isDismissible: true,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20), topRight: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
     );
   }
 

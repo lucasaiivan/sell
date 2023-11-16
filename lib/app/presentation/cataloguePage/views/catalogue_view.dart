@@ -317,8 +317,7 @@ class CataloguePage extends StatelessWidget {
     // var
     double titleSize = 16; 
     String alertStockText = item.stock ? (item.quantityStock == 0 ? 'Sin stock' : '') : ''; 
-    String valueDataUpdate ='Actualizado ${Publications.getFechaPublicacion(fechaActual:item.upgrade.toDate(),fechaPublicacion:  Timestamp.now().toDate())}';
-    valueDataUpdate = valueDataUpdate.substring(0, 1).toUpperCase() + valueDataUpdate.substring(1).toLowerCase();
+    String valueDataUpdate ='Actualizado ${Publications.getFechaPublicacion(fechaPublicacion:item.upgrade.toDate(),fechaActual:  Timestamp.now().toDate() )}'; 
 
     // styles
     final Color primaryTextColor  = Get.isDarkMode?Colors.white:Colors.black;
@@ -358,19 +357,12 @@ class CataloguePage extends StatelessWidget {
         ), 
         // view : texts
         homeController.getIsSubscribedPremium==false?Container():
-        Wrap(
+        item.stock?Row(
           children: [
-            // text : fecha de la ultima actualización
-            Text( valueDataUpdate ,style: textStyleSecundary.copyWith(fontSize: 12),),
-            // text : disponibilidad de stock
-            item.stock?Row(
-              children: [
-                Text(item.quantityStock.toString(),style: textStylePrimery.copyWith(color: catalogueController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
-                Text(' Disponible ',style: textStylePrimery.copyWith(color: catalogueController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
-              ],
-            ):Container(),
+            Text(item.quantityStock.toString(),style: textStylePrimery.copyWith(color: catalogueController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
+            Text(' Disponible ',style: textStylePrimery.copyWith(color: catalogueController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
           ],
-        ),
+        ):Container(),
         // text : favorito
         Row(
           children: [
@@ -379,6 +371,8 @@ class CataloguePage extends StatelessWidget {
             alertStockText == '' ? Container() : Text(alertStockText),
           ],
         ),
+        // text : fecha de la ultima actualización
+        Text( valueDataUpdate ,style: textStyleSecundary.copyWith(fontSize: 12)),
       ],
     );
     dynamic priceWidget = Column(
