@@ -362,6 +362,18 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     }
     getProductsSelectedList.clear();
   }
+  void updatePricePurchaseAndSalesWithPercentage({required List<ProductCatalogue> list,required double percentage}){
+    // con un porcentaje actualiza el precio de compra y venta de todos los productos de la lista pasado por parametro y redondear al numero mas sercano 
+    for (var element in list) {
+      element.purchasePrice = 
+      element.salePrice = element.salePrice + (element.salePrice * percentage / 100); // actualizamos el precio de venta
+      element.upgrade = Timestamp.now(); // actualizamos la fecha de actualizacion
+      // firebase 
+      Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(element.id).set(element.toJson());
+      // publicamos el precio de venta
+      publishSalePricePublic(productCatalogue: element);
+    }
+  }
   void publishSalePricePublic({ required ProductCatalogue productCatalogue}){
     // description : publica el precio de venta de un producto en la base de datos publica
     // Registra el precio en una colección publica
@@ -661,6 +673,11 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
               Get.back();
               updatePricePurchaseAndSalesDialog(); 
             },child: const Text('Actualizar ambos precios')),
+            // textButton : actualizar precio de compra y venta con porcentaje
+            TextButton(onPressed: () {
+              Get.back();
+              updatePricePurchaseAndSalesWithPercentageDialog();
+            },child: const Text('Actualizar ambos precios con porcentaje')),
           ],
         ),
         actions: [
@@ -695,7 +712,7 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
               controller: pricePurchaseController,
               enabled: true, 
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(filled: true,labelText: 'Precio de costo'),
+              decoration: const InputDecoration(filled: true,labelText: 'Precio de costo',prefixIcon: Icon(Icons.monetization_on_rounded)),
             ),
             const SizedBox(height: 10),
             // textfield : precio de venta
@@ -704,7 +721,7 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
               controller: priceSaleController,
               enabled: true, 
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(filled: true,labelText: 'Precio de venta al público'),
+              decoration: const InputDecoration(filled: true,labelText: 'Precio de venta al público',prefixIcon: Icon(Icons.monetization_on_rounded)),
             ),
           ],
         ),
@@ -747,7 +764,7 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
               controller: priceSaleController,
               enabled: true, 
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(filled: true,labelText: 'Precio de venta'),  
+              decoration: const InputDecoration(filled: true,labelText: 'Precio de venta',prefixIcon: Icon(Icons.monetization_on_rounded)),  
             ),
           ],
         ),
@@ -775,6 +792,7 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
     );
   }
   void updatePricePurchaseDialog(){
+
     // controllers
     MoneyMaskedTextController controllerTextEditPrecioCosto = MoneyMaskedTextController(leftSymbol: '\$');
 
@@ -794,7 +812,7 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
               controller: controllerTextEditPrecioCosto,
               enabled: true, 
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(filled: true,labelText: 'Precio de costo'),  
+              decoration: const InputDecoration(filled: true,labelText:'Precio de costo',prefixIcon: Icon(Icons.monetization_on_rounded)),  
             ),
           ],
         ),
@@ -823,6 +841,62 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
       )
     );
   }
+  void updatePricePurchaseAndSalesWithPercentageDialog(){
+    // controllers 
+    TextEditingController percentageController = TextEditingController();
+
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Actualizar precios con porcentaje'),  
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // text : texto informativo de la cantidad de productos seleccionados
+            Text( catalogueController.getProductsSelectedList.length==1?'${ catalogueController.getProductsSelectedList.length} producto seleccionado':'${ catalogueController.getProductsSelectedList.length} productos seleccionados' ,style: const TextStyle(fontWeight: FontWeight.w400)),
+            const SizedBox(height: 10),
+            // textfield : porcentaje
+            TextField(  
+              autofocus: false,
+              controller: percentageController,
+              enabled: true, maxLength: 3, 
+              keyboardType: const TextInputType.numberWithOptions(decimal: false),
+              decoration: const InputDecoration(filled: true,labelText:'Porcentaje',prefixIcon: Icon(Icons.percent_rounded)),  
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: const Text('Cerrar'),
+          ),
+          TextButton(
+            onPressed: () {   
+
+              // condition : porcentaje no puede ser 0
+              if( percentageController.value.text == ''){
+                Get.snackbar('Error', 'Debe ingresar un porcentaje');
+                return;
+              }
+
+              // var
+              double percentage = double.parse(percentageController.value.text);
+
+              // function : actualizar precio de compra de los productos seleccionados
+              catalogueController.updatePricePurchaseAndSalesWithPercentage( list: catalogueController.getProductsSelectedList,percentage: percentage);
+            
+              Get.back();
+
+            },
+            child: const Text('Actualizar'),
+          ),
+        ],
+      )
+    );
+ 
+  } 
   void confirmDeleteProductDialog(){
     Get.dialog(
       AlertDialog(
