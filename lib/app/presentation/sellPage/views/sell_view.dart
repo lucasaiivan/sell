@@ -149,7 +149,7 @@ class SalesView extends StatelessWidget {
 
   Widget drawerTicket({required SalesController controller}) {
     // values
-    const EdgeInsets padding = EdgeInsets.symmetric(horizontal: 20, vertical: 2);
+    const EdgeInsets padding = EdgeInsets.symmetric(horizontal: 20, vertical:1);
     final TicketModel ticket = controller.getTicket;
     ticket.priceTotal = 500.0;
 
@@ -229,19 +229,8 @@ class SalesView extends StatelessWidget {
                             Text(controller.getListProductsSelestedLength.toString(),style: textValuesStyle),
                           ],
                         ),
-                      ),
-                      // text : medio de pago
-                      Padding(
-                        padding: padding,
-                        child: Row(
-                          children: [
-                            const Opacity(opacity: 0.7,child: Text('Medio de pago:',style: textDescrpitionStyle)),
-                            const Spacer(),
-                            Text(controller.getTicket.getNamePayMode,style: textValuesStyle),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 20), 
+                      ), 
+                      const SizedBox(height:12), 
                       // text : el monto total de la transacción
                       Container(
                         margin: const EdgeInsets.symmetric(horizontal: 20, vertical:0),
@@ -250,15 +239,15 @@ class SalesView extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: Row(
                             children: [
-                              Text('Total a cobrar',style: textDescrpitionStyle.copyWith(fontSize: 20,fontWeight: FontWeight.w900,color: Colors.white)),
+                              Text('Total a cobrar',style: textDescrpitionStyle.copyWith(fontSize: 16,fontWeight: FontWeight.w900,color: Colors.white)),
                               const Spacer(),
+                              const SizedBox(width:12),
                               Text(Publications.getFormatoPrecio(monto: controller.getCountPriceTotal()),style: textValuesStyle.copyWith(fontSize: 24,fontWeight: FontWeight.w900,color: Colors.white)),
                             ],
                           ),
                         ),
-                      ),
-                      // spacer
-                      const SizedBox(height: 20),
+                      ), 
+                      const SizedBox(height: 12),
                       // text : paga con
                       controller.getValueReceivedTicket == 0 || controller.getTicket.payMode != 'effective'
                           ? Container()
@@ -266,12 +255,7 @@ class SalesView extends StatelessWidget {
                               padding: padding,
                               child: Row(
                                 children: [
-                                  const Opacity(
-                                      opacity: 0.7,
-                                      child: Text(
-                                        'Pago con:',
-                                        style: textDescrpitionStyle,
-                                      )),
+                                  const Opacity(opacity: 0.7,child: Text('Pago con:',style: textDescrpitionStyle)),
                                   const Spacer(),
                                   Text(controller.getValueReceived(),style: textValuesStyle),
                                 ],
@@ -279,32 +263,36 @@ class SalesView extends StatelessWidget {
                             ),
                       // text : vuelto
                       controller.getValueReceivedTicket == 0 || controller.getTicket.payMode != 'effective'
-                          ? Container()
-                          : Padding(
-                              padding: padding,
-                              child: Row(
-                                children: [
-                                  const Opacity(opacity: 0.7,child: Text('Vuelto:',style: textDescrpitionStyle)),
-                                  const Spacer(),
-                                  Container( 
-                                    color: Colors.black26, 
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric( horizontal: 12, vertical: 1),
-                                      child: Row(
-                                        children: [
-                                          const Text('Dar vuelto ', style: textValuesStyle ),
-                                          Text(controller.getValueChange(),style: textValuesStyle.copyWith(fontSize: 16)),
-                                        ],
-                                      ),
-                                    ),
+                        ? Container()
+                        : Padding(
+                          padding: padding,
+                          child: Row(
+                            children: [
+                              const Opacity(opacity: 0.7,child: Text('Vuelto:',style: textDescrpitionStyle)),
+                              const Spacer(),
+                              Container( 
+                                color: Colors.black26, 
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric( horizontal: 12, vertical: 1),
+                                  child: Row(
+                                    children: [
+                                      const Text('Dar vuelto ', style: textValuesStyle ),
+                                      Text(controller.getValueChange(),style: textValuesStyle.copyWith(fontSize: 16)),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
-                            ),  
+                            ],
+                          ),
+                        ),  
                     ],
-                  ), 
+                  ),
                   // spacer
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 12),
+                  // view : lines ------
+                  dividerLinesWidget,
+                  // spacer
+                  const SizedBox(height: 12),
                   // view 2
                   Column(
                     children: [
@@ -953,8 +941,7 @@ class SalesView extends StatelessWidget {
               onPressed: controller.getListProductsSelested.isEmpty
                   ? null
                   : () {
-                      controller.setTicketView = true;
-                      controller.setValueReceivedTicket = 0.0;
+                      controller.setTicketView = true; 
                     },
               backgroundColor: controller.getListProductsSelested.isEmpty
                   ? Colors.grey
