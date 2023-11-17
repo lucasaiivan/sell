@@ -1130,9 +1130,9 @@ class HomeController extends GetxController {
   }
 
   // void : funcion para cambiar de cuenta en la app
-  void accountChange({required String idAccount}) {
+  void accountChange({required String idAccount}) async {
     // save key/values Storage
-    GetStorage().write('idAccount', idAccount);
+    await GetStorage().write('idAccount', idAccount);
     // navegar hacia otra pantalla
     Get.offAllNamed(Routes.HOME,arguments: {'currentUser': getUserAuth, 'idAccount': idAccount} );
   }
