@@ -134,10 +134,10 @@ class HomeController extends GetxController {
     update();
   }
 
-  void disableCatalogUserGuide() async {
+  void disableCatalogUserGuide() {
     // Deshabilitar la guía del usuario del catálogo
     catalogUserHuideVisibility = false;
-    await GetStorage().write('catalogUserHuideVisibility', catalogUserHuideVisibility);
+    GetStorage().write('catalogUserHuideVisibility', catalogUserHuideVisibility);
   }
 
   // list admins users

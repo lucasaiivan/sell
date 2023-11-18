@@ -8,15 +8,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart'; 
-import 'package:search_page/search_page.dart';
-import 'package:sell/app/core/utils/fuctions.dart';
+import 'package:search_page/search_page.dart'; 
 import 'package:shimmer/shimmer.dart';
 import 'package:uuid/uuid.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../data/datasource/database_cloud.dart';
 import '../../../core/utils/widgets_utils.dart';
-import '../../home/controller/home_controller.dart';
-import 'package:http/http.dart' as http;
+import '../../home/controller/home_controller.dart'; 
 
 class ControllerProductsEdit extends GetxController {
 
@@ -421,14 +419,14 @@ class ControllerProductsEdit extends GetxController {
             if ( getStock ? (getQuantityStock >= 1) : true) {
 
               // Deshabilitar la guía del usuario del catálogo
-              homeController.disableCatalogUserGuide();
+              //homeController.disableCatalogUserGuide();
               
               // update view
               setDataUploadStatus = true;
               setTextAppBar = getNewProduct?'Publicando...':'Espere por favor...';
-              updateAll();
+              update();
 
-              // set : values
+              /* // set : values
               getProduct.description = Utils().capitalize(controllerTextEditDescripcion.text); // controllerTextEditDescripcion.text;
               getProduct.upgrade = Timestamp.now();
               getProduct.idMark = getMarkSelected.id;
@@ -487,7 +485,7 @@ class ControllerProductsEdit extends GetxController {
                   .whenComplete(() async {
                     await Future.delayed(const Duration(seconds: 3)).then((value) {setDataUploadStatus = false; Get.back(); });
                 }).onError((error, stackTrace) => setDataUploadStatus = false).catchError((_) => setDataUploadStatus = false);
-
+ */
 
             } else {
               Get.snackbar(
@@ -869,19 +867,22 @@ class ControllerProductsEdit extends GetxController {
 
   // widget : imagen del producto
   Widget loadImage({double size = 120}) {
+    
+    // var
+    double radius = 5;
 
     // devuelve la imagen del product
     if (getXFileImage.path != '') {
       // el usuario cargo un nueva imagen externa 
-      return ImageProductAvatarApp( path: getXFileImage.path,size: size,onTap: getProduct.verified==false || getEditModerator? showModalBottomSheetCambiarImagen : null );
+      return ImageProductAvatarApp( radius: radius,path: getXFileImage.path,size: size,onTap: getProduct.verified==false || getEditModerator? showModalBottomSheetCambiarImagen : null );
     } else { 
 
       // si no contiene ningun dato la imagen del producto se visualiza una imagen con un icon para agregar foto
       if(getProduct.image == ''){
-        return ImageProductAvatarApp( iconAdd: true,path: '',size: size,onTap: getProduct.verified==false || getEditModerator? showModalBottomSheetCambiarImagen : null );
+        return ImageProductAvatarApp(radius: radius, iconAdd: true,path: '',size: size,onTap: getProduct.verified==false || getEditModerator? showModalBottomSheetCambiarImagen : null );
       }
       // se visualiza la imagen del producto
-      return ImageProductAvatarApp(url: getProduct.image ,size: size,onTap: getProduct.verified==false || getEditModerator? showModalBottomSheetCambiarImagen : null );
+      return ImageProductAvatarApp(radius: radius,url: getProduct.image ,size: size,onTap: getProduct.verified==false || getEditModerator? showModalBottomSheetCambiarImagen : null );
     }
   }
 
