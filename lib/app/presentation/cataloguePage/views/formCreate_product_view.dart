@@ -5,8 +5,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
-import 'package:sell/app/core/utils/fuctions.dart';
+import 'package:get/get.dart'; 
 import 'package:sell/app/presentation/cataloguePage/views/product_edit_view.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/utils/widgets_utils.dart';
@@ -70,11 +69,29 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
 
     // values
     Color colorAccent = controller.darkMode?Colors.white:Colors.black;
+    bool imageProductExist = controller.getProduct.image != '' || controller.getXFileImage.path != '' && controller.currentSlide != 0;
+    String title = controller.getProduct.description!=''?controller.getProduct.description:controller.getTextAppBar;
+
+    // widgets
+    Widget titleWidget = Row(
+      children: [
+        // image : imagen del producto
+        imageProductExist?controller.loadImage(size:40):Container(),
+        imageProductExist?const SizedBox(width: 12):Container(),
+        // text : nombre del producto
+        Text(title,style: TextStyle(  color: colorAccent,fontSize: 18 )),
+      ],
+    );
+    // si se esta guardando los datos del producto
+    if( controller.getDataUploadStatus){
+      titleWidget = Text(controller.getTextAppBar,style: TextStyle(  color: colorAccent,fontSize: 18 ));
+    }
+    
 
     return AppBar(
       systemOverlayStyle: controller.darkMode?SystemUiOverlayStyle.light:SystemUiOverlayStyle.dark,
       iconTheme: IconThemeData(color: colorAccent),
-      title: Text(controller.getTextAppBar,style: TextStyle(  color: colorAccent,fontSize: 18 )),
+      title: titleWidget,
       bottom: controller.getDataUploadStatus? PreferredSize(preferredSize: const Size.fromHeight(4), child: ComponentApp().linearProgressBarApp(color: controller.colorLoading)):PreferredSize(preferredSize: const Size.fromHeight(4), child: lineProgressIndicator),
     );
   }
@@ -83,6 +100,13 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
     // values
     Color boderLineColor = Get.theme.textTheme.bodyMedium!.color ?? Colors.black;
     RoundedRectangleBorder shape  = RoundedRectangleBorder(borderRadius: BorderRadius.circular(6),side: BorderSide(color:boderLineColor,style: BorderStyle.none),);
+
+    // si se esta guardando los datos del producto
+    if(controller.getDataUploadStatus){
+      return Center(
+        child: cardFront,
+      );
+    }
      
     // SingleChildScrollView : Un cuadro en el que se puede desplazar un solo widget
     // Este widget es útil cuando tiene un solo cuadro que normalmente será completamente visible, por ejemplo,la aparición del teclado del sistema, pero debe asegurarse de que se pueda desplazar si el contenedor se vuelve demasiado pequeño en un eje (la dirección de desplazamiento )
@@ -90,51 +114,34 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
       children: [
         Flexible(
           flex: 1,fit: FlexFit.tight,
-          child: SingleChildScrollView(
+          child: ListView(
+            shrinkWrap: true,
             physics: const BouncingScrollPhysics(),
-            scrollDirection: Axis.vertical,
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            // Form : Crea un contenedor para campos de formulario
-            child: Column(
-              children: [ 
-                // view : tarjeta animada
-                cardFront,
-                // chips : chips de información
-                AnimatedContainer(
-                  width: double.infinity,
-                  duration: const Duration(milliseconds: 500),
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Theme(
-                    data: ThemeData.light(),
-                    child: Wrap(
-                      spacing: 5.0, // establece el espacio negativo para compactar horizontalmente  
-                      alignment:  WrapAlignment.center,
-                      children: [
-                        controller.controllerTextEditCategory.text==''?Container():InputChip(shape:shape,checkmarkColor: Colors.red,surfaceTintColor: Colors.green,onPressed: (){controller.carouselController.animateToPage(3, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text(controller.controllerTextEditCategory.text)),
-                        controller.controllerTextEditPrecioCosto.numberValue==0.0?Container():InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(4, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text(Publications.getFormatoPrecio(monto: controller.controllerTextEditPrecioCosto.numberValue))),
-                        controller.getPorcentage==''?Container():InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(5, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text( controller.getPorcentage )),
-                        controller.controllerTextEditPrecioVenta.numberValue==0.0?Container():InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(5, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: Text(Publications.getFormatoPrecio(monto: controller.controllerTextEditPrecioVenta.numberValue))),
-                        controller.getFavorite? InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(6, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label:const  Text('Favorito')):Container(),
-                        controller.getStock? InputChip(shape:shape,onPressed: (){controller.carouselController.animateToPage(7, duration:const Duration(milliseconds: 500), curve: Curves.ease);},label: const Text('Control de Stock')):Container(),
-                      ],
+            children: [
+              Center(
+                child: Column(  
+                  mainAxisSize: MainAxisSize.min,
+                  children: [ 
+                    const SizedBox(height: 50),
+                    // image : imagen del producto
+                    controller.currentSlide==0?controller.loadImage(size:150):Container(),
+                    // text and button : modificar porcentaje de ganancia
+                    controller.getPorcentage == '' || controller.currentSlide != 5 ? Container() : Padding(
+                      padding: const EdgeInsets.only(top: 20,left: 20,right: 20),
+                      child: Row(
+                        children: [  
+                          TextButton(onPressed: controller.showDialogAddProfitPercentage, child: Text( controller.getPorcentage )),
+                          const Spacer(),
+                          TextButton(onPressed: controller.showDialogAddProfitPercentage , child: const Text( 'Modificar porcentaje' )),
+                        ],
+                      ),
                     ),
-                  ),
+                    // formTexts
+                    controller.getDataUploadStatus? Container():textFieldCarrousel(),
+                  ],
                 ),
-                // text and button : modificar porcentaje de ganancia
-                controller.getPorcentage == '' || controller.currentSlide != 5 ? Container() : Padding(
-                  padding: const EdgeInsets.only(top: 20,left: 20,right: 20),
-                  child: Row(
-                    children: [  
-                      TextButton(onPressed: controller.showDialogAddProfitPercentage, child: Text( controller.getPorcentage )),
-                      const Spacer(),
-                      TextButton(onPressed: controller.showDialogAddProfitPercentage , child: const Text( 'Modificar porcentaje' )),
-                    ],
-                  ),
-                ),
-                // formTexts
-                controller.getDataUploadStatus? Container():textFieldCarrousel(),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
         // buttons : back and next
@@ -215,7 +222,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
       child: CarouselSlider.builder(
         carouselController: controller.carouselController,
         options: CarouselOptions(  
-          height: 400,
+          height: 420,
             scrollPhysics: const NeverScrollableScrollPhysics(), 
             onPageChanged: (index, reason) {
               controller.currentSlide = index;
@@ -282,7 +289,7 @@ class _FormCreateProductViewState extends State<FormCreateProductView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text('Cargar foto',style: TextStyle(color: controller.colorButton,fontSize: 18,fontWeight: FontWeight.w400)),
+                Text('Actualizar foto',style: TextStyle(color: controller.colorButton,fontSize: 18,fontWeight: FontWeight.w400)),
                 Opacity(opacity: 0.5,child: Text('visibilidad publica',style: TextStyle(color: controller.colorButton,fontSize: 12,fontWeight: FontWeight.w300))),
               ],
             ),
