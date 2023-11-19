@@ -23,7 +23,7 @@ Future<void> main() async {
     // dispositivo android 
     await Firebase.initializeApp();
 
-    // RevenueCat : subcripcion
+    // RevenueCat : subcripcion 
     await Purchases.setLogLevel(LogLevel.debug); // debug : para ver los errores en la consola
     PurchasesConfiguration configuration = PurchasesConfiguration(googleApiKey)..observerMode = false;
     await Purchases.configure(configuration); // configuramos la compra

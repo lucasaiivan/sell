@@ -10,8 +10,7 @@ import '../../../domain/entities/catalogo_model.dart';
 import '../../../core/utils/fuctions.dart';
 import '../../../core/utils/widgets_utils.dart';
 import '../../home/controller/home_controller.dart';
-import '../controller/product_edit_controller.dart';
-import 'formCreate_product_view.dart';
+import '../controller/product_edit_controller.dart'; 
 
 class ProductEdit extends StatelessWidget {
   ProductEdit({Key? key}) : super(key: key);
@@ -133,12 +132,8 @@ class ProductEdit extends StatelessWidget {
     );
   }
 
-  Widget scaffold({required BuildContext context}) {
+  Widget scaffold({required BuildContext context}) { 
 
-    // view : form new product
-    if (controller.getNewProduct) {
-      return const FormCreateProductView();
-    }
     // view : form edit product
     return Scaffold(
       appBar: appBar(contextPrincipal: context),
@@ -530,30 +525,13 @@ class ProductEdit extends StatelessWidget {
                 ),
 
                 // text : marca de tiempo de la ultima actualización del documento
-                controller.getNewProduct || !controller.getItsInTheCatalogue ? Container() :  Padding(
+                !controller.getItsInTheCatalogue ? Container() :  Padding(
                   padding: const EdgeInsets.only(top: 50),
                   //child: Text('Actualizado ${}'),
                   child: Opacity(opacity: 0.5,child: Center(child: Text('Actualizado ${Publications.getFechaPublicacion(fechaActual: controller.getProduct.upgrade.toDate(), fechaPublicacion: Timestamp.now().toDate()).toLowerCase()}'))),
                 ),
                 // button : guardar
-                const SizedBox(height:50),
-                // CheckboxListTile : consentimiento de usuario para crear un producto
-                !controller.getNewProduct ? Container() :
-                Container(
-                  margin:  const EdgeInsets.only(bottom: 20,top: 12),
-                  decoration: BoxDecoration(
-                    border: Border.all(width: 1.0, color: Colors.grey),
-                  ),
-                  child: CheckboxListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
-                    controlAffinity: ListTileControlAffinity.leading,
-                    title: const Text('Entiendo que no seré el propietario de los datos públicos asociados con el producto, ni podré editarlos después de la verificación. Además, los precios de venta serán públicos',style: TextStyle(fontWeight: FontWeight.w300)),
-                    value: controller.getUserConsent,
-                    onChanged: (value) {
-                      controller.setUserConsent = value!;
-                    },
-                  ),
-                ),
+                const SizedBox(height:50), 
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 500),
                   height: controller.getUserConsent?null:0,
@@ -563,7 +541,7 @@ class ProductEdit extends StatelessWidget {
                 //  button : guardar el producto
                 ComponentApp().button(
                   defaultStyle: true, 
-                  disable:controller.getDataUploadStatus == true || (controller.getNewProduct && !controller.getUserConsent)  ,
+                  disable:controller.getDataUploadStatus == true || !controller.getUserConsent ,
                   onPressed: controller.save,
                   icon: Container(),
                   colorButton: Colors.blue,
@@ -1074,7 +1052,7 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
                     text:  "Editar documento",
                   ), 
             // button : actualizar documento
-            controller.getDataUploadStatus || controller.getNewProduct || !controller.getEditModerator
+            controller.getDataUploadStatus ||  !controller.getEditModerator
                 ? Container()
                 : Padding(
                   padding: const EdgeInsets.only(bottom: 12),
@@ -1088,7 +1066,7 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
                     ),
                 ),
             // button : eliminar documento
-            controller.getDataUploadStatus || controller.getNewProduct || !controller.getEditModerator
+            controller.getDataUploadStatus || !controller.getEditModerator
                 ? Container()
                 : Padding(
                   padding: const EdgeInsets.only(bottom: 12),
@@ -1102,7 +1080,7 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
                     ),
                 ),
             // text : marca de tiempo de la ultima actualización del documento
-            controller.getNewProduct?Container():Opacity(opacity: 0.5,child: Center(child: Text('Creación ${Publications.getFechaPublicacion( fechaActual: controller.getProduct.documentCreation.toDate(),fechaPublicacion:  Timestamp.now().toDate()).toLowerCase()}'))), 
+            Opacity(opacity: 0.5,child: Center(child: Text('Creación ${Publications.getFechaPublicacion( fechaActual: controller.getProduct.documentCreation.toDate(),fechaPublicacion:  Timestamp.now().toDate()).toLowerCase()}'))), 
             const SizedBox(height: 30.0),
           ],
           // fin widget debug

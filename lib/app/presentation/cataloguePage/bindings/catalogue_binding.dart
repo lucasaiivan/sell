@@ -1,9 +1,9 @@
 
-import 'package:get/get.dart';
-
-import '../controller/catalogue_controller.dart';
+import 'package:get/get.dart'; 
+import '../controller/catalogue_controller.dart'; 
+import '../controller/form_create_product_controller.dart';
 import '../controller/product_edit_controller.dart';
-import '../controller/productsSearch_controller.dart';
+import '../controller/productsSearch_controller.dart'; 
 
 class ProductBinding extends Bindings {
   @override
@@ -30,6 +30,6 @@ class ProductsSarchBinding extends Bindings {
 class ProductsFormCreateBinding extends Bindings {
   @override
   void dependencies() {
-    Get.put<ControllerProductsEdit>(ControllerProductsEdit());
+    Get.put<ControllerCreateProductForm>( ControllerCreateProductForm());
   }
 }

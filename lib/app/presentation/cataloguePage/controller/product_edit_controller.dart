@@ -8,7 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart'; 
-import 'package:search_page/search_page.dart'; 
+import 'package:search_page/search_page.dart';
+import 'package:sell/app/core/utils/fuctions.dart'; 
 import 'package:shimmer/shimmer.dart';
 import 'package:uuid/uuid.dart';
 import '../../../domain/entities/catalogo_model.dart';
@@ -100,11 +101,7 @@ class ControllerProductsEdit extends GetxController {
   bool _itsInTheCatalogue = false;
   set setItsInTheCatalogue(bool value) => _itsInTheCatalogue = value;
   bool get getItsInTheCatalogue => _itsInTheCatalogue;
-
-  // variable para mostrar al usuario una viste para editar o crear un nuevo producto
-  bool _newProduct = true;
-  set setNewProduct(bool value) => _newProduct = value;
-  bool get getNewProduct => _newProduct;
+ 
 
   // variable para editar el documento en modo de moderador
   bool _editModerator = false;
@@ -278,26 +275,15 @@ class ControllerProductsEdit extends GetxController {
     setDataUploadStatus = true;
 
     // state account auth
-    setAccountAuth = homeController.getIdAccountSelected != '';
-
-    // se obtiene el parametro y decidimos si es una vista para editrar o un producto nuevo
-    setNewProduct = Get.arguments['new'] ?? false;
+    setAccountAuth = homeController.getIdAccountSelected != ''; 
     // obtenemos el producto por parametro
     ProductCatalogue productFinal = Get.arguments['product'] ?? ProductCatalogue(documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now(),upgrade: Timestamp.now(), creation: Timestamp.now());
-    //  si es un producto nuevo se le asigna solo el codigo del producto
-    if(getNewProduct){productFinal = ProductCatalogue(documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now(),upgrade: Timestamp.now(), creation: Timestamp.now()).copyWith(id: productFinal.code,code:productFinal.code );}
     //  finalmente  asigna el producto
     setProduct = productFinal;
     // load data product
-    if (getNewProduct == false) { 
-      // el documento existe
-      setTextAppBar = 'Editar';
-      isCatalogue();
-      getDataProduct(id: getProduct.id);
-    }else{
-      setTextAppBar = 'Nuevo producto';
-      loadDataFormProduct();
-    }
+    setTextAppBar = 'Editar';
+    isCatalogue();
+    getDataProduct(id: getProduct.id);
 
     super.onInit();
   }
@@ -419,14 +405,14 @@ class ControllerProductsEdit extends GetxController {
             if ( getStock ? (getQuantityStock >= 1) : true) {
 
               // Deshabilitar la guía del usuario del catálogo
-              //homeController.disableCatalogUserGuide();
+              homeController.disableCatalogUserGuide();
               
               // update view
               setDataUploadStatus = true;
-              setTextAppBar = getNewProduct?'Publicando...':'Espere por favor...';
-              update();
+              setTextAppBar = 'Espere por favor...';
+              updateAll();
 
-              /* // set : values
+              // set : values
               getProduct.description = Utils().capitalize(controllerTextEditDescripcion.text); // controllerTextEditDescripcion.text;
               getProduct.upgrade = Timestamp.now();
               getProduct.idMark = getMarkSelected.id;
@@ -485,7 +471,7 @@ class ControllerProductsEdit extends GetxController {
                   .whenComplete(() async {
                     await Future.delayed(const Duration(seconds: 3)).then((value) {setDataUploadStatus = false; Get.back(); });
                 }).onError((error, stackTrace) => setDataUploadStatus = false).catchError((_) => setDataUploadStatus = false);
- */
+
 
             } else {
               Get.snackbar(
@@ -513,30 +499,14 @@ class ControllerProductsEdit extends GetxController {
 
     // valores
     Product product = getProduct.convertProductoDefault();
-    
-    // condition : si el producto es nuevo se le asigna los valores de creación
-    if( getNewProduct ){
-      product.idAccount = homeController.getProfileAccountSelected.id;
-      product.idUserCreation = homeController.getProfileAdminUser.email;
-      product.creation = Timestamp.fromDate(DateTime.now());
-    } 
+     
     //  set : marca de tiempo que se actualizo el documento
     product.upgrade = Timestamp.fromDate(DateTime.now()); 
     //  set : id del usuario que actualizo el documento
     product.idUserUpgrade = homeController.getProfileAdminUser.email;
 
-    // condition : si el producto es nuevo se le asigna los valores de creación
-    if(getNewProduct){
-      // incrementar el valor 'followers' del producto publico
-      product.followers++; 
-      // crear el documento del producto publico
-      Database.refFirestoreProductPublic().doc(product.id).set(product.toJson());
-    }else{
-      // si el producto solo se actualiza se le asigna los valores de creación
-      //
-      // firebase: actualizar el documento del producto publico
+    // firebase: actualizar el documento del producto publico
       Database.refFirestoreProductPublic().doc(product.id).update(product.toJson());
-    } 
   }
   void setProductPublicFirestoreAndBack() { 
     // esta función procede a guardar el documento de una colleción publica
@@ -544,29 +514,13 @@ class ControllerProductsEdit extends GetxController {
     // valores
     Product product = getProduct.convertProductoDefault();
     
-    // condition : si el producto es nuevo se le asigna los valores de creación
-    if( getNewProduct ){
-      product.idAccount = homeController.getProfileAccountSelected.id;
-      product.idUserCreation = homeController.getProfileAdminUser.email;
-      product.creation = Timestamp.fromDate(DateTime.now());
-    } 
     //  set : marca de tiempo que se actualizo el documento
     product.upgrade = Timestamp.fromDate(DateTime.now()); 
     //  set : id del usuario que actualizo el documento
     product.idUserUpgrade = homeController.getProfileAdminUser.email;
 
-    // condition : si el producto es nuevo se le asigna los valores de creación
-    if(getNewProduct){
-      // incrementar el valor 'followers' del producto publico
-      product.followers++; 
-      // crear el documento del producto publico
-      Database.refFirestoreProductPublic().doc(product.id).set(product.toJson());
-    }else{
-      // si el producto solo se actualiza se le asigna los valores de creación
-      //
-      // firebase: actualizar el documento del producto publico
-      Database.refFirestoreProductPublic().doc(product.id).update(product.toJson());
-    }
+    // firebase: actualizar el documento del producto publico
+    Database.refFirestoreProductPublic().doc(product.id).update(product.toJson());
     // actualizar vista
     updateAll();
     Get.back();

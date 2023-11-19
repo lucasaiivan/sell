@@ -6,6 +6,7 @@ abstract class Routes {
   static const LOGIN = _Paths.LOGIN;
   static const HOME = _Paths.HOME;
   static const EDITPRODUCT = _Paths.EDITPRODUCT;
+  static const createProductForm = _Paths.createProductForm;
   static const SEACH_PRODUCT = _Paths.SEACH_PRODUCT;
   static const ACCOUNT = _Paths.ACCOUNT;
   static const MULTIUSER = _Paths.MULTIUSER;
@@ -16,6 +17,7 @@ abstract class _Paths {
   static const SPLASH = '/splash';
   static const LOGIN = '/login';
   static const HOME = '/home';
+  static const createProductForm = '/createProductForm';
   static const EDITPRODUCT = '/editProduct';
   static const SEACH_PRODUCT = '/seachProduct';
   static const ACCOUNT = '/account';
