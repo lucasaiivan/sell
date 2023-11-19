@@ -10,6 +10,7 @@ import '../../presentation/account/bindings/account_binding.dart';
 import '../../presentation/account/views/account_view.dart';
 import '../../presentation/auth/views/login_view.dart';
 import '../../presentation/cataloguePage/bindings/catalogue_binding.dart';
+import '../../presentation/cataloguePage/views/create_product_form_view.dart';
 import '../../presentation/cataloguePage/views/product_edit_view.dart';
 import '../../presentation/cataloguePage/views/productsSearch_view.dart';
 import '../../presentation/multiuser/bindings/multiuser_binding.dart';
@@ -35,7 +36,7 @@ class AppPages {
     ),
     GetPage(
       name: Routes.SPLASH,
-      page: () => SplashInit(),
+      page: () => const SplashInit(),
       binding: SplashBinding(),
     ),
     GetPage(
@@ -52,6 +53,11 @@ class AppPages {
       name: Routes.EDITPRODUCT,
       page: () => ProductEdit(),
       binding: ProductsEditBinding(),
+    ),
+    GetPage(
+      name: Routes.createProductForm,
+      page: () => ProductNewFormView(),
+      binding: ProductsFormCreateBinding(),
     ),
     GetPage(
       name: Routes.SEACH_PRODUCT,
