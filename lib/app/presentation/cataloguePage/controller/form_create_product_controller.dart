@@ -108,12 +108,7 @@ class ControllerCreateProductForm extends GetxController{
   // variable para saber si el producto ya esta o no en el cátalogo
   bool _itsInTheCatalogue = false;
   set setItsInTheCatalogue(bool value) => _itsInTheCatalogue = value;
-  bool get getItsInTheCatalogue => _itsInTheCatalogue;
-
-  // variable para mostrar al usuario una viste para editar o crear un nuevo producto
-  bool _newProduct = true;
-  set setNewProduct(bool value) => _newProduct = value;
-  bool get getNewProduct => _newProduct;
+  bool get getItsInTheCatalogue => _itsInTheCatalogue; 
 
   // variable para editar el documento en modo de moderador
   bool _editModerator = false;
@@ -395,7 +390,7 @@ class ControllerCreateProductForm extends GetxController{
               
               // update view
               setDataUploadStatus = true;
-              setTextAppBar = getNewProduct?'Publicando...':'Espere por favor...';
+              setTextAppBar =  'Publicando...' ;
               updateAll();
 
               // set : values
@@ -414,6 +409,9 @@ class ControllerCreateProductForm extends GetxController{
               getProduct.nameCategory = getCategory.name;
               if(controllerTextEditAlertStock.text!=''){getProduct.alertStock  = int.parse( controllerTextEditAlertStock.text );}
 
+              // TODO : DELETE RELEASE
+              getProduct.verified = true; 
+
               // actualización de la imagen del producto
               if (getXFileImage.path != '') {
                 // image - Si el "path" es distinto '' quiere decir que ahi una nueva imagen para actualizar
@@ -423,41 +421,31 @@ class ControllerCreateProductForm extends GetxController{
                 await uploadTask; // esperamos a que se suba la imagen 
                 await ref.getDownloadURL().then((value) => getProduct.image = value); // obtenemos la url de la imagen
               }
-              // procede agregrar el producto en el cátalogo
-              // Mods - save data product global
-              if ( getProduct.verified==false || getEditModerator) {
-                  setProductPublicFirestore( );
-              }
+              // procede agregrar el producto en una colección publica
+              setProductPublicFirestore();
               
               // Registra el precio en una colección publica
-                ProductPrice precio = ProductPrice(
-                  id: homeController.getProfileAccountSelected.id,
-                  idAccount: homeController.getProfileAccountSelected.id,
-                  imageAccount: homeController.getProfileAccountSelected.image,
-                  nameAccount: homeController.getProfileAccountSelected.name,
-                  price: getProduct.salePrice,
-                  currencySign: getProduct.currencySign,
-                  province: homeController.getProfileAccountSelected.province,
-                  town: homeController.getProfileAccountSelected.town,
-                  time: Timestamp.fromDate(DateTime.now()),
-                );
+              ProductPrice precio = ProductPrice(
+                id: homeController.getProfileAccountSelected.id,
+                idAccount: homeController.getProfileAccountSelected.id,
+                imageAccount: homeController.getProfileAccountSelected.image,
+                nameAccount: homeController.getProfileAccountSelected.name,
+                price: getProduct.salePrice,
+                currencySign: getProduct.currencySign,
+                province: homeController.getProfileAccountSelected.province,
+                town: homeController.getProfileAccountSelected.town,
+                time: Timestamp.fromDate(DateTime.now()),
+              ); 
 
-                // condition : si el producto no existe en el cátalogo
-                if (getItsInTheCatalogue == false) {
-                  // Firebase set : incrementamos el valor de los seguidores del producto
-                  Database.refFirestoreProductPublic().doc(getProduct.id).update({'followers': FieldValue.increment(1)});
-                }
+              // Firebase set : se crea un documento con la referencia del precio del producto
+              Database.refFirestoreRegisterPrice(idProducto: getProduct.id, isoPAis: 'ARG').doc(precio.id).set(precio.toJson());
 
-                // Firebase set : se crea un documento con la referencia del precio del producto
-                Database.refFirestoreRegisterPrice(idProducto: getProduct.id, isoPAis: 'ARG').doc(precio.id).set(precio.toJson());
-
-                // Firebase set : se crea los datos del producto del cátalogo de la cuenta
-                Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id)
-                  .set(getProduct.toJson())
-                  .whenComplete(() async {
-                    await Future.delayed(const Duration(seconds: 3)).then((value) {setDataUploadStatus = false; Get.back(); });
-                }).onError((error, stackTrace) => setDataUploadStatus = false).catchError((_) => setDataUploadStatus = false);
-
+              // Firebase set : se crea los datos del producto del cátalogo de la cuenta
+              Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id)
+                .set(getProduct.toJson())
+                .whenComplete(() async {
+                  await Future.delayed(const Duration(seconds: 3)).then((value) {setDataUploadStatus = false; Get.back(); });
+              }).onError((error, stackTrace) => setDataUploadStatus = false).catchError((_) => setDataUploadStatus = false);
 
             } else {
               Get.snackbar(
@@ -480,68 +468,25 @@ class ControllerCreateProductForm extends GetxController{
             'se produjo un error');}
   }
 
-  void setProductPublicFirestore()  { 
+  void setProductPublicFirestore()  async { 
     // esta función procede a guardar el documento de una colleción publica
 
     // valores
     Product product = getProduct.convertProductoDefault();
     
-    // condition : si el producto es nuevo se le asigna los valores de creación
-    if( getNewProduct ){
-      product.idAccount = homeController.getProfileAccountSelected.id;
-      product.idUserCreation = homeController.getProfileAdminUser.email;
-      product.creation = Timestamp.fromDate(DateTime.now());
-    } 
+    // asignamos los valores de creación
+    product.idAccount = homeController.getProfileAccountSelected.id;
+    product.idUserCreation = homeController.getProfileAdminUser.email;
+    product.creation = Timestamp.fromDate(DateTime.now());
     //  set : marca de tiempo que se actualizo el documento
     product.upgrade = Timestamp.fromDate(DateTime.now()); 
     //  set : id del usuario que actualizo el documento
     product.idUserUpgrade = homeController.getProfileAdminUser.email;
 
-    // condition : si el producto es nuevo se le asigna los valores de creación
-    if(getNewProduct){
-      // incrementar el valor 'followers' del producto publico
-      product.followers++; 
-      // crear el documento del producto publico
-      Database.refFirestoreProductPublic().doc(product.id).set(product.toJson());
-    }else{
-      // si el producto solo se actualiza se le asigna los valores de creación
-      //
-      // firebase: actualizar el documento del producto publico
-      Database.refFirestoreProductPublic().doc(product.id).update(product.toJson());
-    } 
-  }
-  void setProductPublicFirestoreAndBack() { 
-    // esta función procede a guardar el documento de una colleción publica
-
-    // valores
-    Product product = getProduct.convertProductoDefault();
-    
-    // condition : si el producto es nuevo se le asigna los valores de creación
-    if( getNewProduct ){
-      product.idAccount = homeController.getProfileAccountSelected.id;
-      product.idUserCreation = homeController.getProfileAdminUser.email;
-      product.creation = Timestamp.fromDate(DateTime.now());
-    } 
-    //  set : marca de tiempo que se actualizo el documento
-    product.upgrade = Timestamp.fromDate(DateTime.now()); 
-    //  set : id del usuario que actualizo el documento
-    product.idUserUpgrade = homeController.getProfileAdminUser.email;
-
-    // condition : si el producto es nuevo se le asigna los valores de creación
-    if(getNewProduct){
-      // incrementar el valor 'followers' del producto publico
-      product.followers++; 
-      // crear el documento del producto publico
-      Database.refFirestoreProductPublic().doc(product.id).set(product.toJson());
-    }else{
-      // si el producto solo se actualiza se le asigna los valores de creación
-      //
-      // firebase: actualizar el documento del producto publico
-      Database.refFirestoreProductPublic().doc(product.id).update(product.toJson());
-    }
-    // actualizar vista
-    updateAll();
-    Get.back();
+    // incrementar el valor 'followers' del producto publico
+    product.followers++;  
+    // crear el documento del producto publico
+    await Database.refFirestoreProductPublic().doc(product.id).set(product.toJson());
   }
   void deleteProductInCatalogue() async{
     // activate indicator load
@@ -694,17 +639,19 @@ class ControllerCreateProductForm extends GetxController{
     // function : retorna el progreso del formulario
     // value : progreso del formulario
     double progress = 0.0;
-    // estado de progreso
+    // estado de progreso hata 9
     switch(getCurrentSlide){
-      case 0:progress = 0.11; break;
-      case 1:progress = 0.22; break;
-      case 2:progress = 0.33; break;
-      case 3:progress = 0.44; break;
-      case 4:progress = 0.55; break;
-      case 5:progress = 0.66; break;
-      case 6:progress = 0.77; break;
-      case 7:progress = 0.88; break;
-      case 8:progress = 1.0; break;
+      case 0: progress = 0.0;break;
+      case 1: progress = 0.15;break;
+      case 2: progress = 0.30;break;
+      case 3: progress = 0.45;break;
+      case 4: progress = 0.60;break;
+      case 5: progress = 0.70;break;
+      case 6: progress = 0.80;break;
+      case 7: progress = 0.90;break;
+      case 8: progress = 0.95;break;
+      case 9: progress = 1.0;break;
+
       default:progress;
     } 
     return progress;
@@ -733,19 +680,19 @@ class ControllerCreateProductForm extends GetxController{
     //... currentSlide : 4
 
     // precio de venta al publico: este campo es obligatorio
-    if(getCurrentSlide == 5 && salePriceFormKey.currentState!.validate()==false ){next=false;}
+    if(getCurrentSlide == 6 && salePriceFormKey.currentState!.validate()==false ){next=false;}
     
     // favorito : este campo es opcional
     //... currentSlide : 6
 
     // control de stock : este campo es opcional
-    if(getCurrentSlide == 7 && getStock && quantityStockFormKey.currentState!.validate()==false ){
-      Get.snackbar('Debes aceptar los terminos y condiciones', 'Este campo no puede dejarse vacio',snackPosition: SnackPosition.TOP,snackStyle: SnackStyle.FLOATING,);
+    if(getCurrentSlide == 8 && getStock && quantityStockFormKey.currentState!.validate()==false ){
+      Get.snackbar(' Stock no valido 😐', 'debe proporcionar un cantidad');
       next=false;
     }
 
     // concentimientos del usuario : este campo es obligatorio para crear un producto nuevo
-    if(getCurrentSlide == 8 && getUserConsent == false){
+    if(getCurrentSlide == 9 && getUserConsent == false){
       Get.snackbar('Debes aceptar los terminos y condiciones', 'Este campo no puede dejarse vacio',snackPosition: SnackPosition.TOP,snackStyle: SnackStyle.FLOATING,);
       next=false;
     }
@@ -891,10 +838,8 @@ class ControllerCreateProductForm extends GetxController{
   // dialog : muestra el dialogo para eliminar el producto
   void showDialogDelete() {
     Widget widget = AlertDialog(
-      title: const Text(
-          "¿Seguro que quieres eliminar este producto de tu catálogo?"),
-      content: const Text(
-          "El producto será eliminado de tu catálogo y toda la información acumulada"),
+      title: const Text("¿Seguro que quieres eliminar este producto de tu catálogo?"),
+      content: const Text("El producto será eliminado de tu catálogo y toda la información acumulada"),
       actions: <Widget>[
         // usually buttons at the bottom of the dialog
         TextButton(
@@ -1276,6 +1221,8 @@ class _CreateMarkState extends State<CreateMark> {
   }
 
   PreferredSizeWidget appbar() {
+
+    // style 
     Color? colorAccent = Get.theme.textTheme.bodyLarge!.color;
 
     return AppBar(
