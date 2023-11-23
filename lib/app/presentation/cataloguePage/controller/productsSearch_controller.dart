@@ -11,10 +11,7 @@ import '../../home/controller/home_controller.dart';
 class ButtonData {
   Color colorButton = Colors.purple;
   Color colorText = Colors.white; 
-  ButtonData({required Color colorButton, required Color colorText}) {
-    this.colorButton = colorButton;
-    this.colorText = colorText;
-  }
+  ButtonData({required this.colorButton, required this.colorText});
 }
 
 class ControllerProductsSearch extends GetxController {
@@ -28,6 +25,7 @@ class ControllerProductsSearch extends GetxController {
     homeController = Get.find();
     // llamado inmediatamente después de que se asigna memoria al widget - ej. fetchApi();
     _codeBarParameter = Get.arguments['id'] ?? '';
+    // condition : si el parametro no esta vacio
     if (_codeBarParameter != '') {
       getTextEditingController.text = _codeBarParameter;
       queryProduct(id: _codeBarParameter);

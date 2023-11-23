@@ -977,7 +977,7 @@ class _SelectProviderState extends State<SelectProvider> {
   }
 }
 
- // class : vista de opciones para moderador
+// class : vista de opciones para moderador
 class OptionsModeratorsWidget extends StatefulWidget {
   const OptionsModeratorsWidget({super.key});
 

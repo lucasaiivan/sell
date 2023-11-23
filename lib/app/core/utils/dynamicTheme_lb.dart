@@ -190,14 +190,13 @@ class ThemeService {
     }
   } 
   static void switchThemeDefault() {
-    if (Platform.isAndroid) {
-      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
         systemNavigationBarColor: Get.theme.brightness == Brightness.light
-            ? ThemesDataApp.light.scaffoldBackgroundColor
-            : ThemesDataApp.dark.scaffoldBackgroundColor,
+            ? ThemesDataApp.dark.scaffoldBackgroundColor
+            : ThemesDataApp.light.scaffoldBackgroundColor,
         statusBarColor: Get.theme.brightness == Brightness.light
-            ? ThemesDataApp.light.scaffoldBackgroundColor
-            : ThemesDataApp.dark.scaffoldBackgroundColor,
+            ? ThemesDataApp.dark.scaffoldBackgroundColor
+            : ThemesDataApp.light.scaffoldBackgroundColor,
         statusBarBrightness: Get.theme.brightness == Brightness.light
             ? Brightness.light
             : Brightness.dark,
@@ -210,10 +209,9 @@ class ThemeService {
                 : Brightness.light,
         systemNavigationBarDividerColor:
             Get.theme.brightness == Brightness.light
-                ? ThemesDataApp.light.scaffoldBackgroundColor
-                : ThemesDataApp.dark.scaffoldBackgroundColor,
+                ? ThemesDataApp.dark.scaffoldBackgroundColor
+                : ThemesDataApp.light.scaffoldBackgroundColor,
       ));
-    }
   }
 }
 

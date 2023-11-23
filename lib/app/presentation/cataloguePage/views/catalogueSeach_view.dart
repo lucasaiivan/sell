@@ -62,8 +62,7 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
       toolbarHeight: 75,
       // title : textfield search con estilo simple  y fondo transparente  con un iconbutton de clean 
       title: TextField(
-        controller: _searchQueryController,
-        autofocus: true, 
+        controller: _searchQueryController, 
         style: const TextStyle(fontSize: 20),
         decoration: const InputDecoration(
           fillColor: Colors.transparent,
