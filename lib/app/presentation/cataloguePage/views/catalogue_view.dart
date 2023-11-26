@@ -431,7 +431,7 @@ class CataloguePage extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start, 
                           children: [
-                            Text(item.description, maxLines: 1,style: textStylePrimery.copyWith( fontSize: titleSize)),
+                            Text(item.description, maxLines: 1,overflow:TextOverflow.ellipsis,style: textStylePrimery.copyWith( fontSize: titleSize)),
                             description,
                           ],
                         ),

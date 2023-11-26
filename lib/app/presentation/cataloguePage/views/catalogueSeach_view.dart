@@ -275,7 +275,7 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(product.description,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(fontWeight: FontWeight.w500)),
+                        Text(product.description,maxLines: 1,overflow: TextOverflow.ellipsis,style: const TextStyle(fontWeight: FontWeight.w500)),
                         // view : marca del producto y proveedor
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,

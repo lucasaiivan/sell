@@ -292,8 +292,7 @@ class ProductEdit extends StatelessWidget {
                   border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                   enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                   disabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
-                ),  
-                onChanged: (value) => controller.formEditing = true,  // validamos que el usuario ha modificado el formulario
+                ),   
                 // validator: validamos el texto que el usuario
               ),
             ),
@@ -316,8 +315,7 @@ class ProductEdit extends StatelessWidget {
                   border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                   enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                   disabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
-                ),  
-                onChanged: (value) => controller.formEditing = true,  // validamos que el usuario ha modificado el formulario
+                ),   // validamos que el usuario ha modificado el formulario
                 // validator: validamos el texto que el usuario ha ingresado.
                 validator: (value) {
                   if (controller.controllerTextEditCategory.text=='') { return 'Por favor, seleccione una cátegoria'; }
@@ -349,9 +347,7 @@ class ProductEdit extends StatelessWidget {
                       border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                       enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                       ),    
-                    onChanged: (value) { 
-                      controller.formEditing = true;  
-                      controller.updateAll(); 
+                    onChanged: (value) {  
                     } ,  
                     onEditingComplete: (){
                       controller.updateAll();
@@ -393,9 +389,7 @@ class ProductEdit extends StatelessWidget {
                       border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                       enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
                     ),  
-                    onChanged: (value) {
-                      controller.formEditing = true;
-                      controller.updateAll();
+                    onChanged: (value) {  
                     },
                     // validator: validamos el texto que el usuario ha ingresado.
                     validator: (value) {
@@ -531,17 +525,11 @@ class ProductEdit extends StatelessWidget {
                   child: Opacity(opacity: 0.5,child: Center(child: Text('Actualizado ${Publications.getFechaPublicacion(fechaActual: controller.getProduct.upgrade.toDate(), fechaPublicacion: Timestamp.now().toDate()).toLowerCase()}'))),
                 ),
                 // button : guardar
-                const SizedBox(height:50), 
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 500),
-                  height: controller.getUserConsent?null:0,
-                  padding: EdgeInsets.all(controller.getUserConsent?30.0:0),
-                  child: const Text('¡Gracias por hacer que esta aplicación sea aún más útil para más personas! 🚀'),
-                  ),
+                const SizedBox(height:30),  
                 //  button : guardar el producto
                 ComponentApp().button(
                   defaultStyle: true, 
-                  disable:controller.getDataUploadStatus == true || !controller.getUserConsent ,
+                  disable:controller.getDataUploadStatus == true   ,
                   onPressed: controller.save,
                   icon: Container(),
                   colorButton: Colors.blue,
