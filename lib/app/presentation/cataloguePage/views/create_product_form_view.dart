@@ -246,7 +246,7 @@ class ProductNewFormView extends StatelessWidget {
       child: CarouselSlider.builder(
         carouselController: controller.carouselController,
         options: CarouselOptions(
-          height: 420,
+          height: 500,
           scrollPhysics: const NeverScrollableScrollPhysics(),
           onPageChanged: (index, reason) {
 
@@ -316,7 +316,7 @@ class ProductNewFormView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                controller.loadImage(size: 150),
+                controller.loadImage(size: 250),
                 const SizedBox(height: 20),
                 Text('Actualizar foto',
                     style: TextStyle(
@@ -363,6 +363,17 @@ class ProductNewFormView extends StatelessWidget {
                   await launchUrl(uri, mode: LaunchMode.externalApplication);
                 },
                 child: const Text('Buscar en código Google (moderador)')),
+
+            // text : texto infomativo
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              child: Text(
+                'Escriba una descripción del producto',
+                style: TextStyle(
+                    color: Get.theme.textTheme.bodyMedium!.color ?? Colors.black,
+                    fontSize: 18),
+              ),
+            ),
             // TextFormField : descripción del producto
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -382,7 +393,7 @@ class ProductNewFormView extends StatelessWidget {
                   ],
                   decoration: const InputDecoration(
                       border: UnderlineInputBorder(),
-                      labelText: 'Descripción del producto',
+                      labelText: 'Descripción',
                       helperText: 'Visibilidad pública'),
                   onChanged: (value) {
                     controller.formEditing =
@@ -418,6 +429,28 @@ class ProductNewFormView extends StatelessWidget {
     return Column(
       children: [
         const Spacer(),
+        // text : texto infomativo  
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          child: Text.rich(
+            TextSpan(
+              text: 'Elige una ',
+              style: TextStyle(
+                  color: Get.theme.textTheme.bodyMedium!.color ?? Colors.black,
+                  fontSize: 18),
+              children: const <InlineSpan>[
+                TextSpan(
+                  text: 'marca',
+                  style: TextStyle(
+                      color: Colors.blue,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold),
+                ), 
+              ],
+            ),
+          ),
+        ),
+        
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           child: GestureDetector(
@@ -434,7 +467,7 @@ class ProductNewFormView extends StatelessWidget {
                 keyboardType: TextInputType.name,
                 decoration: InputDecoration(
                   border: const UnderlineInputBorder(),  
-                  labelText: controller.controllerTextEditMark.text == '' ? 'Seleccionar marca' : 'Marca',
+                  labelText: controller.controllerTextEditMark.text == '' ? 'Seleccionar' : 'Marca',
                   helperText: 'Visibilidad pública',
                 ),
                 onChanged: (value) => controller.formEditing =
@@ -465,6 +498,27 @@ class ProductNewFormView extends StatelessWidget {
     return Column(
       children: [
         const Spacer(),
+        // text : texto infomativo  
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          child: Text.rich(
+            TextSpan(
+              text: 'Elige una ',
+              style: TextStyle(
+                  color: Get.theme.textTheme.bodyMedium!.color ?? Colors.black,
+                  fontSize: 18),
+              children: const <InlineSpan>[
+                TextSpan(
+                  text: 'categoría',
+                  style: TextStyle(
+                      color: Colors.blue,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold),
+                ),  
+              ],
+            ),
+          ),
+        ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           child: GestureDetector(
@@ -479,8 +533,8 @@ class ProductNewFormView extends StatelessWidget {
               keyboardType: TextInputType.name,
               decoration: InputDecoration(
                 labelText: controller.controllerTextEditCategory.text == ''
-                    ? 'Seleccionar una cátegoria'
-                    : 'Cátegoria',
+                    ? 'Seleccionar'
+                    : 'Cátegoria (opcional)',
                 helperText: 'Visibilidad privada',
                 border: UnderlineInputBorder(
                     borderSide: BorderSide(color: boderLineColor)),
@@ -510,6 +564,27 @@ class ProductNewFormView extends StatelessWidget {
     return Column(
       children: [
         const Spacer(),
+        // text : texto infomativo con textrich 
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          child: Text.rich(
+            TextSpan(
+              text: 'Elige un ',
+              style: TextStyle(
+                  color: Get.theme.textTheme.bodyMedium!.color ?? Colors.black,
+                  fontSize: 18),
+              children: const <InlineSpan>[
+                TextSpan(
+                  text: 'proveedor',
+                  style: TextStyle(
+                      color: Colors.blue,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold),
+                ), 
+              ],
+            ),
+          ),
+        ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           child: GestureDetector(
@@ -525,7 +600,7 @@ class ProductNewFormView extends StatelessWidget {
               decoration: InputDecoration(
                 labelText: controller.controllerTextEditProvider.text == ''
                     ? 'Seleccionar un proveedor'
-                    : 'Proveedor',
+                    : 'Proveedor (opcional)',
                 helperText: 'Visibilidad privada',
                 border: UnderlineInputBorder(
                     borderSide: BorderSide(color: boderLineColor)),
@@ -551,6 +626,38 @@ class ProductNewFormView extends StatelessWidget {
     return Column(
       children: [
         const Spacer(),
+        // text : texto infomativo 'Escriba el precio de compra por mayor de una unidad'
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          child:Text.rich(
+            textAlign:  TextAlign.center,
+            TextSpan(
+              text: 'Escriba el precio de ',
+              style: const  TextStyle( fontSize: 18),
+              children: <InlineSpan>[
+                const TextSpan(
+                  text: 'compra',
+                  style: TextStyle(
+                      color: Colors.blue,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold),
+                ),
+                TextSpan(
+                  text: ' por mayor de la unidad',
+                  style: TextStyle(
+                      color: Get.theme.textTheme.bodyMedium!.color ?? Colors.black,
+                      fontSize: 18),
+                ),
+                TextSpan(
+                  text: ' (opcional)',
+                  style: TextStyle(
+                      color: Get.theme.textTheme.bodyMedium!.color ?? Colors.black,
+                      fontSize: 14),
+                ),
+              ],
+            ),
+          ),
+        ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           child: Form(
@@ -565,8 +672,8 @@ class ProductNewFormView extends StatelessWidget {
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               decoration: const InputDecoration(
                   border: UnderlineInputBorder(),
-                  labelText: 'Precio de compra',
-                  helperText: 'Visibilidad privada'),
+                  labelText: 'Precio de compra (opcional)',
+                  helperText: 'Visibilidad privada (solo tu puedes verlo)'),
 
               onChanged: (value) {
                 if (controller.controllerTextEditPrecioCosto.numberValue != 0) {
@@ -592,6 +699,33 @@ class ProductNewFormView extends StatelessWidget {
     return Column(
       children: [
         const Spacer(),
+        // text : texto infomativo 'Escriba el precio de venta al publico'
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          child: Text.rich(
+            textAlign: TextAlign.center,
+            TextSpan(
+              text: 'Escriba el precio de ',
+              style: const TextStyle(fontSize: 18),
+              children: <InlineSpan>[
+                const TextSpan(
+                  text: 'venta',
+                  style: TextStyle(
+                      color: Colors.blue,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold),
+                ),
+                TextSpan(
+                  text: ' al público',
+                  style: TextStyle(
+                      color: Get.theme.textTheme.bodyMedium!.color ?? Colors.black,
+                      fontSize: 18),
+                ), 
+              ],
+            ),
+          ),
+        ),
+        // textfield : precio de venta al publico
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           child: Column(
@@ -627,8 +761,8 @@ class ProductNewFormView extends StatelessWidget {
                       const TextInputType.numberWithOptions(decimal: true),
                   decoration: const InputDecoration(
                       border: UnderlineInputBorder(),
-                      labelText: 'Precio de venta al público',
-                      helperText: 'Visibilidad pública'),
+                      labelText: 'Precio de venta',
+                      helperText: 'Visibilidad pública (cualquier usuario puede verlo)'),
                   onChanged: (value) {
                     if (controller.controllerTextEditPrecioVenta.numberValue != 0) {
                       controller.setSalePrice =
@@ -660,13 +794,52 @@ class ProductNewFormView extends StatelessWidget {
     return Column(
       children: [
         const Spacer(),
+        // view : icono y texto 
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          child: Column(
+            children: [
+              // icon 
+              Icon(Icons.star_rounded,
+                  color: Colors.yellow[700],
+                  size: 40),
+              // text : texto infomativo 
+              Text.rich(
+                textAlign: TextAlign.center,
+                TextSpan(
+                  text: '¿Quieres agregar este producto a tus ',
+                  style: const TextStyle(fontSize: 18),
+                  children: <InlineSpan>[
+                    const TextSpan(
+                      text: 'favoritos',
+                      style: TextStyle(
+                          color: Colors.blue,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    TextSpan(
+                      text: '?',
+                      style: TextStyle(
+                          color: Get.theme.textTheme.bodyMedium!.color ?? Colors.black,
+                          fontSize: 18),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        
+        ),
         CheckboxListTile(
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           enabled: controller.getDataUploadStatus ? false : true,
           checkColor: Colors.white,
           activeColor: Colors.amber,
           value: controller.getFavorite,
+          shape:  RoundedRectangleBorder(
+            side: BorderSide(color: Colors.grey.withOpacity(0.5)),
+            borderRadius: BorderRadius.circular(5),
+          ), 
           title: Text(controller.getProduct.favorite
               ? 'Quitar de favorito'
               : 'Agregar a favorito'),
@@ -693,6 +866,42 @@ class ProductNewFormView extends StatelessWidget {
     return Column(
       children: [
         const Spacer(),
+        // view : icono y texto 
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          child: Column(
+            children: [
+              // icon 
+              const Icon(Icons.inventory,
+                  color: Colors.blue,
+                  size: 40),
+              // text : texto infomativo 
+              Text.rich(
+                textAlign: TextAlign.center,
+                TextSpan(
+                  text: '¿Quieres controlar el ',
+                  style: const TextStyle(fontSize: 18),
+                  children: <InlineSpan>[
+                    const TextSpan(
+                      text: 'stock',
+                      style: TextStyle(
+                          color: Colors.blue,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    TextSpan(
+                      text: ' de este producto?',
+                      style: TextStyle(
+                          color: Get.theme.textTheme.bodyMedium!.color ?? Colors.black,
+                          fontSize: 18),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        // view : casilla de verificación y texto
         AnimatedContainer(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
           width: double.infinity,
@@ -701,36 +910,38 @@ class ProductNewFormView extends StatelessWidget {
             children: [
               CheckboxListTile(
                 // option premium : solo los usuarios premium pueden crear productos
-                enabled: controller.getHomeController.getIsSubscribedPremium
-                    ? true
-                    : false,
-                contentPadding: EdgeInsets.symmetric(
-                    horizontal: controller.getProduct.stock ? 12 : 0, vertical: 12),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                enabled: true, 
                 checkColor: Colors.white,
                 activeColor: Colors.blue,
                 value: controller.getStock,
-                title: Text(controller.getProduct.stock
-                    ? 'Quitar control de stock'
-                    : 'Agregar control de stock'),
+                title: Text(controller.getProduct.stock ? 'Quitar control de stock' : 'Agregar control de stock'),
                 subtitle: const Text('Controlar el inventario de sus productos'),
+              
+                shape:  RoundedRectangleBorder(
+                  side: BorderSide(color: Colors.grey.withOpacity(0.5)),
+                  borderRadius: BorderRadius.circular(5),
+                ),
                 onChanged: (value) {
+                  // si esta subcripto a premium
+                  if (!controller.getHomeController.getIsSubscribedPremium) {
+                    controller.getHomeController.showModalBottomSheetSubcription(id: 'stock' );
+                    return;
+                  }
+                  // si no esta subcripto a premium y no esta subiendo datos
                   if (!controller.getDataUploadStatus) {
                     controller.setStock = value ?? false;
                   }
                 },
               ),
+              const SizedBox(height: 12),
+              // view :  logo premium : solo los usuarios premium pueden crear productos
               LogoPremium(personalize: true, id: 'stock'),
               controller.getStock ? space : Container(),
               AnimatedContainer(
                 width: controller.getStock ? null : 0,
                 height: controller.getStock ? null : 0,
-                duration: const Duration(milliseconds: 500),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Get.theme.textTheme.bodyMedium!.color ?? Colors.black12,
-                    width: 1,
-                  ),
-                ),
+                duration: const Duration(milliseconds: 500), 
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Column(
                   children: [
@@ -740,15 +951,15 @@ class ProductNewFormView extends StatelessWidget {
                       ),
                       child: Form(
                         key: controller.quantityStockFormKey,
-                        child: TextFormField(
+                        child: TextFormField( 
                           autovalidateMode: AutovalidateMode.onUserInteraction,
                           enabled: !controller.getDataUploadStatus,
                           keyboardType: TextInputType.number,
-                          onChanged: (value) => controller.setQuantityStock =
-                              int.parse(controller.controllerTextEditQuantityStock.text),
+                          onChanged: (value) => controller.setQuantityStock = int.parse(controller.controllerTextEditQuantityStock.text),
+                      
                           decoration: const InputDecoration(
-                            filled: true,
-                            fillColor: Colors.transparent,
+                            border: UnderlineInputBorder(),
+                            filled: true, 
                             hoverColor: Colors.blue,
                             disabledBorder: InputBorder.none,
                             labelText: "Stock",
@@ -779,8 +990,8 @@ class ProductNewFormView extends StatelessWidget {
                         onChanged: (value) => controller.setAlertStock =
                             int.parse(controller.controllerTextEditAlertStock.text),
                         decoration: const InputDecoration(
-                          filled: true,
-                          fillColor: Colors.transparent,
+                          border: UnderlineInputBorder(),
+                            filled: true,  
                           hoverColor: Colors.blue,
                           disabledBorder: InputBorder.none,
                           labelText: "Alerta de stock (opcional)",
@@ -803,6 +1014,10 @@ class ProductNewFormView extends StatelessWidget {
 
   // WIDGET : concentimiento del usuario para crear el producto
   Widget get consentProductCardCheckbox {
+
+    // style 
+    Color cardColor = Colors.amber[50]!;
+
     return Column(
       children: [
         const Spacer(),
@@ -811,17 +1026,14 @@ class ProductNewFormView extends StatelessWidget {
           children: [
             // CheckboxListTile : consentimiento de usuario para crear un producto
             Container(
-              margin: const EdgeInsets.only(bottom: 20, top: 12),
-              decoration: BoxDecoration(
-                border: Border.all(width: 1.0, color: Colors.grey),
-              ),
+              margin: const EdgeInsets.only(bottom: 20, top: 12), 
               child: CheckboxListTile(
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                tileColor: cardColor, 
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 controlAffinity: ListTileControlAffinity.leading,
-                title: const Text(
-                    'Importante!\nAl crear un producto, entiendo y acepto lo siguiente: los datos básicos (descripción, imagen, marca) serán visibles para todos y podrían ser modificados por otros usuarios hasta que un moderador los verifique. Una vez verificados, no podré cambiar estos datos. El (precio de venta al público) también será visible para todos.',
-                    style: TextStyle(fontWeight: FontWeight.w200)),
+                title: const Text('Importante!\nAl crear un producto, entiendo y acepto lo siguiente: los datos básicos (descripción, imagen, marca) serán visibles para todos y podrían ser modificados por otros usuarios hasta que un moderador los verifique. Una vez verificados, no podré cambiar estos datos. El (precio de venta al público) también será visible para todos.',
+                  style: TextStyle(fontWeight: FontWeight.w400),
+                ),
                 value: controller.getUserConsent,
                 onChanged: (value) {
                   controller.setUserConsent = value!;

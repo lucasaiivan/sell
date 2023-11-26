@@ -476,8 +476,19 @@ class WidgetDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
+    return GetBuilder<HomeController>( 
+      initState: (_) {},
+      builder: (_) {
+        return  body(context: context); 
+      },
+    );
+}
 
-    // controllers
+// WIDGETS VIEWS
+Widget body({required BuildContext context}){
+
+  // controllers
     final HomeController homeController = Get.find<HomeController>();
 
     // variables
@@ -594,6 +605,7 @@ class WidgetDrawer extends StatelessWidget {
       ],
     );
   }
+
 }
 
 Widget viewDefault() {

@@ -27,19 +27,7 @@ class ControllerProductsEdit extends GetxController {
   // var style
   Color colorLoading = Colors.blue; 
   final Color colorButton = Colors.blue; 
-  bool darkMode = false;
-  // var logic
-  bool _onBackPressed = false;
-
-
-  // controller : carousel de componentes para que el usuario complete los campos necesarios para crear un nuevo producto nuevo
-  CarouselController carouselController = CarouselController();
-  // var : logic  para que el usuario complete los campos necesarios para crear un nuevo producto nuevo
-  int currentSlide = 0 ;
-  bool formEditing = false;
-  bool theFormIsComplete = false;
-  bool checkValidateForm = false;
-  bool enabledButton = false;
+  bool darkMode = false; 
 
   // var : TextFormField formKey
   GlobalKey<FormState> descriptionFormKey = GlobalKey<FormState>();
@@ -56,14 +44,6 @@ class ControllerProductsEdit extends GetxController {
   // others controllers
   final HomeController homeController = Get.find();
   HomeController get getHomeController => homeController;
-
-  // concentimiento del usuario
-  bool _userConsent = false;
-  set setUserConsent(bool value) {
-    _userConsent = value;
-    update(['updateAll']);
-  }
-  bool get getUserConsent => _userConsent; 
 
   // state internet
   bool connected = false;
@@ -352,49 +332,6 @@ class ControllerProductsEdit extends GetxController {
       }
     }
   } 
-  Future<bool> onBackPressed({required BuildContext context})async{
-    // fuction : si _onBackPressed es false no se puede salir de la app
-
-    // si _onBackPressed es false no se puede salir de la app
-    if(_onBackPressed==false){ 
-      _onBackPressed = !_onBackPressed;
-      return false;
-    }
-
-    if(currentSlide!=0){
-      previousPage();
-      return false;
-    }
-
-    //  si _onBackPressed es true se puede salir de la app
-    if(currentSlide==0){
-      final  shouldPop = await showDialog<bool>(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: const Text('¿Realmente quieres salir?',textAlign: TextAlign.center),
-              content: const Text('Si sales perderás los datos que no hayas guardado',textAlign: TextAlign.center),
-              actionsAlignment: MainAxisAlignment.spaceBetween,
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Get.back();
-                  },
-                  child: const Text('Cancelar'),
-                ),
-                TextButton(
-                  onPressed: (){Get.back();Get.back();},
-                  child: const Text('Si'),
-                ),
-              ],
-            );
-          },
-        );
-        return shouldPop!;
-        }
-    return true;
-        
-  } 
 
   //  fuction : comprobamos los datos necesarios para proceder publicar o actualizar el producto
   Future<void> save() async {
@@ -649,10 +586,8 @@ class ControllerProductsEdit extends GetxController {
       maxHeight: 720.0,
       imageQuality: 55,
     ).then((value) {
-      setXFileImage = value!;
-      formEditing = true;
-      update(['updateAll']);  //  actualizamos la vista
-      next(); //  siguiente componente
+      setXFileImage = value!; 
+      update(['updateAll']);  //  actualizamos la vista 
     });
   }
 
@@ -661,88 +596,13 @@ class ControllerProductsEdit extends GetxController {
     _picker.pickImage(source: ImageSource.camera,maxWidth: 720.0,maxHeight: 720.0,imageQuality: 55,)
     // esperamos a que se seleccione la imagen
     .then((value) {
-    // set
-      formEditing = true; // activamos el formulario
+      // set 
       setXFileImage = value!; // conservamos la imagen
-      update(['updateAll']);  //  actualizamos la vista
-      next(); //  siguiente componente
+      update(['updateAll']);  //  actualizamos la vista 
     });
   }
 
-  //------------------------------------------------------//
-  //- FUNCTIONS LOGIC VIEW FORM CREATE NEW PRODUCT START -//
-  //------------------------------------------------------//  
-   double get getProgressForm{ 
-    // function : retorna el progreso del formulario
-    // value : progreso del formulario
-    double progress = 0.0;
-    // estado de progreso
-    switch(currentSlide){
-      case 0:progress = 0.11; break;
-      case 1:progress = 0.22; break;
-      case 2:progress = 0.33; break;
-      case 3:progress = 0.44; break;
-      case 4:progress = 0.55; break;
-      case 5:progress = 0.66; break;
-      case 6:progress = 0.77; break;
-      case 7:progress = 0.88; break;
-      case 8:progress = 1.0; break;
-      default:progress;
-    } 
-    return progress;
-  }
-  
-  void previousPage(){
-    carouselController.animateToPage(currentSlide-1);
-  }
-  void next(){
-    // function : verificamos que el campo actual este completo para pasar al siguiente campo y complertar el formulario
-
-    // value 
-    bool next = true;
-    //
-    // imagen : este campo es opcional 
-    if(currentSlide == 0  ){next=true;}
-    //  descripción : este campo es obligatorio
-    if(currentSlide == 1 && descriptionFormKey.currentState!.validate()==false ){next=false;}
-    //  marca : este campo es obligatorio
-    if(currentSlide == 2 && markFormKey.currentState!.validate() == false ){next=false;}
-
-    // category : este campo es opcional
-    //... currentSlide : 3
-
-    // precio de compra : este campo es opcional
-    //... currentSlide : 4
-
-    // precio de venta al publico: este campo es obligatorio
-    if(currentSlide == 5 && salePriceFormKey.currentState!.validate()==false ){next=false;}
-    
-    // favorito : este campo es opcional
-    //... currentSlide : 6
-
-    // control de stock : este campo es opcional
-    if(currentSlide == 7 && getStock && quantityStockFormKey.currentState!.validate()==false ){
-      Get.snackbar('Debes aceptar los terminos y condiciones', 'Este campo no puede dejarse vacio',snackPosition: SnackPosition.TOP,snackStyle: SnackStyle.FLOATING,);
-      next=false;
-    }
-
-    // concentimientos del usuario : este campo es obligatorio para crear un producto nuevo
-    if(currentSlide == 8 && getUserConsent == false){
-      Get.snackbar('Debes aceptar los terminos y condiciones', 'Este campo no puede dejarse vacio',snackPosition: SnackPosition.TOP,snackStyle: SnackStyle.FLOATING,);
-      next=false;
-    }
-
-    // action : pasa a la siquiente vista si es posible
-    if(next){carouselController.nextPage();} 
-
-    // actualizamos el estado de las vistas
-    update(['updateAll']);
-  }
-  //-------------------------------------------------//
-  //- FUNCTIONS LOGIC VIEW CREATE NEW PRODUCT FINAL -//
-  //-------------------------------------------------//
-
-
+ 
   // WIDGETS
 
   void showDialogAddProfitPercentage( ) {

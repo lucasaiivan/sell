@@ -444,7 +444,7 @@ class ControllerCreateProductForm extends GetxController{
               Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id)
                 .set(getProduct.toJson())
                 .whenComplete(() async {
-                  await Future.delayed(const Duration(seconds: 3)).then((value) {setDataUploadStatus = false; Get.back(); });
+                  await Future.delayed(const Duration(seconds: 3)).then((value) {setDataUploadStatus = false; Get.back();Get.back(); });
               }).onError((error, stackTrace) => setDataUploadStatus = false).catchError((_) => setDataUploadStatus = false);
 
             } else {
