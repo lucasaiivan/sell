@@ -73,13 +73,26 @@ class ProductNewFormView extends StatelessWidget {
         : controller.getTextAppBar;
 
     // widgets
-    Widget titleWidget = Row(
+    Widget titleWidget = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // image : imagen del producto
-        imageProductExist ? controller.loadImage(size: 40) : Container(),
-        imageProductExist ? const SizedBox(width: 12) : Container(),
-        // text : nombre del producto
-        Text(title, style: TextStyle(color: colorAccent, fontSize: 18)),
+        // text : titulo o nombre del producto
+        Row(
+          children: [
+            // image : imagen del producto
+            imageProductExist ? controller.loadImage(size: 40) : Container(),
+            imageProductExist ? const SizedBox(width: 12) : Container(),
+            // text : nombre del producto
+            Text(title, style: TextStyle(color: colorAccent, fontSize: 18)),
+          ],
+        ),
+        // text : codigo
+        controller.getProduct.code != ''
+            ? Opacity(opacity: 0.5,
+              child: Text(controller.getProduct.code,
+                  style: TextStyle(color: colorAccent, fontSize: 12)),
+            )
+            : Container(),
       ],
     );
     // si se esta guardando los datos del producto
@@ -1016,7 +1029,7 @@ class ProductNewFormView extends StatelessWidget {
   Widget get consentProductCardCheckbox {
 
     // style 
-    Color cardColor = Colors.amber[50]!;
+    Color cardColor = Get.isDarkMode?Colors.black12:Colors.amber[50]!;
 
     return Column(
       children: [
@@ -1024,6 +1037,28 @@ class ProductNewFormView extends StatelessWidget {
         Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // text : texto infomativo
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              child: Text.rich(
+                textAlign: TextAlign.center,
+                TextSpan(
+                  text: '¿Aceptas los ',
+                  style: TextStyle(
+                      color: Get.theme.textTheme.bodyMedium!.color ?? Colors.black,
+                      fontSize: 18),
+                  children: const <InlineSpan>[
+                    TextSpan(
+                      text: 'términos y condiciones?',
+                      style: TextStyle(
+                          color: Colors.blue,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold),
+                    ), 
+                  ],
+                ),
+              ),
+            ),
             // CheckboxListTile : consentimiento de usuario para crear un producto
             Container(
               margin: const EdgeInsets.only(bottom: 20, top: 12), 
@@ -1040,6 +1075,33 @@ class ProductNewFormView extends StatelessWidget {
                 },
               ),
             ),  
+            // text : texto infomativo ' si acepto los terminos y condiciones'
+            !controller.getUserConsent?Container():Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              child: Text.rich(
+                textAlign: TextAlign.center,
+                TextSpan(
+                  text: 'Si acepto los ',
+                  style: TextStyle(
+                      color: Get.theme.textTheme.bodyMedium!.color ?? Colors.black,
+                      fontSize: 18),
+                  children: const <InlineSpan>[
+                    TextSpan(
+                      text: 'términos y condiciones',
+                      style: TextStyle(
+                          color: Colors.blue,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    TextSpan(
+                      text: ', para crear el producto',
+                      style: TextStyle( 
+                          fontSize: 18),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
         const Spacer(),
