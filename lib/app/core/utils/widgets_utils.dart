@@ -492,21 +492,20 @@ Widget body({required BuildContext context}){
     final HomeController homeController = Get.find<HomeController>();
 
     // variables
-    UserModel user = homeController.getProfileAdminUser.copyWith();
-    homeController.getFirebaseAuth.currentUser!.isAnonymous; 
+    UserModel user = homeController.getProfileAdminUser.copyWith(); 
+    bool isAnonymous = homeController.getFirebaseAuth.currentUser!.isAnonymous;
 
     // widgets
     final textButtonLogin = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: SizedBox(width: double.infinity,child: FloatingActionButton(onPressed: homeController.signOutFirebase,elevation: 0,child: const Text('Iniciar sesión',style: TextStyle(color: Colors.white),))),
-    ); 
+    );  
     
     return ListView( 
       children: [
         const SizedBox(height: 50),
-        homeController.getFirebaseAuth.currentUser!.isAnonymous?textButtonLogin
-        //  avatar de la cuenta
-        :ListTile(
+        isAnonymous?textButtonLogin
+          :ListTile(
           leading: Container(padding: const EdgeInsets.all(0.0),child: ComponentApp().userAvatarCircle(urlImage: homeController.getProfileAccountSelected.image)),
           title: Text(homeController.getIdAccountSelected == ''? 'Seleccionar una cuenta': homeController.getProfileAccountSelected.name,maxLines: 1,overflow: TextOverflow.ellipsis),
           subtitle: homeController.getIdAccountSelected == ''? null: Row(
@@ -526,18 +525,19 @@ Widget body({required BuildContext context}){
         // funciones premium //
         // condition : si el usuario de la cuenta no es administrador no se muestra el boton de suscribirse a premium
         user.admin==false?Container():
-        ListTile(
-          tileColor: homeController.getIsSubscribedPremium?null:Colors.amber.withOpacity(0.05),
-          iconColor:  Colors.amber, 
-          //titleTextStyle: const TextStyle(fontWeight: FontWeight.bold),
-            leading: const Icon(Icons.star_rounded),
-            title: Text(homeController.getIsSubscribedPremium?'Premium':'Funciones Premium'),
-            onTap: (){
-              // action : mostrar modal bottom sheet con 
-              Get.back(); // cierra drawer
-              homeController.showModalBottomSheetSubcription();
-            }),
-        const Opacity(opacity: 0.3,child: Divider(height:0)),
+        isAnonymous?Container():
+          ListTile(
+            tileColor: homeController.getIsSubscribedPremium?null:Colors.amber.withOpacity(0.05),
+            iconColor:  Colors.amber, 
+            //titleTextStyle: const TextStyle(fontWeight: FontWeight.bold),
+              leading: const Icon(Icons.star_rounded),
+              title: Text(homeController.getIsSubscribedPremium?'Premium':'Funciones Premium'),
+              onTap: (){
+                // action : mostrar modal bottom sheet con 
+                Get.back(); // cierra drawer
+                homeController.showModalBottomSheetSubcription();
+              }),
+        isAnonymous?Container():const Opacity(opacity: 0.3,child: Divider(height:0)),
         const SizedBox(height: 20),
         // vender 
         ListTile(
@@ -547,26 +547,30 @@ Widget body({required BuildContext context}){
             title: const Text('Vender'),
             onTap: () => homeController.setIndexPage = 0),
         // historial de caja
-        user.historyArqueo?ListTile(
+        user.historyArqueo || isAnonymous ?ListTile( 
+          enabled: !isAnonymous,
           selected: homeController.getIndexPage == 1,
           leading: const Icon(Icons.manage_search_rounded),
           trailing: homeController.getIndexPage != 1 ? null : const Icon(Icons.circle,size: 8),
           title: const Text('Historial de caja'),
           onTap: () => homeController.setIndexPage = 1):Container(),
         // transacciones
-        user.transactions?ListTile(
+        user.transactions || isAnonymous?ListTile(
+          enabled: !isAnonymous,
           selected: homeController.getIndexPage == 2,
           leading: const Icon(Icons.receipt_long_rounded),
           trailing: homeController.getIndexPage != 2 ? null : const Icon(Icons.circle,size: 8),
           title: const Text('Transacciones'),
           onTap: () => homeController.setIndexPage = 2):Container(),
-        user.catalogue?ListTile(
+        user.catalogue || isAnonymous?ListTile(
+          enabled: !isAnonymous,
           selected: homeController.getIndexPage == 3,
           leading: const Icon(Icons.apps_rounded),
           trailing: homeController.getIndexPage != 3 ? null : const Icon(Icons.circle,size: 8),
           title: const Text('Catálogo'),
           onTap: () => homeController.setIndexPage = 3):Container(),
-        user.multiuser?ListTile(
+        user.multiuser || isAnonymous?ListTile(
+          enabled: !isAnonymous,
           selected: homeController.getIndexPage == 4,
           leading: const Icon(Icons.add_moderator_outlined),
           trailing: homeController.getIndexPage != 4 ? null : const Icon(Icons.circle,size: 8),
