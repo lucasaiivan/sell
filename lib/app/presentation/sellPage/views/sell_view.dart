@@ -55,9 +55,7 @@ class SalesView extends StatelessWidget {
                 );
               }),
               // view : barra de navegacion inferior de la app
-              floatingActionButton: controller.getTicketView
-                  ? floatingActionButtonTicket(controller: controller)
-                  : floatingActionButton(controller: controller).animate( delay: Duration( milliseconds: homeController.salesUserGuideVisibility ? 500: 0)).fade(),
+              floatingActionButton: controller.getTicketView ? floatingActionButtonTicket(controller: controller): floatingActionButton(controller: controller).animate( delay: Duration( milliseconds: homeController.salesUserGuideVisibility ? 500: 0)).fade(),
             );
           }
         );

@@ -83,7 +83,9 @@ class ProductNewFormView extends StatelessWidget {
             imageProductExist ? controller.loadImage(size: 40) : Container(),
             imageProductExist ? const SizedBox(width: 12) : Container(),
             // text : nombre del producto
-            Text(title, style: TextStyle(color: colorAccent, fontSize: 18)),
+            SizedBox(
+              width: 200,
+              child: Text(title, style: TextStyle(color: colorAccent, fontSize: 18),overflow: TextOverflow.ellipsis)),
           ],
         ),
         // text : codigo
@@ -147,11 +149,9 @@ class ProductNewFormView extends StatelessWidget {
             shrinkWrap: true,
             physics: const BouncingScrollPhysics(),
             children: [
-              Center(
-                child: controller.getDataUploadStatus
-                    ? Container()
-                    : textFieldCarrousel(),
-              ),
+              controller.getDataUploadStatus
+                  ? Container()
+                  : textFieldCarrousel(),
             ],
           ),
         ),
@@ -216,12 +216,7 @@ class ProductNewFormView extends StatelessWidget {
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Opacity(
-                opacity: 0.6,
-                child: Text(title,
-                    textAlign: TextAlign.start,
-                    style: const TextStyle(
-                        fontSize: 12, fontWeight: FontWeight.w400))),
+            Opacity(opacity: 0.6,child: Text(title,textAlign: TextAlign.start,style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400))),
             const SizedBox(height: 5),
             AnimatedContainer(
                 width: double.infinity,
@@ -254,66 +249,63 @@ class ProductNewFormView extends StatelessWidget {
       consentProductCardCheckbox,
     ];
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 12),
-      child: CarouselSlider.builder(
-        carouselController: controller.carouselController,
-        options: CarouselOptions(
-          height: 500,
-          scrollPhysics: const NeverScrollableScrollPhysics(),
-          onPageChanged: (index, reason) {
-
-            controller.setCurrentSlide = index;
-
-            switch (index) {
-              case 0: // seleccion de una imagen para el producto
-                SystemChannels.textInput.invokeMethod('TextInput.hide'); // quita el foco
-                break;
-              case 1: // descripcion
-                controller.descriptionTextFormFieldfocus.requestFocus(); // pide el foco
-                break;
-              case 2: // marca
-                SystemChannels.textInput.invokeMethod('TextInput.hide'); // quita el foco
-                break;
-              case 3: // cátegoria
-                SystemChannels.textInput.invokeMethod('TextInput.hide'); // quita el foco
-                break;
-              case 4: // proveedor
-                SystemChannels.textInput.invokeMethod('TextInput.hide'); // quita el foco
-                break;
-              case 5: // precio de compra
-                controller.purchasePriceTextFormFieldfocus.requestFocus(); // pide el foco
-                break;
-              case 6: // precio de venta al publico
-                controller.salePriceTextFormFieldfocus .requestFocus(); //  pide el foco
-                break;
-              default:
-                SystemChannels.textInput.invokeMethod('TextInput.hide'); // quita el foco
-                break;
-            }
-          },
-          viewportFraction: 0.95,
-          enableInfiniteScroll: false, 
-          aspectRatio: 2.0,
-          enlargeCenterPage: true,
-          enlargeStrategy: CenterPageEnlargeStrategy.height,
-        ),
-        //options: CarouselOptions(enableInfiniteScroll: lista.length == 1 ? false : true,autoPlay: lista.length == 1 ? false : true,aspectRatio: 2.0,enlargeCenterPage: true,enlargeStrategy: CenterPageEnlargeStrategy.scale),
-        itemCount: listWidgetss.length,
-        itemBuilder: (context, index, realIndex) {
-          // values
-          bool focusWidget = controller.getCurrentSlide == index
-              ? true
-              : false; // si el foco esta en el widget actual
-          // AnimatedOpacity : anima el cambio de opacidad del widget segun el foco actual
-          return AnimatedOpacity(
-            duration: const Duration(milliseconds: 800),
-            opacity: focusWidget ? 1.0 : 0.3,
-            // widget
-            child: listWidgetss[index],
-          );
+    return CarouselSlider.builder(
+      carouselController: controller.carouselController,
+      options: CarouselOptions( 
+        height: 600,
+        scrollPhysics: const NeverScrollableScrollPhysics(),
+        onPageChanged: (index, reason) {
+    
+          controller.setCurrentSlide = index;
+    
+          switch (index) {
+            case 0: // seleccion de una imagen para el producto
+              SystemChannels.textInput.invokeMethod('TextInput.hide'); // quita el foco
+              break;
+            case 1: // descripcion
+              controller.descriptionTextFormFieldfocus.requestFocus(); // pide el foco
+              break;
+            case 2: // marca
+              SystemChannels.textInput.invokeMethod('TextInput.hide'); // quita el foco
+              break;
+            case 3: // cátegoria
+              SystemChannels.textInput.invokeMethod('TextInput.hide'); // quita el foco
+              break;
+            case 4: // proveedor
+              SystemChannels.textInput.invokeMethod('TextInput.hide'); // quita el foco
+              break;
+            case 5: // precio de compra
+              controller.purchasePriceTextFormFieldfocus.requestFocus(); // pide el foco
+              break;
+            case 6: // precio de venta al publico
+              controller.salePriceTextFormFieldfocus .requestFocus(); //  pide el foco
+              break;
+            default:
+              SystemChannels.textInput.invokeMethod('TextInput.hide'); // quita el foco
+              break;
+          }
         },
+        viewportFraction: 0.95,
+        enableInfiniteScroll: false, 
+        aspectRatio: 2.0,
+        enlargeCenterPage: true,
+        enlargeStrategy: CenterPageEnlargeStrategy.height,
       ),
+      //options: CarouselOptions(enableInfiniteScroll: lista.length == 1 ? false : true,autoPlay: lista.length == 1 ? false : true,aspectRatio: 2.0,enlargeCenterPage: true,enlargeStrategy: CenterPageEnlargeStrategy.scale),
+      itemCount: listWidgetss.length,
+      itemBuilder: (context, index, realIndex) {
+        // values
+        bool focusWidget = controller.getCurrentSlide == index
+            ? true
+            : false; // si el foco esta en el widget actual
+        // AnimatedOpacity : anima el cambio de opacidad del widget segun el foco actual
+        return AnimatedOpacity(
+          duration: const Duration(milliseconds: 800),
+          opacity: focusWidget ? 1.0 : 0.3,
+          // widget
+          child: listWidgetss[index],
+        );
+      },
     );
   }
 
@@ -649,14 +641,14 @@ class ProductNewFormView extends StatelessWidget {
               style: const  TextStyle( fontSize: 18),
               children: <InlineSpan>[
                 const TextSpan(
-                  text: 'compra',
+                  text: 'costo',
                   style: TextStyle(
                       color: Colors.blue,
                       fontSize: 24,
                       fontWeight: FontWeight.bold),
                 ),
                 TextSpan(
-                  text: ' por mayor de la unidad',
+                  text: ' del producto',
                   style: TextStyle(
                       color: Get.theme.textTheme.bodyMedium!.color ?? Colors.black,
                       fontSize: 18),
