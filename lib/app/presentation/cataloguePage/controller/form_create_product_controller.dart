@@ -383,10 +383,7 @@ class ControllerCreateProductForm extends GetxController{
       if ( controllerTextEditDescripcion.text != '') {
         if (getMarkSelected.id != '' && getMarkSelected.name != '') {
           if (controllerTextEditPrecioVenta.numberValue > 0 ) {
-            if ( getStock ? (getQuantityStock >= 1) : true) {
-
-              // Deshabilitar la guía del usuario del catálogo
-              homeController.disableCatalogUserGuide();
+            if ( getStock ? (getQuantityStock >= 1) : true) { 
               
               // update view
               setDataUploadStatus = true;
