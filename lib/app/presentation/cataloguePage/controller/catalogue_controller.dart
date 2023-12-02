@@ -472,26 +472,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
                     fontSize: 16, fontWeight: FontWeight.w200))),
       );
     }
-  }
-  Widget get widgetSuggestionProduct{
-    // widget : este texto se va a mostrar en la primera venta
-
-    // comprobamos si es la primera ves que se inicia la aplicación
-    if(homeController.salesUserGuideVisibility){
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Padding(
-            padding: EdgeInsets.only(top: 50,left: 12,right: 12,bottom: 20),
-            child: Opacity(opacity: 0.8,child: Text('¡Agrega tu primer producto!',textAlign: TextAlign.center,style: TextStyle(fontSize: 20))),
-          ),
-          TextButton(onPressed: toSeachProduct,child: const Text('Agregar')),
-        ],
-      );
-      }
-    // si no es la primera ves que se inicica la aplicación devuelve una vistra vacia
-    return Container();
-  }
+  } 
   PreferredSizeWidget get buttonAppBar{
     // bottom : vista de productos seleccionados con un [TextButton] que diga cuantos productos seleccionados hay con opciones para cancelar y actualizar precio de venta
     return  getProductsSelectedList.isEmpty?PreferredSize(preferredSize: const Size.fromHeight(0),child: Container(),): PreferredSize(

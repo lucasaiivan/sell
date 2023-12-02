@@ -16,7 +16,8 @@ import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:sell/app/core/utils/widgets_utils.dart';
 import 'package:uuid/uuid.dart';
 import '../../../domain/entities/catalogo_model.dart';
-import '../../../domain/entities/ticket_model.dart'; 
+import '../../../domain/entities/ticket_model.dart';
+import '../views/sell_view.dart'; 
 
 class SalesController extends GetxController {
 
@@ -223,6 +224,27 @@ class SalesController extends GetxController {
     ticket.payMode = value;
     update();
   }
+  // discount
+  // get : obtiene el descuento formateado si es que existe un valor distinto a 0.0
+  String get getDiscount {
+    if (ticket.discount != 0.0) {
+      // devolver el descuento formateado 'Descuento:(30%) $ 100'
+      // var 
+      int porcent = ((ticket.discount * 100) / getPriceTotalProducts()).round().toInt(); 
+
+      return 'Descuento:(${(porcent).toStringAsFixed(0)}%) ${Publications.getFormatoPrecio(monto:ticket.discount)}';
+    } else {
+      return '';
+    }
+  } 
+  set setDiscount(double value) {
+    ticket.discount = value;
+    update();
+  }
+  void clearDiscount() {
+    ticket.discount = 0.0;
+    update();
+  }
 
   // state cofirnm purchase ticket view
   final RxBool _stateConfirmPurchase = false.obs;
@@ -239,20 +261,7 @@ class SalesController extends GetxController {
   double get getValueReceivedTicket => _valueReceivedTicket.value;
   set setValueReceivedTicket(double value) {_valueReceivedTicket.value = value; }
 
-
-  @override
-  void onInit() async {
-    super.onInit();  
-
-    // esperamos un momento 
-    await Future.delayed( const Duration(milliseconds: 700),() {
-      // mostramos la guía del usuario
-      homeController.showTutorial(targetFocus: [homeController.buttonAddItemFlashTargetFocus],next: showDialogQuickSale ); // mostramos la guía del usuario
-    },);
-    
-
-
-  }
+ 
   @override
   void onClose() {
     textEditingControllerAddFlashDescription.dispose();
@@ -282,7 +291,7 @@ class SalesController extends GetxController {
     getTicket.id = id;
     getTicket.seller = homeController.getUserAuth.email!;
     getTicket.listPoduct = listIdsProducts;
-    getTicket.priceTotal = getCountPriceTotal();
+    getTicket.priceTotal = getPriceTotalProducts();
     getTicket.valueReceived = getValueReceivedTicket;
     getTicket.creation = Timestamp.now();
 
@@ -458,11 +467,20 @@ class SalesController extends GetxController {
     update();
   }
 
-  double getCountPriceTotal() {
+  double getPriceTotalProducts() {
     double total = 0.0;
     for (var element in getListProductsSelested) {
       total = total + (element.salePrice * element.quantity);
     }
+    return total;
+  }
+  double getPriceTotalTicket() {
+    double total = 0.0;
+    for (var element in getListProductsSelested) {
+      total = total + (element.salePrice * element.quantity);
+    }
+    // decontar si existe un descuento
+    total = total - getTicket.discount;
     return total;
   }
 
@@ -487,7 +505,7 @@ class SalesController extends GetxController {
 
     // text format : devuelte un texto formateado del monto del cambio que tiene que recibir el cliente
     if (getValueReceivedTicket == 0.0) {return Publications.getFormatoPrecio(monto: 0);}
-    double result = getValueReceivedTicket - getCountPriceTotal();
+    double result = getValueReceivedTicket - getPriceTotalProducts();
     return Publications.getFormatoPrecio(monto: result);
   }
   String getValueReceived() {
@@ -522,6 +540,19 @@ class SalesController extends GetxController {
     ); 
   }
 
+  
+  void showDialogAddDiscount() {
+
+    // dialog : añadir descuento al ticket 
+    
+     // creamos un dialog con GetX
+    Get.dialog(
+      const ClipRRect(
+        borderRadius: BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12), bottomLeft: Radius.circular(0), bottomRight: Radius.circular(0)),
+        child: ViewAddDiscount(),
+      ),
+    ); 
+  }
   void showDialogQuickSale( ) {
     // Dialog view : Hacer una venta rapida 
 
@@ -597,49 +628,7 @@ class SalesController extends GetxController {
                   icon: const Text('Agregar',textAlign: TextAlign.center), 
                   onPressed: () {
                     addSaleFlash();
-                    textEditingControllerAddFlashPrice.clear();
-                    // mostramos la guía del usuario
-                    homeController.showTutorial(targetFocus:[homeController.buttonAddProductTargetFocus],next:(){
-                      selectedProduct(item: homeController.getProductsOutstandingList[0]);
-                      homeController.showTutorial(targetFocus: [homeController.buttonRegisterTransactionTargetFocus],next:(){
-                        setTicketView = true;
-                
-                          // sleep 1 second
-                          Future.delayed(
-                            const Duration(milliseconds: 300),
-                            () {
-                
-                              // mostramos la guía del usuario si el usuario no ha visto la guía de usuario de la pantalla de ventas
-                              homeController.showTutorial(targetFocus: [homeController.buttonsOptionsPaymentMethodTargetFocus],next:(){ 
-                                setPayModeTicket = 'mercadopago'; 
-                                // mostramos la siguiente guía de usuario si el usuario no ha visto la guía de usuario de la pantalla de ventas
-                                homeController.showTutorial(targetFocus: [homeController.buttonsConfirmTransactionTargetFocus],next:() async { 
-                                  // confirmamos la venta
-                                  confirmedPurchase(); 
-                                  // esperar un momento
-                                  await Future.delayed(const Duration(milliseconds: 500));
-                                  // mostramos la siguiente guía de usuario si el usuario no ha visto la guía de usuario de la pantalla de ventas
-                                  homeController.showTutorial(
-                                    targetFocus: [homeController.buttonsScanCodeBarTargetFocusGuideUX],
-                                    next:()async{ 
-                                      // mostramos la siguiente guía de usuario si el usuario no ha visto la guía de usuario de la pantalla de ventas
-                                      homeController.showTutorial(
-                                        targetFocus: [homeController.buttonsNumCajaTargetFocusGuideUX],
-                                        next:(){
-                                          // final de la guia de usuari0
-                                          homeController.disableSalesUserGuide();
-                                          
-                                        },
-                                        alignSkip: Alignment.bottomRight );
-                                    },
-                                    alignSkip: Alignment.topRight );
-                                },alignSkip: Alignment.topRight );
-                
-                                },alignSkip: Alignment.topRight );
-                            }); // mostramos la guía del usuario
-                          
-                          },alignSkip: Alignment.topRight );
-                      } ,alignSkip: Alignment.bottomLeft); // mostramos la guía del usuario
+                    textEditingControllerAddFlashPrice.clear(); 
                     },),
               ),
             )
@@ -676,7 +665,7 @@ class SalesController extends GetxController {
                 //var
                 double valueReceived = textEditingControllerTicketMount.text == '' ? 0.0 : double.parse(textEditingControllerTicketMount.text);
                 // condition : verificar si el usaurio ingreso un monto valido y que sea mayor al monto total del ticket
-                if (valueReceived >= getCountPriceTotal() &&
+                if (valueReceived >= getPriceTotalProducts() &&
                     textEditingControllerTicketMount.text != '') {
                       setValueReceivedTicket = valueReceived;
                       textEditingControllerTicketMount.text = '';
@@ -696,7 +685,7 @@ class SalesController extends GetxController {
                 spacing: 5.0,
                 children: [
                   // chip : efectivo '100'
-                  getCountPriceTotal() > 100 ? Container() :ChoiceChip(
+                  getPriceTotalProducts() > 100 ? Container() :ChoiceChip(
                     label: const Text('100'),
                     selected: false,
                     onSelected: (bool value) {
@@ -706,7 +695,7 @@ class SalesController extends GetxController {
                     },
                   ),   
                   // chip : efectivo '200'
-                  getCountPriceTotal() > 200 ? Container() :ChoiceChip(
+                  getPriceTotalProducts() > 200 ? Container() :ChoiceChip(
                     label: const Text('200'),
                     selected: false,
                     onSelected: (bool value) {
@@ -716,7 +705,7 @@ class SalesController extends GetxController {
                     },
                   ), 
                   // chip : efectivo '500'
-                  getCountPriceTotal() > 500 ? Container() :ChoiceChip(
+                  getPriceTotalProducts() > 500 ? Container() :ChoiceChip(
                     label: const Text('500'),
                     selected: false,
                     onSelected: (bool value) {
@@ -726,7 +715,7 @@ class SalesController extends GetxController {
                     },
                   ), 
                   // chip : efectivo '1000'
-                  getCountPriceTotal() > 1000 ? Container() :ChoiceChip(
+                  getPriceTotalProducts() > 1000 ? Container() :ChoiceChip(
                     label: const Text('1000'),
                     selected: false,
                     onSelected: (bool value) {
@@ -736,7 +725,7 @@ class SalesController extends GetxController {
                     },
                   ), 
                   // chip : efectivo '1500'
-                  getCountPriceTotal() > 1500 ? Container() :ChoiceChip(
+                  getPriceTotalProducts() > 1500 ? Container() :ChoiceChip(
                     label: const Text('1500'),
                     selected: false,
                     onSelected: (bool value) {
@@ -746,7 +735,7 @@ class SalesController extends GetxController {
                     },
                   ),
                   // chip : efectivo '2000'
-                  getCountPriceTotal() > 2000 ? Container() :ChoiceChip(
+                  getPriceTotalProducts() > 2000 ? Container() :ChoiceChip(
                     label: const Text('2000'),
                     selected: false,
                     onSelected: (bool value) {
@@ -764,8 +753,7 @@ class SalesController extends GetxController {
               child: TextField(
                 autofocus: true,
                 controller: textEditingControllerTicketMount,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: false),
+                keyboardType: const TextInputType.numberWithOptions(decimal: false),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp('[1234567890]'))
                 ],
@@ -781,7 +769,7 @@ class SalesController extends GetxController {
                       ? 0.0
                       : double.parse(textEditingControllerTicketMount.text);
                   // condition : verificar si el usaurio ingreso un monto valido y que sea mayor al monto total del ticket
-                  if (valueReceived >= getCountPriceTotal() && textEditingControllerTicketMount.text != '') {
+                  if (valueReceived >= getPriceTotalProducts() && textEditingControllerTicketMount.text != '') {
                     setValueReceivedTicket = double.parse(textEditingControllerTicketMount.text);
                     textEditingControllerTicketMount.text = '';
                     setPayModeTicket = 'effective';

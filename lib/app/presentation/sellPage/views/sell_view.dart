@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:get/get.dart';
@@ -55,7 +56,7 @@ class SalesView extends StatelessWidget {
                 );
               }),
               // view : barra de navegacion inferior de la app
-              floatingActionButton: controller.getTicketView ? floatingActionButtonTicket(controller: controller): floatingActionButton(controller: controller).animate( delay: Duration( milliseconds: homeController.salesUserGuideVisibility ? 500: 0)).fade(),
+              floatingActionButton: controller.getTicketView ? floatingActionButtonTicket(controller: controller): floatingActionButton(controller: controller).animate( delay: const Duration( milliseconds:  0)).fade(),
             );
           }
         );
@@ -217,7 +218,7 @@ class SalesView extends StatelessWidget {
                       // view : lines ------
                       dividerLinesWidget,
                       const SizedBox(height: 20),
-                      // text : cantidad de elementos 'productos' seleccionados
+                      // view : cantidad de elementos 'productos' seleccionados
                       Padding(
                         padding: padding,
                         child: Row(
@@ -229,7 +230,7 @@ class SalesView extends StatelessWidget {
                         ),
                       ), 
                       const SizedBox(height:12), 
-                      // text : el monto total de la transacción
+                      // view : el monto total de la transacción
                       Container(
                         margin: const EdgeInsets.symmetric(horizontal: 20, vertical:0),
                         color: Colors.green,
@@ -240,7 +241,7 @@ class SalesView extends StatelessWidget {
                               Text('Total a cobrar',style: textDescrpitionStyle.copyWith(fontSize: 16,fontWeight: FontWeight.w900,color: Colors.white)),
                               const Spacer(),
                               const SizedBox(width:12),
-                              Text(Publications.getFormatoPrecio(monto: controller.getCountPriceTotal()),style: textValuesStyle.copyWith(fontSize: 24,fontWeight: FontWeight.w900,color: Colors.white)),
+                              Text(Publications.getFormatoPrecio(monto: controller.getPriceTotalTicket()),style: textValuesStyle.copyWith(fontSize: 24,fontWeight: FontWeight.w900,color: Colors.white)),
                             ],
                           ),
                         ),
@@ -259,7 +260,7 @@ class SalesView extends StatelessWidget {
                                 ],
                               ),
                             ),
-                      // text : vuelto
+                      // view :  vuelto
                       controller.getValueReceivedTicket == 0 || controller.getTicket.payMode != 'effective'
                         ? Container()
                         : Padding(
@@ -284,6 +285,22 @@ class SalesView extends StatelessWidget {
                           ),
                         ),  
                     ],
+                  ),
+                  // view : agregar descuento 
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        const Spacer(),
+                        controller.getDiscount==''?Container():IconButton(
+                          onPressed: controller.clearDiscount,
+                          icon: const Icon(Icons.clear_rounded,color: Colors.red),
+                        ),
+                        TextButton( 
+                          onPressed: controller.showDialogAddDiscount, 
+                          child: Text(controller.getDiscount==''?'Agregar descuento':controller.getDiscount,style: TextStyle(color:controller.getDiscount==''?Colors.blue:Colors.red,fontSize: 18,fontWeight: FontWeight.w400))),
+                      ],
+                    ),
                   ),
                   // spacer
                   const SizedBox(height: 12),
@@ -412,7 +429,7 @@ class SalesView extends StatelessWidget {
               // es premium
               if (selectedValue == 'apertura') {
                 // Get : abrir dialogo de apertura de caja 
-                Get.dialog(CashRegister(id: 'apertura'));
+                Get.dialog(ViewCashRegister(id: 'apertura'));
               } else {
                 // Get : abrir dialogo de apertura de caja
                 controller.upgradeCashRegister(id: selectedValue);
@@ -491,7 +508,7 @@ class SalesView extends StatelessWidget {
               break;
           }
           // Get : view dialog
-          Get.dialog(CashRegister(id: id), useSafeArea: true);
+          Get.dialog(ViewCashRegister(id: id), useSafeArea: true);
         },
         itemBuilder: (BuildContext ctx) => [
               PopupMenuItem(
@@ -945,7 +962,7 @@ class SalesView extends StatelessWidget {
                   ? Colors.grey
                   : null,
               label: Text(
-                  'Cobrar ${controller.getListProductsSelested.isEmpty ? '' : Publications.getFormatoPrecio(monto: controller.getCountPriceTotal())}',
+                  'Cobrar ${controller.getListProductsSelested.isEmpty ? '' : Publications.getFormatoPrecio(monto: controller.getPriceTotalProducts())}',
                   style: const TextStyle(color: Colors.white))),
         ),
       ],
@@ -1017,15 +1034,15 @@ class CustomDivider extends StatelessWidget {
 }
 
 // ignore: must_be_immutable
-class CashRegister extends StatefulWidget {
+class ViewCashRegister extends StatefulWidget {
   late String id;
-  CashRegister({super.key, required this.id});
+  ViewCashRegister({super.key, required this.id});
 
   @override
-  State<CashRegister> createState() => _CashRegisterState();
+  State<ViewCashRegister> createState() => _ViewCashRegisterState();
 }
 
-class _CashRegisterState extends State<CashRegister> {
+class _ViewCashRegisterState extends State<ViewCashRegister> {
   // controllers views
   final HomeController homeController = Get.find<HomeController>();
   final SalesController salesController = Get.find<SalesController>();
@@ -1521,6 +1538,171 @@ class _CashRegisterState extends State<CashRegister> {
                     expectedBalance: moneyMaskedTextController.numberValue);
                 Get.back();
               },),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// VIEW : ViewAddDiscount
+class ViewAddDiscount extends StatefulWidget {
+  const ViewAddDiscount({super.key});
+
+  @override
+  State<ViewAddDiscount> createState() => _ViewAddDiscountState();
+}
+
+class _ViewAddDiscountState extends State<ViewAddDiscount> {
+
+  // controllers
+  final SalesController salesController = Get.find<SalesController>();
+  final MoneyMaskedTextController textEditingDiscountController = MoneyMaskedTextController(leftSymbol: '\$',decimalSeparator: ',',thousandSeparator: '.',precision:2);
+  final TextEditingController textEditingPorcentController = TextEditingController();
+  FocusNode focusNodeDiscount = FocusNode();
+  FocusNode focusNodePorcent = FocusNode();
+
+  @override 
+  void initState() { 
+    super.initState();
+    // controllers listeners : se complementan ambos controllers para que se actualicen entre si, si cambiar el monto se actualiza el porcentaje y viceversa
+    textEditingDiscountController.addListener(() { 
+      if(focusNodePorcent.hasFocus){ 
+        // si el focus esta en el textfield del porcentaje entonces no se actualiza el descuento
+        return;
+      }
+      // var 
+      double priceTotal = salesController.getPriceTotalProducts();
+      double discount = textEditingDiscountController.numberValue;
+      // evita que el descuento sea mayor al precio total
+      if(discount > priceTotal){
+        textEditingDiscountController.updateValue(priceTotal);
+        return;
+      }
+      // devuelve el porcentaje del descuento
+      if(discount == 0.0 ){
+        // si el descuento es 0 entonces el porcentaje es 0
+        textEditingPorcentController.text = '0';
+        setState(() {});
+      }else{
+        // devuelve el porcentaje sin reciduos y redondeado al entero mas cercano
+        textEditingPorcentController.text = ((discount * 100) / priceTotal).round().toInt().toString();
+        setState(() {});
+      }
+    
+    }); 
+    textEditingPorcentController.addListener(() {
+      if(focusNodeDiscount.hasFocus){ 
+        // si el focus esta en el textfield del descuento entonces no se actualiza el porcentaje
+        return;
+      }
+      // var 
+      double priceTotal = salesController.getPriceTotalProducts();
+      int porcent = textEditingPorcentController.text.isEmpty ? 0 : (double.tryParse(textEditingPorcentController.text) ?? 0.0).round().toInt();
+
+          
+      // evitar el que porcentaje sea mayor a 100 evitando que se siga escribiendo otro digito
+      if(porcent > 100){
+        textEditingPorcentController.text = '100';
+        return;
+      } 
+      // devuelve el descuento  del porcentaje
+      if(porcent == 0 ){
+        // si el porcentaje es 0 entonces el descuento es 0
+        textEditingDiscountController.updateValue(0) ;
+        setState(() {});
+      }else{
+        // devuelve el descuento  del porcentaje 
+        textEditingDiscountController.updateValue(priceTotal * porcent / 100);
+        setState(() {});
+      }
+    });
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: appbar ,
+      body: body(),
+    );
+  }
+  // WIDGETS VIEWS 
+  PreferredSizeWidget get appbar => AppBar(
+    title: const Text('Descuento'),
+    actions: [
+      IconButton(onPressed: Get.back, icon: const Icon(Icons.close)),
+    ],
+  );
+  Widget body (){
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // view : escriba el monto del descuento
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: TextField(
+            focusNode: focusNodeDiscount,
+            autofocus: true,
+            controller: textEditingDiscountController,
+            keyboardType:
+                const TextInputType.numberWithOptions(decimal: false),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp('[1234567890]'))
+            ],
+            decoration: const InputDecoration( 
+              hintText: '\$',
+              labelText: "Monto",
+            ),
+            style: const TextStyle(fontSize: 20.0),
+            textInputAction: TextInputAction.next,
+          ),
+        ),
+        const SizedBox(height: 20),
+        // view : escriba el porcentaje del descuento
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: TextField(
+            focusNode: focusNodePorcent,
+            controller: textEditingPorcentController,
+            keyboardType:
+                const TextInputType.numberWithOptions(decimal: false),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp('[1234567890]'))
+            ],
+            decoration: const InputDecoration( 
+              icon: Icon(Icons.percent_rounded), 
+              labelText: "Porcentaje",
+            ),
+            style: const TextStyle(fontSize: 20.0),
+            textInputAction: TextInputAction.next,
+          ),
+        ),
+        const Spacer(),
+        // view : button confirmar
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: SizedBox(
+            width: double.infinity,
+            child: ElevatedButton( 
+              onPressed: textEditingDiscountController.numberValue==0?null: () {
+                // var
+                double discount = textEditingDiscountController.numberValue;
+                // comprobamos si el descuento es mayor a 0
+                if(discount > 0){
+                  // agregamos el descuento
+                  salesController.setDiscount = discount;
+                }
+                Get.back();
+              },
+              style: ButtonStyle(
+                  padding: MaterialStateProperty.all(const EdgeInsets.all(20)),
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(2)))),
+              child: const Text('Confirmar'),
+            ),
           ),
         ),
       ],

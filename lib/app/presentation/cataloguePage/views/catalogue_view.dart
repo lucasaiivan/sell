@@ -136,12 +136,7 @@ class CataloguePage extends StatelessWidget {
     final HomeController homeController = Get.find();
  
     // si el cátalogo esta vacio
-    if (controller.getCataloProducts.isEmpty) {
-
-      // mostramos las sugerencias de productos en el primer inicio de la aplicación
-      if(homeController.catalogUserHuideVisibility){
-        return Center(child: controller.widgetSuggestionProduct);
-      }
+    if (controller.getCataloProducts.isEmpty) { 
 
       return const Center(
         child: Text('Sin productos'),

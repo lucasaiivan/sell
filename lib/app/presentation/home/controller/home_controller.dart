@@ -10,8 +10,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:purchases_flutter/purchases_flutter.dart'; 
 import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart';
-import 'package:sell/app/data/datasource/database_cloud.dart';
-import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
+import 'package:sell/app/data/datasource/database_cloud.dart'; 
 import '../../../core/routes/app_pages.dart';
 import '../../../data/datasource/constant.dart';
 import '../../../domain/entities/cashRegister_model.dart';
@@ -30,9 +29,7 @@ class HomeController extends GetxController {
   final GlobalKey floatingActionButtonScanCodeBarKey = GlobalKey();
   final GlobalKey floatingActionButtonSelectedCajaKey = GlobalKey();
   final GlobalKey buttonsPaymenyMode = GlobalKey();
-  final List<TargetFocus> targets = List<TargetFocus>.empty(growable: true);
-  late final TutorialCoachMark tutorialCoachMark;
-
+  
   // estado de la conexión a internet
   bool _internetConnection = false;
   set setInternetConnection(bool value) => _internetConnection = value;
@@ -110,35 +107,8 @@ class HomeController extends GetxController {
   bool _darkMode = false;
   set setDarkMode(bool value) => _darkMode = value;
   bool get getDarkMode => _darkMode;
-
-  // Guide user : Ventas
-  bool salesUserGuideVisibility = false;
-  void getSalesUserGuideVisibility() {
-    // obtenemos la visibilidad de la guía del usuario de ventas
-    salesUserGuideVisibility = GetStorage().read('salesUserGuideVisibility') ?? true;
-    update();
-  }
-
-  void disableSalesUserGuide() async {
-    // Deshabilitar la guía del usuario de ventas
-    salesUserGuideVisibility = false;
-    await GetStorage().write('salesUserGuideVisibility', salesUserGuideVisibility);
-  }
-
-  // Guide user : Catalogue
-  bool catalogUserHuideVisibility = false;
-  get getCatalogUserHuideVisibility => catalogUserHuideVisibility;
-  void getTheVisibilityOfTheCatalogueUserGuide() {
-    // obtenemos la visibilidad de la guía del usuario del catálogo
-    catalogUserHuideVisibility = GetStorage().read('catalogUserHuideVisibility') ?? true;
-    update();
-  }
-
-  void disableCatalogUserGuide() {
-    // Deshabilitar la guía del usuario del catálogo
-    catalogUserHuideVisibility = false;
-    GetStorage().write('catalogUserHuideVisibility', catalogUserHuideVisibility);
-  }
+ 
+  
 
   // list admins users
   final RxList<UserModel> _adminsUsersList = <UserModel>[].obs;
@@ -321,10 +291,8 @@ class HomeController extends GetxController {
   
     // inicialización de la variable
     setFirebaseAuth = FirebaseAuth.instance; // inicializamos la autenticación de firebase
-    isAppUpdated(); // verificamos si la app esta actualizada
-    getSalesUserGuideVisibility(); // obtenemos la visibilidad de la guía del usuario de ventas
-    getTheVisibilityOfTheCatalogueUserGuide(); // obtenemos la visibilidad de la guía del usuario del catálogo
-
+    isAppUpdated(); // verificamos si la app esta actualizada 
+    
     // condition : comprobamos si el usuario esta autenticado o es un usuario anonimo
     if (getFirebaseAuth.currentUser.isAnonymous) {
       // obtenemos datos de prueba para que el usaurio pueda probar la app sin autenticarse
@@ -345,286 +313,6 @@ class HomeController extends GetxController {
     super.onClose(); 
   }
 
-  // TUTORIAL PARA EL USUARIO
-  TargetFocus get buttonAddItemFlashTargetFocus {
-    // style
-    const TextStyle titleSTexttyle = TextStyle(
-        fontWeight: FontWeight.bold, color: Colors.white, fontSize: 25.0);
-    const TextStyle descriptionTextStyle =
-        TextStyle(color: Colors.white, fontSize: 18.0);
-
-    return TargetFocus(
-        identify: "registro rapido",
-        keyTarget: floatingActionButtonRegisterFlashKeyButton,
-        contents: [
-          TargetContent(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
-              align: ContentAlign.top,
-              child: const Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text("Registra una venta rápida", style: titleSTexttyle),
-                  Padding(
-                    padding: EdgeInsets.only(top: 10.0),
-                    child: Text(
-                        "Puedes registrar un producto rapido solo con el precio y opcionalmente una descripción",
-                        style: descriptionTextStyle),
-                  ),
-                ],
-              ))
-        ]);
-  }
-
-  TargetFocus get viewTicketTargetFocus {
-    // style
-    const TextStyle titleSTexttyle = TextStyle(
-        fontWeight: FontWeight.bold, color: Colors.white, fontSize: 25.0);
-    const TextStyle descriptionTextStyle =
-        TextStyle(color: Colors.white, fontSize: 18.0);
-
-    return TargetFocus(
-        identify: "ticket",
-        keyTarget: floatingActionButtonRegisterFlashKeyButton,
-        contents: [
-          TargetContent(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
-              align: ContentAlign.top,
-              child: const Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text("vista previa del ticket", style: titleSTexttyle),
-                  Padding(
-                    padding: EdgeInsets.only(top: 10.0),
-                    child: Text(
-                        "Puedes registrar un producto rapido solo con el precio y opcionalmente una descripción",
-                        style: descriptionTextStyle),
-                  ),
-                ],
-              ))
-        ]);
-  }
-
-  TargetFocus get buttonAddProductTargetFocus {
-    // style
-    const TextStyle titleSTexttyle = TextStyle(
-        fontWeight: FontWeight.bold, color: Colors.white, fontSize: 25.0);
-    const TextStyle descriptionTextStyle =
-        TextStyle(color: Colors.white, fontSize: 18.0);
-
-    return TargetFocus(
-        identify: "agregar producto",
-        keyTarget: itemProductFlashKeyButton,
-        contents: [
-          TargetContent(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
-              align: ContentAlign.bottom,
-              child: const Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text("Agrega productos rápidamente", style: titleSTexttyle),
-                  Padding(
-                    padding: EdgeInsets.only(top: 10.0),
-                    child: Text(
-                        "En esta sección aparecen tus productos favoritos y los que allas vendido",
-                        style: descriptionTextStyle),
-                  ),
-                ],
-              ))
-        ]);
-  }
-
-  TargetFocus get buttonRegisterTransactionTargetFocus {
-    // style
-    const TextStyle titleSTexttyle = TextStyle(
-        fontWeight: FontWeight.bold, color: Colors.white, fontSize: 25.0);
-    const TextStyle descriptionTextStyle =
-        TextStyle(color: Colors.white, fontSize: 18.0);
-
-    return TargetFocus(
-        identify: "Procede a registrar la venta",
-        keyTarget: floatingActionButtonTransacctionRegister,
-        contents: [
-          TargetContent(
-              padding:
-                  const EdgeInsets.only(left: 12.0, right: 12.0, bottom: 100.0),
-              align: ContentAlign.top,
-              child: const Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text("Registra la venta", style: titleSTexttyle),
-                  Padding(
-                    padding: EdgeInsets.only(top: 10.0),
-                    child: Text("Procede a registrar tu primera transacción",
-                        style: descriptionTextStyle),
-                  ),
-                ],
-              ))
-        ]);
-  }
-
-  TargetFocus get buttonsOptionsPaymentMethodTargetFocus {
-    // style
-    const TextStyle titleSTexttyle = TextStyle(
-        fontWeight: FontWeight.bold, color: Colors.white, fontSize: 25.0);
-
-    return TargetFocus(
-        identify: "metodo de pago",
-        keyTarget: buttonsPaymenyMode,
-        contents: [
-          TargetContent(
-              padding:
-                  const EdgeInsets.only(left: 12.0, right: 12.0, bottom: 130.0),
-              align: ContentAlign.top,
-              child: const Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text("Elige el método de pago y listo",
-                      style: titleSTexttyle),
-                  //Padding(padding: EdgeInsets.only(top: 10.0),child: Text("Procede a registrar tu primera transacción",style: TextStyle(color: Colors.white),),),
-                ],
-              ))
-        ]);
-  }
-
-  TargetFocus get buttonsConfirmTransactionTargetFocus {
-    // style
-    const TextStyle titleSTexttyle = TextStyle(
-        fontWeight: FontWeight.bold, color: Colors.white, fontSize: 25.0);
-    const TextStyle descriptionTextStyle =
-        TextStyle(color: Colors.white, fontSize: 18.0);
-
-    return TargetFocus(
-        identify: "confirmar venta",
-        keyTarget: floatingActionButtonTransacctionConfirm,
-        contents: [
-          TargetContent(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 50.0),
-              align: ContentAlign.top,
-              child: const Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text("Confirma la transacción", style: titleSTexttyle),
-                  Padding(
-                    padding: EdgeInsets.only(top: 10.0),
-                    child: Text(
-                        "Finalmente terminar de concretar tu primera venta",
-                        style: descriptionTextStyle),
-                  ),
-                ],
-              ))
-        ]);
-  }
-
-  TargetFocus get buttonsScanCodeBarTargetFocusGuideUX {
-    // style
-    const TextStyle titleSTexttyle = TextStyle(
-        fontWeight: FontWeight.bold, color: Colors.white, fontSize: 25.0);
-
-    return TargetFocus(
-        identify: "button scan bar",
-        keyTarget: floatingActionButtonScanCodeBarKey,
-        contents: [
-          TargetContent(
-              padding:
-                  const EdgeInsets.only(left: 12.0, right: 12.0, bottom: 100.0),
-              align: ContentAlign.top,
-              child: const Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text("Escanea el código de barra de un producto",
-                      style: titleSTexttyle),
-                ],
-              ))
-        ]);
-  }
-
-  TargetFocus get buttonsNumCajaTargetFocusGuideUX {
-    // style
-    const TextStyle titleSTexttyle = TextStyle(
-        fontWeight: FontWeight.bold, color: Colors.white, fontSize: 25.0);
-
-    return TargetFocus(
-        identify: "numero de caja",
-        keyTarget: floatingActionButtonSelectedCajaKey,
-        contents: [
-          TargetContent(
-              padding:
-                  const EdgeInsets.only(left: 12.0, right: 12.0, top: 100.0),
-              align: ContentAlign.bottom,
-              child: const Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text("Elige la Caja en la que vas a vender",
-                      style: titleSTexttyle),
-                ],
-              ))
-        ]);
-  }
-
-  void showTutorial({required List<TargetFocus> targetFocus,
-      required void Function() next,
-      AlignmentGeometry alignSkip = Alignment.bottomRight,
-      String textSkip = "Salir"}) async {
-    // delay : para que se muestre el tutorial despues de que se muestre la pantalla
-    await Future.delayed(const Duration(milliseconds: 1300));
-
-    // condition : comprueba si el usaurio inicio por primera vez la app
-    // si es asi, se mostrara el tutorial
-    //if (salesUserGuideVisibility==true || getUserAnonymous   ){
-    if (textSkip=='') {
-      // ignore: use_build_context_synchronously
-      TutorialCoachMark(
-        targets: targetFocus,
-        colorShadow: Colors.black12.withOpacity(0.1),
-        textSkip: "Salir",
-        alignSkip: alignSkip,
-        textStyleSkip: const TextStyle(color: Colors.white, fontSize: 18.0),
-        onClickTarget: (target) {
-          // onClickTarget : cuando se hace click en el target sin obtener la posicion del click en el target
-
-          next();
-
-          // ignore: avoid_print
-          print(target);
-        },
-        onClickTargetWithTapPosition: (target, tapDetails) {
-          // onClickTargetWithTapPosition : cuando se hace click en el target y se obtiene la posicion del click en el target
-          // ignore: avoid_print
-          print("target: $target");
-          // ignore: avoid_print
-          print(
-              "clicked at position local: ${tapDetails.localPosition} - global: ${tapDetails.globalPosition}");
-        },
-        onClickOverlay: (target) {
-          // onClickOverlay : cuando se hace click en el overlay (background)
-          // ignore: avoid_print
-          print(target);
-        },
-        onSkip: () {
-          // onSkip : cuando se hace click en el boton de skip
-          // ignore: avoid_print
-          print("skip");
-        },
-        onFinish: () {
-          // onFinish : cuando se termina de mostrar todos los targets
-          // ignore: avoid_print
-          print("finish");
-        },
-      ).show(context: getHomeBuildContext);
-    }
-  }
 
   // FUNCTIONS
   Future<bool> onBackPressed({required BuildContext context}) async {
