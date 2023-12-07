@@ -1,4 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart'; 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:sell/app/domain/entities/catalogo_model.dart'; 
 
 class TicketModel {
   String id = '';
@@ -90,5 +91,26 @@ class TicketModel {
     discount = data['discount'];
     listPoduct = data['listPoduct'] ??[];
     creation = data['creation'];
+  }
+  // get : obtiene el monto total del ticket sin descuento aplicados\
+  double get getTotalPriceWithoutDiscount {
+    // se obtiene el total de la venta de los productos sin descuento 
+    double total = 0.0;
+    for (ProductCatalogue element in listPoduct) {
+      total += element.salePrice * element.quantity;
+    }
+    return total;
+  }
+
+  // get : obtiene el monto total del ticket con descuento aplicados
+  double get getTotalPrice {
+    // se obtiene el total de la venta de los productos con todos los descuentos aplicados al ticket
+    double total = 0.0;
+    for (ProductCatalogue element in listPoduct) {
+      int qauntity = element.quantity;
+      double salePrice = element.salePrice;
+      total += salePrice * qauntity;
+    }
+    return total - discount;
   }
 }
