@@ -1,6 +1,5 @@
-import 'dart:io';
+ 
 import 'package:audioplayers/audioplayers.dart';
-import 'package:firebase_storage/firebase_storage.dart'; 
 import 'package:flutter_masked_text2/flutter_masked_text2.dart'; 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -181,40 +180,39 @@ class SalesController extends GetxController {
   XFile _xFileImageCaptureBarCode = XFile('');
   set setXFileImage(XFile value) => _xFileImageCaptureBarCode = value;
   XFile get getXFileImage => _xFileImageCaptureBarCode;
-
-  // list : lista de productos seleccionados por el usaurio para la venta
-  List get getListProductsSelested => homeController.listProductsSelected;
-  set setListProductsSelected(List value) => homeController.listProductsSelected = value;
+ 
+  // Seleccionados : lista de porductos seleccionados por el usuario para la venta  
   void addProductsSelected({required ProductCatalogue product}) {
     product.quantity = 1;
     product.select = false;
-    homeController.listProductsSelected.add(product);
+    getTicket.listPoduct.add(product);
     update();
   }
   //  list : lista de productos seleccionados por el usaurio para la venta
   set removeProduct(String id) {
     List newList = [];
-    for (ProductCatalogue product in homeController.listProductsSelected) {
+    for (ProductCatalogue product in getTicket.listPoduct) {
       if (product.id != id) {newList.add(product);}
     }
-    setListProductsSelected = newList;
+    getTicket.listPoduct = newList;
     update();
   }
   //  list : lista de productos seleccionados por el usaurio para la venta
   int get getListProductsSelestedLength {
     int count = 0;
-    for (ProductCatalogue element in getListProductsSelested) {
+    for (ProductCatalogue element in getTicket.listPoduct) {
       count += element.quantity;
     }
     return count;
   }
  
-  // ticket
-  TicketModel _recibeTicket = TicketModel(creation: Timestamp.now(), listPoduct: []);
-  TicketModel get getRecibeTicket => _recibeTicket;
-  set setRecibeTicket(TicketModel value){
-    _recibeTicket = value; 
+  // ticket : ticket de la ultima venta
+  TicketModel _lastTicket = TicketModel(creation: Timestamp.now(), listPoduct: []);
+  TicketModel get getLastTicket => _lastTicket;
+  set setLastTicket(TicketModel value){
+    _lastTicket = value; 
   }
+  // ticket : ticket de venta actual
   TicketModel ticket = TicketModel(creation: Timestamp.now(), listPoduct: []);
   TicketModel get getTicket => ticket;
   set setTicket(TicketModel value){
@@ -230,7 +228,7 @@ class SalesController extends GetxController {
     if (ticket.discount != 0.0) {
       // devolver el descuento formateado 'Descuento:(30%) $ 100'
       // var 
-      int porcent = ((ticket.discount * 100) / getPriceTotalProducts()).round().toInt(); 
+      int porcent = ((ticket.discount * 100) / getTicket.getTotalPrice).round().toInt(); 
 
       return 'Descuento:(${(porcent).toStringAsFixed(0)}%) ${Publications.getFormatoPrecio(monto:ticket.discount)}';
     } else {
@@ -273,25 +271,19 @@ class SalesController extends GetxController {
 
   // FIREBASE
   
-  void registerTransaction() {
+  void registerTransaction() async {
 
     // Procederemos a guardar un documento con la transacción
 
     // get values 
-    var id = Publications.generateUid(); // generate id
-    List listIdsProducts = [];
-
-    for (var element in getListProductsSelested) {
-      // generamos una nueva lista con los id de los productos seleccionados
-      listIdsProducts.add(element.toJson());
-    }
+    var id = Publications.generateUid(); // generate id 
+ 
     //  set values
     getTicket.cashRegisterName = homeController.cashRegisterActive.description.toString(); // nombre de la caja registradora
     getTicket.cashRegisterId = homeController.cashRegisterActive.id; // id de la caja registradora
     getTicket.id = id;
-    getTicket.seller = homeController.getUserAuth.email!;
-    getTicket.listPoduct = listIdsProducts;
-    getTicket.priceTotal = getPriceTotalProducts();
+    getTicket.seller = homeController.getUserAuth.email!; 
+    getTicket.priceTotal = getTicket.getTotalPrice;
     getTicket.valueReceived = getValueReceivedTicket;
     getTicket.creation = Timestamp.now();
 
@@ -300,7 +292,7 @@ class SalesController extends GetxController {
     
     // set firestore : guarda la transacción
     Database.refFirestoretransactions(idAccount: homeController.getIdAccountSelected).doc(getTicket.id).set(getTicket.toJson());
-    for (Map element in listIdsProducts) {
+    for (Map element in getTicket.listPoduct) {
 
       // obtenemos el objeto
       ProductCatalogue product = ProductCatalogue.fromMap(element);
@@ -357,7 +349,7 @@ class SalesController extends GetxController {
     } else {
       // verifica si el ID del producto esta en la lista de seleccionados
       bool coincidence = false;
-      for (ProductCatalogue product in getListProductsSelested) {
+      for (ProductCatalogue product in getTicket.listPoduct) {
         if (product.id == item.id) {
           product.quantity++;
           coincidence = true;
@@ -375,7 +367,7 @@ class SalesController extends GetxController {
   void verifyExistenceInSelectedScanResult({required String id}) {
     // primero se verifica si el producto esta en la lista de productos seleccionados
     bool coincidence = false;
-    for (ProductCatalogue product in getListProductsSelested) {
+    for (ProductCatalogue product in getTicket.listPoduct) {
       if (product.id == id) {
         // este producto esta selccionado
         product.quantity++;
@@ -448,7 +440,7 @@ class SalesController extends GetxController {
 
   void cleanTicket() {
     setTicket = TicketModel(creation: Timestamp.now(), listPoduct: []);
-    setListProductsSelected = [];
+    getTicket.listPoduct = [];
     setTicketView = false;
     update();
     Get.back();
@@ -457,7 +449,7 @@ class SalesController extends GetxController {
   void selectedItem({required String id}) {
 
     // seleccionamos el producto 
-    for (ProductCatalogue element in getListProductsSelested) {
+    for (ProductCatalogue element in getTicket.listPoduct) {
       if (element.id == id) {
         element.select = true;
       } else {
@@ -466,23 +458,7 @@ class SalesController extends GetxController {
     }
     update();
   }
-
-  double getPriceTotalProducts() {
-    double total = 0.0;
-    for (var element in getListProductsSelested) {
-      total = total + (element.salePrice * element.quantity);
-    }
-    return total;
-  }
-  double getPriceTotalTicket() {
-    double total = 0.0;
-    for (var element in getListProductsSelested) {
-      total = total + (element.salePrice * element.quantity);
-    }
-    // decontar si existe un descuento
-    total = total - getTicket.discount;
-    return total;
-  }
+ 
 
   void addSaleFlash() {
     // generate new ID
@@ -505,7 +481,7 @@ class SalesController extends GetxController {
 
     // text format : devuelte un texto formateado del monto del cambio que tiene que recibir el cliente
     if (getValueReceivedTicket == 0.0) {return Publications.getFormatoPrecio(monto: 0);}
-    double result = getValueReceivedTicket - getPriceTotalProducts();
+    double result = getValueReceivedTicket - getTicket.getTotalPrice;
     return Publications.getFormatoPrecio(monto: result);
   }
   String getValueReceived() {
@@ -514,18 +490,20 @@ class SalesController extends GetxController {
   }
 
   void confirmedPurchase() {
+    //
+    // el [Usuario] procede a confirmar la venta del ticket 
+    //
 
     // condition : registramos la venta si el usuario esta logueado
     if(homeController.getUserAnonymous == false){
-      registerTransaction(); 
-      } 
+      registerTransaction();
+    } 
+
+    // set  : asignamos el ticket a la variable que recibe el ticket
+    setLastTicket = TicketModel.fromMap(getTicket.toJson());
+    
     // el usuario confirmo su venta
-    setStateConfirmPurchase = true; 
-    // set : 
-    setRecibeTicket = getTicket;
-    // fefault values
-    setListProductsSelected = [];
-    setTicket = TicketModel(creation: Timestamp.now(), listPoduct: []);
+    setStateConfirmPurchase = true;  
   }
 
   void showDialogAddProductNew({ required ProductCatalogue productCatalogue}) {
@@ -665,7 +643,7 @@ class SalesController extends GetxController {
                 //var
                 double valueReceived = textEditingControllerTicketMount.text == '' ? 0.0 : double.parse(textEditingControllerTicketMount.text);
                 // condition : verificar si el usaurio ingreso un monto valido y que sea mayor al monto total del ticket
-                if (valueReceived >= getPriceTotalProducts() &&
+                if (valueReceived >= getTicket.getTotalPrice &&
                     textEditingControllerTicketMount.text != '') {
                       setValueReceivedTicket = valueReceived;
                       textEditingControllerTicketMount.text = '';
@@ -685,7 +663,7 @@ class SalesController extends GetxController {
                 spacing: 5.0,
                 children: [
                   // chip : efectivo '100'
-                  getPriceTotalProducts() > 100 ? Container() :ChoiceChip(
+                  getTicket.getTotalPrice > 100 ? Container() :ChoiceChip(
                     label: const Text('100'),
                     selected: false,
                     onSelected: (bool value) {
@@ -695,7 +673,7 @@ class SalesController extends GetxController {
                     },
                   ),   
                   // chip : efectivo '200'
-                  getPriceTotalProducts() > 200 ? Container() :ChoiceChip(
+                  getTicket.getTotalPrice > 200 ? Container() :ChoiceChip(
                     label: const Text('200'),
                     selected: false,
                     onSelected: (bool value) {
@@ -705,7 +683,7 @@ class SalesController extends GetxController {
                     },
                   ), 
                   // chip : efectivo '500'
-                  getPriceTotalProducts() > 500 ? Container() :ChoiceChip(
+                  getTicket.getTotalPrice > 500 ? Container() :ChoiceChip(
                     label: const Text('500'),
                     selected: false,
                     onSelected: (bool value) {
@@ -715,7 +693,7 @@ class SalesController extends GetxController {
                     },
                   ), 
                   // chip : efectivo '1000'
-                  getPriceTotalProducts() > 1000 ? Container() :ChoiceChip(
+                  getTicket.getTotalPrice > 1000 ? Container() :ChoiceChip(
                     label: const Text('1000'),
                     selected: false,
                     onSelected: (bool value) {
@@ -725,7 +703,7 @@ class SalesController extends GetxController {
                     },
                   ), 
                   // chip : efectivo '1500'
-                  getPriceTotalProducts() > 1500 ? Container() :ChoiceChip(
+                  getTicket.getTotalPrice > 1500 ? Container() :ChoiceChip(
                     label: const Text('1500'),
                     selected: false,
                     onSelected: (bool value) {
@@ -735,7 +713,7 @@ class SalesController extends GetxController {
                     },
                   ),
                   // chip : efectivo '2000'
-                  getPriceTotalProducts() > 2000 ? Container() :ChoiceChip(
+                  getTicket.getTotalPrice > 2000 ? Container() :ChoiceChip(
                     label: const Text('2000'),
                     selected: false,
                     onSelected: (bool value) {
@@ -769,7 +747,7 @@ class SalesController extends GetxController {
                       ? 0.0
                       : double.parse(textEditingControllerTicketMount.text);
                   // condition : verificar si el usaurio ingreso un monto valido y que sea mayor al monto total del ticket
-                  if (valueReceived >= getPriceTotalProducts() && textEditingControllerTicketMount.text != '') {
+                  if (valueReceived >= getTicket.getTotalPrice && textEditingControllerTicketMount.text != '') {
                     setValueReceivedTicket = double.parse(textEditingControllerTicketMount.text);
                     textEditingControllerTicketMount.text = '';
                     setPayModeTicket = 'effective';
@@ -1170,6 +1148,8 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
     
     /// Filtra una lista de elementos [ProductCatalogue] basándose en el criterio de búsqueda [query]. 
     final filteredSuggestions = _filteredItems;
+    // control de vista
+    SystemChannels.textInput.invokeMethod('TextInput.hide'); // quita el foco
 
     // condition : si no hay query entonces mostramos las categorias
     if(query.isEmpty){

@@ -187,10 +187,7 @@ class HomeController extends GetxController {
   set setCatalogueProducts(List<ProductCatalogue> products) {
     _catalogueBusiness.value = products;
     //...filter
-  }
-
-  // lista de porductos seleccionados por el usuario para la venta
-  List listProductsSelected = [];
+  }  
 
   // list : marcas de productos disponibles en el catálogo
   final List<Mark> _markList = [];

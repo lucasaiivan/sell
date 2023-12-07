@@ -65,6 +65,7 @@ class _StaticsCardsState extends State<StaticsCards> {
         description: '',
         ),    
       // card : productos vendidos
+      !transactionsController.getMostSelledProducts.isNotEmpty ?Container():
       CardAnalityc( 
         isPremium: homeController.getIsSubscribedPremium,
         backgroundColor: Colors.blue.shade200.withOpacity(0.7),
@@ -72,7 +73,7 @@ class _StaticsCardsState extends State<StaticsCards> {
         titleText: 'Productos vendidos', 
         subtitle: 'Total',
         valueText: Publications.getFormatAmount(value:transactionsController.readTotalProducts ),
-        description: 'Mejor vendido con ${Publications.getFormatAmount(value: transactionsController.getMostSelledProducts[0].quantity)} ventas', 
+        description: 'Mejor vendido con ${Publications.getFormatAmount(value:  transactionsController.getMostSelledProducts[0].quantity )} ventas', 
         modalContent: SoldProductsView(),
         // view : item del producto con mayor cantidad de ventas
         widgetDescription: Padding(
@@ -80,7 +81,7 @@ class _StaticsCardsState extends State<StaticsCards> {
           child: Row(
             children: [ 
               // imagen del producto
-              ImageProductAvatarApp(size: 24,url:transactionsController.getMostSelledProducts[0].image),
+              ImageProductAvatarApp(size: 24,url: transactionsController.getMostSelledProducts[0].image),
               const SizedBox(width: 5),
               // text : nombre
               Flexible(child: Text(transactionsController.getMostSelledProducts[0].description,style: const TextStyle(fontSize: 12,fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines: 1)),

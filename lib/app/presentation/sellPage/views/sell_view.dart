@@ -50,7 +50,9 @@ class SalesView extends StatelessWidget {
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
+                    // view : cuerpo de la app
                     Flexible(child: body(controller: controller)),
+                    // view : informacion del ticket actual
                     drawerTicket(controller: controller),
                   ],
                 );
@@ -124,11 +126,11 @@ class SalesView extends StatelessWidget {
               crossAxisCount: crossAxisCount,
               crossAxisSpacing: 1.0,
               mainAxisSpacing: 1.0),
-          itemCount: controller.getListProductsSelested.length + 15,
+          itemCount: controller.getTicket.listPoduct.length + 15,
           itemBuilder: (context, index) {
             // mostramos un número de elementos vacíos de los cuales el primero tendrá un icono 'add'
             List list =
-                controller.getListProductsSelested.reversed.toList();
+                controller.getTicket.listPoduct.reversed.toList();
             if (index < list.length) {
               if (index == 0) {
                 return ZoomIn(
@@ -193,8 +195,7 @@ class SalesView extends StatelessWidget {
             : ListView(
                 key: const Key('ticket'),
                 shrinkWrap: false,
-                children: [ 
-      
+                children: [  
                   // view : informacion del ticket
                   Column(
                     children: [
@@ -241,7 +242,7 @@ class SalesView extends StatelessWidget {
                               Text('Total a cobrar',style: textDescrpitionStyle.copyWith(fontSize: 16,fontWeight: FontWeight.w900,color: Colors.white)),
                               const Spacer(),
                               const SizedBox(width:12),
-                              Text(Publications.getFormatoPrecio(monto: controller.getPriceTotalTicket()),style: textValuesStyle.copyWith(fontSize: 24,fontWeight: FontWeight.w900,color: Colors.white)),
+                              Text(Publications.getFormatoPrecio(monto: controller.getTicket.getTotalPrice),style: textValuesStyle.copyWith(fontSize: 24,fontWeight: FontWeight.w900,color: Colors.white)),
                             ],
                           ),
                         ),
@@ -861,7 +862,7 @@ class SalesView extends StatelessWidget {
                           const SizedBox(height: 12),
                           const Text('Hecho',style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold,color: accentColor)),
                           // text : monto del precio total del ticket 
-                          Expanded(child: Center( child: Text( 'Total ${Publications.getFormatoPrecio(monto: salesController.getRecibeTicket.priceTotal)}',style: TextStyle(color: colorText,fontSize: 30,fontWeight: FontWeight.w300)))),
+                          Expanded(child: Center( child: Text( 'Total ${Publications.getFormatoPrecio(monto: salesController.getLastTicket.getTotalPrice)}',style: TextStyle(color: colorText,fontSize: 30,fontWeight: FontWeight.w300)))),
                         ],
                       ),
                     ), 
@@ -899,8 +900,8 @@ class SalesView extends StatelessWidget {
                             onPressed: () {
                               //views
                               salesController.setStateConfirmPurchase = false;
-                              salesController.setTicketView = false;
-                              // default values
+                              salesController.setTicketView = false; 
+                              // set : default values  
                               salesController.setTicket = TicketModel(creation: Timestamp.now(), listPoduct: []);
                             },
                           ), 
@@ -953,16 +954,16 @@ class SalesView extends StatelessWidget {
           key: homeController.floatingActionButtonTransacctionRegister,
           controller: (p0) => controller.floatingActionButtonAnimateController = p0,
           child: FloatingActionButton.extended(
-              onPressed: controller.getListProductsSelested.isEmpty
+              onPressed: controller.getTicket.listPoduct.isEmpty
                   ? null
                   : () {
                       controller.setTicketView = true; 
                     },
-              backgroundColor: controller.getListProductsSelested.isEmpty
+              backgroundColor: controller.getTicket.listPoduct.isEmpty
                   ? Colors.grey
                   : null,
               label: Text(
-                  'Cobrar ${controller.getListProductsSelested.isEmpty ? '' : Publications.getFormatoPrecio(monto: controller.getPriceTotalProducts())}',
+                  'Cobrar ${controller.getTicket.listPoduct.isEmpty ? '' : Publications.getFormatoPrecio(monto: controller.getTicket.getTotalPrice)}',
                   style: const TextStyle(color: Colors.white))),
         ),
       ],
@@ -1572,7 +1573,7 @@ class _ViewAddDiscountState extends State<ViewAddDiscount> {
         return;
       }
       // var 
-      double priceTotal = salesController.getPriceTotalProducts();
+      double priceTotal = salesController.getTicket.getTotalPrice;
       double discount = textEditingDiscountController.numberValue;
       // evita que el descuento sea mayor al precio total
       if(discount > priceTotal){
@@ -1597,7 +1598,7 @@ class _ViewAddDiscountState extends State<ViewAddDiscount> {
         return;
       }
       // var 
-      double priceTotal = salesController.getPriceTotalProducts();
+      double priceTotal = salesController.getTicket.getTotalPrice;
       int porcent = textEditingPorcentController.text.isEmpty ? 0 : (double.tryParse(textEditingPorcentController.text) ?? 0.0).round().toInt();
 
           

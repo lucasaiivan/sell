@@ -58,7 +58,7 @@ class TransactionsController extends GetxController {
   // productos más vendidos
   List<ProductCatalogue> mostSelledProducts = [];
   List<ProductCatalogue> get getMostSelledProducts => mostSelledProducts;
-  set setMostSelledProducts(List<ProductCatalogue> value) => mostSelledProducts = value;
+  set setMostSelledProducts(List<ProductCatalogue> value) => mostSelledProducts = value; 
 
   // var : productos más vendidos con mayor beneficio
   List<ProductCatalogue> _bestSellingProductWithHighestProfit = [];
@@ -224,7 +224,9 @@ class TransactionsController extends GetxController {
         List<TicketModel> list = [];
         //  get
         for (var element in value.docs) {
-          list.add(TicketModel.fromMap(element.data()));
+          if(TicketModel.fromMap(element.data()).priceTotal != 0){
+            list.add(TicketModel.fromMap(element.data()));
+          } 
         }
         //  set
         setTransactionsList = list;
@@ -676,6 +678,8 @@ class TransactionsController extends GetxController {
   }
   // devuelve el porcentaje de ganancias
   int getPercentEarningsTotal() { 
+    // prueba de error 
+    if(getAmountTotalFilter == 0) return 0;
     // devolvemos el porcentaje de ganancias
     return (getEarningsTotal * 100 / getAmountTotalFilter).round();
   }
@@ -855,7 +859,12 @@ class TransactionsController extends GetxController {
       // converit chartData en una nuevo Map
       List<Map> map = [];
       for (var item in chartData) {
-        map.add({'name':getPayMode(idMode: item.key)['name'],'value':item.value,'priceTotal':Publications.getFormatoPrecio(monto: item.value),'color':getPayMode(idMode: item.key)['color']});
+        map.add({
+          'name':getPayMode(idMode: item.key)['name'],
+          'value':item.value,
+          'priceTotal':Publications.getFormatoPrecio(monto: item.value),
+          'color':getPayMode(idMode: item.key)['color'],
+          });
       } 
       
       // var
