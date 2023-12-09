@@ -182,26 +182,24 @@ class SalesController extends GetxController {
   XFile get getXFileImage => _xFileImageCaptureBarCode;
  
   // Seleccionados : lista de porductos seleccionados por el usuario para la venta  
-  void addProductsSelected({required ProductCatalogue product}) {
-    product.quantity = 1;
-    product.select = false;
-    getTicket.listPoduct.add(product);
+  void addProductsSelected({required ProductCatalogue product}) { 
+    getTicket.addProduct(product: product);
+    update();
+  } 
+  // id del producto de la lista de productos seleccionados
+  String idProductSelected = '';
+  String get getIdProductSelected => idProductSelected;
+  set setIdProductSelected(String value) {
+    idProductSelected = value;
     update();
   }
-  //  list : lista de productos seleccionados por el usaurio para la venta
-  set removeProduct(String id) {
-    List newList = [];
-    for (ProductCatalogue product in getTicket.listPoduct) {
-      if (product.id != id) {newList.add(product);}
-    }
-    getTicket.listPoduct = newList;
-    update();
-  }
+
   //  list : lista de productos seleccionados por el usaurio para la venta
   int get getListProductsSelestedLength {
     int count = 0;
-    for (ProductCatalogue element in getTicket.listPoduct) {
-      count += element.quantity;
+    for (var element in getTicket.listPoduct) {
+      ProductCatalogue product = ProductCatalogue.fromMap(element); 
+      count += product.quantity;
     }
     return count;
   }
@@ -271,20 +269,21 @@ class SalesController extends GetxController {
 
   // FIREBASE
   
-  void registerTransaction() async {
+  void registerTransaction() {
 
     // Procederemos a guardar un documento con la transacción
 
-    // get values 
-    var id = Publications.generateUid(); // generate id 
- 
+    // get values    
+
+    // set  : asignamos el ticket a la variable que recibe el ticket
+    setLastTicket = TicketModel.fromMap(getTicket.toJson()); 
     //  set values
+    getTicket.id = Publications.generateUid(); // generate id  
     getTicket.cashRegisterName = homeController.cashRegisterActive.description.toString(); // nombre de la caja registradora
     getTicket.cashRegisterId = homeController.cashRegisterActive.id; // id de la caja registradora
-    getTicket.id = id;
     getTicket.seller = homeController.getUserAuth.email!; 
     getTicket.priceTotal = getTicket.getTotalPrice;
-    getTicket.valueReceived = getValueReceivedTicket;
+    getTicket.valueReceived = getValueReceivedTicket; 
     getTicket.creation = Timestamp.now();
 
     // registramos el monto en caja
@@ -292,14 +291,14 @@ class SalesController extends GetxController {
     
     // set firestore : guarda la transacción
     Database.refFirestoretransactions(idAccount: homeController.getIdAccountSelected).doc(getTicket.id).set(getTicket.toJson());
-    for (Map element in getTicket.listPoduct) {
-
-      // obtenemos el objeto
-      ProductCatalogue product = ProductCatalogue.fromMap(element);
+    
+    for (dynamic data in getTicket.listPoduct) { 
+      // obj
+      ProductCatalogue product = ProductCatalogue.fromMap(data as Map<String, dynamic>);
 
       // set firestore : hace un incremento en el valor sales'ventas'  del producto
       Database.dbProductStockSalesIncrement(idAccount: homeController.getIdAccountSelected,idProduct: product.id,quantity: product.quantity );
-      // set firestore : hace un descremento en el valor 'stock' del producto
+      // set firestore : hace un descremento en el valor 'stock' del producto si es que tiene stock habilitado
       if (product.stock) {
         // set firestore : hace un descremento en el valor 'stock'
         Database.dbProductStockDecrement(idAccount: homeController.getIdAccountSelected,idProduct: product.id,quantity: product.quantity);
@@ -307,10 +306,8 @@ class SalesController extends GetxController {
     }
   }
 
-  // FUCTIONS
-
-
-
+  // FUCTIONS 
+  
   void showSeach({required BuildContext context}) {
     // Busca entre los productos de mi catálogo 
     showSearch(
@@ -349,16 +346,16 @@ class SalesController extends GetxController {
     } else {
       // verifica si el ID del producto esta en la lista de seleccionados
       bool coincidence = false;
-      for (ProductCatalogue product in getTicket.listPoduct) {
-        if (product.id == item.id) {
-          product.quantity++;
+      for (var i = 0; i < getTicket.listPoduct.length; i++) {  
+        if (getTicket.listPoduct[i]['id'] == item.id) {
+          getTicket.listPoduct[i]['quantity']++;
           coincidence = true;
           update();
           animateAdd(itemListAnimated: false);
         }
       }
       // si no hay coincidencia
-      if (coincidence == false) {
+      if (!coincidence) {
         verifyExistenceInCatalogue(id: item.id);
       }
     }
@@ -367,7 +364,8 @@ class SalesController extends GetxController {
   void verifyExistenceInSelectedScanResult({required String id}) {
     // primero se verifica si el producto esta en la lista de productos seleccionados
     bool coincidence = false;
-    for (ProductCatalogue product in getTicket.listPoduct) {
+    for (var item in getTicket.listPoduct) {
+      ProductCatalogue product = ProductCatalogue.fromMap(item as Map<String, dynamic>);
       if (product.id == id) {
         // este producto esta selccionado
         product.quantity++;
@@ -390,8 +388,7 @@ class SalesController extends GetxController {
       // si el producto se encuentra en el cátalgo de la cuenta se agrega a la lista de productos seleccionados
       if (product.id == id) {
         coincidence = true;
-        addProductsSelected(product: product);
-        update();
+        addProductsSelected(product: product); 
         animateAdd();
       }
     }
@@ -444,21 +441,7 @@ class SalesController extends GetxController {
     setTicketView = false;
     update();
     Get.back();
-  }
-
-  void selectedItem({required String id}) {
-
-    // seleccionamos el producto 
-    for (ProductCatalogue element in getTicket.listPoduct) {
-      if (element.id == id) {
-        element.select = true;
-      } else {
-        element.select = false;
-      }
-    }
-    update();
-  }
- 
+  } 
 
   void addSaleFlash() {
     // generate new ID
@@ -468,9 +451,8 @@ class SalesController extends GetxController {
     String valueDescription = textEditingControllerAddFlashDescription.text;
 
     if (valuePrice != 0) {
-      addProductsSelected(product: ProductCatalogue(id: id,description: valueDescription,salePrice: textEditingControllerAddFlashPrice.numberValue,creation: Timestamp.now(),upgrade: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now()));
       textEditingControllerAddFlashPrice.clear();
-      update();
+      addProductsSelected(product: ProductCatalogue(id: id,description: valueDescription,salePrice: textEditingControllerAddFlashPrice.numberValue,creation: Timestamp.now(),upgrade: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now()));
       Get.back();
     } else {
       ComponentApp().showMessageAlertApp(title: '😔No se puedo agregar 😔',message: 'Debe ingresar un valor distinto a 0');
@@ -497,11 +479,7 @@ class SalesController extends GetxController {
     // condition : registramos la venta si el usuario esta logueado
     if(homeController.getUserAnonymous == false){
       registerTransaction();
-    } 
-
-    // set  : asignamos el ticket a la variable que recibe el ticket
-    setLastTicket = TicketModel.fromMap(getTicket.toJson());
-    
+    }  
     // el usuario confirmo su venta
     setStateConfirmPurchase = true;  
   }

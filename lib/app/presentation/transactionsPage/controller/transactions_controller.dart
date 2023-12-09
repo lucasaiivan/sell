@@ -550,10 +550,8 @@ class TransactionsController extends GetxController {
             // si el producto ya existe en la lista, sumamos la cantidad de productos vendidos
             productNew.quantity = value.quantity + productNew.quantity;
           }
-        });
-         
-        productsList[productNew.id] = productNew;
-         
+        }); 
+        productsList[productNew.id] = productNew; 
       }
     }
     // ordenar los productos en forma descendente
@@ -710,10 +708,7 @@ class TransactionsController extends GetxController {
   }
 
   void deleteTicket({required TicketModel ticketModel}) {
-    Database.refFirestoretransactions(
-            idAccount: homeController.getIdAccountSelected)
-        .doc(ticketModel.id)
-        .delete();
+    Database.refFirestoretransactions(idAccount: homeController.getIdAccountSelected).doc(ticketModel.id).delete();
   }
 
   void deleteSale({required TicketModel ticketModel}) {

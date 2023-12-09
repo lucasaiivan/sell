@@ -143,8 +143,7 @@ class ProductCatalogue {
   double purchasePrice = 0.0; // precio de compra
   String currencySign = "\$"; // signo de la moneda
 
-  // var optional
-  bool select = false;
+  // var optional app
   int quantity = 0;
   double revenue = 0.0;
   double priceTotal = 0;
@@ -181,8 +180,7 @@ class ProductCatalogue {
     this.currencySign = "\$",
     this.idMark = '',
     this.nameMark = '',
-    this.select = false,
-    // var app
+    // var app 
     this.quantity = 1,
   });
 
@@ -246,8 +244,7 @@ class ProductCatalogue {
     purchasePrice: purchasePrice ?? this.purchasePrice,
     currencySign: currencySign ?? this.currencySign,
     idMark: idMark ?? this.idMark,
-    nameMark: nameMark ?? this.nameMark,
-    select: select ?? this.select,
+    nameMark: nameMark ?? this.nameMark, 
     quantity: quantity ?? this.quantity,
   );
 }
@@ -279,13 +276,13 @@ class ProductCatalogue {
       salePrice: data.containsKey('salePrice') ? data['salePrice'].toDouble()??0.0.toDouble() :0.0.toDouble(),
       purchasePrice: data.containsKey('purchasePrice') ? data['purchasePrice'].toDouble()??0.0.toDouble():0.0.toDouble(),
       currencySign: data.containsKey('currencySign')?data['currencySign']:data['signo_moneda'] ?? '',
-      quantity: data.containsKey('quantity') ? data['quantity'] : 1,
       quantityStock: data['quantityStock'] ?? 0,
       sales: data.containsKey('sales')? data['sales'] : 0,
-      select: false,
       stock: data['stock'] ?? false,
       alertStock: data.containsKey('alertStock')?data['alertStock'] : 5,
       revenue: data.containsKey('revenue')?data['revenue'] : 0.0,
+      // values of app
+      quantity: data.containsKey('quantity') ? data['quantity'] : 1, 
     );
   }
 

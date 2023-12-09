@@ -763,7 +763,7 @@ class HomeController extends GetxController {
     // obj : se obtiene los datos para registrar del precio al publico del producto en una colección publica de la db
     ProductPrice precio = ProductPrice(id: getProfileAccountSelected.id,idAccount: getProfileAccountSelected.id,imageAccount: getProfileAccountSelected.image,nameAccount: getProfileAccountSelected.name,price: product.salePrice,currencySign: product.currencySign,province: getProfileAccountSelected.province,town: getProfileAccountSelected.town,time: Timestamp.fromDate(DateTime.now()));
     // condition : si el producto es nuevo se le asigna los valores de creación
-    if(isProductNew){  
+    if(isProductNew){
       // el producto no existe 
       product.creation = Timestamp.fromDate(DateTime.now()); // fecha de creación del producto
       product.followers++; // incrementamos el contador de los seguidores del producto publico 
