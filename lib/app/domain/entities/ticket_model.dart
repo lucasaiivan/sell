@@ -11,7 +11,7 @@ class TicketModel {
   double valueReceived = 0.0;
   double discount = 0.0;
   String currencySymbol = '\$';
-  List<dynamic> listPoduct= [];
+  List<Map<String,dynamic>> listPoduct= [];
   late Timestamp creation; // Marca de tiempo ( hora en que se reporto el producto )
 
   TicketModel({
@@ -96,8 +96,9 @@ class TicketModel {
   double get getTotalPriceWithoutDiscount {
     // se obtiene el total de la venta de los productos sin descuento 
     double total = 0.0;
-    for (ProductCatalogue element in listPoduct) {
-      total += element.salePrice * element.quantity;
+    for (var element in listPoduct) {
+      ProductCatalogue product = ProductCatalogue.fromMap(element);
+      total += product.salePrice * product.quantity;
     }
     return total;
   }
@@ -106,11 +107,63 @@ class TicketModel {
   double get getTotalPrice {
     // se obtiene el total de la venta de los productos con todos los descuentos aplicados al ticket
     double total = 0.0;
-    for (ProductCatalogue element in listPoduct) {
-      int qauntity = element.quantity;
-      double salePrice = element.salePrice;
+    for (var element in listPoduct) {
+      ProductCatalogue product = ProductCatalogue.fromMap(element);
+      int qauntity = product.quantity;
+      double salePrice = product.salePrice;
       total += salePrice * qauntity;
     }
     return total - discount;
   }
+  // void : incrementa el producto seleccionado del ticket
+  void incrementProduct({required ProductCatalogue product}) {
+    // se verifica la coincidencia del producto en la lista de productos del ticket
+    for (var i = 0; i < listPoduct.length; i++) { 
+      if (listPoduct[i]['id'] == product.id) {
+        listPoduct[i]['quantity'] ++;
+        return;
+      }
+    }
+  }
+  // void : decrementa el producto seleccionado del ticket
+  void decrementProduct({required ProductCatalogue product}) {
+    // se verifica la coincidencia del producto en la lista de productos del ticket
+    for (var i = 0; i < listPoduct.length; i++) { 
+      if (listPoduct[i]['id'] == product.id) {
+        // condition : si la cantidad del producto es mayor a 1 se decrementa
+        if(listPoduct[i]['quantity'] > 1){
+          listPoduct[i]['quantity']=listPoduct[i]['quantity']-1;
+        }
+        return;
+      }
+    }
+  }
+  // void : elimina el producto seleccionado del ticket
+  void removeProduct({required ProductCatalogue product}) {
+    // se verifica la coincidencia del producto en la lista de productos del ticket
+    for (var i = 0; i < listPoduct.length; i++) { 
+      if (listPoduct[i]['id'] == product.id) {
+        listPoduct.removeAt(i);
+        return;
+      }
+    }
+  }
+  // void : agrega un producto al ticket
+  void addProduct({required ProductCatalogue product}) {
+    // se verifica si el producto ya esta en el ticket
+    bool exist = false;
+    for (var i = 0; i < listPoduct.length; i++) { 
+      if (listPoduct[i]['id'] == product.id) {
+        listPoduct[i]['quantity'] ++;
+        exist = true;
+        break; 
+      }
+    }
+    // si el producto no esta en el ticket se agrega
+    if(!exist){
+      listPoduct.add(product.toJson());
+    }
+  }
+
+
 }

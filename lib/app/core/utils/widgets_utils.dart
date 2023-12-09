@@ -251,9 +251,12 @@ class ProductoItem extends StatefulWidget {
 class _ProductoItemState extends State<ProductoItem> {
   // controllers
   SalesController salesController = Get.find<SalesController>();
+
   @override
   Widget build(BuildContext context) {
+
     //  values
+    bool isSelect = salesController.getIdProductSelected == widget.producto.id;
     final String alertStockText = widget.producto.stock ? (widget.producto.quantityStock >=0 ? widget.producto.quantityStock<=widget.producto.alertStock?'Stock bajo':'' : 'Sin stock'): '';
 
     // aparición animada
@@ -289,20 +292,23 @@ class _ProductoItemState extends State<ProductoItem> {
               color: Colors.transparent,
               child: InkWell(
                 mouseCursor: MouseCursor.uncontrolled,
-                onTap: () => salesController.selectedItem(id: widget.producto.id),
-                onLongPress: () {},
+                onTap: (){
+                  // action : selecciona producto de la lista de productos del ticket
+                  salesController.setIdProductSelected = widget.producto.id; 
+                }, 
               ),
             ),
           ),
           // color selected
-          widget.producto.select ?Positioned.fill(child: Container(color: Colors.black26,)):Container(),
+          isSelect ?Positioned.fill(child: Container(color: Colors.black26,)):Container(),
           // button delete
-          widget.producto.select
+          isSelect
               ? Align(
                   alignment: Alignment.topRight,
                   child: IconButton(
                       onPressed: () {
-                        salesController.removeProduct = widget.producto.id;
+                        salesController.getTicket.removeProduct(product: widget.producto);
+                        salesController.update();
                       },
                       icon: const CircleAvatar(
                           backgroundColor: Colors.red,
@@ -312,12 +318,13 @@ class _ProductoItemState extends State<ProductoItem> {
                           ))))
               : Container(),
           // value quantity
-          widget.producto.quantity > 1 || widget.producto.select
+          widget.producto.quantity > 1 || isSelect
               ? Align(
                   alignment: Alignment.topLeft,
                   child: IconButton(
-                    onPressed: () =>
-                        salesController.selectedItem(id: widget.producto.id),
+                    onPressed: (){
+                     salesController.setIdProductSelected = widget.producto.id;
+                    },
                     icon: CircleAvatar(
                       backgroundColor: Colors.black,
                       child: Padding(
@@ -333,15 +340,13 @@ class _ProductoItemState extends State<ProductoItem> {
                   ))
               : Container(),
           // button  subtract quantity
-          widget.producto.select
+          isSelect
               ? Align(
                   alignment: Alignment.bottomLeft,
                   child: IconButton(
                       onPressed: () {
-                        if (widget.producto.quantity > 1) {
-                          widget.producto.quantity--;
-                          salesController.update();
-                        }
+                        salesController.getTicket.decrementProduct(product: widget.producto);
+                        salesController.update();
                       },
                       icon: const CircleAvatar(
                           backgroundColor: Colors.blue,
@@ -351,12 +356,12 @@ class _ProductoItemState extends State<ProductoItem> {
                           ))))
               : Container(),
           // button  increase quantity
-          widget.producto.select
+          isSelect
               ? Align(
                   alignment: Alignment.bottomRight,
                   child: IconButton(
                       onPressed: () {
-                        widget.producto.quantity++;
+                        salesController.getTicket.incrementProduct(product: widget.producto);
                         salesController.update();
                       },
                       icon: const CircleAvatar(
@@ -367,14 +372,12 @@ class _ProductoItemState extends State<ProductoItem> {
                           ))))
               : Container(),
           // button  deselect
-          widget.producto.select
+          isSelect
               ? Align(
                   alignment: Alignment.center,
                   child: IconButton(
                       onPressed: () {
-                        setState(() {
-                          widget.producto.select = !widget.producto.select;
-                        });
+                        salesController.setIdProductSelected = '';
                       },
                       icon: const Icon(
                         Icons.close,

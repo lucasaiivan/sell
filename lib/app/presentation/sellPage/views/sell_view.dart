@@ -120,7 +120,7 @@ class SalesView extends StatelessWidget {
         // var : logica de la vista para la web
         int crossAxisCount = constraints.maxWidth<700?3:constraints.maxWidth<900?4:5;
 
-        return GridView.builder(
+        return GridView.builder( 
           padding: const EdgeInsets.all(12),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
@@ -129,16 +129,14 @@ class SalesView extends StatelessWidget {
           itemCount: controller.getTicket.listPoduct.length + 15,
           itemBuilder: (context, index) {
             // mostramos un número de elementos vacíos de los cuales el primero tendrá un icono 'add'
-            List list =
-                controller.getTicket.listPoduct.reversed.toList();
+            List list = controller.getTicket.listPoduct.reversed.toList();
             if (index < list.length) {
               if (index == 0) {
                 return ZoomIn(
-                    controller: (p0) => controller
-                        .newProductSelectedAnimationController = p0,
-                    child: ProductoItem(producto: list[index]));
+                    controller: (p0) => controller.newProductSelectedAnimationController = p0,
+                    child: ProductoItem(producto: ProductCatalogue.fromMap(list[index])));
               }
-              return ProductoItem(producto: list[index]);
+              return ProductoItem(producto: ProductCatalogue.fromMap(list[index]));
             } else {
               return ElasticIn( child: Card( elevation: 0, color: Colors.grey.withOpacity(0.1)));
             }
