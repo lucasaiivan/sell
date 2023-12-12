@@ -183,6 +183,7 @@ class SalesController extends GetxController {
  
   // Seleccionados : lista de porductos seleccionados por el usuario para la venta  
   void addProductsSelected({required ProductCatalogue product}) { 
+    ///setIdProductSelected = product.id;
     getTicket.addProduct(product: product);
     update();
   } 
@@ -365,7 +366,7 @@ class SalesController extends GetxController {
     // primero se verifica si el producto esta en la lista de productos seleccionados
     bool coincidence = false;
     for (var item in getTicket.listPoduct) {
-      ProductCatalogue product = ProductCatalogue.fromMap(item as Map<String, dynamic>);
+      ProductCatalogue product = ProductCatalogue.fromMap(item);
       if (product.id == id) {
         // este producto esta selccionado
         product.quantity++;
@@ -452,7 +453,8 @@ class SalesController extends GetxController {
 
     if (valuePrice != 0) {
       textEditingControllerAddFlashPrice.clear();
-      addProductsSelected(product: ProductCatalogue(id: id,description: valueDescription,salePrice: textEditingControllerAddFlashPrice.numberValue,creation: Timestamp.now(),upgrade: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now()));
+      textEditingControllerAddFlashDescription.clear;
+      addProductsSelected(product: ProductCatalogue(id: id,description: valueDescription,salePrice: valuePrice,creation: Timestamp.now(),upgrade: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now()));
       Get.back();
     } else {
       ComponentApp().showMessageAlertApp(title: '😔No se puedo agregar 😔',message: 'Debe ingresar un valor distinto a 0');

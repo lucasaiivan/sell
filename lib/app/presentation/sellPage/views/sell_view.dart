@@ -130,7 +130,9 @@ class SalesView extends StatelessWidget {
           itemBuilder: (context, index) {
             // mostramos un número de elementos vacíos de los cuales el primero tendrá un icono 'add'
             List list = controller.getTicket.listPoduct.reversed.toList();
+            // conditional : si el index es menor a la lista de productos seleccionados
             if (index < list.length) {
+              // conditional : si el index es igual a 0
               if (index == 0) {
                 return ZoomIn(
                     controller: (p0) => controller.newProductSelectedAnimationController = p0,

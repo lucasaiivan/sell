@@ -214,16 +214,18 @@ class TransactionsController extends GetxController {
 
     // obtenemos los obj(productos) del catalogo de la cuenta del negocio
     if (homeController.getProfileAccountSelected.id != '') {
-      // stream var
+      // stream : obtenemos los documentos creados en el día
       Stream<QuerySnapshot<Map<String, dynamic>>> stream = Database.readTransactionsFilterTimeStream(
         idAccount: homeController.getProfileAccountSelected.id,
         timeStart: timeStart,
         timeEnd: timeEnd,
       );
+      // listen : escuchamos los cambios que se producen en la base de datos
       stream.listen((value) {
         List<TicketModel> list = [];
         //  get
         for (var element in value.docs) {
+          // condition : evaluamos que el precio total sea distinto de cero
           if(TicketModel.fromMap(element.data()).priceTotal != 0){
             list.add(TicketModel.fromMap(element.data()));
           } 
@@ -243,7 +245,7 @@ class TransactionsController extends GetxController {
     // recorremos todos los tickers que se filtraron
     for (TicketModel ticket in getTransactionsList) {
       // recorremos los productos de cada ticket
-      for (Map item in ticket.listPoduct) {
+      for (dynamic item in ticket.listPoduct) {
         // get
         final ProductCatalogue productNew = ProductCatalogue.fromMap(item); 
         // var
@@ -376,7 +378,7 @@ class TransactionsController extends GetxController {
     }
   }
 
-  void readCatalogueProductsOfTheDay() {
+  /* void readCatalogueProductsOfTheDay() {
     // obtenemos los documentos creados en el día
 
     // a la marca de tiempo actual le descontamos las horas del día
@@ -403,7 +405,7 @@ class TransactionsController extends GetxController {
         setTransactionsList = list;
       });
     }
-  }
+  } */
 
   void readProductWithMoreEarnings() {
     //
@@ -417,7 +419,7 @@ class TransactionsController extends GetxController {
     // recorremos todos los tickers que se filtraron
     for (TicketModel ticket in getTransactionsList) {
       // recorremos los productos de cada ticket
-      for (Map item in ticket.listPoduct) {
+      for (dynamic item in ticket.listPoduct) {
         // get
         final ProductCatalogue productNew = ProductCatalogue.fromMap(item);
         bool update = false;
@@ -541,7 +543,7 @@ class TransactionsController extends GetxController {
     // recorremos todos los tickers que se filtraron
     for (TicketModel ticket in getTransactionsList) {
       // recorremos los productos de cada ticket
-      for (Map item in ticket.listPoduct) {
+      for (dynamic item in ticket.listPoduct) {
         // get
         final ProductCatalogue productNew = ProductCatalogue.fromMap(item);  
         // verificamos si el producto ya existe en la lista
@@ -590,7 +592,7 @@ class TransactionsController extends GetxController {
       double transactionEarnings = 0;
 
       // recorremos los productos vendidos en la transacción
-      for (Map item in ticket.listPoduct) {
+      for (dynamic item in ticket.listPoduct) {
         final ProductCatalogue product = ProductCatalogue.fromMap(item);
 
         // si el precio de compra es distinto de cero, sumamos las ganancias
@@ -620,7 +622,7 @@ class TransactionsController extends GetxController {
     double transactionEarnings = 0; // ganancias de la transacción
 
     // recorremos la lista de productos que se vendieron
-    for (Map item in ticket.listPoduct) {
+    for (dynamic item in ticket.listPoduct) {
       // var
       ProductCatalogue product = ProductCatalogue.fromMap(item);
 
@@ -657,7 +659,7 @@ class TransactionsController extends GetxController {
     for (TicketModel ticket in getTransactionsList) { 
 
       // recorremos la lista de productos que se vendieron
-      for (Map item in ticket.listPoduct) {
+      for (dynamic item in ticket.listPoduct) {
         // var
         ProductCatalogue product = ProductCatalogue.fromMap(item);
 
