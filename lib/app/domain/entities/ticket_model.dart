@@ -11,7 +11,7 @@ class TicketModel {
   double valueReceived = 0.0;
   double discount = 0.0;
   String currencySymbol = '\$';
-  List<Map<String,dynamic>> listPoduct= [];
+  List<dynamic> listPoduct= [];
   late Timestamp creation; // Marca de tiempo ( hora en que se reporto el producto )
 
   TicketModel({
@@ -64,17 +64,17 @@ class TicketModel {
       };
   factory TicketModel.fromMap(Map<dynamic, dynamic> data) {
     return TicketModel(
-      id: data['id'] ?? '',
-      payMode: data['payMode'] ?? '',
-      seller: data['seller'] ?? '',
-      currencySymbol: data['currencySymbol'] ?? '\$',
-      cashRegisterName: data['cashRegisterName'] ?? '',
-      cashRegisterId: data['cashRegisterId'] ?? '',
-      priceTotal: (data['priceTotal'] ?? 0).toDouble(),
-      valueReceived: (data['valueReceived'] ?? 0).toDouble(),
-      discount: (data['discount'] ?? 0).toDouble(),
-      listPoduct: data['listPoduct'] ?? [],
-      creation: data['creation'],
+      id: data.containsKey('id') ? data['id'] : '',
+      payMode: data.containsKey('payMode') ? data['payMode'] : '',
+      seller: data.containsKey('seller') ? data['seller'] : '',
+      currencySymbol: data.containsKey('currencySymbol') ? data['currencySymbol'] : '\$',
+      cashRegisterName: data.containsKey('cashRegisterName') ? data['cashRegisterName'] : '',
+      cashRegisterId: data.containsKey('cashRegisterId') ? data['cashRegisterId'] : '',
+      priceTotal: data.containsKey('priceTotal') ? (data['priceTotal'] ?? 0).toDouble() : 0.0,
+      valueReceived:  data.containsKey('valueReceived') ? (data['valueReceived'] ?? 0).toDouble() : 0.0,
+      discount: data.containsKey('discount') ? (data['discount'] ?? 0).toDouble() : 0.0,
+      listPoduct: data.containsKey('listPoduct') ? data['listPoduct'] : [],
+      creation: data.containsKey('creation') ? data['creation'] : Timestamp.now(),
     );
   }
   TicketModel.fromDocumentSnapshot({required DocumentSnapshot documentSnapshot}) {

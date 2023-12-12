@@ -294,7 +294,7 @@ class TransactionsView extends StatelessWidget {
   void showAlertDialogTransactionInformation(BuildContext context, TicketModel ticket) {
     String id = ticket.id;
     String seller = ticket.seller;
-    String cashRegister = ticket.cashRegisterName;
+    String cashRegister = ticket.cashRegisterName == ''?'sin especificar':ticket.cashRegisterName;
     String payMode = ticket.payMode;
     double priceTotal = ticket.priceTotal;
     double valueReceived = ticket.valueReceived;
@@ -315,7 +315,7 @@ class TransactionsView extends StatelessWidget {
     // styles
     const double opacity = 0.8;
     Widget divider = ComponentApp().divider();
-    Widget spacer = const SizedBox(height: 12);
+    Widget spacer = const SizedBox(height: 6);
     TextStyle textStyleDescription = const TextStyle( fontWeight: FontWeight.w300);
     TextStyle textStyleValue = const TextStyle(fontSize: 16,fontWeight: FontWeight.w600);
 
@@ -370,7 +370,7 @@ class TransactionsView extends StatelessWidget {
                     spacer,
                     Row(
                       children: <Widget>[
-                        Opacity(opacity:opacity,child: Text("Vendedor: ",style: textStyleDescription)),
+                        Opacity(opacity:opacity,child: Text("Vendedor: ",style: textStyleDescription,overflow:TextOverflow.ellipsis)),
                         const Spacer(),
                         Text(seller,style: textStyleValue),
                       ],
@@ -396,14 +396,30 @@ class TransactionsView extends StatelessWidget {
                     spacer,  
                     divider,
                     spacer,  
+                    // text : descuentos
+                    ticket.discount==0?Container():
                     Row(
                       children: <Widget>[
-                        Opacity(opacity:opacity,child: Text("Precio total: ",style: textStyleDescription)),
+                        Opacity(opacity:opacity,child: Text("Descuentos: ",style: textStyleDescription)),
                         const Spacer(),
-                        Text( Publications.getFormatoPrecio(monto: priceTotal,moneda: currencySymbol),style: textStyleValue),
+                        Text(Publications.getFormatoPrecio(monto: ticket.discount,moneda: currencySymbol),style: textStyleValue.copyWith(color: Colors.red.shade400)),
                       ],
                     ),
+                    spacer, 
+                    // text : precio total
+                    Container(
+                      color: Colors.black12,
+                      child: Row(
+                        children: <Widget>[
+                          Opacity(opacity:opacity,child: Text("Precio total: ",style: textStyleDescription)),
+                          const Spacer(),
+                          Text( Publications.getFormatoPrecio(monto: priceTotal,moneda: currencySymbol),style: textStyleValue ),
+                        ],
+                      ),
+                    ),
                     spacer,
+                    // text : valor recibido
+                    valueReceived==0?Container():
                     Row(
                       children: <Widget>[
                         Opacity(opacity:opacity,child: Text("Valor recibido: ",style: textStyleDescription)),
@@ -412,6 +428,8 @@ class TransactionsView extends StatelessWidget {
                       ],
                     ),
                     spacer,
+                    // text : valor del vuelto
+                    changeAmount == 0?Container():
                     Row(
                       children: <Widget>[
                         Opacity(opacity:opacity,child: Text("Vuelto: ",style: textStyleDescription)),

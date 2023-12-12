@@ -136,9 +136,9 @@ class ProductCatalogue {
   Timestamp documentCreation =Timestamp.now(); // Marca de tiempo ( hora en que se creo el producto publico )
   Timestamp documentUpgrade =Timestamp.now();// Marca de tiempo ( hora en que se actualizo el producto publico )
   int quantityStock = 0;
-  int sales = 0;
   bool stock = false;
   int alertStock = 5;
+  int sales = 0;
   double salePrice = 0.0; // precio de venta
   double purchasePrice = 0.0; // precio de compra
   String currencySign = "\$"; // signo de la moneda
@@ -212,8 +212,7 @@ class ProductCatalogue {
   double? purchasePrice,
   String? currencySign,
   String? idMark,
-  String? nameMark,
-  bool? select,
+  String? nameMark, 
   int? quantity,
 }) {
   return ProductCatalogue(
@@ -252,33 +251,33 @@ class ProductCatalogue {
   factory ProductCatalogue.fromMap(Map data) {
     return ProductCatalogue(
       // Valores del producto
-      id: data['id'] ?? '',
+      id: data.containsKey('id')? data['id'] :'',
       verified: data.containsKey('verified')? data['verified']: data['verificado'] ?? false,
-      followers: data['followers'] ?? 0,
-      outstanding:  data['outstanding'] ?? false,
+      followers: data.containsKey('followers')? data['followers']: data['seguidores'] ?? 0,
+      outstanding: data.containsKey('outstanding')? data['outstanding']: data['destacado'] ?? false,
       favorite: data.containsKey('favorite')? data['favorite']: data['favorito'] ?? false,
       idMark:data.containsKey('idMark') ? data['idMark'] : data['id_marca'] ?? '',
-      nameMark: data['nameMark'] ?? '',
+      nameMark: data.containsKey('nameMark') ? data['nameMark'] : data['nombre_marca'] ?? '',
       image: data.containsKey('image')? data['image']: data['urlimagen'] ?? 'https://default',
       description: data.containsKey('description')?data['description']: data['descripcion'] ?? '',
       code: data.containsKey('code') ? data['code'] : data['codigo'] ?? '',
-      provider: data['provider'] ?? '',
-      nameProvider: data['nameProvider'] ?? '',
+      provider: data.containsKey('provider')?data['provider']:data['proveedor'] ?? '',
+      nameProvider: data.containsKey('nameProvider')?data['nameProvider']:data['proveedorName'] ?? '',
       category: data.containsKey('category')?data['category']:data['categoria'] ?? '',
       nameCategory: data.containsKey('nameCategory')?data['nameCategory']:data['categoriaName'] ?? '',
       subcategory: data.containsKey('subcategory')?data['subcategory']:data['subcategoria'] ?? '',
       nameSubcategory: data.containsKey('nameSubcategory')?data['nameSubcategory']:data['subcategoriaName'] ?? '',
       upgrade: data.containsKey('upgrade')? data['upgrade']: data['timestamp_actualizacion'] ?? Timestamp.now(),
       creation: data.containsKey('creation')? data['creation']: data['timestamp_creation'] ?? Timestamp.now(),
-      documentCreation: data['documentCreation'] ?? Timestamp.now(),
-      documentUpgrade:  data['documentUpgrade'] ?? Timestamp.now(),
+      documentCreation: data.containsKey('documentCreation')? data['documentCreation']: data['documentCreation'] ?? Timestamp.now(),
+      documentUpgrade: data.containsKey('documentUpgrade')? data['documentUpgrade']: data['documentUpgrade'] ?? Timestamp.now(),
       // valores de la cuenta
       salePrice: data.containsKey('salePrice') ? data['salePrice'].toDouble()??0.0.toDouble() :0.0.toDouble(),
       purchasePrice: data.containsKey('purchasePrice') ? data['purchasePrice'].toDouble()??0.0.toDouble():0.0.toDouble(),
       currencySign: data.containsKey('currencySign')?data['currencySign']:data['signo_moneda'] ?? '',
-      quantityStock: data['quantityStock'] ?? 0,
+      quantityStock: data.containsKey('quantityStock')? data['quantityStock'] : 0,
       sales: data.containsKey('sales')? data['sales'] : 0,
-      stock: data['stock'] ?? false,
+      stock:  data.containsKey('stock')? data['stock'] : false,
       alertStock: data.containsKey('alertStock')?data['alertStock'] : 5,
       revenue: data.containsKey('revenue')?data['revenue'] : 0.0,
       // values of app
