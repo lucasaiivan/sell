@@ -310,14 +310,15 @@ class ControllerProductsEdit extends GetxController {
     if ( controllerTextEditPrecioVenta.numberValue == 0 ) {
       return '0%';
     }
-    
-    double ganancia = controllerTextEditPrecioVenta.numberValue - controllerTextEditPrecioCosto.numberValue;
-    double porcentajeDeGanancia = (ganancia / controllerTextEditPrecioCosto.numberValue) * 100;
+    double dCosto = controllerTextEditPrecioCosto.numberValue;
+    double ganancia = controllerTextEditPrecioVenta.numberValue - controllerTextEditPrecioCosto.numberValue; 
+    double porcentajeGanancia = (ganancia / dCosto) * 100;
+
     
     if (ganancia % 1 != 0) {
-      return '${porcentajeDeGanancia.toStringAsFixed(2)}%';
+      return '${porcentajeGanancia.toStringAsFixed(2)}%';
     } else {
-      return '${porcentajeDeGanancia.toInt()}%';
+      return '${porcentajeGanancia.toInt()}%';
     }
   }
 
