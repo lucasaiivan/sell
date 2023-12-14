@@ -1070,6 +1070,7 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
     final Color primaryTextColor  = Get.isDarkMode?Colors.white70:Colors.black87;
     final TextStyle textStylePrimary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400,fontSize: 16);
     final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
+    
     // widgets 
     final Widget viewMarks = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1128,11 +1129,14 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
     
     /// Filtra una lista de elementos [ProductCatalogue] basándose en el criterio de búsqueda [query]. 
     final filteredSuggestions = _filteredItems;
-    // control de vista
-    SystemChannels.textInput.invokeMethod('TextInput.hide'); // quita el foco
+    
 
-    // condition : si no hay query entonces mostramos las categorias
+    // condition : si no hay query entonces mostramos las categorias y quitamos el foco del teclado
     if(query.isEmpty){
+
+      // control de vista
+      SystemChannels.textInput.invokeMethod('TextInput.hide'); // quita el foco
+
       return Padding(
         padding: const EdgeInsets.only(top: 20,left: 12,right: 12),
         child: ListView(

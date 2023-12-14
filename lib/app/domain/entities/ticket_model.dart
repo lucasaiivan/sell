@@ -92,7 +92,41 @@ class TicketModel {
     listPoduct = data['listPoduct'] ??[];
     creation = data['creation'];
   }
-  // get : obtiene el monto total del ticket sin descuento aplicados\
+
+  // get : obtenemos el porcentaje de ganancia de la venta del ticket
+  int get getPercentageProfit {
+    // se obtiene el total de la venta de los productos sin descuento 
+    double total = 0.0;
+    for (var element in listPoduct) {
+      // obtenemos el objeto del producto
+      ProductCatalogue product = ProductCatalogue.fromMap(element); 
+      // condition : si el producto tiene un valor de compra y venta se calcula la ganancia
+      if(product.purchasePrice != 0 ){ 
+        total += (product.salePrice - product.purchasePrice) * product.quantity;
+      }
+    }
+    // si existe un descuento se resta al total de la ganancia
+    if(discount != 0) total = total - discount;
+    // se calcula el porcentaje de ganancia 
+    double percentage = (total * 100) / getTotalPrice;
+    return percentage.toInt();
+  }
+
+  // double : obtenemos las ganancias de la venta del ticket
+  double get getProfit {
+    // se obtiene el total de la venta de los productos sin descuento 
+    double total = 0.0;
+    for (var element in listPoduct) {
+      // obtenemos el objeto del producto
+      ProductCatalogue product = ProductCatalogue.fromMap(element); 
+      // condition : si el producto tiene un valor de compra y venta se calcula la ganancia
+      if(product.purchasePrice != 0 ){ 
+        total += (product.salePrice - product.purchasePrice) * product.quantity;
+      }
+    }
+    return total - discount;
+  }
+  // get : obtiene el monto total del ticket sin descuento aplicados
   double get getTotalPriceWithoutDiscount {
     // se obtiene el total de la venta de los productos sin descuento 
     double total = 0.0;
@@ -100,6 +134,8 @@ class TicketModel {
       ProductCatalogue product = ProductCatalogue.fromMap(element);
       total += product.salePrice * product.quantity;
     }
+    // si existe un descuento se resta al total de la ganancia
+    if(discount != 0) total = total - discount;
     return total;
   }
 
@@ -115,6 +151,12 @@ class TicketModel {
     }
     return total - discount;
   }
+
+  // 
+  // Fuctions
+  //
+
+
   // void : incrementa el producto seleccionado del ticket
   void incrementProduct({required ProductCatalogue product}) {
     // se verifica la coincidencia del producto en la lista de productos del ticket

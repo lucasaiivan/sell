@@ -151,7 +151,9 @@ class TransactionsView extends StatelessWidget {
 
     // values
     final Map payMode =transactionsController.getPayMode(idMode: ticketModel.payMode);
-    final String revenue = transactionsController.readEarnings(ticket: ticketModel);
+    final double  dRevenue = ticketModel.getProfit; 
+    final String sRevenue = Publications.getFormatoPrecio(monto:dRevenue);  
+    final int iPorcent = ticketModel.getPercentageProfit;
     // styles
     final Color primaryTextColor  = Get.isDarkMode?Colors.white70:Colors.black87;
     final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
@@ -252,17 +254,21 @@ class TransactionsView extends StatelessWidget {
           Column(
           crossAxisAlignment:CrossAxisAlignment.end,mainAxisSize: MainAxisSize.min,
           children: [
-            //  text : precio totol del ticket
-            Text(Publications.getFormatoPrecio(monto: ticketModel.priceTotal),style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18,color: primaryTextColor)),
-            //  content : text and icon
+            // view : monto de ganancia
+            sRevenue==''?Container():Text(sRevenue,style: TextStyle(fontWeight: FontWeight.w500,fontSize: 14,color: Colors.green.withOpacity(0.9)  )),
+            //  view : procentaje de ganancia
+            iPorcent==0?Container():
             Row(
               children: [
                 // icon
-                revenue==''?Container():Icon(Icons.arrow_upward_rounded,size: 14,color: Colors.green.withOpacity(0.9)),
+                sRevenue==''?Container():Icon(Icons.arrow_upward_rounded,size: 14,color: Colors.green.withOpacity(0.9)),
                 // text : ganancias
-                Text(revenue,style: TextStyle(fontWeight: FontWeight.w500,fontSize: 14,color: Colors.green.withOpacity(0.9)  )),
+                Text('%$iPorcent',style: TextStyle(fontWeight: FontWeight.w500,fontSize: 14,color: Colors.green.withOpacity(0.9)  )),
               ],
             ),
+            //  text : precio totol del ticket
+            Text(Publications.getFormatoPrecio(monto: ticketModel.priceTotal),style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18,color: primaryTextColor)),
+            
           ],
         ),
         ],
@@ -416,6 +422,22 @@ class TransactionsView extends StatelessWidget {
                           Text( Publications.getFormatoPrecio(monto: priceTotal,moneda: currencySymbol),style: textStyleValue ),
                         ],
                       ),
+                    ),
+                    spacer,
+                    // text : ganancias
+                    ticket.getProfit==0?Container():
+                    Row(
+                      children: <Widget>[
+                        Opacity(opacity:opacity,child: Text("Ganancias: ",style: textStyleDescription)),
+                        const Spacer(),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.auto_graph_outlined,size: 14,color: Colors.green),
+                            Text( Publications.getFormatoPrecio(monto: ticket.getProfit,moneda: currencySymbol),style: textStyleValue.copyWith(color: Colors.green)),
+                          ],
+                        ),
+                      ],
                     ),
                     spacer,
                     // text : valor recibido

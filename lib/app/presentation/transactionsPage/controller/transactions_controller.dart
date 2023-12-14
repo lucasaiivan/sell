@@ -205,9 +205,7 @@ class TransactionsController extends GetxController {
     // a la marca de tiempo actual le descontamos las horas del día
     Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(Timestamp.now()
         .toDate()
-        .subtract(Duration(
-            hours: Timestamp.now().toDate().hour,
-            minutes: Timestamp.now().toDate().minute))
+        .subtract(Duration(hours: Timestamp.now().toDate().hour,minutes: Timestamp.now().toDate().minute))
         .millisecondsSinceEpoch);
     // marca de tiempo actual
     Timestamp timeEnd = Timestamp.now();
@@ -610,36 +608,7 @@ class TransactionsController extends GetxController {
     return totalEarnings == 0.0
         ? ''
         : Publications.getFormatoPrecio( monto: totalEarnings, moneda: currencySymbol);
-  }
-
-
-  String readEarnings({required TicketModel ticket}) {
-    // description : leemos las ganancias de una transacción
-
-    // var
-    double totalEarnings = 0;
-    String currencySymbol = ticket.currencySymbol;
-    double transactionEarnings = 0; // ganancias de la transacción
-
-    // recorremos la lista de productos que se vendieron
-    for (dynamic item in ticket.listPoduct) {
-      // var
-      ProductCatalogue product = ProductCatalogue.fromMap(item);
-
-      // si el precio de compra es distinto de cero, sumamos las ganancias
-      if (product.purchasePrice != 0) {
-        transactionEarnings +=
-            (product.salePrice - product.purchasePrice) * product.quantity;
-      }
-    }
-    // sumamos las ganancias de la transacción al total de ganancias
-    totalEarnings += transactionEarnings;
-
-    // devolvemos el total de ganancias formateado como una cadena de texto
-    return totalEarnings == 0.0
-        ? ''
-        : Publications.getFormatoPrecio( monto: totalEarnings, moneda: currencySymbol);
-  }
+  } 
 
   double get getAmountTotalFilter{
     // var
@@ -651,37 +620,28 @@ class TransactionsController extends GetxController {
   String get getInfoAmountTotalFilter{  
     return Publications.getFormatoPrecio(monto: getAmountTotalFilter);
   }
-  double get getEarningsTotal{ 
-    // description : leemos las ganancias de una transacción
+  double get getEarningsFilteredTotal{ 
+    // description : obtenemos el total de ganancias de las transacciones filtradas
+    //
     // var 
     double transactionEarnings = 0; // ganancias de la transacción
 
     for (TicketModel ticket in getTransactionsList) { 
-
-      // recorremos la lista de productos que se vendieron
-      for (dynamic item in ticket.listPoduct) {
-        // var
-        ProductCatalogue product = ProductCatalogue.fromMap(item);
-
-        // si el precio de compra es distinto de cero, sumamos las ganancias
-        if (product.purchasePrice != 0) {
-          // sumamos las ganancias de la transacción
-          transactionEarnings += (product.salePrice - product.purchasePrice) * product.quantity;
-        }
-      }
+      // obtenemos las ganancias de la transacción
+      transactionEarnings += ticket.getProfit;
     }
     // devolvemos el total de ganancias
     return transactionEarnings;
   }
-  String get getEarningsTotalFormat{ 
-    return Publications.getFormatoPrecio(monto: getEarningsTotal);
+  String get getEarningsTotalFilteredFormat{ 
+    return Publications.getFormatoPrecio(monto: getEarningsFilteredTotal);
   }
   // devuelve el porcentaje de ganancias
-  int getPercentEarningsTotal() { 
+  int getPercentEarningsFilteredTotal() { 
     // prueba de error 
     if(getAmountTotalFilter == 0) return 0;
     // devolvemos el porcentaje de ganancias
-    return (getEarningsTotal * 100 / getAmountTotalFilter).round();
+    return (getEarningsFilteredTotal * 100 / getAmountTotalFilter).round();
   }
 
   Map getPayMode({required String idMode}) {
