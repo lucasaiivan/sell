@@ -1071,7 +1071,7 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
     final TextStyle textStylePrimary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400,fontSize: 16);
     final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
     
-    // widgets 
+    // widget : lista de chips de las marcas de los productos
     final Widget viewMarks = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
