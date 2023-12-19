@@ -18,6 +18,7 @@ class HomeView extends GetView<HomeController> {
   // var 
   InternetConnectivity internetConnectivity = InternetConnectivity();
   Widget getView({required index}) {
+    // nos permite crear una vista elegida por el usuario del menú de navegación lateral
     switch (index) {
       case 0:
         return SalesView();
@@ -46,44 +47,44 @@ class HomeView extends GetView<HomeController> {
     return Obx(() {
 
       //  condition : si el usuario no ha seleccionado una cuenta
-      if (controller.getProfileAccountSelected.id == '' && controller.getFirebaseAuth.currentUser!.isAnonymous == false){
+      if (controller.getProfileAccountSelected.id == '' && controller.getFirebaseAuth.currentUser!.isAnonymous == false ){
         // viewDefault : se muestra la vista por defecto para iniciar sesión de una cuenta existente o crear una nueva cuenta
         return viewDefault();
       }
 
-      // WillPopScope : nos permite controlar el botón de retroceso del dispositivo
-      return WillPopScope(
-        onWillPop: () => controller.onBackPressed(context: context), 
-        // getView : nos permite crear una vista con un diseño predefinido
+      // PopScope : nos permite controlar el botón de retroceso del dispositivo
+      return PopScope( 
+        canPop: false, // deshabilitar el botón de retroceso del dispositivo
+        onPopInvoked: (_) => controller.onBackPressed(context: context), 
         child: InternetConnectivityBuilder(
-      connectivityBuilder: (BuildContext context, bool hasInternetAccess, Widget? child) { 
-        if(hasInternetAccess) {
-          // con conexión a internet
-          controller.setInternetConnection = hasInternetAccess;
-          return getView(index: controller.getIndexPage);
-        } else {
-          // sin conexión a internet
-          controller.setInternetConnection = hasInternetAccess;
-          return Scaffold(
-            appBar: AppBar(
-              // quitar margen
-              toolbarHeight: 20,
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.wifi_off,color: Colors.red.shade300,size: 20),
-                  const SizedBox(width: 10),
-                  Text('Sin conexión a internet',style: TextStyle(fontSize: 16,color: Colors.red.shade300)),
-                ],
-              ),
-              centerTitle: true, 
-              automaticallyImplyLeading: false,
-            ),
-            body: getView(index: controller.getIndexPage),
-          );
-        }
-      },
-      child: getView(index: controller.getIndexPage),
+          connectivityBuilder: (BuildContext context, bool hasInternetAccess, Widget? child) { 
+            if(hasInternetAccess) {
+              // con conexión a internet
+              controller.setInternetConnection = hasInternetAccess;
+              return getView(index: controller.getIndexPage);
+            } else {
+              // sin conexión a internet
+              controller.setInternetConnection = hasInternetAccess;
+              return Scaffold(
+                appBar: AppBar(
+                  // quitar margen
+                  toolbarHeight: 20,
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.wifi_off,color: Colors.red.shade300,size: 20),
+                      const SizedBox(width: 10),
+                      Text('Sin conexión a internet',style: TextStyle(fontSize: 16,color: Colors.red.shade300)),
+                    ],
+                  ),
+                  centerTitle: true, 
+                  automaticallyImplyLeading: false,
+                ),
+                body: getView(index: controller.getIndexPage),
+              );
+            }
+          },
+        child: getView(index: controller.getIndexPage),
       ),
       );
     });
