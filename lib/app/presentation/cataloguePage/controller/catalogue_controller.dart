@@ -474,6 +474,9 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     }
   } 
   PreferredSizeWidget get buttonAppBar{
+
+    // style 
+    TextStyle infoStyle = const TextStyle( fontWeight: FontWeight.w400,fontSize: 24);
     // bottom : vista de productos seleccionados con un [TextButton] que diga cuantos productos seleccionados hay con opciones para cancelar y actualizar precio de venta
     return  getProductsSelectedList.isEmpty?PreferredSize(preferredSize: const Size.fromHeight(0),child: Container(),): PreferredSize(
         preferredSize: const Size.fromHeight(50),
@@ -482,23 +485,24 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // text : cantidad de productos seleccionados
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: TextButton(
-                  onPressed: () { 
-                    // dialog : vista de productos seleccionados
-                    Get.dialog( const ViewProductsSelected());
-                  },
-                  child: Text( getProductsSelectedList.length==1?'${ getProductsSelectedList.length } seleccionado':'${ getProductsSelectedList.length } seleccionados'),
-                ),
+              // icon : close
+              IconButton(
+                onPressed: () {
+                  // function : descartar los productos seleccionados
+                  getProductsSelectedList.clear(); 
+                },
+                icon: const Icon(Icons.close),
               ),
+              // text : cantidad de productos seleccionados
+              Text( getProductsSelectedList.length.toString(),style: infoStyle),
+              const Spacer(),
               // textbutton : cancelar
               TextButton(
-                onPressed: () {
-                  getProductsSelectedList.clear();  
+                onPressed: () {  
+                  // dialog : vista de productos seleccionados
+                  Get.dialog( const ViewProductsSelected()); 
                 },
-                child: const Text('Descartar',style: TextStyle(color: Colors.red)),
+                child: const Text('SELECCIONADOS',style: TextStyle(color: Colors.blue)),
               ), 
             ],
           ),
@@ -513,6 +517,7 @@ class ViewProductsSelected extends StatefulWidget {
 
   @override
   State<ViewProductsSelected> createState() => _ViewProductsSelectedState();
+  
 }
 
 class _ViewProductsSelectedState extends State<ViewProductsSelected> {

@@ -194,13 +194,16 @@ class HomeController extends GetxController {
   List<Mark> get getMarkList => _markList; 
   void loadMarkCatalogue(){
     // obtenemos las marcas de los productos disponibles en el catálogo
-    _markList.clear(); 
+    _markList.clear();
     for (ProductCatalogue item in _catalogueBusiness) {
       // object : obtenemos los datos de la marca
       Mark mark = Mark(id: item.idMark, name: item.nameMark,creation: Timestamp.now(),upgrade: Timestamp.now());
-      // condition : si la marca no esta en la lista la añadimos
-      if(!_markList.contains(mark)){
-        _markList.add(mark);
+      // condition : validamos la marca del producto
+      if(mark.id !='' && mark.name != ''){
+        // condition : si la marca no esta en la lista la añadimos
+        if(!_markList.contains(mark)){
+          _markList.add(mark);
+        }
       }
     }  
   }
