@@ -139,6 +139,7 @@ class HomeController extends GetxController {
       opening: DateTime.now(),
       closure: DateTime.now(),
       billing: 0.0,
+      discount: 0.0,
       cashInFlow: 0.0,
       cashOutFlow: 0.0,
       expectedBalance: 0.0,
@@ -1103,10 +1104,12 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
               // color : gradient de un color y transparent 
               decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.transparent,Theme.of(context).scaffoldBackgroundColor.withOpacity(0.9),Theme.of(context).scaffoldBackgroundColor], begin: Alignment.topCenter,end: Alignment.bottomCenter),),
               // condition : comprobar que 'offerings' esta inicializado
-              child:  homeController.offerings==null? TextButton(onPressed:(){
+              child:  true ?// homeController.offerings==null? 
+              TextButton(onPressed:(){
                 homeController.setIsSubscribedPremium = true;
-              }, child: const Text('Subcribirce a Premium'))
-              :Column(
+                }, 
+                child: const Text('Subcribirce a Premium'))
+                :Column(
                 children: [
                   ListView.builder(
                     physics: const BouncingScrollPhysics(),
