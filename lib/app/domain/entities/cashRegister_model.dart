@@ -10,6 +10,7 @@ class CashRegister {
   double initialCash; // monto inicial
   int sales; // cantidad de ventas
   double billing; // monto de facturación
+  double discount; // monto de descuento
   double cashInFlow; // monto de ingresos
   double cashOutFlow; // monto de egresos (numero negativo)
   double expectedBalance; // monto esperado
@@ -25,6 +26,7 @@ class CashRegister {
     required this.closure,
     required this.sales,
     required this.billing,
+    required this.discount,
     required this.cashInFlow,
     required this.cashOutFlow,
     required this.expectedBalance,
@@ -52,6 +54,7 @@ class CashRegister {
       closure: DateTime.now(),
       sales: 0,
       billing: 0.0,
+      discount: 0.0,
       cashInFlow: 0.0,
       cashOutFlow: 0.0,
       expectedBalance: 0.0,
@@ -69,6 +72,7 @@ class CashRegister {
         "closure": closure,
         "sales": sales,
         "billing": billing,
+        "discount": discount,
         "cashInFlow": cashInFlow,
         "cashOutFlow": cashOutFlow,
         "expectedBalance": expectedBalance,
@@ -82,18 +86,19 @@ class CashRegister {
   factory CashRegister.fromMap(Map  data) {
     return CashRegister(
       id: data['id'] ,
-      description: data['description'] ,
-      initialCash: double.parse(data['initialCash'].toString()),
-      opening: data['opening'].toDate(),
-      closure: data['closure'].toDate(),
-      sales: data['sales'] ?? 0,
-      billing: double.parse(data['billing'].toString()),
-      cashInFlow: double.parse(data['cashInFlow'].toString()) ,
-      cashOutFlow: double.parse(data['cashOutFlow'].toString()),
-      expectedBalance:double.parse(data['expectedBalance'].toString()),
-      balance: double.parse(data['balance'].toString()),
-      cashInFlowList: data['cashInFlowList'] ?? [],
-      cashOutFlowList: data['cashOutFlowList'] ?? [],
+      description: data.containsKey('description')? data['description'] : '',
+      initialCash: data.containsKey('initialCash')? double.parse(data['initialCash'].toString()) : 0.0,
+      opening: data.containsKey('opening')? data['opening'].toDate() : DateTime.now(),
+      closure: data.containsKey('closure')? data['closure'].toDate() : DateTime.now(),
+      sales:  data.containsKey('sales')? data['sales'] ?? 0 : 0,
+      billing: data.containsKey('billing')? double.parse(data['billing'].toString()) : 0.0,
+      discount: data.containsKey('discount')? double.parse(data['discount'].toString()) : 0.0,
+      cashInFlow: data.containsKey('cashInFlow')? double.parse(data['cashInFlow'].toString()) : 0.0,
+      cashOutFlow: data.containsKey('cashOutFlow')? double.parse(data['cashOutFlow'].toString()) : 0.0,
+      expectedBalance: data.containsKey('expectedBalance')? double.parse(data['expectedBalance'].toString()) : 0.0,
+      balance: data.containsKey('balance')? double.parse(data['balance'].toString()): 0.0,
+      cashInFlowList: data.containsKey('cashInFlowList')? data['cashInFlowList'] ?? [] : [],
+      cashOutFlowList: data.containsKey('cashOutFlowList')? data['cashOutFlowList'] ?? [] : [],
     );
   }
 
@@ -105,6 +110,7 @@ class CashRegister {
     opening = documentSnapshot['opening'].toDate();
     closure = documentSnapshot['closure'].toDate();
     billing = documentSnapshot['billing'].toDouble();
+    discount = documentSnapshot['discount'].toDouble();
     sales = documentSnapshot['sales'];
     cashInFlow = documentSnapshot['cashInFlow'].toDouble();
     cashOutFlow = documentSnapshot['cashOutFlow'].toDouble();
@@ -122,6 +128,7 @@ class CashRegister {
     DateTime? closure,
     int? sales,
     double? billing,
+    double? discount,
     double? cashInFlow,
     double? cashOutFlow,
     double? expectedBalance,
@@ -137,6 +144,7 @@ class CashRegister {
       closure: closure ?? this.closure,
       sales: sales ?? this.sales,
       billing: billing ?? this.billing,
+      discount: discount ?? this.discount,
       cashInFlow: cashInFlow ?? this.cashInFlow,
       cashOutFlow: cashOutFlow ?? this.cashOutFlow,
       expectedBalance: expectedBalance ?? this.expectedBalance,

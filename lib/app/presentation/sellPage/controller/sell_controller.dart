@@ -120,7 +120,7 @@ class SalesController extends GetxController {
       }
     }); 
   } 
-  void cashRegisterSetTransaction({required double amount}){
+  void cashRegisterSetTransaction({required double amount,double discount = 0.0 }){
     // incrementar monto de transaccion de caja
     //
     // firebase
@@ -137,6 +137,8 @@ class SalesController extends GetxController {
           CashRegister cashRegister = CashRegister.fromMap(snapshot.data() as Map<String, dynamic>);
           // incrementa el valor total de la facturacion de la caja
           cashRegister.billing += amount; 
+          // incrementa el valor si es que existe un descuento
+          cashRegister.discount += discount;
           // incrementa el valor de las ventas de la caja
           cashRegister.sales ++;
           // Actualiza el valor del número en el documento
@@ -288,7 +290,7 @@ class SalesController extends GetxController {
     getTicket.creation = Timestamp.now();
 
     // registramos el monto en caja
-    cashRegisterSetTransaction(amount: getTicket.priceTotal);
+    cashRegisterSetTransaction(amount: getTicket.priceTotal,discount: getTicket.discount);
     
     // set firestore : guarda la transacción
     Database.refFirestoretransactions(idAccount: homeController.getIdAccountSelected).doc(getTicket.id).set(getTicket.toJson());
@@ -338,7 +340,7 @@ class SalesController extends GetxController {
     }
   }
 
-  void selectedProduct({required ProductCatalogue item}) {
+  void selectedProduct({required ProductCatalogue item}) { 
     // agregamos un nuevo producto a la venta
 
   // verificamos si se trata de un código existente
@@ -355,8 +357,9 @@ class SalesController extends GetxController {
           animateAdd(itemListAnimated: false);
         }
       }
-      // si no hay coincidencia
+      // condition : si no hay coincidencia
       if (!coincidence) {
+        // verifica si el producto esta en el catálogo de la cuenta
         verifyExistenceInCatalogue(id: item.id);
       }
     }
@@ -375,8 +378,9 @@ class SalesController extends GetxController {
         animateAdd();
       }
     }
-    // si no hay coincidencia verificamos si esta en el cátalogo de productos de la cuenta
+    
     if (coincidence == false) {
+      // el producto no esta en la lista de productos seleccionados del ticket
       verifyExistenceInCatalogue(id: id);
     }
   }

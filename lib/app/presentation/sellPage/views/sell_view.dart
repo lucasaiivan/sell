@@ -1298,6 +1298,13 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
                         monto: homeController.cashRegisterActive.billing),
                     style: textStyleValue)
               ]),
+              // view info : descuentos
+              const SizedBox(height: 12),
+              Row(children: [
+                Text('Descuentos', style: textStyleDescription),
+                const Spacer(),
+                Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.discount),style: textStyleValue.copyWith(color: Colors.red.shade300))
+              ]),
               // view info : egresos
               const SizedBox(height: 12),
               Row(children: [

@@ -191,7 +191,9 @@ class TicketModel {
     }
   }
   // void : agrega un producto al ticket
-  void addProduct({required ProductCatalogue product}) {
+  void addProduct({required ProductCatalogue product}) { 
+    // normalizar la cantidad cuantificada del producto
+    if(product.quantity != 1) product.quantity = 1;
     // se verifica si el producto ya esta en el ticket
     bool exist = false;
     for (var i = 0; i < listPoduct.length; i++) { 
