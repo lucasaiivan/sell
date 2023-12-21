@@ -760,6 +760,18 @@ class CashRegisterView extends StatelessWidget {
 
               ],
             ),
+            // view : descuentos
+            Padding(padding: const EdgeInsets.symmetric(vertical:8),child: ComponentApp().divider()),
+            Row(
+              children: [
+                // text : descuentos
+                const Text('Descuentos:'),
+                const Spacer(),
+                // text : monto de descuentos
+                Text(Publications.getFormatoPrecio(monto: cashRegister.discount),style: const TextStyle(fontWeight: FontWeight.w300)),
+
+              ],
+            ),
             // view : Balance esperado en la caja
             Padding(padding: const EdgeInsets.symmetric(vertical:8),child: ComponentApp().divider()),
             Row(
