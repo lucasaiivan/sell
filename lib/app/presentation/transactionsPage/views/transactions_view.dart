@@ -152,7 +152,7 @@ class TransactionsView extends StatelessWidget {
     // values
     final Map payMode =transactionsController.getPayMode(idMode: ticketModel.payMode);
     final double  dRevenue = ticketModel.getProfit; 
-    final String sRevenue = Publications.getFormatoPrecio(monto:dRevenue);  
+    final String sRevenue = dRevenue==0?'': Publications.getFormatoPrecio(monto:dRevenue);  
     final int iPorcent = ticketModel.getPercentageProfit;
     // styles
     final Color primaryTextColor  = Get.isDarkMode?Colors.white70:Colors.black87;

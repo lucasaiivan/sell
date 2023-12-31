@@ -1237,14 +1237,10 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
         backgroundColor:
             MaterialStateProperty.all(confirmCloseState ? Colors.blue : null),
         padding: MaterialStateProperty.all(const EdgeInsets.all(20)),
-        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(2))));
-    TextStyle textStylebutton =
-        TextStyle(color: confirmCloseState ? Colors.white : Colors.blue);
-    TextStyle textStyleDescription =
-        const TextStyle(fontWeight: FontWeight.w300);
-    TextStyle textStyleValue =
-        const TextStyle(fontSize: 18, fontWeight: FontWeight.w600);
+        shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(borderRadius: BorderRadius.circular(2))));
+    TextStyle textStylebutton = TextStyle(color: confirmCloseState ? Colors.white : Colors.blue);
+    TextStyle textStyleDescription = const TextStyle(fontWeight: FontWeight.w300);
+    TextStyle textStyleValue = const TextStyle(fontSize: 18, fontWeight: FontWeight.w600);
 
     return Column(
       children: [
