@@ -330,10 +330,10 @@ class SalesController extends GetxController {
         true,
         ScanMode.BARCODE,
       );
-      if(barcodeScanRes == '-1'){ 
-        return;
-        }
+      if(barcodeScanRes == '-1'){ return;}
+      // sound
       playSoundScan();
+      // verifica el código de barra
       verifyExistenceInSelectedScanResult(id:barcodeScanRes);
     } on PlatformException {
       Get.snackbar('scanBarcode', 'Failed to get platform version');
@@ -367,12 +367,12 @@ class SalesController extends GetxController {
 
   void verifyExistenceInSelectedScanResult({required String id}) {
     // primero se verifica si el producto esta en la lista de productos seleccionados
-    bool coincidence = false;
+    bool coincidence = false; 
     for (var item in getTicket.listPoduct) {
       ProductCatalogue product = ProductCatalogue.fromMap(item);
       if (product.id == id) {
         // este producto esta selccionado
-        product.quantity++;
+        getTicket.addProduct(product: product); 
         coincidence = true;
         update();
         animateAdd();
