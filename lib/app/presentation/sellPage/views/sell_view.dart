@@ -75,8 +75,7 @@ class SalesView extends StatelessWidget {
         controller.getListProductsSelestedLength != 0
             ? TextButton.icon(
                 icon: const Icon(Icons.clear_rounded),
-                label: const Text('Descartar Ticket'),
-                onPressed: controller.dialogCleanTicketAlert)
+                label: const Text('Descartar Ticket'),onPressed: controller.dialogCleanTicketAlert)
             : Container(
                 key: homeController.floatingActionButtonSelectedCajaKey,
                 child: cashRegisterNumberPopupMenuButton()),
@@ -1059,7 +1058,7 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
   // var
   String titleAppBar = '';
   bool confirmCloseState = false;
-  late Widget view;
+  late Widget view;   
 
   // void
   void loadData() {
@@ -1097,8 +1096,7 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
   void initState() {
     super.initState();
     //  set : values
-    homeController.cashRegisterActive.balance =
-        0; // reseteamos el balance  para evitar que se acumule
+    homeController.cashRegisterActive.balance = 0; // reseteamos el balance  para evitar que se acumule
   }
 
   @override

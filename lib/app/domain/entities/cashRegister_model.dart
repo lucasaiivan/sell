@@ -34,7 +34,10 @@ class CashRegister {
     required this.cashInFlowList,
     required this.cashOutFlowList,
   });
- 
+
+  // contructor 
+  
+
   // difference : devuelve la diferencia entre el monto esperado y el monto de cierre
   double get getDifference{
     if(balance == 0){ return 0.0;}
