@@ -320,7 +320,8 @@ class SalesController extends GetxController {
 
   }
   
-  Future<void> scanBarcodeNormal() async {
+  Future<void> scanBarcodeNormal() async { 
+
     // Escanner Code - Abre en pantalla completa la camara para escanear el código
     try {
       late String barcodeScanRes;
@@ -984,8 +985,7 @@ class _NewProductViewState extends State<NewProductView> {
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(vertical: 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: ListView( 
           children: [  
             // text : codigo del producto
             listtileCode,  

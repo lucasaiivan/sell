@@ -389,8 +389,7 @@ class ProductEdit extends StatelessWidget {
                       border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                       enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
                     ),  
-                    onChanged: (value) {  
-                    },
+                    onChanged: (value) { },
                     // validator: validamos el texto que el usuario ha ingresado.
                     validator: (value) {
                       if ( controller.controllerTextEditPrecioVenta.numberValue == 0.0) { return 'Por favor, escriba un precio de venta'; }

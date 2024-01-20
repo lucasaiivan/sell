@@ -106,9 +106,7 @@ class HomeController extends GetxController {
   // brillo de la pantalla
   bool _darkMode = false;
   set setDarkMode(bool value) => _darkMode = value;
-  bool get getDarkMode => _darkMode;
- 
-  
+  bool get getDarkMode => _darkMode; 
 
   // list admins users
   final RxList<UserModel> _adminsUsersList = <UserModel>[].obs;
