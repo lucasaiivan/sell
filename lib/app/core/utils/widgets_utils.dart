@@ -740,7 +740,7 @@ class ComponentApp extends StatelessWidget {
     return avatar;
   }
   // BUTTONS 
-  Widget button( {bool defaultStyle = true,double elevation=0,double width = double.infinity,bool disable = false,required Widget icon,String text = '',required dynamic onPressed,EdgeInsets padding =const EdgeInsets.symmetric(horizontal: 12, vertical: 12),Color colorButton = Colors.purple,Color colorAccent = Colors.white}) {
+  Widget button( {bool defaultStyle = false,double elevation=0,double width = double.infinity,bool disable = false, Widget? icon, String text = '',required dynamic onPressed,EdgeInsets padding =const EdgeInsets.symmetric(horizontal: 12, vertical: 12),Color colorButton = Colors.blue,Color colorAccent = Colors.white}) {
     // button : personalizado
     return FadeIn(
         child: Padding(
@@ -751,11 +751,12 @@ class ComponentApp extends StatelessWidget {
           onPressed: disable?null:onPressed,
           style: ElevatedButton.styleFrom(
             elevation:defaultStyle?0: elevation,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
-              padding: const EdgeInsets.all(20.0),
-              backgroundColor:defaultStyle?null: colorButton,
-              textStyle: TextStyle(color: colorAccent,fontWeight: FontWeight.w700)),
-          icon: icon,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+            padding: const EdgeInsets.all(20.0),
+            backgroundColor:defaultStyle?null: colorButton,
+            textStyle: TextStyle(color: colorAccent,fontWeight: FontWeight.w700),
+          ),  
+          icon: icon??Container(),
           label: Text(text, style:defaultStyle?null: TextStyle(color: colorAccent)),
         ),
       ),

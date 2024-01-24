@@ -238,7 +238,7 @@ class SalesView extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: Row(
                             children: [
-                              Text('Total a cobrar',style: textDescrpitionStyle.copyWith(fontSize: 16,fontWeight: FontWeight.w900,color: Colors.white)),
+                              Text('Total',style: textDescrpitionStyle.copyWith(fontSize: 16,fontWeight: FontWeight.w900,color: Colors.white)),
                               const Spacer(),
                               const SizedBox(width:12),
                               Text(Publications.getFormatoPrecio(monto: controller.getTicket.getTotalPrice),style: textValuesStyle.copyWith(fontSize: 24,fontWeight: FontWeight.w900,color: Colors.white)),
