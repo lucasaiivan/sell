@@ -320,8 +320,7 @@ class SalesController extends GetxController {
 
   }
   
-  Future<void> scanBarcodeNormal() async { 
-
+  Future<void>  scanBarcodeNormal() async {  
     // Escanner Code - Abre en pantalla completa la camara para escanear el código
     try {
       late String barcodeScanRes;
@@ -331,11 +330,11 @@ class SalesController extends GetxController {
         true,
         ScanMode.BARCODE,
       );
-      if(barcodeScanRes == '-1'){ return;}
+      //if(barcodeScanRes == '-1'){ return;}
       // sound
       playSoundScan();
       // verifica el código de barra
-      verifyExistenceInSelectedScanResult(id:barcodeScanRes);
+      verifyExistenceInSelectedScanResult(id:'13234');
     } on PlatformException {
       Get.snackbar('scanBarcode', 'Failed to get platform version');
     }
@@ -522,8 +521,11 @@ class SalesController extends GetxController {
     //var
     final FocusNode myFocusNode = FocusNode(); 
 
+    // style
+    final Color colorAccent = Get.isDarkMode?Colors.white:Colors.black; 
     // widgets
     Widget content = Scaffold(
+      backgroundColor: Get.context!.theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Venta rapida'), 
         actions: [
@@ -553,9 +555,11 @@ class SalesController extends GetxController {
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp('[1234567890]'))
                       ],
-                      decoration: const InputDecoration( 
-                        hintText: '\$',
-                        labelText: "Escribe el precio",
+                      decoration: InputDecoration(  
+                        labelText: "Precio",
+                        prefixIcon: const Icon(Icons.attach_money_rounded), 
+                        border: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent)),
+                        enabledBorder: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent), )
                       ),
                       style: const TextStyle(fontSize: 20.0),
                       textInputAction: TextInputAction.next,
@@ -569,8 +573,11 @@ class SalesController extends GetxController {
                       focusNode: myFocusNode,
                       autofocus: false,
                       controller: textEditingControllerAddFlashDescription,
-                      decoration: const InputDecoration( 
-                        labelText: "Descripción (opcional)"),
+                      decoration: InputDecoration( 
+                        labelText: "Descripción (opcional)",
+                        border: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent)),
+                        enabledBorder: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent), )
+                        ),
                       textInputAction: TextInputAction.done,
                       onSubmitted: (value) {
                         addSaleFlash();
@@ -581,18 +588,20 @@ class SalesController extends GetxController {
                 ],
               ),
             ),
-            const Spacer(),
+            const Spacer(), 
             // buttons 
             SizedBox(
               width: double.infinity,
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
-                child: ComponentApp().button(
-                  icon: const Text('Agregar',textAlign: TextAlign.center), 
+                child: ComponentApp().button( 
+                  text: 'Agregar',
                   onPressed: () {
                     addSaleFlash();
                     textEditingControllerAddFlashPrice.clear(); 
-                    },),
+                    },
+                    
+                    ),
               ),
             )
           ],
@@ -883,20 +892,22 @@ class _NewProductViewState extends State<NewProductView> {
           child: Form(
             key:  priceFormKey,
             child: TextFormField( 
-              style: const TextStyle(fontSize: 18),
+              style: const TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
               autofocus: true,
               focusNode: null,
               controller: controllerTextEditPrecioVenta,
               enabled: true,
               autovalidateMode: AutovalidateMode.onUserInteraction,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration( 
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),  
+              decoration: InputDecoration(
                 labelText: 'Precio de venta al públuco',
                 hintText: 'ej. agua saborisada 500 ml',  
                 hintStyle: hintStyle,
                 labelStyle: labelStyle,
+                prefixIcon: const Icon(Icons.attach_money_rounded), 
                 border: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent)),
-                enabledBorder: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent)),
+                enabledBorder: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent), 
+                ),
                 
                 ), 
               onChanged: (value) {
@@ -934,8 +945,8 @@ class _NewProductViewState extends State<NewProductView> {
     // button 
     final Widget buttonConfirm = Padding(
       padding: const EdgeInsets.all(12.0),
-      child: ElevatedButton.icon(
-          onPressed: () {
+      child:ComponentApp().button(
+        onPressed: () {
             // variables de condiciones
             bool conditionDescription = widget.productCatalogue.verified?true:descriptionFormKey.currentState!.validate();
             bool conditionPrice = priceFormKey.currentState!.validate();
@@ -958,13 +969,8 @@ class _NewProductViewState extends State<NewProductView> {
               Get.back();
             }
           },
-          style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-              padding: const EdgeInsets.all(16.0),
-              backgroundColor: Colors.blue,),
-          icon: Container(),
-          label: const Text('Confirmar',style: TextStyle(color: Colors.white),),
-        ),
+          text: 'Confirmar',
+      ), 
     );
     
     return Scaffold(
@@ -996,7 +1002,6 @@ class _NewProductViewState extends State<NewProductView> {
             widgetTextFieldPrice,
             // widget :  permiso para guardar el producto nuevo en mi cátalogo (app catalogo)
             Padding(padding: const EdgeInsets.all(12.0),child: checkboxAddProductToCatalogue),
-            const Spacer(),
             SizedBox(width: double.infinity,child: buttonConfirm),
           ],
         ),
