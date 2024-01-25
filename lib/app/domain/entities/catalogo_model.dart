@@ -139,7 +139,7 @@ class ProductCatalogue {
   bool stock = false;
   int alertStock = 5;
   int sales = 0; // ventas
-  double salePrice = 0.0; // precio de venta
+  double salePrice = 0.0; // precio de venta al publico
   double purchasePrice = 0.0; // precio de compra
   String currencySign = "\$"; // signo de la moneda
 

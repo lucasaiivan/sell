@@ -72,7 +72,7 @@ class TicketModel {
       cashRegisterId: data.containsKey('cashRegisterId') ? data['cashRegisterId'] : '',
       priceTotal: data.containsKey('priceTotal') ? (data['priceTotal'] ?? 0).toDouble() : 0.0,
       valueReceived:  data.containsKey('valueReceived') ? (data['valueReceived'] ?? 0).toDouble() : 0.0,
-      discount: data.containsKey('discount') ? (data['discount'] ?? 0).toDouble() : 0.0,
+      discount: data.containsKey('discount') ? (data['discount'] ?? 0.0).toDouble() : 0.0,
       listPoduct: data.containsKey('listPoduct') ? data['listPoduct'] : [],
       creation: data.containsKey('creation') ? data['creation'] : Timestamp.now(),
     );
@@ -88,7 +88,7 @@ class TicketModel {
     cashRegisterId = data['cashRegisterId'] ?? '';
     priceTotal = data['priceTotal'];
     valueReceived = data['valueReceived'];
-    discount = data['discount'];
+    discount = data['discount']??0.0;
     listPoduct = data['listPoduct'] ??[];
     creation = data['creation'];
   }
@@ -97,18 +97,21 @@ class TicketModel {
   int get getPercentageProfit {
     // se obtiene el total de la venta de los productos sin descuento 
     double total = 0.0;
+    double totalWithoutDiscount = getTotalPrice;
     for (var element in listPoduct) {
       // obtenemos el objeto del producto
       ProductCatalogue product = ProductCatalogue.fromMap(element); 
       // condition : si el producto tiene un valor de compra y venta se calcula la ganancia
-      if(product.purchasePrice != 0 ){ 
-        total += (product.salePrice - product.purchasePrice) * product.quantity;
-      }
-    }
-    // si existe un descuento se resta al total de la ganancia
-    if(discount != 0) total = total - discount;
+      if(product.purchasePrice != 0 ){ total += (product.salePrice - product.purchasePrice) * product.quantity;}
+    }   
+
+    // si existe un descuento se calcula el porcentaje de ganancia con el descuento aplicado
+    if(discount != 0){ total -= discount; }
+
     // se calcula el porcentaje de ganancia 
-    double percentage = (total * 100) / getTotalPrice;
+    double percentage = (total * 100) / (totalWithoutDiscount );
+    if(percentage <=0) return 0;
+
     return percentage.toInt();
   }
 
@@ -120,11 +123,15 @@ class TicketModel {
       // obtenemos el objeto del producto
       ProductCatalogue product = ProductCatalogue.fromMap(element); 
       // condition : si el producto tiene un valor de compra y venta se calcula la ganancia
-      if(product.purchasePrice != 0 ){ 
+      if(product.purchasePrice > 0 ){ 
         total += (product.salePrice - product.purchasePrice) * product.quantity;
       }
-    }
-    return total - discount;
+    } 
+
+    // si existe un descuento se calcula el porcentaje de ganancia con el descuento aplicado
+    if(discount != 0){ total -= discount; }
+    
+    return total ;
   }
   // get : obtiene el monto total del ticket sin descuento aplicados
   double get getTotalPriceWithoutDiscount {
@@ -133,9 +140,7 @@ class TicketModel {
     for (var element in listPoduct) {
       ProductCatalogue product = ProductCatalogue.fromMap(element);
       total += product.salePrice * product.quantity;
-    }
-    // si existe un descuento se resta al total de la ganancia
-    if(discount != 0) total = total - discount;
+    } 
     return total;
   }
 
@@ -149,6 +154,7 @@ class TicketModel {
       double salePrice = product.salePrice;
       total += salePrice * qauntity;
     }
+    
     return total - discount;
   }
 
