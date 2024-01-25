@@ -268,7 +268,8 @@ class TransactionsView extends StatelessWidget {
             ),
             //  text : precio totol del ticket
             Text(Publications.getFormatoPrecio(monto: ticketModel.priceTotal),style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18,color: primaryTextColor)),
-            
+            // text : descuento
+            ticketModel.discount==0?Container():Text('-${Publications.getFormatoPrecio(monto: ticketModel.discount)}',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 10,color: Colors.red.withOpacity(0.9)  )),
           ],
         ),
         ],

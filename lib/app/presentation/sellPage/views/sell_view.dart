@@ -1528,7 +1528,7 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
           child: SizedBox(
             width: double.infinity,
             child: ComponentApp().button(
-              icon: const Text('Inciar caja'),
+              text: 'Inciar caja',
               onPressed: () {
                 // recordamos la descripcion ingresada por el usuario
                 salesController.registerFixerDescription(

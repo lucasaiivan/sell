@@ -526,8 +526,7 @@ class ProductEdit extends StatelessWidget {
                 // button : guardar
                 const SizedBox(height:30),  
                 //  button : guardar el producto
-                ComponentApp().button(
-                  defaultStyle: true, 
+                ComponentApp().button( 
                   disable:controller.getDataUploadStatus == true   ,
                   onPressed: controller.save,
                   icon: Container(),

@@ -330,11 +330,11 @@ class SalesController extends GetxController {
         true,
         ScanMode.BARCODE,
       );
-      //if(barcodeScanRes == '-1'){ return;}
+      if(barcodeScanRes == '-1'){ return;}
       // sound
       playSoundScan();
       // verifica el código de barra
-      verifyExistenceInSelectedScanResult(id:'13234');
+      verifyExistenceInSelectedScanResult(id:barcodeScanRes);
     } on PlatformException {
       Get.snackbar('scanBarcode', 'Failed to get platform version');
     }

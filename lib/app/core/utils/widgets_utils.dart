@@ -757,7 +757,7 @@ class ComponentApp extends StatelessWidget {
             textStyle: TextStyle(color: colorAccent,fontWeight: FontWeight.w700),
           ),  
           icon: icon??Container(),
-          label: Text(text, style:defaultStyle?null: TextStyle(color: colorAccent)),
+          label: Text(text, style: TextStyle(color: colorAccent)),
         ),
       ),
     ));
