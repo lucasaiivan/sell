@@ -826,6 +826,13 @@ class ControllerProductsEdit extends GetxController {
     getProduct.followers++;
     update(['updateAll']);
   }
+  void descreaseFollowersProductPublic() {
+    // function : disminuye el valor de los seguidores del producto publico
+    Database.refFirestoreProductPublic().doc(getProduct.id).update({'followers': FieldValue.increment(-1)});
+    // actualizamos el valor de los seguidores del producto
+    getProduct.followers--;
+    update(['updateAll']);
+  }
   void showDialogSaveOPTDeveloper() {
     Get.dialog(AlertDialog(
       title:

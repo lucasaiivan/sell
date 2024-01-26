@@ -109,8 +109,13 @@ class TicketModel {
     if(discount != 0){ total -= discount; }
 
     // se calcula el porcentaje de ganancia 
-    double percentage = (total * 100) / (totalWithoutDiscount );
-    if(percentage <=0) return 0;
+    double percentage = 0;
+    // condition : si el total de la venta es mayor a 0 y el total de la venta sin descuento es mayor a 0 se calcula el porcentaje
+    if (totalWithoutDiscount != 0 && total.isFinite && totalWithoutDiscount.isFinite) {
+      percentage = (total * 100) / totalWithoutDiscount;
+    }
+    // condition : si el porcentaje es menor o igual a 0 o no es finito se retorna 0
+    if (percentage <= 0 || !percentage.isFinite) return 0;
 
     return percentage.toInt();
   }
@@ -129,7 +134,10 @@ class TicketModel {
     } 
 
     // si existe un descuento se calcula el porcentaje de ganancia con el descuento aplicado
-    if(discount != 0){ total -= discount; }
+    if(discount > 0 && total >0 ){  
+      if(total - discount < 0){ return 0;}
+      total -= discount; 
+    }
     
     return total ;
   }
