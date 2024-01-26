@@ -102,15 +102,9 @@ class ProductEdit extends StatelessWidget {
       actions: <Widget>[
         // TODO : delete release
         // 
-        // estart : contenido para desarrollo (debug)
-        // iconButton  : aumentar seguidor del producto publico
-        IconButton(
-          icon: const Icon(Icons.add_business_outlined),
-          onPressed: () async {
-            controller.increaseFollowersProductPublic(); 
-          },
-        ), 
+        // start : contenido para desarrollo (debug) 
         // iconButton : opciones de moderador
+        //
         controller.getDataUploadStatus
             ? Container()
             :IconButton(
@@ -121,6 +115,7 @@ class ProductEdit extends StatelessWidget {
                 );
               },
             ), 
+        //
         // fin contentido para desarrollo (debug)
         //
         // iconButton : actualizar producto 
@@ -160,8 +155,7 @@ class ProductEdit extends StatelessWidget {
     final Color textDescriptionStyleColor = Get.isDarkMode?Colors.white.withOpacity(0.8):Colors.black.withOpacity(0.8);
     final Color boderLineColor = Get.isDarkMode?Colors.white.withOpacity(0.3):Colors.black.withOpacity(0.3);
     bool enableEdit = controller.getDataUploadStatus? false: controller.getEditModerator || controller.getProduct.verified==false;
-    final Color fillColor = Get.isDarkMode?Colors.white.withOpacity(0.01):Colors.black.withOpacity(0.01);
-    
+     
     
     // view : descripcion del producto
     return Padding(
@@ -174,10 +168,7 @@ class ProductEdit extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.start,
 
-            children: [
-              //controller.getProduct.code != ""?const Opacity(opacity: 0.8,child: Text('Código:',style: TextStyle(height: 1,fontSize: 14,fontWeight: FontWeight.normal))):Container(),
-              // spacer
-              //controller.getProduct.code != ""?const SizedBox(width: 8):Container(),
+            children: [ 
               // icon : verificacion
               controller.getProduct.verified?const Icon(Icons.verified_rounded,size: 16,color: Colors.blue):Container(),
               // spacer si esta verificado
@@ -255,23 +246,7 @@ class ProductEdit extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[ 
-          //TODO: eliminar para desarrrollo
-          // inicio : contenido para desarrollo
-          TextButton(
-              onPressed: () async {
-                String clave = controller.controllerTextEditDescripcion.text;
-                Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
-                await launchUrl(uri,mode: LaunchMode.externalApplication);
-              },
-              child: const Text('Buscar descripción en Google (moderador)')),
-          TextButton(
-              onPressed: () async {
-                String clave = controller.getProduct.code;
-                Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
-                await launchUrl(uri,mode: LaunchMode.externalApplication);
-              },
-              child: const Text('Buscar en código Google (moderador)')),
-          // fin : contenido para desarrollo
+          
           !controller.getAccountAuth? Container():const Text('Personaliza tu producto',style: TextStyle(fontSize: 18.0)),
           space,
           // textfield : seleccionar proveedor
@@ -983,9 +958,57 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: ListView( 
-          children: [ 
-            SizedBox(height: !controller.getDataUploadStatus ? 12.0 : 0.0),
+        child: ListView(  
+          children: [  
+            // textButton : buscar en google
+            TextButton(
+                onPressed: () async {
+                  String clave = controller.controllerTextEditDescripcion.text;
+                  Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
+                  await launchUrl(uri,mode: LaunchMode.externalApplication);
+                },
+                child: const Text('Buscar por la descripción en Google' )),
+            // textButton : buscar en google
+            TextButton(
+                onPressed: () async {
+                  String clave = controller.getProduct.code;
+                  Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
+                  await launchUrl(uri,mode: LaunchMode.externalApplication);
+                },
+                child: const Text('Buscar por el código Google')), 
+            const Divider(), 
+            Row(
+              children: [
+                // textButtons
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // button : incrementar seguidores
+                    TextButton(
+                        onPressed: !controller.getEditModerator?null: (){
+                          setState(() {
+                            controller.increaseFollowersProductPublic();
+                          });
+                        },
+                        child: const Text('Incrementar'),
+                    ),
+                    // button : decrementar seguidores
+                    TextButton(
+                        onPressed: !controller.getEditModerator?null: (){
+                          setState(() {
+                            controller.descreaseFollowersProductPublic();
+                          });
+                        }, 
+                        child: Text('Decrementar',style:TextStyle(color: !controller.getEditModerator?null:Colors.red)),
+                    ),
+                  ],
+                ),
+              const Spacer(),
+                // text : cantidad de comercios que tienen el producto
+              Opacity(opacity: 0.4,child: Text('${Publications.getFormatAmount(value: controller.getProduct.followers)} ${controller.getProduct.followers == 1 ? 'comercio' : 'comercios'}')),
+              ],
+            ),
+            const Divider(),
             CheckboxListTile(
               enabled: controller.getEditModerator ? controller.getDataUploadStatus? false: true: false,
               checkColor: Colors.white,
@@ -1000,8 +1023,8 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
                   });
                 }
               },
-            ),
-            SizedBox(height: !controller.getDataUploadStatus ? 12.0 : 0.0),
+            ), 
+            const Divider(),
             CheckboxListTile(
               enabled: controller.getEditModerator
                   ? controller.getDataUploadStatus

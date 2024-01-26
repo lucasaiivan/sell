@@ -36,7 +36,7 @@ class _StaticsCardsState extends State<StaticsCards> {
       // card : facturación
       CardAnalityc(
         isPremium:true, // siempre es visible su contenido
-        backgroundColor: Colors.blueGrey.shade200.withOpacity(0.7),
+        backgroundColor: Colors.blueGrey.shade100.withOpacity(0.7),
         icon:  const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.attach_money_rounded,color: Colors.white,size:14)))),
         titleText: 'Facturación', 
         valueText: transactionsController.getInfoAmountTotalFilter,
@@ -45,7 +45,7 @@ class _StaticsCardsState extends State<StaticsCards> {
       // card : transacciones
       CardAnalityc( 
         isPremium: true, // siempre es visible su contenido
-        backgroundColor: Colors.teal.shade200.withOpacity(0.7),
+        backgroundColor: Colors.teal.shade100.withOpacity(0.7),
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.receipt,color: Colors.white,size:14)))),
         titleText: 'Transacciones',
         subtitle: '',
@@ -56,7 +56,7 @@ class _StaticsCardsState extends State<StaticsCards> {
       // card : ganancia 
       CardAnalityc( 
         isPremium: homeController.getIsSubscribedPremium,
-        backgroundColor: Colors.green.shade200.withOpacity(0.7),
+        backgroundColor: Colors.green.shade100.withOpacity(0.7),
         icon:  const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.show_chart_rounded,color: Colors.white,size:14)))),
         //content: transactionsController.viewPercentageBarValue(text:'%${transactionsController.getPercentEarningsTotal()}',value: transactionsController.getEarningsTotal,total: transactionsController.getAmountTotalFilter),
         titleText: 'Ganancia',
@@ -68,7 +68,7 @@ class _StaticsCardsState extends State<StaticsCards> {
       !transactionsController.getMostSelledProducts.isNotEmpty ?Container():
       CardAnalityc( 
         isPremium: homeController.getIsSubscribedPremium,
-        backgroundColor: Colors.blue.shade200.withOpacity(0.7),
+        backgroundColor: Colors.blue.shade100.withOpacity(0.7),
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.category_rounded,color: Colors.white,size:14)))),
         titleText: 'Productos vendidos', 
         subtitle: 'Total',
@@ -102,7 +102,7 @@ class _StaticsCardsState extends State<StaticsCards> {
       // card : rentabilidad
       CardAnalityc( 
         isPremium: homeController.getIsSubscribedPremium,
-        backgroundColor: Colors.cyan.shade200.withOpacity(0.7),
+        backgroundColor: Colors.cyan.shade100.withOpacity(0.7),
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.query_stats_rounded,color: Colors.white,size:14)))),
         titleText: 'Rentabilidad',
         modalContent: ProfitabilityProductsView(),
@@ -152,14 +152,13 @@ class _StaticsCardsState extends State<StaticsCards> {
     }); 
  
 
-    return Padding(
-      padding: const EdgeInsets.only(left: 12),
+    return Center(
       child: Wrap( 
         crossAxisAlignment: WrapCrossAlignment.start,
         alignment: WrapAlignment.start,
         direction: Axis.horizontal,
-        spacing: 8,
-        runSpacing: MediaQuery.of(context).size.width < 600 ? 8 : 16,
+        spacing: 4,
+        runSpacing: MediaQuery.of(context).size.width < 600 ? 4 : 16,
         children: cards,
       ),
     );
