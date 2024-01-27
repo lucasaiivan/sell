@@ -560,7 +560,7 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
           ),
         ),
         // button : abre un dialog para actualizar el precio de venta de los productos seleccionados
-        ComponentApp().button(icon: const Text('Actualizar'), onPressed: (){
+        ComponentApp().button(text: 'Actualizar', onPressed: (){
           Get.back();
           updateDialog();
         }),
@@ -568,7 +568,7 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
         ComponentApp().button(
           defaultStyle: false,
           icon: const Text('Eliminar de mi catálogo',style: TextStyle(color: Colors.white)), 
-          colorButton: Colors.red.withOpacity(0.4),
+          colorButton: Colors.red.shade300,
         onPressed: (){ 
           // dialog : confirmar la eliminación de los productos seleccionados
           confirmDeleteProductDialog();
