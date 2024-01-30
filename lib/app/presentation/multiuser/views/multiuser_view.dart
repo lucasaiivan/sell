@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart'; 
+import 'package:get/get.dart';
+import 'package:path/path.dart'; 
 import 'package:sell/app/presentation/home/controller/home_controller.dart';
 import 'package:sell/app/presentation/splash/controllers/splash_controller.dart';
 import '../../../core/utils/fuctions.dart';
@@ -32,7 +33,7 @@ class LoadingInitView extends StatelessWidget {
       builder: (controller) {
 
         return Scaffold( 
-          appBar: appbar,
+          appBar: appbar(context: context),
           drawer: drawerApp(),
           body: body,
         );
@@ -41,49 +42,32 @@ class LoadingInitView extends StatelessWidget {
   }
 
   // WIDGETS MAIN
-  PreferredSizeWidget get appbar{
+  PreferredSizeWidget appbar({required BuildContext context}){
 
     // controllers
     final MultiUserController controller = Get.find();
     final HomeController homeController = Get.find();
-
-    // var
-    final bool darkTheme = Get.isDarkMode;
-
-    // style 
-    Color iconColor =  homeController.getIsSubscribedPremium==false?Colors.amber: darkTheme?Colors.white:Colors.black;
-    Color textColor = darkTheme == false || homeController.getIsSubscribedPremium==false?Colors.white:Colors.black;
-   
+ 
 
     return AppBar(
       title: const Text('Multiusuario'),
       actions: [
         // Opcion Premium // 
         // icon : agregar nuevo usuario administrador para la cuenta
-        IconButton(
-          onPressed: (){
+        ComponentApp().buttonAppbar(
+          context: context,
+          padding:  const EdgeInsets.symmetric(horizontal: 10,vertical: 8),
+          text: 'Crear',
+          iconTrailing: Icons.add, 
+          onTap: (){
             // condition :  si la cuenta tiene un subcripcion premium
             if(homeController.getIsSubscribedPremium){
               homeController.getUserAnonymous?null:controller.addItem();
             }else{
               homeController.showModalBottomSheetSubcription(id: 'multiuser');
             }
-          },  
-          icon:  Opacity(
-            opacity: homeController.getUserAnonymous?0.1:1,
-            child: Material(
-                color:iconColor,
-                borderRadius: const BorderRadius.all(Radius.circular(8.0)),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal:8),
-                  child: Row(
-                    children: [
-                      Text('Crear',style:TextStyle(color: textColor,fontWeight: FontWeight.w700)),
-                      Icon(Icons.add,color:textColor),
-                    ],
-                  ),
-                )),
-          )),
+          },
+        ), 
       ],
     );
   }

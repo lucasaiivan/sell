@@ -52,13 +52,7 @@ class TransactionsView extends StatelessWidget {
     // others controllers
     final TransactionsController transactionsController = Get.find();
 
-    // var
-    bool darkTheme = Get.isDarkMode;
-
-    // style 
-    Color iconColor =  transactionsController.homeController.getIsSubscribedPremium==false?Colors.amber: darkTheme?Colors.white:Colors.black;
-    Color textColor = darkTheme == false || transactionsController.homeController.getIsSubscribedPremium==false?Colors.white:Colors.black;
-    
+ 
     return AppBar(
       elevation: 0,
       centerTitle: false,
@@ -66,20 +60,11 @@ class TransactionsView extends StatelessWidget {
       title: const Text('Transacciones',textAlign: TextAlign.center),
       actions: [
         
-        PopupMenuButton(
-            icon: Material(
-              color:iconColor,
-              borderRadius: const BorderRadius.all(Radius.circular(8.0)),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Row(
-                  children: [
-                    Text(transactionsController.getFilterText,style:TextStyle(color: textColor,fontWeight: FontWeight.w400)),
-                    const SizedBox(width: 5),
-                    Icon(Icons.filter_list,color:textColor),
-                  ],
-                ),
-              ),
+        PopupMenuButton( 
+            icon: ComponentApp().buttonAppbar(
+              context: context,
+              text: transactionsController.getFilterText,
+              iconTrailing: Icons.filter_list,  
             ),
             onSelected: (selectedValue) {
               transactionsController.filterList(key: selectedValue);

@@ -740,6 +740,41 @@ class ComponentApp extends StatelessWidget {
     return avatar;
   }
   // BUTTONS 
+  Widget buttonAppbar({ required BuildContext context,Function() ?onTap,required String text,Color ?colorBackground ,Color ?colorAccent,IconData ?iconLeading ,IconData ?iconTrailing,EdgeInsetsGeometry padding = const EdgeInsets.symmetric(horizontal: 0, vertical: 0)}){ 
+    
+    // values default
+    colorBackground ??= Theme.of(context).brightness == Brightness.dark?Colors.white:Colors.black;
+    colorAccent ??= Theme.of(context).brightness == Brightness.dark?Colors.black:Colors.white;
+
+    return Padding(
+      padding: padding,
+      child: Material(
+        clipBehavior: Clip.antiAlias, 
+        color: colorBackground,
+        borderRadius: BorderRadius.circular(25),
+        elevation: 0,
+        child: InkWell(
+          onTap:  onTap,
+          child: Padding(
+            padding: const EdgeInsets.only(left: 12, right: 14, top: 8, bottom: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // icon leading
+                iconLeading==null?Container():Icon(iconLeading,color: colorAccent,size: 24),
+                iconLeading==null?Container():const SizedBox(width:8),
+                // text
+                Text(text,style: TextStyle(color: colorAccent,fontSize: 16 )), 
+                iconTrailing==null?Container():const SizedBox(width:8),
+                // icon trailing
+                iconTrailing==null?Container():Icon(iconTrailing,color: colorAccent,size: 24),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
   Widget button( {bool defaultStyle = false,double elevation=0,double width = double.infinity,bool disable = false, Widget? icon, String text = '',required dynamic onPressed,EdgeInsets padding =const EdgeInsets.symmetric(horizontal: 12, vertical: 12),Color colorButton = Colors.blue,Color colorAccent = Colors.white}) {
     // button : personalizado
     return FadeIn(

@@ -36,33 +36,18 @@ class HistoryCashRegisterView extends StatelessWidget {
   PreferredSizeWidget appbar({required BuildContext context}) {
     // controllers
     HistoryCashRegisterController historyCashRegisterController = Get.find();
-
-    // var
-    bool darkTheme = Get.isDarkMode;
-    // style 
-    Color iconColor =  historyCashRegisterController.homeController.getIsSubscribedPremium==false?Colors.amber: darkTheme?Colors.white:Colors.black;
-    Color textColor = darkTheme ==false || historyCashRegisterController.homeController.getIsSubscribedPremium==false?Colors.white:Colors.black;
-   
+ 
     return AppBar(
       elevation: 0,
       centerTitle: false,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       title: const Text('Historial de caja', textAlign: TextAlign.center),
       actions: [
-        PopupMenuButton(
-            icon: Material(
-              color: iconColor,
-              borderRadius: const BorderRadius.all(Radius.circular(8.0)),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Row(
-                  children: [
-                    Text(historyCashRegisterController.getTextFilter,style: TextStyle(color:textColor,fontWeight: FontWeight.w400)),
-                    const SizedBox(width: 5),
-                    Icon(Icons.filter_list,color:textColor),
-                  ],
-                ),
-              ),
+        PopupMenuButton( 
+            icon:ComponentApp().buttonAppbar(
+              context: context,
+              text: historyCashRegisterController.getTextFilter,
+              iconTrailing: Icons.filter_list,  
             ),
             onSelected: (selectedValue) {
               historyCashRegisterController.filterCashRegister( filter: selectedValue.toString());
