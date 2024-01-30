@@ -38,11 +38,6 @@ class CataloguePage extends StatelessWidget {
     // controllers
     final CataloguePageController catalogueController = Get.find();
     final HomeController homeController = Get.find();
-    final bool darkTheme = Theme.of(context).brightness == Brightness.dark;
-
-    // style 
-    Color iconTextColor =  homeController.getIsSubscribedPremium==false?Colors.amber: darkTheme?Colors.white:Colors.black;
-    Color textColor = darkTheme == false || homeController.getIsSubscribedPremium==false?Colors.white:Colors.black;
     
     return AppBar(
       elevation: 0,
@@ -55,38 +50,26 @@ class CataloguePage extends StatelessWidget {
         IconButton(icon: const Icon(Icons.search),onPressed: (() => catalogueController.showSeach(context: context))),
         // buttons : filter list
         catalogueController.filterState?IconButton(onPressed: catalogueController.catalogueFilter, icon: const Icon(Icons.close),padding: const EdgeInsets.all(0))
-        : Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 5),
-          child: Material(
-            color: iconTextColor,
-            borderRadius: const BorderRadius.all(Radius.circular(8.0)),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 1),
-              child: PopupMenuButton( 
-                  child: Row(
-                    children: [
-                      Text('Filtrar',style:TextStyle(color:textColor,fontWeight: FontWeight.w400)),
-                      const SizedBox(width: 5),
-                    Icon(Icons.filter_list,color: textColor),
-                    ],
-                  ), 
-                  onSelected: (selectedValue) => catalogueController.popupMenuButtonCatalogueFilter(key: selectedValue),
-                  itemBuilder: (BuildContext ctx) => [
-                        const PopupMenuItem(value: '0', child: Text('Mostrar todos')),
-                        const PopupMenuItem(value: '2', child: Text('Mostrar favoritos')),
-                        const PopupMenuItem(value: '5', child: Text('Hace más de 5 meses')),
-                        homeController.getIsSubscribedPremium?const PopupMenuItem(child: null,height: 0): const PopupMenuItem(value: 'premium',child: Text('Opciones Premium',style: TextStyle(color: Colors.amber,fontWeight: FontWeight.w600),)),
-                        PopupMenuItem(value: '1',enabled: catalogueController.homeController.getIsSubscribedPremium, child: const Text('Mostrar con stock')),
-                        PopupMenuItem(value: '3',enabled: catalogueController.homeController.getIsSubscribedPremium, child: const Text('Mostrar con stock bajos')),
-                        PopupMenuItem(value: '4',enabled: catalogueController.homeController.getIsSubscribedPremium, child: const Text('Actualizado hace más de 2 meses')),
-                        // TODO : delete release
-                        const PopupMenuItem(value: '6', child: Text('Sin verificación')),
-                        const PopupMenuItem(value: '7', child: Text('Cargar toda la Base de Datos')),
-                        const PopupMenuItem(value: '8', child: Text('DB sin verificar')),
-                      ]),
-            ),
-          ),
-        ),
+        : PopupMenuButton( 
+          icon: ComponentApp().buttonAppbar(
+            context: context,
+            text: 'Filtrar',
+            iconTrailing: Icons.filter_list,  
+          ), 
+            onSelected: (selectedValue) => catalogueController.popupMenuButtonCatalogueFilter(key: selectedValue),
+            itemBuilder: (BuildContext ctx) => [
+                  const PopupMenuItem(value: '0', child: Text('Mostrar todos')),
+                  const PopupMenuItem(value: '2', child: Text('Mostrar favoritos')),
+                  const PopupMenuItem(value: '5', child: Text('Hace más de 5 meses')),
+                  homeController.getIsSubscribedPremium?const PopupMenuItem(child: null,height: 0): const PopupMenuItem(value: 'premium',child: Text('Opciones Premium',style: TextStyle(color: Colors.amber,fontWeight: FontWeight.w600),)),
+                  PopupMenuItem(value: '1',enabled: catalogueController.homeController.getIsSubscribedPremium, child: const Text('Mostrar con stock')),
+                  PopupMenuItem(value: '3',enabled: catalogueController.homeController.getIsSubscribedPremium, child: const Text('Mostrar con stock bajos')),
+                  PopupMenuItem(value: '4',enabled: catalogueController.homeController.getIsSubscribedPremium, child: const Text('Actualizado hace más de 2 meses')),
+                  // TODO : delete release
+                  const PopupMenuItem(value: '6', child: Text('Sin verificación')),
+                  const PopupMenuItem(value: '7', child: Text('Cargar toda la Base de Datos')),
+                  const PopupMenuItem(value: '8', child: Text('DB sin verificar')),
+                ]),
       ],
     );
   }

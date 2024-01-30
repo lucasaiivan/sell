@@ -69,13 +69,9 @@ class AccountView extends GetView<AccountController> {
     return AppBar(
       backgroundColor: Get.theme.scaffoldBackgroundColor,
       elevation: 0,
-      iconTheme: Theme.of(context)
-          .iconTheme
-          .copyWith(color: Theme.of(context).textTheme.bodyText1!.color),
+      iconTheme: Theme.of(context).iconTheme.copyWith(color: Theme.of(context).textTheme.bodyLarge!.color),
       title: Text(controller.newAccount ? 'Perfil de mi negocio' : 'Perfil',
-          style: TextStyle(
-              fontSize: 18.0,
-              color: Theme.of(context).textTheme.bodyText1!.color)),
+          style: TextStyle(fontSize: 18.0,color: Theme.of(context).textTheme.bodyLarge!.color)),
       actions: <Widget>[
         IconButton(
           icon: controller.getSavingIndicator
@@ -291,8 +287,7 @@ class AccountView extends GetView<AccountController> {
                   labelText: "Ciudad (opcional)",
                   filled: true,
                 ),
-                controller:
-                    TextEditingController(text: controller.profileAccount.town),
+                controller: TextEditingController(text: controller.profileAccount.town),
               ),
               const Divider(color: Colors.transparent, thickness: 1), 
               // text : marca de tiempo de la ultima actualización del documento

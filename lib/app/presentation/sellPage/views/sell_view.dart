@@ -68,8 +68,16 @@ class SalesView extends StatelessWidget {
 
   // WIDGETS VIEWS
   PreferredSizeWidget appbar({required SalesController controller}) {
-    return AppBar(
-      title: Text(controller.titleText, textAlign: TextAlign.center),
+    return AppBar( 
+      titleSpacing: 0.0,
+      title: ComponentApp().buttonAppbar(
+        context:  buildContext,
+        onTap: ()=> controller.showSeach(context: buildContext), 
+        text: 'Vender',
+        iconLeading: Icons.search,
+        colorBackground: Theme.of(buildContext).colorScheme.outline.withOpacity(0.2),//Colors.blueGrey.shade300.withOpacity(0.4),
+        colorAccent: Theme.of(buildContext).textTheme.bodyLarge?.color,
+        ),
       centerTitle: false,
       actions: [
         controller.getListProductsSelestedLength != 0
@@ -367,6 +375,9 @@ class SalesView extends StatelessWidget {
   }
 
   // WIDGETS COMPONENTS
+   
+
+  
   Widget cashRegisterNumberPopupMenuButton() {
     // opcion premium : esta funcionalidad de arqueo de caja solo esta disponible en la version premium
     bool isPremium = homeController.getIsSubscribedPremium;
@@ -383,46 +394,27 @@ class SalesView extends StatelessWidget {
       
       // button : suscribirse a premium
       return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-        child: Material(
-          clipBehavior: Clip.antiAlias,
-          color: isPremium?homeController.getDarkMode ? Colors.white : Colors.black:Colors.amber[600],
-          borderRadius: const BorderRadius.all(Radius.circular(8.0)),
-          child: InkWell(
-            onTap: () => homeController.showModalBottomSheetSubcription(id: 'arching'),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
-              child: Row(
-                children: [ 
-                  Text('Iniciar caja', style: TextStyle( color: isPremium?homeController.getDarkMode ? Colors.black : Colors.white:Colors.white)),
-                  const SizedBox(width: 5),
-                  Icon(Icons.keyboard_arrow_down_rounded, color: isPremium?homeController.getDarkMode ? Colors.black : Colors.white:Colors.white),
-                ],
-              ),
-            ),
-          ),
+        padding: const EdgeInsets.all(8.0),
+        child: ComponentApp().buttonAppbar(
+          context: buildContext,
+          onTap: ()=> homeController.showModalBottomSheetSubcription(),
+          text: 'Iniciar caja',
+          iconTrailing: Icons.keyboard_arrow_down_rounded,
+          colorAccent: Colors.white,
+          colorBackground: Colors.amber,
         ),
-      );
+      ); 
     }
     // condition : si no hay caja abierta
     if (homeController.cashRegisterActive.id == '') {
       // no hay caja abierta
       // view : button : iniciar caja
-      return PopupMenuButton(
-          icon: Material(
-            color: isPremium?homeController.getDarkMode ? Colors.white : Colors.black:Colors.amber[600],
-            borderRadius: const BorderRadius.all(Radius.circular(8.0)),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
-              child: Row(
-                children: [ 
-                  Text('Iniciar caja', style: TextStyle( color: isPremium?homeController.getDarkMode ? Colors.black : Colors.white:Colors.white)),
-                  const SizedBox(width: 5),
-                  Icon(Icons.keyboard_arrow_down_rounded, color: isPremium?homeController.getDarkMode ? Colors.black : Colors.white:Colors.white),
-                ],
-              ),
-            ),
-          ), 
+      return PopupMenuButton( 
+          icon:ComponentApp().buttonAppbar( 
+            context: buildContext,
+            text: 'Iniciar caja',
+            iconTrailing: Icons.keyboard_arrow_down_rounded,  
+          ),
           onSelected: (selectedValue) { 
             // opcion premium : esta funcionalidad de arqueo de caja solo esta disponible en la version premium
             if(homeController.getIsSubscribedPremium==true){ 
@@ -472,9 +464,9 @@ class SalesView extends StatelessWidget {
     return PopupMenuButton( 
         icon: Material(
           color: homeController.getDarkMode ? Colors.white : Colors.black,
-          borderRadius: const BorderRadius.all(Radius.circular(8.0)),
+          borderRadius: const BorderRadius.all(Radius.circular(24.0)),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Row(
               children: [
                 Text('Caja ${homeController.cashRegisterActive.description}',
@@ -628,122 +620,45 @@ class SalesView extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 10),
                 scrollDirection: Axis.horizontal,
                 itemCount: 15,
-                itemBuilder: (context, index) => circleAvatarSeachAndDefault(context: context),
+                itemBuilder: (context, index) => circleAvatarDefault(context: context),
               ),
             ),
       );
     }
 
-    return Stack(
-      children: [
-        SizedBox(
-          height: height,
-          width: double.infinity,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: itemCount,
-            itemBuilder: (context, index) {
-              // values
-              Widget widget = index <= (controller.getProductsOutstandingList.length - 1) && index < itemCount - numItemDefault
-                ? circleAvatarProduct(productCatalogue:controller.getProductsOutstandingList[index].copyWith())
-                : circleAvatarProduct(productCatalogue: ProductCatalogue(creation: Timestamp.now(),upgrade: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now()));
-              // condition : views default
-              if (viewDefault) {
-                return Padding(
-                  padding: EdgeInsets.only(left: index == 0 ? 5 : 0),
-                  child: circleAvatarSeachAndDefault(context: context),
-                );
-              }
-              // condition : vista de productos destacados
-              if (index == 0) {
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(width: 95.0, height: height),
-                    Container(key: homeController.itemProductFlashKeyButton,child: widget)
-                  ]);
-              }
-
-              return widget;
-            },
-          ),
-        ),
-        SizedBox(
-          width: 110.0,
-          height: height,
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.centerRight,
-                end: Alignment.centerLeft,
-                colors: <Color>[
-                  Theme.of(context).scaffoldBackgroundColor.withOpacity(0.0),
-                  Theme.of(context).scaffoldBackgroundColor,
-                  Theme.of(context).scaffoldBackgroundColor,
-                  Theme.of(context).scaffoldBackgroundColor,
-                  Theme.of(context).scaffoldBackgroundColor,
-                ],
-                tileMode: TileMode.mirror,
-              ),
-            ),
-          ),
-        ),
-        circleAvatarSeachAndDefault(context: context, seach: true)
-      ],
+    return SizedBox(
+      height: height,
+      width: double.infinity,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: itemCount,
+        padding: const EdgeInsets.only(left: 10),
+        itemBuilder: (context, index) {
+          // values
+          Widget widget = index <= (controller.getProductsOutstandingList.length - 1) && index < itemCount - numItemDefault
+            ? circleAvatarProduct(productCatalogue:controller.getProductsOutstandingList[index].copyWith())
+            : circleAvatarProduct(productCatalogue: ProductCatalogue(creation: Timestamp.now(),upgrade: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now()));
+          // condition : views default
+          if (viewDefault) {
+            return Padding(
+              padding: EdgeInsets.only(left: index == 0 ? 5 : 0),
+              child: circleAvatarDefault(context: context),
+            );
+          } 
+    
+          return widget;
+        },
+      ),
     );
   }
 
-  Widget circleAvatarSeachAndDefault({bool seach = false, required BuildContext context}) {
-    
-    // controller
-    final SalesController salesController = Get.find();
+  Widget circleAvatarDefault({ required BuildContext context}) {
+     
 
     // values
-    double radius = 40.0;
-    double spaceImageText = 1; 
+    double radius = 40.0; 
 
-    return seach
-        ? ElasticIn(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 7),
-              child: Container(
-                width: 81.0,
-                height: 120.0,
-                padding: const EdgeInsets.all(5),
-                child: Column(
-                  children: [
-                    InkWell(
-                      hoverColor: Colors.red,
-                      splashColor: Colors.amber,
-                      focusColor: Colors.pink,
-                      onTap: () => salesController.showSeach(context: context),
-                      child: Column(
-                        children: <Widget>[
-                          CircleAvatar(
-                            radius: radius,
-                            backgroundColor: Colors.grey.withOpacity(0.1),
-                            child: Icon(Icons.search, color: Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black54),
-                          ),
-                          SizedBox(height: spaceImageText),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 5),
-                            child: Text('Buscar',
-                                style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.normal),
-                                overflow: TextOverflow.fade,
-                                maxLines: 1,
-                                softWrap: false),
-                          )
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          )
-        : ElasticIn(
+    return ElasticIn(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.start,
