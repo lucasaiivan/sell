@@ -378,11 +378,27 @@ class SalesView extends StatelessWidget {
    
 
   
-  Widget cashRegisterNumberPopupMenuButton() {
+  Widget cashRegisterNumberPopupMenuButton() { 
+
     // opcion premium : esta funcionalidad de arqueo de caja solo esta disponible en la version premium
     bool isPremium = homeController.getIsSubscribedPremium;
     // controllers
     final controller = Get.find<SalesController>(); 
+
+    // condition : si el esta en modo de prueba, solo muestra el boton de inciar caja
+    if(homeController.getUserAnonymous){
+      return Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: ComponentApp().buttonAppbar(
+          context: buildContext,
+          onTap: null,
+          text: 'Iniciar caja',
+          iconTrailing: Icons.keyboard_arrow_down_rounded,
+          colorAccent: homeController.getDarkMode? Colors.white: Colors.black,
+          colorBackground:homeController.getDarkMode ? Colors.white12 : Colors.grey.shade300,
+        ),
+      ); 
+    }
 
     // condition : si el usuario de la cuenta no es administrador no se muestra el boton de suscribirse a premium
       if(  homeController.getProfileAdminUser.arqueo == false){
@@ -390,7 +406,7 @@ class SalesView extends StatelessWidget {
       }
       
     // condition : si no es premium se muestra el boton de suscribirse a premium 
-    if(homeController.getIsSubscribedPremium==false){ 
+    if(isPremium==false ){ 
       
       // button : suscribirse a premium
       return Padding(
@@ -406,15 +422,11 @@ class SalesView extends StatelessWidget {
       ); 
     }
     // condition : si no hay caja abierta
-    if (homeController.cashRegisterActive.id == '') {
+    if (homeController.cashRegisterActive.id == '' ) {
       // no hay caja abierta
       // view : button : iniciar caja
       return PopupMenuButton( 
-          icon:ComponentApp().buttonAppbar( 
-            context: buildContext,
-            text: 'Iniciar caja',
-            iconTrailing: Icons.keyboard_arrow_down_rounded,  
-          ),
+          icon:ComponentApp().buttonAppbar( context: buildContext,text: 'Iniciar caja',iconTrailing: Icons.keyboard_arrow_down_rounded),
           onSelected: (selectedValue) { 
             // opcion premium : esta funcionalidad de arqueo de caja solo esta disponible en la version premium
             if(homeController.getIsSubscribedPremium==true){ 
@@ -439,19 +451,11 @@ class SalesView extends StatelessWidget {
                 value: 'apertura',
                 child: Row(children: [
                   Icon(Icons.add),
-                  Padding(
-                      padding: EdgeInsets.fromLTRB(12, 0, 0, 0),
-                      child: Text('Nueva arqueo de caja')),
+                  Padding(padding: EdgeInsets.fromLTRB(12, 0, 0, 0),child: Text('Nueva arqueo de caja')),
                 ])));
             // agregar las cajas existentes
             for (var element in homeController.listCashRegister) {
-              items.add(PopupMenuItem(
-                  value: element.id,
-                  child: Row(children: [
-                    Padding(
-                        padding: const EdgeInsets.fromLTRB(12, 0, 0, 0),
-                        child: Text(element.description)),
-                  ])));
+              items.add(PopupMenuItem(value: element.id,child: Row(children: [Padding(padding: const EdgeInsets.fromLTRB(12, 0, 0, 0),child: Text(element.description))])));
             }
             // generate vista de cada item de homeController.cashRegisterList
             return List.generate(homeController.listCashRegister.length + 1,
@@ -473,9 +477,7 @@ class SalesView extends StatelessWidget {
                     style: TextStyle(color: homeController.getDarkMode? Colors.black: Colors.white)),
                 const SizedBox(width: 5),
                 Icon(Icons.keyboard_arrow_down_rounded,
-                    color: homeController.getDarkMode
-                        ? Colors.black
-                        : Colors.white),
+                    color: homeController.getDarkMode? Colors.black: Colors.white),
               ],
             ),
           ),
@@ -1356,84 +1358,67 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
               const Text('Descripción de la caja',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400)),
               const SizedBox(height: 5),
+
               // textfield con autocompletado: descripcion (opcional)
+              TextField(
+                controller: textEditingController,
+                //focusNode: focusNode,
+                keyboardType: TextInputType.text,
+                maxLength: 9, // Límite de caracteres
+                decoration: const InputDecoration(
+                  border: UnderlineInputBorder(),
+                  enabledBorder: UnderlineInputBorder(),
+                  labelText: 'Descripción',
+                ),
+                onChanged: (value) {
+                  textEditingController.text = value;
+                },
+              ),
+              // chips : sugerencias de descripciones
               FutureBuilder<List<String>>(
-                  future: salesController.loadFixerDescriotions(),
-                  initialData: const [],
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      // textfield autocomplete
-                      return Autocomplete<String>(
-                        optionsViewBuilder: (context, onSelected, options) {
-                          // recrea la vista original de las opciones
-                          return Align(
-                            alignment: Alignment.topLeft,
-                            child: Material(
-                              elevation: 4.0,
-                              child: ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: options.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  final String option = options.elementAt(index);
-                                  return GestureDetector(
-                                    onTap: ()=> onSelected(option),
-                                    child: ListTile(
-                                      visualDensity: VisualDensity.compact,
-                                      title: Text(option),
-                                      // icon : delete
-                                      trailing: Padding(
-                                        padding: const EdgeInsets.only(right: 12),
-                                        child: IconButton(
-                                          icon: const Icon(Icons.clear_rounded),
-                                          onPressed: () {
-                                            setState(() {
-                                              // eliminar de 'snapshot' la descripcion
-                                              snapshot.data!.remove(option);
-                                              // eliminamos la descripcion de la base de datos
-                                              salesController.deleteFixedDescription(description: option);
-                                            });
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
+                future: salesController.loadFixerDescriotions(), // tu Future
+                builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const LinearProgressIndicator(); // o algún otro widget de carga
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else {
+                    // Los datos están disponibles, muestra la lista
+                    return SizedBox(
+                      height: 50,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: snapshot.data?.length, 
+                        shrinkWrap: true,
+                        itemBuilder: (context, index) {
+
+                          // id
+                          String option = snapshot.data![index];
+
+                          return Padding(
+                            padding: const EdgeInsets.all(2.0),
+                            child: InputChip( 
+                              label: Text(option), 
+                              onPressed: () {
+                                textEditingController.text = option;
+                              },
+                              deleteIcon: const Icon(Icons.close, size: 20),
+                              onDeleted: () {
+                                setState(() {
+                                  // eliminar de 'snapshot' la descripcion
+                                  snapshot.data!.remove(option);
+                                  // eliminamos la descripcion de la base de datos
+                                  salesController.deleteFixedDescription(description: option);
+                                });
+                              },
                             ),
                           );
-                        },
-                        optionsBuilder: (TextEditingValue textEditingValue) {
-                          return snapshot.data!.where((String option) {
-                            return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
-                          });
-                        },
-                        fieldViewBuilder: (context,
-                            textEditingAutoCompleteController,
-                            focusNode,
-                            onFieldSubmitted) {
-                          return TextField(
-                            controller: textEditingAutoCompleteController,
-                            focusNode: focusNode,
-                            keyboardType: TextInputType.text,
-                            maxLength: 9, // Límite de caracteres
-                            decoration: const InputDecoration(
-                              border: UnderlineInputBorder(),
-                              enabledBorder: UnderlineInputBorder(),
-                              labelText: 'Descripción',
-                            ),
-                            onChanged: (value) {
-                              textEditingController.text = value;
-                            },
-                          );
-                        },
-                        onSelected: (String selection) {
-                          textEditingController.text = selection;
-                        },
-                      );
-                    } else {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                  }),
+                        },  
+                      ),
+                    );
+                  }
+                },
+              )
             ],
           ),
         ),

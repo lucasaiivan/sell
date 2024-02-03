@@ -116,7 +116,9 @@ class WidgetButtonListTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(10.0),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-          width: 75.0,
+          width: 80.0,
+          // shape : borde delineada con esquinas redondeadas 
+          decoration: BoxDecoration(border: Border.all(color: homeController.getDarkMode?Colors.white: Colors.black38,width:0.2,),borderRadius: BorderRadius.circular(10.0)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -134,7 +136,7 @@ class WidgetButtonListTile extends StatelessWidget {
                   }
                 },
                 child: SizedBox(
-                  height: 75,width: 75,
+                  height: 50,width: 50,
                   child: perfilNegocio.image != '' || perfilNegocio.image.isNotEmpty
                       ? CachedNetworkImage(
                           fadeInDuration: const Duration(milliseconds: 200),
@@ -514,7 +516,7 @@ Widget body({required BuildContext context}){
           subtitle: homeController.getIdAccountSelected == ''? null: Row(
             crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment:  MainAxisAlignment.start,
             children: [
-              user.name==''?Container():Text( user.name,overflow: TextOverflow.ellipsis,maxLines: 1),
+              user.name==''?Container():const Flexible(child: Text( 'ivan de turno manana',overflow: TextOverflow.ellipsis,maxLines: 1)),
               // view : punto de seracion
               user.name==''?Container():const Icon(Icons.arrow_right_rounded), 
               Text( user.admin? 'Administrador': 'Usuario estandar',overflow: TextOverflow.ellipsis,maxLines: 1),

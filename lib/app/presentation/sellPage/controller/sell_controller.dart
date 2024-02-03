@@ -1205,7 +1205,7 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
     final Widget dividerCircle = Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child:Icon(Icons.circle,size: 4, color: primaryTextColor.withOpacity(0.5)));
 
     // var
-    String alertStockText =product.stock ? (product.quantityStock == 0 ? 'Sin stock' : '{product.quantityStock} en stock') : '';
+    String alertStockText =product.stock ? (product.quantityStock == 0 ? 'Sin stock' : '${product.quantityStock} en stock') : '';
           
     return Column(
       children: [
@@ -1255,8 +1255,7 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
                                 Text('Favorito',style: textStyleSecundary),
                               ],
                             ):Container(),
-                          //  text : alert stock
-
+                          //  text : alert stockv
                             alertStockText != ''?Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
