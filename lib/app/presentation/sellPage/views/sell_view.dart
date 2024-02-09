@@ -1570,9 +1570,7 @@ class _ViewAddDiscountState extends State<ViewAddDiscount> {
             controller: textEditingPorcentController,
             keyboardType:
                 const TextInputType.numberWithOptions(decimal: false),
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp('[1234567890]'))
-            ],
+            inputFormatters: [ FilteringTextInputFormatter.allow(RegExp('[1234567890]'))],
             decoration: const InputDecoration( 
               icon: Icon(Icons.percent_rounded), 
               labelText: "Porcentaje",
