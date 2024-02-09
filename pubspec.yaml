@@ -50,7 +50,6 @@ dependencies:
   # RevanueCat
   purchases_flutter: ^6.4.0 # Un complemento de Flutter para la API de compras de RevenueCat.
 
-
   # state controller
   get: ^4.6.6 # GetX es una solución potente y extraligera para Flutter. Combina la gestión del estado de alto rendimiento, la inyección inteligente de dependencias y la gestión de rutas de forma rápida y práctica.
   # storage
@@ -59,7 +58,7 @@ dependencies:
   flutter_secure_storage: ^9.0.0
   # app info 
   package_info_plus: ^5.0.1 # Un complemento de Flutter para obtener información sobre el paquete actual, como el nombre, la versión y el número de compilación.
-  # others  
+  # others   
   observe_internet_connectivity: ^1.0.2 # Un paquete de Flutter que proporciona un widget de conexión a Internet que se puede usar para verificar la conectividad a Internet
   fast_cached_network_image: ^1.2.0
   cached_network_image: ^3.3.0 # Un paquete de Flutter que proporciona una implementación de red de imágenes que se almacenan en caché.
@@ -88,7 +87,7 @@ dependencies:
   carousel_slider: ^4.2.1 # Un widget deslizante de carrusel
   email_validator: ^2.1.17
   blur: ^3.1.0  # Un paquete de Flutter que proporciona un widget de enfoque de desenfoque.
-  fl_chart: ^0.65.0 # Un paquete de Flutter que proporciona un widget de gráfico de datos.
+  fl_chart: ^0.66.1 # Un paquete de Flutter que proporciona un widget de gráfico de datos.
   
 flutter_icons:
   android: true

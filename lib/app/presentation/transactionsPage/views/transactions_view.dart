@@ -1,5 +1,6 @@
  
-import 'package:cloud_firestore/cloud_firestore.dart'; 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fl_chart/fl_chart.dart'; 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart'; 
 import 'package:intl/intl.dart'; 
@@ -119,9 +120,19 @@ class TransactionsView extends StatelessWidget {
       transactions.add( ComponentApp().divider());
     }
     // Finalmente, utiliza la lista de widgets widgets e
-    return ListView.builder(
-      itemCount: transactions.length,
-      itemBuilder: (BuildContext context, int index) => transactions[index],
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(50.0),
+          child: MiniLineChart(prices: []),
+        ),
+        Flexible(
+          child: ListView.builder(
+            itemCount: transactions.length,
+            itemBuilder: (BuildContext context, int index) => transactions[index],
+          ),
+        ),
+      ],
     );
 
   }
@@ -473,3 +484,77 @@ class TransactionsView extends StatelessWidget {
   }
 }
 
+
+
+
+
+
+class MiniLineChart extends StatelessWidget {
+
+  List<double> prices=[];
+  
+  MiniLineChart({Key? key,required this.prices}) : super(key: key);
+ 
+
+  @override
+  Widget build(BuildContext context) {
+
+    if(prices.isEmpty) prices = [0,355,900, 1450, 3785, 5000,6090, 5030,7234];
+ 
+    return SizedBox(
+      height: 100,
+      width: 200,
+      child: LineChart(
+        LineChartData(
+          lineTouchData: LineTouchData(  
+            handleBuiltInTouches: true,
+            touchTooltipData: LineTouchTooltipData(  
+              getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
+                return touchedBarSpots.map((barSpot) {
+                  final flSpot = barSpot; 
+                  return LineTooltipItem(
+                    formatValue(flSpot.y),
+                    const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  );
+                }).toList();
+              },
+
+            ),
+          ),
+          lineBarsData: [
+            LineChartBarData(
+              spots: [
+                for (int i = 0; i < prices.length; i++)
+                  FlSpot(i.toDouble(), prices[i]),
+              ],
+              isCurved: true,
+              color:Colors.blue,
+              barWidth: 3,   
+            ),
+            
+            
+          ],
+          gridData: const FlGridData(
+            show: false,
+          ),
+          borderData: FlBorderData(
+            show: false,
+          ),
+          titlesData: const FlTitlesData(
+            show: false,
+          ),
+        ),
+        
+      ),
+    );
+  }
+
+  String formatValue(double value) {
+  if (value >= 1000) {
+    return '${value/1000}K';
+  } else {
+    return value.toStringAsFixed(0);
+  }
+}
+
+}

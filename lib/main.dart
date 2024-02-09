@@ -20,7 +20,7 @@ Future<void> main() async {
     // web
     await Firebase.initializeApp(options: firebaseConfig);
   } else {
-    // dispositivo android 
+    // disposition android
     await Firebase.initializeApp();
 
     // RevenueCat : subcripcion 
