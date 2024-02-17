@@ -11,10 +11,7 @@ import '../../home/controller/home_controller.dart';
 class ButtonData {
   Color colorButton = Colors.purple;
   Color colorText = Colors.white; 
-  ButtonData({required Color colorButton, required Color colorText}) {
-    this.colorButton = colorButton;
-    this.colorText = colorText;
-  }
+  ButtonData({required this.colorButton, required this.colorText});
 }
 
 class ControllerProductsSearch extends GetxController {
@@ -28,6 +25,7 @@ class ControllerProductsSearch extends GetxController {
     homeController = Get.find();
     // llamado inmediatamente después de que se asigna memoria al widget - ej. fetchApi();
     _codeBarParameter = Get.arguments['id'] ?? '';
+    // condition : si el parametro no esta vacio
     if (_codeBarParameter != '') {
       getTextEditingController.text = _codeBarParameter;
       queryProduct(id: _codeBarParameter);
@@ -79,8 +77,8 @@ class ControllerProductsSearch extends GetxController {
   }
   List<Map<String, dynamic>> get getListExcelToJson => listExcelToJson;
 
-  // write code
-  bool _writeCode = false;
+  // write code : 
+  bool _writeCode = false; 
   set setWriteCode(bool value){
     _writeCode = value;
     update(['updateAll']);
@@ -107,10 +105,8 @@ class ControllerProductsSearch extends GetxController {
   
 
   // color component textfield
-  ButtonData _buttonData =
-      ButtonData(colorButton: Get.theme.primaryColor, colorText: Colors.white);
-  setButtonData({required Color colorButton, required Color colorText}) =>
-      _buttonData = ButtonData(colorButton: colorButton, colorText: colorText);
+  ButtonData _buttonData = ButtonData(colorButton: Get.theme.primaryColor, colorText: Colors.white);
+  setButtonData({required Color colorButton, required Color colorText}) => _buttonData = ButtonData(colorButton: colorButton, colorText: colorText);
   ButtonData get getButtonData => _buttonData;
 
   // state search : estado de la busqueda
@@ -142,13 +138,17 @@ class ControllerProductsSearch extends GetxController {
 
   // FUCTIONS
   void queryProduct({required String id}) {
+    // verificamos que el id no este vacio y que no sea -1 (back)
     if (id != '' && id != '-1') {
       // set
       setStateSearch = true;
       update(['updateAll']);
       // query
-      Database.readProductPublicFuture(id: id).then((value) {
+      Future<DocumentSnapshot<Map<String, dynamic>>> documentSnapshot = Database.readProductPublicFuture(id: id);
+      documentSnapshot.then((value) {
+        // obtenemos el obj
         Product product = Product.fromMap(value.data() as Map);
+        // convertimos el obj a product catalogue
         toProductView(porduct: product.convertProductCatalogue());
       }).onError((error, stackTrace) {
         setproductDoesNotExist = true;
@@ -187,7 +187,7 @@ class ControllerProductsSearch extends GetxController {
 
   void queryProductSuggestion() {
     if (getListProductsSuggestions.isEmpty) {
-      Database.readProductsFuture(limit: 6).then((value) {
+      Database.readProductsFavoritesFuture(limit: 7).then((value) {
 
         // values 
         List<Product> newList = [];
@@ -214,7 +214,7 @@ class ControllerProductsSearch extends GetxController {
     productSelect.id = id;
     productSelect.code = id;
     // navega hacia una nueva vista para crear un nuevo producto
-    Get.toNamed(Routes.EDITPRODUCT,arguments: {'new': true, 'product': productSelect});
+    Get.toNamed(Routes.createProductForm,arguments: { 'product': productSelect});
   }
 }
 
