@@ -2,42 +2,168 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserModel {
   UserModel({
-    this.superAdmin = false, // Super administrador es el usaurio que creo la cuenta
-    this.admin = false, // permiso de administrador del usuario para administrar la cuenta
-    this.email = '',
+    this.inactivate = false,
+    this.account = "", 
+    this.email = '',  
+    this.name='', 
+    this.superAdmin = false,  
+    this.admin = false,  
+    this.personalized = false,  
+    required this.creation,
+    required this.lastUpdate,
+    // ... 
+    this.arqueo = false,  
+    this.historyArqueo = false, 
+    this.transactions = false, 
+    this.catalogue = false,  
+    this.multiuser = false,  
+    this.editAccount = false, 
   });
 
-  bool superAdmin = false;
-  bool admin = false;
-  String email = '';
+  bool inactivate = false; // inactivar usuario
+  String account = ""; // el ID de la cuenta administrada por defecto es el ID del usuario quien lo creo
+  String email = ''; // email del usuario
+  String name=''; // nombre del usuario (opcaional)
+  bool superAdmin = false; // Super administrador es el usaurio que creo la cuenta
+  bool admin = false; // permiso de administrador 
+  Timestamp creation = Timestamp.now(); // Fecha en la que se creo la cuenta
+  Timestamp lastUpdate = Timestamp.now(); // Fecha en la que se actualizo la cuenta
+  // permisos personalizados
+  bool personalized = false;
+  // ...  
+  bool arqueo = false; // crear arqueo de caja
+  bool historyArqueo = false; // ver y eliminar registros de arqueo de caja
+  bool transactions = false; // ver y eliminar registros de transacciones
+  bool catalogue = false;  // ver, editar y eliminar productos del catalogo
+  bool multiuser = false;  // ver, editar y eliminar usuarios de la cuenta
+  bool editAccount = false; // editar la cuenta
+
 
   factory UserModel.fromDocument(DocumentSnapshot doc) {
     Map data = doc.data() as Map;
     return UserModel(
+      inactivate: data.containsKey("inactivate") ? doc["inactivate"] : false,
+      account: doc["account"],
+      email: data.containsKey("email") ? doc["email"] : '',
+      name: data.containsKey('name') ? doc['name'] : '',
       superAdmin: data.containsKey("superAdmin") ? doc["superAdmin"] : false,
       admin: data.containsKey("admin") ? doc["admin"] : false,
-      email: data.containsKey("email") ? doc["email"] : '',
+      personalized: data.containsKey("personalized") ? doc["personalized"] : false,
+      creation: data.containsKey("creation") ? doc["creation"] : Timestamp.now(),
+      lastUpdate: data.containsKey("lastUpdate") ? doc["lastUpdate"] : Timestamp.now(),
+      // ... 
+      arqueo: data.containsKey("arqueo") ? doc["arqueo"] : false,
+      historyArqueo: data.containsKey("historyArqueo") ? doc["historyArqueo"] : false,
+      transactions: data.containsKey("transactions") ? doc["transactions"] : false,
+      catalogue: data.containsKey("catalogue") ? doc["catalogue"] : false,
+      multiuser: data.containsKey("multiuser") ? doc["multiuser"] : false,
+      editAccount: data.containsKey("editAccount") ? doc["editAccount"] : false,
+
     );
+    
   }
 
-  Map<String, dynamic> toJson() => {"superAdmin": superAdmin,"email": email};
+  Map<String, dynamic> toJson() => {
+    "inactivate": inactivate,
+    "account": account,
+    "email": email,
+    'name':name,
+    "superAdmin": superAdmin,
+    "admin": admin,
+    'creation': creation,
+    'lastUpdate': lastUpdate,
+    // permisos personalizados
+    "personalized": personalized, 
+    "arqueo": arqueo,
+    "historyArqueo": historyArqueo,
+    "transactions": transactions,
+    "catalogue": catalogue,
+    "multiuser": multiuser,
+    "editAccount": editAccount,
+  };
 
   factory UserModel.fromMap(Map data) {
     return UserModel(
+      inactivate: data['inactivate'] ?? false,
+      account: data['account'] ?? '',
+      email: data['email'] ?? '',
+      name:data['name'] ?? '',
       superAdmin: data['superAdmin'] ?? false,
       admin: data['admin'] ?? false,
-      email: data['email'] ?? '',
+      personalized: data['personalized'] ?? false,
+      creation: data['creation'] ?? Timestamp.now(),
+      lastUpdate: data['lastUpdate'] ?? Timestamp.now(),
+      // ... 
+      arqueo: data['arqueo'] ?? false,
+      historyArqueo: data['historyArqueo'] ?? false,
+      transactions: data['transactions'] ?? false,
+      catalogue: data['catalogue'] ?? false,
+      multiuser: data['multiuser'] ?? false,
+      editAccount: data['editAccount'] ?? false,
     );
   }
 
-  UserModel.fromDocumentSnapshot({required DocumentSnapshot documentSnapshot}) {
+  UserModel.fromDocumentSnapshot({required DocumentSnapshot documentSnapshot}) { 
     // get
-    Map data = documentSnapshot.data() as Map;
+    late Map data= {};
+    if (documentSnapshot.data() != null) {data = documentSnapshot.data() as Map; }
 
     //  set
-    superAdmin = data['superAdmin'] ?? false;
-    admin = data['admin'] ?? false;
-    email = data["email"] ?? '';
+    inactivate = data.containsKey('inactivate') ? data['inactivate'] : false;
+    account = data.containsKey('account') ? data['account'] : documentSnapshot.id;
+    email = data.containsKey('email') ? data['email'] : '';
+    name = data.containsKey('name') ? data['name'] : '';
+    superAdmin = data.containsKey('superAdmin') ? data['superAdmin'] : false;
+    admin = data.containsKey('admin') ? data['admin'] : false;
+    personalized = data.containsKey('personalized') ? data['personalized'] : false;
+    creation = data.containsKey('creation') ? data['creation'] : Timestamp.now();
+    lastUpdate = data.containsKey('lastUpdate') ? data['lastUpdate'] : Timestamp.now();
+    // ... 
+    arqueo = data.containsKey('arqueo') ? data['arqueo'] : false;
+    historyArqueo = data.containsKey('historyArqueo') ? data['historyArqueo'] : false;
+    transactions = data.containsKey('transactions') ? data['transactions'] : false;
+    catalogue = data.containsKey('catalogue') ? data['catalogue'] : false;
+    multiuser = data.containsKey('multiuser') ? data['multiuser'] : false;
+    editAccount = data.containsKey('editAccount') ? data['editAccount'] : false;
+  }
+
+  UserModel copyWith({
+    bool? inactivate,
+    String? id,
+    String? email,
+    String? name,
+    bool? superAdmin,
+    bool? admin,
+    bool? personalized,
+    Timestamp? creation,
+    Timestamp? lastUpdate,
+    // ...
+    bool? sell,
+    bool? arqueo,
+    bool? historyArqueo,
+    bool? transactions,
+    bool? catalogue,
+    bool? multiuser,
+    bool? editAccount,
+  }) {
+    return UserModel(
+      inactivate: inactivate ?? this.inactivate,
+      account: id ?? account,
+      email: email ?? this.email,
+      name: name ?? this.name,
+      superAdmin: superAdmin ?? this.superAdmin,
+      admin: admin ?? this.admin,
+      personalized: personalized ?? this.personalized,
+      creation: creation ?? this.creation,
+      lastUpdate: lastUpdate ?? this.lastUpdate,
+      // ... 
+      arqueo: arqueo ?? this.arqueo,
+      historyArqueo: historyArqueo ?? this.historyArqueo,
+      transactions: transactions ?? this.transactions,
+      catalogue: catalogue ?? this.catalogue,
+      multiuser: multiuser ?? this.multiuser,
+      editAccount: editAccount ?? this.editAccount,
+    );
   }
 }
 
@@ -130,9 +256,7 @@ class ProfileAccountModel {
     subscribed = true;// data['subscribed']??false;
     image =data.containsKey('image') ? data['image'] : data['imagen_perfil'] ?? '';
     name = data.containsKey('name') ? data['name'] : data['nombre_negocio']; 
-    creation = data.containsKey('creation')
-        ? data['creation']
-        : data['timestamp_creation'];
+    creation = data.containsKey('creation')? data['creation']: data['timestamp_creation']?? Timestamp.now();
     currencySign = data.containsKey('currencySign')
         ? data['currencySign']
         : data['signo_moneda'] ?? "\$";
@@ -172,10 +296,11 @@ class ProfileAccountModel {
 
   ProfileAccountModel.fromDocumentSnapshot( {required DocumentSnapshot documentSnapshot}) {
     // get
-    Map data = documentSnapshot.data() as Map;
+    late Map data= {};
+    if (documentSnapshot.data() != null) {data = documentSnapshot.data() as Map; }
 
     //  set
-    creation = data["creation"];
+    creation = data["creation"]??Timestamp.now();
     // TODO: variable que se tiene que evaluar en cada inicio de la app
     subscribed = true; //data.containsKey('subscribed') ? data['subscribed'] : false;
     id = data.containsKey('id') ? data['id'] : documentSnapshot.id;
@@ -189,7 +314,7 @@ class ProfileAccountModel {
         : data["signo_moneda"] ?? '';
     blockingAccount = data.containsKey('blockingAccount')
         ? data['blockingAccount']
-        : data["bloqueo"] ?? '';
+        : data["bloqueo"] ?? false;
     blockingMessage = data.containsKey('blockingMessage')
         ? data['blockingMessage']
         : data["mensaje_bloqueo"] ?? '';

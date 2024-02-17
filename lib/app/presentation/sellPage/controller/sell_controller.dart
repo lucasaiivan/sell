@@ -1,33 +1,165 @@
-import 'dart:io';
+ 
 import 'package:audioplayers/audioplayers.dart';
-import 'package:firebase_storage/firebase_storage.dart'; 
-import 'package:flutter_masked_text2/flutter_masked_text2.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter_masked_text2/flutter_masked_text2.dart'; 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:image_picker/image_picker.dart'; 
-import 'package:search_page/search_page.dart';
+import 'package:image_picker/image_picker.dart';  
+import 'package:sell/app/domain/entities/cashRegister_model.dart';
 import 'package:sell/app/presentation/home/controller/home_controller.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:sell/app/core/utils/widgets_utils.dart';
+import 'package:uuid/uuid.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../domain/entities/ticket_model.dart';
+import '../views/sell_view.dart'; 
 
 class SalesController extends GetxController {
 
-
-  String valueResponseChatGpt = 'Vender'; 
-
-  // others controllers
+  // controllers views //
   final HomeController homeController = Get.find();
+  
+
+  // titulo del Appbar //
+  String titleText = 'Vender'; 
+
+  //  cash register  // 
+  void deleteFixedDescription({required String description}){
+    // firebase : elimina una descripción fijada
+    Database.refFirestoreFixedDescriptions(idAccount:homeController.getProfileAccountSelected.id).doc(description).delete();
+  }
+  void registerFixerDescription({required String description}){
+    // firebase : registra una descripción fija
+    Database.refFirestoreFixedDescriptions(idAccount:homeController.getProfileAccountSelected.id).doc(description).set({'description':description});
+  }
+  Future<List<String>> loadFixerDescriotions(){
+    // firebase : obtenemos las descripciones fijadas por el usuario
+    return Database.refFirestoreFixedDescriptions(idAccount:homeController.getProfileAccountSelected.id).get().then((value) {
+      List<String> list = [];
+      for (var element in value.docs) {
+        list.add(element['description'] as String);
+      }
+      return list;
+    });
+    
+  }
+  void startCashRegister({required String description,required double initialCash,required double expectedBalance}){   
+    // inicializa nueva caja
+    //
+    if(description==''){description=(homeController.listCashRegister.length+1).toString();}
+    // set
+    String uniqueId = Publications.generateUid(); // genera un id unico
+    homeController.cashRegisterActive.id=uniqueId; // asigna el id unico a la caja
+    homeController.cashRegisterActive.description=description; // asigna la descripcion a la caja 
+    homeController.cashRegisterActive.initialCash = initialCash; // asigna el dinero inicial a la caja
+    homeController.cashRegisterActive.expectedBalance += expectedBalance;  // asigna el dinero esperado a la caja al iniciar
+    cashRegisterLocalSave(); // guarda el id de la caja en el dispositivo
+    // firebase : guarda un documento de la caja registradora
+    Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(uniqueId).set(homeController.cashRegisterActive.toJson());
+    update(); // actualiza la vista
+  }  
+  void closeCashRegisterDefault() {
+    // cierre de la caja seleccionada
+    homeController.cashRegisterActive.closure = DateTime.now(); // asigna la fecha de cierre
+    homeController.cashRegisterActive.expectedBalance = homeController.cashRegisterActive.getExpectedBalance; // actualizamos el balance de la caja actual 
+    // firebase : guardamos un copia del documento de la caja en la colección de cajas cerradas
+    Database.refFirestoreRecords(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegisterActive.id).set(homeController.cashRegisterActive.toJson());
+    // firebase : eliminamos el documento de la caja de la colección de cajas abiertas
+    Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegisterActive.id).delete();
+    // default values
+    homeController.cashRegisterActive = CashRegister.initialData();
+    update();
+  }
+  void cashRegisterOutFlow({required double amount,String description = ''}){
+    // egreso de dinero al flujo de caja
+    //
+    // firebase
+    FirebaseFirestore  firebaseFirestoreInstance  = FirebaseFirestore.instance;
+    firebaseFirestoreInstance.runTransaction((transaction) async {
+      // Obtiene el documento actual
+      DocumentReference documentRef = Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegisterActive.id);
+      // creamos una transacción de firebase 
+      DocumentSnapshot snapshot = await transaction.get(documentRef);
+      // Verifica si el documento existe y contiene un campo 'numero'
+      if (snapshot.exists) {
+        // Crea una instancia de la clase CashRegister a partir de los datos del documento
+        CashRegister cashRegister = CashRegister.fromMap(snapshot.data() as Map<String, dynamic>);
+        // incrementa el valor total de los ingresos
+        cashRegister.cashOutFlow += amount;
+        // agregamos el registro del ingreso
+        cashRegister.cashOutFlowList.add(CashFlow(id: const Uuid().v4(),userId: homeController.getIdAccountSelected,description: description,amount: amount,date: DateTime.now(),).toJson());
+        // Actualiza el valor del número en el documento
+        transaction.update(documentRef, cashRegister.toJson());
+      }
+    }); 
+  }
+  void cashRegisterInFlow({required double amount,String description = ''}){
+    // ingreso de dinero al flujo de caja 
+    //
+    // firebase
+    FirebaseFirestore  firebaseFirestoreInstance  = FirebaseFirestore.instance;
+    firebaseFirestoreInstance.runTransaction((transaction) async {
+      // Obtiene el documento actual
+      DocumentReference documentRef = Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegisterActive.id);
+      // creamos una transacción de firebase 
+      DocumentSnapshot snapshot = await transaction.get(documentRef);
+      // Verifica si el documento existe y contiene un campo 'numero'
+      if (snapshot.exists) {
+        // Crea una instancia de la clase CashRegister a partir de los datos del documento
+        CashRegister cashRegister = CashRegister.fromMap(snapshot.data() as Map<String, dynamic>);
+        // incrementa el valor total de los ingresos
+        cashRegister.cashInFlow += amount;
+        // agregamos el registro del ingreso
+        cashRegister.cashInFlowList.add(CashFlow(id: const Uuid().v4(),description: description,userId: homeController.getIdAccountSelected,amount: amount,date: DateTime.now(),).toJson());
+        // Actualiza el valor del número en el documento
+        transaction.update(documentRef, cashRegister.toJson());
+      }
+    }); 
+  } 
+  void cashRegisterSetTransaction({required double amount,double discount = 0.0 }){
+    // incrementar monto de transaccion de caja
+    //
+    // firebase
+    if(homeController.cashRegisterActive.id!=''){
+      FirebaseFirestore  firebaseFirestoreInstance  = FirebaseFirestore.instance;
+      firebaseFirestoreInstance.runTransaction((transaction) async {
+        // Obtiene el documento actual
+        DocumentReference documentRef = Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegisterActive.id);
+        // creamos una transacción de firebase 
+        DocumentSnapshot snapshot = await transaction.get(documentRef);
+        // Verifica si el documento existe y contiene un campo 'numero'
+        if (snapshot.exists) {
+          // Crea una instancia de la clase CashRegister a partir de los datos del documento
+          CashRegister cashRegister = CashRegister.fromMap(snapshot.data() as Map<String, dynamic>);
+          // incrementa el valor total de la facturacion de la caja
+          cashRegister.billing += amount; 
+          // incrementa el valor si es que existe un descuento
+          cashRegister.discount += discount;
+          // incrementa el valor de las ventas de la caja
+          cashRegister.sales ++;
+          // Actualiza el valor del número en el documento
+          transaction.update(documentRef, cashRegister.toJson());
+        }
+      }); 
+    }
+  } 
+
+  void cashRegisterLocalSave()async{  await GetStorage().write('cashRegisterID', homeController.cashRegisterActive.id);}
+  void upgradeCashRegister({required String id})async{
+    await homeController.upgradeCashRegister(id: id);
+    cashRegisterLocalSave();
+    update();
+  }
+  List get getListCashRegister => homeController.listCashRegister; 
+  
+
+  // others controllers // 
   late AnimationController floatingActionButtonAnimateController;
   late AnimationController newProductSelectedAnimationController;
-
   void animateAdd({bool itemListAnimated=true }){
     try{
       if(itemListAnimated){newProductSelectedAnimationController.repeat();}
@@ -35,14 +167,14 @@ class SalesController extends GetxController {
     floatingActionButtonAnimateController.repeat();
   }
 
-  // productos seleccionados recientemente
+  // productos seleccionados recientemente  //
   List<ProductCatalogue> get getRecentlySelectedProductsList => homeController.getProductsOutstandingList;
 
   // efecto de sonido para escaner
   void playSoundScan() async {AudioCache cache = AudioCache();cache.load("soundBip.mp3");}
 
-  // text field controllers
-  final TextEditingController textEditingControllerAddFlashPrice = TextEditingController();
+  // text field controllers 
+  final MoneyMaskedTextController textEditingControllerAddFlashPrice = MoneyMaskedTextController(leftSymbol: '\$',decimalSeparator: ',',thousandSeparator: '.',precision:2);
   final TextEditingController textEditingControllerAddFlashDescription =TextEditingController();
   final TextEditingController textEditingControllerTicketMount =TextEditingController();
 
@@ -50,61 +182,73 @@ class SalesController extends GetxController {
   XFile _xFileImageCaptureBarCode = XFile('');
   set setXFileImage(XFile value) => _xFileImageCaptureBarCode = value;
   XFile get getXFileImage => _xFileImageCaptureBarCode;
+ 
+  // Seleccionados : lista de porductos seleccionados por el usuario para la venta  
+  void addProductsSelected({required ProductCatalogue product}) { 
+    ///setIdProductSelected = product.id;
+    getTicket.addProduct(product: product);
+    update();
+  } 
+  // id del producto de la lista de productos seleccionados
+  String idProductSelected = '';
+  String get getIdProductSelected => idProductSelected;
+  set setIdProductSelected(String value) {
+    idProductSelected = value;
+    update();
+  }
 
-  // list : lista de productos seleccionados por el usaurio para la venta
-  List get getListProductsSelested => homeController.listProductsSelected;
-  set setListProductsSelected(List value) => homeController.listProductsSelected = value;
-  void addProductsSelected({required ProductCatalogue product}) {
-    product.quantity = 1;
-    product.select = false;
-    homeController.listProductsSelected.add(product);
-    update();
-  }
-  //  list : lista de productos seleccionados por el usaurio para la venta
-  set removeProduct(String id) {
-    List newList = [];
-    for (ProductCatalogue product in homeController.listProductsSelected) {
-      if (product.id != id) {newList.add(product);}
-    }
-    setListProductsSelected = newList;
-    update();
-  }
   //  list : lista de productos seleccionados por el usaurio para la venta
   int get getListProductsSelestedLength {
     int count = 0;
-    for (ProductCatalogue element in getListProductsSelested) {
-      count += element.quantity;
+    for (var element in getTicket.listPoduct) {
+      ProductCatalogue product = ProductCatalogue.fromMap(element); 
+      count += product.quantity;
     }
     return count;
   }
-
-  // cash Register Number : obtenemos la caja seleccionada por el usuario en el dispositivo que es actualmente utilizada
-  int cashRegisterNumber=1;
-  void getCashRegisterNumber(){
-    cashRegisterNumber = GetStorage().read('cashRegisterNumber') ?? 1; 
+ 
+  // ticket : ticket de la ultima venta
+  TicketModel _lastTicket = TicketModel(creation: Timestamp.now(), listPoduct: []);
+  TicketModel get getLastTicket => _lastTicket;
+  set setLastTicket(TicketModel value){
+    _lastTicket = value; 
   }
-  //  cash Register Number : obtenemos la caja seleccionada por el usuario en el dispositivo que es actualmente utilizada
-  void setCashRegisterNumber({required int number})async{
-    cashRegisterNumber=number;
-    await GetStorage().write('cashRegisterNumber', number);
-    update();
-    
-  }
-
-  // ticket
+  // ticket : ticket de venta actual
   TicketModel ticket = TicketModel(creation: Timestamp.now(), listPoduct: []);
   TicketModel get getTicket => ticket;
-  set setTicket(TicketModel value) => ticket = value;
+  set setTicket(TicketModel value){
+    ticket = value;
+  }
   set setPayModeTicket(String value) {
     ticket.payMode = value;
+    update();
+  }
+  // discount
+  // get : obtiene el descuento formateado si es que existe un valor distinto a 0.0
+  String get getDiscount {
+    if (ticket.discount != 0.0) {
+      // devolver el descuento formateado 'Descuento:(30%) $ 100'
+      // var 
+      int porcent = ((ticket.discount * 100) / getTicket.getTotalPrice).round().toInt(); 
+
+      return 'Descuento:(${(porcent).toStringAsFixed(0)}%) ${Publications.getFormatoPrecio(monto:ticket.discount)}';
+    } else {
+      return '';
+    }
+  } 
+  set setDiscount(double value) {
+    ticket.discount = value;
+    update();
+  }
+  void clearDiscount() {
+    ticket.discount = 0.0;
     update();
   }
 
   // state cofirnm purchase ticket view
   final RxBool _stateConfirmPurchase = false.obs;
   bool get getStateConfirmPurchase => _stateConfirmPurchase.value;
-  set setStateConfirmPurchase(bool value) =>
-      _stateConfirmPurchase.value = value;
+  set setStateConfirmPurchase(bool value) => _stateConfirmPurchase.value = value;
 
   // state ticket view
   final RxBool _ticketView = false.obs;
@@ -116,117 +260,48 @@ class SalesController extends GetxController {
   double get getValueReceivedTicket => _valueReceivedTicket.value;
   set setValueReceivedTicket(double value) {_valueReceivedTicket.value = value; }
 
-
-  @override
-  void onInit() async {
-    super.onInit(); 
-    getCashRegisterNumber();
-
-    // esperamos un momento 
-    await Future.delayed( const Duration(milliseconds: 700),() {
-      // mostramos la guía del usuario
-      homeController.showTutorial(targetFocus: [homeController.buttonAddItemFlashTargetFocus],next: showDialogQuickSale ); // mostramos la guía del usuario
-    },);
-    
-
-
-  }
+ 
   @override
   void onClose() {
     textEditingControllerAddFlashDescription.dispose();
     textEditingControllerAddFlashPrice.dispose();
     textEditingControllerTicketMount.dispose();
+    super.dispose();
   }
 
 
   // FIREBASE
- 
-  Future<void> save({required ProductCatalogue product}) async {
-    //  fuction : comprobamos los datos necesarios para proceder publicar el producto
-    
-    // actualización de la imagen del producto si existe una imagen nueva
-    if (getXFileImage.path != '') {
-      // image - Si el "path" es distinto '' quiere decir que ahi una nueva imagen para actualizar
-      // si es asi procede a guardar la imagen en la base de la app
-      Reference ref = Database.referenceStorageProductPublic(id: product.id); // obtenemos la referencia en el storage
-      UploadTask uploadTask = ref.putFile(File(getXFileImage.path)); // cargamos la imagen
-      await uploadTask; // esperamos a que se suba la imagen 
-      await ref.getDownloadURL().then((value) => product.image = value); // obtenemos la url de la imagen
-    }
-
-    // Registra el precio en una colección publica
-    Price precio = Price(
-      id: homeController.getProfileAccountSelected.id,
-      idAccount: homeController.getProfileAccountSelected.id,
-      imageAccount: homeController.getProfileAccountSelected.image,
-      nameAccount: homeController.getProfileAccountSelected.name,
-      price: product.salePrice,
-      currencySign: product.currencySign,
-      province: homeController.getProfileAccountSelected.province,
-      town: homeController.getProfileAccountSelected.town,
-      time: Timestamp.fromDate(DateTime.now()),
-    );
-    // Firebase set : se guarda un documento con la referencia del precio del producto
-    Database.refFirestoreRegisterPrice(idProducto: product.id, isoPAis: 'ARG').doc(precio.id).set(precio.toJson());
-    // Firebase set : se guarda un documento con la referencia del producto en el cátalogo de la cuenta
-    Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(product.id).set(product.toJson());
-
-    setProductPublicFirestore(product: product.convertProductoDefault(),isNew: true);
-
-  }
-  void setProductPublicFirestore({required Product product,required bool isNew})  {
-    // esta función procede a guardar el documento de una colleción publica
-    
-    //  set : id de la cuenta desde la cual se creo el producto
-    product.idAccount = homeController.getProfileAccountSelected.id; 
-    //  set : marca de tiempo que se creo el documenti por primera vez
-    if(isNew) { product.creation = Timestamp.fromDate(DateTime.now()); } 
-    //  set : marca de tiempo que se actualizo el documenti
-    product.upgrade = Timestamp.fromDate(DateTime.now());
-    //  set : id del usuario que creo el documentoi 
-    if(isNew) { product.idUserCreation = homeController.getProfileAdminUser.email;}
-    //  set : id del usuario que actualizo el documento
-    product.idUserUpgrade = homeController.getProfileAdminUser.email;
-
-    // set firestore - save product public
-    if(isNew){
-      Database.refFirestoreProductPublic().doc(product.id).set(product.toJson());
-    }else{
-      Database.refFirestoreProductPublic().doc(product.id).update(product.toJson());
-    }
-  }
-
+  
   void registerTransaction() {
 
     // Procederemos a guardar un documento con la transacción
 
-    // get values 
-    var id = Publications.generateUid(); // generate id
-    List listIdsProducts = [];
+    // get values    
 
-    for (var element in getListProductsSelested) {
-      // generamos una nueva lista con los id de los productos seleccionados
-      listIdsProducts.add(element.toJson());
-    }
+    // set  : asignamos el ticket a la variable que recibe el ticket
+    setLastTicket = TicketModel.fromMap(getTicket.toJson()); 
     //  set values
-    getTicket.cashRegister = cashRegisterNumber.toString();
-    getTicket.id = id;
-    getTicket.seller = homeController.getUserAuth.email!;
-    getTicket.listPoduct = listIdsProducts;
-    getTicket.priceTotal = getCountPriceTotal();
-    getTicket.valueReceived = getValueReceivedTicket;
+    getTicket.id = Publications.generateUid(); // generate id  
+    getTicket.cashRegisterName = homeController.cashRegisterActive.description.toString(); // nombre de la caja registradora
+    getTicket.cashRegisterId = homeController.cashRegisterActive.id; // id de la caja registradora
+    getTicket.seller = homeController.getUserAuth.email!; 
+    getTicket.priceTotal = getTicket.getTotalPrice;
+    getTicket.valueReceived = getValueReceivedTicket; 
     getTicket.creation = Timestamp.now();
+
+    // registramos el monto en caja
+    cashRegisterSetTransaction(amount: getTicket.priceTotal,discount: getTicket.discount);
     
     // set firestore : guarda la transacción
     Database.refFirestoretransactions(idAccount: homeController.getIdAccountSelected).doc(getTicket.id).set(getTicket.toJson());
-    for (Map element in listIdsProducts) {
-
-      // obtenemos el objeto
-      ProductCatalogue product = ProductCatalogue.fromMap(element);
+    
+    for (dynamic data in getTicket.listPoduct) { 
+      // obj
+      ProductCatalogue product = ProductCatalogue.fromMap(data as Map<String, dynamic>);
 
       // set firestore : hace un incremento en el valor sales'ventas'  del producto
       Database.dbProductStockSalesIncrement(idAccount: homeController.getIdAccountSelected,idProduct: product.id,quantity: product.quantity );
-      // set firestore : hace un descremento en el valor 'stock' del producto
+      // set firestore : hace un descremento en el valor 'stock' del producto si es que tiene stock habilitado
       if (product.stock) {
         // set firestore : hace un descremento en el valor 'stock'
         Database.dbProductStockDecrement(idAccount: homeController.getIdAccountSelected,idProduct: product.id,quantity: product.quantity);
@@ -234,171 +309,18 @@ class SalesController extends GetxController {
     }
   }
 
-  // FUCTIONS
-
-
-
+  // FUCTIONS 
+  
   void showSeach({required BuildContext context}) {
-    // Busca entre los productos de mi catálogo
-
-
-    // styles
-    final Color primaryTextColor  = Get.isDarkMode?Colors.white70:Colors.black87;
-    final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
-    // widgets
-    final Widget dividerCircle = Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child: Icon(Icons.circle,size: 4, color: primaryTextColor.withOpacity(0.5)));
- 
-
+    // Busca entre los productos de mi catálogo 
     showSearch(
       context: context,
-      delegate: SearchPage<ProductCatalogue>(
-        items: homeController.getCataloProducts,
-        searchLabel: 'Buscar',
-        searchStyle: TextStyle(color: primaryTextColor),
-        barTheme: Get.theme.copyWith(hintColor: primaryTextColor, highlightColor: primaryTextColor,inputDecorationTheme: const InputDecorationTheme(filled: false)),
-        suggestion: const Center(child: Text('ej. alfajor')),
-        failure: const Center(child: Text('No se encontro en tu cátalogo:(')),
-        filter: (product) => [product.description, product.nameMark,product.code],
-        builder: (product) {
-
-          // values
-          String alertStockText =product.stock ? (product.quantityStock == 0 ? 'Sin stock' : '${product.quantityStock} en stock') : '';
-          
-          return Column(
-          children: [
-            InkWell(
-              onTap: () {
-                selectedProduct(item: product);
-                Get.back();
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    // image
-                    ImageAvatarApp(url: product.image,size: 75,favorite:product.favorite),
-                    // text : datos del producto
-                    Flexible(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal:12),
-                        child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(product.description,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(fontWeight: FontWeight.w500)),
-                          product.nameMark==''?Container():Text(product.nameMark,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(color: Colors.blue)),
-                          Wrap(
-                            crossAxisAlignment: WrapCrossAlignment.start,
-                            direction: Axis.horizontal,
-                            children: <Widget>[
-                              // text : code
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    dividerCircle,
-                                    Text(product.code,style: textStyleSecundary),
-                                  ],
-                                ),
-                                // favorite
-                                product.favorite?Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    dividerCircle,
-                                    Text('Favorito',style: textStyleSecundary),
-                                  ],
-                                ):Container(),
-                              //  text : alert stock
-                                alertStockText != ''?Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    dividerCircle,
-                                    Text(alertStockText,style: textStyleSecundary),
-                                  ],
-                                ):Container(),
-                            ],
-                          ),
-                                  
-                        ],
-                                      ),
-                      ),
-                    ),
-                    // text : precio
-                    Text(Publications.getFormatoPrecio(monto: product.salePrice),style: const  TextStyle(fontSize: 18,fontWeight: FontWeight.w300),)
-                  ],
-                ),
-              ),
-            ), 
-          ComponentApp().divider(), 
-          ],
-        );
-        },
-      ),
+      delegate: CustomSearchDelegate(items: homeController.getCataloProducts),
     );
+
   }
   
-
-  void selectedProduct({required ProductCatalogue item}) {
-    // agregamos un nuevo producto a la venta
-
-  // verificamos si se trata de un código existente
-    if (item.code == '') {
-      addProductsSelected(product: item);
-    } else {
-      // verifica si el ID del producto esta en la lista de seleccionados
-      bool coincidence = false;
-      for (ProductCatalogue product in getListProductsSelested) {
-        if (product.id == item.id) {
-          product.quantity++;
-          coincidence = true;
-          update();
-          animateAdd(itemListAnimated: false);
-        }
-      }
-      // si no hay coincidencia
-      if (coincidence == false) {
-        verifyExistenceInCatalogue(id: item.id);
-      }
-    }
-  }
-
-  void verifyExistenceInSelectedScanResult({required String id}) {
-    // primero se verifica si el producto esta en la lista de productos seleccionados
-    bool coincidence = false;
-    for (ProductCatalogue product in getListProductsSelested) {
-      if (product.id == id) {
-        // este producto esta selccionado
-        product.quantity++;
-        coincidence = true;
-        update();
-        animateAdd();
-      }
-    }
-    // si no hay coincidencia verificamos si esta en el cátalogo de productos de la cuenta
-    if (coincidence == false) {
-      verifyExistenceInCatalogue(id: id);
-    }
-  }
-
-  void verifyExistenceInCatalogue({required String id}) {
-    // verificamos si el producto esta en el catálogo de productos de la cuenta
-    bool coincidence = false;
-    for (ProductCatalogue product in homeController.getCataloProducts) {
-      // si el producto se encuentra en el cátalgo de la cuenta se agrega a la lista de productos seleccionados
-      if (product.id == id) {
-        coincidence = true;
-        addProductsSelected(product: product);
-        update();
-        animateAdd();
-      }
-    }
-    // si el producto no se encuentra en el cátalogo de la cuenta se va consultar en la base de datos de productos publicos
-    if (coincidence == false) {
-      queryProductDbPublic(id: id);
-    }
-  }
-
-  Future<void> scanBarcodeNormal() async {
+  Future<void>  scanBarcodeNormal() async {  
     // Escanner Code - Abre en pantalla completa la camara para escanear el código
     try {
       late String barcodeScanRes;
@@ -408,28 +330,99 @@ class SalesController extends GetxController {
         true,
         ScanMode.BARCODE,
       );
-      if(barcodeScanRes == '-1'){return;}
+      if(barcodeScanRes == '-1'){ return;}
+      // sound
       playSoundScan();
-      verifyExistenceInSelectedScanResult(id: barcodeScanRes);
+      // verifica el código de barra
+      verifyExistenceInSelectedScanResult(id:barcodeScanRes);
     } on PlatformException {
       Get.snackbar('scanBarcode', 'Failed to get platform version');
+    }
+  }
+
+  void selectedProduct({required ProductCatalogue item}) { 
+    // agregamos un nuevo producto a la venta
+
+  // verificamos si se trata de un código existente
+    if (item.code == '') {
+      addProductsSelected(product: item);
+    } else {
+      // verifica si el ID del producto esta en la lista de seleccionados
+      bool coincidence = false;
+      for (var i = 0; i < getTicket.listPoduct.length; i++) {  
+        if (getTicket.listPoduct[i]['id'] == item.id) {
+          getTicket.listPoduct[i]['quantity']++;
+          coincidence = true;
+          update();
+          animateAdd(itemListAnimated: false);
+        }
+      }
+      // condition : si no hay coincidencia
+      if (!coincidence) {
+        // verifica si el producto esta en el catálogo de la cuenta
+        verifyExistenceInCatalogue(id: item.id);
+      }
+    }
+  }
+
+  void verifyExistenceInSelectedScanResult({required String id}) {
+    // primero se verifica si el producto esta en la lista de productos seleccionados
+    bool coincidence = false; 
+    for (var item in getTicket.listPoduct) {
+      ProductCatalogue product = ProductCatalogue.fromMap(item);
+      if (product.id == id) {
+        // este producto esta selccionado
+        getTicket.addProduct(product: product); 
+        coincidence = true;
+        update();
+        animateAdd();
+      }
+    }
+    
+    if (coincidence == false) {
+      // el producto no esta en la lista de productos seleccionados del ticket
+      verifyExistenceInCatalogue(id: id);
+    }
+  }
+
+  void verifyExistenceInCatalogue({required String id}) {
+    // verificamos si el producto esta en el catálogo de productos de la cuenta
+    bool coincidence = false;
+    final listCatalogue =  homeController.getCataloProducts..toList();
+    for (final ProductCatalogue product in listCatalogue) {
+      // si el producto se encuentra en el cátalgo de la cuenta se agrega a la lista de productos seleccionados
+      if (product.id == id) {
+        coincidence = true;
+        addProductsSelected(product: product); 
+        animateAdd();
+      }
+    }
+    // si el producto no se encuentra en el cátalogo de la cuenta se va consultar en la base de datos de productos publicos
+    if (coincidence == false) {
+      queryProductDbPublic(id: id);
     }
   }
 
   void queryProductDbPublic({required String id}) {
     // consulta el código existe en la base de datos de productos publicos
     if (id != '') {
+      // firebase
+      Future<DocumentSnapshot<Map<String, dynamic>>> documentSnapshot = Database.readProductPublicFuture(id: id);
       // query
-      Database.readProductPublicFuture(id: id).then((value) { 
+      documentSnapshot.then((value) { 
 
+        // get : product
+        ProductCatalogue product = ProductCatalogue.fromMap(value.data() as Map);
+        // set : marca de tiempo
+        product.upgrade = Timestamp.now();
         // show dialog
-        showDialogAddProductNew(productCatalogue: ProductCatalogue.fromMap(value.data() as Map));
+        showDialogAddProductNew(productCatalogue:product);
       
       }).onError((error, stackTrace) { 
         // no se encontro el producto en la base de datos
         //
         // dialog : agregar producto nuevo
-        showDialogAddProductNew(productCatalogue: ProductCatalogue(id: id,code: id, creation: Timestamp.now(), documentCreation: Timestamp.now(), upgrade: Timestamp.now(), documentUpgrade: Timestamp.now()));
+        showDialogAddProductNew(productCatalogue: ProductCatalogue(id: id,description:'',code: id, creation: Timestamp.now(), documentCreation: Timestamp.now(), upgrade: Timestamp.now(), documentUpgrade: Timestamp.now()));
       }).catchError((error) {
         // error al consultar db
         Get.snackbar('ah ocurrido algo', 'Fallo el escaneo');
@@ -449,51 +442,26 @@ class SalesController extends GetxController {
 
   void cleanTicket() {
     setTicket = TicketModel(creation: Timestamp.now(), listPoduct: []);
-    setListProductsSelected = [];
+    getTicket.listPoduct = [];
     setTicketView = false;
     update();
     Get.back();
-  }
-
-  void selectedItem({required String id}) {
-
-    // seleccionamos el producto 
-    for (ProductCatalogue element in getListProductsSelested) {
-      if (element.id == id) {
-        element.select = true;
-      } else {
-        element.select = false;
-      }
-    }
-    update();
-  }
-
-  double getCountPriceTotal() {
-    double total = 0.0;
-    for (var element in getListProductsSelested) {
-      total = total + (element.salePrice * element.quantity);
-    }
-    return total;
-  }
+  } 
 
   void addSaleFlash() {
     // generate new ID
     var id = Publications.generateUid();
     // var
-    String valuePrice = textEditingControllerAddFlashPrice.text;
+    double  valuePrice = textEditingControllerAddFlashPrice.numberValue;
     String valueDescription = textEditingControllerAddFlashDescription.text;
 
-    if (valuePrice != '') {
-      if (double.parse(valuePrice) != 0) {
-        addProductsSelected(product: ProductCatalogue(id: id,description: valueDescription,salePrice: double.parse(textEditingControllerAddFlashPrice.text),creation: Timestamp.now(),upgrade: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now()));
-        textEditingControllerAddFlashPrice.text = '';
-        update();
-        Get.back();
-      } else {
-        showMessageAlertApp(title: '😔No se puedo agregar 😔',message: 'Debe ingresar un valor distinto a 0');
-      }
+    if (valuePrice != 0) {
+      textEditingControllerAddFlashPrice.clear();
+      textEditingControllerAddFlashDescription.clear;
+      addProductsSelected(product: ProductCatalogue(id: id,description: valueDescription,salePrice: valuePrice,creation: Timestamp.now(),upgrade: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now()));
+      Get.back();
     } else {
-      showMessageAlertApp(title: '😔', message: 'Debe ingresar un valor valido');
+      ComponentApp().showMessageAlertApp(title: '😔No se puedo agregar 😔',message: 'Debe ingresar un valor distinto a 0');
     }
   }
 
@@ -501,7 +469,7 @@ class SalesController extends GetxController {
 
     // text format : devuelte un texto formateado del monto del cambio que tiene que recibir el cliente
     if (getValueReceivedTicket == 0.0) {return Publications.getFormatoPrecio(monto: 0);}
-    double result = getValueReceivedTicket - getCountPriceTotal();
+    double result = getValueReceivedTicket - getTicket.getTotalPrice;
     return Publications.getFormatoPrecio(monto: result);
   }
   String getValueReceived() {
@@ -510,23 +478,16 @@ class SalesController extends GetxController {
   }
 
   void confirmedPurchase() {
+    //
+    // el [Usuario] procede a confirmar la venta del ticket 
+    //
 
     // condition : registramos la venta si el usuario esta logueado
-    if(homeController.getUserAnonymous == false){registerTransaction(); } 
+    if(homeController.getUserAnonymous == false){
+      registerTransaction();
+    }  
     // el usuario confirmo su venta
-    setStateConfirmPurchase = true;
-    // mostramos una vista 'confirm purchase' por 2 segundos
-    Future.delayed(
-      const Duration(milliseconds: 1300),
-      () {
-        // fdefault values
-        setListProductsSelected = [];
-        setTicket = TicketModel(creation: Timestamp.now(), listPoduct: []);
-        //views
-        setStateConfirmPurchase = false;
-        setTicketView = false;
-      },
-    );
+    setStateConfirmPurchase = true;  
   }
 
   void showDialogAddProductNew({ required ProductCatalogue productCatalogue}) {
@@ -541,20 +502,43 @@ class SalesController extends GetxController {
     ); 
   }
 
+  
+  void showDialogAddDiscount() {
+
+    // dialog : añadir descuento al ticket 
+    
+     // creamos un dialog con GetX
+    Get.dialog(
+      const ClipRRect(
+        borderRadius: BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12), bottomLeft: Radius.circular(0), bottomRight: Radius.circular(0)),
+        child: ViewAddDiscount(),
+      ),
+    ); 
+  }
   void showDialogQuickSale( ) {
     // Dialog view : Hacer una venta rapida 
 
     //var
-    final FocusNode myFocusNode = FocusNode();
-    final ButtonStyle buttonStyle = ButtonStyle(padding: MaterialStateProperty.all(const EdgeInsets.all(12)));
+    final FocusNode myFocusNode = FocusNode(); 
 
+    // style
+    final Color colorAccent = Get.isDarkMode?Colors.white:Colors.black; 
     // widgets
     Widget content = Scaffold(
+      backgroundColor: Get.context!.theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Venta rapida'), 
+        actions: [
+          IconButton(
+            onPressed: () {
+              textEditingControllerAddFlashPrice.text = '';Get.back();
+            },
+            icon: const Icon(Icons.close_rounded),
+          ),
+        ],
         automaticallyImplyLeading: false,
         ),
-        body: Column(
+        body: Column( 
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 24),
@@ -571,9 +555,11 @@ class SalesController extends GetxController {
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp('[1234567890]'))
                       ],
-                      decoration: const InputDecoration( 
-                        hintText: '\$',
-                        labelText: "Escribe el precio",
+                      decoration: InputDecoration(  
+                        labelText: "Precio",
+                        prefixIcon: const Icon(Icons.attach_money_rounded), 
+                        border: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent)),
+                        enabledBorder: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent), )
                       ),
                       style: const TextStyle(fontSize: 20.0),
                       textInputAction: TextInputAction.next,
@@ -587,71 +573,37 @@ class SalesController extends GetxController {
                       focusNode: myFocusNode,
                       autofocus: false,
                       controller: textEditingControllerAddFlashDescription,
-                      decoration: const InputDecoration( 
-                        labelText: "Descripción (opcional)"),
+                      decoration: InputDecoration( 
+                        labelText: "Descripción (opcional)",
+                        border: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent)),
+                        enabledBorder: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent), )
+                        ),
                       textInputAction: TextInputAction.done,
                       onSubmitted: (value) {
                         addSaleFlash();
-                        textEditingControllerAddFlashPrice.text = '';
+                        textEditingControllerAddFlashPrice.clear();
                       },
                     ),
                   ),
                 ],
               ),
             ),
-            const Spacer(),
-            // buttons
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                TextButton(style:  buttonStyle,onPressed: () {textEditingControllerAddFlashPrice.text = '';Get.back();}, child: const Text('Cancelar',textAlign: TextAlign.center)),
-                TextButton(style:  buttonStyle,onPressed: () {
-                  addSaleFlash();textEditingControllerAddFlashPrice.text = '';
-                  // mostramos la guía del usuario
-                  homeController.showTutorial(targetFocus:[homeController.buttonAddProductTargetFocus],next:(){
-                    selectedProduct(item: homeController.getProductsOutstandingList[0]);
-                    homeController.showTutorial(targetFocus: [homeController.buttonRegisterTransactionTargetFocus],next:(){
-                       setTicketView = true;
-
-                       // sleep 1 second
-                        Future.delayed(
-                          const Duration(milliseconds: 300),
-                          () {
-
-                            // mostramos la guía del usuario si el usuario no ha visto la guía de usuario de la pantalla de ventas
-                            homeController.showTutorial(targetFocus: [homeController.buttonsOptionsPaymentMethodTargetFocus],next:(){ 
-                              setPayModeTicket = 'mercadopago'; 
-                              // mostramos la siguiente guía de usuario si el usuario no ha visto la guía de usuario de la pantalla de ventas
-                              homeController.showTutorial(targetFocus: [homeController.buttonsConfirmTransactionTargetFocus],next:() async { 
-                                // confirmamos la venta
-                                confirmedPurchase(); 
-                                // esperar un momento
-                                await Future.delayed(const Duration(milliseconds: 500));
-                                // mostramos la siguiente guía de usuario si el usuario no ha visto la guía de usuario de la pantalla de ventas
-                                homeController.showTutorial(
-                                  targetFocus: [homeController.buttonsScanCodeBarTargetFocusGuideUX],
-                                  next:()async{ 
-                                    // mostramos la siguiente guía de usuario si el usuario no ha visto la guía de usuario de la pantalla de ventas
-                                    homeController.showTutorial(
-                                      targetFocus: [homeController.buttonsNumCajaTargetFocusGuideUX],
-                                      next:(){
-                                        // final de la guia de usuari0
-                                        homeController.disableSalesUserGuide();
-                                        
-                                      },
-                                      alignSkip: Alignment.topRight );
-                                  },
-                                  alignSkip: Alignment.topRight );
-                              },alignSkip: Alignment.topRight );
-
-                              },alignSkip: Alignment.topRight );
-                          }); // mostramos la guía del usuario
-                       
-                       },alignSkip: Alignment.topRight );
-                    } ,alignSkip: Alignment.bottomLeft); // mostramos la guía del usuario
-                  }, child: const Text('Agregar',textAlign: TextAlign.center)),
-              ],
-            ),
+            const Spacer(), 
+            // buttons 
+            SizedBox(
+              width: double.infinity,
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: ComponentApp().button( 
+                  text: 'Agregar',
+                  onPressed: () {
+                    addSaleFlash();
+                    textEditingControllerAddFlashPrice.clear(); 
+                    },
+                    
+                    ),
+              ),
+            )
           ],
         ),
     );
@@ -685,131 +637,124 @@ class SalesController extends GetxController {
                 //var
                 double valueReceived = textEditingControllerTicketMount.text == '' ? 0.0 : double.parse(textEditingControllerTicketMount.text);
                 // condition : verificar si el usaurio ingreso un monto valido y que sea mayor al monto total del ticket
-                if (valueReceived >= getCountPriceTotal() &&
+                if (valueReceived >= getTicket.getTotalPrice &&
                     textEditingControllerTicketMount.text != '') {
                       setValueReceivedTicket = valueReceived;
                       textEditingControllerTicketMount.text = '';
                       setPayModeTicket = 'effective';
                       Get.back();
                 } else {
-                  showMessageAlertApp( title: '😔', message: 'Tiene que ingresar un monto valido');
+                  ComponentApp().showMessageAlertApp( title: '😔', message: 'Tiene que ingresar un monto valido');
                 }
               },
               child: const Text('aceptar')),
         ),
-        content: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20, left: 12, right: 12),
-                child: Wrap(
-                  //mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TextButton(
-                        onPressed: getCountPriceTotal() > 100
-                            ? null
-                            : () {
-                                setPayModeTicket = 'effective';
-                                setValueReceivedTicket = 100;
-                                Get.back();
-                              },
-                        child:
-                            const Text('100', style: TextStyle(fontSize: 24))),
-                    TextButton(
-                        onPressed: getCountPriceTotal() > 200
-                            ? null
-                            : () {
-                                setPayModeTicket = 'effective';
-                                setValueReceivedTicket = 200;
-                                Get.back();
-                              },
-                        child:
-                            const Text('200', style: TextStyle(fontSize: 24))),
-                    TextButton(
-                        onPressed: getCountPriceTotal() > 500
-                            ? null
-                            : () {
-                                setPayModeTicket = 'effective';
-                                setValueReceivedTicket = 500;
-                                Get.back();
-                              },
-                        child:
-                            const Text('500', style: TextStyle(fontSize: 24))),
-                    TextButton(
-                        onPressed: getCountPriceTotal() > 1000 
-                          ? null
-                            : () {
-                                setPayModeTicket = 'effective';
-                                setValueReceivedTicket = 1000;
-                                Get.back();
-                              },
-                        child:const Text('1000', style: TextStyle(fontSize: 24))
-                    ),
-                    TextButton(
-                        onPressed: getCountPriceTotal() > 1500 
-                          ? null
-                            : () {
-                                setPayModeTicket = 'effective';
-                                setValueReceivedTicket = 1500;
-                                Get.back();
-                              },
-                        child:const Text('1500', style: TextStyle(fontSize: 24))
-                    ),
-                    TextButton(
-                        onPressed: getCountPriceTotal() > 2000 
-                          ? null
-                            : () {
-                                setPayModeTicket = 'effective';
-                                setValueReceivedTicket = 2000;
-                                Get.back();
-                              },
-                        child:const Text('2000', style: TextStyle(fontSize: 24))
-                    ),
-
-                  ],
-                ),
-              ),
-              // mount textfield
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: TextField(
-                  autofocus: true,
-                  controller: textEditingControllerTicketMount,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: false),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp('[1234567890]'))
-                  ],
-                  decoration: const InputDecoration(
-                    hintText: '\$',
-                    labelText: "Escribe el monto",
-                  ),
-                  style: const TextStyle(fontSize: 20.0),
-                  textInputAction: TextInputAction.done,
-                  onSubmitted: (value) {
-                    //var
-                    double valueReceived = textEditingControllerTicketMount.text ==''
-                        ? 0.0
-                        : double.parse(textEditingControllerTicketMount.text);
-                    // condition : verificar si el usaurio ingreso un monto valido y que sea mayor al monto total del ticket
-                    if (valueReceived >= getCountPriceTotal() && textEditingControllerTicketMount.text != '') {
-                      setValueReceivedTicket = double.parse(textEditingControllerTicketMount.text);
-                      textEditingControllerTicketMount.text = '';
+        content: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12, left: 12, right: 12),
+              child: Wrap(
+                spacing: 5.0,
+                children: [
+                  // chip : efectivo '100'
+                  getTicket.getTotalPrice > 100 ? Container() :ChoiceChip(
+                    label: const Text('100'),
+                    selected: false,
+                    onSelected: (bool value) {
                       setPayModeTicket = 'effective';
+                      setValueReceivedTicket = 100;
                       Get.back();
-                    } else {
-                      showMessageAlertApp( title: '😔', message: 'Tiene que ingresar un monto valido');
-                    }
-                  },
-                ),
+                    },
+                  ),   
+                  // chip : efectivo '200'
+                  getTicket.getTotalPrice > 200 ? Container() :ChoiceChip(
+                    label: const Text('200'),
+                    selected: false,
+                    onSelected: (bool value) {
+                      setPayModeTicket = 'effective';
+                      setValueReceivedTicket = 200;
+                      Get.back();
+                    },
+                  ), 
+                  // chip : efectivo '500'
+                  getTicket.getTotalPrice > 500 ? Container() :ChoiceChip(
+                    label: const Text('500'),
+                    selected: false,
+                    onSelected: (bool value) {
+                      setPayModeTicket = 'effective';
+                      setValueReceivedTicket = 500;
+                      Get.back();
+                    },
+                  ), 
+                  // chip : efectivo '1000'
+                  getTicket.getTotalPrice > 1000 ? Container() :ChoiceChip(
+                    label: const Text('1000'),
+                    selected: false,
+                    onSelected: (bool value) {
+                      setPayModeTicket = 'effective';
+                      setValueReceivedTicket = 1000;
+                      Get.back();
+                    },
+                  ), 
+                  // chip : efectivo '1500'
+                  getTicket.getTotalPrice > 1500 ? Container() :ChoiceChip(
+                    label: const Text('1500'),
+                    selected: false,
+                    onSelected: (bool value) {
+                      setPayModeTicket = 'effective';
+                      setValueReceivedTicket = 1500;
+                      Get.back();
+                    },
+                  ),
+                  // chip : efectivo '2000'
+                  getTicket.getTotalPrice > 2000 ? Container() :ChoiceChip(
+                    label: const Text('2000'),
+                    selected: false,
+                    onSelected: (bool value) {
+                      setPayModeTicket = 'effective';
+                      setValueReceivedTicket = 2000;
+                      Get.back();
+                    },
+                  ), 
+                ],
               ),
-            ],
-          ),
+            ),
+            // mount textfield
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: TextField(
+                autofocus: true,
+                controller: textEditingControllerTicketMount,
+                keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp('[1234567890]'))
+                ],
+                decoration: const InputDecoration(
+                  hintText: '\$',
+                  labelText: "Escribe el monto",
+                ),
+                style: const TextStyle(fontSize: 20.0),
+                textInputAction: TextInputAction.done,
+                onSubmitted: (value) {
+                  //var
+                  double valueReceived = textEditingControllerTicketMount.text ==''
+                      ? 0.0
+                      : double.parse(textEditingControllerTicketMount.text);
+                  // condition : verificar si el usaurio ingreso un monto valido y que sea mayor al monto total del ticket
+                  if (valueReceived >= getTicket.getTotalPrice && textEditingControllerTicketMount.text != '') {
+                    setValueReceivedTicket = double.parse(textEditingControllerTicketMount.text);
+                    textEditingControllerTicketMount.text = '';
+                    setPayModeTicket = 'effective';
+                    Get.back();
+                  } else {
+                    ComponentApp().showMessageAlertApp( title: '😔', message: 'Tiene que ingresar un monto valido');
+                  }
+                },
+              ),
+            ),
+          ],
         ));
   }
-  
- 
 }
 
 //
@@ -817,7 +762,6 @@ class SalesController extends GetxController {
 // WIDGETS CLASS
 //
 //
- 
 class NewProductView extends StatefulWidget {
   
   // parametro obligatorio
@@ -829,7 +773,6 @@ class NewProductView extends StatefulWidget {
   @override
   State<NewProductView> createState() => _NewProductViewState();
 }
-
 class _NewProductViewState extends State<NewProductView> { 
 
   // Añade un constructor sin nombre a la clase
@@ -846,8 +789,8 @@ class _NewProductViewState extends State<NewProductView> {
 
   // variables
   late Color  colorAccent ;
-  late  bool isProductNew ; 
-  bool checkAddCatalogue = false; 
+  bool isProductNew = true ; 
+  bool checkAddCatalogue = true; 
   Color checkActiveColor =  Colors.blue;
   // styles
   late TextStyle hintStyle ;
@@ -859,7 +802,7 @@ class _NewProductViewState extends State<NewProductView> {
     super.initState();
 
     // set
-    isProductNew = widget.productCatalogue.description==''?true:false;
+    isProductNew = widget.productCatalogue.description=='' &&  widget.productCatalogue.salePrice==0.0 ;
     colorAccent = Get.isDarkMode?Colors.white:Colors.black;
     hintStyle = TextStyle(color: colorAccent.withOpacity(0.3));
     labelStyle = TextStyle(color: colorAccent.withOpacity(0.9));
@@ -902,6 +845,7 @@ class _NewProductViewState extends State<NewProductView> {
       padding: padding,
       child: // text :  crear un rich text para poder darle estilo al texto
         RichText(
+          maxLines: 2,
           text: TextSpan( 
             style: textStyle,
             children: <TextSpan>[
@@ -948,20 +892,22 @@ class _NewProductViewState extends State<NewProductView> {
           child: Form(
             key:  priceFormKey,
             child: TextFormField( 
-              style: const TextStyle(fontSize: 18),
+              style: const TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
               autofocus: true,
               focusNode: null,
               controller: controllerTextEditPrecioVenta,
               enabled: true,
               autovalidateMode: AutovalidateMode.onUserInteraction,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration( 
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),  
+              decoration: InputDecoration(
                 labelText: 'Precio de venta al públuco',
                 hintText: 'ej. agua saborisada 500 ml',  
                 hintStyle: hintStyle,
                 labelStyle: labelStyle,
+                prefixIcon: const Icon(Icons.attach_money_rounded), 
                 border: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent)),
-                enabledBorder: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent)),
+                enabledBorder: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent), 
+                ),
                 
                 ), 
               onChanged: (value) {
@@ -999,8 +945,8 @@ class _NewProductViewState extends State<NewProductView> {
     // button 
     final Widget buttonConfirm = Padding(
       padding: const EdgeInsets.all(12.0),
-      child: ElevatedButton.icon(
-          onPressed: () {
+      child:ComponentApp().button(
+        onPressed: () {
             // variables de condiciones
             bool conditionDescription = widget.productCatalogue.verified?true:descriptionFormKey.currentState!.validate();
             bool conditionPrice = priceFormKey.currentState!.validate();
@@ -1015,7 +961,7 @@ class _NewProductViewState extends State<NewProductView> {
               //
               if(checkAddCatalogue && homeController.getUserAnonymous == false){
                 // add product to catalogue
-                homeController.addProductToCatalogue(product: widget.productCatalogue);
+                homeController.addProductToCatalogue(product: widget.productCatalogue,isProductNew: isProductNew);
               }
               // add : agregamos el producto a la lista de productos seleccionados
               salesController.addProductsSelected(product: widget.productCatalogue);
@@ -1023,18 +969,20 @@ class _NewProductViewState extends State<NewProductView> {
               Get.back();
             }
           },
-          style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-              padding: const EdgeInsets.all(16.0),
-              backgroundColor: Colors.blue,),
-          icon: Container(),
-          label: const Text('Confirmar',style: TextStyle(color: Colors.white),),
-        ),
+          text: 'Confirmar',
+      ), 
     );
     
     return Scaffold(
       appBar: AppBar( 
-        title: Text(isProductNew?'Nuevo Producto':'Producto'), 
+        title: Row(
+          children: [
+            widget.productCatalogue.image==''?Container():
+            ImageProductAvatarApp(url: widget.productCatalogue.image, size: 35),
+            const SizedBox(width: 12),
+            const Text('Nuevo producto'),
+          ],
+        ), 
         backgroundColor: Colors.transparent, 
         automaticallyImplyLeading: false,
         actions: [
@@ -1043,11 +991,10 @@ class _NewProductViewState extends State<NewProductView> {
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(vertical: 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // listtile : datos del producto
-            listtileCode, 
+        child: ListView( 
+          children: [  
+            // text : codigo del producto
+            listtileCode,  
             // textfield : descripcion del producto
             widgetTextFieldDescription,
             const SizedBox(height: 12),
@@ -1055,11 +1002,282 @@ class _NewProductViewState extends State<NewProductView> {
             widgetTextFieldPrice,
             // widget :  permiso para guardar el producto nuevo en mi cátalogo (app catalogo)
             Padding(padding: const EdgeInsets.all(12.0),child: checkboxAddProductToCatalogue),
-            const Spacer(),
             SizedBox(width: double.infinity,child: buttonConfirm),
           ],
         ),
       ),
+    );
+  }
+}
+ 
+// search delegate : implementar el buscador de productos
+class CustomSearchDelegate<T> extends SearchDelegate<T> {
+
+  // vars
+  final List<ProductCatalogue> items; 
+  final Color primaryTextColor  = Get.isDarkMode?Colors.white70:Colors.black87;
+
+  CustomSearchDelegate({
+    required this.items, 
+  });
+
+  // controllers
+  HomeController homeController = Get.find<HomeController>();
+  SalesController salesController = Get.find<SalesController>();
+
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: const Icon(Icons.clear),
+        onPressed: () {
+          if(query.isEmpty){
+            Get.back();
+          }else{
+            query = '';
+          } 
+        },
+      ),
+    ];
+  } 
+  // estilo de la barra de busqueda
+  @override
+  ThemeData appBarTheme(BuildContext context) {
+    return Get.theme.copyWith(hintColor: primaryTextColor, highlightColor: primaryTextColor,inputDecorationTheme: const InputDecorationTheme(filled: false));
+  } 
+  // texto de ayuda del textfield de busqueda
+  @override
+  String get searchFieldLabel => 'Buscar';
+
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.arrow_back),
+      onPressed: () { 
+        Get.back();
+      },
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    return ListView.builder(
+      itemCount: _filteredItems.length, 
+      itemBuilder: (context, index) { 
+        // Aquí puedes construir el diseño de cada resultado.
+        // Por ejemplo: ListTile, Container, Card, etc.
+        return item(product:_filteredItems[index]);
+      },
+    );
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+
+    // styles
+    final Color primaryTextColor  = Get.isDarkMode?Colors.white70:Colors.black87;
+    final TextStyle textStylePrimary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400,fontSize: 16);
+    final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
+    
+    // widget : lista de chips de las marcas de los productos
+    final Widget viewMarks = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        homeController.getMarkList.isEmpty?Container(): Text('Marcas',style: textStylePrimary),
+        const SizedBox(height: 5), 
+        Wrap(
+          children: [
+            for (Mark element in homeController.getMarkList)
+              // chip
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal:3),
+                child: GestureDetector(
+                  onTap: (){
+                    // set query
+                    query = element.name;
+                  },
+                  child: Chip( 
+                    label: Text(element.name,style: textStyleSecundary), 
+                    shape: RoundedRectangleBorder(side: BorderSide(color: primaryTextColor.withOpacity(0.5)),borderRadius: BorderRadius.circular(5)),
+                    backgroundColor: Colors.transparent,   
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+    final Widget viewCategories = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        homeController.getCatalogueCategoryList.isEmpty?Container():Text('Categorías',style: textStylePrimary),
+        const SizedBox(height: 5),
+        Wrap(
+          children: [
+            for (Category element in homeController.getCatalogueCategoryList)
+              // chip
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal:3),
+                child: GestureDetector(
+                  onTap: (){
+                    // set query
+                    query = element.name;
+                  },
+                  child: Chip( 
+                    label: Text(element.name,style: textStyleSecundary), 
+                    shape: RoundedRectangleBorder(side: BorderSide(color: primaryTextColor.withOpacity(0.5)),borderRadius: BorderRadius.circular(5)),
+                    backgroundColor: Colors.transparent,   
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+    
+    /// Filtra una lista de elementos [ProductCatalogue] basándose en el criterio de búsqueda [query]. 
+    final filteredSuggestions = _filteredItems;
+    
+
+    // condition : si no hay query entonces mostramos las categorias y quitamos el foco del teclado
+    if(query.isEmpty){
+
+      // control de vista
+      SystemChannels.textInput.invokeMethod('TextInput.hide'); // quita el foco
+
+      return Padding(
+        padding: const EdgeInsets.only(top: 20,left: 12,right: 12),
+        child: ListView(
+            children: [
+              viewCategories, 
+              viewMarks,
+            ],
+          ),
+      );
+    }
+    // condition : si se consulto pero no se obtuvieron resultados
+    if(filteredSuggestions.isEmpty && query.isNotEmpty){
+      return const Center(child: Text('No se encontraron resultados'));
+    }
+
+
+    return ListView.builder(
+      itemCount: filteredSuggestions.length,
+      itemBuilder: (context, index) { 
+        // values
+        ProductCatalogue product = filteredSuggestions[index]; 
+        return item(product:product); 
+      },
+    );
+  }
+
+  List<ProductCatalogue> get _filteredItems {
+    /// Filtra una lista de elementos [ProductCatalogue] basándose en el criterio de búsqueda [query].
+    /// Los elementos se filtran de acuerdo a coincidencias encontradas en los atributos
+    /// 'description', 'nombre de la marca' y 'codigo' de cada elemento.
+    return query.isEmpty
+    ? items
+    : items.where((item) {
+        // Convertimos la descripción, marca y código del elemento y el query a minúsculas
+        final description = item.description.toLowerCase();
+        final brand = item.nameMark.toLowerCase();
+        final code = item.code.toLowerCase();
+        final category = item.nameCategory.toLowerCase();
+        final lowerCaseQuery = query.toLowerCase();
+
+        // Dividimos el query en palabras individuales
+        final queryWords = lowerCaseQuery.split(' ');
+
+        // Verificamos que todas las palabras del query estén presentes en la descripción, marca código
+        return queryWords.every((word) => description.contains(word) || brand.contains(word) || code.contains(word) || category.contains(word));
+      }).toList();
+  }
+
+  // WIDGETS
+  Widget item({required ProductCatalogue product}){
+
+    // styles
+    final Color highlightColor = Get.isDarkMode?Colors.white:Colors.black;
+    final Color primaryTextColor  = Get.isDarkMode?Colors.white54:Colors.black45;
+    final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
+    // widgets
+    final Widget dividerCircle = Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child:Icon(Icons.circle,size: 4, color: primaryTextColor.withOpacity(0.5)));
+
+    // var
+    String alertStockText =product.stock ? (product.quantityStock == 0 ? 'Sin stock' : '${product.quantityStock} en stock') : '';
+          
+    return Column(
+      children: [
+        InkWell(
+          // color del cliqueable
+          splashColor: Colors.blue, 
+          highlightColor: highlightColor.withOpacity(0.1),
+
+          onTap: () {
+            salesController.selectedProduct(item: product);
+            Get.back();
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                // image
+                ImageProductAvatarApp(url: product.image,size: 75,favorite:product.favorite),
+                // text : datos del producto
+                Flexible(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal:12),
+                    child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(product.description,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(fontWeight: FontWeight.w500)),
+                      product.nameMark==''?Container():Text(product.nameMark,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(color: Colors.blue)),
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.start,
+                        direction: Axis.horizontal,
+                        children: <Widget>[
+                          // text : code
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                dividerCircle,
+                                Text(product.code,style: textStyleSecundary),
+                              ],
+                            ),
+                            // favorite
+                            product.favorite?Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                dividerCircle,
+                                Text('Favorito',style: textStyleSecundary),
+                              ],
+                            ):Container(),
+                          //  text : alert stockv
+                            alertStockText != ''?Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                dividerCircle,
+                                Text(alertStockText,style: textStyleSecundary),
+                              ],
+                            ):Container(),
+                        ],
+                      ),
+                              
+                    ],
+                                  ),
+                  ),
+                ),
+                // text : precio
+                Text(Publications.getFormatoPrecio(monto: product.salePrice),style: const  TextStyle(fontSize: 18,fontWeight: FontWeight.w300),)
+              ],
+            ),
+          ),
+        ), 
+      ComponentApp().divider(), 
+      ],
     );
   }
 }
