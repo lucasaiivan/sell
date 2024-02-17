@@ -44,7 +44,7 @@ class Publications {
   }
 
   // Recibe la fecha y la decha actual para devolver hace cuanto tiempo se publico
-  static String getFechaPublicacionFormating({required DateTime dateTime}) => DateFormat('dd/MM/yyyy HH:mm').format(dateTime).toString();
+  static String getFechaPublicacionFormating({required DateTime dateTime}) => DateFormat('dd/MM/yyyy HH:mm','es').format(dateTime).toString();
   static String getFechaPublicacionSimple(DateTime postDate, DateTime currentDate) {
   /** 
     Obtiene la fecha de publicación en formato legible para el usuario.
@@ -54,7 +54,7 @@ class Publications {
   */
   if (postDate.year != currentDate.year) {
     // Si la publicación es de un año diferente, muestra la fecha completa
-    return DateFormat('dd MMM. yyyy').format(postDate);
+    return DateFormat('dd MMM. yyyy','es').format(postDate);
   } else if (postDate.month != currentDate.month || postDate.day != currentDate.day) {
     // Si la publicación no es del mismo día de hoy
     if (postDate.year == currentDate.year &&
@@ -64,7 +64,7 @@ class Publications {
       return 'Ayer';
     } else {
       // Si la publicación no es del día anterior, muestra la fecha sin el año
-      return DateFormat('dd MMM.').format(postDate);
+      return DateFormat('dd MMM.','es').format(postDate);
     }
   } else {
     // Si la publicación es del mismo día de hoy, muestra "Hoy"
@@ -77,22 +77,23 @@ static String getFechaPublicacion({required DateTime fechaPublicacion, required 
     @param fechaPublicacion La fecha de publicación del contenido.
     @param fechaActual La fecha actual del sistema.
     @return La fecha en formato legible para el usuario.
-  */
+  */ 
+ 
 
   // condition : si el año de la publicacion es diferente al año actual
   if (fechaPublicacion.year != fechaActual.year) {
     // Si la publicación es de un año diferente, muestra la fecha completa
-    return DateFormat('dd MMM. yyyy').format(fechaPublicacion);
+    return DateFormat('dd MMM. yyyy','es').format(fechaPublicacion);
   } else if (fechaPublicacion.month != fechaActual.month || fechaPublicacion.day != fechaActual.day) {
     // Si la publicación no es del mismo día de hoy
     if (fechaPublicacion.year == fechaActual.year &&
         fechaPublicacion.month == fechaActual.month &&
         fechaPublicacion.day == fechaActual.day - 1) {
       // Si la publicación es del día anterior, muestra "Ayer"
-      return 'Ayer ${DateFormat('HH:mm').format(fechaPublicacion)}';
+      return 'Ayer ${DateFormat('HH:mm','es').format(fechaPublicacion)}';
     }else {
       // Si la publicación no es del día anterior, muestra la fecha sin el año
-      return DateFormat('dd MMM.').format(fechaPublicacion);
+      return DateFormat('dd MMM.','es').format(fechaPublicacion);
     }
   } else {
     // Si la publicación es del mismo día de hoy
@@ -113,15 +114,7 @@ static String getFechaPublicacion({required DateTime fechaPublicacion, required 
   }
 }
 
-
-  static String sGanancia(
-      {required double precioCompra, required double precioVenta}) {
-    double ganancia = 0.0;
-    if (precioCompra != 0.0) {
-      ganancia = precioVenta - precioCompra;
-    }
-    return Publications.getFormatoPrecio(monto: ganancia);
-  }
+ 
 }
 class Utils {
   // Devuelve un color Random

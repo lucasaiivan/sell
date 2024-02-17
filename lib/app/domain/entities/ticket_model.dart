@@ -48,8 +48,24 @@ class TicketModel {
     if(id == 'card') return 'Tarjeta De Crédito/Débito';
     return 'Sin Especificar';
   }
+ 
+  // Map : serializa el objeto a un mapa
+  Map<String, dynamic> toMap() => {
+        "id": id,
+        "payMode": payMode,
+        "currencySymbol": currencySymbol,
+        "seller": seller,
+        "cashRegisterName": cashRegisterName,
+        'cashRegisterId' : cashRegisterId,
+        "priceTotal": priceTotal,
+        "valueReceived": valueReceived,
+        "discount": discount,
+        // refactorizamos los valores [Timestamp]  a un [String] 
+        "listPoduct": listPoduct.map((e) => ProductCatalogue.fromMap(e).toMap()).toList(),  
+        "creation": creation.millisecondsSinceEpoch, // convertimos a milisegundos
+      };
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson({bool cache =false}) => {
         "id": id,
         "payMode": payMode,
         "currencySymbol": currencySymbol,
@@ -62,7 +78,23 @@ class TicketModel {
         "listPoduct": listPoduct,
         "creation": creation,
       };
-  factory TicketModel.fromMap(Map<dynamic, dynamic> data) {
+  factory TicketModel.mapRefactoring(Map<dynamic, dynamic> data ) {
+    return TicketModel(
+      id: data.containsKey('id') ? data['id'] : '',
+      payMode: data.containsKey('payMode') ? data['payMode'] : '',
+      seller: data.containsKey('seller') ? data['seller'] : '',
+      currencySymbol: data.containsKey('currencySymbol') ? data['currencySymbol'] : '\$',
+      cashRegisterName: data.containsKey('cashRegisterName') ? data['cashRegisterName'] : '',
+      cashRegisterId: data.containsKey('cashRegisterId') ? data['cashRegisterId'] : '',
+      priceTotal: data.containsKey('priceTotal') ? (data['priceTotal'] ?? 0).toDouble() : 0.0,
+      valueReceived:  data.containsKey('valueReceived') ? (data['valueReceived'] ?? 0).toDouble() : 0.0,
+      discount: data.containsKey('discount') ? (data['discount'] ?? 0.0).toDouble() : 0.0,
+      creation: data.containsKey('creation') ? Timestamp.fromMillisecondsSinceEpoch(data['creation']) : Timestamp.now(),
+      // refactorizamos los valores [String Time]  a un [TimesTamp] 
+      listPoduct: data['listPoduct'].map((e) => ProductCatalogue.mapRefactoring(e) ).toList() ,
+    );
+  }
+  factory TicketModel.fromMap(Map<dynamic, dynamic> data ) {
     return TicketModel(
       id: data.containsKey('id') ? data['id'] : '',
       payMode: data.containsKey('payMode') ? data['payMode'] : '',

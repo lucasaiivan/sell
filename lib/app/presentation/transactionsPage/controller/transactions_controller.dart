@@ -1,10 +1,12 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:sell/app/core/utils/widgets_utils.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:sell/app/domain/entities/catalogo_model.dart';
+import '../../../data/datasource/cache.dart';
 import '../../../domain/entities/cashRegister_model.dart';
 import '../../../domain/entities/ticket_model.dart';
 import '../../home/controller/home_controller.dart';
@@ -18,6 +20,12 @@ class TransactionsController extends GetxController {
   // style : estilo de la vista
   final double cardBoderRadius = 20.0;
   double get getCardBoderRadius => cardBoderRadius;
+
+  // lista de montos de las transacciones por fecha
+  int positionIndex = 0;
+  List<double> _billingByDateList = [];
+  List<double> get getBillingByDateList => _billingByDateList;
+  set setBillingByDateList(List<double> value) => _billingByDateList = value;
 
   // obtenemos los medios de pagos y sus respectivas ganancias
   // description : efective (Efectivo) - mercadopago (Mercado Pago) - card (Tarjeta De Crédito/Débito)
@@ -34,7 +42,7 @@ class TransactionsController extends GetxController {
 
       // obtenemos el monto tortal de la transacciones en determinado medio 'list[0].key'
       double totalAmount = 0.0;
-      for (var element in getTransactionsList) {
+      for (var element in getVisibilityTransactionsList) {
         if (element.payMode == list[0].key) {
           totalAmount += element.priceTotal;
         }
@@ -76,11 +84,21 @@ class TransactionsController extends GetxController {
   String get getFilterText => _filterText;
   set setFilterText(String value) => _filterText = value;
 
-  // list transactions
-  List<TicketModel> _listTransactions = [];
-  List<TicketModel> get getTransactionsList => _listTransactions;
-  set setTransactionsList(List<TicketModel> value) {
-    _listTransactions = value; 
+  // lista del historial de transacciones
+  List<TicketModel> _historyTransactionsList = [];
+  List<TicketModel> get getHistoryTransactionsList => _historyTransactionsList;
+  set setHistoryTransactionsList(List<TicketModel> value) => _historyTransactionsList = value;
+
+  // las transacciones del día actual
+  List<TicketModel> _transactionsTodayList = [];
+  List<TicketModel> get getTransactionsTodayList => _transactionsTodayList;
+  set setTransactionsTodayList(List<TicketModel> value) => _transactionsTodayList = value;
+
+  // list transactions visibles que el usuario va ver
+  List<TicketModel> _visibilityTransactionsList = [];
+  List<TicketModel> get getVisibilityTransactionsList => _visibilityTransactionsList;
+  set setVisivilityTransactionsList(List<TicketModel> value) {
+    _visibilityTransactionsList = value; 
     readBestSellingProductWithHighestProfit(); // actualizamos los productos más vendidos
     readProductWithMoreEarnings(); // actualizamos el producto con más ganancias
     readAnalyticsMeansOfPayment(); // actualizamos los medios de pago
@@ -107,6 +125,11 @@ class TransactionsController extends GetxController {
 
   // set/get
   void filterList({required String key}) {
+ 
+
+    // values default 
+    setBillingByDateList = [];
+    
     switch (key) {
       case 'premium': 
         homeController.showModalBottomSheetSubcription(id:'analytic');
@@ -141,98 +164,131 @@ class TransactionsController extends GetxController {
 
   // FIREBASE
 
-  void readLastYearTransactions() {
-    //obtenemos los documentos creados el año pasado
-
-    // a la marca de tiempo actual le descontamos dias
-    DateTime getTime = Timestamp.now().toDate();
-    //  a la marca de tiempo actual le descontamos dias del mes
-    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(
-        DateTime(getTime.year - 1, 0, 0, 0).millisecondsSinceEpoch);
+  void getHistoryTransactions() async{  
+    //  description : obtenemos las transacciones creadas desde ayer hasta el año pasado
+    // a la marca de tiempo [timeStart] le descontamos el tiempo hasta la primera fecha del año pasado
+    Timestamp timeStart =  Timestamp.fromMillisecondsSinceEpoch( DateTime( Timestamp.now().toDate().year-1 ).millisecondsSinceEpoch);
     // marca de tiempo actual
-    Timestamp timeEnd = Timestamp.fromMillisecondsSinceEpoch(
-        DateTime(getTime.year, 0, 0, 0).millisecondsSinceEpoch);
+    Timestamp timeEnd = Timestamp.fromMillisecondsSinceEpoch(Timestamp.now().toDate().subtract( Duration(hours:Timestamp.now().toDate().hour )).millisecondsSinceEpoch);
 
-    // obtenemos los obj(productos) del catalogo de la cuenta del negocio
-    if (homeController.getProfileAccountSelected.id != '') {
+    List<TicketModel> list = await TrasactionsCache().loadCacheTransactions();
+    print('.......................  se guardo en cache  /${list.length} .......................' );
+    // condition : si la lista de transacciones esta vacia
+    if ( list.isEmpty) {
       Database.readTransactionsFilterTimeStream(
         idAccount: homeController.getProfileAccountSelected.id,
         timeStart: timeStart,
         timeEnd: timeEnd,
       ).listen((value) {
-        List<TicketModel> list = [];
-        //  get
-        for (var element in value.docs) {
-          list.add(TicketModel.fromMap(element.data()));
-        }
+        //  get : agregamos los tickets a la lista
+        List<TicketModel> list = value.docs.map((e) => TicketModel.fromMap(e.data())).toList();
+        // agregamos los tickets de hoy a la lista
+        for (var element in getTransactionsTodayList) {
+          list.add(element);
+        } 
         //  set
-        setTransactionsList = list;
+        setHistoryTransactionsList = list;
+        TrasactionsCache().saveTransactions(list: list); 
       });
+    }else{
+      //  set
+      setHistoryTransactionsList = list; 
     }
+  }
+
+  void readLastYearTransactions() {
+    //
+    //  obtenemos los documentos creados el año pasado
+    //
+
+    // obtenemos los obj(productos) del catalogo de la cuenta del negocio
+    if (homeController.getProfileAccountSelected.id != '') {
+      List<TicketModel> list = [];
+      //  get
+      for (var element in getHistoryTransactionsList) {
+        if(element.creation.toDate().year == Timestamp.now().toDate().year-1){
+          list.add(element);
+        }
+      }
+      //  set
+      setVisivilityTransactionsList = list; 
+    }
+    
   }
 
   void readTransactionsThisYear() {
-    //obtenemos los documentos creados este año
-
-    // a la marca de tiempo actual le descontamos dias
-    DateTime getTime = Timestamp.now().toDate();
-    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(
-        DateTime(getTime.year, 1, 1, 0).millisecondsSinceEpoch);
-    // marca de tiempo actual
-    Timestamp timeEnd = Timestamp.now();
+    //
+    //  obtenemos los documentos creados este año 
+    //
 
     // obtenemos los obj(productos) del catalogo de la cuenta del negocio
     if (homeController.getProfileAccountSelected.id != '') {
-      Database.readTransactionsFilterTimeStream(
-        idAccount: homeController.getProfileAccountSelected.id,
-        timeStart: timeStart,
-        timeEnd: timeEnd,
-      ).listen((value) {
-        List<TicketModel> list = [];
-        //  get
-        for (var element in value.docs) {
-          list.add(TicketModel.fromMap(element.data()));
+  
+      List<TicketModel> list = [];
+      //  get
+      for (var element in getHistoryTransactionsList) {
+        if(element.creation.toDate().year == Timestamp.now().toDate().year){
+          list.add(element);
         }
-        //  set
-        setTransactionsList = list;
-      });
+      }
+      //  set
+      setVisivilityTransactionsList = list; 
+
     }
   }
-
-  void readTransactionsOfTheDay() {
-    // obtenemos los documentos creados en el día
-
-    // a la marca de tiempo actual le descontamos las horas del día
-    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(Timestamp.now()
-        .toDate()
-        .subtract(Duration(hours: Timestamp.now().toDate().hour,minutes: Timestamp.now().toDate().minute))
-        .millisecondsSinceEpoch);
+  // obtenenemos las transacciones del día actual y los ultimos 5 dias
+  void readTransactionsOfTheDay() { 
+    // a la marca de tiempo actual le descontamos las los ultimos 5 dias
+    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(Timestamp.now().toDate() .subtract(const Duration(days: 5)).millisecondsSinceEpoch);
     // marca de tiempo actual
     Timestamp timeEnd = Timestamp.now();
 
-    // obtenemos los obj(productos) del catalogo de la cuenta del negocio
-    if (homeController.getProfileAccountSelected.id != '') {
-      // stream : obtenemos los documentos creados en el día
-      Stream<QuerySnapshot<Map<String, dynamic>>> stream = Database.readTransactionsFilterTimeStream(
-        idAccount: homeController.getProfileAccountSelected.id,
-        timeStart: timeStart,
-        timeEnd: timeEnd,
-      );
-      // listen : escuchamos los cambios que se producen en la base de datos
-      stream.listen((value) {
-        List<TicketModel> list = [];
-        //  get
-        for (var element in value.docs) {
-          // condition : evaluamos que el precio total sea distinto de cero
-          if(TicketModel.fromMap(element.data()).priceTotal != 0){
-            list.add(TicketModel.fromMap(element.data()));
-          } 
+    // stream : obtenemos los documentos creados en el día
+    Stream<QuerySnapshot<Map<String, dynamic>>> stream = Database.readTransactionsFilterTimeStream(
+      idAccount: homeController.getProfileAccountSelected.id,
+      timeStart: timeStart,
+      timeEnd: timeEnd,
+    );
+    // stream : obtenemos los documentos creados en el día
+    stream.listen((value) {
+      // var
+      List<double> listAmountTotal = [];  
+      List<TicketModel> transactionsTodayList = [];
+      // lista de las transacciones de los ultimos 5 dias
+      List<TicketModel> transactionsAlllist = []; 
+
+      // obtenemos las transacciones del dia de hoy
+      for (var element in value.docs) {
+        TicketModel ticket = TicketModel.fromMap(element.data());
+        if( ticket.creation.toDate().day == Timestamp.now().toDate().day){
+          transactionsTodayList.add(ticket); 
         }
-        //  set
-        setTransactionsList = list;
-      });
-    }
+      }
+      // obtenemos todas las transacciones de los ultimos 5 dias 
+      for (var element in value.docs) {
+        transactionsAlllist.add(TicketModel.fromMap(element.data()));
+      }
+      // obtenemos y clasificamos por fecha y obtenemos el monto total de cada día  
+      for (var i = 0; i < 5; i++) {
+        double amountTotal = 0; 
+        for (TicketModel element in transactionsAlllist) {
+          if (element.creation.toDate().day == Timestamp.now().toDate().subtract(Duration(days: i)).day) {
+            amountTotal += element.priceTotal;
+          }
+        }
+        listAmountTotal.add(amountTotal);
+      }
+      //  set
+      positionIndex = 4; 
+      setBillingByDateList = listAmountTotal;
+      setTransactionsTodayList = transactionsTodayList;
+      setVisivilityTransactionsList = transactionsTodayList;
+      getHistoryTransactions();
+
+    });
+
   }
+  
 
   void readBestSellingProductWithHighestProfit() {
     // description : obtener los producto más vendido con mayor beneficio
@@ -241,7 +297,7 @@ class TransactionsController extends GetxController {
     Map<String, ProductCatalogue> productsList = {}; // en esta lista almacenamos las ganancias de los productos
 
     // recorremos todos los tickers que se filtraron
-    for (TicketModel ticket in getTransactionsList) {
+    for (TicketModel ticket in getVisibilityTransactionsList) {
       // recorremos los productos de cada ticket
       for (dynamic item in ticket.listPoduct) {
         // get
@@ -284,130 +340,121 @@ class TransactionsController extends GetxController {
       }
     }  
   }
-
+ 
+  // obtenemos las transacciones de los ultimos 5 dias y del dia de ayer
   void readTransactionsYesterday() {
-    // obtenemos los documentos creados en el día de ayer de la fecha actual
+    // var :  marca de tiempo actual
+    DateTime timeNow = Timestamp.now().toDate();
+    // var
+    List<TicketModel> transactionsTodayList = []; // lista de las transacciones del día de ayer  
 
-    // a la marca de tiempo actual le descontamos las horas del día
-    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(Timestamp.now()
-        .toDate()
-        .subtract(Duration(hours: Timestamp.now().toDate().hour, days: 1))
-        .millisecondsSinceEpoch);
-    // marca de tiempo actual
-    Timestamp timeEnd = Timestamp.fromMillisecondsSinceEpoch(Timestamp.now()
-        .toDate()
-        .subtract(Duration(hours: Timestamp.now().toDate().hour))
-        .millisecondsSinceEpoch);
-
-    // obtenemos los obj(productos) del catalogo de la cuenta del negocio
-    if (homeController.getProfileAccountSelected.id != '') {
-      Database.readTransactionsFilterTimeStream(
-        idAccount: homeController.getProfileAccountSelected.id,
-        timeStart: timeStart,
-        timeEnd: timeEnd,
-      ).listen((value) {
-        List<TicketModel> list = [];
-        //  get
-        for (var element in value.docs) {
-          list.add(TicketModel.fromMap(element.data()));
-        }
-        //  set
-        setTransactionsList = list;
-      });
+    // obtenemos todas las transacciones del día e ayer
+    for (var ticket in getHistoryTransactionsList ) { 
+      if( ticket.creation.toDate().day == timeNow.subtract(const Duration(days: 1)).day ){
+        transactionsTodayList.add(ticket);
+      } 
     }
+    // obtenemos y clasificamos por fecha y obtenemos el monto total de cada día  de los ultimos 5 días 
+    List<TicketModel> ticketsList = getHistoryTransactionsList.where((element) => element.creation.toDate().isAfter( DateTime.now().subtract(const Duration(days:5)) ) ).toList();
+    // var : montos totales de los ultimos 5 dias
+    List<double> listAmountTotal = [];  
+    for (var i = 0; i < 5; i++) {
+      double amountTotal = 0; 
+      for (TicketModel element in ticketsList) { 
+        if (element.creation.toDate().day == (timeNow.day - i)) {
+          amountTotal += element.priceTotal;
+        }
+      }
+      listAmountTotal.add(amountTotal);
+    }
+    //  set
+    positionIndex = 3; 
+    setBillingByDateList = listAmountTotal; 
+    setVisivilityTransactionsList = transactionsTodayList;
+
   }
-
-  void readTransactionsThisMonth() {
-    //obtenemos los documentos creados este mes
-
+  // obtenemos las transacciones de los ultimos 5 meses y del mes actual
+  void readTransactionsThisMonth() { 
     // marca de tiempo actual
     DateTime getTime = Timestamp.now().toDate();
-    //  a la marca de tiempo actual le descontamos dias del mes
-    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(
-        DateTime(getTime.year, getTime.month, 1, 0).millisecondsSinceEpoch);
-    // marca de tiempo actual
-    Timestamp timeEnd = Timestamp.now();
+    //  a la marca de tiempo actual le descontamos 5 meses
+    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch( DateTime(getTime.year, getTime.month-4, 1, 0).millisecondsSinceEpoch);
+ 
 
-    // obtenemos los obj(productos) del catalogo de la cuenta del negocio
-    if (homeController.getProfileAccountSelected.id != '') {
-      Database.readTransactionsFilterTimeStream(
-        idAccount: homeController.getProfileAccountSelected.id,
-        timeStart: timeStart,
-        timeEnd: timeEnd,
-      ).listen((value) {
-        List<TicketModel> list = [];
-        //  get
-        for (var element in value.docs) {
-          list.add(TicketModel.fromMap(element.data()));
-        }
-        //  set
-        setTransactionsList = list;
-      });
+    // var 
+    List<TicketModel> transactionsTodayList = []; 
+
+    // obtenemos todas las transacciones del mes actual
+    for (var ticket in getHistoryTransactionsList) { 
+      if (ticket.creation.toDate().month == Timestamp.now().toDate().month) {
+        transactionsTodayList.add(ticket);
+      }
     }
-  }
+    // obtenemos todas las transacciones de los ultimos 5 meses 
+    List<TicketModel> ticketsList = getHistoryTransactionsList.where((element) => element.creation.toDate().isAfter( timeStart.toDate() ) ).toList();
+    // obtenemos y clasificamos por fecha y obtenemos el monto total de cada día
+    List<double> listAmountTotal = [];      
+    Map data = {};
+    for (var element in ticketsList) {
+      // obtenemos el año y el mes de la fecha
+      String timeData = '${element.creation.toDate().year}-${element.creation.toDate().month}';
+      // add data
+      data.containsKey(timeData)
+          ? data[timeData] = data[timeData] + element.priceTotal
+          : data[timeData] = element.priceTotal;
+      
+    } 
+    // obtenemos el monto total de cada mes 
+    for (var element in data.entries) {
+      listAmountTotal.add(element.value);
+    }
+    //  set
+    positionIndex = 4; 
+    setBillingByDateList = listAmountTotal;
+    setVisivilityTransactionsList = transactionsTodayList;
 
+  } 
+
+  // obtenemos las transacciones de los ultimos 5 meses y del mes pasado
   void readTransactionsLastMonth() {
-    //obtenemos los documentos creados el mes pasado
-
-    // marca de tiempo actual
-    DateTime getTime = Timestamp.now().toDate();
-    //  a la marca de tiempo actual le descontamos dias del mes
-    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(
-        DateTime(getTime.year, getTime.month - 1, 1, 0).millisecondsSinceEpoch);
-    // marca de tiempo actual
-    Timestamp timeEnd = Timestamp.fromMillisecondsSinceEpoch(
-        DateTime(getTime.year, getTime.month, 1, 0).millisecondsSinceEpoch);
-
-    // obtenemos los obj(productos) del catalogo de la cuenta del negocio
-    if (homeController.getProfileAccountSelected.id != '') {
-      Database.readTransactionsFilterTimeStream(
-        idAccount: homeController.getProfileAccountSelected.id,
-        timeStart: timeStart,
-        timeEnd: timeEnd,
-      ).listen((value) {
-        List<TicketModel> list = [];
-        //  get
-        for (var element in value.docs) {
-          list.add(TicketModel.fromMap(element.data()));
-        }
-        //  set
-        setTransactionsList = list;
-      });
+    // var :  marca de tiempo actual
+    DateTime timeNow = Timestamp.now().toDate();  
+    
+    // var :  obtenemos todas las transacciones de los ultimos 5 meses
+    Timestamp lastMonthTimeStart = Timestamp.fromMillisecondsSinceEpoch( DateTime(timeNow.year, timeNow.month-4, 1, 0).millisecondsSinceEpoch) ; 
+    List<TicketModel> transactionsAlllist = getHistoryTransactionsList.where((element) => element.creation.toDate().isAfter( lastMonthTimeStart.toDate() ) ).toList();
+    // obtenemos todas las transacciones del mes pasado
+    List<TicketModel> lastMonthsTicketList = transactionsAlllist.where((element) => element.creation.toDate().isAfter( Timestamp.fromMillisecondsSinceEpoch( DateTime(timeNow.year, timeNow.month-1).millisecondsSinceEpoch).toDate() )).toList();
+    lastMonthsTicketList = lastMonthsTicketList.where((element) => element.creation.toDate().isBefore( Timestamp.fromMillisecondsSinceEpoch( DateTime(timeNow.year, timeNow.month ).millisecondsSinceEpoch).toDate() )).toList(); 
+    // obtenemos y clasificamos por fecha y obtenemos el monto total de cada día
+    List<double> listAmountTotal = [];      
+    Map data = {};
+    for (var element in transactionsAlllist) {
+      // obtenemos el año y el mes de la fecha
+      String timeData = '${element.creation.toDate().year}-${element.creation.toDate().month}';
+      // add data
+      data.containsKey(timeData)
+          ? data[timeData] = data[timeData] + element.priceTotal
+          : data[timeData] = element.getTotalPrice;
+      
+    } 
+    // obtenemos el monto total de cada mes 
+    for (var element in data.entries) {
+      listAmountTotal.add(element.value);
     }
+ 
+    //  set
+    positionIndex = 3; 
+    setBillingByDateList = listAmountTotal;
+    setVisivilityTransactionsList = lastMonthsTicketList;
+
+  
+
   }
 
-  /* void readCatalogueProductsOfTheDay() {
-    // obtenemos los documentos creados en el día
-
-    // a la marca de tiempo actual le descontamos las horas del día
-    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(Timestamp.now()
-        .toDate()
-        .subtract(Duration(hours: Timestamp.now().toDate().hour))
-        .millisecondsSinceEpoch);
-    // marca de tiempo actual
-    Timestamp timeEnd = Timestamp.now();
-
-    // obtenemos los obj(productos) del catalogo de la cuenta del negocio
-    if (homeController.getProfileAccountSelected.id != '') {
-      Database.readTransactionsFilterTimeStream(
-        idAccount: homeController.getProfileAccountSelected.id,
-        timeStart: timeStart,
-        timeEnd: timeEnd,
-      ).listen((value) {
-        List<TicketModel> list = [];
-        //  get
-        for (var element in value.docs) {
-          list.add(TicketModel.fromMap(element.data()));
-        }
-        //  set
-        setTransactionsList = list;
-      });
-    }
-  } */
-
-  void readProductWithMoreEarnings() {
+  void readProductWithMoreEarnings() { 
     //
-    //  devuelve el producto que se obtubo más ganancias
+    // description : devuelve el producto que se obtubo más ganancias 
     //
 
     // var
@@ -415,7 +462,7 @@ class TransactionsController extends GetxController {
         {}; // en esta lista almacenamos las ganancias de los productos
 
     // recorremos todos los tickers que se filtraron
-    for (TicketModel ticket in getTransactionsList) {
+    for (TicketModel ticket in getVisibilityTransactionsList) {
       // recorremos los productos de cada ticket
       for (dynamic item in ticket.listPoduct) {
         // get
@@ -469,10 +516,10 @@ class TransactionsController extends GetxController {
   }
 
   void readAnalyticsMeansOfPayment() {
-    //obtenemos el medios de pago mas usado y sus respecvtivas monto transacciones e
+    //  description : obtenemos el medios de pago mas usado y sus respecvtivas monto transacciones e
     setAnalyticsMeansOfPayment = {}; 
     // recorremos todos los tickers
-    for (var element in getTransactionsList) {
+    for (var element in getVisibilityTransactionsList) {
       switch (element.payMode) {
         case 'effective': 
           getAnalyticsMeansOfPayment.containsKey(element.payMode)
@@ -502,7 +549,7 @@ class TransactionsController extends GetxController {
     //obtenemos el monto de cada caja
     setCashiersList = {};
     // recorremos todos los tickers
-    for (TicketModel element in getTransactionsList) {
+    for (TicketModel element in getVisibilityTransactionsList) {
       // get : obtenemos los datos del ticket
       TicketModel ticketModel = element;
       // recorremos todas las cajas
@@ -539,7 +586,7 @@ class TransactionsController extends GetxController {
     Map<String, ProductCatalogue> productsList = {}; // en esta lista almacenamos las ganancias de los productos
 
     // recorremos todos los tickers que se filtraron
-    for (TicketModel ticket in getTransactionsList) {
+    for (TicketModel ticket in getVisibilityTransactionsList) {
       // recorremos los productos de cada ticket
       for (dynamic item in ticket.listPoduct) {
         // get
@@ -572,7 +619,7 @@ class TransactionsController extends GetxController {
 
     int value = 0;
     // recorremos la lista de productos que se vendieron
-    for (TicketModel ticket in getTransactionsList) {
+    for (TicketModel ticket in getVisibilityTransactionsList) {
       for (Map product in ticket.listPoduct) {
         value = value + (product['quantity'] as int);
       }
@@ -585,7 +632,7 @@ class TransactionsController extends GetxController {
     String currencySymbol = '\$';
 
     // recorremos la lista de transacciones de venta
-    for (TicketModel ticket in getTransactionsList) {
+    for (TicketModel ticket in getVisibilityTransactionsList) {
       currencySymbol = ticket.currencySymbol;
       double transactionEarnings = 0;
 
@@ -614,7 +661,7 @@ class TransactionsController extends GetxController {
     // var
     double total = 0.0;
     // recorremos la lista de transacciones de venta
-    for (TicketModel ticket in getTransactionsList) { total += ticket.priceTotal;  }
+    for (TicketModel ticket in getVisibilityTransactionsList) { total += ticket.priceTotal;  }
     return total;
   }
   String get getInfoAmountTotalFilter{  
@@ -626,7 +673,7 @@ class TransactionsController extends GetxController {
     // var 
     double transactionEarnings = 0; // ganancias de la transacción
 
-    for (TicketModel ticket in getTransactionsList) { 
+    for (TicketModel ticket in getVisibilityTransactionsList) { 
       // obtenemos las ganancias de la transacción
       transactionEarnings += ticket.getProfit;
     }

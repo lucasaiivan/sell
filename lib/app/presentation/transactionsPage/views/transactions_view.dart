@@ -90,16 +90,16 @@ class TransactionsView extends StatelessWidget {
     final TransactionsController transactionsController = Get.find();
 
     // vista para mostrar en el caso que no alla ninguna transacción
-    if (transactionsController.getTransactionsList.isEmpty) {
+    if (transactionsController.getVisibilityTransactionsList.isEmpty) {
       return Center( child: Text( 'Sin transacciones ${transactionsController.getFilterText.toLowerCase()}'));
     }
 
     // define una variable currentDate para realizar el seguimiento de la fecha actual en la que se está construyendo la lista. Inicializa esta variable con la fecha de la primera transacción en la lista
-    DateTime currentDate = transactionsController.getTransactionsList[0].creation.toDate();
+    DateTime currentDate = transactionsController.getVisibilityTransactionsList[0].creation.toDate();
     // lista de widgets List<Widget> donde se almacenarán los elementos de la lista
     List<Widget> transactions = []; 
     // add : Itera sobre la lista de transacciones y verifica si la fecha de la transacción actual es diferente a la fecha actual. Si es así, crea un elemento Divider y actualiza la fecha actual
-    for (int i = 0; i < transactionsController.getTransactionsList.length; i++) {
+    for (int i = 0; i < transactionsController.getVisibilityTransactionsList.length; i++) {
       // condition : si es la primera transacción
       if(i==0){
         // add : añade tarjetas de estadísticas
@@ -108,31 +108,21 @@ class TransactionsView extends StatelessWidget {
         transactions.add(const Padding(padding: EdgeInsets.only(left: 8.0,top: 20.0,bottom:4.0),child: Text('Registros',style:TextStyle(fontSize: 24,fontWeight: FontWeight.w300))));
       }
       // condition : si la fecha actual es diferente a la fecha de la transacción actual
-      if (currentDate.day != transactionsController.getTransactionsList[i].creation.toDate().day || i==0) {
+      if (currentDate.day != transactionsController.getVisibilityTransactionsList[i].creation.toDate().day || i==0) {
         //  set : actualiza la fecha actual de la variable
-        currentDate = transactionsController.getTransactionsList[i].creation.toDate();
+        currentDate = transactionsController.getVisibilityTransactionsList[i].creation.toDate();
         // add : añade un Container con el texto de la fecha como divisor
-        transactions.add(Container(padding: const EdgeInsets.symmetric(horizontal: 8.0,vertical: 8.0),width: double.infinity,color: Colors.grey.withOpacity(.05),child: Opacity(opacity: 0.8,child: Text(Publications.getFechaPublicacionSimple(  transactionsController.getTransactionsList[i].creation.toDate(),Timestamp.now().toDate()),textAlign: TextAlign.center,style: const TextStyle(fontSize: 18,fontWeight: FontWeight.w300)))));
+        transactions.add(Container(padding: const EdgeInsets.symmetric(horizontal: 8.0,vertical: 8.0),width: double.infinity,color: Colors.grey.withOpacity(.05),child: Opacity(opacity: 0.8,child: Text(Publications.getFechaPublicacionSimple(  transactionsController.getVisibilityTransactionsList[i].creation.toDate(),Timestamp.now().toDate()),textAlign: TextAlign.center,style: const TextStyle(fontSize: 18,fontWeight: FontWeight.w300)))));
       }
       //  add : añade el elemento de la lista actual a la lista de widgets
-      transactions.add(tileItem(ticketModel: transactionsController.getTransactionsList[i]),);
+      transactions.add(tileItem(ticketModel: transactionsController.getVisibilityTransactionsList[i]),);
       // agregar un divider
       transactions.add( ComponentApp().divider());
     }
     // Finalmente, utiliza la lista de widgets widgets e
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(50.0),
-          child: MiniLineChart(prices: []),
-        ),
-        Flexible(
-          child: ListView.builder(
-            itemCount: transactions.length,
-            itemBuilder: (BuildContext context, int index) => transactions[index],
-          ),
-        ),
-      ],
+    return ListView.builder(
+      itemCount: transactions.length,
+      itemBuilder: (BuildContext context, int index) => transactions[index],
     );
 
   }
@@ -206,7 +196,7 @@ class TransactionsView extends StatelessWidget {
                       )),
                     Opacity(opacity:0.3,child: dividerCircle),
                     // fecha de transacción
-                    Text(Publications.getFechaPublicacion(fechaActual: ticketModel.creation.toDate(),fechaPublicacion: Timestamp.now().toDate()),style: TextStyle(color: primaryTextColor.withOpacity(0.3),fontWeight: FontWeight.w400 )),
+                    Text(Publications.getFechaPublicacion(fechaActual: Timestamp.now().toDate(),fechaPublicacion: ticketModel.creation.toDate()),style: TextStyle(color: primaryTextColor.withOpacity(0.3),fontWeight: FontWeight.w400 )),
                   ],
                 ),
                 Column(
@@ -489,72 +479,3 @@ class TransactionsView extends StatelessWidget {
 
 
 
-class MiniLineChart extends StatelessWidget {
-
-  List<double> prices=[];
-  
-  MiniLineChart({Key? key,required this.prices}) : super(key: key);
- 
-
-  @override
-  Widget build(BuildContext context) {
-
-    if(prices.isEmpty) prices = [0,355,900, 1450, 3785, 5000,6090, 5030,7234];
- 
-    return SizedBox(
-      height: 100,
-      width: 200,
-      child: LineChart(
-        LineChartData(
-          lineTouchData: LineTouchData(  
-            handleBuiltInTouches: true,
-            touchTooltipData: LineTouchTooltipData(  
-              getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
-                return touchedBarSpots.map((barSpot) {
-                  final flSpot = barSpot; 
-                  return LineTooltipItem(
-                    formatValue(flSpot.y),
-                    const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                  );
-                }).toList();
-              },
-
-            ),
-          ),
-          lineBarsData: [
-            LineChartBarData(
-              spots: [
-                for (int i = 0; i < prices.length; i++)
-                  FlSpot(i.toDouble(), prices[i]),
-              ],
-              isCurved: true,
-              color:Colors.blue,
-              barWidth: 3,   
-            ),
-            
-            
-          ],
-          gridData: const FlGridData(
-            show: false,
-          ),
-          borderData: FlBorderData(
-            show: false,
-          ),
-          titlesData: const FlTitlesData(
-            show: false,
-          ),
-        ),
-        
-      ),
-    );
-  }
-
-  String formatValue(double value) {
-  if (value >= 1000) {
-    return '${value/1000}K';
-  } else {
-    return value.toStringAsFixed(0);
-  }
-}
-
-}

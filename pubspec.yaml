@@ -52,10 +52,10 @@ dependencies:
 
   # state controller
   get: ^4.6.6 # GetX es una solución potente y extraligera para Flutter. Combina la gestión del estado de alto rendimiento, la inyección inteligente de dependencias y la gestión de rutas de forma rápida y práctica.
-  # storage
-  sqflite: ^2.3.0
+  # storage 
   get_storage: ^2.1.1
   flutter_secure_storage: ^9.0.0
+
   # app info 
   package_info_plus: ^5.0.1 # Un complemento de Flutter para obtener información sobre el paquete actual, como el nombre, la versión y el número de compilación.
   # others   
@@ -88,6 +88,7 @@ dependencies:
   email_validator: ^2.1.17
   blur: ^3.1.0  # Un paquete de Flutter que proporciona un widget de enfoque de desenfoque.
   fl_chart: ^0.66.1 # Un paquete de Flutter que proporciona un widget de gráfico de datos.
+  flutter_cache: ^0.1.0
   
 flutter_icons:
   android: true
