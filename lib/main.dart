@@ -3,7 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart'; 
+import 'package:get_storage/get_storage.dart';
+import 'package:intl/date_symbol_data_local.dart'; 
 import 'app/core/routes/app_pages.dart';
 import 'app/core/utils/dynamicTheme_lb.dart';
 import 'app/data/datasource/constant.dart';
@@ -43,13 +44,17 @@ Future<void> main() async {
     systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
   ));
 
-  runApp(GetMaterialApp(
-    title: "Punto de Venta",
-    initialRoute: AppPages.INITIAL,
-    getPages: AppPages.routes,
-    debugShowCheckedModeBanner: false,
-    themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
-    theme: ThemesDataApp().themeData,
-    darkTheme: ThemesDataApp().themeDataDark,
-  ));
+  initializeDateFormatting('es', null).then((_){
+    runApp(GetMaterialApp(
+      title: "Punto de Venta",
+      initialRoute: AppPages.INITIAL,
+      getPages: AppPages.routes,
+      debugShowCheckedModeBanner: false,
+      themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
+      theme: ThemesDataApp().themeData,
+      darkTheme: ThemesDataApp().themeDataDark,
+      )
+    );
+  });
+  
 }

@@ -285,6 +285,37 @@ class ProductCatalogue {
     );
   }
 
+  Map<String, dynamic> toMap() => {
+        "id": id,
+        "verified": verified,
+        'followers':followers,
+        'outstanding':outstanding,
+        "favorite": favorite,
+        "idMark": idMark,
+        "nameMark": nameMark,
+        "image": image,
+        "description": description,
+        "code": code,
+        "provider": provider,
+        "nameProvider": nameProvider,
+        "category": category,
+        "nameCategory": nameCategory,
+        "subcategory": subcategory,
+        "nameSubcategory": nameSubcategory,
+        "salePrice": salePrice,
+        "purchasePrice": purchasePrice,
+        "creation": creation.millisecondsSinceEpoch, // convertimos a milisegundos
+        "upgrade": upgrade.millisecondsSinceEpoch, // convertimos a milisegundos
+        "documentCreation": documentCreation.millisecondsSinceEpoch, // convertimos a milisegundos
+        "documentUpgrade": documentUpgrade.millisecondsSinceEpoch, // convertimos a milisegundos
+        "currencySign": currencySign,
+        "quantity": quantity,
+        "stock": stock,
+        "quantityStock": quantityStock,
+        "sales": sales,
+        "alertStock": alertStock,
+      };
+
   Map<String, dynamic> toJson() => {
         "id": id,
         "verified": verified,
@@ -315,6 +346,39 @@ class ProductCatalogue {
         "sales": sales,
         "alertStock": alertStock,
       };
+  factory ProductCatalogue.mapRefactoring(Map<dynamic, dynamic> data ){
+    return ProductCatalogue(
+      id: data['id'] ?? '',
+      verified: data['verified'] ?? false,
+      followers: data['followers'] ?? 0,
+      favorite: data['favorite'] ?? false,
+      outstanding: data['outstanding'] ?? false,
+      idMark: data['idMark'] ?? '',
+      nameMark: data['nameMark'] ?? '',
+      image: data['image'] ?? '',
+      description: data['description'] ?? '',
+      code: data['code'] ?? '',
+      provider: data['provider'] ?? '',
+      nameProvider: data['nameProvider'] ?? '',
+      category: data['category'] ?? '',
+      nameCategory: data['nameCategory'] ?? '',
+      subcategory: data['subcategory'] ?? '',
+      nameSubcategory: data['nameSubcategory'] ?? '',
+      salePrice: data['salePrice'] ?? 0.0,
+      purchasePrice: data['purchasePrice'] ?? 0.0,
+      currencySign: data['currencySign'] ?? '',
+      creation: Timestamp.fromMillisecondsSinceEpoch(data['creation']),
+      upgrade: Timestamp.fromMillisecondsSinceEpoch(data['upgrade']),
+      documentCreation: Timestamp.fromMillisecondsSinceEpoch(data['documentCreation']),
+      documentUpgrade: Timestamp.fromMillisecondsSinceEpoch(data['documentUpgrade']),
+      quantityStock: data['quantityStock'] ?? 0,
+      stock: data['stock'] ?? false,
+      alertStock: data['alertStock'] ?? 5,
+      revenue: data['revenue'] ?? 0.0,
+      sales: data['sales'] ?? 0,
+      quantity: data['quantity'] ?? 1,
+    );
+  }
 
   Product convertProductoDefault() {
     // convertimos en el modelo para producto global

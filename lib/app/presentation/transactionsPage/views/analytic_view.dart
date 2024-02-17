@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -41,6 +42,7 @@ class _StaticsCardsState extends State<StaticsCards> {
         titleText: 'Facturación', 
         valueText: transactionsController.getInfoAmountTotalFilter,
         description: 'Balance total',
+        content: MiniLineChart(prices: transactionsController.getBillingByDateList.reversed.toList(),positionIndex: transactionsController.positionIndex),
         ), 
       // card : transacciones
       CardAnalityc( 
@@ -49,7 +51,7 @@ class _StaticsCardsState extends State<StaticsCards> {
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.receipt,color: Colors.white,size:14)))),
         titleText: 'Transacciones',
         subtitle: '',
-        content: Text(transactionsController.getTransactionsList.length.toString(),style: const TextStyle(fontSize: 50,fontWeight: FontWeight.w500)),
+        content: Text(transactionsController.getVisibilityTransactionsList.length.toString(),style: const TextStyle(fontSize: 50,fontWeight: FontWeight.w500)),
         //valueText: transactionsController.getTransactionsList.length.toString(),
         description: '',
         ), 
@@ -147,7 +149,7 @@ class _StaticsCardsState extends State<StaticsCards> {
         subtitle: 'Facturación',
         modalContent: CashRegisterView(cashRegister: value['object']),
         valueText: Publications.getFormatoPrecio(monto: value['total'] ), 
-        description: 'Transacciones: ${value['sales'].toString()}\nApertura: ${value['opening'].toString()}',
+        description: 'Transacciones: ${value['sales'].toString()}',
         ));
     }); 
  
@@ -186,16 +188,23 @@ class CardAnalityc extends StatelessWidget {
   // ignore: prefer_const_constructors_in_immutables
   CardAnalityc({Key? key,this.backgroundColor=Colors.grey,this.isPremium=false,this.titleText='',this.description='',this.valueText='',this.subtitle='' ,this.content = const SizedBox(),this.modalContent=const SizedBox(),required this.icon,this.widgetDescription= const SizedBox()}) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) { 
-
-
+  double calculateCardWidth(BuildContext context) {
     // var : logica para el tamaño de la tarjeta
     double width =  MediaQuery.of(context).size.width / 2 - 12;
     if( MediaQuery.of(context).size.width > 500){  width = MediaQuery.of(context).size.width / 2 - 12;}
     if( MediaQuery.of(context).size.width > 600){  width = MediaQuery.of(context).size.width / 3 - 12;}
     if(MediaQuery.of(context).size.width > 800){  width = MediaQuery.of(context).size.width / 4 - 12;}
     if(MediaQuery.of(context).size.width > 1000){  width = MediaQuery.of(context).size.width / 5 - 12;}
+    return width;
+  }
+
+  @override
+  Widget build(BuildContext context) { 
+
+
+    // var : logica para el tamaño de la tarjeta
+    double width =  calculateCardWidth(context); 
+
 
     return SizedBox(
       width:width,
@@ -792,4 +801,98 @@ class CashRegisterView extends StatelessWidget {
       ),
     );
   }
+}
+
+
+
+
+
+
+
+
+
+
+class MiniLineChart extends StatelessWidget {
+
+  List<double> prices=[];
+  int positionIndex=0;
+  
+  MiniLineChart({Key? key,required this.prices,this.positionIndex=0}) : super(key: key);
+ 
+
+  @override
+  Widget build(BuildContext context) {
+
+    if(prices.isEmpty) return Container();
+ 
+    return SizedBox(
+      height: 30,
+      width: double.infinity,
+      child: LineChart(
+        LineChartData(
+          
+
+          lineTouchData: LineTouchData(  
+            handleBuiltInTouches: true,
+            touchTooltipData: LineTouchTooltipData(  
+              getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
+                return touchedBarSpots.map((barSpot) {
+                  final flSpot = barSpot; 
+                  return LineTooltipItem(
+                    formatValue(flSpot.y),
+                    const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  );
+                }).toList();
+              },
+
+            ),
+          ),
+          lineBarsData: [
+            LineChartBarData(  
+              spots: [
+                for (int i = 0; i < prices.length; i++)
+                  FlSpot(i.toDouble(), prices[i]),
+              ], 
+              isCurved: true,
+              color:Colors.blue,
+              barWidth: 2,
+              dotData: FlDotData(
+                show: true,
+                getDotPainter: (spot, percent, barData, index) {
+                  return FlDotCirclePainter(
+                    radius: index==0?4: index == positionIndex ? 6 : 4,
+                    color:Colors.blue,
+                    strokeColor: Colors.white ,
+                    strokeWidth: index==0?0: index == positionIndex ? 1 : 0,
+                  );
+                },
+        ),  
+            ),
+            
+            
+          ],
+          gridData: const FlGridData(
+            show: false,
+          ),
+          borderData: FlBorderData(
+            show: false,
+          ),
+          titlesData: const FlTitlesData(
+            show: false,
+          ),
+        ),
+        
+      ),
+    );
+  }
+
+  String formatValue(double value) {
+  if (value >= 1000) {
+    return '${value /1000}';
+  } else {
+    return value.toStringAsFixed(0);
+  }
+} 
+
+
 }

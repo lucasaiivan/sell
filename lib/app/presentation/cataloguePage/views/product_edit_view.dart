@@ -321,13 +321,10 @@ class ProductEdit extends StatelessWidget {
                       labelText: 'Precio de costo',
                       border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                       enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
-                      ),    
-                    onChanged: (value) {  
-                    } ,  
-                    onEditingComplete: (){
+                      ),      
+                    onChanged: (value) {   
                       controller.updateAll();
-                      FocusScope.of(controller.getContext).previousFocus();
-                    },
+                    } ,   
                     // validator: validamos el texto que el usuario ha ingresado.
                     validator: (value) {
                       // if (value == null || value.isEmpty) { return 'Por favor, escriba un precio de compra'; }
@@ -347,8 +344,7 @@ class ProductEdit extends StatelessWidget {
                 space,
                 // precio de venta al público
                 Form(
-                  key: controller.salePriceFormKey,
-                  // TODO : RangeError TextFormField : cuando el usuario mantiene presionado el boton de borrar > 'RangeError : Invalid value: only valid value is 0: -1'
+                  key: controller.salePriceFormKey, 
                   child: TextFormField(
                     style: valueTextStyle,
                     autofocus: false,
@@ -363,8 +359,8 @@ class ProductEdit extends StatelessWidget {
                       labelText: 'Precio de venta al público',
                       border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                       enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
-                    ),  
-                    onChanged: (value) { },
+                    ),   
+                    onChanged: (value) { controller.updateAll(); },
                     // validator: validamos el texto que el usuario ha ingresado.
                     validator: (value) {
                       if ( controller.controllerTextEditPrecioVenta.numberValue == 0.0) { return 'Por favor, escriba un precio de venta'; }
