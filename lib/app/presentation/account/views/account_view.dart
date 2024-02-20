@@ -69,13 +69,9 @@ class AccountView extends GetView<AccountController> {
     return AppBar(
       backgroundColor: Get.theme.scaffoldBackgroundColor,
       elevation: 0,
-      iconTheme: Theme.of(context)
-          .iconTheme
-          .copyWith(color: Theme.of(context).textTheme.bodyText1!.color),
+      iconTheme: Theme.of(context).iconTheme.copyWith(color: Theme.of(context).textTheme.bodyLarge!.color),
       title: Text(controller.newAccount ? 'Perfil de mi negocio' : 'Perfil',
-          style: TextStyle(
-              fontSize: 18.0,
-              color: Theme.of(context).textTheme.bodyText1!.color)),
+          style: TextStyle(fontSize: 18.0,color: Theme.of(context).textTheme.bodyLarge!.color)),
       actions: <Widget>[
         IconButton(
           icon: controller.getSavingIndicator
@@ -206,18 +202,7 @@ class AccountView extends GetView<AccountController> {
                   }
                   return null;
                 },
-              ),
-              // textfiel: username
-              /*TextField(
-                enabled: !controller.getSavingIndicator,
-                minLines: 1,
-                maxLines: 5,
-                keyboardType: TextInputType.multiline,
-                onChanged: (value) => controller.profileAccount.username = value,
-                decoration: const InputDecoration(filled: true,labelText: "Nombre de usuario"),
-                controller: TextEditingController(text: controller.profileAccount.username),
-                textInputAction: TextInputAction.next,
-              ), */ 
+              ), 
               divider,
               // textfiel: signo de moneda
               InkWell(
@@ -302,14 +287,13 @@ class AccountView extends GetView<AccountController> {
                   labelText: "Ciudad (opcional)",
                   filled: true,
                 ),
-                controller:
-                    TextEditingController(text: controller.profileAccount.town),
+                controller: TextEditingController(text: controller.profileAccount.town),
               ),
               const Divider(color: Colors.transparent, thickness: 1), 
               // text : marca de tiempo de la ultima actualización del documento
               controller.newAccount?Container():Padding(
                 padding: const EdgeInsets.only(top: 50),
-                child: Opacity(opacity: 0.5,child: Center(child: Text('Te uniste ${Publications.getFechaPublicacion(controller.profileAccount.creation.toDate(), Timestamp.now().toDate()).toLowerCase()}'))),
+                child: Opacity(opacity: 0.5,child: Center(child: Text('Te uniste ${Publications.getFechaPublicacion(fechaPublicacion: controller.profileAccount.creation.toDate(), fechaActual: Timestamp.now().toDate()).toLowerCase()}'))),
               ),
               const SizedBox(height: 75),
               // text : informativo 

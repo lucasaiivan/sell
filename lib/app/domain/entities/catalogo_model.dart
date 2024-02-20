@@ -10,6 +10,7 @@ class Product {
   String image = ""; // URL imagen
   String code = "";
 
+  int followers = 0; // seguidores
   bool outstanding = false; // producto destacado
   bool verified = false; // estado de verificación  al un moderador
   Timestamp creation =Timestamp.now(); // Marca de tiempo ( hora en que se creo el producto )
@@ -22,6 +23,7 @@ class Product {
 
   Product({
     this.id = "",
+    this.followers = 0,
     this.idUserCreation = '',
     this.idAccount = '',
     this.idUserUpgrade = '',
@@ -38,6 +40,7 @@ class Product {
 
   Map<String, dynamic> toJson() => {
         "id": id,
+        'followers':followers,
         'idAccount': idAccount,
         'idUserCreation': idUserCreation,
         'idUserUpgrade': idUserUpgrade,
@@ -54,26 +57,29 @@ class Product {
 
   factory Product.fromMap(Map data) {
     return Product(
-      id: data['id'] ?? '',
-      idAccount: data.containsKey('idAccount')? data['idAccount']: data['id_negocio'] ?? '',
-      idUserCreation: data['idUserCreation'] ?? '',
-      idUserUpgrade: data['idUserUpgrade'] ?? '',
-      verified: data.containsKey('verified')? data['verified']: data['verificado'] ?? false,
-      outstanding: data['outstanding'] ?? false,
-      idMark:data.containsKey('idMark') ? data['idMark'] : data['id_marca'] ?? '',
-      nameMark: data['nameMark'] ?? '',
-      image:data.containsKey('image') ? data['image'] : data['urlimagen'] ?? '',
-      description: data.containsKey('description')? data['description']: data['descripcion'] ?? '',
-      code: data.containsKey('code') ? data['code'] : data['codigo'] ?? '',
-      upgrade: data.containsKey('upgrade')? data['upgrade']: data['timestamp_actualizacion'] ?? Timestamp.now(),
-      creation: data.containsKey('creation')? data['creation']: data['timestamp_creation'] ?? Timestamp.now(),
+      id: data.containsKey('id')? data['id'] :'',
+      followers: data.containsKey('followers')? data['followers'] : 0,
+      idAccount: data.containsKey('idAccount')? data['idAccount']: '',
+      idUserCreation: data.containsKey('idUserCreation')? data['idUserCreation'] : '',
+      idUserUpgrade: data.containsKey('idUserUpgrade')? data['idUserUpgrade'] : '',
+      verified: data.containsKey('verified')? data['verified']: false,
+      outstanding: data.containsKey('outstanding')? data['outstanding'] : false,
+      idMark: data.containsKey('idMark') ? data['idMark'] : data.containsKey('id_marca') ?data['id_marca'] :'',
+      nameMark: data.containsKey('nameMark') ? data['nameMark'] : '',
+      image: data.containsKey('image') ? data['image'] :  data.containsKey('urlimagen') ? data['urlimagen'] :'',
+      description: data.containsKey('description')? data['description']: data.containsKey('descripcion')?data['descripcion']:'',
+      code: data.containsKey('code') ? data['code'] :  data.containsKey('codigo') ?data['codigo']:'',
+      upgrade: data.containsKey('upgrade')? data['upgrade']: Timestamp.now(),
+      creation: data.containsKey('creation')? data['creation']: Timestamp.now(),
     );
+    
   }
   Product.fromDocumentSnapshot({required DocumentSnapshot documentSnapshot}) {
     // convert
     Map data = documentSnapshot.data() as Map;
     // set
     id = data['id'] ?? '';
+    followers = data.containsKey('followers')? data['followers'] : 0;
     idAccount = data.containsKey('idAccount')? data['idAccount']: data['id_negocio'] ?? '';
     idUserCreation = data['idUserCreation'] ?? '';
     idUserUpgrade = data['idUserUpgrade'] ?? '';
@@ -92,6 +98,7 @@ class Product {
     ProductCatalogue productCatalogue =   ProductCatalogue(upgrade: Timestamp.now(), creation: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now());
     //  set
     productCatalogue.id = id;
+    productCatalogue.followers = followers;
     productCatalogue.image = image;
     productCatalogue.verified = verified;
     productCatalogue.outstanding = outstanding;
@@ -109,6 +116,8 @@ class Product {
 class ProductCatalogue {
   // valores del producto
   String id = "";
+  bool verified = false; // estado de verificación por un moderador
+  int followers = 0; // seguidores
   bool outstanding = false; // producto destacado
   bool favorite = false;
   String idMark = ""; // ID de la marca por defecto esta vacia
@@ -117,6 +126,8 @@ class ProductCatalogue {
   String description = ""; // Información
   String code = "";
   String category = ""; // ID de la categoria del producto
+  String provider = ""; // ID del proveedor del producto
+  String nameProvider = ""; // name provider
   String nameCategory = ""; // name category
   String subcategory = ""; // ID de la subcategoria del producto
   String nameSubcategory = ""; // name subcategory
@@ -124,17 +135,15 @@ class ProductCatalogue {
   Timestamp upgrade = Timestamp.now(); // Marca de tiempo ( hora en que se actualizo el documento )
   Timestamp documentCreation =Timestamp.now(); // Marca de tiempo ( hora en que se creo el producto publico )
   Timestamp documentUpgrade =Timestamp.now();// Marca de tiempo ( hora en que se actualizo el producto publico )
-  bool verified = false; // estado de verificación por un moderador
   int quantityStock = 0;
-  int sales = 0;
   bool stock = false;
   int alertStock = 5;
-  double salePrice = 0.0; // precio de venta
+  int sales = 0; // ventas
+  double salePrice = 0.0; // precio de venta al publico
   double purchasePrice = 0.0; // precio de compra
   String currencySign = "\$"; // signo de la moneda
 
-  // var optional
-  bool select = false;
+  // var optional app
   int quantity = 0;
   double revenue = 0.0;
   double priceTotal = 0;
@@ -143,11 +152,14 @@ class ProductCatalogue {
     // Valores del producto
     this.id = "",
     this.verified = false,
+    this.followers = 0,
     this.favorite = false,
     this.outstanding = false,
     this.image = "",
     this.description = "",
     this.code = "",
+    this.provider = "",
+    this.nameProvider = "",
     this.category = "",
     this.nameCategory = '',
     this.subcategory = "",
@@ -168,19 +180,21 @@ class ProductCatalogue {
     this.currencySign = "\$",
     this.idMark = '',
     this.nameMark = '',
-    this.select = false,
-    // var app
+    // var app 
     this.quantity = 1,
   });
 
   ProductCatalogue copyWith({
   String? id,
   bool? verified,
+  int? followers,
   bool? favorite,
   bool? outstanding,
   String? image,
   String? description,
   String? code,
+  String? provider,
+  String? nameProvider,
   String? category,
   String? nameCategory,
   String? subcategory,
@@ -198,18 +212,20 @@ class ProductCatalogue {
   double? purchasePrice,
   String? currencySign,
   String? idMark,
-  String? nameMark,
-  bool? select,
+  String? nameMark, 
   int? quantity,
 }) {
   return ProductCatalogue(
     id: id ?? this.id,
     verified: verified ?? this.verified,
+    followers: followers ?? this.followers,
     favorite: favorite ?? this.favorite,
     outstanding: outstanding ?? this.outstanding,
     image: image ?? this.image,
     description: description ?? this.description,
     code: code ?? this.code,
+    provider: provider ?? this.provider,
+    nameProvider: nameProvider ?? this.nameProvider,
     category: category ?? this.category,
     nameCategory: nameCategory ?? this.nameCategory,
     subcategory: subcategory ?? this.subcategory,
@@ -227,8 +243,7 @@ class ProductCatalogue {
     purchasePrice: purchasePrice ?? this.purchasePrice,
     currencySign: currencySign ?? this.currencySign,
     idMark: idMark ?? this.idMark,
-    nameMark: nameMark ?? this.nameMark,
-    select: select ?? this.select,
+    nameMark: nameMark ?? this.nameMark, 
     quantity: quantity ?? this.quantity,
   );
 }
@@ -236,63 +251,84 @@ class ProductCatalogue {
   factory ProductCatalogue.fromMap(Map data) {
     return ProductCatalogue(
       // Valores del producto
-      id: data['id'] ?? '',
+      id: data.containsKey('id')? data['id'] :'',
       verified: data.containsKey('verified')? data['verified']: data['verificado'] ?? false,
-      outstanding:  data['outstanding'] ?? false,
+      followers: data.containsKey('followers')? data['followers']: data['seguidores'] ?? 0,
+      outstanding: data.containsKey('outstanding')? data['outstanding']: data['destacado'] ?? false,
       favorite: data.containsKey('favorite')? data['favorite']: data['favorito'] ?? false,
       idMark:data.containsKey('idMark') ? data['idMark'] : data['id_marca'] ?? '',
-      nameMark: data['nameMark'] ?? '',
+      nameMark: data.containsKey('nameMark') ? data['nameMark'] : data['nombre_marca'] ?? '',
       image: data.containsKey('image')? data['image']: data['urlimagen'] ?? 'https://default',
-      description: data.containsKey('description')
-          ? data['description']
-          : data['descripcion'] ?? '',
+      description: data.containsKey('description')?data['description']: data['descripcion'] ?? '',
       code: data.containsKey('code') ? data['code'] : data['codigo'] ?? '',
-      category: data.containsKey('category')
-          ? data['category']
-          : data['categoria'] ?? '',
-      nameCategory: data.containsKey('nameCategory')
-          ? data['nameCategory']
-          : data['categoriaName'] ?? '',
-      subcategory: data.containsKey('subcategory')
-          ? data['subcategory']
-          : data['subcategoria'] ?? '',
-      nameSubcategory: data.containsKey('nameSubcategory')
-          ? data['nameSubcategory']
-          : data['subcategoriaName'] ?? '',
+      provider: data.containsKey('provider')?data['provider']:data['proveedor'] ?? '',
+      nameProvider: data.containsKey('nameProvider')?data['nameProvider']:data['proveedorName'] ?? '',
+      category: data.containsKey('category')?data['category']:data['categoria'] ?? '',
+      nameCategory: data.containsKey('nameCategory')?data['nameCategory']:data['categoriaName'] ?? '',
+      subcategory: data.containsKey('subcategory')?data['subcategory']:data['subcategoria'] ?? '',
+      nameSubcategory: data.containsKey('nameSubcategory')?data['nameSubcategory']:data['subcategoriaName'] ?? '',
       upgrade: data.containsKey('upgrade')? data['upgrade']: data['timestamp_actualizacion'] ?? Timestamp.now(),
       creation: data.containsKey('creation')? data['creation']: data['timestamp_creation'] ?? Timestamp.now(),
-      documentCreation: data['documentCreation'] ?? Timestamp.now(),
-      documentUpgrade:  data['documentUpgrade'] ?? Timestamp.now(),
+      documentCreation: data.containsKey('documentCreation')? data['documentCreation']: data['documentCreation'] ?? Timestamp.now(),
+      documentUpgrade: data.containsKey('documentUpgrade')? data['documentUpgrade']: data['documentUpgrade'] ?? Timestamp.now(),
       // valores de la cuenta
-      salePrice: data.containsKey('salePrice')
-          ? data['salePrice']
-          : data['precio_venta'] ?? 0.0,
-      purchasePrice: data.containsKey('purchasePrice')
-          ? data['purchasePrice']
-          : data['precio_compra'] ?? 0.0,
-      currencySign: data.containsKey('currencySign')
-          ? data['currencySign']
-          : data['signo_moneda'] ?? '',
-      quantity: data.containsKey('quantity') ? data['quantity'] : 1,
-      quantityStock: data['quantityStock'] ?? 0,
+      salePrice: data.containsKey('salePrice') ? data['salePrice'].toDouble()??0.0.toDouble() :0.0.toDouble(),
+      purchasePrice: data.containsKey('purchasePrice') ? data['purchasePrice'].toDouble()??0.0.toDouble():0.0.toDouble(),
+      currencySign: data.containsKey('currencySign')?data['currencySign']:data['signo_moneda'] ?? '',
+      quantityStock: data.containsKey('quantityStock')? data['quantityStock'] : 0,
       sales: data.containsKey('sales')? data['sales'] : 0,
-      select: false,
-      stock: data['stock'] ?? false,
+      stock:  data.containsKey('stock')? data['stock'] : false,
       alertStock: data.containsKey('alertStock')?data['alertStock'] : 5,
       revenue: data.containsKey('revenue')?data['revenue'] : 0.0,
+      // values of app
+      quantity: data.containsKey('quantity') ? data['quantity'] : 1, 
     );
   }
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toMap() => {
         "id": id,
-        'outstanding':outstanding,
         "verified": verified,
+        'followers':followers,
+        'outstanding':outstanding,
         "favorite": favorite,
         "idMark": idMark,
         "nameMark": nameMark,
         "image": image,
         "description": description,
         "code": code,
+        "provider": provider,
+        "nameProvider": nameProvider,
+        "category": category,
+        "nameCategory": nameCategory,
+        "subcategory": subcategory,
+        "nameSubcategory": nameSubcategory,
+        "salePrice": salePrice,
+        "purchasePrice": purchasePrice,
+        "creation": creation.millisecondsSinceEpoch, // convertimos a milisegundos
+        "upgrade": upgrade.millisecondsSinceEpoch, // convertimos a milisegundos
+        "documentCreation": documentCreation.millisecondsSinceEpoch, // convertimos a milisegundos
+        "documentUpgrade": documentUpgrade.millisecondsSinceEpoch, // convertimos a milisegundos
+        "currencySign": currencySign,
+        "quantity": quantity,
+        "stock": stock,
+        "quantityStock": quantityStock,
+        "sales": sales,
+        "alertStock": alertStock,
+      };
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "verified": verified,
+        'followers':followers,
+        'outstanding':outstanding,
+        "favorite": favorite,
+        "idMark": idMark,
+        "nameMark": nameMark,
+        "image": image,
+        "description": description,
+        "code": code,
+        "provider": provider,
+        "nameProvider": nameProvider,
         "category": category,
         "nameCategory": nameCategory,
         "subcategory": subcategory,
@@ -310,11 +346,45 @@ class ProductCatalogue {
         "sales": sales,
         "alertStock": alertStock,
       };
+  factory ProductCatalogue.mapRefactoring(Map<dynamic, dynamic> data ){
+    return ProductCatalogue(
+      id: data['id'] ?? '',
+      verified: data['verified'] ?? false,
+      followers: data['followers'] ?? 0,
+      favorite: data['favorite'] ?? false,
+      outstanding: data['outstanding'] ?? false,
+      idMark: data['idMark'] ?? '',
+      nameMark: data['nameMark'] ?? '',
+      image: data['image'] ?? '',
+      description: data['description'] ?? '',
+      code: data['code'] ?? '',
+      provider: data['provider'] ?? '',
+      nameProvider: data['nameProvider'] ?? '',
+      category: data['category'] ?? '',
+      nameCategory: data['nameCategory'] ?? '',
+      subcategory: data['subcategory'] ?? '',
+      nameSubcategory: data['nameSubcategory'] ?? '',
+      salePrice: data['salePrice'] ?? 0.0,
+      purchasePrice: data['purchasePrice'] ?? 0.0,
+      currencySign: data['currencySign'] ?? '',
+      creation: Timestamp.fromMillisecondsSinceEpoch(data['creation']),
+      upgrade: Timestamp.fromMillisecondsSinceEpoch(data['upgrade']),
+      documentCreation: Timestamp.fromMillisecondsSinceEpoch(data['documentCreation']),
+      documentUpgrade: Timestamp.fromMillisecondsSinceEpoch(data['documentUpgrade']),
+      quantityStock: data['quantityStock'] ?? 0,
+      stock: data['stock'] ?? false,
+      alertStock: data['alertStock'] ?? 5,
+      revenue: data['revenue'] ?? 0.0,
+      sales: data['sales'] ?? 0,
+      quantity: data['quantity'] ?? 1,
+    );
+  }
 
   Product convertProductoDefault() {
     // convertimos en el modelo para producto global
     Product productoDefault = Product(upgrade: Timestamp.now(), creation: Timestamp.now());
     productoDefault.id = id;
+    productoDefault.followers = followers;
     productoDefault.image = image;
     productoDefault.verified = verified;
     productoDefault.outstanding = outstanding;
@@ -328,6 +398,7 @@ class ProductCatalogue {
   ProductCatalogue updateData({required Product product}) {
     // actualizamos los datos del documento publico
     id = product.id;
+    followers = product.followers;
     image = product.image;
     verified = product.verified;
     outstanding = product.outstanding;
@@ -371,7 +442,7 @@ class ProductCatalogue {
 
 }
 
-class Price {
+class ProductPrice {
   String id = '';
   double price = 0.0;
   late Timestamp time; // marca de tiempo en la que se registro el precio
@@ -383,7 +454,7 @@ class Price {
   String imageAccount = ''; // imagen de perfil de la cuenta
   String nameAccount = ''; // nombre de la cuenta
 
-  Price({
+  ProductPrice({
     required this.id,
     required this.idAccount,
     required this.imageAccount,
@@ -395,7 +466,7 @@ class Price {
     this.town = '',
   });
 
-  Price.fromMap(Map data) {
+  ProductPrice.fromMap(Map data) {
     id = data['id'] ?? '';
     idAccount = data['idAccount'] ?? '';
     imageAccount = data.containsKey('imageAccount')
@@ -509,6 +580,15 @@ class Mark {
         "creation": creation,
         "upgrade": upgrade,
       };
+
+  // Sobreescribir el operador ==
+  @override
+  bool operator ==(other) {
+    return other is Mark && other.id == id && other.name == name;
+  }
+  // Sobreescribir el metodo hashCode
+  @override
+  int get hashCode => id.hashCode ^ name.hashCode;
 }
 
 class ReportProduct {
@@ -551,4 +631,29 @@ class ReportProduct {
     description = data['description'] ?? '';
     time = data['time'];
   }
+}
+
+// class Supplier: proveedor de productos  
+class Provider {
+  String id = ""; 
+  String name = ""; 
+  Provider({
+    this.id = "", 
+    this.name = "", 
+  });
+  Provider.fromMap(Map data) {
+    id = data['id'] ?? ''; 
+    name = data['name'] ?? ''; 
+  }
+  Map<String, dynamic> toJson() => {
+        "id": id, 
+        "name": name, 
+      }; 
+  Provider.fromDocumentSnapshot({required DocumentSnapshot documentSnapshot}) {
+    Map data = documentSnapshot.data() as Map;
+
+    id = data['id'] ?? ''; 
+    name = data['name'] ?? ''; 
+  }
+ 
 }

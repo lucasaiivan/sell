@@ -6,18 +6,28 @@ import '../../splash/controllers/splash_controller.dart';
 
 class LoginController extends GetxController {
 
+  // source
+  String sellImagen = "assets/sell.png";
+  String transactionImage = "assets/transaction.png";
+  String catalogueImage = "assets/catalogue.png";
+
   // firebase
   final FirebaseAuth auth = FirebaseAuth.instance;
 
   // controllers
   SplashController homeController = Get.find<SplashController>();
 
+  // state : style
+  Rx<Color> checkPolicyAlertColor = Colors.orange.shade100.withOpacity(0.3).obs;
   // state - Check Accept Privacy And Use Policy
   RxBool stateCheckAcceptPrivacyAndUsePolicy = false.obs;
   bool get getStateCheckAcceptPrivacyAndUsePolicy =>
       stateCheckAcceptPrivacyAndUsePolicy.value;
-  set setStateCheckAcceptPrivacyAndUsePolicy(bool value) =>
-      stateCheckAcceptPrivacyAndUsePolicy.value = value;
+  set setStateCheckAcceptPrivacyAndUsePolicy(bool value) {
+    if(value){checkPolicyAlertColor.value = Colors.transparent;}
+    else {checkPolicyAlertColor.value = Colors.orange.shade100.withOpacity(0.5);}
+    stateCheckAcceptPrivacyAndUsePolicy.value = value;  
+  }
 
 
 
@@ -54,6 +64,7 @@ class LoginController extends GetxController {
       Get.snackbar(
           'Primero tienes que leer nuestras políticas y términos de uso 🙂',
           'Tienes que aceptar nuestros términos de uso y política de privacidad para usar esta aplicación');
+      checkPolicyAlertColor.value = Colors.red.shade100.withOpacity(0.5); 
     }
   } 
   void signInAnonymously() async { 
