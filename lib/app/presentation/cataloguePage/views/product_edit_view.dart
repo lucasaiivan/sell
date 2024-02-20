@@ -12,6 +12,7 @@ import '../../../core/utils/widgets_utils.dart';
 import '../../home/controller/home_controller.dart';
 import '../controller/product_edit_controller.dart'; 
 
+// ignore: must_be_immutable
 class ProductEdit extends StatelessWidget {
   ProductEdit({Key? key}) : super(key: key);
 
@@ -22,7 +23,7 @@ class ProductEdit extends StatelessWidget {
   Color? appBarTextColor = Get.theme.textTheme.bodyMedium!.color;
   final Widget space = const SizedBox(
     height: 16.0,
-    width: 16.0,
+    width: 16.0, 
   );
 
   @override
@@ -33,6 +34,7 @@ class ProductEdit extends StatelessWidget {
     controller.colorLoading = Get.theme.primaryColor;
     controller.darkMode = Get.isDarkMode; 
 
+    // ignore: unused_local_variable
     Widget noEdit = Column(
       mainAxisSize: MainAxisSize.min,
       children: [
