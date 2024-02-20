@@ -1,11 +1,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:observe_internet_connectivity/observe_internet_connectivity.dart';
+import 'package:sell/app/presentation/historyCashRegisterPage/views/historyCashRegister_view.dart';
 import 'package:sell/app/presentation/sellPage/views/sell_view.dart';
 import 'package:sell/app/presentation/cataloguePage/views/catalogue_view.dart';
 import 'package:sell/app/presentation/transactionsPage/views/transactions_view.dart';
 import '../../../core/utils/widgets_utils.dart';
-import '../../multiuser/views/multiuser_view.dart';
+import '../../multiuser/views/multiuser_view.dart';  
 import '../controller/home_controller.dart';
 
 
@@ -14,15 +16,19 @@ class HomeView extends GetView<HomeController> {
   HomeView({Key? key}) : super(key: key);
 
   // var 
+  InternetConnectivity internetConnectivity = InternetConnectivity();
   Widget getView({required index}) {
+    // nos permite crear una vista elegida por el usuario del menú de navegación lateral
     switch (index) {
       case 0:
         return SalesView();
       case 1:
-        return TransactionsView();
+        return HistoryCashRegisterView();
       case 2:
-        return CataloguePage();
+        return TransactionsView();
       case 3:
+        return CataloguePage();
+      case 4:
         return MultiUser();
       default:
         return SalesView();
@@ -32,22 +38,54 @@ class HomeView extends GetView<HomeController> {
 
   @override
   Widget build(BuildContext context) { 
-     
-
-    // condition : si el usuario no ha seleccionado una cuenta, se muestra la vista por defecto
-    if (controller.getProfileAccountSelected.id == '' && controller.getFirebaseAuth.currentUser!.isAnonymous == false){return viewDefault();}
-
+    
     // get : nos permite obtener el valor de una variable
-    controller.setBuildContext=context;
+    controller.setHomeBuildContext=context;
     controller.setDarkMode = Theme.of(context).brightness==Brightness.dark;
 
     // Obx : nos permite observar los cambios en el estado de la variable
     return Obx(() {
-      // WillPopScope : nos permite controlar el botón de retroceso del dispositivo
-      return WillPopScope(
-        onWillPop: () => controller.onBackPressed(context: context), 
-        // getView : nos permite crear una vista con un diseño predefinido
+
+      //  condition : si el usuario no ha seleccionado una cuenta
+      if (controller.getProfileAccountSelected.id == '' && controller.getFirebaseAuth.currentUser!.isAnonymous == false ){
+        // viewDefault : se muestra la vista por defecto para iniciar sesión de una cuenta existente o crear una nueva cuenta
+        return viewDefault();
+      }
+
+      // PopScope : nos permite controlar el botón de retroceso del dispositivo
+      return PopScope( 
+        canPop: false, // deshabilitar el botón de retroceso del dispositivo
+        onPopInvoked: (_) => controller.onBackPressed(context: context), 
+        child: InternetConnectivityBuilder(
+          connectivityBuilder: (BuildContext context, bool hasInternetAccess, Widget? child) { 
+            if(hasInternetAccess) {
+              // con conexión a internet
+              controller.setInternetConnection = hasInternetAccess;
+              return getView(index: controller.getIndexPage);
+            } else {
+              // sin conexión a internet
+              controller.setInternetConnection = hasInternetAccess;
+              return Scaffold(
+                appBar: AppBar(
+                  // quitar margen
+                  toolbarHeight: 20,
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.wifi_off,color: Colors.red.shade300,size: 20),
+                      const SizedBox(width: 10),
+                      Text('Sin conexión a internet',style: TextStyle(fontSize: 16,color: Colors.red.shade300)),
+                    ],
+                  ),
+                  centerTitle: true, 
+                  automaticallyImplyLeading: false,
+                ),
+                body: getView(index: controller.getIndexPage),
+              );
+            }
+          },
         child: getView(index: controller.getIndexPage),
+      ),
       );
     });
   }

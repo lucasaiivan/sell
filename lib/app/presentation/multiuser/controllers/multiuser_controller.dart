@@ -1,10 +1,11 @@
 
-import 'dart:async';
-
+import 'dart:async'; 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:sell/app/core/utils/fuctions.dart';
+import '../../../core/utils/widgets_utils.dart';
 import '../../../domain/entities/user_model.dart';
 import '../../../data/datasource/database_cloud.dart';
 import '../../home/controller/home_controller.dart';
@@ -44,12 +45,39 @@ class MultiUserController extends GetxController {
     _periodicTimer.cancel();
   }
 
+  // crear nuevo usaurio
+  void createNewUser({required UserModel user}) { 
+
+    // set : values
+    user.email;
+    // Firebase : refencia de la base de datos 
+    var refFirestoreUserAccountsList = Database.refFirestoreUserAccountsList(email: user.email).doc( homeController.getIdAccountSelected );
+    var refFirestoreAccountsUsersList = Database.refFirestoreAccountsUsersList(idAccount: homeController.getIdAccountSelected ).doc(user.email);
+    // Firebase : agrega o actualiza el documento en la coleccion de usuarios en la cuenta
+    refFirestoreAccountsUsersList.set(user.toJson());
+    // Firebase : agrega o actualiza el documento en la coleccion de cuentas administradas del usuario
+    refFirestoreUserAccountsList.set(Map<String, dynamic>.from(user.toJson()));
+  }
+  void updateUser({required UserModel user}) {
+    // Firebase reference: lista de cuenta administradas por el usuario
+    var refFirestoreUserAccountsList = Database.refFirestoreUserAccountsList(email: user.email).doc( homeController.getIdAccountSelected );
+    // Firebase reference: lista de usuarios administradores de la cuenta
+    var refFirestoreAccountsUsersList = Database.refFirestoreAccountsUsersList(idAccount: homeController.getIdAccountSelected ).doc(user.email);
+    // Firebase :  actualiza el documento en la coleccion de usuarios en la cuenta
+    refFirestoreAccountsUsersList.update(user.toJson());
+    // Firebase :  actualiza el documento en la coleccion de cuentas administradas del usuario
+    refFirestoreUserAccountsList.update(Map<String, dynamic>.from(user.toJson()));
+  }
+
 
 
   // WIDGETS DIALOG
+  void editItem({required UserModel user}) {
+    dialogUserAdmin( user: user );
+  }
   void addItem() { 
 
-    Get.dialog(AddAlertDialog());
+    dialogUserAdmin(user: UserModel(creation:Timestamp.now(),lastUpdate:Timestamp.now()) );
   }
   void deleteItem({required UserModel user}) {
     Widget widget = AlertDialog(
@@ -61,14 +89,15 @@ class MultiUserController extends GetxController {
         TextButton(
             onPressed: () {
 
-              // Firebase : ref 
+              // Firebase : referencias de la base de datos
               var refFirestoreUserAccountsList = Database.refFirestoreUserAccountsList(email: user.email).doc( homeController.getIdAccountSelected );
               var refFirestoreAccountsUsersList = Database.refFirestoreAccountsUsersList(idAccount: homeController.getIdAccountSelected ) .doc(user.email);
 
-              // Firebase : delete
+              // firebase : se elimina el documento de la lista de usuarios administradores de la cuenta
               refFirestoreUserAccountsList.delete();
+              // firebase : se elimina el documento de la lista de cuentas administradas por el usuario
               refFirestoreAccountsUsersList.delete();
-
+    
               Get.back();
             },
             child: const Text('si, eliminar')),
@@ -82,90 +111,346 @@ class MultiUserController extends GetxController {
     }
   }
   
+  // dialog : crear nuevo o editar usuario administrador
+  void dialogUserAdmin({required UserModel user}) {
+    Widget content = UserAdminAlertDialog(user: user );
+    
+    // creamos un dialog con GetX
+    Get.dialog(
+      ClipRRect(
+        borderRadius: const  BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12), bottomLeft: Radius.circular(0), bottomRight: Radius.circular(0)),
+        child: content,
+      ),
+    ); 
+  }
+  
 }
 
-class AddAlertDialog extends StatefulWidget {
-  AddAlertDialog({Key? key}) : super(key: key);
+// ignore: must_be_immutable
+class UserAdminAlertDialog extends StatefulWidget {
+  UserModel user = UserModel(creation:Timestamp.now(),lastUpdate:Timestamp.now());
+  UserAdminAlertDialog({Key? key,required this.user}) : super(key: key);
 
   @override
-  State<AddAlertDialog> createState() => _AddAlertDialogState();
+  State<UserAdminAlertDialog> createState() => _UserAdminAlertDialogState();
 }
 
-class _AddAlertDialogState extends State<AddAlertDialog> {
+class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
 
   // controllers
   final HomeController homeController = Get.find();
-  final MultiUserController controller = Get.find();
-  final TextEditingController _textFieldController = TextEditingController();
+  final MultiUserController multiUserController = Get.find();
+  final TextEditingController _nameTextFieldController = TextEditingController();
+  final TextEditingController _emailTextFieldController = TextEditingController();
 
-  // var
-  bool? admin = false;
-  bool? standar = false;
+  
+
+  // var  
+  bool newUser = true;
+  bool enableEmailTextField = true; 
+
+  void setAdmin(){
+    setState(() { 
+      widget.user.admin = true;
+      widget.user.personalized = false; 
+      // ...
+      widget.user.arqueo = true;
+      widget.user.historyArqueo = true;
+      widget.user.catalogue = true;
+      widget.user.transactions = true; 
+      widget.user.multiuser = true;
+      widget.user.editAccount = true;
+    });
+  }
+  void setPersonalized(){ 
+    if(widget.user.arqueo && widget.user.historyArqueo && widget.user.catalogue && widget.user.transactions && widget.user.multiuser && widget.user.editAccount){
+      // si todos los permisos estan activados
+      widget.user.admin = true;
+      widget.user.personalized = false; 
+    }else{
+      // si algun permiso esta desactivado
+      widget.user.admin = false;
+      widget.user.personalized = true; 
+    }
+  }
 
   @override
-  Widget build(BuildContext context) {
+  void initState() { 
+    super.initState();
 
-    return AlertDialog(
-      title: const Text('Nuevo usuario',textAlign: TextAlign.center),
+    if(widget.user.email.isNotEmpty){
+      newUser = false; // no es un nuevo usuario
+      _emailTextFieldController.text = widget.user.email; // seteamos el email del usuario
+      _nameTextFieldController.text = widget.user.name; // seteamos el nombre del usuario
+      enableEmailTextField = false; // deshabilitamos el campo de texto
+     
 
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TextField(
-            controller: _textFieldController,
-            decoration: const InputDecoration(hintText: "Email"),
-          ),
-          const Padding(
-            padding: EdgeInsets.only(top:40),
-            child: Opacity(opacity: 0.7,child: Text('Permisos')),
-          ),
-          CheckboxListTile(title:const Text('Administrador'),value: admin, onChanged: (value){setState(() {
-            admin=value;
-            if(admin==true){standar=false;}
-          });}),
-          CheckboxListTile(
-            title:const Text('Estandar'),
-            subtitle: const Text('Solo puede vender'),
-            value: standar, onChanged: (value){setState(() {
-            standar=value;
-            if(standar==true){admin=false;}
-          });}),
-        ],
-      ),
+    }
+  }
 
-      actions: [
-        TextButton(onPressed: Get.back,child: const Text('Cancelar')),
-        TextButton(
+  @override
+  Widget build(BuildContext context) { 
+
+    // widgets
+    Widget divider = ComponentApp().divider();
+    // style  
+    final Color textDescriptionStyleColor = Get.isDarkMode?Colors.white:Colors.black ;
+    TextStyle valueTextStyle= TextStyle(height:2,color: textDescriptionStyleColor); 
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text( newUser?'Nuevo usuario':'Actualizar usuario',
+        textAlign: TextAlign.center),
+        automaticallyImplyLeading: false,// desabilitamos el boton de regresar
+        actions: [
+          IconButton(
             onPressed: () {
-
-              if(EmailValidator.validate(_textFieldController.text) ){
-                if( admin==true || standar==true){
-
-                  // create user 
-                  UserModel user = UserModel(email: _textFieldController.text , admin: admin??false);
-
-                  // Firebase : ref 
-                  var refFirestoreUserAccountsList = Database.refFirestoreUserAccountsList(email: user.email).doc( homeController.getIdAccountSelected );
-                  var refFirestoreAccountsUsersList = Database.refFirestoreAccountsUsersList(idAccount: homeController.getIdAccountSelected ) .doc(user.email);
-                  // Firebase : set doc
-                  refFirestoreAccountsUsersList.set(user.toJson(),SetOptions(merge: true));
-                  refFirestoreUserAccountsList.set(Map<String, dynamic>.from({'id': homeController.getIdAccountSelected ,'superAdmin':user.admin}),SetOptions(merge: true));
-
-                  Get.back();
-                }else{
-                  Get.snackbar('Permiso del usuario','Elige qué tipo de permisos tiene este usuario');
-                }
-              }else{
-                Get.snackbar('E-mail invalido','Debe proporcionar un correo electrónico válido, asegúrese de que no contenga espacios vacios');
-              }
-
-              // Firebase : delete
-              //Database.refFirestoreAccountsUsersList(idAccount: homeController.getIdAccountSelected).doc(user.email).delete();
-              //Get.back();
+              Get.back();
             },
-            child: const Text('Crear usuario')),
-      ],
+            icon: const Icon(Icons.close),
+          ),
+        ],
+        ),
+
+      body: Stack(
+        fit:  StackFit.expand,
+        children: [
+          ListView( 
+            physics: const BouncingScrollPhysics(),
+            children: [
+              // view : datos del usuario
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Column(
+                  children: [
+                    const SizedBox(height:20),
+                    // textfield : nombre
+                    TextField( 
+                      style: valueTextStyle,
+                      controller: _nameTextFieldController,
+                      decoration: const InputDecoration(labelText: "Nombre (opcional))" ),
+                      onChanged: (value) {
+                        widget.user.name = value;
+                      },
+                    ),
+                    const SizedBox(height:12),
+                    // textfield : email
+                    TextField( 
+                      style: valueTextStyle,
+                      enabled: enableEmailTextField,
+                      controller: _emailTextFieldController,
+                      decoration: const InputDecoration(labelText: "Email" ),
+                      onChanged: (value) {
+                        widget.user.email = value;
+                      },
+                    ),
+                    
+                  ],
+                ),
+              ), 
+              const SizedBox(height:12),
+              // CheckboxListTile : opcipn de inactivar el usuario
+              CheckboxListTile(  
+                enabled: !widget.user.superAdmin,
+                title:const Text('Inactivar usuario'),
+                subtitle: const Opacity(opacity: 0.5,child: Text('Permite bloquear el usuario')),
+                value: widget.user.inactivate, 
+                onChanged: (value){ 
+                  setState(() {
+                    widget.user.inactivate = value!;
+                  });
+                },
+              ),
+              const Divider(thickness: 8),
+              // text : permisos
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12,vertical: 12),
+                child: Opacity(opacity: 0.7,child: Text('Permisos',style:TextStyle(fontSize: 16,fontWeight: FontWeight.w700))),
+              ),
+              // view : butones de categorias de permisos 
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal:12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [ 
+                    // button : permiso administrador
+                    Padding(
+                      padding: const EdgeInsets.all(2.0),
+                      child: ElevatedButton.icon(
+                        style: ButtonStyle(elevation:MaterialStateProperty.all(widget.user.admin? 5: 0)),
+                        icon: widget.user.admin? const Icon(Icons.check_circle_rounded) : Container(),
+                        onPressed: setAdmin,
+                        label: Text(widget.user.superAdmin?'Super administrador':'Administrador'),
+                      ),
+                    ),
+                    // button : permiso personalizados 
+                    Padding(
+                      padding: const EdgeInsets.all(2.0),
+                      child: ElevatedButton.icon(
+                        
+                        style: ButtonStyle(elevation:MaterialStateProperty.all(widget.user.personalized? 5: 0)),
+                        icon: widget.user.personalized? const Icon(Icons.check_circle_rounded) : Container(),
+                        onPressed: widget.user.superAdmin?null: () { 
+                          setState(() {
+                            widget.user.personalized = !widget.user.personalized;
+                            widget.user.admin = false;
+                          }); 
+                        },
+                        label: const Text('Personalizado'),
+                      ),
+                    ),
+                  ],
+                ),
+              ), 
+              // checkbox : arqueo
+              CheckboxListTile(
+                enabled: !widget.user.superAdmin,
+                title:const Text('Arqueo de caja'),
+                subtitle: const Opacity(opacity: 0.5,child: Text('Permite crear y cerrar arqueos de caja')),
+                value: widget.user.arqueo, 
+                onChanged: (value){
+                  setState(() { 
+                    widget.user.arqueo=value!; 
+                    setPersonalized();
+                  });
+                }, 
+              ),
+              divider,
+              // checkbox : historial de arqueos
+              CheckboxListTile(
+                enabled: !widget.user.superAdmin,
+                title:const Text('Historial de arqueos'),
+                subtitle: const Opacity(opacity: 0.5,child: Text('Permite ver y eliminar registros de arqueos')),
+                value: widget.user.historyArqueo, 
+                onChanged: (value){
+                  setState(() {
+                    widget.user.historyArqueo=value!; 
+                    setPersonalized();
+                  });
+                },
+              ),
+              divider,
+              // checkbox : transacciones
+              CheckboxListTile(
+                enabled: !widget.user.superAdmin,
+                title:const Text('Transacciones de ventas'),
+                subtitle: const Opacity(opacity: 0.5,child: Text('Permite ver y eliminar registros de ventas')),
+                value: widget.user.transactions, 
+                onChanged: (value){
+                  setState(() {
+                    widget.user.transactions=value!; 
+                    setPersonalized();
+                  });
+                },
+              ),
+              divider,
+              // checkbox : catalogo
+              CheckboxListTile(
+                enabled: !widget.user.superAdmin,
+                title:const Text('Catálogo'),
+                subtitle: const Opacity(opacity: 0.5,child: Text('Permite registrar, editar y eliminar productos')),
+                value: widget.user.catalogue, 
+                onChanged: (value){
+                  setState(() {
+                    widget.user.catalogue=value!; 
+                    setPersonalized();
+                  });
+                },
+              ),
+              divider,
+              // checkbox : multiusuario
+              CheckboxListTile(
+                enabled: !widget.user.superAdmin,
+                title:const Text('Multiusuario'),
+                subtitle: const Opacity(opacity: 0.5,child: Text('Permite crear, modificar y eliminar usuarios')),
+                value: widget.user.multiuser, 
+                onChanged: (value){
+                  setState(() {
+                    widget.user.multiuser=value!; 
+                    setPersonalized();
+                  });
+                },
+              ),
+              divider,
+              // checkbox : editar cuenta
+              CheckboxListTile(
+                enabled: !widget.user.superAdmin,
+                title:const Text('Editar cuenta'),
+                subtitle: const Opacity(opacity: 0.5,child: Text('Permite editar o eliminar los datos de la cuenta para siempre')),
+                value: widget.user.editAccount, 
+                onChanged: (value){
+                  setState(() {
+                    widget.user.editAccount=value!; 
+                    setPersonalized();
+                  });
+                },
+              ), 
+              const SizedBox(height: 100),
+            ],
+          ),
+          // elevateButton : crear o actualizar
+          //
+          // Positioned : para posicionar el boton en la parte inferior de la pantalla
+          Positioned(
+            bottom: 0,left: 0,right: 0,
+            child: Container(   
+              // color : gradient de un color y transparent 
+              decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.transparent,Theme.of(context).scaffoldBackgroundColor.withOpacity(0.3),Theme.of(context).scaffoldBackgroundColor], begin: Alignment.topCenter,end: Alignment.bottomCenter),),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: ComponentApp().button(
+                  defaultStyle: true,
+                  icon: Text(newUser?'Crear usuario':'Actualizar'),
+                  onPressed: (){ 
+
+                    if(homeController.getIsSubscribedPremium==false){
+                      // no es premium
+                      Get.back();
+                      homeController.showModalBottomSheetSubcription(id: 'multiuser');
+                      return;
+                    }
+
+                    if(EmailValidator.validate(widget.user.email) ){ 
+                      // condition : nos aseguramos que se haya seleccionado un tipo de permiso
+                      if( widget.user.admin==true || widget.user.personalized==true){ 
+    
+                        // verificamos que el email no exista en la lista de usuarios existentes 
+                        if(newUser){
+                          for (var user in multiUserController.getUsersList) {
+                            if(user.email == widget.user.email){
+                              Get.snackbar('Email invalido','El email ya existe en la lista de usuarios');
+                              return; // detenemos el proceso
+                            }
+                          }
+                        }
+    
+                        // set 
+                        widget.user.account = homeController.getIdAccountSelected; // seteamos el id de la cuenta
+                        // condition : si es un nuevo usuario o se esta actualizando
+                        if(newUser){
+                          widget.user.creation = Timestamp.now(); // seteamos la fecha de creacion 
+                          // creamos un nuevo usuario
+                          multiUserController.createNewUser(user: widget.user.copyWith());
+                        }else{ 
+                        widget.user.lastUpdate = Timestamp.now(); // seteamos la fecha de actualizacion 
+                          // actualizamos el usuario
+                          multiUserController.updateUser(user: widget.user.copyWith());
+                        }
+                        
+                        Get.back();
+                      }else{
+                        Get.snackbar('Permiso del usuario','Elige qué tipo de permisos tiene este usuario');
+                      }
+                    }else{
+                      Get.snackbar('E-mail invalido','Debe proporcionar un correo electrónico válido, asegúrese de que no contenga espacios vacios');
+                    }
+                    }, 
+                ),
+              ),
+            ),
+          ),
+        ],
+      ), 
     );
   }
 }
