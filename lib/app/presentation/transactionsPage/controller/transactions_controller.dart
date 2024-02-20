@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart'; 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:sell/app/core/utils/widgets_utils.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
