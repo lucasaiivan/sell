@@ -49,7 +49,7 @@ class TicketModel {
     return 'Sin Especificar';
   }
  
-  // Map : serializa el objeto a un mapa
+  // Map : serializa el objeto a un mapa con tipo de datos primitivos
   Map<String, dynamic> toMap() => {
         "id": id,
         "payMode": payMode,
@@ -89,9 +89,10 @@ class TicketModel {
       priceTotal: data.containsKey('priceTotal') ? (data['priceTotal'] ?? 0).toDouble() : 0.0,
       valueReceived:  data.containsKey('valueReceived') ? (data['valueReceived'] ?? 0).toDouble() : 0.0,
       discount: data.containsKey('discount') ? (data['discount'] ?? 0.0).toDouble() : 0.0,
+      
       creation: data.containsKey('creation') ? Timestamp.fromMillisecondsSinceEpoch(data['creation']) : Timestamp.now(),
       // refactorizamos los valores [String Time]  a un [TimesTamp] 
-      listPoduct: data['listPoduct'].map((e) => ProductCatalogue.mapRefactoring(e) ).toList() ,
+      listPoduct: data.containsKey('listPoduct') ? data['listPoduct'].map((e) => ProductCatalogue.translatePrimitiveData(e).toJson()).toList() : [],
     );
   }
   factory TicketModel.fromMap(Map<dynamic, dynamic> data ) {

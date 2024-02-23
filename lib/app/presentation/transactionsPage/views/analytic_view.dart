@@ -810,6 +810,7 @@ class CashRegisterView extends StatelessWidget {
 
 
 
+// ignore: must_be_immutable
 class MiniLineChart extends StatelessWidget {
 
   List<double> prices=[];

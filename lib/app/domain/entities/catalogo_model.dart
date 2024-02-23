@@ -284,6 +284,43 @@ class ProductCatalogue {
       quantity: data.containsKey('quantity') ? data['quantity'] : 1, 
     );
   }
+  factory ProductCatalogue.translatePrimitiveData(Map data) {
+    return ProductCatalogue(
+      // Valores del producto
+      id: data.containsKey('id')? data['id'] :'',
+      verified: data.containsKey('verified')? data['verified']: data['verificado'] ?? false,
+      followers: data.containsKey('followers')? data['followers']: data['seguidores'] ?? 0,
+      outstanding: data.containsKey('outstanding')? data['outstanding']: data['destacado'] ?? false,
+      favorite: data.containsKey('favorite')? data['favorite']: data['favorito'] ?? false,
+      idMark:data.containsKey('idMark') ? data['idMark'] : data['id_marca'] ?? '',
+      nameMark: data.containsKey('nameMark') ? data['nameMark'] : data['nombre_marca'] ?? '',
+      image: data.containsKey('image')? data['image']: data['urlimagen'] ?? 'https://default',
+      description: data.containsKey('description')?data['description']: data['descripcion'] ?? '',
+      code: data.containsKey('code') ? data['code'] : data['codigo'] ?? '',
+      provider: data.containsKey('provider')?data['provider']:data['proveedor'] ?? '',
+      nameProvider: data.containsKey('nameProvider')?data['nameProvider']:data['proveedorName'] ?? '',
+      category: data.containsKey('category')?data['category']:data['categoria'] ?? '',
+      nameCategory: data.containsKey('nameCategory')?data['nameCategory']:data['categoriaName'] ?? '',
+      subcategory: data.containsKey('subcategory')?data['subcategory']:data['subcategoria'] ?? '',
+      nameSubcategory: data.containsKey('nameSubcategory')?data['nameSubcategory']:data['subcategoriaName'] ?? '',
+      // traducir datos primitivos
+      upgrade: data.containsKey('upgrade')? Timestamp.fromMillisecondsSinceEpoch(data['upgrade']): Timestamp.fromMillisecondsSinceEpoch(data['timestamp_actualizacion']),
+      creation: data.containsKey('creation')? Timestamp.fromMillisecondsSinceEpoch(data['creation']): Timestamp.fromMillisecondsSinceEpoch(data['timestamp_creation']),
+      documentCreation: data.containsKey('documentCreation')? Timestamp.fromMillisecondsSinceEpoch(data['documentCreation']): Timestamp.fromMillisecondsSinceEpoch(data['documentCreation']),
+      documentUpgrade: data.containsKey('documentUpgrade')? Timestamp.fromMillisecondsSinceEpoch(data['documentUpgrade']): Timestamp.fromMillisecondsSinceEpoch(data['documentUpgrade']),
+      // valores de la cuenta
+      salePrice: data.containsKey('salePrice') ? data['salePrice'].toDouble()??0.0.toDouble() :0.0.toDouble(),
+      purchasePrice: data.containsKey('purchasePrice') ? data['purchasePrice'].toDouble()??0.0.toDouble():0.0.toDouble(),
+      currencySign: data.containsKey('currencySign')?data['currencySign']:data['signo_moneda'] ?? '',
+      quantityStock: data.containsKey('quantityStock')? data['quantityStock'] : 0,
+      sales: data.containsKey('sales')? data['sales'] : 0,
+      stock:  data.containsKey('stock')? data['stock'] : false,
+      alertStock: data.containsKey('alertStock')?data['alertStock'] : 5,
+      revenue: data.containsKey('revenue')?data['revenue'] : 0.0,
+      // values of app
+      quantity: data.containsKey('quantity') ? data['quantity'] : 1, 
+    );
+  }
 
   Map<String, dynamic> toMap() => {
         "id": id,
