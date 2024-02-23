@@ -1,10 +1,8 @@
 import 'dart:ui';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../../core/utils/fuctions.dart';
 import '../../../core/utils/widgets_utils.dart';
 import '../../../domain/entities/cashRegister_model.dart';
@@ -812,6 +810,7 @@ class CashRegisterView extends StatelessWidget {
 
 
 
+// ignore: must_be_immutable
 class MiniLineChart extends StatelessWidget {
 
   List<double> prices=[];

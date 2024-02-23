@@ -15,7 +15,7 @@ class TrasactionsCache {
    Future<List<TicketModel>> loadCacheTransactions() async {
     // obtenemos la consulta del cache y la deserializamos 
     List<dynamic> cacheData = await cache.load('transactions') ; 
-    print('.......................  se guardo en cache  /${cacheData.length} .......................'); 
+    print('.......................  se recupero de cache  /${cacheData.length} .......................'); 
     return cacheData.map((e) => TicketModel.mapRefactoring(e)).toList();  
   } 
   

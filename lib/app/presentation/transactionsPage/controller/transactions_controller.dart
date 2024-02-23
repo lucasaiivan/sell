@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart'; 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:sell/app/core/utils/widgets_utils.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
@@ -171,10 +170,9 @@ class TransactionsController extends GetxController {
     // marca de tiempo actual
     Timestamp timeEnd = Timestamp.fromMillisecondsSinceEpoch(Timestamp.now().toDate().subtract( Duration(hours:Timestamp.now().toDate().hour )).millisecondsSinceEpoch);
 
-    List<TicketModel> list = await TrasactionsCache().loadCacheTransactions();
-    print('.......................  se guardo en cache  /${list.length} .......................' );
+    List<TicketModel> list = await TrasactionsCache().loadCacheTransactions(); 
     // condition : si la lista de transacciones esta vacia
-    if ( list.isEmpty) {
+    if (list.isEmpty) {
       Database.readTransactionsFilterTimeStream(
         idAccount: homeController.getProfileAccountSelected.id,
         timeStart: timeStart,
@@ -349,7 +347,7 @@ class TransactionsController extends GetxController {
     List<TicketModel> transactionsTodayList = []; // lista de las transacciones del día de ayer  
 
     // obtenemos todas las transacciones del día e ayer
-    for (var ticket in getHistoryTransactionsList ) { 
+    for (TicketModel ticket in getHistoryTransactionsList ) { 
       if( ticket.creation.toDate().day == timeNow.subtract(const Duration(days: 1)).day ){
         transactionsTodayList.add(ticket);
       } 
@@ -392,6 +390,8 @@ class TransactionsController extends GetxController {
     }
     // obtenemos todas las transacciones de los ultimos 5 meses 
     List<TicketModel> ticketsList = getHistoryTransactionsList.where((element) => element.creation.toDate().isAfter( timeStart.toDate() ) ).toList();
+    
+
     // obtenemos y clasificamos por fecha y obtenemos el monto total de cada día
     List<double> listAmountTotal = [];      
     Map data = {};
