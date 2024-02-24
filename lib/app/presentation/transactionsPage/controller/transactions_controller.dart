@@ -171,13 +171,20 @@ class TransactionsController extends GetxController {
     Timestamp timeEnd = Timestamp.fromMillisecondsSinceEpoch(Timestamp.now().toDate().subtract( Duration(hours:Timestamp.now().toDate().hour )).millisecondsSinceEpoch);
 
     List<TicketModel> list = await TrasactionsCache().loadCacheTransactions(); 
+    DateTime lastUpdate = await TrasactionsCache().lastUpdate();
+    // convertir datetime a timestamp 
+    Timestamp lastUpdateTimestamp = Timestamp.fromDate(lastUpdate);
+    
+    // TODO : implementar un metodo para decidir cuando y como se actualiza el cache de la transacciones
     // condition : si la lista de transacciones esta vacia
     if (list.isEmpty) {
+      // firebase : obtenemos los documentos creados desde el año pasado hasta el día de hoy
       Database.readTransactionsFilterTimeStream(
         idAccount: homeController.getProfileAccountSelected.id,
         timeStart: timeStart,
         timeEnd: timeEnd,
       ).listen((value) {
+        print('.......................  se recupero de firebase  /${value.docs.length} .......................');
         //  get : agregamos los tickets a la lista
         List<TicketModel> list = value.docs.map((e) => TicketModel.fromMap(e.data())).toList();
         // agregamos los tickets de hoy a la lista
@@ -189,8 +196,24 @@ class TransactionsController extends GetxController {
         TrasactionsCache().saveTransactions(list: list); 
       });
     }else{
-      //  set
-      setHistoryTransactionsList = list; 
+      
+      // firebase : obtenemos los documentos creados desde el año pasado hasta el día de hoy
+      Database.readTransactionsFilterTimeStream(
+        idAccount: homeController.getProfileAccountSelected.id,
+        timeStart: lastUpdateTimestamp,
+        timeEnd: timeEnd,
+      ).listen((value) {
+        print('.......................  se recupero de firebase  /${value.docs.length} .......................');
+        //  get : agregamos los tickets a la lista
+        List<TicketModel> newList = value.docs.map((e) => TicketModel.fromMap(e.data())).toList();
+        // agregamos los tickets nuevos a la lista
+        for (var element in newList) {
+          list.add(element);
+        } 
+        //  set
+        setHistoryTransactionsList = list;
+        TrasactionsCache().saveTransactions(list: list); 
+      });
     }
   }
 
@@ -352,8 +375,10 @@ class TransactionsController extends GetxController {
         transactionsTodayList.add(ticket);
       } 
     }
+    print(  '...................${getHistoryTransactionsList.length} .............................');
     // obtenemos y clasificamos por fecha y obtenemos el monto total de cada día  de los ultimos 5 días 
-    List<TicketModel> ticketsList = getHistoryTransactionsList.where((element) => element.creation.toDate().isAfter( DateTime.now().subtract(const Duration(days:5)) ) ).toList();
+    List<TicketModel> ticketsList = getHistoryTransactionsList.where((element) => element.creation.toDate().isAfter( Timestamp.now().toDate().subtract(const Duration(days:5)) ) ).toList();
+    print(  '...................${ticketsList.length} .............................');
     // var : montos totales de los ultimos 5 dias
     List<double> listAmountTotal = [];  
     for (var i = 0; i < 5; i++) {
@@ -368,8 +393,7 @@ class TransactionsController extends GetxController {
     //  set
     positionIndex = 3; 
     setBillingByDateList = listAmountTotal; 
-    setVisivilityTransactionsList = transactionsTodayList;
-
+    setVisivilityTransactionsList = transactionsTodayList; 
   }
   // obtenemos las transacciones de los ultimos 5 meses y del mes actual
   void readTransactionsThisMonth() { 
