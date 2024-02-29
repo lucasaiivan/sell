@@ -111,6 +111,7 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
                     setQuery = element.name;
                   },
                   child: Chip( 
+                    avatar: element.image==''?null:CircleAvatar(backgroundImage: NetworkImage(element.image),),
                     label: Text(element.name,style: textStyleSecundary), 
                     shape: RoundedRectangleBorder(side: BorderSide(color: primaryTextColor.withOpacity(0.5)),borderRadius: BorderRadius.circular(5)),
                     backgroundColor: Colors.transparent,   
@@ -139,6 +140,7 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
                     setQuery = element.name;
                   },
                   child: Chip( 
+                    
                     label: Text(element.name,style: textStyleSecundary), 
                     shape: RoundedRectangleBorder(side: BorderSide(color: primaryTextColor.withOpacity(0.5)),borderRadius: BorderRadius.circular(5)),
                     backgroundColor: Colors.transparent,   

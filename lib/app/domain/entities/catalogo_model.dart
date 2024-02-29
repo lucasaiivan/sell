@@ -6,6 +6,7 @@ class Product {
   String id = "";
   String idMark = ""; // ID de la marca por defecto esta vacia
   String nameMark = '';
+  String imageMark='';
   String description = ""; // Informacion
   String image = ""; // URL imagen
   String code = "";
@@ -31,6 +32,7 @@ class Product {
     this.outstanding = false,
     this.idMark = "",
     this.nameMark = '',
+    this.imageMark='',
     this.image = "",
     this.description = "",
     this.code = "",
@@ -48,6 +50,7 @@ class Product {
         "outstanding": outstanding,
         "idMark": idMark,
         'nameMark': nameMark,
+        'imageMark':imageMark,
         "image": image,
         "description": description,
         "code": code,
@@ -66,6 +69,7 @@ class Product {
       outstanding: data.containsKey('outstanding')? data['outstanding'] : false,
       idMark: data.containsKey('idMark') ? data['idMark'] : data.containsKey('id_marca') ?data['id_marca'] :'',
       nameMark: data.containsKey('nameMark') ? data['nameMark'] : '',
+      imageMark: data.containsKey('imageMark') ? data['imageMark'] : '',
       image: data.containsKey('image') ? data['image'] :  data.containsKey('urlimagen') ? data['urlimagen'] :'',
       description: data.containsKey('description')? data['description']: data.containsKey('descripcion')?data['descripcion']:'',
       code: data.containsKey('code') ? data['code'] :  data.containsKey('codigo') ?data['codigo']:'',
@@ -87,6 +91,7 @@ class Product {
     outstanding = data['outstanding'] ?? false;
     idMark =data.containsKey('idMark') ? data['idMark'] : data['id_marca'] ?? '';
     nameMark = data['nameMark'] ?? '';
+    imageMark = data['imageMark'] ?? '';
     image = data.containsKey('image') ? data['image'] : data['urlimagen'] ?? '';
     description = data.containsKey('description')? data['description']: data['descripcion'] ?? '';
     code = data.containsKey('code') ? data['code'] : data['codigo'] ?? '';
@@ -104,6 +109,7 @@ class Product {
     productCatalogue.outstanding = outstanding;
     productCatalogue.idMark = idMark;
     productCatalogue.nameMark = nameMark;
+    productCatalogue.imageMark = imageMark;
     productCatalogue.description = description;
     productCatalogue.code = code;
     productCatalogue.upgrade = upgrade;
@@ -122,6 +128,7 @@ class ProductCatalogue {
   bool favorite = false;
   String idMark = ""; // ID de la marca por defecto esta vacia
   String nameMark = ''; // nombre de la marca
+  String imageMark = ''; // url de la imagen de la marca
   String image = ""; // URL imagen
   String description = ""; // Información
   String code = "";
@@ -180,6 +187,7 @@ class ProductCatalogue {
     this.currencySign = "\$",
     this.idMark = '',
     this.nameMark = '',
+    this.imageMark = '',
     // var app 
     this.quantity = 1,
   });
@@ -213,6 +221,7 @@ class ProductCatalogue {
   String? currencySign,
   String? idMark,
   String? nameMark, 
+  String? imageMark,
   int? quantity,
 }) {
   return ProductCatalogue(
@@ -244,6 +253,7 @@ class ProductCatalogue {
     currencySign: currencySign ?? this.currencySign,
     idMark: idMark ?? this.idMark,
     nameMark: nameMark ?? this.nameMark, 
+    imageMark: imageMark ?? this.imageMark,
     quantity: quantity ?? this.quantity,
   );
 }
@@ -258,6 +268,7 @@ class ProductCatalogue {
       favorite: data.containsKey('favorite')? data['favorite']: data['favorito'] ?? false,
       idMark:data.containsKey('idMark') ? data['idMark'] : data['id_marca'] ?? '',
       nameMark: data.containsKey('nameMark') ? data['nameMark'] : data['nombre_marca'] ?? '',
+      imageMark: data.containsKey('imageMark') ? data['imageMark'] : '',
       image: data.containsKey('image')? data['image']: data['urlimagen'] ?? 'https://default',
       description: data.containsKey('description')?data['description']: data['descripcion'] ?? '',
       code: data.containsKey('code') ? data['code'] : data['codigo'] ?? '',
@@ -294,6 +305,7 @@ class ProductCatalogue {
       favorite: data.containsKey('favorite')? data['favorite']: data['favorito'] ?? false,
       idMark:data.containsKey('idMark') ? data['idMark'] : data['id_marca'] ?? '',
       nameMark: data.containsKey('nameMark') ? data['nameMark'] : data['nombre_marca'] ?? '',
+      imageMark: data.containsKey('imageMark') ? data['imageMark'] : '',
       image: data.containsKey('image')? data['image']: data['urlimagen'] ?? 'https://default',
       description: data.containsKey('description')?data['description']: data['descripcion'] ?? '',
       code: data.containsKey('code') ? data['code'] : data['codigo'] ?? '',
@@ -330,6 +342,7 @@ class ProductCatalogue {
         "favorite": favorite,
         "idMark": idMark,
         "nameMark": nameMark,
+        'imageMark':imageMark,
         "image": image,
         "description": description,
         "code": code,
@@ -361,6 +374,7 @@ class ProductCatalogue {
         "favorite": favorite,
         "idMark": idMark,
         "nameMark": nameMark,
+        'imageMark':imageMark,
         "image": image,
         "description": description,
         "code": code,
@@ -392,6 +406,7 @@ class ProductCatalogue {
       outstanding: data['outstanding'] ?? false,
       idMark: data['idMark'] ?? '',
       nameMark: data['nameMark'] ?? '',
+      imageMark: data['imageMark'] ?? '',
       image: data['image'] ?? '',
       description: data['description'] ?? '',
       code: data['code'] ?? '',
@@ -427,6 +442,7 @@ class ProductCatalogue {
     productoDefault.outstanding = outstanding;
     productoDefault.idMark =  idMark;
     productoDefault.nameMark =  nameMark;
+    productoDefault.imageMark = imageMark;
     productoDefault.description =  description;
     productoDefault.code = code;
     return productoDefault;
@@ -441,6 +457,7 @@ class ProductCatalogue {
     outstanding = product.outstanding;
     idMark = product.idMark;
     nameMark = product.nameMark;
+    imageMark = product.imageMark;
     description = product.description;
     code = product.code;
     documentCreation = product.creation;

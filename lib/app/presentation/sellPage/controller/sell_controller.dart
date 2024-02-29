@@ -1097,7 +1097,8 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
                     // set query
                     query = element.name;
                   },
-                  child: Chip( 
+                  child: Chip(  
+                    avatar: element.image==''?null:CircleAvatar(backgroundImage: NetworkImage(element.image),),
                     label: Text(element.name,style: textStyleSecundary), 
                     shape: RoundedRectangleBorder(side: BorderSide(color: primaryTextColor.withOpacity(0.5)),borderRadius: BorderRadius.circular(5)),
                     backgroundColor: Colors.transparent,   
