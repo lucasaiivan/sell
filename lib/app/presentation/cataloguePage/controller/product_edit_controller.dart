@@ -351,6 +351,7 @@ class ControllerProductsEdit extends GetxController {
               getProduct.upgrade = Timestamp.now();
               getProduct.idMark = getMarkSelected.id;
               getProduct.nameMark = getMarkSelected.name;
+              getProduct.imageMark = getMarkSelected.image;
               getProduct.purchasePrice = controllerTextEditPrecioCosto.numberValue;
               getProduct.salePrice = controllerTextEditPrecioVenta.numberValue;
               getProduct.favorite = getFavorite;

@@ -30,12 +30,15 @@ class _StaticsCardsState extends State<StaticsCards> {
   @override
   Widget build(BuildContext context) {
 
+    // var
+    Color cardColor = Colors.blueGrey.withOpacity(0.2);
+
     // widgets
     List<Widget> cards =   [ 
       // card : facturación
       CardAnalityc(
         isPremium:true, // siempre es visible su contenido
-        backgroundColor: Colors.blueGrey.shade100.withOpacity(0.7),
+        backgroundColor: cardColor,
         icon:  const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.attach_money_rounded,color: Colors.white,size:14)))),
         titleText: 'Facturación', 
         valueText: transactionsController.getInfoAmountTotalFilter,
@@ -45,7 +48,7 @@ class _StaticsCardsState extends State<StaticsCards> {
       // card : transacciones
       CardAnalityc( 
         isPremium: true, // siempre es visible su contenido
-        backgroundColor: Colors.teal.shade100.withOpacity(0.7),
+        backgroundColor: cardColor,
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.receipt,color: Colors.white,size:14)))),
         titleText: 'Transacciones',
         subtitle: '',
@@ -56,7 +59,7 @@ class _StaticsCardsState extends State<StaticsCards> {
       // card : ganancia 
       CardAnalityc( 
         isPremium: homeController.getIsSubscribedPremium,
-        backgroundColor: Colors.green.shade100.withOpacity(0.7),
+        backgroundColor: cardColor,
         icon:  const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.show_chart_rounded,color: Colors.white,size:14)))),
         //content: transactionsController.viewPercentageBarValue(text:'%${transactionsController.getPercentEarningsTotal()}',value: transactionsController.getEarningsTotal,total: transactionsController.getAmountTotalFilter),
         titleText: 'Ganancia',
@@ -68,7 +71,7 @@ class _StaticsCardsState extends State<StaticsCards> {
       !transactionsController.getMostSelledProducts.isNotEmpty ?Container():
       CardAnalityc( 
         isPremium: homeController.getIsSubscribedPremium,
-        backgroundColor: Colors.blue.shade100.withOpacity(0.7),
+        backgroundColor: cardColor,
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.category_rounded,color: Colors.white,size:14)))),
         titleText: 'Productos vendidos', 
         subtitle: 'Total',
@@ -92,7 +95,7 @@ class _StaticsCardsState extends State<StaticsCards> {
       // card : clientes
       CardAnalityc( 
         isPremium: homeController.getIsSubscribedPremium,
-        backgroundColor: Colors.orangeAccent.shade100.withOpacity(0.7),
+        backgroundColor: cardColor,
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.payment_rounded,color: Colors.white,size:14)))),
         content: transactionsController.viewPercentageBarCharTextDataHorizontal(chartData:  transactionsController.getAnalyticsMeansOfPayment.entries.toList()),
         titleText: 'Medio de pago', 
@@ -102,7 +105,7 @@ class _StaticsCardsState extends State<StaticsCards> {
       // card : rentabilidad
       CardAnalityc( 
         isPremium: homeController.getIsSubscribedPremium,
-        backgroundColor: Colors.cyan.shade100.withOpacity(0.7),
+        backgroundColor: cardColor,
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.query_stats_rounded,color: Colors.white,size:14)))),
         titleText: 'Rentabilidad',
         modalContent: ProfitabilityProductsView(),
@@ -141,7 +144,7 @@ class _StaticsCardsState extends State<StaticsCards> {
       // add : agregamos las tarjetas de las cajas en una posicion especifica
       cards.insert(2,CardAnalityc( 
         isPremium: homeController.getIsSubscribedPremium,
-        backgroundColor: Colors.grey.shade400.withOpacity(0.7),
+        backgroundColor: cardColor,
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.point_of_sale_sharp,color: Colors.white,size:14)))),
         titleText: 'Caja ${value['name']}',
         subtitle: 'Facturación',
@@ -828,12 +831,13 @@ class MiniLineChart extends StatelessWidget {
       height: 30,
       width: double.infinity,
       child: LineChart(
-        LineChartData(
-          
-
+        LineChartData( 
           lineTouchData: LineTouchData(  
-            handleBuiltInTouches: true,
+            handleBuiltInTouches: true, // habilita el touch
+            longPressDuration: const Duration(milliseconds: 100), // duracion del touch
+
             touchTooltipData: LineTouchTooltipData(  
+              tooltipPadding: const EdgeInsets.all(2), 
               getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
                 return touchedBarSpots.map((barSpot) {
                   final flSpot = barSpot; 
@@ -842,8 +846,7 @@ class MiniLineChart extends StatelessWidget {
                     const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                   );
                 }).toList();
-              },
-
+              }, 
             ),
           ),
           lineBarsData: [
@@ -851,18 +854,19 @@ class MiniLineChart extends StatelessWidget {
               spots: [
                 for (int i = 0; i < prices.length; i++)
                   FlSpot(i.toDouble(), prices[i]),
-              ], 
+              ],   
               isCurved: true,
               color:Colors.blue,
               barWidth: 2,
               dotData: FlDotData(
-                show: true,
+                show: true, 
                 getDotPainter: (spot, percent, barData, index) {
                   return FlDotCirclePainter(
                     radius: index==0?4: index == positionIndex ? 6 : 4,
                     color:Colors.blue,
                     strokeColor: Colors.white ,
-                    strokeWidth: index==0?0: index == positionIndex ? 1 : 0,
+                    strokeWidth: index==0?0: index == positionIndex ? 2 : 0,
+
                   );
                 },
         ),  
@@ -886,12 +890,13 @@ class MiniLineChart extends StatelessWidget {
   }
 
   String formatValue(double value) {
-  if (value >= 1000) {
-    return '${value /1000}';
-  } else {
-    return value.toStringAsFixed(0);
-  }
-} 
+    // return : devuelve el valor formateado en miles 
+    if (value >= 1000) {
+      return '\$${(value /1000).toStringAsFixed(1)}k';
+    } else {
+      return '\$${value.toStringAsFixed(0)}';
+    }
+  } 
 
 
 }

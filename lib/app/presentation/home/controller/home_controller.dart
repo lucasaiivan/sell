@@ -1100,13 +1100,22 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
             bottom: 0,left: 0,right: 0,
             child: Container(   
               // color : gradient de un color y transparent 
-              decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.transparent,Theme.of(context).scaffoldBackgroundColor.withOpacity(0.9),Theme.of(context).scaffoldBackgroundColor], begin: Alignment.topCenter,end: Alignment.bottomCenter),),
+              decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.transparent,Theme.of(context).scaffoldBackgroundColor.withOpacity(0.5)], begin: Alignment.topCenter,end: Alignment.bottomCenter),),
               // condition : comprobar que 'offerings' esta inicializado
               child:  true ?// homeController.offerings==null? 
-              TextButton(onPressed:(){
-                homeController.setIsSubscribedPremium = true;
-                }, 
-                child: const Text('Subcribirce a Premium'))
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ComponentApp().button(
+                  elevation: 0,
+                  colorButton: Colors.yellow.shade700 ,
+                  onPressed: () { 
+                    homeController.setIsSubscribedPremium = true;
+                    Get.back();
+                  },
+                  text: 'Subscribirse a Premium',
+                  fontSize: 18,
+                ),
+              )
                 :Column(
                 children: [
                   ListView.builder(

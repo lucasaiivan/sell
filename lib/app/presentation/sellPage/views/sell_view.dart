@@ -846,6 +846,7 @@ class SalesView extends StatelessWidget {
         
         // FloatingActionButton : efectuar una venta rapida
         FloatingActionButton(
+          heroTag: 'uniqueTag3',
             key: homeController.floatingActionButtonRegisterFlashKeyButton,
             backgroundColor: Colors.amber,
             onPressed: () {
@@ -859,6 +860,7 @@ class SalesView extends StatelessWidget {
         // FloatingActionButton : determinar si es un dispositivo movil o web para mostrar este buton
         const SizedBox(width: kIsWeb?0:8), 
         kIsWeb? const SizedBox(width: kIsWeb?0:8):FloatingActionButton(
+          heroTag: 'uniqueTag2',
           key: homeController.floatingActionButtonScanCodeBarKey,
           backgroundColor: Colors.blue,
           onPressed: controller.scanBarcodeNormal,
@@ -870,6 +872,7 @@ class SalesView extends StatelessWidget {
           key: homeController.floatingActionButtonTransacctionRegister,
           controller: (p0) => controller.floatingActionButtonAnimateController = p0,
           child: FloatingActionButton.extended(
+            heroTag: 'uniqueTag1',
               onPressed: controller.getTicket.listPoduct.isEmpty
                   ? null
                   : () {
@@ -1384,37 +1387,26 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
                     return Text('Error: ${snapshot.error}');
                   } else {
                     // Los datos están disponibles, muestra la lista
-                    return SizedBox(
-                      height: 50,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: snapshot.data?.length, 
-                        shrinkWrap: true,
-                        itemBuilder: (context, index) {
-
-                          // id
-                          String option = snapshot.data![index];
-
-                          return Padding(
-                            padding: const EdgeInsets.all(2.0),
-                            child: InputChip( 
-                              label: Text(option), 
-                              onPressed: () {
-                                textEditingController.text = option;
-                              },
-                              deleteIcon: const Icon(Icons.close, size: 20),
-                              onDeleted: () {
-                                setState(() {
-                                  // eliminar de 'snapshot' la descripcion
-                                  snapshot.data!.remove(option);
-                                  // eliminamos la descripcion de la base de datos
-                                  salesController.deleteFixedDescription(description: option);
-                                });
-                              },
-                            ),
-                          );
-                        },  
-                      ),
+                    return Wrap(
+                      spacing: 3.0, // espacio entre chips
+                      runSpacing: 1.0, // espacio entre líneas de chips
+                      children: snapshot.data!.map((option) {
+                        return InputChip( 
+                          label: Text(option), 
+                          onPressed: () {
+                            textEditingController.text = option;
+                          },
+                          deleteIcon: const Icon(Icons.close, size: 20),
+                          onDeleted: () {
+                            setState(() {
+                              // eliminar de 'snapshot' la descripcion
+                              snapshot.data!.remove(option);
+                              // eliminamos la descripcion de la base de datos
+                              salesController.deleteFixedDescription(description: option);
+                            });
+                          },
+                        );
+                      }).toList(),
                     );
                   }
                 },

@@ -777,7 +777,7 @@ class ComponentApp extends StatelessWidget {
       ),
     );
   }
-  Widget button( {bool defaultStyle = false,double elevation=0,double width = double.infinity,bool disable = false, Widget? icon, String text = '',required dynamic onPressed,EdgeInsets padding =const EdgeInsets.symmetric(horizontal: 12, vertical: 12),Color colorButton = Colors.blue,Color colorAccent = Colors.white}) {
+  Widget button( {bool defaultStyle = false,double elevation=0,double fontSize = 14,double width = double.infinity,bool disable = false, Widget? icon, String text = '',required dynamic onPressed,EdgeInsets padding =const EdgeInsets.symmetric(horizontal: 12, vertical: 12),Color colorButton = Colors.blue,Color colorAccent = Colors.white}) {
     // button : personalizado
     return FadeIn(
         child: Padding(
@@ -794,7 +794,7 @@ class ComponentApp extends StatelessWidget {
             textStyle: TextStyle(color: colorAccent,fontWeight: FontWeight.w700),
           ),  
           icon: icon??Container(),
-          label: Text(text, style: TextStyle(color: colorAccent)),
+          label: Text(text, style: TextStyle(color: colorAccent,fontSize: fontSize)),
         ),
       ),
     ));
