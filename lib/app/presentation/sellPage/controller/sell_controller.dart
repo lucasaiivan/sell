@@ -16,16 +16,38 @@ import 'package:sell/app/core/utils/widgets_utils.dart';
 import 'package:uuid/uuid.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../domain/entities/ticket_model.dart';
-import '../views/sell_view.dart'; 
+import '../views/sell_view.dart';  
+import 'package:mobile_scanner/mobile_scanner.dart';
+
+
+
 
 class SalesController extends GetxController {
 
   // controllers views //
-  final HomeController homeController = Get.find();
-  
+  final HomeController homeController = Get.find(); 
 
   // titulo del Appbar //
   String titleText = 'Vender'; 
+
+  // state view barcodescan //
+  final RxBool _stateViewBarCodeScan = false.obs;
+  bool get getStateViewBarCodeScan => _stateViewBarCodeScan.value;
+  set setStateViewBarCodeScan(bool value) {
+    _stateViewBarCodeScan.value = value;
+    update();
+  }
+  MobileScannerController cameraScanBarCodeController = MobileScannerController(
+    detectionSpeed: DetectionSpeed.normal, 
+    detectionTimeoutMs: 2000, // detectionTimeoutMs : tiempo de espera para detectar un código de barra
+  );
+  // state flash camera scan bar code //
+  final RxBool _stateFlashCameraScanBarCode = false.obs;
+  bool get getStateFlashCameraScanBarCode => _stateFlashCameraScanBarCode.value;
+  set setStateFlashCameraScanBarCode(bool value) {
+    _stateFlashCameraScanBarCode.value = value;
+    update();
+  }
 
   //  cash register  // 
   void deleteFixedDescription({required String description}){
@@ -319,10 +341,88 @@ class SalesController extends GetxController {
     );
 
   }
+
   
-  Future<void>  scanBarcodeNormal() async {  
+  
+  Future<void>  scanBarcodeNormal() async {   
+    MobileScannerController cameraController = MobileScannerController(
+      detectionSpeed: DetectionSpeed.normal, 
+      detectionTimeoutMs: 2000, // detectionTimeoutMs : tiempo de espera para detectar un código de barra 
+    );
+ 
+
+    // show dialog : widget
+    showDialog(
+      context: Get.context!,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          
+          title: const Text('Escanear código de barra'),
+          content: SizedBox(
+            width: 200,
+            height: 200,
+            child: MobileScanner( 
+              fit: BoxFit.cover, 
+
+          controller: cameraController, 
+          onDetect: (capture) { 
+            final List<Barcode> barcodes = capture.barcodes; 
+            for (final barcode in barcodes) {
+              debugPrint('Barcode found! ${barcode.rawValue}');
+              print('............Barcode found! ${barcode.rawValue}'); 
+              verifyExistenceInSelectedScanResult(id:barcode.rawValue.toString());
+            }
+            Future.delayed(const Duration(seconds: 3), () { 
+              });
+          },
+        ),
+          ),
+          actions: <Widget>[
+            // button : flash
+            IconButton(
+              color: Colors.white,
+              icon: ValueListenableBuilder(
+                valueListenable: cameraController.torchState,
+                builder: (context, state, child) {
+                  switch (state) {
+                    case TorchState.off:
+                      return const Icon(Icons.flash_off, color: Colors.grey);
+                    case TorchState.on:
+                      return const Icon(Icons.flash_on, color: Colors.yellow);
+                  }
+                },
+              ),
+              iconSize: 32.0,
+              onPressed: () => cameraController.toggleTorch(),
+            ),
+            TextButton(
+              onPressed: () { 
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancelar'),
+            ), 
+          ],
+        );
+      },
+    );
+    
+    /* FlutterBarcodeScanner.getBarcodeStreamReceiver(
+      "#ff6666",
+      "Cancel",
+      true,
+      ScanMode.BARCODE,
+    )?.listen((event) { 
+      if(event != '-1'){
+        // sound
+        playSoundScan();
+        // verifica el código de barra
+        print('......................codigo de barra: $event');
+        Get.snackbar('codigo de barra',event );
+        //verifyExistenceInSelectedScanResult(id:event);
+      }
+    }); */
     // Escanner Code - Abre en pantalla completa la camara para escanear el código
-    try {
+    /* try {
       late String barcodeScanRes;
       barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
         "#ff6666",
@@ -337,7 +437,7 @@ class SalesController extends GetxController {
       verifyExistenceInSelectedScanResult(id:barcodeScanRes);
     } on PlatformException {
       Get.snackbar('scanBarcode', 'Failed to get platform version');
-    }
+    } */
   }
 
   void selectedProduct({required ProductCatalogue item}) { 
@@ -1282,3 +1382,5 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
     );
   }
 }
+
+
