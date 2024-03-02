@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
@@ -15,7 +17,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../core/utils/dynamicTheme_lb.dart';
 import '../../home/controller/home_controller.dart';
-import '../controller/sell_controller.dart';
+import '../controller/sell_controller.dart'; 
 
 // ignore: must_be_immutable
 class SalesView extends StatelessWidget {
@@ -91,7 +93,6 @@ class SalesView extends StatelessWidget {
       ],  
     );
   }
-
   Widget body({required SalesController controller}) {
     // Widgets
     Widget updateview = homeController.getUpdateApp
@@ -866,7 +867,7 @@ class SalesView extends StatelessWidget {
           key: homeController.floatingActionButtonScanCodeBarKey,
           backgroundColor: Colors.blue,
           onPressed: (){
-            controller.setStateViewBarCodeScan = !controller.getStateViewBarCodeScan;
+            controller.setStateViewBarCodeScan = !controller.getStateViewBarCodeScan; 
           },
           child: SizedBox(width: 30,height: 30,child: imageBarCode),
         ),
@@ -935,9 +936,10 @@ Widget floatingActionButtonCameraScanBarCode({required SalesController controlle
                   onPressed: (){
                     controller.setStateViewBarCodeScan = false;
                     controller.setStateFlashCameraScanBarCode = false;
+                    controller.cameraScanBarCodeController.dispose();
                   },
                   label: const Text(
-                    'Cerrar scaner',
+                    'Dejar de escanear',
                     style: TextStyle(color: Colors.white),
                   )),
             ],
@@ -1645,118 +1647,112 @@ class ViewScanBarCode extends StatefulWidget {
 class _ViewScanBarCodeState extends State<ViewScanBarCode> {
 
   // controllers
-  
-  SalesController sellController = Get.find<SalesController>();
+  SalesController sellController = Get.find<SalesController>(); 
   // var
   String code = '';
+ 
+  @override
+  void initState() {
+    super.initState();  
+    // controller : configuramos el escaner de código de barra
+    sellController.cameraScanBarCodeController = MobileScannerController(
+      detectionSpeed: DetectionSpeed.normal, 
+      detectionTimeoutMs: 2000, // tiempo de espera para detectar un código de barra 
+      formats: [BarcodeFormat.ean13, BarcodeFormat.ean8, BarcodeFormat.upcA, BarcodeFormat.upcE, BarcodeFormat.code128 ], 
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return viewScanBarCode();
+    
+    return ElasticIn(
+      child: viewScanBarCode(),
+    );
   }
 
   Widget viewScanBarCode() {
-    // obtener las dimensiones de la pantalla
+    // var
     final Size size = MediaQuery.of(context).size;
-    
     // vista : escaner de código de barra
     return SizedBox(
       width: size.width,
-      height: 200,
-      child: SizedBox(
-        width: size.width,
-        height: 150,
-        child: MobileScanner( 
-          fit: BoxFit.cover,  
-          overlay: code==''?LineaMovil(width: size.width*0.9, height: 150):Text(code,style: const TextStyle(color: Colors.white,fontSize: 24)),
-          controller: sellController.cameraScanBarCodeController, 
-          onDetect: (capture) { 
-            setState(() {
-              code = capture.barcodes[0].rawValue.toString(); 
-            });
-            final List<Barcode> barcodes = capture.barcodes; 
-            for (final barcode in barcodes) { 
-              code = barcode.rawValue.toString();
-              // comprobamos si el código de barra ya existe en la lista de productos
-              sellController.verifyExistenceInSelectedScanResult(id:code);
-            } 
-            // esperamos 2 segundos para limpiar el código de barra
-            Future.delayed(const Duration(seconds: 2), () { 
-              setState(() {
-                code = '';
-                barcodes.clear();
-              });
-            }); 
-          },
-      ),
+      height: 150,
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 12),
+        elevation: 0,
+        clipBehavior: Clip.antiAlias,
+        child: Stack( 
+          clipBehavior: Clip.antiAlias,
+          alignment: Alignment.center,
+          children: [
+            ImageFiltered(
+              enabled: code!='',
+              imageFilter: ImageFilter.blur(sigmaX: 5, sigmaY: 5,tileMode: TileMode.clamp),
+              //
+              // MobileScanner
+              //
+              child: MobileScanner( 
+                fit: BoxFit.cover,  
+                overlay: code ==''?AnimatedLine(width: size.width*0.8, height: 100):null, 
+                controller: sellController.cameraScanBarCodeController, 
+                onDetect: (capture) {  
+                  setState(() {
+                    sellController.playSoundScan();
+                    code = capture.barcodes[0].rawValue.toString(); 
+                    sellController.verifyExistenceInSelectedScanResult(id:code); 
+                  });  
+                  // esperamos 2 segundos para limpiar el código de barra
+                  Future.delayed(const Duration(seconds: 2), () => setState(()=> code = '')); 
+                },  
+              ),
+            ),
+            Center(child: Text(code,style: const TextStyle(color: Colors.white,fontSize: 24)),),
+          ],
+        ),
       ),
     );
   }
+
+  
 }
  
 
-class LineaMovil extends StatefulWidget {
+class AnimatedLine extends StatefulWidget {
+  // description : creamos una animacion simple de una linea que se mueve de arriba hacia abajo
   final double width;
   final double height;
-
-  const LineaMovil({Key? key, required this.width, required this.height}) : super(key: key);
-
+  const AnimatedLine({Key? key, required this.width, required this.height}) : super(key: key);
   @override
-  State<LineaMovil> createState() => _LineaMovilState();
+  State<AnimatedLine> createState() => _AnimatedLineState();
 }
 
-class _LineaMovilState extends State<LineaMovil> with TickerProviderStateMixin {
+class _AnimatedLineState extends State<AnimatedLine> with TickerProviderStateMixin {
+  // controllers
   late AnimationController _controller;
   late Animation<double> _animacionY;
-
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(seconds: 2),
-      vsync: this,
-    )..repeat(reverse: true);
-
-    _animacionY = Tween<double>(
-      begin: widget.height,
-      end: 0,
-    ).animate(_controller);
+    _controller = AnimationController(duration: const Duration(seconds: 2),vsync: this)..repeat(reverse: true); 
+    _animacionY = Tween<double>(begin:widget.height,end: 0,).animate(_controller);
   }
-
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(12.0),
+    return SizedBox(
+      width: widget.width,
+      height: widget.height,
       child: Stack(
         clipBehavior: Clip.antiAlias,
-        alignment: Alignment.center,
-        children: [
-          // background opacity
-          Positioned(
-            bottom: 0,
-            child: Container(
-              width: widget.width,
-              height: widget.height,
-              color: Colors.black12,
-            ),
-          ),
-          // animate line
+        alignment: Alignment.center, 
+        children: [  
           AnimatedBuilder( 
             animation: _animacionY,
-            builder: (context, child) => Positioned(
-              bottom: _animacionY.value, 
-              child: Container(  
-                width: widget.width,
-                height: 0.7,
-                color: Colors.red,
-              ),
-            ),
+            builder: (context, child) => Positioned(bottom: _animacionY.value,child: Container(width: widget.width,height: 0.7,color: Colors.red)),
           ),
         ],
       ),
