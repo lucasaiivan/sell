@@ -229,10 +229,7 @@ class CardAnalityc extends StatelessWidget {
               );
               
             },
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: viewContent,
-            ),
+            child: viewContent,
           ),
         ),
       ),
@@ -249,38 +246,42 @@ class CardAnalityc extends StatelessWidget {
     TextStyle descriptionStyle = const TextStyle(fontSize: 12);  
 
     return Stack(
+      fit: StackFit.expand,
       children: [
         // view : contenedor de informacion estadisticos 
         ImageFiltered(
           enabled: !isPremium,
-            imageFilter: ImageFilter.blur(sigmaX: 5, sigmaY: 5,tileMode: TileMode.clamp),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [  
-                const Spacer(), 
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [ 
-                    content,
-                    subtitle==''?Container(): Flexible(child: Opacity(opacity: 0.7, child: Text(subtitle,style: subtitleStyle))),
-                    valueText==''?Container():Flexible(child: Text(valueText,maxLines:2, textAlign: TextAlign.start, style: valueTextStyle)),
-                    description==''?Container():Flexible(child: Opacity(opacity: 0.7, child: Text(description, style: descriptionStyle))),
-                    Row(   
-                      children: [
-                        Flexible(
-                          fit: FlexFit.tight,
-                          child: widgetDescription),
-                          // condition : si ruta esta vacio no muesta el icono de ver mas informacion
-                        modalContent is SizedBox ?Container():const Padding(
-                          padding: EdgeInsets.only(left: 8),
-                          child: Opacity(opacity: 0.2,child: Icon(Icons.expand_circle_down_sharp,size: 24)),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
+            imageFilter: ImageFilter.blur(sigmaX:4,sigmaY:4,tileMode: TileMode.decal),
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [  
+                  const Spacer(), 
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [ 
+                      content,
+                      subtitle==''?Container(): Flexible(child: Opacity(opacity: 0.7, child: Text(subtitle,style: subtitleStyle))),
+                      valueText==''?Container():Flexible(child: Text(valueText,maxLines:2, textAlign: TextAlign.start, style: valueTextStyle)),
+                      description==''?Container():Flexible(child: Opacity(opacity: 0.7, child: Text(description, style: descriptionStyle))),
+                      Row(   
+                        children: [
+                          Flexible(
+                            fit: FlexFit.tight,
+                            child: widgetDescription),
+                            // condition : si ruta esta vacio no muesta el icono de ver mas informacion
+                          modalContent is SizedBox ?Container():const Padding(
+                            padding: EdgeInsets.only(left: 8),
+                            child: Opacity(opacity: 0.2,child: Icon(Icons.expand_circle_down_sharp,size: 24)),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ), 
           // view : logo de premium
@@ -288,8 +289,8 @@ class CardAnalityc extends StatelessWidget {
             Center(child: LogoPremium(personalize: true,id: 'analytic')),
           // position : posicionar en la parte superior  al inicio  de lado izquierdo
           Positioned(
-            top: 0,
-            left: 0,
+            top:12,
+            left:12,
             child: Row( 
             children: [
               icon,

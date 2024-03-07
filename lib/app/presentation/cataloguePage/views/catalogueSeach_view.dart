@@ -268,7 +268,7 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
                 crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   // image
-                  ImageProductAvatarApp(url: product.image,size: 75,favorite:product.favorite),
+                  ImageProductAvatarApp(url:product.local?'':product.image,size: 75,favorite:product.favorite),
                   // text : datos del producto
                   Flexible(
                     child: Padding(

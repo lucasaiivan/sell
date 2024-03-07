@@ -1,4 +1,5 @@
  
+import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; 
 import 'package:flutter/material.dart'; 
 import 'package:get/get.dart'; 
@@ -15,7 +16,8 @@ class ButtonData {
 }
 
 class ControllerProductsSearch extends GetxController {
-  // controllers
+
+  // controllers 
   late HomeController homeController;
 
   @override
@@ -28,7 +30,7 @@ class ControllerProductsSearch extends GetxController {
     // condition : si el parametro no esta vacio
     if (_codeBarParameter != '') {
       getTextEditingController.text = _codeBarParameter;
-      queryProduct(id: _codeBarParameter);
+      searchProductCatalogue(id: _codeBarParameter);
     }
     queryProductSuggestion();
 
@@ -39,22 +41,30 @@ class ControllerProductsSearch extends GetxController {
   void onReady() {
     // llamado después de que el widget se representa en la pantalla - ej. showIntroDialog();
     super.onReady();
+    productSelect.local = true;
   }
 
   @override
   void onClose() {
     ThemeService.switchThemeDefault();
     super.onClose();
+    
   }
 
   // product
   ProductCatalogue productSelect = ProductCatalogue(upgrade: Timestamp.now(), creation: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now());
 
+  // sound : efecto de sonido para escaner
+  void playSoundScan() async {
+    final player = AudioPlayer(); // "soundBip.mp3"
+    await player.play(AssetSource("soundBip.mp3")); 
+  }
+
   // list excel to json
    List<ProductCatalogue> productsToExelList = [];
   static List<Map<String, dynamic>> listExcelToJson = [];
-  void filterListExcelToJson({required List<Map<String, dynamic>> value}) async{
 
+  void filterListExcelToJson({required List<Map<String, dynamic>> value}) async{
     for (var element in value) {
       // set values
       ProductCatalogue productCatalogue = ProductCatalogue(creation: Timestamp.now(),upgrade: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now());
@@ -137,8 +147,32 @@ class ControllerProductsSearch extends GetxController {
   get getproductDoesNotExist => _productDoesNotExist;
 
   // FUCTIONS
-  void queryProduct({required String id}) {
-    // verificamos que el id no este vacio y que no sea -1 (back)
+  void searchProductCatalogue({required String id}){
+    // description : busca un producto en el catálogo de la cuenta
+ 
+    if (id != '' && id != '-1') {
+      // set
+      setStateSearch = true;
+      update(['updateAll']);
+      // recorremos el catálogo en busca de un coincidencia
+      bool thereIsACoincidence = false;
+      for (var element in homeController.getCataloProducts) {
+        if (element.id == id) {
+          toProductView(porduct: element);
+          thereIsACoincidence = true;
+        }
+      }
+      if(!thereIsACoincidence){
+        searchProductDBPublic(id: id);
+      }
+    }else{
+      clean(); 
+    }
+  }
+  void searchProductDBPublic({required String id}) {
+    // description : busca un producto en la base de datos publica
+
+    // verificamos que el id no este vacio y que no sea -1 (back que devuelve el scanner bar api )
     if (id != '' && id != '-1') {
       // set
       setStateSearch = true;
@@ -146,10 +180,12 @@ class ControllerProductsSearch extends GetxController {
       // query
       Future<DocumentSnapshot<Map<String, dynamic>>> documentSnapshot = Database.readProductPublicFuture(id: id);
       documentSnapshot.then((value) {
+
         // obtenemos el obj
         Product product = Product.fromMap(value.data() as Map);
         // convertimos el obj a product catalogue
         toProductView(porduct: product.convertProductCatalogue());
+
       }).onError((error, stackTrace) {
         setproductDoesNotExist = true;
         setStateSearch = false;

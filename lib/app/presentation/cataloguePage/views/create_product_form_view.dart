@@ -91,7 +91,7 @@ class ProductNewFormView extends StatelessWidget {
         // text : codigo
         controller.getProduct.code != ''
             ? Opacity(opacity: 0.5,
-              child: Text(controller.getProduct.code,
+              child: Text('${controller.getProduct.code}${controller.getProduct.local?' (local)':''}',
                   style: TextStyle(color: colorAccent, fontSize: 12)),
             )
             : Container(),
