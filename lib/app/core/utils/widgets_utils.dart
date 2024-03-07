@@ -401,7 +401,7 @@ class _ProductoItemState extends State<ProductoItem> {
             : widget.producto.description.substring(0, 1)
         : Publications.getFormatoPrecio(
             monto: widget.producto.salePrice * widget.producto.quantity);
-    return widget.producto.image != ""
+    return widget.producto.image != "" && !widget.producto.local
         ? SizedBox(
             width: double.infinity,
             child: CachedNetworkImage(
@@ -411,17 +411,14 @@ class _ProductoItemState extends State<ProductoItem> {
               placeholder: (context, url) => Container(
                 color: Colors.grey[100],
                 child: Center(
-                  child: Text(description,
-                      style:
-                          const TextStyle(fontSize: 24.0, color: Colors.grey)),
+                  child: Text(description, style: const TextStyle(fontSize: 24.0, color: Colors.grey,overflow: TextOverflow.clip )),
                 ),
               ),
               errorWidget: (context, url, error) => Container(
                 color: Colors.grey[100],
                 child: Center(
                   child: Text(description,
-                      style:
-                          const TextStyle(fontSize: 24.0, color: Colors.grey)),
+                      style:  const TextStyle(fontSize: 24.0, color: Colors.grey,overflow: TextOverflow.clip)),
                 ),
               ),
             ),
@@ -430,7 +427,7 @@ class _ProductoItemState extends State<ProductoItem> {
             color: Colors.grey[100],
             child: Center(
               child: Text(description,
-                  style: const TextStyle(fontSize: 24.0, color: Colors.grey)),
+                  style: const TextStyle(fontSize: 24.0, color: Colors.grey,overflow: TextOverflow.clip)),
             ),
           );
   }

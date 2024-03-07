@@ -402,7 +402,7 @@ class CataloguePage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    ImageProductAvatarApp(url: item.image,size: 80,favorite: item.favorite),
+                    ImageProductAvatarApp(url:item.local?'': item.image,size: 80,favorite: item.favorite),
                     Flexible( 
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),

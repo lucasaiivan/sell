@@ -407,10 +407,10 @@ class ControllerCreateProductForm extends GetxController{
               if(controllerTextEditAlertStock.text!=''){getProduct.alertStock  = int.parse( controllerTextEditAlertStock.text );}
 
               // TODO : DELETE RELEASE
-              getProduct.verified = true; 
+              getProduct.verified = getProduct.local ? false : true; 
 
               // actualización de la imagen del producto
-              if (getXFileImage.path != '') {
+              if (getXFileImage.path != '') { 
                 // image - Si el "path" es distinto '' quiere decir que ahi una nueva imagen para actualizar
                 // si es asi procede a guardar la imagen en la base de la app
                 Reference ref = Database.referenceStorageProductPublic(id: getProduct.id); // obtenemos la referencia en el storage
@@ -418,24 +418,26 @@ class ControllerCreateProductForm extends GetxController{
                 await uploadTask; // esperamos a que se suba la imagen 
                 await ref.getDownloadURL().then((value) => getProduct.image = value); // obtenemos la url de la imagen
               }
-              // procede agregrar el producto en una colección publica
-              setProductPublicFirestore();
-              
-              // Registra el precio en una colección publica
-              ProductPrice precio = ProductPrice(
-                id: homeController.getProfileAccountSelected.id,
-                idAccount: homeController.getProfileAccountSelected.id,
-                imageAccount: homeController.getProfileAccountSelected.image,
-                nameAccount: homeController.getProfileAccountSelected.name,
-                price: getProduct.salePrice,
-                currencySign: getProduct.currencySign,
-                province: homeController.getProfileAccountSelected.province,
-                town: homeController.getProfileAccountSelected.town,
-                time: Timestamp.fromDate(DateTime.now()),
-              ); 
+              if(getProduct.local == false){
+                // procede agregrar el producto en una colección publica
+                setProductPublicFirestore();
+                
+                // Registra el precio en una colección publica
+                ProductPrice precio = ProductPrice(
+                  id: homeController.getProfileAccountSelected.id,
+                  idAccount: homeController.getProfileAccountSelected.id,
+                  imageAccount: homeController.getProfileAccountSelected.image,
+                  nameAccount: homeController.getProfileAccountSelected.name,
+                  price: getProduct.salePrice,
+                  currencySign: getProduct.currencySign,
+                  province: homeController.getProfileAccountSelected.province,
+                  town: homeController.getProfileAccountSelected.town,
+                  time: Timestamp.fromDate(DateTime.now()),
+                ); 
 
-              // Firebase set : se crea un documento con la referencia del precio del producto
-              Database.refFirestoreRegisterPrice(idProducto: getProduct.id, isoPAis: 'ARG').doc(precio.id).set(precio.toJson());
+                // Firebase set : se crea un documento con la referencia del precio del producto
+                Database.refFirestoreRegisterPrice(idProducto: getProduct.id, isoPAis: 'ARG').doc(precio.id).set(precio.toJson());
+              }
 
               // Firebase set : se crea los datos del producto del cátalogo de la cuenta
               Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id)

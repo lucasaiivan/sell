@@ -1,4 +1,4 @@
-
+ 
 import 'package:cached_network_image/cached_network_image.dart'; 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -73,10 +73,11 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                         controller.getStateSearch == false && controller.getWriteCode
                             ? Padding(
                               padding: EdgeInsets.symmetric(horizontal: controller.getproductDoesNotExist?12:0),
-                              child: FadeInRight(
+                              child: ElasticIn(
+                                curve: Curves.fastLinearToSlowEaseIn,
                                   child: button(
                                     icon: Icon(Icons.search, color: controller.getButtonData.colorText),
-                                    onPressed: () =>controller.textEditingController.text == ''? null: controller.queryProduct(id: controller.textEditingController.value.text),
+                                    onPressed: () =>controller.textEditingController.text == ''? null: controller.searchProductCatalogue(id: controller.textEditingController.value.text),
                                     text: "Buscar",
                                     colorAccent:controller.getButtonData.colorText,
                                     colorButton: controller.getButtonData.colorButton,
@@ -136,7 +137,9 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                             fontSize: 16,
                             padding: 16,
                             icon: Icon(Icons.add,color: controller.getButtonData.colorText,),
-                            onPressed: () {controller.toProductNew(id: controller.textEditingController.text);},
+                            onPressed: () {
+                              controller.toProductNew(id: controller.textEditingController.text);
+                            },
                             text: "Crear producto",
                             colorAccent: controller.getButtonData.colorText,
                             colorButton: controller.getButtonData.colorButton,
@@ -182,30 +185,33 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
 
   Widget textFieldCodeBar() {
 
-    return TextField(
-              controller: controller.textEditingController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: false),
-              inputFormatters: [FilteringTextInputFormatter.allow(RegExp('[1234567890]'))],
-              decoration: InputDecoration(
-                fillColor: controller.getColorFondo,
-                  suffixIcon: controller.textEditingController.value.text == ""?null:IconButton(onPressed: ()=>controller.clean(),icon: Icon(Icons.clear, color: controller.getColorTextField)),
-                  filled: true,
-                  hintText: 'ej. 77565440001743',
-                  hintStyle: TextStyle(color: Get.theme.hintColor.withOpacity(0.3)),
-                  enabledBorder: OutlineInputBorder(borderRadius: const BorderRadius.all(Radius.circular(16.0)),borderSide: BorderSide(color: controller.getColorTextField)),
-                  border: OutlineInputBorder(borderRadius: const BorderRadius.all(Radius.circular(16.0)),borderSide: BorderSide(color: controller.getColorTextField)),
-                  focusedBorder: OutlineInputBorder(borderRadius: const BorderRadius.all(Radius.circular(16.0)),borderSide: BorderSide(color: controller.getColorTextField)),
-                  labelStyle: TextStyle(color: controller.getColorTextField),
-                  labelText: "Escribe el código de barra",
-                  suffixStyle: TextStyle(color: controller.getColorTextField),
-                ),
-              style: TextStyle(fontSize: 20.0, color: controller.getColorTextField),
-              textInputAction: TextInputAction.search,
-              onSubmitted: (value) {
-                //  Se llama cuando el usuario indica que ha terminado de editar el texto en el campo
-                controller.queryProduct( id: controller.textEditingController.value.text);
-              },
-            );
+    return ElasticIn(
+      curve: Curves.fastLinearToSlowEaseIn,
+      child: TextField(
+                controller: controller.textEditingController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                inputFormatters: [FilteringTextInputFormatter.allow(RegExp('[1234567890]'))],
+                decoration: InputDecoration(
+                  fillColor: controller.getColorFondo,
+                    suffixIcon: controller.textEditingController.value.text == ""?null:IconButton(onPressed: ()=>controller.clean(),icon: Icon(Icons.clear, color: controller.getColorTextField)),
+                    filled: true,
+                    hintText: 'ej. 77565440001743',
+                    hintStyle: TextStyle(color: Get.theme.hintColor.withOpacity(0.3)),
+                    enabledBorder: OutlineInputBorder(borderRadius: const BorderRadius.all(Radius.circular(16.0)),borderSide: BorderSide(color: controller.getColorTextField)),
+                    border: OutlineInputBorder(borderRadius: const BorderRadius.all(Radius.circular(16.0)),borderSide: BorderSide(color: controller.getColorTextField)),
+                    focusedBorder: OutlineInputBorder(borderRadius: const BorderRadius.all(Radius.circular(16.0)),borderSide: BorderSide(color: controller.getColorTextField)),
+                    labelStyle: TextStyle(color: controller.getColorTextField),
+                    labelText: "Escribe el código de barra",
+                    suffixStyle: TextStyle(color: controller.getColorTextField),
+                  ),
+                style: TextStyle(fontSize: 20.0, color: controller.getColorTextField),
+                textInputAction: TextInputAction.search,
+                onSubmitted: (value) {
+                  //  Se llama cuando el usuario indica que ha terminado de editar el texto en el campo
+                  controller.searchProductCatalogue( id: controller.textEditingController.value.text);
+                },
+              ),
+    );
   }
   
 
@@ -324,11 +330,17 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
       late String barcodeScanRes; 
+      // FlutterBarcodeScanner : escanea el codigo de barras
       barcodeScanRes = await FlutterBarcodeScanner.scanBarcode( "#ff6666", "Cancel", true, ScanMode.BARCODE);
+      // sound : play 
+      controller.playSoundScan();
+      //  set 
+      controller.productSelect.local = false;
       controller.textEditingController.text = barcodeScanRes;
-      controller.queryProduct(id: barcodeScanRes);
+      controller.searchProductCatalogue(id: barcodeScanRes);
     } on PlatformException {
       Get.snackbar('scanBarcode', 'Failed to get platform version');
     }
   }
 }
+

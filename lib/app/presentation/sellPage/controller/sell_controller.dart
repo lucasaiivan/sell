@@ -191,11 +191,11 @@ class SalesController extends GetxController {
   // productos seleccionados recientemente  //
   List<ProductCatalogue> get getRecentlySelectedProductsList => homeController.getProductsOutstandingList;
 
-  // efecto de sonido para escaner
+  // sound : efecto de sonido para escaner
   void playSoundScan() async {
     final player = AudioPlayer(); // "soundBip.mp3"
     await player.play(AssetSource("soundBip.mp3")); 
-    }
+  }
 
   // text field controllers 
   final MoneyMaskedTextController textEditingControllerAddFlashPrice = MoneyMaskedTextController(leftSymbol: '\$',decimalSeparator: ',',thousandSeparator: '.',precision:2);
@@ -1252,7 +1252,7 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
               crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 // image
-                ImageProductAvatarApp(url: product.image,size: 75,favorite:product.favorite),
+                ImageProductAvatarApp(url: product.local?'':product.image,size: 75,favorite:product.favorite),
                 // text : datos del producto
                 Flexible(
                   child: Padding(
@@ -1262,7 +1262,7 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(product.description,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(fontWeight: FontWeight.w500)),
-                      product.nameMark==''?Container():Text(product.nameMark,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(color: Colors.blue)),
+                      product.nameMark==''?Container():Text(product.nameMark,maxLines: 1,overflow: TextOverflow.clip,style: TextStyle(color: product.verified?Colors.blue:null)),
                       Wrap(
                         crossAxisAlignment: WrapCrossAlignment.start,
                         direction: Axis.horizontal,

@@ -711,7 +711,7 @@ class SalesView extends StatelessWidget {
                 children: <Widget>[
                   // image
                   CachedNetworkImage(
-                    imageUrl: productCatalogue.image,
+                    imageUrl: productCatalogue.local?'': productCatalogue.image,
                     placeholder: (context, url) => CircleAvatar(
                         radius: radius,
                         backgroundColor: backgroundColor,
