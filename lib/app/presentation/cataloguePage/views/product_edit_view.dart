@@ -140,6 +140,7 @@ class ProductEdit extends StatelessWidget {
             scrollDirection: Axis.vertical,
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             children: [
+              controller.getProductPublicUpdateStatus?updateProductTile():Container(),
               productDataView(), 
               ComponentApp().divider(),
               productFromView(),
@@ -566,7 +567,44 @@ class ProductEdit extends StatelessWidget {
       ),
     );
   }
-
+  Widget updateProductTile() {
+    // description : crear un [ListTile] con bordes redondeados,avatar y description y un textbutton 'actualizar' del nuevo producto [controller.getProductPublicUpdate]
+    return Column(  
+      children: [
+        const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.new_releases_outlined),
+            SizedBox(width: 8),
+            Text('Producto encontrado con este código',style: TextStyle(fontWeight: FontWeight.w400)),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Card(
+            elevation: 0,
+            child: ListTile(
+              contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+              leading: ImageProductAvatarApp(url: controller.getProductPublicUpdate.image),
+              title: Row(
+                children: [
+                  // icon : verificacion
+                  const Icon(Icons.verified_rounded,size: 16,color: Colors.blue),
+                  // spacer si esta verificado
+                  const SizedBox(width:2), 
+                  // text : codigo
+                  Text(controller.getProductPublicUpdate.code,style: const TextStyle(height: 1,fontSize: 14,fontWeight: FontWeight.w400)),
+                ],
+              ),
+              subtitle: Text(controller.getProductPublicUpdate.description),
+              trailing: TextButton(onPressed: ()  =>  controller.updateProductCatalogue(), child: const Text('Actualizar',style: TextStyle(fontSize: 16))),
+              onTap:null,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
   
 }
 

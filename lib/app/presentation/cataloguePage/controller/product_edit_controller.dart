@@ -18,6 +18,10 @@ import '../../home/controller/home_controller.dart';
 
 class ControllerProductsEdit extends GetxController {
 
+  // others controllers
+  final HomeController homeController = Get.find();
+  HomeController get getHomeController => homeController;
+
   // Build context
   BuildContext? context;
   BuildContext get getContext => context!;
@@ -39,10 +43,6 @@ class ControllerProductsEdit extends GetxController {
   final descriptionTextFormFieldfocus = FocusNode(); 
   final purchasePriceTextFormFieldfocus = FocusNode(); 
   final salePriceTextFormFieldfocus = FocusNode(); 
-
-  // others controllers
-  final HomeController homeController = Get.find();
-  HomeController get getHomeController => homeController;
 
   // state internet
   bool connected = false;
@@ -91,10 +91,21 @@ class ControllerProductsEdit extends GetxController {
 
   bool get getEditModerator => _editModerator;
 
-  // parameter
+  // producto seleccionado
   ProductCatalogue _product = ProductCatalogue(upgrade: Timestamp.now(), creation: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now());
   set setProduct(ProductCatalogue product) => _product = product;
   ProductCatalogue get getProduct => _product;
+  // nuevo producto encontrado en la DB Global para actualizar
+  Product _productPublicUpdate = Product(upgrade: Timestamp.now(), creation: Timestamp.now());
+  set setProductPublicUpdate(Product product) {
+    _productPublicUpdate = product;
+    setProductPublicUpdateStatus = true;
+    updateAll();
+  }
+  Product get getProductPublicUpdate => _productPublicUpdate;
+  bool productPublicUpdate = false; 
+  bool get getProductPublicUpdateStatus => productPublicUpdate;
+  set setProductPublicUpdateStatus(bool value) => productPublicUpdate = value;
 
   // TextEditingController
   TextEditingController controllerTextEditDescripcion = TextEditingController();
@@ -213,7 +224,7 @@ class ControllerProductsEdit extends GetxController {
   bool _dataUploadStatusProvider = false;
   // estado de carga de datos de la categoria 
   bool _dataUploadStatusCategory = false;
- 
+
   void checkDataUploadStatusProduct({bool? dataUploadStatusProduct, bool? dataUploadStatusMark, bool? dataUploadStatusProvider, bool? dataUploadStatusCategory}) {
     // descrioption : chequea si se cargaron los datos del producto, marca, proveedor y categoria
     
@@ -257,6 +268,8 @@ class ControllerProductsEdit extends GetxController {
       // obtenemos los datos del producto de la base de datos global
       getDataProduct(id: getProduct.id);
     }
+    // comprobamos si el producto local tiene existencia en la base de datos publica
+    checkUpdateProductPublic();
 
     super.onInit();
   }
@@ -421,7 +434,6 @@ class ControllerProductsEdit extends GetxController {
       Get.snackbar('No se puedo continuar 👎',
             'se produjo un error');}
   }
-
   void setProductPublicFirestore()  { 
     // esta función procede a guardar el documento de una colleción publica
 
@@ -492,7 +504,7 @@ class ControllerProductsEdit extends GetxController {
       Get.back();
     });
   }
-  // fuction : carga los datos del producto en el formulario una ves que se obtienen de la base de datos
+  // read : carga los datos del producto en el formulario una ves que se obtienen de la base de datos
   void loadDataFormProduct() {
  
     // set : datos del producto para validar 
@@ -568,8 +580,35 @@ class ControllerProductsEdit extends GetxController {
       checkDataUploadStatusProduct(dataUploadStatusProvider: true);
     });
   }
- 
-
+  // read : comprobamos actualización en la DB publica de productos
+  void checkUpdateProductPublic() {
+    // description : comprobamos si el producto es local y si tiene existencia en la base de datos publica de productos
+    if (getProduct.local) {
+      // firebase : comprobamos si el producto existe en la base de datos publica
+      Database.readProductPublicFuture(id: getProduct.id).then((value) {
+        // get 
+        Product product = Product.fromMap(value.data() as Map);  
+        //  set
+        if(product.verified){
+          setProductPublicUpdate = product; 
+        } 
+      });
+    }
+  }
+  void updateProductCatalogue() {
+    // description : actualiza el producto en el cátalogo de la cuenta
+    // get
+    ProductCatalogue product = getProduct; 
+    setProduct = product.updateData(product: getProductPublicUpdate);
+    // Firebase set  
+    Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id).set( getProduct.toJson()).whenComplete(() {
+      // Firebase set : incrementamos el valor de los seguidores del producto o
+      Database.refFirestoreProductPublic().doc(getProduct.id).update({'followers': FieldValue.increment(1)});
+    });
+    getProduct.followers++;
+    setProductPublicUpdateStatus = false;
+    updateAll();
+  }
   // read XFile image
   void getLoadImageGalery() {
     //  function : selecciona una imagen de la galeria
@@ -583,7 +622,6 @@ class ControllerProductsEdit extends GetxController {
       update(['updateAll']);  //  actualizamos la vista 
     });
   }
-
   void getLoadImageCamera() {
     //  function : selecciona una imagen de la camara
     _picker.pickImage(source: ImageSource.camera,maxWidth: 720.0,maxHeight: 720.0,imageQuality: 55,)
@@ -595,9 +633,7 @@ class ControllerProductsEdit extends GetxController {
     });
   }
 
- 
   // WIDGETS
-
   void showDialogAddProfitPercentage( ) {
     // Dialog view :  muestra el dialogo para agregar el porcentaje de ganancia
 

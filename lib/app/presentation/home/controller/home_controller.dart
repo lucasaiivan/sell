@@ -721,11 +721,13 @@ class HomeController extends GetxController {
     Database.refFirestoreUserAccountsList(email: email).get().then((value) {
       //  recorre la lista de cuentas
       for (var element in value.docs) {
+        // get : obtenemos los datos del perfil del usuario
+        UserModel userModel = UserModel.fromDocumentSnapshot(documentSnapshot: element);
         // condition : si el id de la cuenta es diferente de vacio para evitar errores de consulta inexistentes
-        if (element.get('id') != '') {
+        if (userModel.account != '') {
           // firebase : obtenemos los datos de la cuenta
-          Database.readProfileAccountModelFuture(element.get('id')).then((value) {
-            // obtenemos los perfiles de las cuentas administradas
+          Database.readProfileAccountModelFuture(userModel.account).then((value) {
+            // get : obtenemos los perfiles de las cuentas administradas
             ProfileAccountModel profileAccountModel = ProfileAccountModel.fromDocumentSnapshot(documentSnapshot:value);
             // set
             addManagedAccountsList = profileAccountModel; 

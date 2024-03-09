@@ -97,7 +97,7 @@ class AccountController extends GetxController {
   @override
   void onInit() async {
     // obtenemos los datos del controlador principal
-    verifyAccount(idAccount: homeController.getUserAuth.uid);
+    verifyAccount();
 
     super.onInit();
   }
@@ -110,17 +110,17 @@ class AccountController extends GetxController {
   @override
   void onClose() {}
 
-  void verifyAccount({required String idAccount}) { 
+  void verifyAccount( ) { 
     // obtenemos los datos de la cuenta
     setProfileAccount = homeController.getProfileAccountSelected.copyWith();
     // set
-    newAccount = profileAccount.name=='';
+    newAccount = profileAccount.id=='';
     setControllerTextEditProvincia =TextEditingController(text: profileAccount.province);
     setControllerTextEditPais =TextEditingController(text: profileAccount.country);
     setControllerTextEditSignoMoneda =TextEditingController(text: profileAccount.currencySign);
     // actuazamos la vista
     stateLoding = false;
-    update(['load']);
+    update(['load']);  
   }
 
   void saveAccount() async {
@@ -137,7 +137,7 @@ class AccountController extends GetxController {
       if (newAccount) {
         //  si es una nueva cuenta se crea un nuevo id obtenido de la id de autenticacion del usuario
         // esto es para que la cuenta sea unica y no se pueda crear mas de una cuenta por usuario autenticado 
-        profileAccount.id = homeController.getUserAuth.uid;
+        profileAccount.id = homeController.getUserAuth.uid; 
       }
       // si se cargo una nueva imagen procede a guardar la imagen en Storage
       if (getImageUpdate) {
@@ -148,14 +148,14 @@ class AccountController extends GetxController {
       }
 
       // actualizamos los datos de la cuenta en la memoria en ejecucion de la app
-      homeController.setProfileAccountSelected = profileAccount.copyWith();
+      //homeController.setProfileAccountSelected = profileAccount.copyWith();
 
       // si la cuenta no existe, se crea una nueva de lo contrario de actualiza los datos
       newAccount? createAccount(data: profileAccount ): updateAccount(data: profileAccount.toJson());
     }
   }
 
-  Future<void> updateAccount({required Map<String, dynamic> data}) async {
+  updateAccount({required Map<String, dynamic> data}) async {
     // Esto actualiza los datos de la cuenta
     if (data['id'] != '') {
       // db ref
@@ -174,13 +174,13 @@ class AccountController extends GetxController {
     }
   }
 
-  Future<void> createAccount({required ProfileAccountModel data}) async {
+  void createAccount({required ProfileAccountModel data}) async {
     // Esto guarda un documento con los datos de la cuenta por crear
 
     // vales
     UserModel user = UserModel(
         account: data.id,
-        email: homeController.getUserAuth.email ?? 'null',
+        email: homeController.getUserAuth.email ?? '',
         superAdmin: true,
         admin: true,
         arqueo: true,
@@ -191,8 +191,7 @@ class AccountController extends GetxController {
         personalized: false, 
         transactions: true,
         creation: Timestamp.now(),
-        lastUpdate: Timestamp.now(),
-
+        lastUpdate: Timestamp.now(), 
       );
     //...
     if (data.id != '') {
@@ -201,17 +200,22 @@ class AccountController extends GetxController {
       var refFirestoreUserAccountsList = Database.refFirestoreUserAccountsList(email: user.email).doc(data.id);
       var refFirestoreAccountsUsersList = Database.refFirestoreAccountsUsersList(idAccount: data.id) .doc(user.email);
 
-      // se crea un nuevo documento
-      await documentReferencer.set(data).whenComplete(() {
+      // firestore : crear un documento (cuenta del negocio)
+      documentReferencer.set(data.toJson()).whenComplete(() {
+        // firestore : crea un documento (referencia) con los datos del usuario en el perfil de la cuenta
         refFirestoreAccountsUsersList.set(user.toJson(),SetOptions(merge: true));
+        // firestore : crea un documento (referencia) con los datos de la cuenta en el perfil del usuario
         refFirestoreUserAccountsList.set(user.toJson(),SetOptions(merge: true));
+        // actualizamos los datos de la cuenta en la memoria en ejecucion de la app
         homeController.accountChange(idAccount: data.id);
         Get.back();
       }).catchError((e) {
         setSavingIndicator = false;
-        Get.snackbar('No se puedo guardar los datos',
-            'Puede ser un problema de conexión');
+        Get.snackbar('No se puedo guardar los datos','Puede ser un problema de conexión');
       });
+    }else{
+      setSavingIndicator = false;
+      Get.snackbar('No se puedo guardar los datos','Problema con la indentificación de la cuenta');
     }
   }
 }
