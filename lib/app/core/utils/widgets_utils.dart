@@ -51,21 +51,22 @@ class ImageBarWidget extends StatelessWidget {
 class ImageIconScanWidget extends StatelessWidget {
   /// Tamaño deseado del icono.
   final double size;
+  final Color? color;
 
   /// Crea un widget de icono de escaneo de código de barras.
   ///
   /// [size] es el tamaño deseado del icono en píxeles.
   const ImageIconScanWidget({
-    Key? key,
-    required this.size,
+    Key? key, 
+    required this.size, this.color,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) { 
     return SizedBox(
       width: size,
       height: size,
-      child: Image.asset('assets/scanbarcode.png',color: Colors.white),
+      child: Image.asset('assets/scanbarcode.png',color: color),
     );
   }
 }
@@ -773,7 +774,7 @@ class ComponentApp extends StatelessWidget {
         ),
       ),
     );
-  }
+  } 
   Widget button( {bool defaultStyle = false,double elevation=0,double fontSize = 14,double width = double.infinity,bool disable = false, Widget? icon, String text = '',required dynamic onPressed,EdgeInsets padding =const EdgeInsets.symmetric(horizontal: 12, vertical: 12),Color colorButton = Colors.blue,Color colorAccent = Colors.white}) {
     // button : personalizado
     return FadeIn(
@@ -999,7 +1000,7 @@ class ImageProductAvatarApp extends StatelessWidget {
       imageDefault = AnimatedContainer(
       duration: const Duration(milliseconds: 500),
       color: backgroundColor,
-      child: Image.asset('assets/default_image.png',fit: BoxFit.cover,color: iconColor,));
+      child: Image.asset('assets/default_image.png',fit: BoxFit.cover,color: iconColor));
     }
     return SizedBox(
       width: size,height: size,

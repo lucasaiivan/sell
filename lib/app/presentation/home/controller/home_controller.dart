@@ -720,7 +720,7 @@ class HomeController extends GetxController {
     // firebase : obtenemos la lista de cuentas del usuario
     Database.refFirestoreUserAccountsList(email: email).get().then((value) {
       //  recorre la lista de cuentas
-      for (var element in value.docs) {
+      for (var element in value.docs){
         // get : obtenemos los datos del perfil del usuario
         UserModel userModel = UserModel.fromDocumentSnapshot(documentSnapshot: element);
         // condition : si el id de la cuenta es diferente de vacio para evitar errores de consulta inexistentes

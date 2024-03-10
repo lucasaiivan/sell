@@ -281,6 +281,13 @@ class ControllerCreateProductForm extends GetxController{
     setProduct = Get.arguments['product']?? ProductCatalogue(creation: Timestamp.now(), upgrade: Timestamp.now(), documentCreation: Timestamp.now(), documentUpgrade: Timestamp.now());
   } 
   @override
+  void onReady() {
+    super.onReady();
+    if(getProduct.local){
+      carouselController.animateToPage(1);
+    }
+  }
+  @override
   void onClose() {
     super.onClose();
 
@@ -342,13 +349,13 @@ class ControllerCreateProductForm extends GetxController{
       return false;
     }
 
-    if(getCurrentSlide!=0){
+    if(getCurrentSlide!=0 && !getProduct.local){
       previousPage();
       return false;
     }
 
-    //  si _onBackPressed es true se puede salir de la app
-    if(getCurrentSlide==0){
+    //  si _onBackPressed es true se puede salir 
+    if(getCurrentSlide==0 || (getProduct.local && getCurrentSlide==1)){
       final  shouldPop = await showDialog<bool>(
           context: context,
           builder: (context) {
