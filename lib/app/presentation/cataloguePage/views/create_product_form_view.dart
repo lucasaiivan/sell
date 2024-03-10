@@ -91,7 +91,7 @@ class ProductNewFormView extends StatelessWidget {
         // text : codigo
         controller.getProduct.code != ''
             ? Opacity(opacity: 0.5,
-              child: Text('${controller.getProduct.code}${controller.getProduct.local?' (local)':''}',
+              child: Text('${controller.getProduct.code}${controller.getProduct.local?' (Catálogo)':''}',
                   style: TextStyle(color: colorAccent, fontSize: 12)),
             )
             : Container(),
@@ -164,7 +164,7 @@ class ProductNewFormView extends StatelessWidget {
             TextButton(
               onPressed: controller.getDataUploadStatus
                   ? null
-                  : controller.getCurrentSlide == 0
+                  : controller.getCurrentSlide == 0 || (controller.getProduct.local && controller.getCurrentSlide == 1) 
                       ? null
                       : () {
                           controller.previousPage();
