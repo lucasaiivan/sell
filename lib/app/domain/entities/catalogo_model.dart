@@ -111,8 +111,8 @@ class Product {
     productCatalogue.imageMark = imageMark;
     productCatalogue.description = description;
     productCatalogue.code = code;
-    productCatalogue.upgrade = upgrade;
-    productCatalogue.creation = creation; 
+    productCatalogue.documentUpgrade = upgrade;
+    productCatalogue.documentCreation = creation; 
 
     return productCatalogue;
   }

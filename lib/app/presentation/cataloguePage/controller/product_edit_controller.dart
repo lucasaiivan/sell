@@ -839,8 +839,9 @@ class ControllerProductsEdit extends GetxController {
         Product product = Product.fromMap(value.data() as Map);
         //  set
         setProduct = getProduct.updateData(product: product);
-        checkDataUploadStatusProduct(dataUploadStatusProduct: true);
         loadDataFormProduct(); // carga los datos del producto en el formulario
+        // actualiza la vista ui
+        checkDataUploadStatusProduct(dataUploadStatusProduct: true);
         
       }).catchError((error) {
         checkDataUploadStatusProduct(dataUploadStatusProduct: false);

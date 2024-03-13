@@ -307,16 +307,18 @@ class TransactionsView extends StatelessWidget {
     // styles
     const double opacity = 0.8;
     Widget divider = ComponentApp().divider();
-    Widget spacer = const SizedBox(height: 6);
-    TextStyle textStyleDescription = const TextStyle( fontWeight: FontWeight.w300);
-    TextStyle textStyleValue = const TextStyle(fontSize: 16,fontWeight: FontWeight.w600);
+    Widget spacer = const SizedBox(height:6);
+    TextStyle textStyleDescription = const TextStyle(fontSize:12,fontWeight: FontWeight.w300,fontFamily: 'Courier',);
+    TextStyle textStyleValue = const TextStyle(fontSize: 12,fontWeight: FontWeight.w600,fontFamily: 'Courier',);
 
-  //  showDialog  : mostrar detalles de la transacción
+  //  showDialog : mostrar detalles de la transacción
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog( 
-          contentPadding: const EdgeInsets.all(5),
+          contentPadding: const EdgeInsets.all(5), 
+          // bordes : 
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0.1)),
           //  SingleChildScrollView : para que el contenido de la alerta se pueda desplazar
           content: SizedBox(
             // establece el ancho a toda la pantalla
@@ -332,7 +334,7 @@ class TransactionsView extends StatelessWidget {
                     // text : titulo de la alerta
                     const Padding(
                       padding: EdgeInsets.only(bottom: 12),
-                      child: Text("Información de transacción",textAlign: TextAlign.center, style: TextStyle(fontSize: 18,fontWeight: FontWeight.w400)),
+                      child: Text("Ticket",textAlign: TextAlign.center, style: TextStyle(fontSize: 18,fontWeight: FontWeight.w400,fontFamily: 'Courier')),
                     ),
                     const SizedBox(height: 20),
                     // text
@@ -346,15 +348,15 @@ class TransactionsView extends StatelessWidget {
                     spacer,
                     Row(
                       children: <Widget>[
-                        Opacity(opacity:opacity,child: Text("Fecha de creación: ",style: textStyleDescription)),
+                        Opacity(opacity:opacity,child: Text("Fecha: ",style: textStyleDescription)),
                         const Spacer(),
-                        Text(formattedCreationDate,style: textStyleValue),
+                        Text(formattedCreationDate,style: textStyleValue,overflow:TextOverflow.ellipsis),
                       ],
                     ),
                     spacer,
                     Row(
                       children: <Widget>[
-                        Opacity(opacity:opacity,child: Text("Caja registradora: ",style: textStyleDescription)),
+                        Opacity(opacity:opacity,child: Text("Caja: ",style: textStyleDescription)),
                         const Spacer(),
                         Text(cashRegister,style: textStyleValue),
                       ],
@@ -364,7 +366,7 @@ class TransactionsView extends StatelessWidget {
                       children: <Widget>[
                         Opacity(opacity:opacity,child: Text("Vendedor: ",style: textStyleDescription,overflow:TextOverflow.ellipsis)),
                         const Spacer(),
-                        Text(seller,style: textStyleValue),
+                        Text(seller,style: textStyleValue,overflow:TextOverflow.ellipsis),
                       ],
                     ),
                     spacer,  
@@ -372,7 +374,7 @@ class TransactionsView extends StatelessWidget {
                     spacer,  
                     Row(
                       children: <Widget>[
-                        Opacity(opacity:opacity,child: Text("Cantidad de artículos: ",style: textStyleDescription)),
+                        Opacity(opacity:opacity,child: Text("Artículos: ",style: textStyleDescription)),
                         const Spacer(),
                         Text("${ticket.getLengh()}",style: textStyleValue),
                       ],
@@ -382,7 +384,7 @@ class TransactionsView extends StatelessWidget {
                       children: <Widget>[
                         Opacity(opacity:opacity,child: Text("Modo de pago: ",style: textStyleDescription)),
                         const Spacer(),
-                        Text("${ payModeMap['name'] }",style: textStyleValue),
+                        Text("${ payModeMap['name'] }",style: textStyleValue,overflow:TextOverflow.ellipsis),
                       ],
                     ),
                     spacer,  
@@ -394,7 +396,7 @@ class TransactionsView extends StatelessWidget {
                       children: <Widget>[
                         Opacity(opacity:opacity,child: Text("Descuentos: ",style: textStyleDescription)),
                         const Spacer(),
-                        Text(Publications.getFormatoPrecio(monto: ticket.discount,moneda: currencySymbol),style: textStyleValue.copyWith(color: Colors.red.shade400)),
+                        Text(Publications.getFormatoPrecio(monto: ticket.discount,moneda: currencySymbol),overflow:TextOverflow.ellipsis,style: textStyleValue.copyWith(color: Colors.red.shade400)),
                       ],
                     ),
                     spacer, 
@@ -403,9 +405,9 @@ class TransactionsView extends StatelessWidget {
                       color: Colors.black12,
                       child: Row(
                         children: <Widget>[
-                          Opacity(opacity:opacity,child: Text("Precio total: ",style: textStyleDescription)),
+                          Opacity(opacity:opacity,child: Text("Total: ",style: textStyleDescription)),
                           const Spacer(),
-                          Text( Publications.getFormatoPrecio(monto: priceTotal,moneda: currencySymbol),style: textStyleValue ),
+                          Text( Publications.getFormatoPrecio(monto: priceTotal,moneda: currencySymbol),overflow:TextOverflow.ellipsis,style: textStyleValue ),
                         ],
                       ),
                     ),
@@ -420,7 +422,7 @@ class TransactionsView extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             const Icon(Icons.auto_graph_outlined,size: 14,color: Colors.green),
-                            Text( Publications.getFormatoPrecio(monto: ticket.getProfit,moneda: currencySymbol),style: textStyleValue.copyWith(color: Colors.green)),
+                            Text( Publications.getFormatoPrecio(monto: ticket.getProfit,moneda: currencySymbol),overflow:TextOverflow.ellipsis,style: textStyleValue.copyWith(color: Colors.green)),
                           ],
                         ),
                       ],

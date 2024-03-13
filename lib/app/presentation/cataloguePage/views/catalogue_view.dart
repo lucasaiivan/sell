@@ -265,7 +265,7 @@ class CataloguePage extends StatelessWidget {
   }
   // WIDGETS COMPONENTS
   Widget floatingActionButton({required CataloguePageController controller}) {
-    return FloatingActionButton(
+    return FloatingActionButton( 
         backgroundColor: controller.homeController.getUserAnonymous?Colors.grey:Colors.blue,
         onPressed: (){ 
 
