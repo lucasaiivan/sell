@@ -42,11 +42,13 @@ class ControllerProductsSearch extends GetxController {
     // llamado después de que el widget se representa en la pantalla - ej. showIntroDialog();
     super.onReady();
     productSelect.local = true;
+    textFieldCodeFocusNode = FocusNode();
   }
 
   @override
   void onClose() {
     ThemeService.switchThemeDefault();
+    textFieldCodeFocusNode.dispose();
     super.onClose();
     
   }
@@ -108,6 +110,8 @@ class ControllerProductsSearch extends GetxController {
   set setColorTextField(Color color) => _colorTextField = color;
   get getColorTextField => _colorTextField;
 
+  // FocusNode : textfield de entrda de codigo
+  FocusNode textFieldCodeFocusNode = FocusNode();
   // TextEditingController
   TextEditingController textEditingController =  TextEditingController(text: '');
   set setTextEditingController(TextEditingController editingController) => textEditingController = editingController;
@@ -248,7 +252,7 @@ class ControllerProductsSearch extends GetxController {
     clean();
     //set
     productSelect.id = id;
-    productSelect.code = id;
+    productSelect.code = id; 
     // navega hacia una nueva vista para crear un nuevo producto
     Get.toNamed(Routes.createProductForm,arguments: { 'product': productSelect});
   }

@@ -819,9 +819,8 @@ class WidgetSuggestionProduct extends StatelessWidget {
 
   //values
   final bool searchButton ;
-  final List<Product> list ;
-  
-
+  final List<Product> list ; 
+   
   @override
   Widget build(BuildContext context) {
 
@@ -834,78 +833,67 @@ class WidgetSuggestionProduct extends StatelessWidget {
     Color? colorAccent = Get.theme.textTheme.titleMedium?.color;
     double radius = 32.0;
 
-    return Column(
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.max,
       children: [
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text("Sugerencias para vos",style: Get.theme.textTheme.titleMedium),
-        ),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            !searchButton
-                ? Container()
-                : InkWell(
-                    onTap: () => Get.toNamed(Routes.SEACH_PRODUCT,arguments: {'id': ''}),
-                    borderRadius: BorderRadius.circular(50),
-                    child: Padding(
-                      padding: const EdgeInsets.all(5.0),
-                      child: FadeInLeft(
-                        child: CircleAvatar(
-                            radius: radius,
-                            backgroundColor: colorAccent,
-                            child: CircleAvatar(radius: radius-2,backgroundColor:Get.theme.scaffoldBackgroundColor,child: Icon(Icons.search, color: colorAccent))),
-                      ),
-                    ),
+        !searchButton
+            ? Container()
+            : InkWell(
+                onTap: () => Get.toNamed(Routes.SEACH_PRODUCT,arguments: {'id': ''}),
+                borderRadius: BorderRadius.circular(50),
+                child: Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: FadeInLeft(
+                    child: CircleAvatar(
+                        radius: radius,
+                        backgroundColor: colorAccent,
+                        child: CircleAvatar(radius: radius-2,backgroundColor:Get.theme.scaffoldBackgroundColor,child: Icon(Icons.search, color: colorAccent))),
                   ),
-            SizedBox(
-                width: Get.size.width,
-                height: 100,
-                child: Center(
-                  child: ListView.builder(
-                      shrinkWrap: true,
-                      scrollDirection: Axis.horizontal,
-                      itemCount: list.length,
-                      itemBuilder: (context, index) {
-                        return Align(
-                          widthFactor: 0.5,
-                          child: InkWell(
-                            onTap: () => homeController.toNavigationProductEdit(productCatalogue: list[index].convertProductCatalogue()),
-                            borderRadius: BorderRadius.circular(50),
-                            child: Padding(
-                              padding: const EdgeInsets.all(5.0),
-                              child: FadeInRight(
+                ),
+              ),
+        SizedBox(
+            width: Get.size.width,
+            height: 100,
+            child: Center(
+              child: ListView.builder(
+                  shrinkWrap: true,
+                  scrollDirection: Axis.horizontal,
+                  itemCount: list.length,
+                  itemBuilder: (context, index) {
+                    return Align(
+                      widthFactor: 0.5,
+                      child: InkWell(
+                        onTap: () => homeController.toNavigationProductEdit(productCatalogue: list[index].convertProductCatalogue()),
+                        borderRadius: BorderRadius.circular(50),
+                        child: Padding(
+                          padding: const EdgeInsets.all(5.0),
+                          child: FadeInRight(
+                            child: CircleAvatar(
+                                backgroundColor: colorAccent,
+                                foregroundColor: colorAccent,
+                                radius: radius,
                                 child: CircleAvatar(
-                                    backgroundColor: colorAccent,
-                                    foregroundColor: colorAccent,
-                                    radius: radius,
-                                    child: CircleAvatar(
-                                        backgroundColor: Colors.grey[100],
-                                        foregroundColor: Colors.grey[100],
-                                        radius: radius-2,
-                                        child: ClipRRect(
-                                          borderRadius:BorderRadius.circular(50),
-                                          child: CachedNetworkImage(
-                                            fadeInDuration: const Duration( milliseconds: 200),
-                                            fit: BoxFit.cover,
-                                            imageUrl: list[index].image,
-                                            placeholder: (context, url) =>CircleAvatar(backgroundColor:Colors.grey[100],foregroundColor:Colors.grey[100]),
-                                            errorWidget:(context, url, error) =>CircleAvatar(backgroundColor:Colors.grey[100],foregroundColor:Colors.grey[100]),
-                                          ),
-                                        ))),
-                              ),
-                            ),
+                                    backgroundColor: Colors.grey[100],
+                                    foregroundColor: Colors.grey[100],
+                                    radius: radius-2,
+                                    child: ClipRRect(
+                                      borderRadius:BorderRadius.circular(50),
+                                      child: CachedNetworkImage(
+                                        fadeInDuration: const Duration( milliseconds: 200),
+                                        fit: BoxFit.cover,
+                                        imageUrl: list[index].image,
+                                        placeholder: (context, url) =>CircleAvatar(backgroundColor:Colors.grey[100],foregroundColor:Colors.grey[100]),
+                                        errorWidget:(context, url, error) =>CircleAvatar(backgroundColor:Colors.grey[100],foregroundColor:Colors.grey[100]),
+                                      ),
+                                    ))),
                           ),
-                        );
-                      }),
-                )),
-          ],
-        ),
+                        ),
+                      ),
+                    );
+                  }),
+            )),
       ],
     );
   }

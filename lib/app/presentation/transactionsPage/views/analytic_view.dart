@@ -42,7 +42,7 @@ class _StaticsCardsState extends State<StaticsCards> {
         icon:  const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.attach_money_rounded,color: Colors.white,size:14)))),
         titleText: 'Facturación', 
         valueText: transactionsController.getInfoAmountTotalFilter,
-        description: 'Balance total',
+        description: 'Balance total', 
         content: MiniLineChart(prices: transactionsController.getBillingByDateList.reversed.toList(),positionIndex: transactionsController.positionIndex),
         ), 
       // card : transacciones
@@ -240,10 +240,11 @@ class CardAnalityc extends StatelessWidget {
 
 
 
-    // style  
+    // style   
     TextStyle subtitleStyle = const TextStyle(fontSize: 18,fontWeight: FontWeight.w300);
     TextStyle valueTextStyle = TextStyle(fontSize: description=='' && subtitle==''? 30: 24, fontWeight: FontWeight.w500,overflow: TextOverflow.ellipsis);
     TextStyle descriptionStyle = const TextStyle(fontSize: 12);  
+    Color? buttonColor = Get.isDarkMode?Colors.white70:Colors.grey.shade700;
 
     return Stack(
       fit: StackFit.expand,
@@ -252,41 +253,43 @@ class CardAnalityc extends StatelessWidget {
         ImageFiltered(
           enabled: !isPremium,
             imageFilter: ImageFilter.blur(sigmaX:4,sigmaY:4,tileMode: TileMode.decal),
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [  
-                  const Spacer(), 
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [ 
-                      content,
-                      subtitle==''?Container(): Flexible(child: Opacity(opacity: 0.7, child: Text(subtitle,style: subtitleStyle))),
-                      valueText==''?Container():Flexible(child: Text(valueText,maxLines:2, textAlign: TextAlign.start, style: valueTextStyle)),
-                      description==''?Container():Flexible(child: Opacity(opacity: 0.7, child: Text(description, style: descriptionStyle))),
-                      Row(   
-                        children: [
-                          Flexible(
-                            fit: FlexFit.tight,
-                            child: widgetDescription),
-                            // condition : si ruta esta vacio no muesta el icono de ver mas informacion
-                          modalContent is SizedBox ?Container():const Padding(
-                            padding: EdgeInsets.only(left: 8),
-                            child: Opacity(opacity: 0.2,child: Icon(Icons.expand_circle_down_sharp,size: 24)),
+                    children: [  
+                      const Spacer(), 
+                      Column(
+                        mainAxisSize: MainAxisSize.min, 
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [ 
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: content,
                           ),
+                          subtitle==''?Container(): Flexible(child: Opacity(opacity: 0.7, child: Text(subtitle,style: subtitleStyle))),
+                          valueText==''?Container():Flexible(child: Text(valueText,maxLines:2, textAlign: TextAlign.start, style: valueTextStyle)),
+                          description==''?Container():Flexible(child: Opacity(opacity: 0.7, child: Text(description, style: descriptionStyle))),
+                          widgetDescription,
                         ],
                       ),
                     ],
+                    
                   ),
-                ],
-              ),
+                ),
+                // position : posiciona en la parte inferior izquiedo
+                Positioned(
+                  bottom: 8,
+                  right: 8,
+                  child: modalContent is SizedBox ?Container(): Padding(padding: const EdgeInsets.only(left: 8),child: CircleAvatar(backgroundColor: Colors.black26,maxRadius: 16,child: Icon(Icons.expand_circle_down_sharp,size: 24,color:buttonColor),) ),
+                ),
+              ],
             ),
           ), 
           // view : logo de premium
-          isPremium?Container(): 
-            Center(child: LogoPremium(personalize: true,id: 'analytic')),
+          isPremium?Container():Center(child: LogoPremium(personalize: true,id: 'analytic')),
           // position : posicionar en la parte superior  al inicio  de lado izquierdo
           Positioned(
             top:12,
@@ -297,7 +300,7 @@ class CardAnalityc extends StatelessWidget {
               Text(titleText,style: const TextStyle(fontWeight: FontWeight.w400),overflow:  TextOverflow.ellipsis)
             ],
           ),
-          ),  
+          ),   
         ],
     );
   }

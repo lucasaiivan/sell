@@ -1,10 +1,8 @@
- 
-import 'package:cached_network_image/cached_network_image.dart'; 
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-import 'package:get/get.dart'; 
-import '../../../domain/entities/catalogo_model.dart';
+import 'package:get/get.dart';  
 import '../../../core/utils/dynamicTheme_lb.dart';
 import '../../../core/utils/widgets_utils.dart';
 import '../controller/productsSearch_controller.dart';
@@ -21,10 +19,31 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
       initState: (_) {},
       builder: (_) {
         return Scaffold(
-          resizeToAvoidBottomInset: false,
+          resizeToAvoidBottomInset: true,  // evita que el teclado cubra el contenido
           backgroundColor: controller.getColorFondo,
           appBar: appbar(),
           body: _body(),
+          floatingActionButton: Opacity(
+                opacity: controller.getproductDoesNotExist ? 0.5 : 1.0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Button : escribir código manual 
+                    controller.getWriteCode?Container():FloatingActionButton(onPressed: (){ 
+                      controller.setWriteCode =!controller.getWriteCode;
+                      controller.textFieldCodeFocusNode.requestFocus();
+                      },elevation: 0,backgroundColor: controller.getButtonData.colorButton,child: Icon(Icons.keyboard,color: controller.getButtonData.colorText)),
+                    const SizedBox(width: 5.0),
+                    // button : buscar producto
+                    !controller.getWriteCode?Container():FloatingActionButton(onPressed: () =>controller.textEditingController.text == ''? null: controller.searchProductCatalogue(id: controller.textEditingController.value.text),elevation: 0,backgroundColor: controller.getButtonData.colorButton,child: Icon(Icons.search,color: controller.getButtonData.colorText)),
+                    const SizedBox(width: 5.0),
+                    // button : escanear código de barra
+                    FloatingActionButton(onPressed: scanBarcodeNormal,elevation: 0,backgroundColor: controller.getButtonData.colorButton,child: ImageIconScanWidget(size: 30,color: controller.getButtonData.colorText)),
+                  ],
+                ),
+              )
         );
       },
     );
@@ -49,95 +68,99 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
   }
 
   Widget _body() {
-    return Center(
-      child: ListView(
-          padding:const EdgeInsets.all(0.0),
-          shrinkWrap: true,
-          children: [
-            // view : sugerencias de productos
-            controller.getproductDoesNotExist? Container(): WidgetSuggestionProduct(list: controller.getListProductsSuggestions),
-            // view : content
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                children: [
-                  !controller.getWriteCode?Container():
-                  Row(
+ 
+
+    return SingleChildScrollView( 
+      child: Center(
+        child: Column(  
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max, 
+            children: [
+              const SizedBox(height:50),
+              // view : sugerencias de productos
+              controller.getWriteCode||controller.getproductDoesNotExist? Container(): WidgetSuggestionProduct(list: controller.getListProductsSuggestions),
+              // view : image 
+              controller.getproductDoesNotExist?Container():
+              const Card(
+                color: Colors.black12,
+                margin: EdgeInsets.all(20.0),
+                elevation: 0,
+                child: Padding(
+                  padding: EdgeInsets.all(12.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center, 
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // textField : leer código de barra
-                      Flexible(child: textFieldCodeBar() ),
-                      const SizedBox(width: 5.0),
-                      // button : search code
-                      Opacity(
-                        opacity: controller.getproductDoesNotExist ? 0.5 : 1.0,
-                        child: Row(
+                      Text('Escanear código de barra',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold )), 
+                      //ImageIconScanWidget(size: 30,color: Colors.black),
+                      Text('Encuentra muchos productos precargados en la base de datos',style: TextStyle(fontSize: 16),textAlign: TextAlign.center),
+                    ],
+                  ),
+                ),
+              ),
+              // view : content
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  children: [ 
+                    !controller.getWriteCode?Container():
+                    textFieldCodeBar(), 
+                    const SizedBox(height: 12.0),
+                    // button : buscar código
+                    controller.getWriteCode||controller.getproductDoesNotExist?Container():
+                    Opacity(
+                      opacity: controller.getproductDoesNotExist ? 0.5 : 1.0,
+                      child: !controller.getStateSearch
+                          ? Padding(
+                            padding: EdgeInsets.symmetric(horizontal: controller.getproductDoesNotExist?12:0),
+                            child: FadeInRight(
+                                child: TextButton(
+                                  onPressed: scanBarcodeNormal,
+                                  child: const Text('Escanear código'),
+                                ),
+                              ),
+                          )
+                          : Container(),
+                    ), 
+                    // view : texto informativo que el producto aún no existe
+                    controller.productSelect.local  ||!controller.getproductDoesNotExist?Container():
+                    Card(
+                      elevation: 0,
+                      color: Colors.black12,
+                      margin: const EdgeInsets.symmetric(vertical: 20.0),
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 0.0,bottom: 20.0),
+                        child: Column(
                           children: [
-                            FloatingActionButton(onPressed: () =>controller.textEditingController.text == ''? null: controller.searchProductCatalogue(id: controller.textEditingController.value.text),elevation: 0,backgroundColor: controller.getButtonData.colorButton,child: Icon(Icons.search,color: controller.getButtonData.colorText)),
-                            const SizedBox(width: 5.0),
-                            // button : escanear código de barra
-                            FloatingActionButton(onPressed: scanBarcodeNormal,elevation: 0,backgroundColor: controller.getButtonData.colorButton,child: ImageIconScanWidget(size: 30,color: controller.getButtonData.colorText)),
+                            Image.asset('assets/default_image.png',height: 75,width: 75,fit: BoxFit.cover,color: Colors.white38),
+                            const Text( 'El producto escaneado aún no existe',textAlign: TextAlign.center, style: TextStyle(fontSize: 18,color: Colors.white70, fontWeight: FontWeight.bold)),
+                            const Text('Ayúdanos a registrar nuevos productos para que esta aplicación sea aún más útil para más personsa 🌍 ',textAlign: TextAlign.center, style: TextStyle(color: Colors.white)),
                           ],
                         ),
                       ),
-                    ],
-                  ), 
-                  
-                  // textButton : escribir código por teclado
-                  controller.getWriteCode?Container():TextButton(onPressed: (){ controller.setWriteCode =!controller.getWriteCode;}, child: Text('Escribir código',style: TextStyle(color: controller.getproductDoesNotExist?Colors.white:Colors.blue) ,)),
-                  const SizedBox(height: 12.0),
-                  // button : buscar código
-                  controller.getWriteCode||controller.getproductDoesNotExist?Container():
-                  Opacity(
-                    opacity: controller.getproductDoesNotExist ? 0.5 : 1.0,
-                    child: !controller.getStateSearch
-                        ? Padding(
-                          padding: EdgeInsets.symmetric(horizontal: controller.getproductDoesNotExist?12:0),
-                          child: FadeInRight(
-                              child: button(
-                                icon: ImageIconScanWidget(size: 30,color: controller.getButtonData.colorText),
-                                onPressed: scanBarcodeNormal,
-                                text: "Escanear código",
-                                colorAccent:controller.getButtonData.colorText,
-                                colorButton:controller.getButtonData.colorButton,
-                              ),
+                    ),  
+                    //  button : crear producto
+                    controller.getproductDoesNotExist
+                        ? FadeInRight(
+                            child: button(
+                              fontSize: 16,
+                              padding: 16,
+                              icon: Icon(Icons.add,color: controller.getButtonData.colorText,),
+                              onPressed: () {
+                                controller.toProductNew(id: controller.textEditingController.text);
+                              },
+                              text: "Crear producto",
+                              colorAccent: controller.getButtonData.colorText,
+                              colorButton: controller.getButtonData.colorButton,
                             ),
-                        )
+                          )
                         : Container(),
-                  ),
-                  const SizedBox(height: 12.0),
-                  // view : texto informativo que el producto aún no existe
-                  !controller.getproductDoesNotExist?Container():
-                  Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      children: [
-                        const Text( 'El producto aún no existe',textAlign: TextAlign.center, style: TextStyle(fontSize: 24,color: Colors.white70, fontWeight: FontWeight.bold)),
-                        Image.asset('assets/default_image.png',height: 100,width: 100,fit: BoxFit.cover,color: Colors.white38),
-                        const Text('Ayúdenos a registrar nuevos productos para que esta aplicación sea aún más útil para más personsa 🌍 ',textAlign: TextAlign.center, style: TextStyle(color: Colors.white)),
-                      ],
-                    ),
-                  ),  
-                  //  button : crear producto
-                  controller.getproductDoesNotExist
-                      ? FadeInRight(
-                          child: button(
-                            fontSize: 16,
-                            padding: 16,
-                            icon: Icon(Icons.add,color: controller.getButtonData.colorText,),
-                            onPressed: () {
-                              controller.toProductNew(id: controller.textEditingController.text);
-                            },
-                            text: "Crear producto",
-                            colorAccent: controller.getButtonData.colorText,
-                            colorButton: controller.getButtonData.colorButton,
-                          ),
-                        )
-                      : Container(),
-                ],
+                  ],
+                ),
               ),
+            ] //your list view content here
             ),
-          ] //your list view content here
-          ),
+      ),
     );
   }
 
@@ -175,142 +198,35 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
     return ElasticIn(
       curve: Curves.fastLinearToSlowEaseIn,
       child: TextField(
-                controller: controller.textEditingController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: false),
-                inputFormatters: [FilteringTextInputFormatter.allow(RegExp('[1234567890]'))],
-                decoration: InputDecoration(
-                  fillColor: controller.getColorFondo,
-                    suffixIcon: controller.textEditingController.value.text == ""?null:IconButton(onPressed: ()=>controller.clean(),icon: Icon(Icons.clear, color: controller.getColorTextField)),
-                    filled: true,
-                    hintText: 'ej. 77565440001743',
-                    hintStyle: TextStyle(color: Get.theme.hintColor.withOpacity(0.3)),
-                    enabledBorder: OutlineInputBorder(borderRadius: const BorderRadius.all(Radius.circular(16.0)),borderSide: BorderSide(color: controller.getColorTextField)),
-                    border: OutlineInputBorder(borderRadius: const BorderRadius.all(Radius.circular(16.0)),borderSide: BorderSide(color: controller.getColorTextField)),
-                    focusedBorder: OutlineInputBorder(borderRadius: const BorderRadius.all(Radius.circular(16.0)),borderSide: BorderSide(color: controller.getColorTextField)),
-                    labelStyle: TextStyle(color: controller.getColorTextField),
-                    labelText: "Escribe el código de barra",
-                    suffixStyle: TextStyle(color: controller.getColorTextField),
-                  ),
-                style: TextStyle(fontSize: 20.0, color: controller.getColorTextField),
-                textInputAction: TextInputAction.search,
-                onSubmitted: (value) {
-                  //  Se llama cuando el usuario indica que ha terminado de editar el texto en el campo
-                  controller.searchProductCatalogue( id: controller.textEditingController.value.text);
-                },
-              ),
+        focusNode: controller.textFieldCodeFocusNode,
+        controller: controller.textEditingController,
+        keyboardType: const TextInputType.numberWithOptions(decimal: false),
+        inputFormatters: [FilteringTextInputFormatter.allow(RegExp('[1234567890]'))],
+        decoration: InputDecoration(
+          fillColor: controller.getColorFondo,
+            suffixIcon: controller.textEditingController.value.text == ""?null:IconButton(onPressed: ()=>controller.clean(),icon: Icon(Icons.clear, color: controller.getColorTextField)),
+            filled: true,
+            hintText: 'ej. 77565440001743',
+            hintStyle: TextStyle(color: Get.theme.hintColor.withOpacity(0.3)),
+            enabledBorder: OutlineInputBorder(borderRadius: const BorderRadius.all(Radius.circular(16.0)),borderSide: BorderSide(color: controller.getColorTextField)),
+            border: OutlineInputBorder(borderRadius: const BorderRadius.all(Radius.circular(16.0)),borderSide: BorderSide(color: controller.getColorTextField)),
+            focusedBorder: OutlineInputBorder(borderRadius: const BorderRadius.all(Radius.circular(16.0)),borderSide: BorderSide(color: controller.getColorTextField)),
+            labelStyle: TextStyle(color: controller.getColorTextField),
+            labelText: "Código de barra",
+            suffixStyle: TextStyle(color: controller.getColorTextField),
+          ),
+        style: TextStyle(fontSize: 20.0, color: controller.getColorTextField),
+        textInputAction: TextInputAction.search,
+        onSubmitted: (value) {
+          //  Se llama cuando el usuario indica que ha terminado de editar el texto en el campo
+          controller.searchProductCatalogue( id: controller.textEditingController.value.text);
+        },
+      ),
     );
   }
   
 
-  Widget widgetSuggestions({required List<Product> list}) {
-    if (list.isEmpty) return Container();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text("sugerencias para ti"),
-        ),
-        Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 0),
-              child: InkWell(
-                onTap: () => controller.toProductView(porduct: list[0].convertProductCatalogue()),
-                borderRadius: BorderRadius.circular(50),
-                child: Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: FadeInRight(
-                    child: CircleAvatar(
-                        radius: 26,
-                        backgroundColor: Get.theme.primaryColor,
-                        child: CircleAvatar(
-                            radius: 24,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(999),
-                              child: CachedNetworkImage(
-                                  imageUrl: list[0].image, fit: BoxFit.cover),
-                            ))),
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 40),
-              child: InkWell(
-                onTap: () => controller.toProductView(
-                    porduct: list[1].convertProductCatalogue()),
-                borderRadius: BorderRadius.circular(50),
-                child: Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: FadeInRight(
-                    child: CircleAvatar(
-                        radius: 26,
-                        backgroundColor: Get.theme.primaryColor,
-                        child: CircleAvatar(
-                            radius: 24,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(999),
-                              child: CachedNetworkImage(
-                                  imageUrl: list[1].image, fit: BoxFit.cover),
-                            ))),
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 80),
-              child: InkWell(
-                onTap: () => controller.toProductView(
-                    porduct: list[2].convertProductCatalogue()),
-                borderRadius: BorderRadius.circular(50),
-                child: Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: FadeInRight(
-                    child: CircleAvatar(
-                        radius: 26,
-                        backgroundColor: Get.theme.primaryColor,
-                        child: CircleAvatar(
-                            radius: 24,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(999),
-                              child: CachedNetworkImage(
-                                  imageUrl: list[2].image, fit: BoxFit.cover),
-                            ))),
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 120),
-              child: InkWell(
-                onTap: () => controller.toProductView(
-                    porduct: list[3].convertProductCatalogue()),
-                borderRadius: BorderRadius.circular(50),
-                child: Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: FadeInRight(
-                    child: CircleAvatar(
-                        radius: 26,
-                        backgroundColor: Get.theme.primaryColor,
-                        child: CircleAvatar(
-                            radius: 24,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(999),
-                              child: CachedNetworkImage(
-                                  imageUrl: list[3].image, fit: BoxFit.cover),
-                            ))),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
+  
   /* FUNCTIONS */
   Future<void> scanBarcodeNormal() async {
     // Escanner Code - Abre en pantalla completa la camara para escanear
