@@ -27,6 +27,11 @@ class ControllerProductsEdit extends GetxController {
   BuildContext get getContext => context!;
   set setContext(BuildContext value) => context = value;
 
+  // var : message notification
+  String _messageNotification = '';
+  set setMessageNotification(String value) => _messageNotification = value;
+  String get getMessageNotification => _messageNotification;
+
   // var style
   Color colorLoading = Colors.blue; 
   final Color colorButton = Colors.blue; 
@@ -95,11 +100,13 @@ class ControllerProductsEdit extends GetxController {
   ProductCatalogue _product = ProductCatalogue(upgrade: Timestamp.now(), creation: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now());
   set setProduct(ProductCatalogue product) => _product = product;
   ProductCatalogue get getProduct => _product;
+
   // nuevo producto encontrado en la DB Global para actualizar
   Product _productPublicUpdate = Product(upgrade: Timestamp.now(), creation: Timestamp.now());
   set setProductPublicUpdate(Product product) {
     _productPublicUpdate = product;
     setProductPublicUpdateStatus = true;
+    setMessageNotification = 'Producto encontrado con este código';
     updateAll();
   }
   Product get getProductPublicUpdate => _productPublicUpdate;
@@ -257,19 +264,20 @@ class ControllerProductsEdit extends GetxController {
     // obtenemos el producto por parametro
     ProductCatalogue productFinal = Get.arguments['product'] ?? ProductCatalogue(documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now(),upgrade: Timestamp.now(), creation: Timestamp.now());
     //  finalmente  asigna el producto
-    setProduct = productFinal;
+    setProduct = productFinal.copyWith();
     // load data product
     setTextAppBar = 'Editar';
     isCatalogue();
     if(productFinal.local){
       // obtenemos los datos solo del cátalogo de la cuenta
       loadDataFormProduct();  
+      // comprobamos si el producto local tiene existencia en la base de datos publica
+      checkUpdateProductPublic();
     }else{
       // obtenemos los datos del producto de la base de datos global
       getDataProduct(id: getProduct.id);
     }
-    // comprobamos si el producto local tiene existencia en la base de datos publica
-    checkUpdateProductPublic();
+    
 
     super.onInit();
   }
@@ -298,7 +306,7 @@ class ControllerProductsEdit extends GetxController {
 
   // TODO : la subcripción por defecto es true
   // get 
-  bool get isSubscribed => true;//homeController.getProfileAccountSelected.subscribed;
+  bool get isSubscribed => true; //homeController.getProfileAccountSelected.subscribed;
 
   //
   // FUNCTIONS
@@ -331,7 +339,7 @@ class ControllerProductsEdit extends GetxController {
       if (element.id == getProduct.id) {
         // get values
         setItsInTheCatalogue = true;
-        setProduct = element;
+        setProduct = element.copyWith();
         update(['updateAll']);
       }
     }
@@ -352,7 +360,7 @@ class ControllerProductsEdit extends GetxController {
 
               // set : values
               getProduct.description = Utils().capitalize(controllerTextEditDescripcion.text); // controllerTextEditDescripcion.text;
-              getProduct.upgrade = Timestamp.now();
+              getProduct.upgrade = Timestamp.now(); 
               getProduct.idMark = getMarkSelected.id;
               getProduct.nameMark = getMarkSelected.name;
               getProduct.imageMark = getMarkSelected.image;
@@ -582,18 +590,16 @@ class ControllerProductsEdit extends GetxController {
   }
   // read : comprobamos actualización en la DB publica de productos
   void checkUpdateProductPublic() {
-    // description : comprobamos si el producto es local y si tiene existencia en la base de datos publica de productos
-    if (getProduct.local) {
-      // firebase : comprobamos si el producto existe en la base de datos publica
-      Database.readProductPublicFuture(id: getProduct.id).then((value) {
-        // get 
-        Product product = Product.fromMap(value.data() as Map);  
-        //  set
-        if(product.verified){
-          setProductPublicUpdate = product; 
-        } 
-      });
-    }
+    // firebase : comprobamos si el producto existe en la base de datos publica
+    Database.readProductPublicFuture(id: getProduct.id).then((value) {
+      // get 
+      Product product = Product.fromMap(value.data() as Map);  
+
+      //  set
+      if(product.verified){
+        setProductPublicUpdate = product; 
+      } 
+    });
   }
   void updateProductCatalogue() {
     // description : actualiza el producto en el cátalogo de la cuenta
@@ -836,7 +842,13 @@ class ControllerProductsEdit extends GetxController {
     if (id != '') {
       Database.readProductPublicFuture(id: id).then((value) {
         //  get
-        Product product = Product.fromMap(value.data() as Map);
+        Product product = Product.fromMap(value.data() as Map); 
+        // commprobar que las fechas de actualización sean diferentes
+        if (getProduct.documentUpgrade.toDate().isBefore(product.upgrade.toDate())  ) {
+          // se notifica que existen datos actualizados del producto
+          setMessageNotification = 'Producto actualizado';
+        } 
+
         //  set
         setProduct = getProduct.updateData(product: product);
         loadDataFormProduct(); // carga los datos del producto en el formulario

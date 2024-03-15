@@ -91,8 +91,7 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                     mainAxisAlignment: MainAxisAlignment.center, 
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text('Escanear código de barra',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold )), 
-                      //ImageIconScanWidget(size: 30,color: Colors.black),
+                      Text('Escanear código de barra',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold )),  
                       Text('Encuentra muchos productos precargados en la base de datos',style: TextStyle(fontSize: 16),textAlign: TextAlign.center),
                     ],
                   ),
@@ -122,6 +121,24 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                           )
                           : Container(),
                     ), 
+                    // view : texto informativo que el producto aún no existe si no se encuentra en la base de datos y se escribio manualmente el código por el teclado 
+                    !(controller.productSelect.local && controller.getproductDoesNotExist)?Container():
+                    const Card(
+                      color: Colors.black12,
+                      margin: EdgeInsets.all(20.0),
+                      elevation: 0,
+                      child: Padding(
+                        padding: EdgeInsets.all(12.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center, 
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text('El código escrito aún no existe',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white )),  
+                            Text('Crea el producto en tu catálogo y se te notificará cuando haya un producto verificado',style: TextStyle(fontSize: 16,color: Colors.white70),textAlign: TextAlign.center,),
+                          ],
+                        ),
+                      ),
+                    ),
                     // view : texto informativo que el producto aún no existe
                     controller.productSelect.local  ||!controller.getproductDoesNotExist?Container():
                     Card(
@@ -133,8 +150,8 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                         child: Column(
                           children: [
                             Image.asset('assets/default_image.png',height: 75,width: 75,fit: BoxFit.cover,color: Colors.white38),
-                            const Text( 'El producto escaneado aún no existe',textAlign: TextAlign.center, style: TextStyle(fontSize: 18,color: Colors.white70, fontWeight: FontWeight.bold)),
-                            const Text('Ayúdanos a registrar nuevos productos para que esta aplicación sea aún más útil para más personsa 🌍 ',textAlign: TextAlign.center, style: TextStyle(color: Colors.white)),
+                            const Text( 'El producto escaneado aún no existe',textAlign: TextAlign.center, style: TextStyle(fontSize: 18,color: Colors.white, fontWeight: FontWeight.bold)),
+                            const Text('Ayúdanos a registrar nuevos productos para que esta aplicación sea aún más útil para más personsa 🌍 ',textAlign: TextAlign.center, style: TextStyle(color: Colors.white70)),
                           ],
                         ),
                       ),
