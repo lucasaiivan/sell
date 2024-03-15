@@ -536,8 +536,7 @@ Widget body({required BuildContext context}){
               leading: const Icon(Icons.star_rounded),
               title: Text(homeController.getIsSubscribedPremium?'Premium':'Funciones Premium'),
               onTap: (){
-                // action : mostrar modal bottom sheet con 
-                Get.back(); // cierra drawer
+                // action : mostrar modal bottom sheet con  las funciones premium
                 homeController.showModalBottomSheetSubcription();
               }),
         isAnonymous?Container():const Opacity(opacity: 0.3,child: Divider(height:0)),

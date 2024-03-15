@@ -73,7 +73,7 @@ class _StaticsCardsState extends State<StaticsCards> {
         isPremium: homeController.getIsSubscribedPremium,
         backgroundColor: cardColor,
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.category_rounded,color: Colors.white,size:14)))),
-        titleText: 'Productos vendidos', 
+        titleText: 'Productos', 
         subtitle: 'Total',
         valueText: Publications.getFormatAmount(value:transactionsController.readTotalProducts ),
         description: 'Mejor vendido con ${Publications.getFormatAmount(value:  transactionsController.getMostSelledProducts[0].quantity )} ventas', 

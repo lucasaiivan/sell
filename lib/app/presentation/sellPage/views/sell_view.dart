@@ -386,10 +386,10 @@ class SalesView extends StatelessWidget {
     // opcion premium : esta funcionalidad de arqueo de caja solo esta disponible en la version premium
     bool isPremium = homeController.getIsSubscribedPremium;
     // controllers
-    final controller = Get.find<SalesController>(); 
-
+    final controller = Get.find<SalesController>();
+ 
     // condition : si el esta en modo de prueba, solo muestra el boton de inciar caja
-    if(homeController.getUserAnonymous){
+    if( homeController.getUserAnonymous){
       return Padding(
         padding: const EdgeInsets.all(8.0),
         child: ComponentApp().buttonAppbar(
