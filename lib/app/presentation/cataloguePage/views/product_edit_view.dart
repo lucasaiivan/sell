@@ -211,13 +211,13 @@ class ProductEdit extends StatelessWidget {
               ),
               // view : codigo,icon de verificaciones, descripcion y marca del producto
               Flexible(
-                  child: textfielBottomSheetListOptions(
-                    contentPadding: const EdgeInsets.only(bottom: 12,top: 12,left: 12,right: 12),
-                    stateEdit: controller.getLoadingData? false: controller.getEditModerator || controller.getProduct.verified==false,
-                    textValue: controller.getMarkSelected.name ,
-                    labelText: controller.getMarkSelected.id == ''? 'Seleccionar una marca': 'Marca',
-                    onTap: controller.getProduct.verified==false || controller.getEditModerator? controller.showModalSelectMarca : () {}
-                                ),
+                child: textfielBottomSheetListOptions(
+                  contentPadding: const EdgeInsets.only(bottom: 12,top: 12,left: 12,right: 12),
+                  stateEdit: controller.getLoadingData? false: controller.getEditModerator || controller.getProduct.verified==false,
+                  textValue: controller.getMarkSelected.name ,
+                  labelText: controller.getMarkSelected.id == ''? 'Seleccionar una marca': 'Marca',
+                  onTap: controller.getProduct.verified==false || controller.getEditModerator? controller.showModalSelectMarca : () {}
+                ),
               )
             ],
           ),

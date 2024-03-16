@@ -977,6 +977,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
   ControllerCreateProductForm controllerProductNew = Get.find();
   //  var
   List<Mark> list = [];
+  bool viewListState = false;
 
   @override
   void initState() {
@@ -1002,45 +1003,54 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         actions: [
           // TODO : delete icon 'add new mark for release'
           IconButton(onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},icon: const Icon(Icons.add)),
+          IconButton(icon: Icon( viewListState? Icons.grid_view_rounded:Icons.table_rows_rounded),onPressed: () { 
+            setState(() {
+              viewListState = !viewListState;
+            });
+          }),
           IconButton(icon: const Icon(Icons.search),onPressed: () {Get.back();showSeachMarks();})
         ],
       ),
-      body: list.isEmpty
-          ? widgetAnimLoad()
-          : ListView.builder(
-              padding: const EdgeInsets.only(bottom: 12),
-              shrinkWrap: true,
-              itemCount: list.length,
-              itemBuilder: (BuildContext context, int index) {
-
-                //  values
-                Mark marcaSelect = list[index];
-
-                if (index == 0) {
-                  return Column(
-                    children: [
-                      getWidgetOptionOther(),
-                      ComponentApp().divider(),
-                      controllerProductNew.getUltimateSelectionMark.id == '' || controllerProductNew.getUltimateSelectionMark.id == 'other'? Container() : listTile( marcaSelect: controllerProductNew.getUltimateSelectionMark),
-                      ComponentApp().divider(),
-                      listTile(marcaSelect: marcaSelect),
-                      ComponentApp().divider(),
-                    ],
-                  );
-                }
-                return Column(
-                  children: <Widget>[
-                    listTile(marcaSelect: marcaSelect),
-                    ComponentApp().divider(),
-                  ],
-                );
-              },
-            ),
+      body: list.isEmpty ? widgetAnimLoad : viewListState ? bodyList : bodyGrid,
     );
   }
+  // WIDGETS VIEW 
+  Widget get bodyList {
 
+
+    return ListView.builder(
+      padding: const EdgeInsets.only(bottom: 12),
+      shrinkWrap: true,
+      itemCount: list.length,
+      itemBuilder: (BuildContext context, int index) {
+
+        //  values
+        Mark marcaSelect = list[index]; 
+        return Column(
+          children: <Widget>[
+            itemList(marcaSelect: marcaSelect),
+            ComponentApp().divider(),
+          ],
+        );
+      },
+    );
+  } 
+  Widget get bodyGrid {
+    
+    return GridView.builder(
+      padding: const EdgeInsets.only(bottom: 12),
+      shrinkWrap: true, 
+      itemCount: list.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:4,childAspectRatio: 1.1),
+      itemBuilder: (BuildContext context, int index) {
+        //  values
+        Mark marcaSelect = list[index]; 
+        return itemGrid(marcaSelect: marcaSelect);
+      },
+    );
+  }
   // WIDGETS
-  Widget widgetAnimLoad() {
+  Widget get widgetAnimLoad {
     return Center(
         child: ListView(
       children: [
@@ -1095,22 +1105,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
       ],
     ));
   }
-
-  Widget getWidgetOptionOther() {
-    //values
-    late Widget widget;
-    // recorre la la de marcas para buscar la informaciób de opción 'other'
-    if (controllerProductNew.getMarks.isEmpty) {
-      widget = Container();
-    } else {
-      for (var element in controllerProductNew.getMarks) {
-        if (element.id == 'other') {
-          widget = listTile(marcaSelect: element);
-        }
-      }
-    }
-    return widget;
-  }
+ 
 
   // WIDGETS COMPONENT
   showSeachMarks(){
@@ -1120,7 +1115,6 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
     // var
     Color colorAccent = Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
 
-     getWidgetOptionOther();
 
     showSearch(
       context: context,
@@ -1133,14 +1127,36 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         failure: const Center(child: Text('No se encontro :(')),
         filter: (product) => [product.name,product.description],
         builder: (mark) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[
-          listTile(marcaSelect: mark),
+          itemList(marcaSelect: mark),
           ComponentApp().divider(),
           ]),
       ),
     );
   }
-
-  Widget listTile({required Mark marcaSelect, bool icon = true}) {
+  Widget itemGrid({required Mark marcaSelect}) {
+    return InkWell(
+      onTap: () {
+        controllerProductNew.setUltimateSelectionMark = marcaSelect;
+        controllerProductNew.setMarkSelected = marcaSelect;
+        Get.back();
+      },
+      onLongPress: (){
+        // TODO : delete fuction
+        Get.to(() => CreateMark(mark: marcaSelect));
+      },
+      borderRadius: BorderRadius.circular(5),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ImageProductAvatarApp(url: marcaSelect.image,size: 50,description:marcaSelect.name),
+          const SizedBox(height:2),
+          Text(marcaSelect.name,style: const TextStyle(fontWeight: FontWeight.w400 ),textAlign: TextAlign.center,),
+        ],
+      ),
+    );
+  }
+  Widget itemList({required Mark marcaSelect, bool icon = true}) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       trailing:!icon? null  :marcaSelect.image==''?null: ImageProductAvatarApp(url: marcaSelect.image,size: 50,description:marcaSelect.name),
@@ -1171,16 +1187,35 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
             mark.id = element.id;
             list.add(mark);
           }
+          updateListMarkSelected();
           controllerProductNew.setMarks = list;
         });
       });
     } else {
       // datos ya descargados
       list = controllerProductNew.getMarks;
+      updateListMarkSelected();
       setState(() => list = controllerProductNew.getMarks);
     }
+
   }
-  
+  updateListMarkSelected() {
+    //  description : posicionamos el ultimo item seleccionado por el usuario en el segundo lugar 
+    //                para que el usuario pueda encontrarlo facilmente
+
+    // comprobamos que ahi un item seleccionado
+    if (controllerProductNew.getUltimateSelectionMark.id != '') {
+      // eliminamos el item seleccionado de la lista
+      list.removeWhere((element) => element.id == controllerProductNew.getUltimateSelectionMark.id);
+      // insertamos el item seleccionado en la segunda posicion de la lista
+      list.insert(1, controllerProductNew.getUltimateSelectionMark);
+    }
+
+    // eliminamos el item con la id 'other' de la lista
+    list.removeWhere((element) => element.id == 'other');
+    // insertar en la primera posicion de la lista 
+    list.insert(0, Mark(id: 'other',name: 'Otro',upgrade: Timestamp.now(),creation: Timestamp.now()));
+  }
 }
 
 // TODO : delete release

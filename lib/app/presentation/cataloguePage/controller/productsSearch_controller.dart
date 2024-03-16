@@ -1,7 +1,8 @@
  
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; 
-import 'package:flutter/material.dart'; 
+import 'package:flutter/material.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart'; 
 import 'package:get/get.dart'; 
 import 'package:sell/app/data/datasource/database_cloud.dart';
 import 'package:sell/app/core/utils/dynamicTheme_lb.dart'; 
@@ -151,6 +152,28 @@ class ControllerProductsSearch extends GetxController {
   get getproductDoesNotExist => _productDoesNotExist;
 
   // FUCTIONS
+  Future<void> scanBarcodeNormal() async {
+    // Escanner Code - Abre en pantalla completa la camara para escanear
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      late String barcodeScanRes; 
+      // FlutterBarcodeScanner : escanea el codigo de barras
+      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode( "#ff6666", "Cancel", true, ScanMode.BARCODE);
+      // condition : comprobamos 'back'
+      if (barcodeScanRes == '-1') {
+        return;
+      }
+      // sound : play 
+      playSoundScan();
+      //  set 
+      productSelect.local = false;
+      textEditingController.text = barcodeScanRes;
+      searchProductCatalogue(id: barcodeScanRes);
+    } on Exception {
+      // error
+      Get.snackbar('scanBarcode', 'Failed to get platform version');
+    }
+  }
   void searchProductCatalogue({required String id}){
     // description : busca un producto en el catálogo de la cuenta
  
