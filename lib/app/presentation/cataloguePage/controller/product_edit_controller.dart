@@ -62,10 +62,7 @@ class ControllerProductsEdit extends GetxController {
   static Mark _ultimateSelectionMark = Mark(upgrade: Timestamp.now(), creation: Timestamp.now());
   set setUltimateSelectionMark(Mark value) => _ultimateSelectionMark = value;
   Mark get getUltimateSelectionMark => _ultimateSelectionMark;
-
-  static Mark _ultimateSelectionMark2 = Mark(upgrade: Timestamp.now(), creation: Timestamp.now());
-  set setUltimateSelectionMark2(Mark value) => _ultimateSelectionMark2 = value;
-  Mark get getUltimateSelectionMark2 => _ultimateSelectionMark2;
+ 
 
   // state account auth
   bool _accountAuth = false;
@@ -739,16 +736,18 @@ class ControllerProductsEdit extends GetxController {
     Widget widget =   Wrap(
       children: <Widget>[
         ListTile(
-            leading: const Icon(Icons.camera),
-            title: const Text('Capturar una imagen'),
-            onTap: () {
-              getLoadImageCamera();
-              Get.back();
-              
-            }),
+          contentPadding: const EdgeInsets.only(top: 12,left: 12,right: 12),
+          leading: const Icon(Icons.camera),
+          title: const Text('Capturar una imagen'),
+          onTap: () {
+            getLoadImageCamera();
+            Get.back();
+            
+          }),
         ListTile(
+          contentPadding: const EdgeInsets.only(top: 12,left: 12,right: 12,bottom: 20),
           leading: const Icon(Icons.image),
-          title: const Text('Seleccionar desde la galería de fotos'),
+          title: const Text('Galería de fotos'),
           onTap: () {
             Get.back();
             getLoadImageGalery();
@@ -757,8 +756,10 @@ class ControllerProductsEdit extends GetxController {
       ],
     );
     // muestre la hoja inferior modal de getx
-    Get.bottomSheet(
+    Get.bottomSheet( 
       widget,
+      elevation: 0,
+      clipBehavior: Clip.antiAlias,
       backgroundColor: Get.theme.scaffoldBackgroundColor,
       enableDrag: true,
       isDismissible: true,
@@ -844,9 +845,11 @@ class ControllerProductsEdit extends GetxController {
         //  get
         Product product = Product.fromMap(value.data() as Map); 
         // commprobar que las fechas de actualización sean diferentes
-        if (getProduct.documentUpgrade.toDate().isBefore(product.upgrade.toDate())  ) {
+        DateTime date1 = getProduct.documentUpgrade.toDate().copyWith(hour: 0,minute: 0,millisecond: 0,second: 0,microsecond: 0  );
+        DateTime date2 = product.upgrade.toDate().copyWith(hour: 0,minute: 0,millisecond: 0,second: 0,microsecond: 0);
+        if (date1.isBefore(date2)  ) {
           // se notifica que existen datos actualizados del producto
-          setMessageNotification = 'Producto actualizado';
+          setMessageNotification = 'Producto actualizado \n ${Publications.getFechaPublicacionFormating(dateTime: date1)} \n ${Publications.getFechaPublicacionFormating(dateTime: date2)}';
         } 
 
         //  set
@@ -915,6 +918,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
   ControllerProductsEdit controllerProductsEdit = Get.find();
   //  var
   List<Mark> list = [];
+  bool viewListState = false;
 
   @override
   void initState() {
@@ -940,40 +944,47 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         actions: [
           // TODO : delete icon 'add new mark for release'
           IconButton(onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},icon: const Icon(Icons.add)),
+          IconButton(icon: Icon( viewListState? Icons.grid_view_rounded:Icons.table_rows_rounded),onPressed: () { 
+            setState(() {
+              viewListState = !viewListState;
+            });
+          }),
           IconButton(icon: const Icon(Icons.search),onPressed: () {Get.back();showSeachMarks();})
         ],
       ),
-      body: list.isEmpty
-          ? widgetAnimLoad()
-          : ListView.builder(
-              padding: const EdgeInsets.only(bottom: 12),
-              shrinkWrap: true,
-              itemCount: list.length,
-              itemBuilder: (BuildContext context, int index) {
+      body: list.isEmpty ? widgetAnimLoad() : viewListState? bodyList() : bodyGrid(),
+    );
+  }
 
-                //  values
-                Mark marcaSelect = list[index];
-
-                if (index == 0) {
-                  return Column(
-                    children: [
-                      getWidgetOptionOther(),
-                      ComponentApp().divider(),
-                      controllerProductsEdit.getUltimateSelectionMark.id == '' || controllerProductsEdit.getUltimateSelectionMark.id == 'other'? Container() : listTile( marcaSelect: controllerProductsEdit.getUltimateSelectionMark),
-                      ComponentApp().divider(),
-                      listTile(marcaSelect: marcaSelect),
-                      ComponentApp().divider(),
-                    ],
-                  );
-                }
-                return Column(
-                  children: <Widget>[
-                    listTile(marcaSelect: marcaSelect),
-                    ComponentApp().divider(),
-                  ],
-                );
-              },
-            ),
+  // WIDGETS VIEW 
+  Widget bodyList() {
+    return ListView.builder(
+      padding: const EdgeInsets.only(bottom: 12),
+      shrinkWrap: true,
+      itemCount: list.length,
+      itemBuilder: (BuildContext context, int index) {
+        //  values
+        Mark marcaSelect = list[index]; 
+        return Column(
+          children: <Widget>[
+            itemList(marcaSelect: marcaSelect),
+            ComponentApp().divider(),
+          ],
+        );
+      },
+    );
+  } 
+  Widget bodyGrid() {
+    return GridView.builder(
+      padding: const EdgeInsets.only(bottom: 12),
+      shrinkWrap: true, 
+      itemCount: list.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:4,childAspectRatio: 1.1),
+      itemBuilder: (BuildContext context, int index) {
+        //  values
+        Mark marcaSelect = list[index];
+        return itemGrid(marcaSelect: marcaSelect);
+      },
     );
   }
 
@@ -1032,23 +1043,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         ),
       ],
     ));
-  }
-
-  Widget getWidgetOptionOther() {
-    //values
-    late Widget widget;
-    // recorre la la de marcas para buscar la informaciób de opción 'other'
-    if (controllerProductsEdit.getMarks.isEmpty) {
-      widget = Container();
-    } else {
-      for (var element in controllerProductsEdit.getMarks) {
-        if (element.id == 'other') {
-          widget = listTile(marcaSelect: element);
-        }
-      }
-    }
-    return widget;
-  }
+  } 
 
   // WIDGETS COMPONENT
   showSeachMarks(){
@@ -1058,7 +1053,6 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
     // var
     Color colorAccent = Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
 
-     getWidgetOptionOther();
 
     showSearch(
       context: context,
@@ -1071,14 +1065,36 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         failure: const Center(child: Text('No se encontro :(')),
         filter: (product) => [product.name,product.description],
         builder: (mark) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[
-          listTile(marcaSelect: mark),
+          itemList(marcaSelect: mark),
           ComponentApp().divider(),
           ]),
       ),
     );
   }
-
-  Widget listTile({required Mark marcaSelect, bool icon = true}) {
+  Widget itemGrid({required Mark marcaSelect}) {
+    return InkWell(
+      onTap: () {
+        controllerProductsEdit.setUltimateSelectionMark = marcaSelect;
+        controllerProductsEdit.setMarkSelected = marcaSelect;
+        Get.back();
+      },
+      onLongPress: (){
+        // TODO : delete fuction
+        Get.to(() => CreateMark(mark: marcaSelect));
+      },
+      borderRadius: BorderRadius.circular(5),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ImageProductAvatarApp(url: marcaSelect.image,size: 50,description:marcaSelect.name),
+          const SizedBox(height:2),
+          Text(marcaSelect.name,style: const TextStyle(fontWeight: FontWeight.w400 ),textAlign: TextAlign.center,),
+        ],
+      ),
+    );
+  }
+  Widget itemList({required Mark marcaSelect, bool icon = true}) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       trailing:!icon? null  :marcaSelect.image==''?null: ImageProductAvatarApp(url: marcaSelect.image,size: 50,description:marcaSelect.name),
@@ -1109,14 +1125,33 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
             mark.id = element.id;
             list.add(mark);
           }
+          updateListMarkSelected();
           controllerProductsEdit.setMarks = list;
         });
       });
     } else {
       // datos ya descargados
       list = controllerProductsEdit.getMarks;
+      updateListMarkSelected();
       setState(() => list = controllerProductsEdit.getMarks);
     }
+  }
+  updateListMarkSelected() {
+    //  description : posicionamos el ultimo item seleccionado por el usuario en el segundo lugar 
+    //                para que el usuario pueda encontrarlo facilmente
+
+    // comprobamos que ahi un item seleccionado
+    if (controllerProductsEdit.getUltimateSelectionMark.id != '') {
+      // eliminamos el item seleccionado de la lista
+      list.removeWhere((element) => element.id == controllerProductsEdit.getUltimateSelectionMark.id);
+      // insertamos el item seleccionado en la segunda posicion de la lista
+      list.insert(1, controllerProductsEdit.getUltimateSelectionMark);
+    }
+
+    // eliminamos el item con la id 'other' de la lista
+    list.removeWhere((element) => element.id == 'other');
+    // insertar en la primera posicion de la lista 
+    list.insert(0, Mark(id: 'other',name: 'Otro',upgrade: Timestamp.now(),creation: Timestamp.now()));
   }
   
 }
@@ -1238,14 +1273,12 @@ class _CreateMarkState extends State<CreateMark> {
 
   //  MARK CREATE
   void getLoadImageMark() {
-    _picker
-        .pickImage(
+    _picker.pickImage(
       source: ImageSource.gallery,
       maxWidth: 720.0,
       maxHeight: 720.0,
       imageQuality: 55,
-    )
-        .then((value) {
+    ).then((value) {
       setState(() => xFile = value!);
     });
   }
