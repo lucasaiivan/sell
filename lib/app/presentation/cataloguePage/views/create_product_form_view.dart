@@ -454,8 +454,7 @@ class ProductNewFormView extends StatelessWidget {
               ],
             ),
           ),
-        ),
-        
+        ), 
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           child: GestureDetector(
@@ -473,10 +472,11 @@ class ProductNewFormView extends StatelessWidget {
                 decoration: InputDecoration(
                   border: const UnderlineInputBorder(),  
                   labelText: controller.controllerTextEditMark.text == '' ? 'Seleccionar' : 'Marca',
-                  helperText: 'Visibilidad pública',
-                ),
-                onChanged: (value) => controller.formEditing =
-                    true, // validamos que el usuario ha modificado el formulario
+                  helperText: 'Visibilidad pública', 
+                  
+                ), 
+
+                onChanged: (value) => controller.formEditing = true, // validamos que el usuario ha modificado el formulario
                 // validator: validamos el texto que el usuario ha ingresado.
                 validator: (value) {
                   if (value == null || value.isEmpty) {

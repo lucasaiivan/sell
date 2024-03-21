@@ -64,26 +64,24 @@ class ProductEdit extends StatelessWidget {
           child: AnimatedSwitcher(
           duration: const  Duration(milliseconds: 100),
             child: controller.homeController.getInternetConnection ? scaffold(context: context) : Scaffold(
-                      appBar: AppBar(
-                        elevation: 0.0,
-                        backgroundColor: Get.theme.scaffoldBackgroundColor,
-                        iconTheme: Theme.of(context)
-                            .iconTheme
-                            .copyWith(color: appBarTextColor),
-                        title: Text(controller.getTextAppBar,style: TextStyle(  color: appBarTextColor,fontSize: 18 )),
-                      ),
-                      body: const Center(
-                          child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.all(12.0),
-                            child: Icon(Icons.wifi_off_rounded),
-                          ),
-                          Text('No hay internet'),
-                        ],
-                      )),
-                    ),
+              appBar: AppBar(
+                elevation: 0.0,
+                backgroundColor: Get.theme.scaffoldBackgroundColor,
+                iconTheme: Theme.of(context).iconTheme.copyWith(color: appBarTextColor),
+                title: Text(controller.getTextAppBar,style: TextStyle(  color: appBarTextColor,fontSize: 18 )),
+              ),
+              body: const Center(
+                  child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.all(12.0),
+                    child: Icon(Icons.wifi_off_rounded),
+                  ),
+                  Text('No hay internet'),
+                ],
+              )),
+            ),
           ),
         );
       },
@@ -120,10 +118,24 @@ class ProductEdit extends StatelessWidget {
         //
         // fin contentido para desarrollo (debug)
         //
+        // iconButton : agregar producto a favorito
+        controller.getLoadingData
+            ? Container()
+            :IconButton(
+              icon: controller.getFavorite
+                  ? const Icon(Icons.star_rounded,color: Colors.orange)
+                  : const Icon(Icons.star_outline_rounded),
+              onPressed: () { 
+                if (!controller.getLoadingData) { 
+                  controller.setFavorite = !controller.getFavorite;
+                 }
+                
+              },
+            ),
         // iconButton : actualizar producto 
         controller.getLoadingData
             ? Container()
-            :TextButton.icon(onPressed: () => controller.save(), icon:const Icon( Icons.check ), label: Text( controller.getItsInTheCatalogue?'Actualizar':'Agregar')) ,
+            :TextButton.icon(onPressed: () => controller.save(), icon: Icon(controller.getItsInTheCatalogue? Icons.check:Icons.add ), label: Text( controller.getItsInTheCatalogue?'':'Agregar')) ,
       ],
       bottom: controller.getLoadingData? ComponentApp().linearProgressBarApp(color: controller.colorLoading):null,
     );
@@ -211,12 +223,15 @@ class ProductEdit extends StatelessWidget {
               ),
               // view : codigo,icon de verificaciones, descripcion y marca del producto
               Flexible(
-                child: textfielBottomSheetListOptions(
+                child: textfielBottomSheetListOptions( 
                   contentPadding: const EdgeInsets.only(bottom: 12,top: 12,left: 12,right: 12),
                   stateEdit: controller.getLoadingData? false: controller.getEditModerator || controller.getProduct.verified==false,
                   textValue: controller.getMarkSelected.name ,
                   labelText: controller.getMarkSelected.id == ''? 'Seleccionar una marca': 'Marca',
-                  onTap: controller.getProduct.verified==false || controller.getEditModerator? controller.showModalSelectMarca : () {}
+                  onTap: controller.getProduct.verified==false || controller.getEditModerator? controller.showModalSelectMarca : () {},
+                  suffix: controller.getMarkSelected.toString().isNotEmpty
+                      ? ComponentApp().userAvatarCircle(urlImage: controller.getMarkSelected.image,empty: true)
+                      : null,
                 ),
               )
             ],
@@ -288,7 +303,7 @@ class ProductEdit extends StatelessWidget {
                 // validator: validamos el texto que el usuario
               ),
             ),
-          space,
+          space, 
           // textfield : seleccionar cátegoria
           !controller.getAccountAuth? Container(): GestureDetector(
               onTap: SelectCategory.show, 
@@ -315,96 +330,80 @@ class ProductEdit extends StatelessWidget {
                 },
               ),
             ),
-          space, 
+          space,  
+          
           !controller.getAccountAuth
           ? Container()
           : Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [ 
-                // textfield : precio de costo
-                Form(
-                  key: controller.purchasePriceFormKey,
-                  child: TextFormField(
-                    style: valueTextStyle,
-                    autofocus: false,
-                    focusNode:controller.purchasePriceTextFormFieldfocus,
-                    controller: controller.controllerTextEditPrecioCosto,
-                    enabled: true,
-                    autovalidateMode: AutovalidateMode.onUserInteraction, 
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: InputDecoration( 
-                      filled: true,
-                      fillColor: fillColor,
-                      labelText: 'Precio de costo',
-                      border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
-                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
-                      ),      
-                    onChanged: (value) {   
-                      controller.updateAll();
-                    } ,   
-                    // validator: validamos el texto que el usuario ha ingresado.
-                    validator: (value) {
-                      // if (value == null || value.isEmpty) { return 'Por favor, escriba un precio de compra'; }
-                      return null; 
-                    },
-                  ),
-                ),
-                controller.getPorcentage == '' ? Container():space,
-                // text and button : modificar porcentaje de ganancia
-                controller.getPorcentage == '' ? Container():Row(
+                // view : 
+                Row( 
                   children: [
-                    TextButton(onPressed: controller.showDialogAddProfitPercentage, child: Text( controller.getPorcentage )),
-                    const Spacer(),
-                    TextButton(onPressed: controller.showDialogAddProfitPercentage , child: const Text( 'Modificar porcentaje' )),
+                    // textfield : precio de costo
+                    Flexible(
+                      flex: 1,
+                      child: Form(
+                        key: controller.purchasePriceFormKey,
+                        child: TextFormField(
+                          style: valueTextStyle,
+                          autofocus: false,
+                          focusNode:controller.purchasePriceTextFormFieldfocus,
+                          controller: controller.controllerTextEditPrecioCosto,
+                          enabled: true,
+                          autovalidateMode: AutovalidateMode.onUserInteraction, 
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          decoration: InputDecoration( 
+                            filled: true,
+                            fillColor: fillColor,
+                            labelText: 'Costo',
+                            border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                            enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                            ),      
+                          onChanged: (value) {   
+                            controller.updateAll();
+                          } ,   
+                          // validator: validamos el texto que el usuario ha ingresado.
+                          validator: (value) {
+                            // if (value == null || value.isEmpty) { return 'Por favor, escriba un precio de compra'; }
+                            return null; 
+                          },
+                        ),
+                      ),
+                    ), 
+                    // text and button : modificar porcentaje de ganancia
+                    controller.getPorcentage == '' ? const SizedBox(width:12):TextButton(onPressed: controller.showDialogAddProfitPercentage, child: Text( controller.getPorcentage )), 
+                    // precio de venta al público
+                    Flexible(
+                      flex: 2,
+                      child: Form(
+                        key: controller.salePriceFormKey, 
+                        child: TextFormField(
+                          style: valueTextStyle,
+                          autofocus: false,
+                          focusNode:controller.salePriceTextFormFieldfocus,
+                          controller: controller.controllerTextEditPrecioVenta,
+                          enabled: true,
+                          autovalidateMode: AutovalidateMode.onUserInteraction, 
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: fillColor,
+                            labelText: 'Precio de venta al público',
+                            border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                            enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
+                          ),   
+                          onChanged: (value) { controller.updateAll(); },
+                          // validator: validamos el texto que el usuario ha ingresado.
+                          validator: (value) {
+                            if ( controller.controllerTextEditPrecioVenta.numberValue == 0.0) { return 'Por favor, escriba un precio de venta'; }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ),
                   ],
-                ),
-                space,
-                // precio de venta al público
-                Form(
-                  key: controller.salePriceFormKey, 
-                  child: TextFormField(
-                    style: valueTextStyle,
-                    autofocus: false,
-                    focusNode:controller.salePriceTextFormFieldfocus,
-                    controller: controller.controllerTextEditPrecioVenta,
-                    enabled: true,
-                    autovalidateMode: AutovalidateMode.onUserInteraction, 
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: fillColor,
-                      labelText: 'Precio de venta al público',
-                      border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
-                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
-                    ),   
-                    onChanged: (value) { controller.updateAll(); },
-                    // validator: validamos el texto que el usuario ha ingresado.
-                    validator: (value) {
-                      if ( controller.controllerTextEditPrecioVenta.numberValue == 0.0) { return 'Por favor, escriba un precio de venta'; }
-                      return null;
-                    },
-                  ),
-                ), 
-                space,
-                // view : control de stock
-                AnimatedContainer(
-                  width:double.infinity, 
-                  duration: const Duration(milliseconds: 500),
-                  decoration: BoxDecoration(border: Border.all(color: controller.getFavorite?Colors.amber :boderLineColor,width: 0.5,),),
-                  child: CheckboxListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal:12, vertical: 12),
-                    enabled: controller.getLoadingData ? false : true,
-                    checkColor: Colors.white,
-                    activeColor: Colors.amber,
-                    value: controller.getFavorite,
-                    tileColor: controller.getFavorite?Colors.amber.withOpacity(0.1):null,
-                    title: Text(controller.getFavorite?'Quitar de favorito':'Agregar a favorito'),
-                    subtitle: controller.getFavorite?null: const Opacity(opacity: 0.5,child: Text('Accede rápidamente a tus productos favoritos')),
-                    onChanged: (value) {
-                      if (!controller.getLoadingData) { controller.setFavorite = value ?? false; }
-                    },
-                  ),
-                ),
+                ),  
                 space,
                 //
                 // view : control stock
@@ -552,7 +551,7 @@ class ProductEdit extends StatelessWidget {
     child: const Text('opciones para moderadores',style: TextStyle(color: Colors.blue),textAlign: TextAlign.center,),
   );
 }
-  Widget textfielBottomSheetListOptions({required String labelText,String textValue = '',required Function() onTap,bool stateEdit = true,EdgeInsetsGeometry contentPadding = const EdgeInsets.all(12) }) {
+  Widget textfielBottomSheetListOptions({required String labelText,String textValue = '',required Function() onTap,bool stateEdit = true,EdgeInsetsGeometry contentPadding = const EdgeInsets.all(12),Widget? suffix}) {
 
     // value
     final Color textDescriptionStyleColor = Get.isDarkMode?Colors.white.withOpacity(0.7):Colors.black.withOpacity(0.7);
@@ -574,7 +573,9 @@ class ProductEdit extends StatelessWidget {
           filled: stateEdit,
           fillColor:stateEdit?fillColor:Colors.transparent , 
           labelText: labelText,
+          suffix:suffix,
           ),
+        
       ),
     );
   }
@@ -992,58 +993,78 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Opciones para moderador'),
+        title: const Text('Moderador'),
+        actions: [
+          // iconButton : editar opciones
+          controller.getEditModerator?Container():IconButton(
+            onPressed:() => setState(()=>controller.setEditModerator = !controller.getEditModerator), 
+            icon: const Icon(Icons.edit_square,color: Colors.amber,),
+          ),
+          // button : actualizar documento
+          controller.getLoadingData ||  !controller.getEditModerator
+              ? Container() : Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: IconButton(
+                  onPressed: Get.back,
+                  icon: const Icon(Icons.check,color: Colors.blue,),
+                ),
+              ),
+        ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(12.0),
         child: ListView(  
           children: [  
-            // textButton : buscar en google
-            TextButton(
-                onPressed: () async {
-                  String clave = controller.controllerTextEditDescripcion.text;
-                  Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
-                  await launchUrl(uri,mode: LaunchMode.externalApplication);
-                },
-                child: const Text('Buscar por la descripción en Google' )),
-            // textButton : buscar en google
-            TextButton(
-                onPressed: () async {
-                  String clave = controller.getProduct.code;
-                  Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
-                  await launchUrl(uri,mode: LaunchMode.externalApplication);
-                },
-                child: const Text('Buscar por el código Google')), 
-            const Divider(), 
+            // view :botones de busqueda en google
             Row(
               children: [
+                // text 
+                const Text('Buscar en google:'),
+                const Spacer(),
+                // button : textButton : buscar en google
+                TextButton(
+                    onPressed: () async {
+                      String clave = controller.controllerTextEditDescripcion.text;
+                      Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
+                      await launchUrl(uri,mode: LaunchMode.externalApplication);
+                    },
+                    child: const Text('Descripción' )),
+                // textButton : buscar en google
+                TextButton(
+                    onPressed: () async {
+                      String clave = controller.getProduct.code;
+                      Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
+                      await launchUrl(uri,mode: LaunchMode.externalApplication);
+                    },
+                    child: const Text('Código')),
+              ],
+            ), 
+            const Divider(), 
+            // view : cantidad de comercios que tienen el producto
+            Row(
+              children: [
+                // text : cantidad de comercios que tienen el producto
+                const Opacity(opacity: 0.4,child: Text('comercios')),
+                const Spacer(),
                 // textButtons
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // button : incrementar seguidores
-                    TextButton(
-                        onPressed: !controller.getEditModerator?null: (){
-                          setState(() {
-                            controller.increaseFollowersProductPublic();
-                          });
-                        },
-                        child: const Text('Incrementar'),
-                    ),
                     // button : decrementar seguidores
                     TextButton(
-                        onPressed: !controller.getEditModerator?null: (){
-                          setState(() {
-                            controller.descreaseFollowersProductPublic();
-                          });
-                        }, 
-                        child: Text('Decrementar',style:TextStyle(color: !controller.getEditModerator?null:Colors.red)),
+                        onPressed: !controller.getEditModerator?null: ()=> setState(()=>controller.descreaseFollowersProductPublic()), 
+                        child:  const Icon(Icons.indeterminate_check_box ),
                     ),
+                    Opacity(opacity:!controller.getEditModerator?0.3:1,child: Text(Publications.getFormatAmount(value: controller.getProduct.followers))),
+                    // button : incrementar seguidores
+                    TextButton(
+                        onPressed: !controller.getEditModerator?null: ()=> setState(()=>controller.increaseFollowersProductPublic() ),
+                        child: const Icon(Icons.add_box_rounded),
+                    ),
+                    
                   ],
                 ),
-              const Spacer(),
-                // text : cantidad de comercios que tienen el producto
-              Opacity(opacity: 0.4,child: Text('${Publications.getFormatAmount(value: controller.getProduct.followers)} ${controller.getProduct.followers == 1 ? 'comercio' : 'comercios'}')),
+              
               ],
             ),
             const Divider(),
@@ -1083,35 +1104,7 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
                 }
               },
             ),
-            controller.getEditModerator ? Container() :SizedBox(height: !controller.getLoadingData ? 12.0 : 0.0),
-            controller.getEditModerator
-                ? Container()
-                : button(
-                    padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
-                    icon:const Icon(Icons.security, color: Colors.white),
-                    onPressed: () { 
-                      setState(() {
-                        controller.setEditModerator = !controller.getEditModerator;
-                      });
-                    },
-                    colorAccent: Colors.white,
-                    colorButton:  Colors.orange,
-                    text:  "Editar documento",
-                  ), 
-            // button : actualizar documento
-            controller.getLoadingData ||  !controller.getEditModerator
-                ? Container()
-                : Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: button(
-                      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
-                      icon:const Icon(Icons.security, color: Colors.white),
-                      onPressed: controller.setProductPublicFirestoreAndBack,
-                      colorAccent: Colors.white,
-                      colorButton: Colors.green.shade400,
-                      text: "Actualizar documento",
-                    ),
-                ),
+            const SizedBox(height:20),
             // button : eliminar documento
             controller.getLoadingData || !controller.getEditModerator
                 ? Container()
@@ -1127,7 +1120,7 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
                     ),
                 ),
             // text : marca de tiempo de la ultima actualización del documento
-            Opacity(opacity: 0.5,child: Center(child: Text('Creación ${Publications.getFechaPublicacion( fechaActual: controller.getProduct.documentCreation.toDate(),fechaPublicacion:  Timestamp.now().toDate()).toLowerCase()}'))), 
+            Opacity(opacity: 0.5,child: Center(child: Text('Creación ${Publications.getFechaPublicacion( fechaPublicacion: controller.getProduct.documentCreation.toDate(),fechaActual:  Timestamp.now().toDate()).toLowerCase()}'))), 
             const SizedBox(height: 30.0),
           ],
           // fin widget debug

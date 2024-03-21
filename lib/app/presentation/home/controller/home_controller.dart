@@ -298,7 +298,7 @@ class HomeController extends GetxController {
       readAccountsInviteData();
     } else {
       // GetX : obtenemos por parametro los datos de la cuenta de atentificación
-      Map arguments = Get.arguments;
+      final Map arguments = Get.arguments;
       // verificamos y obtenemos los datos pasados por parametro
       setUserAuth = arguments['currentUser'];
       // obtenemos el id de la cuenta seleccionada si es que existe 
@@ -472,6 +472,14 @@ class HomeController extends GetxController {
     final GoogleSignIn googleSignIn = GoogleSignIn();
     // cerramos sesión
     try {
+      // Eliminar los datos de la memoria del dispositivo
+      await const FlutterSecureStorage().deleteAll();
+      // elimina los datos de shared preferences
+      await GetStorage().erase();
+      // set : id de la cuenta seleccionada nulo por defecto
+      await GetStorage().write('idAccount','');
+      
+
       // 1. Cerrar sesión de Google
       await googleSignIn.signOut();
 
@@ -481,8 +489,6 @@ class HomeController extends GetxController {
       // 3. Revocar el token de acceso actual
       await googleSignIn.disconnect();
 
-      // Eliminar los datos de la memoria del dispositivo
-      await const FlutterSecureStorage().deleteAll();
     } catch (error) {
       print('#### error : signOutGoogle');
     }
@@ -717,25 +723,34 @@ class HomeController extends GetxController {
   }
 
   void readUserAccountsList({required String email}) {
+    // var : logica de lectura completa de la lista de cuentas administradas por el usuario
+    int documentsLength = 0;
+    int documentsRead = 0;
     // firebase : obtenemos la lista de cuentas del usuario
     Database.refFirestoreUserAccountsList(email: email).get().then((value) {
+      documentsLength = value.docs.length;
       //  recorre la lista de cuentas
       for (var element in value.docs){
+        
         // get : obtenemos los datos del perfil del usuario
         UserModel userModel = UserModel.fromDocumentSnapshot(documentSnapshot: element);
         // condition : si el id de la cuenta es diferente de vacio para evitar errores de consulta inexistentes
         if (userModel.account != '') {
           // firebase : obtenemos los datos de la cuenta
           Database.readProfileAccountModelFuture(userModel.account).then((value) {
+            documentsRead++;
             // get : obtenemos los perfiles de las cuentas administradas
             ProfileAccountModel profileAccountModel = ProfileAccountModel.fromDocumentSnapshot(documentSnapshot:value);
             // set
             addManagedAccountsList = profileAccountModel; 
+            // condition : si ya se leyeron todos los documentos
+            if (documentsRead == documentsLength) {
+              // set : estado de la lista de cuentas administradas
+              setLoadedManagedAccountsList = true;
+            }
           });
         }
-      }
-      // actualizamos el estado de la lista de cuentas administradas
-      setLoadedManagedAccountsList = true;
+      } 
     }).onError((error, stackTrace){
       setLoadedManagedAccountsList = true;
     }).catchError((onError) {
@@ -879,6 +894,7 @@ class HomeController extends GetxController {
           ),
         ],
       ),
+      clipBehavior: Clip.antiAlias,
       backgroundColor: Get.theme.scaffoldBackgroundColor,
       enableDrag: true,
       isDismissible: true,

@@ -88,7 +88,7 @@ class WidgetButtonListTile extends StatelessWidget {
       contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15.0),
       trailing: const Icon(Icons.add), 
       dense: true,
-      title: const Text("Crear mi perfil de mi negocio", style: TextStyle(fontSize: 16.0)),
+      title: const Text("Crear perfil de mi negocio", style: TextStyle(fontSize: 16.0)),
       onTap: () {
         Get.back();
         Get.toNamed(Routes.ACCOUNT);
@@ -260,7 +260,7 @@ class _ProductoItemState extends State<ProductoItem> {
 
     //  values
     bool isSelect = salesController.getIdProductSelected == widget.producto.id;
-    final String alertStockText = widget.producto.stock ? (widget.producto.quantityStock >=0 ? widget.producto.quantityStock<=widget.producto.alertStock?'Stock bajo':'' : 'Sin stock'): '';
+    final String alertStockText = widget.producto.stock && salesController.homeController.getIsSubscribedPremium ? (widget.producto.quantityStock >=0 ? widget.producto.quantityStock<=widget.producto.alertStock?'Stock bajo':'' : 'Sin stock'): '';
 
     // aparición animada
     return Card(
@@ -270,7 +270,7 @@ class _ProductoItemState extends State<ProductoItem> {
       clipBehavior: Clip.antiAlias,
       child: Stack(  
         children: [
-          // image and description  to product
+          // view : alert stock, image and info
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -289,7 +289,7 @@ class _ProductoItemState extends State<ProductoItem> {
               contentInfo(),
             ],
           ),
-          // selected
+          // view : selected
           Positioned.fill(
             child: Material(
               color: Colors.transparent,
@@ -620,6 +620,7 @@ Widget viewDefault() {
 
   // controllers
   final HomeController homeController = Get.find();
+  // style
   const TextStyle textStyle = TextStyle(
     fontFamily: 'Roboto', // o 'Open Sans'
     fontSize: 20,
@@ -638,11 +639,20 @@ Widget viewDefault() {
                 // text : bienvenida
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20),
-                  child: Text('Hola 🖐️\n\nIngresa a tu cuenta para gestionar tu tienda\n',textAlign: TextAlign.center,style: textStyle,),
+                  child: Text('Hola 🖐️\n\nIngresa a una cuenta para gestionar la tienda\n',textAlign: TextAlign.center,style: textStyle,),
                 ),
                 const SizedBox(height: 20), 
+
+                !homeController.getLoadedManagedAccountsList?Container():homeController.checkAccountExistence?Container():
+                ComponentApp().button(
+                  disable: homeController.getProfileAdminUser.superAdmin,
+                  text: 'Crear perfil de mi negocio',
+                  onPressed: () { 
+                    Get.toNamed(Routes.ACCOUNT);
+                  },
+                ),
                 // lista de cuentas administradas o boton para crear una cuenta
-                !homeController.getLoadedManagedAccountsList?const CircularProgressIndicator(): !homeController.checkAccountExistence? WidgetButtonListTile().buttonListTileCrearCuenta()
+                !homeController.getLoadedManagedAccountsList?const CircularProgressIndicator(): homeController.getManagedAccountsList.isEmpty? Container()
                 :Flexible(  
                   fit: FlexFit.loose,
                   child: SizedBox( 
@@ -706,15 +716,16 @@ class ComponentApp extends StatelessWidget {
     return Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child:Icon(Icons.circle,size:size, color: color.withOpacity(0.4)));
   }
   // view : imagen avatar del usuario
-  Widget userAvatarCircle({String urlImage='',String text = '', double radius = 20.0}) {
+  Widget userAvatarCircle({bool empty=false,String urlImage='',String text = '', double radius = 20.0}) {
     
     // style
-    Color backgroundColor = Get.theme.dividerColor.withOpacity(0.5);
+    Color backgroundColor = Get.theme.dividerColor.withOpacity(empty?0.03:0.5);
     // widgets
     late Widget avatar;
     Widget iconDedault = Icon(Icons.person_outline_rounded,color: Colors.white,size: radius*1.5,);
-
-    if(urlImage == '' && text == ''){
+    if(empty){
+      iconDedault = Container();
+    }else if(urlImage == '' && text == ''){
       iconDedault = Icon(Icons.person_outline_rounded,color: Colors.white,size: radius*1 );
     }else if(urlImage == '' && text != ''){
       iconDedault = Text( text.substring( 0,1),style: const TextStyle(color: Colors.white));

@@ -355,8 +355,9 @@ class ControllerProductsEdit extends GetxController {
               setTextAppBar = 'Espere por favor...';
               updateAll();
 
-              // set : values
-              getProduct.description = Utils().capitalize(controllerTextEditDescripcion.text); // controllerTextEditDescripcion.text;
+              // set : values 
+              getProduct.description = Utils().capitalize(controllerTextEditDescripcion.text); // format : actualiza a mayuscula la primera letra de cada palabra
+              getProduct.code = getProduct.code == '' ? getProduct.id : getProduct.code;
               getProduct.upgrade = Timestamp.now(); 
               getProduct.idMark = getMarkSelected.id;
               getProduct.nameMark = getMarkSelected.name;
@@ -841,6 +842,7 @@ class ControllerProductsEdit extends GetxController {
   void getDataProduct({required String id}) {
     // function : obtiene los datos del producto de la base de datos y los carga en el formulario de edición 
     if (id != '') {
+      // firebase : obtiene los datos del producto
       Database.readProductPublicFuture(id: id).then((value) {
         //  get
         Product product = Product.fromMap(value.data() as Map); 
@@ -979,7 +981,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
       padding: const EdgeInsets.only(bottom: 12),
       shrinkWrap: true, 
       itemCount: list.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:4,childAspectRatio: 1.1),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:4,childAspectRatio: 1),
       itemBuilder: (BuildContext context, int index) {
         //  values
         Mark marcaSelect = list[index];

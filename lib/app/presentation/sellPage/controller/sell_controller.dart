@@ -314,7 +314,9 @@ class SalesController extends GetxController {
     getTicket.creation = Timestamp.now();
 
     // registramos el monto en caja
-    cashRegisterSetTransaction(amount: getTicket.priceTotal,discount: getTicket.discount);
+    if( homeController.getIsSubscribedPremium ){
+      cashRegisterSetTransaction(amount: getTicket.priceTotal,discount: getTicket.discount);
+    }
     
     // set firestore : guarda la transacción
     Database.refFirestoretransactions(idAccount: homeController.getIdAccountSelected).doc(getTicket.id).set(getTicket.toJson());
@@ -323,10 +325,10 @@ class SalesController extends GetxController {
       // obj
       ProductCatalogue product = ProductCatalogue.fromMap(data as Map<String, dynamic>);
 
-      // set firestore : hace un incremento en el valor sales'ventas'  del producto
+      // set firestore : hace un incremento de las ventas del producto
       Database.dbProductStockSalesIncrement(idAccount: homeController.getIdAccountSelected,idProduct: product.id,quantity: product.quantity );
       // set firestore : hace un descremento en el valor 'stock' del producto si es que tiene stock habilitado
-      if (product.stock) {
+      if (product.stock && homeController.getIsSubscribedPremium ) {
         // set firestore : hace un descremento en el valor 'stock'
         Database.dbProductStockDecrement(idAccount: homeController.getIdAccountSelected,idProduct: product.id,quantity: product.quantity);
       }
