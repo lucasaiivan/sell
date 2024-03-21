@@ -1041,7 +1041,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
       padding: const EdgeInsets.only(bottom: 12),
       shrinkWrap: true, 
       itemCount: list.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:4,childAspectRatio: 1.1),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:4,childAspectRatio: 1),
       itemBuilder: (BuildContext context, int index) {
         //  values
         Mark marcaSelect = list[index]; 

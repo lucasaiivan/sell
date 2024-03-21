@@ -613,6 +613,7 @@ class SalesView extends StatelessWidget {
     const double height = 120;
     final bool viewDefault = controller.getProductsOutstandingList.isEmpty;
     final int itemCount = viewDefault?6:controller.getProductsOutstandingList.length + numItemDefault;
+    
     // views : load widget mientras se carga la data
     if(homeController.productsBestSellersLoadComplete.value == false ){
       return SizedBox(
@@ -683,6 +684,7 @@ class SalesView extends StatelessWidget {
   }
 
   Widget circleAvatarProduct({required ProductCatalogue productCatalogue}) {
+
     // controller
     final SalesController salesController = Get.find();
 
@@ -691,8 +693,8 @@ class SalesView extends StatelessWidget {
     double radius = 40.0;
     double spaceImageText = 1;
     Color backgroundColor = Colors.grey.withOpacity(0.1);
-    bool stateAlertStock = productCatalogue.stock && homeController.getProfileAccountSelected.subscribed ? productCatalogue.quantityStock < 5 : false;
-    Color borderCicleColor = stateAlertStock ? Colors.red : productCatalogue.favorite ? Colors.amber : backgroundColor;
+    bool stateAlertStock = productCatalogue.stock && homeController.getIsSubscribedPremium ? productCatalogue.quantityStock < 5 : false;
+    Color borderCicleColor = stateAlertStock  ? Colors.red : productCatalogue.favorite ? Colors.amber : backgroundColor;
 
     return ElasticIn(
       child: Container(
