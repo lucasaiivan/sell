@@ -676,10 +676,10 @@ class HomeController extends GetxController {
   void readProductsCatalogue({required String idAccount}) {
     // obtenemos los obj(productos) del catalogo de la cuenta del negocio
     Stream<QuerySnapshot<Map<String, dynamic>>> streamSubscription = Database.readProductsCatalogueStream(id: idAccount);
+    // stream : escuchamos los cambios en los productos de cátalogo
     streamSubscription.listen((value) {
       //  values
       List<ProductCatalogue> list = [];
-
       if (value.docs.isNotEmpty) {
         for (var element in value.docs) {
           list.add(ProductCatalogue.fromMap(element.data()));

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart'; 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -12,8 +14,12 @@ import 'package:fl_chart/fl_chart.dart';
 
 
 class TransactionsController extends GetxController {
+
   // others controllers
   final HomeController homeController = Get.find();
+
+  // stream  
+  StreamSubscription?  streamSubscription;
 
   // style : estilo de la vista
   final double cardBoderRadius = 20.0;
@@ -132,7 +138,7 @@ class TransactionsController extends GetxController {
       case 'premium': 
         homeController.showModalBottomSheetSubcription(id:'analytic');
         break;
-      case 'hoy':
+      case 'hoy':  
         readTransactionsOfTheDay();
         setFilterText = 'El día de hoy';
         break;
@@ -177,8 +183,10 @@ class TransactionsController extends GetxController {
       timeStart: timeStart,
       timeEnd: timeEnd,
     );
-
-    stream.listen((value) {
+    // si ahi una suscripcion activa la cancelamos
+    streamSubscription?.cancel();
+    // stream : obtenemos los documentos creados en el día
+    streamSubscription=stream.listen((value) {
       // var
       List<TicketModel> transactionsAlllist =  [];
       // get : agregamos los tickets a la lista
@@ -200,13 +208,15 @@ class TransactionsController extends GetxController {
     Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch( DateTime( timeNow.year ).millisecondsSinceEpoch);
 
     // stream : obtenemos los documentos creados este año
-    Stream<QuerySnapshot<Map<String, dynamic>>> query = Database.readTransactionsFilterTimeStream(
+    Stream<QuerySnapshot<Map<String, dynamic>>> stream = Database.readTransactionsFilterTimeStream(
       idAccount: homeController.getProfileAccountSelected.id,
       timeStart: timeStart,
       timeEnd: Timestamp.fromDate(timeNow),
     );
-
-    query.listen((value) { 
+    // si ahi una suscripcion activa la cancelamos
+    streamSubscription?.cancel();
+    // stream : obtenemos los documentos creados en el día
+    streamSubscription=stream.listen((value) { 
       // var
       List<TicketModel> transactionsAlllist =  [];
       // get : agregamos los tickets a la lista
@@ -216,20 +226,20 @@ class TransactionsController extends GetxController {
     }); 
   }
   // obtenenemos las transacciones del día actual y los ultimos 5 dias
-  void readTransactionsOfTheDay() { 
+  void readTransactionsOfTheDay(){ 
     // a la marca de tiempo actual le descontamos las los ultimos 5 dias
     Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(Timestamp.now().toDate() .subtract(const Duration(days: 5)).millisecondsSinceEpoch);
-    // marca de tiempo actual
-    Timestamp timeEnd = Timestamp.now();
 
     // stream : obtenemos los documentos creados en el día
-    Stream<QuerySnapshot<Map<String, dynamic>>> stream = Database.readTransactionsFilterTimeStream(
+    Stream<QuerySnapshot<Map<String, dynamic>>> stream = Database.readTransactionsFilterIsGreaterThanTimeStream(
       idAccount: homeController.getProfileAccountSelected.id,
-      timeStart: timeStart,
-      timeEnd: timeEnd,
-    );
+      timeStart: timeStart, 
+    );    
+    // si ahi una suscripcion activa la cancelamos
+    streamSubscription?.cancel();
     // stream : obtenemos los documentos creados en el día
-    stream.listen((value) {
+    streamSubscription= stream.listen((value) { 
+      
       // var
       List<double> listAmountTotal = [];  
       List<TicketModel> transactionsTodayList = [];
@@ -326,13 +336,15 @@ class TransactionsController extends GetxController {
     Timestamp timeStart = Timestamp.fromDate(timeEnd.subtract(const Duration(days:5)));
 
     // stream : obtenemos los documentos creados en el día
-    Stream<QuerySnapshot<Map<String, dynamic>>> query = Database.readTransactionsFilterTimeStream(
+    Stream<QuerySnapshot<Map<String, dynamic>>> stream = Database.readTransactionsFilterTimeStream(
       idAccount: homeController.getProfileAccountSelected.id,
       timeStart: timeStart,
       timeEnd: Timestamp.fromDate(timeEnd),
     );
-
-    query.listen((value) {
+    // si ahi una suscripcion activa la cancelamos
+    streamSubscription?.cancel();
+    // stream : obtenemos los documentos creados en el día
+    streamSubscription=stream.listen((value) {
       // var
       List<TicketModel> transactionsTodayList = [];  // lista de las transacciones del día de ayer
       List<TicketModel> transactionsAlllist =  []; // lista de las transacciones de los ultimos 5 dias
@@ -373,13 +385,14 @@ class TransactionsController extends GetxController {
     Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch( DateTime(timeEnd.year, timeEnd.month-4, 1, 0).millisecondsSinceEpoch);
 
     // stream : obtenemos los documentos creados en los ultimos 5 meses
-    Stream<QuerySnapshot<Map<String, dynamic>>> query = Database.readTransactionsFilterTimeStream(
+    Stream<QuerySnapshot<Map<String, dynamic>>> stream = Database.readTransactionsFilterIsGreaterThanTimeStream(
       idAccount: homeController.getProfileAccountSelected.id,
-      timeStart: timeStart,
-      timeEnd: Timestamp.fromDate(timeEnd),
-    );
+      timeStart: timeStart, 
+    ); 
+    // si ahi una suscripcion activa la cancelamos
+    streamSubscription?.cancel();
     // obtenemos los documentos creados en el día
-    query.listen((value) {
+    streamSubscription=stream.listen((value) {
       // var 
       List<TicketModel> transactionsTodayList = []; 
       List<TicketModel> transactionsAlllist =  [];
@@ -417,7 +430,7 @@ class TransactionsController extends GetxController {
       setVisivilityTransactionsList = transactionsTodayList;
 
 
-    }); 
+    });  
 
   } 
 
@@ -428,13 +441,15 @@ class TransactionsController extends GetxController {
     // var :  obtenemos todas las transacciones de los ultimos 5 meses
     Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch( DateTime(timeNow.year, timeNow.month-4, 1, 0).millisecondsSinceEpoch) ; 
     // stream : obtenemos los documentos creados  hace 5 meses
-    Stream<QuerySnapshot<Map<String, dynamic>>> query = Database.readTransactionsFilterTimeStream(
+    Stream<QuerySnapshot<Map<String, dynamic>>> stream = Database.readTransactionsFilterTimeStream(
       idAccount: homeController.getProfileAccountSelected.id,
       timeStart: timeStart,
       timeEnd: Timestamp.fromDate(timeNow),
     );
-
-    query.listen((value) {
+    // si ahi una suscripcion activa la cancelamos
+    streamSubscription?.cancel();
+    // stream : obtenemos los documentos creados en el día
+    streamSubscription=stream.listen((value) {
       
       // var
       List<TicketModel> transactionsAlllist = value.docs.map((e) => TicketModel.fromMap(e.data())).toList();
@@ -748,10 +763,8 @@ class TransactionsController extends GetxController {
             child: const Text('Cancelar')),
         TextButton(
             onPressed: () {
-              Database.refFirestoretransactions(
-                      idAccount: homeController.getIdAccountSelected)
-                  .doc(ticketModel.id)
-                  .delete();
+              // firebase : elimina la transacción
+              Database.refFirestoretransactions(idAccount: homeController.getIdAccountSelected).doc(ticketModel.id).delete();
               Get.back();
             },
             child: const Text('si, eliminar')),

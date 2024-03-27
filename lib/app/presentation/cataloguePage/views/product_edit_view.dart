@@ -508,7 +508,7 @@ class ProductEdit extends StatelessWidget {
                 !controller.getItsInTheCatalogue ? Container() :  Padding(
                   padding: const EdgeInsets.only(top: 50),
                   //child: Text('Actualizado ${}'),
-                  child: Opacity(opacity: 0.5,child: Center(child: Text('Actualizado ${Publications.getFechaPublicacion(fechaActual: controller.getProduct.upgrade.toDate(), fechaPublicacion: Timestamp.now().toDate()).toLowerCase()}'))),
+                  child: Opacity(opacity: 0.5,child: Center(child: Text('Actualizado ${Publications.getFechaPublicacion(fechaPublicacion: controller.getProduct.upgrade.toDate(), fechaActual: Timestamp.now().toDate()).toLowerCase()}'))),
                 ),
                 // button : guardar
                 const SizedBox(height:30),  

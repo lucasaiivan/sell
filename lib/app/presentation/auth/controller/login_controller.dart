@@ -18,14 +18,14 @@ class LoginController extends GetxController {
   SplashController homeController = Get.find<SplashController>();
 
   // state : style
-  Rx<Color> checkPolicyAlertColor = Colors.orange.shade100.withOpacity(0.3).obs;
+  Rx<Color> checkPolicyAlertColor = Colors.orange.shade100.withOpacity(0.4).obs;
   // state - Check Accept Privacy And Use Policy
   RxBool stateCheckAcceptPrivacyAndUsePolicy = false.obs;
   bool get getStateCheckAcceptPrivacyAndUsePolicy =>
       stateCheckAcceptPrivacyAndUsePolicy.value;
   set setStateCheckAcceptPrivacyAndUsePolicy(bool value) {
     if(value){checkPolicyAlertColor.value = Colors.transparent;}
-    else {checkPolicyAlertColor.value = Colors.orange.shade100.withOpacity(0.5);}
+    else {checkPolicyAlertColor.value = Colors.orange.shade100.withOpacity(0.4);}
     stateCheckAcceptPrivacyAndUsePolicy.value = value;  
   }
 
@@ -64,7 +64,7 @@ class LoginController extends GetxController {
       Get.snackbar(
           'Primero tienes que leer nuestras políticas y términos de uso 🙂',
           'Tienes que aceptar nuestros términos de uso y política de privacidad para usar esta aplicación');
-      checkPolicyAlertColor.value = Colors.red.shade100.withOpacity(0.5); 
+      checkPolicyAlertColor.value = Colors.red.shade100.withOpacity(0.7); 
     }
   } 
   void signInAnonymously() async { 

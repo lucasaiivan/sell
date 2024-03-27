@@ -69,9 +69,14 @@ class Database {
   static Future dbProductStockDecrement({required String idAccount, required String idProduct,int quantity=-1}) =>FirebaseFirestore.instance.collection('ACCOUNTS/$idAccount/CATALOGUE/').doc(idProduct).update({"quantityStock": FieldValue.increment(-quantity)}); 
   // stream - consultas compuestas
   static Stream<QuerySnapshot<Map<String, dynamic>>>readSalesProduct({required String idAccount,int limit = 50}) =>FirebaseFirestore.instance.collection('ACCOUNTS/$idAccount/CATALOGUE').where("sales", isNotEqualTo:0).orderBy("sales", descending: true).limit(limit).snapshots();
+
+  static Stream<QuerySnapshot<Map<String, dynamic>>> readTransactionsFilterIsGreaterThanTimeStream({required String idAccount,required Timestamp timeStart}) => FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/TRANSACTIONS/')
+        .orderBy('creation', descending: true)
+        .where('creation',isGreaterThan: timeStart )  
+        .snapshots();
   static Stream<QuerySnapshot<Map<String, dynamic>>> readTransactionsFilterTimeStream({required String idAccount,required Timestamp timeEnd,required Timestamp timeStart}) => FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/TRANSACTIONS/')
         .orderBy('creation', descending: true)
-        .where('creation',isGreaterThan: timeStart)
+        .where('creation',isGreaterThan: timeStart ) 
         .where('creation', isLessThan: timeEnd)
         .snapshots();
   // future - <QuerySnapshot>

@@ -76,8 +76,9 @@ class AuthView extends GetView<LoginController> {
                       borderRadius: BorderRadius.circular(12.0),
                       child: Obx(() => AnimatedContainer( 
                         duration: const Duration(milliseconds:500),
-                        color: controller.checkPolicyAlertColor.value,
-                        child: widgetCheckAcceptPrivacyAndUsePolicy()))),
+                        color: controller.checkPolicyAlertColor.value ,
+                        child: widgetCheckAcceptPrivacyAndUsePolicy(),
+                        ))),
                   ),
                 ),
                 // buttons : login with google 
@@ -134,7 +135,7 @@ class AuthView extends GetView<LoginController> {
     return Obx(() => Padding(
           padding: const EdgeInsets.all(8.0),
           child: CheckboxListTile(  
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0),side: BorderSide(color: controller.checkPolicyAlertColor.value)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
             selectedTileColor: Colors.transparent,
             checkColor: Colors.white,
             activeColor: Colors.blue,
