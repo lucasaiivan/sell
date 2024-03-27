@@ -308,8 +308,8 @@ class TransactionsView extends StatelessWidget {
     const double opacity = 0.8;
     Widget divider = ComponentApp().divider();
     Widget spacer = const SizedBox(height:6);
-    TextStyle textStyleDescription = const TextStyle(fontSize:12,fontWeight: FontWeight.w300,fontFamily: 'Courier',);
-    TextStyle textStyleValue = const TextStyle(fontSize: 12,fontWeight: FontWeight.w600,fontFamily: 'Courier',);
+    TextStyle textStyleDescription = const TextStyle(fontWeight: FontWeight.w300,fontFamily: 'Courier',);
+    TextStyle textStyleValue = const TextStyle(fontWeight: FontWeight.w600,fontFamily: 'Courier',);
 
   //  showDialog : mostrar detalles de la transacción
     showDialog(

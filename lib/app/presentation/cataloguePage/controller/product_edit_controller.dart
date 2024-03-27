@@ -27,6 +27,9 @@ class ControllerProductsEdit extends GetxController {
   BuildContext get getContext => context!;
   set setContext(BuildContext value) => context = value;
 
+  // var : obtenemos el precio de venta al publico original para determinar si se actualizo
+  double priceSaleOriginal = 0.0;
+
   // var : message notification
   String _messageNotification = '';
   set setMessageNotification(String value) => _messageNotification = value;
@@ -358,7 +361,6 @@ class ControllerProductsEdit extends GetxController {
               // set : values 
               getProduct.description = Utils().capitalize(controllerTextEditDescripcion.text); // format : actualiza a mayuscula la primera letra de cada palabra
               getProduct.code = getProduct.code == '' ? getProduct.id : getProduct.code;
-              getProduct.upgrade = Timestamp.now(); 
               getProduct.idMark = getMarkSelected.id;
               getProduct.nameMark = getMarkSelected.name;
               getProduct.imageMark = getMarkSelected.image;
@@ -372,6 +374,10 @@ class ControllerProductsEdit extends GetxController {
               getProduct.category = getCategory.id; 
               getProduct.nameCategory = getCategory.name;
               if(controllerTextEditAlertStock.text!=''){getProduct.alertStock  = int.parse( controllerTextEditAlertStock.text );}
+              // se actualiza la marca de tiempo si se actualiza el precio de venta al publico
+              if (priceSaleOriginal != getProduct.salePrice) {
+                getProduct.upgrade = Timestamp.now();
+              } 
 
               // actualización de la imagen del producto
               if (getXFileImage.path != '') {
@@ -524,6 +530,8 @@ class ControllerProductsEdit extends GetxController {
     setMarkSelected = Mark(id: getProduct.idMark, name: getProduct.nameMark, creation:getProduct.documentCreation, upgrade: getProduct.documentUpgrade);
     setCategory = Category(id: getProduct.category, name: getProduct.nameCategory); 
     setProvider = Provider(id: getProduct.provider);
+    // set : precio de venta original para determinar si se actualizo
+    priceSaleOriginal = getProduct.salePrice; 
 
     checkDataUploadStatusProduct(dataUploadStatusProduct: true);
     
