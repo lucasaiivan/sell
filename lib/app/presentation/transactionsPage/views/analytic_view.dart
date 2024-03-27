@@ -30,22 +30,25 @@ class _StaticsCardsState extends State<StaticsCards> {
   @override
   Widget build(BuildContext context) {
 
+    // var
+    Color cardColor = Colors.blueGrey.withOpacity(0.2);
+
     // widgets
     List<Widget> cards =   [ 
       // card : facturación
       CardAnalityc(
         isPremium:true, // siempre es visible su contenido
-        backgroundColor: Colors.blueGrey.shade100.withOpacity(0.7),
+        backgroundColor: cardColor,
         icon:  const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.attach_money_rounded,color: Colors.white,size:14)))),
         titleText: 'Facturación', 
         valueText: transactionsController.getInfoAmountTotalFilter,
-        description: 'Balance total',
+        description: 'Balance total', 
         content: MiniLineChart(prices: transactionsController.getBillingByDateList.reversed.toList(),positionIndex: transactionsController.positionIndex),
         ), 
       // card : transacciones
       CardAnalityc( 
         isPremium: true, // siempre es visible su contenido
-        backgroundColor: Colors.teal.shade100.withOpacity(0.7),
+        backgroundColor: cardColor,
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.receipt,color: Colors.white,size:14)))),
         titleText: 'Transacciones',
         subtitle: '',
@@ -56,7 +59,7 @@ class _StaticsCardsState extends State<StaticsCards> {
       // card : ganancia 
       CardAnalityc( 
         isPremium: homeController.getIsSubscribedPremium,
-        backgroundColor: Colors.green.shade100.withOpacity(0.7),
+        backgroundColor: cardColor,
         icon:  const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.show_chart_rounded,color: Colors.white,size:14)))),
         //content: transactionsController.viewPercentageBarValue(text:'%${transactionsController.getPercentEarningsTotal()}',value: transactionsController.getEarningsTotal,total: transactionsController.getAmountTotalFilter),
         titleText: 'Ganancia',
@@ -68,9 +71,9 @@ class _StaticsCardsState extends State<StaticsCards> {
       !transactionsController.getMostSelledProducts.isNotEmpty ?Container():
       CardAnalityc( 
         isPremium: homeController.getIsSubscribedPremium,
-        backgroundColor: Colors.blue.shade100.withOpacity(0.7),
+        backgroundColor: cardColor,
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.category_rounded,color: Colors.white,size:14)))),
-        titleText: 'Productos vendidos', 
+        titleText: 'Productos', 
         subtitle: 'Total',
         valueText: Publications.getFormatAmount(value:transactionsController.readTotalProducts ),
         description: 'Mejor vendido con ${Publications.getFormatAmount(value:  transactionsController.getMostSelledProducts[0].quantity )} ventas', 
@@ -92,7 +95,7 @@ class _StaticsCardsState extends State<StaticsCards> {
       // card : clientes
       CardAnalityc( 
         isPremium: homeController.getIsSubscribedPremium,
-        backgroundColor: Colors.orangeAccent.shade100.withOpacity(0.7),
+        backgroundColor: cardColor,
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.payment_rounded,color: Colors.white,size:14)))),
         content: transactionsController.viewPercentageBarCharTextDataHorizontal(chartData:  transactionsController.getAnalyticsMeansOfPayment.entries.toList()),
         titleText: 'Medio de pago', 
@@ -102,7 +105,7 @@ class _StaticsCardsState extends State<StaticsCards> {
       // card : rentabilidad
       CardAnalityc( 
         isPremium: homeController.getIsSubscribedPremium,
-        backgroundColor: Colors.cyan.shade100.withOpacity(0.7),
+        backgroundColor: cardColor,
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.query_stats_rounded,color: Colors.white,size:14)))),
         titleText: 'Rentabilidad',
         modalContent: ProfitabilityProductsView(),
@@ -141,7 +144,7 @@ class _StaticsCardsState extends State<StaticsCards> {
       // add : agregamos las tarjetas de las cajas en una posicion especifica
       cards.insert(2,CardAnalityc( 
         isPremium: homeController.getIsSubscribedPremium,
-        backgroundColor: Colors.grey.shade400.withOpacity(0.7),
+        backgroundColor: cardColor,
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.point_of_sale_sharp,color: Colors.white,size:14)))),
         titleText: 'Caja ${value['name']}',
         subtitle: 'Facturación',
@@ -226,10 +229,7 @@ class CardAnalityc extends StatelessWidget {
               );
               
             },
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: viewContent,
-            ),
+            child: viewContent,
           ),
         ),
       ),
@@ -240,61 +240,68 @@ class CardAnalityc extends StatelessWidget {
 
 
 
-    // style  
+    // style   
     TextStyle subtitleStyle = const TextStyle(fontSize: 18,fontWeight: FontWeight.w300);
     TextStyle valueTextStyle = TextStyle(fontSize: description=='' && subtitle==''? 30: 24, fontWeight: FontWeight.w500,overflow: TextOverflow.ellipsis);
     TextStyle descriptionStyle = const TextStyle(fontSize: 12);  
+    Color? buttonColor = Get.isDarkMode?Colors.white70:Colors.grey.shade700;
 
     return Stack(
+      fit: StackFit.expand,
       children: [
         // view : contenedor de informacion estadisticos 
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [  
-            const Spacer(), 
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [ 
-                content,
-                subtitle==''?Container(): Flexible(child: Opacity(opacity: 0.7, child: Text(subtitle,style: subtitleStyle))),
-                valueText==''?Container():Flexible(child: Text(valueText,maxLines:2, textAlign: TextAlign.start, style: valueTextStyle)),
-                description==''?Container():Flexible(child: Opacity(opacity: 0.7, child: Text(description, style: descriptionStyle))),
-                Row(   
-                  children: [
-                    Flexible(
-                      fit: FlexFit.tight,
-                      child: widgetDescription),
-                      // condition : si ruta esta vacio no muesta el icono de ver mas informacion
-                    modalContent is SizedBox ?Container():const Padding(
-                      padding: EdgeInsets.only(left: 8),
-                      child: Opacity(opacity: 0.2,child: Icon(Icons.expand_circle_down_sharp,size: 24)),
-                    ),
-                  ],
+        ImageFiltered(
+          enabled: !isPremium,
+            imageFilter: ImageFilter.blur(sigmaX:4,sigmaY:4,tileMode: TileMode.decal),
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [  
+                      const Spacer(), 
+                      Column(
+                        mainAxisSize: MainAxisSize.min, 
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [ 
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: content,
+                          ),
+                          subtitle==''?Container(): Flexible(child: Opacity(opacity: 0.7, child: Text(subtitle,style: subtitleStyle))),
+                          valueText==''?Container():Flexible(child: Text(valueText,maxLines:2, textAlign: TextAlign.start, style: valueTextStyle)),
+                          description==''?Container():Flexible(child: Opacity(opacity: 0.7, child: Text(description, style: descriptionStyle))),
+                          widgetDescription,
+                        ],
+                      ),
+                    ],
+                    
+                  ),
+                ),
+                // position : posiciona en la parte inferior izquiedo
+                Positioned(
+                  bottom: 8,
+                  right: 8,
+                  child: modalContent is SizedBox ?Container(): Padding(padding: const EdgeInsets.only(left: 8),child: CircleAvatar(backgroundColor: Colors.black26,maxRadius: 16,child: Icon(Icons.expand_circle_down_sharp,size: 24,color:buttonColor),) ),
                 ),
               ],
             ),
-          ],
-        ), 
-        // condition : si es premium desenfoca el contenido
-        isPremium?Container(): 
-          BackdropFilter(
-          filter: ImageFilter.blur(sigmaX:5, sigmaY:5),
-          // view :  texto y icon version premium  
-          child: Center(child: LogoPremium(personalize: true,id: 'analytic')),
+          ), 
+          // view : logo de premium
+          isPremium?Container():Center(child: LogoPremium(personalize: true,id: 'analytic')),
+          // position : posicionar en la parte superior  al inicio  de lado izquierdo
+          Positioned(
+            top:12,
+            left:12,
+            child: Row( 
+            children: [
+              icon,
+              Text(titleText,style: const TextStyle(fontWeight: FontWeight.w400),overflow:  TextOverflow.ellipsis)
+            ],
           ),
-        // position : posicionar en la parte superior  al inicio  de lado izquierdo
-        Positioned(
-          top: 0,
-          left: 0,
-          child: Row( 
-          children: [
-            icon,
-            Text(titleText,style: const TextStyle(fontWeight: FontWeight.w400),overflow:  TextOverflow.ellipsis)
-          ],
-        ),
-        ),  
-      ],
+          ),   
+        ],
     );
   }
 }
@@ -828,12 +835,13 @@ class MiniLineChart extends StatelessWidget {
       height: 30,
       width: double.infinity,
       child: LineChart(
-        LineChartData(
-          
-
+        LineChartData( 
           lineTouchData: LineTouchData(  
-            handleBuiltInTouches: true,
+            handleBuiltInTouches: true, // habilita el touch
+            longPressDuration: const Duration(milliseconds: 100), // duracion del touch
+
             touchTooltipData: LineTouchTooltipData(  
+              tooltipPadding: const EdgeInsets.all(2), 
               getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
                 return touchedBarSpots.map((barSpot) {
                   final flSpot = barSpot; 
@@ -842,8 +850,7 @@ class MiniLineChart extends StatelessWidget {
                     const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                   );
                 }).toList();
-              },
-
+              }, 
             ),
           ),
           lineBarsData: [
@@ -851,18 +858,19 @@ class MiniLineChart extends StatelessWidget {
               spots: [
                 for (int i = 0; i < prices.length; i++)
                   FlSpot(i.toDouble(), prices[i]),
-              ], 
+              ],   
               isCurved: true,
               color:Colors.blue,
               barWidth: 2,
               dotData: FlDotData(
-                show: true,
+                show: true, 
                 getDotPainter: (spot, percent, barData, index) {
                   return FlDotCirclePainter(
                     radius: index==0?4: index == positionIndex ? 6 : 4,
                     color:Colors.blue,
                     strokeColor: Colors.white ,
-                    strokeWidth: index==0?0: index == positionIndex ? 1 : 0,
+                    strokeWidth: index==0?0: index == positionIndex ? 2 : 0,
+
                   );
                 },
         ),  
@@ -886,12 +894,13 @@ class MiniLineChart extends StatelessWidget {
   }
 
   String formatValue(double value) {
-  if (value >= 1000) {
-    return '${value /1000}';
-  } else {
-    return value.toStringAsFixed(0);
-  }
-} 
+    // return : devuelve el valor formateado en miles 
+    if (value >= 1000) {
+      return '\$${(value /1000).toStringAsFixed(1)}k';
+    } else {
+      return '\$${value.toStringAsFixed(0)}';
+    }
+  } 
 
 
 }

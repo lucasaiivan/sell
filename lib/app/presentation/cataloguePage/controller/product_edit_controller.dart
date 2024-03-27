@@ -18,10 +18,22 @@ import '../../home/controller/home_controller.dart';
 
 class ControllerProductsEdit extends GetxController {
 
+  // others controllers
+  final HomeController homeController = Get.find();
+  HomeController get getHomeController => homeController;
+
   // Build context
   BuildContext? context;
   BuildContext get getContext => context!;
   set setContext(BuildContext value) => context = value;
+
+  // var : obtenemos el precio de venta al publico original para determinar si se actualizo
+  double priceSaleOriginal = 0.0;
+
+  // var : message notification
+  String _messageNotification = '';
+  set setMessageNotification(String value) => _messageNotification = value;
+  String get getMessageNotification => _messageNotification;
 
   // var style
   Color colorLoading = Colors.blue; 
@@ -40,10 +52,6 @@ class ControllerProductsEdit extends GetxController {
   final purchasePriceTextFormFieldfocus = FocusNode(); 
   final salePriceTextFormFieldfocus = FocusNode(); 
 
-  // others controllers
-  final HomeController homeController = Get.find();
-  HomeController get getHomeController => homeController;
-
   // state internet
   bool connected = false;
   set setStateConnect(bool value) {
@@ -57,10 +65,7 @@ class ControllerProductsEdit extends GetxController {
   static Mark _ultimateSelectionMark = Mark(upgrade: Timestamp.now(), creation: Timestamp.now());
   set setUltimateSelectionMark(Mark value) => _ultimateSelectionMark = value;
   Mark get getUltimateSelectionMark => _ultimateSelectionMark;
-
-  static Mark _ultimateSelectionMark2 = Mark(upgrade: Timestamp.now(), creation: Timestamp.now());
-  set setUltimateSelectionMark2(Mark value) => _ultimateSelectionMark2 = value;
-  Mark get getUltimateSelectionMark2 => _ultimateSelectionMark2;
+ 
 
   // state account auth
   bool _accountAuth = false;
@@ -91,10 +96,23 @@ class ControllerProductsEdit extends GetxController {
 
   bool get getEditModerator => _editModerator;
 
-  // parameter
+  // producto seleccionado
   ProductCatalogue _product = ProductCatalogue(upgrade: Timestamp.now(), creation: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now());
   set setProduct(ProductCatalogue product) => _product = product;
   ProductCatalogue get getProduct => _product;
+
+  // nuevo producto encontrado en la DB Global para actualizar
+  Product _productPublicUpdate = Product(upgrade: Timestamp.now(), creation: Timestamp.now());
+  set setProductPublicUpdate(Product product) {
+    _productPublicUpdate = product;
+    setProductPublicUpdateStatus = true;
+    setMessageNotification = 'Producto encontrado con este código';
+    updateAll();
+  }
+  Product get getProductPublicUpdate => _productPublicUpdate;
+  bool productPublicUpdate = false; 
+  bool get getProductPublicUpdateStatus => productPublicUpdate;
+  set setProductPublicUpdateStatus(bool value) => productPublicUpdate = value;
 
   // TextEditingController
   TextEditingController controllerTextEditDescripcion = TextEditingController();
@@ -202,47 +220,35 @@ class ControllerProductsEdit extends GetxController {
   XFile get getXFileImage => _xFileImage;
 
   // estado de carga de datos
-  bool _dataUploadStatus = false;
-  set setDataUploadStatus(bool value){
-    _dataUploadStatus = value; 
-  }
-  bool get getDataUploadStatus => _dataUploadStatus;
+  bool _loadingData = false;
+  set setLoadingData(bool value) => _loadingData = value;
+  bool get getLoadingData => _loadingData;
   // estado de carga de datos del producto
   bool _dataUploadStatusProduct = false;
-  set setDataUploadStatusProduct(bool value){
-    _dataUploadStatusProduct = value;
-    checkDataUploadStatus();
-  }
-  bool get getDataUploadStatusProduct => _dataUploadStatusProduct;
   // estado de carga de datos de la marca 
   bool _dataUploadStatusMark = false; 
-  set setDataUploadStatusMark(bool value){
-    _dataUploadStatusMark = value;
-    checkDataUploadStatus();
-  }
-  bool get getDataUploadStatusMark => _dataUploadStatusMark;
   // estado de carga de datos del proveedor 
   bool _dataUploadStatusProvider = false;
-  set setDataUploadStatusProvider(bool value){
-    _dataUploadStatusProvider = value;
-    checkDataUploadStatus();
-  }
-  bool get getDataUploadStatusProvider => _dataUploadStatusProvider;
   // estado de carga de datos de la categoria 
   bool _dataUploadStatusCategory = false;
-  set setDataUploadStatusCategory(bool value){
-    _dataUploadStatusCategory = value;
-    checkDataUploadStatus();
-  }
-  bool get getDataUploadStatusCategory => _dataUploadStatusCategory;
 
-  // void : comprobar si se cargaron los datos del producto,de la marca, proveedor y categoria
-  void checkDataUploadStatus() {
-    if (getDataUploadStatusProduct && getDataUploadStatusMark && getDataUploadStatusProvider && getDataUploadStatusCategory) {
-      setDataUploadStatus = false;
+  void checkDataUploadStatusProduct({bool? dataUploadStatusProduct, bool? dataUploadStatusMark, bool? dataUploadStatusProvider, bool? dataUploadStatusCategory}) {
+    // descrioption : chequea si se cargaron los datos del producto, marca, proveedor y categoria
+    
+    // set : valores
+    _dataUploadStatusProduct = dataUploadStatusProduct ?? _dataUploadStatusProduct;
+    _dataUploadStatusMark = dataUploadStatusMark ?? _dataUploadStatusMark;
+    _dataUploadStatusProvider = dataUploadStatusProvider ?? _dataUploadStatusProvider;
+    _dataUploadStatusCategory = dataUploadStatusCategory ?? _dataUploadStatusCategory;
+    // condition : comprobamos si se cargaron todos los datos necesarios del producto
+    if (_dataUploadStatusProduct && _dataUploadStatusMark && _dataUploadStatusProvider && _dataUploadStatusCategory) {
+      setLoadingData = false; // Los datos se cargaron
     }else{
-      setDataUploadStatus = true;
-    }
+      setLoadingData = true; // no se cargaron todos los datos no cargados
+    } 
+
+    // actualizamos la vista
+    update(['updateAll']);
   }
 
 
@@ -251,18 +257,27 @@ class ControllerProductsEdit extends GetxController {
     // llamado inmediatamente después de que se asigna memoria al widget
 
     // anim : carga de datos 
-    setDataUploadStatus = true;
+    checkDataUploadStatusProduct(dataUploadStatusCategory:false,dataUploadStatusMark:false,dataUploadStatusProvider:false,dataUploadStatusProduct:false);
 
     // state account auth
     setAccountAuth = homeController.getIdAccountSelected != ''; 
     // obtenemos el producto por parametro
     ProductCatalogue productFinal = Get.arguments['product'] ?? ProductCatalogue(documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now(),upgrade: Timestamp.now(), creation: Timestamp.now());
     //  finalmente  asigna el producto
-    setProduct = productFinal;
+    setProduct = productFinal.copyWith();
     // load data product
     setTextAppBar = 'Editar';
     isCatalogue();
-    getDataProduct(id: getProduct.id);
+    if(productFinal.local){
+      // obtenemos los datos solo del cátalogo de la cuenta
+      loadDataFormProduct();  
+      // comprobamos si el producto local tiene existencia en la base de datos publica
+      checkUpdateProductPublic();
+    }else{
+      // obtenemos los datos del producto de la base de datos global
+      getDataProduct(id: getProduct.id);
+    }
+    
 
     super.onInit();
   }
@@ -271,10 +286,7 @@ class ControllerProductsEdit extends GetxController {
   void onReady() {
     // llamado después de que el widget se representa en la pantalla - ej. showIntroDialog(); //
     super.onReady();
-
-    controllerTextEditPrecioCosto.addListener(() {
-      updateAll(); 
-      });
+    controllerTextEditPrecioCosto.addListener( () => updateAll() );
   }
 
   @override
@@ -294,7 +306,7 @@ class ControllerProductsEdit extends GetxController {
 
   // TODO : la subcripción por defecto es true
   // get 
-  bool get isSubscribed => true;//homeController.getProfileAccountSelected.subscribed;
+  bool get isSubscribed => true; //homeController.getProfileAccountSelected.subscribed;
 
   //
   // FUNCTIONS
@@ -327,7 +339,7 @@ class ControllerProductsEdit extends GetxController {
       if (element.id == getProduct.id) {
         // get values
         setItsInTheCatalogue = true;
-        setProduct = element;
+        setProduct = element.copyWith();
         update(['updateAll']);
       }
     }
@@ -342,15 +354,16 @@ class ControllerProductsEdit extends GetxController {
             if ( getStock ? (getQuantityStock >= 1) : true) { 
               
               // update view
-              setDataUploadStatus = true;
+              setLoadingData = true;
               setTextAppBar = 'Espere por favor...';
               updateAll();
 
-              // set : values
-              getProduct.description = Utils().capitalize(controllerTextEditDescripcion.text); // controllerTextEditDescripcion.text;
-              getProduct.upgrade = Timestamp.now();
+              // set : values 
+              getProduct.description = Utils().capitalize(controllerTextEditDescripcion.text); // format : actualiza a mayuscula la primera letra de cada palabra
+              getProduct.code = getProduct.code == '' ? getProduct.id : getProduct.code;
               getProduct.idMark = getMarkSelected.id;
               getProduct.nameMark = getMarkSelected.name;
+              getProduct.imageMark = getMarkSelected.image;
               getProduct.purchasePrice = controllerTextEditPrecioCosto.numberValue;
               getProduct.salePrice = controllerTextEditPrecioVenta.numberValue;
               getProduct.favorite = getFavorite;
@@ -361,6 +374,10 @@ class ControllerProductsEdit extends GetxController {
               getProduct.category = getCategory.id; 
               getProduct.nameCategory = getCategory.name;
               if(controllerTextEditAlertStock.text!=''){getProduct.alertStock  = int.parse( controllerTextEditAlertStock.text );}
+              // se actualiza la marca de tiempo si se actualiza el precio de venta al publico
+              if (priceSaleOriginal != getProduct.salePrice) {
+                getProduct.upgrade = Timestamp.now();
+              } 
 
               // actualización de la imagen del producto
               if (getXFileImage.path != '') {
@@ -371,13 +388,14 @@ class ControllerProductsEdit extends GetxController {
                 await uploadTask; // esperamos a que se suba la imagen 
                 await ref.getDownloadURL().then((value) => getProduct.image = value); // obtenemos la url de la imagen
               }
-              // procede agregrar el producto en el cátalogo
-              // Mods - save data product global
-              if ( getProduct.verified==false || getEditModerator) {
+              // procede agregrar en la base de datos global de productos
+              // TODO : delete release
+              if ( getEditModerator && getProduct.local == false) {
                   setProductPublicFirestore( );
               }
-              
-              // Registra el precio en una colección publica
+              // condition : verifica si el producto es global publico
+              if(!getProduct.local){
+                // Registra el precio en una colección publica
                 ProductPrice precio = ProductPrice(
                   id: homeController.getProfileAccountSelected.id,
                   idAccount: homeController.getProfileAccountSelected.id,
@@ -398,13 +416,14 @@ class ControllerProductsEdit extends GetxController {
 
                 // Firebase set : se crea un documento con la referencia del precio del producto
                 Database.refFirestoreRegisterPrice(idProducto: getProduct.id, isoPAis: 'ARG').doc(precio.id).set(precio.toJson());
+              }
 
-                // Firebase set : se crea los datos del producto del cátalogo de la cuenta
-                Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id)
-                  .set(getProduct.toJson())
-                  .whenComplete(() async {
-                    await Future.delayed(const Duration(seconds: 3)).then((value) {setDataUploadStatus = false; Get.back(); });
-                }).onError((error, stackTrace) => setDataUploadStatus = false).catchError((_) => setDataUploadStatus = false);
+              // Firebase set : se crea los datos del producto del cátalogo de la cuenta
+              Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id)
+                .set(getProduct.toJson())
+                .whenComplete(() async {
+                  await Future.delayed(const Duration(seconds: 3)).then((value) {setLoadingData = false; Get.back(); });
+              }).onError((error, stackTrace) => setLoadingData = false).catchError((_) => setLoadingData = false);
 
 
             } else {
@@ -427,7 +446,6 @@ class ControllerProductsEdit extends GetxController {
       Get.snackbar('No se puedo continuar 👎',
             'se produjo un error');}
   }
-
   void setProductPublicFirestore()  { 
     // esta función procede a guardar el documento de una colleción publica
 
@@ -440,7 +458,7 @@ class ControllerProductsEdit extends GetxController {
     product.idUserUpgrade = homeController.getProfileAdminUser.email;
 
     // firebase: actualizar el documento del producto publico
-      Database.refFirestoreProductPublic().doc(product.id).update(product.toJson());
+    Database.refFirestoreProductPublic().doc(product.id).update(product.toJson());
   }
   void setProductPublicFirestoreAndBack() { 
     // esta función procede a guardar el documento de una colleción publica
@@ -461,7 +479,7 @@ class ControllerProductsEdit extends GetxController {
   }
   void deleteProductInCatalogue() async{
     // activate indicator load
-    setDataUploadStatus = true;
+    setLoadingData = true;
     setTextAppBar = 'Eliminando...';
     updateAll();
     
@@ -484,7 +502,7 @@ class ControllerProductsEdit extends GetxController {
   }
   void deleteProducPublic() async {
     // activate indicator load
-    setDataUploadStatus = true;
+    setLoadingData = true;
     setTextAppBar = 'Eliminando...';
     updateAll();
 
@@ -498,7 +516,7 @@ class ControllerProductsEdit extends GetxController {
       Get.back();
     });
   }
-  // fuction : carga los datos del producto en el formulario una ves que se obtienen de la base de datos
+  // read : carga los datos del producto en el formulario una ves que se obtienen de la base de datos
   void loadDataFormProduct() {
  
     // set : datos del producto para validar 
@@ -509,37 +527,41 @@ class ControllerProductsEdit extends GetxController {
     setAlertStock = getProduct.alertStock;
     setStock = getProduct.stock;
     setDescription= getProduct.description;
-    setMarkSelected = Mark(id: getProduct.idMark, name: getProduct.nameMark, creation: Timestamp.now(), upgrade: Timestamp.now());
+    setMarkSelected = Mark(id: getProduct.idMark, name: getProduct.nameMark, creation:getProduct.documentCreation, upgrade: getProduct.documentUpgrade);
     setCategory = Category(id: getProduct.category, name: getProduct.nameCategory); 
     setProvider = Provider(id: getProduct.provider);
+    // set : precio de venta original para determinar si se actualizo
+    priceSaleOriginal = getProduct.salePrice; 
+
+    checkDataUploadStatusProduct(dataUploadStatusProduct: true);
     
     // set : controles de las entradas de texto
-    controllerTextEditDescripcion =TextEditingController(text: getDescription);
-    controllerTextEditPrecioVenta =MoneyMaskedTextController(initialValue: getSalePrice,leftSymbol: '\$');
-    controllerTextEditPrecioCosto =MoneyMaskedTextController(initialValue: getPurchasePrice,leftSymbol: '\$');
-    controllerTextEditQuantityStock =TextEditingController(text: getQuantityStock.toString());
+    controllerTextEditDescripcion = TextEditingController(text: getDescription);
+    controllerTextEditPrecioVenta = MoneyMaskedTextController(initialValue: getSalePrice,leftSymbol: '\$');
+    controllerTextEditPrecioCosto = MoneyMaskedTextController(initialValue: getPurchasePrice,leftSymbol: '\$');
+    controllerTextEditQuantityStock = TextEditingController(text: getQuantityStock.toString());
     controllerTextEditAlertStock = TextEditingController(text: getAlertStock.toString());
     controllerTextEditCategory = TextEditingController(text: getCategory.name);
 
     // primero verificamos que no tenga el metadato del dato de la marca para hacer un consulta inecesaria
-    if (getProduct.idMark != ''){readMarkProducts();} else{ setDataUploadStatusMark = true; }
-    if (getProduct.category != ''){readCategory();} else{ setDataUploadStatusCategory = true; }
-    if (getProduct.provider != ''){readProvider();} else{ setDataUploadStatusProvider = true; }
+    if (getProduct.idMark != ''){readMarkProducts();} else{ checkDataUploadStatusProduct(dataUploadStatusMark: true); }
+    if (getProduct.category != ''){readCategory();} else{ checkDataUploadStatusProduct(dataUploadStatusCategory: true); }
+    if (getProduct.provider != ''){readProvider();} else{ checkDataUploadStatusProduct(dataUploadStatusProvider: true); }
   }
   // read : obtiene los datos de la maraca del producto
   void readMarkProducts() {
-    //  function : lee la marca del producto
+    //  function : lee la marca del producto 
     if (getProduct.idMark.isNotEmpty) {
       Database.readMarkFuture(id: getProduct.idMark).then((value) {
         setMarkSelected = Mark.fromMap(value.data() as Map);
         getProduct.nameMark = getMarkSelected.name; // guardamos un metadato
-        setDataUploadStatusMark = true; 
+        checkDataUploadStatusProduct(dataUploadStatusMark: true);
       }).onError((error, stackTrace) {
         setMarkSelected = Mark(upgrade: Timestamp.now(), creation: Timestamp.now());
-        setDataUploadStatusMark = true;
+        checkDataUploadStatusProduct(dataUploadStatusMark: true);
       }).catchError((_) {
         setMarkSelected = Mark(upgrade: Timestamp.now(), creation: Timestamp.now());
-        setDataUploadStatusMark = true;
+        checkDataUploadStatusProduct(dataUploadStatusMark: true);
       });
     }
   }
@@ -549,13 +571,13 @@ class ControllerProductsEdit extends GetxController {
     Database.readCategotyCatalogueFuture(idAccount: homeController.getProfileAccountSelected.id, idCategory: getProduct.category)
         .then((value) {
       setCategory = Category.fromDocumentSnapshot(documentSnapshot: value);
-      setDataUploadStatusCategory = true;
+      checkDataUploadStatusProduct(dataUploadStatusCategory: true);
       }).onError((error, stackTrace) {
         setCategory = Category(id: '', name: '');
-        setDataUploadStatusCategory = true;
+        checkDataUploadStatusProduct(dataUploadStatusCategory: true);
       }).catchError((_) {
         setCategory = Category(id: '', name: '');
-        setDataUploadStatusCategory = true;
+        checkDataUploadStatusProduct(dataUploadStatusCategory: true);
       });
   }
   // read : obtiene los datos del proveedor del producto
@@ -563,17 +585,42 @@ class ControllerProductsEdit extends GetxController {
     //  function : lee el proveedor del producto
     Database.refFirestoreProvider(idAccount:homeController.getIdAccountSelected).doc(getProduct.provider).get().then((value) {
       setProvider = Provider.fromDocumentSnapshot(documentSnapshot: value);
-      setDataUploadStatusProvider = true;
+      checkDataUploadStatusProduct(dataUploadStatusProvider: true);
     }).onError((error, stackTrace) {
       setProvider = Provider(id: '', name: '');
-      setDataUploadStatusProvider = true;
+      checkDataUploadStatusProduct(dataUploadStatusProvider: true);
     }).catchError((_) {
       setProvider = Provider(id: '', name: '');
-      setDataUploadStatusProvider = true;
+      checkDataUploadStatusProduct(dataUploadStatusProvider: true);
     });
   }
- 
+  // read : comprobamos actualización en la DB publica de productos
+  void checkUpdateProductPublic() {
+    // firebase : comprobamos si el producto existe en la base de datos publica
+    Database.readProductPublicFuture(id: getProduct.id).then((value) {
+      // get 
+      Product product = Product.fromMap(value.data() as Map);  
 
+      //  set
+      if(product.verified){
+        setProductPublicUpdate = product; 
+      } 
+    });
+  }
+  void updateProductCatalogue() {
+    // description : actualiza el producto en el cátalogo de la cuenta
+    // get
+    ProductCatalogue product = getProduct; 
+    setProduct = product.updateData(product: getProductPublicUpdate);
+    // Firebase set  
+    Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id).set( getProduct.toJson()).whenComplete(() {
+      // Firebase set : incrementamos el valor de los seguidores del producto o
+      Database.refFirestoreProductPublic().doc(getProduct.id).update({'followers': FieldValue.increment(1)});
+    });
+    getProduct.followers++;
+    setProductPublicUpdateStatus = false;
+    updateAll();
+  }
   // read XFile image
   void getLoadImageGalery() {
     //  function : selecciona una imagen de la galeria
@@ -587,7 +634,6 @@ class ControllerProductsEdit extends GetxController {
       update(['updateAll']);  //  actualizamos la vista 
     });
   }
-
   void getLoadImageCamera() {
     //  function : selecciona una imagen de la camara
     _picker.pickImage(source: ImageSource.camera,maxWidth: 720.0,maxHeight: 720.0,imageQuality: 55,)
@@ -599,9 +645,7 @@ class ControllerProductsEdit extends GetxController {
     });
   }
 
- 
   // WIDGETS
-
   void showDialogAddProfitPercentage( ) {
     // Dialog view :  muestra el dialogo para agregar el porcentaje de ganancia
 
@@ -701,16 +745,18 @@ class ControllerProductsEdit extends GetxController {
     Widget widget =   Wrap(
       children: <Widget>[
         ListTile(
-            leading: const Icon(Icons.camera),
-            title: const Text('Capturar una imagen'),
-            onTap: () {
-              getLoadImageCamera();
-              Get.back();
-              
-            }),
+          contentPadding: const EdgeInsets.only(top: 12,left: 12,right: 12),
+          leading: const Icon(Icons.camera),
+          title: const Text('Capturar una imagen'),
+          onTap: () {
+            getLoadImageCamera();
+            Get.back();
+            
+          }),
         ListTile(
+          contentPadding: const EdgeInsets.only(top: 12,left: 12,right: 12,bottom: 20),
           leading: const Icon(Icons.image),
-          title: const Text('Seleccionar desde la galería de fotos'),
+          title: const Text('Galería de fotos'),
           onTap: () {
             Get.back();
             getLoadImageGalery();
@@ -719,8 +765,10 @@ class ControllerProductsEdit extends GetxController {
       ],
     );
     // muestre la hoja inferior modal de getx
-    Get.bottomSheet(
+    Get.bottomSheet( 
       widget,
+      elevation: 0,
+      clipBehavior: Clip.antiAlias,
       backgroundColor: Get.theme.scaffoldBackgroundColor,
       enableDrag: true,
       isDismissible: true,
@@ -802,20 +850,28 @@ class ControllerProductsEdit extends GetxController {
   void getDataProduct({required String id}) {
     // function : obtiene los datos del producto de la base de datos y los carga en el formulario de edición 
     if (id != '') {
+      // firebase : obtiene los datos del producto
       Database.readProductPublicFuture(id: id).then((value) {
         //  get
-        Product product = Product.fromMap(value.data() as Map);
+        Product product = Product.fromMap(value.data() as Map); 
+        // commprobar que las fechas de actualización sean diferentes
+        DateTime date1 = getProduct.documentUpgrade.toDate().copyWith(hour: 0,minute: 0,millisecond: 0,second: 0,microsecond: 0  );
+        DateTime date2 = product.upgrade.toDate().copyWith(hour: 0,minute: 0,millisecond: 0,second: 0,microsecond: 0);
+        if (date1.isBefore(date2)  ) {
+          // se notifica que existen datos actualizados del producto
+          setMessageNotification = 'Producto actualizado \n ${Publications.getFechaPublicacionFormating(dateTime: date1)} \n ${Publications.getFechaPublicacionFormating(dateTime: date2)}';
+        } 
+
         //  set
         setProduct = getProduct.updateData(product: product);
-        setDataUploadStatusProduct = true;
         loadDataFormProduct(); // carga los datos del producto en el formulario
+        // actualiza la vista ui
+        checkDataUploadStatusProduct(dataUploadStatusProduct: true);
         
       }).catchError((error) {
-        printError(info: error.toString());
-        setDataUploadStatus = false;
+        checkDataUploadStatusProduct(dataUploadStatusProduct: false);
       }).onError((error, stackTrace) {
-        loadDataFormProduct();
-        printError(info: error.toString()); 
+        checkDataUploadStatusProduct(dataUploadStatusProduct: false);
       });
     }
   }
@@ -872,6 +928,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
   ControllerProductsEdit controllerProductsEdit = Get.find();
   //  var
   List<Mark> list = [];
+  bool viewListState = false;
 
   @override
   void initState() {
@@ -897,40 +954,47 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         actions: [
           // TODO : delete icon 'add new mark for release'
           IconButton(onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},icon: const Icon(Icons.add)),
+          IconButton(icon: Icon( viewListState? Icons.grid_view_rounded:Icons.table_rows_rounded),onPressed: () { 
+            setState(() {
+              viewListState = !viewListState;
+            });
+          }),
           IconButton(icon: const Icon(Icons.search),onPressed: () {Get.back();showSeachMarks();})
         ],
       ),
-      body: list.isEmpty
-          ? widgetAnimLoad()
-          : ListView.builder(
-              padding: const EdgeInsets.only(bottom: 12),
-              shrinkWrap: true,
-              itemCount: list.length,
-              itemBuilder: (BuildContext context, int index) {
+      body: list.isEmpty ? widgetAnimLoad() : viewListState? bodyList() : bodyGrid(),
+    );
+  }
 
-                //  values
-                Mark marcaSelect = list[index];
-
-                if (index == 0) {
-                  return Column(
-                    children: [
-                      getWidgetOptionOther(),
-                      ComponentApp().divider(),
-                      controllerProductsEdit.getUltimateSelectionMark.id == '' || controllerProductsEdit.getUltimateSelectionMark.id == 'other'? Container() : listTile( marcaSelect: controllerProductsEdit.getUltimateSelectionMark),
-                      ComponentApp().divider(),
-                      listTile(marcaSelect: marcaSelect),
-                      ComponentApp().divider(),
-                    ],
-                  );
-                }
-                return Column(
-                  children: <Widget>[
-                    listTile(marcaSelect: marcaSelect),
-                    ComponentApp().divider(),
-                  ],
-                );
-              },
-            ),
+  // WIDGETS VIEW 
+  Widget bodyList() {
+    return ListView.builder(
+      padding: const EdgeInsets.only(bottom: 12),
+      shrinkWrap: true,
+      itemCount: list.length,
+      itemBuilder: (BuildContext context, int index) {
+        //  values
+        Mark marcaSelect = list[index]; 
+        return Column(
+          children: <Widget>[
+            itemList(marcaSelect: marcaSelect),
+            ComponentApp().divider(),
+          ],
+        );
+      },
+    );
+  } 
+  Widget bodyGrid() {
+    return GridView.builder(
+      padding: const EdgeInsets.only(bottom: 12),
+      shrinkWrap: true, 
+      itemCount: list.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:4,childAspectRatio: 1),
+      itemBuilder: (BuildContext context, int index) {
+        //  values
+        Mark marcaSelect = list[index];
+        return itemGrid(marcaSelect: marcaSelect);
+      },
     );
   }
 
@@ -989,23 +1053,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         ),
       ],
     ));
-  }
-
-  Widget getWidgetOptionOther() {
-    //values
-    late Widget widget;
-    // recorre la la de marcas para buscar la informaciób de opción 'other'
-    if (controllerProductsEdit.getMarks.isEmpty) {
-      widget = Container();
-    } else {
-      for (var element in controllerProductsEdit.getMarks) {
-        if (element.id == 'other') {
-          widget = listTile(marcaSelect: element);
-        }
-      }
-    }
-    return widget;
-  }
+  } 
 
   // WIDGETS COMPONENT
   showSeachMarks(){
@@ -1015,7 +1063,6 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
     // var
     Color colorAccent = Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
 
-     getWidgetOptionOther();
 
     showSearch(
       context: context,
@@ -1028,14 +1075,36 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         failure: const Center(child: Text('No se encontro :(')),
         filter: (product) => [product.name,product.description],
         builder: (mark) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[
-          listTile(marcaSelect: mark),
+          itemList(marcaSelect: mark),
           ComponentApp().divider(),
           ]),
       ),
     );
   }
-
-  Widget listTile({required Mark marcaSelect, bool icon = true}) {
+  Widget itemGrid({required Mark marcaSelect}) {
+    return InkWell(
+      onTap: () {
+        controllerProductsEdit.setUltimateSelectionMark = marcaSelect;
+        controllerProductsEdit.setMarkSelected = marcaSelect;
+        Get.back();
+      },
+      onLongPress: (){
+        // TODO : delete fuction
+        Get.to(() => CreateMark(mark: marcaSelect));
+      },
+      borderRadius: BorderRadius.circular(5),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ImageProductAvatarApp(url: marcaSelect.image,size: 50,description:marcaSelect.name),
+          const SizedBox(height:2),
+          Text(marcaSelect.name,style: const TextStyle(fontWeight: FontWeight.w400 ),textAlign: TextAlign.center,),
+        ],
+      ),
+    );
+  }
+  Widget itemList({required Mark marcaSelect, bool icon = true}) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       trailing:!icon? null  :marcaSelect.image==''?null: ImageProductAvatarApp(url: marcaSelect.image,size: 50,description:marcaSelect.name),
@@ -1066,14 +1135,33 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
             mark.id = element.id;
             list.add(mark);
           }
+          updateListMarkSelected();
           controllerProductsEdit.setMarks = list;
         });
       });
     } else {
       // datos ya descargados
       list = controllerProductsEdit.getMarks;
+      updateListMarkSelected();
       setState(() => list = controllerProductsEdit.getMarks);
     }
+  }
+  updateListMarkSelected() {
+    //  description : posicionamos el ultimo item seleccionado por el usuario en el segundo lugar 
+    //                para que el usuario pueda encontrarlo facilmente
+
+    // comprobamos que ahi un item seleccionado
+    if (controllerProductsEdit.getUltimateSelectionMark.id != '') {
+      // eliminamos el item seleccionado de la lista
+      list.removeWhere((element) => element.id == controllerProductsEdit.getUltimateSelectionMark.id);
+      // insertamos el item seleccionado en la segunda posicion de la lista
+      list.insert(1, controllerProductsEdit.getUltimateSelectionMark);
+    }
+
+    // eliminamos el item con la id 'other' de la lista
+    list.removeWhere((element) => element.id == 'other');
+    // insertar en la primera posicion de la lista 
+    list.insert(0, Mark(id: 'other',name: 'Otro',upgrade: Timestamp.now(),creation: Timestamp.now()));
   }
   
 }
@@ -1195,14 +1283,12 @@ class _CreateMarkState extends State<CreateMark> {
 
   //  MARK CREATE
   void getLoadImageMark() {
-    _picker
-        .pickImage(
+    _picker.pickImage(
       source: ImageSource.gallery,
       maxWidth: 720.0,
       maxHeight: 720.0,
       imageQuality: 55,
-    )
-        .then((value) {
+    ).then((value) {
       setState(() => xFile = value!);
     });
   }

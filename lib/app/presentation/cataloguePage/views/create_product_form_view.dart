@@ -91,7 +91,7 @@ class ProductNewFormView extends StatelessWidget {
         // text : codigo
         controller.getProduct.code != ''
             ? Opacity(opacity: 0.5,
-              child: Text(controller.getProduct.code,
+              child: Text('${controller.getProduct.code}${controller.getProduct.local?' (Catálogo)':''}',
                   style: TextStyle(color: colorAccent, fontSize: 12)),
             )
             : Container(),
@@ -164,7 +164,7 @@ class ProductNewFormView extends StatelessWidget {
             TextButton(
               onPressed: controller.getDataUploadStatus
                   ? null
-                  : controller.getCurrentSlide == 0
+                  : controller.getCurrentSlide == 0 || (controller.getProduct.local && controller.getCurrentSlide == 1) 
                       ? null
                       : () {
                           controller.previousPage();
@@ -454,8 +454,7 @@ class ProductNewFormView extends StatelessWidget {
               ],
             ),
           ),
-        ),
-        
+        ), 
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           child: GestureDetector(
@@ -473,10 +472,11 @@ class ProductNewFormView extends StatelessWidget {
                 decoration: InputDecoration(
                   border: const UnderlineInputBorder(),  
                   labelText: controller.controllerTextEditMark.text == '' ? 'Seleccionar' : 'Marca',
-                  helperText: 'Visibilidad pública',
-                ),
-                onChanged: (value) => controller.formEditing =
-                    true, // validamos que el usuario ha modificado el formulario
+                  helperText: 'Visibilidad pública', 
+                  
+                ), 
+
+                onChanged: (value) => controller.formEditing = true, // validamos que el usuario ha modificado el formulario
                 // validator: validamos el texto que el usuario ha ingresado.
                 validator: (value) {
                   if (value == null || value.isEmpty) {

@@ -18,7 +18,7 @@ publish_to: 'none' # Quite esta línea si desea publicar en pub.dev
 version: 1.1.0+4
 
 environment:
-  sdk: '>=2.18.0-130.0.dev <3.0.0'
+  sdk: '^3.0.0'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -88,7 +88,8 @@ dependencies:
   email_validator: ^2.1.17
   blur: ^3.1.0  # Un paquete de Flutter que proporciona un widget de enfoque de desenfoque.
   fl_chart: ^0.66.1 # Un paquete de Flutter que proporciona un widget de gráfico de datos.
-  flutter_cache: ^0.1.0
+  flutter_cache: ^0.1.0  
+  mobile_scanner: ^4.0.1 
   
 flutter_icons:
   android: true

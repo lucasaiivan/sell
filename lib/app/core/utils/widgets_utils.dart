@@ -51,21 +51,22 @@ class ImageBarWidget extends StatelessWidget {
 class ImageIconScanWidget extends StatelessWidget {
   /// Tamaño deseado del icono.
   final double size;
+  final Color? color;
 
   /// Crea un widget de icono de escaneo de código de barras.
   ///
   /// [size] es el tamaño deseado del icono en píxeles.
   const ImageIconScanWidget({
-    Key? key,
-    required this.size,
+    Key? key, 
+    required this.size, this.color,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) { 
     return SizedBox(
       width: size,
       height: size,
-      child: Image.asset('assets/scanbarcode.png',color: Colors.white),
+      child: Image.asset('assets/scanbarcode.png',color: color),
     );
   }
 }
@@ -87,7 +88,7 @@ class WidgetButtonListTile extends StatelessWidget {
       contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15.0),
       trailing: const Icon(Icons.add), 
       dense: true,
-      title: const Text("Crear mi perfil de mi negocio", style: TextStyle(fontSize: 16.0)),
+      title: const Text("Crear perfil de mi negocio", style: TextStyle(fontSize: 16.0)),
       onTap: () {
         Get.back();
         Get.toNamed(Routes.ACCOUNT);
@@ -259,7 +260,7 @@ class _ProductoItemState extends State<ProductoItem> {
 
     //  values
     bool isSelect = salesController.getIdProductSelected == widget.producto.id;
-    final String alertStockText = widget.producto.stock ? (widget.producto.quantityStock >=0 ? widget.producto.quantityStock<=widget.producto.alertStock?'Stock bajo':'' : 'Sin stock'): '';
+    final String alertStockText = widget.producto.stock && salesController.homeController.getIsSubscribedPremium ? (widget.producto.quantityStock >=0 ? widget.producto.quantityStock<=widget.producto.alertStock?'Stock bajo':'' : 'Sin stock'): '';
 
     // aparición animada
     return Card(
@@ -269,7 +270,7 @@ class _ProductoItemState extends State<ProductoItem> {
       clipBehavior: Clip.antiAlias,
       child: Stack(  
         children: [
-          // image and description  to product
+          // view : alert stock, image and info
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -288,7 +289,7 @@ class _ProductoItemState extends State<ProductoItem> {
               contentInfo(),
             ],
           ),
-          // selected
+          // view : selected
           Positioned.fill(
             child: Material(
               color: Colors.transparent,
@@ -401,7 +402,7 @@ class _ProductoItemState extends State<ProductoItem> {
             : widget.producto.description.substring(0, 1)
         : Publications.getFormatoPrecio(
             monto: widget.producto.salePrice * widget.producto.quantity);
-    return widget.producto.image != ""
+    return widget.producto.image != "" && !widget.producto.local
         ? SizedBox(
             width: double.infinity,
             child: CachedNetworkImage(
@@ -411,17 +412,14 @@ class _ProductoItemState extends State<ProductoItem> {
               placeholder: (context, url) => Container(
                 color: Colors.grey[100],
                 child: Center(
-                  child: Text(description,
-                      style:
-                          const TextStyle(fontSize: 24.0, color: Colors.grey)),
+                  child: Text(description, style: const TextStyle(fontSize: 24.0, color: Colors.grey,overflow: TextOverflow.clip )),
                 ),
               ),
               errorWidget: (context, url, error) => Container(
                 color: Colors.grey[100],
                 child: Center(
                   child: Text(description,
-                      style:
-                          const TextStyle(fontSize: 24.0, color: Colors.grey)),
+                      style:  const TextStyle(fontSize: 24.0, color: Colors.grey,overflow: TextOverflow.clip)),
                 ),
               ),
             ),
@@ -430,7 +428,7 @@ class _ProductoItemState extends State<ProductoItem> {
             color: Colors.grey[100],
             child: Center(
               child: Text(description,
-                  style: const TextStyle(fontSize: 24.0, color: Colors.grey)),
+                  style: const TextStyle(fontSize: 24.0, color: Colors.grey,overflow: TextOverflow.clip)),
             ),
           );
   }
@@ -538,8 +536,7 @@ Widget body({required BuildContext context}){
               leading: const Icon(Icons.star_rounded),
               title: Text(homeController.getIsSubscribedPremium?'Premium':'Funciones Premium'),
               onTap: (){
-                // action : mostrar modal bottom sheet con 
-                Get.back(); // cierra drawer
+                // action : mostrar modal bottom sheet con  las funciones premium
                 homeController.showModalBottomSheetSubcription();
               }),
         isAnonymous?Container():const Opacity(opacity: 0.3,child: Divider(height:0)),
@@ -623,6 +620,7 @@ Widget viewDefault() {
 
   // controllers
   final HomeController homeController = Get.find();
+  // style
   const TextStyle textStyle = TextStyle(
     fontFamily: 'Roboto', // o 'Open Sans'
     fontSize: 20,
@@ -641,11 +639,20 @@ Widget viewDefault() {
                 // text : bienvenida
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20),
-                  child: Text('Hola 🖐️\n\nIngresa a tu cuenta para gestionar tu tienda\n',textAlign: TextAlign.center,style: textStyle,),
+                  child: Text('Hola 🖐️\n\nIngresa a una cuenta para gestionar la tienda\n',textAlign: TextAlign.center,style: textStyle,),
                 ),
                 const SizedBox(height: 20), 
+
+                !homeController.getLoadedManagedAccountsList?Container():homeController.checkAccountExistence?Container():
+                ComponentApp().button(
+                  disable: homeController.getProfileAdminUser.superAdmin,
+                  text: 'Crear perfil de mi negocio',
+                  onPressed: () { 
+                    Get.toNamed(Routes.ACCOUNT);
+                  },
+                ),
                 // lista de cuentas administradas o boton para crear una cuenta
-                !homeController.getLoadedManagedAccountsList?const CircularProgressIndicator(): !homeController.checkAccountExistence? WidgetButtonListTile().buttonListTileCrearCuenta()
+                !homeController.getLoadedManagedAccountsList?const CircularProgressIndicator(): homeController.getManagedAccountsList.isEmpty? Container()
                 :Flexible(  
                   fit: FlexFit.loose,
                   child: SizedBox( 
@@ -709,15 +716,16 @@ class ComponentApp extends StatelessWidget {
     return Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child:Icon(Icons.circle,size:size, color: color.withOpacity(0.4)));
   }
   // view : imagen avatar del usuario
-  Widget userAvatarCircle({String urlImage='',String text = '', double radius = 20.0}) {
+  Widget userAvatarCircle({bool empty=false,String urlImage='',String text = '', double radius = 20.0}) {
     
     // style
-    Color backgroundColor = Get.theme.dividerColor.withOpacity(0.5);
+    Color backgroundColor = Get.theme.dividerColor.withOpacity(empty?0.03:0.5);
     // widgets
     late Widget avatar;
     Widget iconDedault = Icon(Icons.person_outline_rounded,color: Colors.white,size: radius*1.5,);
-
-    if(urlImage == '' && text == ''){
+    if(empty){
+      iconDedault = Container();
+    }else if(urlImage == '' && text == ''){
       iconDedault = Icon(Icons.person_outline_rounded,color: Colors.white,size: radius*1 );
     }else if(urlImage == '' && text != ''){
       iconDedault = Text( text.substring( 0,1),style: const TextStyle(color: Colors.white));
@@ -776,8 +784,8 @@ class ComponentApp extends StatelessWidget {
         ),
       ),
     );
-  }
-  Widget button( {bool defaultStyle = false,double elevation=0,double width = double.infinity,bool disable = false, Widget? icon, String text = '',required dynamic onPressed,EdgeInsets padding =const EdgeInsets.symmetric(horizontal: 12, vertical: 12),Color colorButton = Colors.blue,Color colorAccent = Colors.white}) {
+  } 
+  Widget button( {bool defaultStyle = false,double elevation=0,double fontSize = 14,double width = double.infinity,bool disable = false, Widget? icon, String text = '',required dynamic onPressed,EdgeInsets padding =const EdgeInsets.symmetric(horizontal: 12, vertical: 12),Color colorButton = Colors.blue,Color colorAccent = Colors.white}) {
     // button : personalizado
     return FadeIn(
         child: Padding(
@@ -794,7 +802,7 @@ class ComponentApp extends StatelessWidget {
             textStyle: TextStyle(color: colorAccent,fontWeight: FontWeight.w700),
           ),  
           icon: icon??Container(),
-          label: Text(text, style: TextStyle(color: colorAccent)),
+          label: Text(text, style: TextStyle(color: colorAccent,fontSize: fontSize)),
         ),
       ),
     ));
@@ -821,9 +829,8 @@ class WidgetSuggestionProduct extends StatelessWidget {
 
   //values
   final bool searchButton ;
-  final List<Product> list ;
-  
-
+  final List<Product> list ; 
+   
   @override
   Widget build(BuildContext context) {
 
@@ -836,78 +843,67 @@ class WidgetSuggestionProduct extends StatelessWidget {
     Color? colorAccent = Get.theme.textTheme.titleMedium?.color;
     double radius = 32.0;
 
-    return Column(
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.max,
       children: [
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text("Sugerencias para vos",style: Get.theme.textTheme.titleMedium),
-        ),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            !searchButton
-                ? Container()
-                : InkWell(
-                    onTap: () => Get.toNamed(Routes.SEACH_PRODUCT,arguments: {'id': ''}),
-                    borderRadius: BorderRadius.circular(50),
-                    child: Padding(
-                      padding: const EdgeInsets.all(5.0),
-                      child: FadeInLeft(
-                        child: CircleAvatar(
-                            radius: radius,
-                            backgroundColor: colorAccent,
-                            child: CircleAvatar(radius: radius-2,backgroundColor:Get.theme.scaffoldBackgroundColor,child: Icon(Icons.search, color: colorAccent))),
-                      ),
-                    ),
+        !searchButton
+            ? Container()
+            : InkWell(
+                onTap: () => Get.toNamed(Routes.SEACH_PRODUCT,arguments: {'id': ''}),
+                borderRadius: BorderRadius.circular(50),
+                child: Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: FadeInLeft(
+                    child: CircleAvatar(
+                        radius: radius,
+                        backgroundColor: colorAccent,
+                        child: CircleAvatar(radius: radius-2,backgroundColor:Get.theme.scaffoldBackgroundColor,child: Icon(Icons.search, color: colorAccent))),
                   ),
-            SizedBox(
-                width: Get.size.width,
-                height: 100,
-                child: Center(
-                  child: ListView.builder(
-                      shrinkWrap: true,
-                      scrollDirection: Axis.horizontal,
-                      itemCount: list.length,
-                      itemBuilder: (context, index) {
-                        return Align(
-                          widthFactor: 0.5,
-                          child: InkWell(
-                            onTap: () => homeController.toNavigationProductEdit(productCatalogue: list[index].convertProductCatalogue()),
-                            borderRadius: BorderRadius.circular(50),
-                            child: Padding(
-                              padding: const EdgeInsets.all(5.0),
-                              child: FadeInRight(
+                ),
+              ),
+        SizedBox(
+            width: Get.size.width,
+            height: 100,
+            child: Center(
+              child: ListView.builder(
+                  shrinkWrap: true,
+                  scrollDirection: Axis.horizontal,
+                  itemCount: list.length,
+                  itemBuilder: (context, index) {
+                    return Align(
+                      widthFactor: 0.5,
+                      child: InkWell(
+                        onTap: () => homeController.toNavigationProductEdit(productCatalogue: list[index].convertProductCatalogue()),
+                        borderRadius: BorderRadius.circular(50),
+                        child: Padding(
+                          padding: const EdgeInsets.all(5.0),
+                          child: FadeInRight(
+                            child: CircleAvatar(
+                                backgroundColor: colorAccent,
+                                foregroundColor: colorAccent,
+                                radius: radius,
                                 child: CircleAvatar(
-                                    backgroundColor: colorAccent,
-                                    foregroundColor: colorAccent,
-                                    radius: radius,
-                                    child: CircleAvatar(
-                                        backgroundColor: Colors.grey[100],
-                                        foregroundColor: Colors.grey[100],
-                                        radius: radius-2,
-                                        child: ClipRRect(
-                                          borderRadius:BorderRadius.circular(50),
-                                          child: CachedNetworkImage(
-                                            fadeInDuration: const Duration( milliseconds: 200),
-                                            fit: BoxFit.cover,
-                                            imageUrl: list[index].image,
-                                            placeholder: (context, url) =>CircleAvatar(backgroundColor:Colors.grey[100],foregroundColor:Colors.grey[100]),
-                                            errorWidget:(context, url, error) =>CircleAvatar(backgroundColor:Colors.grey[100],foregroundColor:Colors.grey[100]),
-                                          ),
-                                        ))),
-                              ),
-                            ),
+                                    backgroundColor: Colors.grey[100],
+                                    foregroundColor: Colors.grey[100],
+                                    radius: radius-2,
+                                    child: ClipRRect(
+                                      borderRadius:BorderRadius.circular(50),
+                                      child: CachedNetworkImage(
+                                        fadeInDuration: const Duration( milliseconds: 200),
+                                        fit: BoxFit.cover,
+                                        imageUrl: list[index].image,
+                                        placeholder: (context, url) =>CircleAvatar(backgroundColor:Colors.grey[100],foregroundColor:Colors.grey[100]),
+                                        errorWidget:(context, url, error) =>CircleAvatar(backgroundColor:Colors.grey[100],foregroundColor:Colors.grey[100]),
+                                      ),
+                                    ))),
                           ),
-                        );
-                      }),
-                )),
-          ],
-        ),
+                        ),
+                      ),
+                    );
+                  }),
+            )),
       ],
     );
   }
@@ -1002,7 +998,7 @@ class ImageProductAvatarApp extends StatelessWidget {
       imageDefault = AnimatedContainer(
       duration: const Duration(milliseconds: 500),
       color: backgroundColor,
-      child: Image.asset('assets/default_image.png',fit: BoxFit.cover,color: iconColor,));
+      child: Image.asset('assets/default_image.png',fit: BoxFit.cover,color: iconColor));
     }
     return SizedBox(
       width: size,height: size,

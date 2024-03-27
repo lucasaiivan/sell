@@ -2,24 +2,24 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
 
 
-class Product {
-  String id = "";
+class Product { 
+  String id = ""; // ID del producto / código del producto
   String idMark = ""; // ID de la marca por defecto esta vacia
-  String nameMark = '';
+  String nameMark = ''; // nombre de la marca
+  String imageMark=''; // url de la imagen de la marca
   String description = ""; // Informacion
   String image = ""; // URL imagen
-  String code = "";
-
+  String code = ""; // codigo del producto
+  // valores de comunidad
   int followers = 0; // seguidores
   bool outstanding = false; // producto destacado
   bool verified = false; // estado de verificación  al un moderador
   Timestamp creation =Timestamp.now(); // Marca de tiempo ( hora en que se creo el producto )
   Timestamp upgrade =Timestamp.now(); // Marca de tiempo ( hora en que se edito el producto )
-
   // datos del usuario y cuenta 
   String idAccount = ''; // ID del negocios que actualizo el documento
   String idUserCreation =''; // id del usuario que creo el documento
-  String idUserUpgrade = '' ;
+  String idUserUpgrade = '' ; // id del usuario que actualizo el documento
 
   Product({
     this.id = "",
@@ -31,6 +31,7 @@ class Product {
     this.outstanding = false,
     this.idMark = "",
     this.nameMark = '',
+    this.imageMark='',
     this.image = "",
     this.description = "",
     this.code = "",
@@ -48,6 +49,7 @@ class Product {
         "outstanding": outstanding,
         "idMark": idMark,
         'nameMark': nameMark,
+        'imageMark':imageMark,
         "image": image,
         "description": description,
         "code": code,
@@ -66,6 +68,7 @@ class Product {
       outstanding: data.containsKey('outstanding')? data['outstanding'] : false,
       idMark: data.containsKey('idMark') ? data['idMark'] : data.containsKey('id_marca') ?data['id_marca'] :'',
       nameMark: data.containsKey('nameMark') ? data['nameMark'] : '',
+      imageMark: data.containsKey('imageMark') ? data['imageMark'] : '',
       image: data.containsKey('image') ? data['image'] :  data.containsKey('urlimagen') ? data['urlimagen'] :'',
       description: data.containsKey('description')? data['description']: data.containsKey('descripcion')?data['descripcion']:'',
       code: data.containsKey('code') ? data['code'] :  data.containsKey('codigo') ?data['codigo']:'',
@@ -87,6 +90,7 @@ class Product {
     outstanding = data['outstanding'] ?? false;
     idMark =data.containsKey('idMark') ? data['idMark'] : data['id_marca'] ?? '';
     nameMark = data['nameMark'] ?? '';
+    imageMark = data['imageMark'] ?? '';
     image = data.containsKey('image') ? data['image'] : data['urlimagen'] ?? '';
     description = data.containsKey('description')? data['description']: data['descripcion'] ?? '';
     code = data.containsKey('code') ? data['code'] : data['codigo'] ?? '';
@@ -104,37 +108,42 @@ class Product {
     productCatalogue.outstanding = outstanding;
     productCatalogue.idMark = idMark;
     productCatalogue.nameMark = nameMark;
+    productCatalogue.imageMark = imageMark;
     productCatalogue.description = description;
     productCatalogue.code = code;
-    productCatalogue.upgrade = upgrade;
-    productCatalogue.creation = creation; 
+    productCatalogue.documentUpgrade = upgrade;
+    productCatalogue.documentCreation = creation; 
 
     return productCatalogue;
   }
 }
 
 class ProductCatalogue {
-  // valores del producto
+  // información basica del producto
   String id = "";
-  bool verified = false; // estado de verificación por un moderador
-  int followers = 0; // seguidores
-  bool outstanding = false; // producto destacado
-  bool favorite = false;
   String idMark = ""; // ID de la marca por defecto esta vacia
   String nameMark = ''; // nombre de la marca
+  String imageMark = ''; // url de la imagen de la marca
   String image = ""; // URL imagen
   String description = ""; // Información
   String code = "";
-  String category = ""; // ID de la categoria del producto
-  String provider = ""; // ID del proveedor del producto
-  String nameProvider = ""; // name provider
-  String nameCategory = ""; // name category
-  String subcategory = ""; // ID de la subcategoria del producto
-  String nameSubcategory = ""; // name subcategory
-  Timestamp creation =Timestamp.now(); // Marca de tiempo ( hora en que se creo el documento  )
-  Timestamp upgrade = Timestamp.now(); // Marca de tiempo ( hora en que se actualizo el documento )
   Timestamp documentCreation =Timestamp.now(); // Marca de tiempo ( hora en que se creo el producto publico )
   Timestamp documentUpgrade =Timestamp.now();// Marca de tiempo ( hora en que se actualizo el producto publico )
+  
+  // variables del producto global
+  bool verified = false; // estado de verificación por un moderador
+  bool outstanding = false; // producto destacado en la DB global
+  int followers = 0; // seguidores
+  
+  // variables del catalogo de la cuenta
+  bool local = false; // producto local
+  Timestamp creation =Timestamp.now(); // Marca de tiempo ( hora en que se creo el documento en el catalogo de la cuenta  )
+  Timestamp upgrade = Timestamp.now(); // Marca de tiempo ( hora en que se actualizo el documento en el catalogo de la cuenta  )
+  bool favorite = false;  
+  String category = ""; // ID de la categoria del producto
+  String provider = ""; // ID del proveedor del producto
+  String nameProvider = ""; // nombre del proveedor
+  String nameCategory = ""; // nombre de la categoria 
   int quantityStock = 0;
   bool stock = false;
   int alertStock = 5;
@@ -143,10 +152,14 @@ class ProductCatalogue {
   double purchasePrice = 0.0; // precio de compra
   String currencySign = "\$"; // signo de la moneda
 
-  // var optional app
+  //  variables en tiempo de ejecucion
   int quantity = 0;
   double revenue = 0.0;
   double priceTotal = 0;
+
+  // variables en desuso
+  String subcategory = ""; // ID de la subcategoria del producto
+  String nameSubcategory = ""; // name subcategory
 
   ProductCatalogue({
     // Valores del producto
@@ -171,50 +184,51 @@ class ProductCatalogue {
     required this.creation,
     required this.upgrade,
     required this.documentCreation,
-    required this.documentUpgrade,
-
-    // value account
+    required this.documentUpgrade, 
     this.sales = 0,
     this.salePrice = 0.0,
     this.purchasePrice = 0.0,
     this.currencySign = "\$",
     this.idMark = '',
     this.nameMark = '',
-    // var app 
+    this.imageMark = '', 
     this.quantity = 1,
+    this.local = false,
   });
 
   ProductCatalogue copyWith({
-  String? id,
-  bool? verified,
-  int? followers,
-  bool? favorite,
-  bool? outstanding,
-  String? image,
-  String? description,
-  String? code,
-  String? provider,
-  String? nameProvider,
-  String? category,
-  String? nameCategory,
-  String? subcategory,
-  String? nameSubcategory,
-  bool? stock,
-  int? quantityStock,
-  int? alertStock,
-  double? revenue,
-  Timestamp ? creation,
-  Timestamp ? upgrade,
-  Timestamp? documentCreation,
-  Timestamp? documentUpgrade,
-  int? sales,
-  double? salePrice,
-  double? purchasePrice,
-  String? currencySign,
-  String? idMark,
-  String? nameMark, 
-  int? quantity,
-}) {
+    String? id,
+    bool? verified,
+    int? followers,
+    bool? favorite,
+    bool? outstanding,
+    String? image,
+    String? description,
+    String? code,
+    String? provider,
+    String? nameProvider,
+    String? category,
+    String? nameCategory,
+    String? subcategory,
+    String? nameSubcategory,
+    bool? stock,
+    int? quantityStock,
+    int? alertStock,
+    double? revenue,
+    Timestamp ? creation,
+    Timestamp ? upgrade,
+    Timestamp? documentCreation,
+    Timestamp? documentUpgrade,
+    int? sales,
+    double? salePrice,
+    double? purchasePrice,
+    String? currencySign,
+    String? idMark,
+    String? nameMark, 
+    String? imageMark,
+    int? quantity,
+    bool? local, 
+  }) {
   return ProductCatalogue(
     id: id ?? this.id,
     verified: verified ?? this.verified,
@@ -244,7 +258,9 @@ class ProductCatalogue {
     currencySign: currencySign ?? this.currencySign,
     idMark: idMark ?? this.idMark,
     nameMark: nameMark ?? this.nameMark, 
+    imageMark: imageMark ?? this.imageMark,
     quantity: quantity ?? this.quantity,
+    local:  local ?? this.local,
   );
 }
 
@@ -258,6 +274,7 @@ class ProductCatalogue {
       favorite: data.containsKey('favorite')? data['favorite']: data['favorito'] ?? false,
       idMark:data.containsKey('idMark') ? data['idMark'] : data['id_marca'] ?? '',
       nameMark: data.containsKey('nameMark') ? data['nameMark'] : data['nombre_marca'] ?? '',
+      imageMark: data.containsKey('imageMark') ? data['imageMark'] : '',
       image: data.containsKey('image')? data['image']: data['urlimagen'] ?? 'https://default',
       description: data.containsKey('description')?data['description']: data['descripcion'] ?? '',
       code: data.containsKey('code') ? data['code'] : data['codigo'] ?? '',
@@ -282,18 +299,21 @@ class ProductCatalogue {
       revenue: data.containsKey('revenue')?data['revenue'] : 0.0,
       // values of app
       quantity: data.containsKey('quantity') ? data['quantity'] : 1, 
+      local: data.containsKey('local')? data['local'] : false,
     );
   }
   factory ProductCatalogue.translatePrimitiveData(Map data) {
     return ProductCatalogue(
       // Valores del producto
       id: data.containsKey('id')? data['id'] :'',
+      local: data.containsKey('local')? data['local'] : false,
       verified: data.containsKey('verified')? data['verified']: data['verificado'] ?? false,
       followers: data.containsKey('followers')? data['followers']: data['seguidores'] ?? 0,
       outstanding: data.containsKey('outstanding')? data['outstanding']: data['destacado'] ?? false,
       favorite: data.containsKey('favorite')? data['favorite']: data['favorito'] ?? false,
       idMark:data.containsKey('idMark') ? data['idMark'] : data['id_marca'] ?? '',
       nameMark: data.containsKey('nameMark') ? data['nameMark'] : data['nombre_marca'] ?? '',
+      imageMark: data.containsKey('imageMark') ? data['imageMark'] : '',
       image: data.containsKey('image')? data['image']: data['urlimagen'] ?? 'https://default',
       description: data.containsKey('description')?data['description']: data['descripcion'] ?? '',
       code: data.containsKey('code') ? data['code'] : data['codigo'] ?? '',
@@ -324,12 +344,14 @@ class ProductCatalogue {
 
   Map<String, dynamic> toMap() => {
         "id": id,
+        'local':local,
         "verified": verified,
         'followers':followers,
         'outstanding':outstanding,
         "favorite": favorite,
         "idMark": idMark,
         "nameMark": nameMark,
+        'imageMark':imageMark,
         "image": image,
         "description": description,
         "code": code,
@@ -355,12 +377,14 @@ class ProductCatalogue {
 
   Map<String, dynamic> toJson() => {
         "id": id,
+        'local':local,
         "verified": verified,
         'followers':followers,
         'outstanding':outstanding,
         "favorite": favorite,
         "idMark": idMark,
         "nameMark": nameMark,
+        'imageMark':imageMark,
         "image": image,
         "description": description,
         "code": code,
@@ -386,12 +410,14 @@ class ProductCatalogue {
   factory ProductCatalogue.mapRefactoring(Map<dynamic, dynamic> data ){
     return ProductCatalogue(
       id: data['id'] ?? '',
+      local: data['local'] ?? false,
       verified: data['verified'] ?? false,
       followers: data['followers'] ?? 0,
       favorite: data['favorite'] ?? false,
       outstanding: data['outstanding'] ?? false,
       idMark: data['idMark'] ?? '',
       nameMark: data['nameMark'] ?? '',
+      imageMark: data['imageMark'] ?? '',
       image: data['image'] ?? '',
       description: data['description'] ?? '',
       code: data['code'] ?? '',
@@ -427,6 +453,7 @@ class ProductCatalogue {
     productoDefault.outstanding = outstanding;
     productoDefault.idMark =  idMark;
     productoDefault.nameMark =  nameMark;
+    productoDefault.imageMark = imageMark;
     productoDefault.description =  description;
     productoDefault.code = code;
     return productoDefault;
@@ -434,6 +461,7 @@ class ProductCatalogue {
 
   ProductCatalogue updateData({required Product product}) {
     // actualizamos los datos del documento publico
+    local = false;
     id = product.id;
     followers = product.followers;
     image = product.image;
@@ -441,6 +469,7 @@ class ProductCatalogue {
     outstanding = product.outstanding;
     idMark = product.idMark;
     nameMark = product.nameMark;
+    imageMark = product.imageMark;
     description = product.description;
     code = product.code;
     documentCreation = product.creation;

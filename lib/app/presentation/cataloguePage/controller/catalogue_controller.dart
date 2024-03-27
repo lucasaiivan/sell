@@ -107,6 +107,8 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     setCatalogueProducts = list;
   }
   void popupMenuButtonCatalogueFilter({required String key}) {
+
+    // var
     List<ProductCatalogue> list = [];
 
     //filter

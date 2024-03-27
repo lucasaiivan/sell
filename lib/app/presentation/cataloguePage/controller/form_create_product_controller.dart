@@ -281,6 +281,13 @@ class ControllerCreateProductForm extends GetxController{
     setProduct = Get.arguments['product']?? ProductCatalogue(creation: Timestamp.now(), upgrade: Timestamp.now(), documentCreation: Timestamp.now(), documentUpgrade: Timestamp.now());
   } 
   @override
+  void onReady() {
+    super.onReady();
+    if(getProduct.local){
+      carouselController.animateToPage(1);
+    }
+  }
+  @override
   void onClose() {
     super.onClose();
 
@@ -342,13 +349,13 @@ class ControllerCreateProductForm extends GetxController{
       return false;
     }
 
-    if(getCurrentSlide!=0){
+    if(getCurrentSlide!=0 && !getProduct.local){
       previousPage();
       return false;
     }
 
-    //  si _onBackPressed es true se puede salir de la app
-    if(getCurrentSlide==0){
+    //  si _onBackPressed es true se puede salir 
+    if(getCurrentSlide==0 || (getProduct.local && getCurrentSlide==1)){
       final  shouldPop = await showDialog<bool>(
           context: context,
           builder: (context) {
@@ -407,10 +414,10 @@ class ControllerCreateProductForm extends GetxController{
               if(controllerTextEditAlertStock.text!=''){getProduct.alertStock  = int.parse( controllerTextEditAlertStock.text );}
 
               // TODO : DELETE RELEASE
-              getProduct.verified = true; 
+              getProduct.verified = getProduct.local ? false : true; 
 
               // actualización de la imagen del producto
-              if (getXFileImage.path != '') {
+              if (getXFileImage.path != '') { 
                 // image - Si el "path" es distinto '' quiere decir que ahi una nueva imagen para actualizar
                 // si es asi procede a guardar la imagen en la base de la app
                 Reference ref = Database.referenceStorageProductPublic(id: getProduct.id); // obtenemos la referencia en el storage
@@ -418,24 +425,26 @@ class ControllerCreateProductForm extends GetxController{
                 await uploadTask; // esperamos a que se suba la imagen 
                 await ref.getDownloadURL().then((value) => getProduct.image = value); // obtenemos la url de la imagen
               }
-              // procede agregrar el producto en una colección publica
-              setProductPublicFirestore();
-              
-              // Registra el precio en una colección publica
-              ProductPrice precio = ProductPrice(
-                id: homeController.getProfileAccountSelected.id,
-                idAccount: homeController.getProfileAccountSelected.id,
-                imageAccount: homeController.getProfileAccountSelected.image,
-                nameAccount: homeController.getProfileAccountSelected.name,
-                price: getProduct.salePrice,
-                currencySign: getProduct.currencySign,
-                province: homeController.getProfileAccountSelected.province,
-                town: homeController.getProfileAccountSelected.town,
-                time: Timestamp.fromDate(DateTime.now()),
-              ); 
+              if(getProduct.local == false){
+                // procede agregrar el producto en una colección publica
+                setProductPublicFirestore();
+                
+                // Registra el precio en una colección publica
+                ProductPrice precio = ProductPrice(
+                  id: homeController.getProfileAccountSelected.id,
+                  idAccount: homeController.getProfileAccountSelected.id,
+                  imageAccount: homeController.getProfileAccountSelected.image,
+                  nameAccount: homeController.getProfileAccountSelected.name,
+                  price: getProduct.salePrice,
+                  currencySign: getProduct.currencySign,
+                  province: homeController.getProfileAccountSelected.province,
+                  town: homeController.getProfileAccountSelected.town,
+                  time: Timestamp.fromDate(DateTime.now()),
+                ); 
 
-              // Firebase set : se crea un documento con la referencia del precio del producto
-              Database.refFirestoreRegisterPrice(idProducto: getProduct.id, isoPAis: 'ARG').doc(precio.id).set(precio.toJson());
+                // Firebase set : se crea un documento con la referencia del precio del producto
+                Database.refFirestoreRegisterPrice(idProducto: getProduct.id, isoPAis: 'ARG').doc(precio.id).set(precio.toJson());
+              }
 
               // Firebase set : se crea los datos del producto del cátalogo de la cuenta
               Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id)
@@ -968,6 +977,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
   ControllerCreateProductForm controllerProductNew = Get.find();
   //  var
   List<Mark> list = [];
+  bool viewListState = false;
 
   @override
   void initState() {
@@ -993,45 +1003,54 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         actions: [
           // TODO : delete icon 'add new mark for release'
           IconButton(onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},icon: const Icon(Icons.add)),
+          IconButton(icon: Icon( viewListState? Icons.grid_view_rounded:Icons.table_rows_rounded),onPressed: () { 
+            setState(() {
+              viewListState = !viewListState;
+            });
+          }),
           IconButton(icon: const Icon(Icons.search),onPressed: () {Get.back();showSeachMarks();})
         ],
       ),
-      body: list.isEmpty
-          ? widgetAnimLoad()
-          : ListView.builder(
-              padding: const EdgeInsets.only(bottom: 12),
-              shrinkWrap: true,
-              itemCount: list.length,
-              itemBuilder: (BuildContext context, int index) {
-
-                //  values
-                Mark marcaSelect = list[index];
-
-                if (index == 0) {
-                  return Column(
-                    children: [
-                      getWidgetOptionOther(),
-                      ComponentApp().divider(),
-                      controllerProductNew.getUltimateSelectionMark.id == '' || controllerProductNew.getUltimateSelectionMark.id == 'other'? Container() : listTile( marcaSelect: controllerProductNew.getUltimateSelectionMark),
-                      ComponentApp().divider(),
-                      listTile(marcaSelect: marcaSelect),
-                      ComponentApp().divider(),
-                    ],
-                  );
-                }
-                return Column(
-                  children: <Widget>[
-                    listTile(marcaSelect: marcaSelect),
-                    ComponentApp().divider(),
-                  ],
-                );
-              },
-            ),
+      body: list.isEmpty ? widgetAnimLoad : viewListState ? bodyList : bodyGrid,
     );
   }
+  // WIDGETS VIEW 
+  Widget get bodyList {
 
+
+    return ListView.builder(
+      padding: const EdgeInsets.only(bottom: 12),
+      shrinkWrap: true,
+      itemCount: list.length,
+      itemBuilder: (BuildContext context, int index) {
+
+        //  values
+        Mark marcaSelect = list[index]; 
+        return Column(
+          children: <Widget>[
+            itemList(marcaSelect: marcaSelect),
+            ComponentApp().divider(),
+          ],
+        );
+      },
+    );
+  } 
+  Widget get bodyGrid {
+    
+    return GridView.builder(
+      padding: const EdgeInsets.only(bottom: 12),
+      shrinkWrap: true, 
+      itemCount: list.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:4,childAspectRatio: 1),
+      itemBuilder: (BuildContext context, int index) {
+        //  values
+        Mark marcaSelect = list[index]; 
+        return itemGrid(marcaSelect: marcaSelect);
+      },
+    );
+  }
   // WIDGETS
-  Widget widgetAnimLoad() {
+  Widget get widgetAnimLoad {
     return Center(
         child: ListView(
       children: [
@@ -1086,22 +1105,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
       ],
     ));
   }
-
-  Widget getWidgetOptionOther() {
-    //values
-    late Widget widget;
-    // recorre la la de marcas para buscar la informaciób de opción 'other'
-    if (controllerProductNew.getMarks.isEmpty) {
-      widget = Container();
-    } else {
-      for (var element in controllerProductNew.getMarks) {
-        if (element.id == 'other') {
-          widget = listTile(marcaSelect: element);
-        }
-      }
-    }
-    return widget;
-  }
+ 
 
   // WIDGETS COMPONENT
   showSeachMarks(){
@@ -1111,7 +1115,6 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
     // var
     Color colorAccent = Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
 
-     getWidgetOptionOther();
 
     showSearch(
       context: context,
@@ -1124,14 +1127,36 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         failure: const Center(child: Text('No se encontro :(')),
         filter: (product) => [product.name,product.description],
         builder: (mark) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[
-          listTile(marcaSelect: mark),
+          itemList(marcaSelect: mark),
           ComponentApp().divider(),
           ]),
       ),
     );
   }
-
-  Widget listTile({required Mark marcaSelect, bool icon = true}) {
+  Widget itemGrid({required Mark marcaSelect}) {
+    return InkWell(
+      onTap: () {
+        controllerProductNew.setUltimateSelectionMark = marcaSelect;
+        controllerProductNew.setMarkSelected = marcaSelect;
+        Get.back();
+      },
+      onLongPress: (){
+        // TODO : delete fuction
+        Get.to(() => CreateMark(mark: marcaSelect));
+      },
+      borderRadius: BorderRadius.circular(5),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ImageProductAvatarApp(url: marcaSelect.image,size: 50,description:marcaSelect.name),
+          const SizedBox(height:2),
+          Text(marcaSelect.name,style: const TextStyle(fontWeight: FontWeight.w400 ),textAlign: TextAlign.center,),
+        ],
+      ),
+    );
+  }
+  Widget itemList({required Mark marcaSelect, bool icon = true}) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       trailing:!icon? null  :marcaSelect.image==''?null: ImageProductAvatarApp(url: marcaSelect.image,size: 50,description:marcaSelect.name),
@@ -1162,16 +1187,35 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
             mark.id = element.id;
             list.add(mark);
           }
+          updateListMarkSelected();
           controllerProductNew.setMarks = list;
         });
       });
     } else {
       // datos ya descargados
       list = controllerProductNew.getMarks;
+      updateListMarkSelected();
       setState(() => list = controllerProductNew.getMarks);
     }
+
   }
-  
+  updateListMarkSelected() {
+    //  description : posicionamos el ultimo item seleccionado por el usuario en el segundo lugar 
+    //                para que el usuario pueda encontrarlo facilmente
+
+    // comprobamos que ahi un item seleccionado
+    if (controllerProductNew.getUltimateSelectionMark.id != '') {
+      // eliminamos el item seleccionado de la lista
+      list.removeWhere((element) => element.id == controllerProductNew.getUltimateSelectionMark.id);
+      // insertamos el item seleccionado en la segunda posicion de la lista
+      list.insert(1, controllerProductNew.getUltimateSelectionMark);
+    }
+
+    // eliminamos el item con la id 'other' de la lista
+    list.removeWhere((element) => element.id == 'other');
+    // insertar en la primera posicion de la lista 
+    list.insert(0, Mark(id: 'other',name: 'Otro',upgrade: Timestamp.now(),creation: Timestamp.now()));
+  }
 }
 
 // TODO : delete release

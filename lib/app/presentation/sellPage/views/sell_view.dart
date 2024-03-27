@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
@@ -6,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:get/get.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:sell/app/core/utils/widgets_utils.dart';
 import 'package:sell/app/domain/entities/ticket_model.dart'; 
@@ -14,7 +17,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../core/utils/dynamicTheme_lb.dart';
 import '../../home/controller/home_controller.dart';
-import '../controller/sell_controller.dart';
+import '../controller/sell_controller.dart'; 
 
 // ignore: must_be_immutable
 class SalesView extends StatelessWidget {
@@ -58,7 +61,7 @@ class SalesView extends StatelessWidget {
                 );
               }),
               // view : barra de navegacion inferior de la app
-              floatingActionButton: controller.getTicketView ? floatingActionButtonTicket(controller: controller): floatingActionButton(controller: controller).animate( delay: const Duration( milliseconds:  0)).fade(),
+              floatingActionButton: controller.getStateViewBarCodeScan?floatingActionButtonCameraScanBarCode(controller: controller): controller.getTicketView ? floatingActionButtonTicket(controller: controller): floatingActionButton(controller: controller).animate( delay: const Duration( milliseconds:  0)).fade(),
             );
           }
         );
@@ -87,10 +90,9 @@ class SalesView extends StatelessWidget {
             : Container(
                 key: homeController.floatingActionButtonSelectedCajaKey,
                 child: cashRegisterNumberPopupMenuButton()),
-      ],
+      ],  
     );
   }
-
   Widget body({required SalesController controller}) {
     // Widgets
     Widget updateview = homeController.getUpdateApp
@@ -117,7 +119,8 @@ class SalesView extends StatelessWidget {
           SliverList(
               delegate: SliverChildListDelegate([
                 updateview,
-                widgeSuggestedProducts(context: context )
+                widgeSuggestedProducts(context: context ),
+                controller.getStateViewBarCodeScan? const ViewScanBarCode():Container(),
               ])
           ),
         ];
@@ -383,10 +386,10 @@ class SalesView extends StatelessWidget {
     // opcion premium : esta funcionalidad de arqueo de caja solo esta disponible en la version premium
     bool isPremium = homeController.getIsSubscribedPremium;
     // controllers
-    final controller = Get.find<SalesController>(); 
-
+    final controller = Get.find<SalesController>();
+ 
     // condition : si el esta en modo de prueba, solo muestra el boton de inciar caja
-    if(homeController.getUserAnonymous){
+    if( homeController.getUserAnonymous){
       return Padding(
         padding: const EdgeInsets.all(8.0),
         child: ComponentApp().buttonAppbar(
@@ -610,6 +613,7 @@ class SalesView extends StatelessWidget {
     const double height = 120;
     final bool viewDefault = controller.getProductsOutstandingList.isEmpty;
     final int itemCount = viewDefault?6:controller.getProductsOutstandingList.length + numItemDefault;
+    
     // views : load widget mientras se carga la data
     if(homeController.productsBestSellersLoadComplete.value == false ){
       return SizedBox(
@@ -680,6 +684,7 @@ class SalesView extends StatelessWidget {
   }
 
   Widget circleAvatarProduct({required ProductCatalogue productCatalogue}) {
+
     // controller
     final SalesController salesController = Get.find();
 
@@ -688,8 +693,8 @@ class SalesView extends StatelessWidget {
     double radius = 40.0;
     double spaceImageText = 1;
     Color backgroundColor = Colors.grey.withOpacity(0.1);
-    bool stateAlertStock = productCatalogue.stock && homeController.getProfileAccountSelected.subscribed ? productCatalogue.quantityStock < 5 : false;
-    Color borderCicleColor = stateAlertStock ? Colors.red : productCatalogue.favorite ? Colors.amber : backgroundColor;
+    bool stateAlertStock = productCatalogue.stock && homeController.getIsSubscribedPremium ? productCatalogue.quantityStock < 5 : false;
+    Color borderCicleColor = stateAlertStock  ? Colors.red : productCatalogue.favorite ? Colors.amber : backgroundColor;
 
     return ElasticIn(
       child: Container(
@@ -708,7 +713,7 @@ class SalesView extends StatelessWidget {
                 children: <Widget>[
                   // image
                   CachedNetworkImage(
-                    imageUrl: productCatalogue.image,
+                    imageUrl: productCatalogue.local?'': productCatalogue.image,
                     placeholder: (context, url) => CircleAvatar(
                         radius: radius,
                         backgroundColor: backgroundColor,
@@ -838,7 +843,7 @@ class SalesView extends StatelessWidget {
   Widget floatingActionButton({required SalesController controller}) {
 
     // var
-    Widget imageBarCode = Image.asset('assets/scanbarcode.png',color: Colors.white);
+    Widget imageBarCode = controller.getStateViewBarCodeScan?const Icon(Icons.close,color: Colors.white,): Image.asset('assets/scanbarcode.png',color: Colors.white);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -846,6 +851,7 @@ class SalesView extends StatelessWidget {
         
         // FloatingActionButton : efectuar una venta rapida
         FloatingActionButton(
+          heroTag: 'uniqueTag3',
             key: homeController.floatingActionButtonRegisterFlashKeyButton,
             backgroundColor: Colors.amber,
             onPressed: () {
@@ -859,9 +865,12 @@ class SalesView extends StatelessWidget {
         // FloatingActionButton : determinar si es un dispositivo movil o web para mostrar este buton
         const SizedBox(width: kIsWeb?0:8), 
         kIsWeb? const SizedBox(width: kIsWeb?0:8):FloatingActionButton(
+          heroTag: 'uniqueTag2',
           key: homeController.floatingActionButtonScanCodeBarKey,
           backgroundColor: Colors.blue,
-          onPressed: controller.scanBarcodeNormal,
+          onPressed: (){
+            controller.setStateViewBarCodeScan = !controller.getStateViewBarCodeScan; 
+          },
           child: SizedBox(width: 30,height: 30,child: imageBarCode),
         ),
         const SizedBox(width: 8),
@@ -870,6 +879,7 @@ class SalesView extends StatelessWidget {
           key: homeController.floatingActionButtonTransacctionRegister,
           controller: (p0) => controller.floatingActionButtonAnimateController = p0,
           child: FloatingActionButton.extended(
+            heroTag: 'uniqueTag1',
               onPressed: controller.getTicket.listPoduct.isEmpty
                   ? null
                   : () {
@@ -910,6 +920,34 @@ class SalesView extends StatelessWidget {
           );
   }
 }
+Widget floatingActionButtonCameraScanBarCode({required SalesController controller}) { 
+ 
+
+    return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FloatingActionButton(
+                  backgroundColor: controller.getStateFlashCameraScanBarCode? Colors.amber:Colors.grey,
+                  onPressed: () {
+                    controller.cameraScanBarCodeController.toggleTorch();
+                    controller.setStateFlashCameraScanBarCode = !controller.getStateFlashCameraScanBarCode;
+                  },
+                  child: controller.getStateFlashCameraScanBarCode? const Icon(Icons.flashlight_on_sharp, color: Colors.white): const Icon(Icons.flashlight_off_outlined, color: Colors.white)),
+              const SizedBox(width: 8),
+              FloatingActionButton.extended( 
+                  onPressed: (){
+                    controller.setStateViewBarCodeScan = false;
+                    controller.setStateFlashCameraScanBarCode = false;
+                    controller.cameraScanBarCodeController.dispose();
+                  },
+                  label: const Text(
+                    'Dejar de escanear',
+                    style: TextStyle(color: Colors.white),
+                  )),
+            ],
+          );
+  }
+
 
 class CustomDivider extends StatelessWidget {
   final double height;
@@ -1384,37 +1422,26 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
                     return Text('Error: ${snapshot.error}');
                   } else {
                     // Los datos están disponibles, muestra la lista
-                    return SizedBox(
-                      height: 50,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: snapshot.data?.length, 
-                        shrinkWrap: true,
-                        itemBuilder: (context, index) {
-
-                          // id
-                          String option = snapshot.data![index];
-
-                          return Padding(
-                            padding: const EdgeInsets.all(2.0),
-                            child: InputChip( 
-                              label: Text(option), 
-                              onPressed: () {
-                                textEditingController.text = option;
-                              },
-                              deleteIcon: const Icon(Icons.close, size: 20),
-                              onDeleted: () {
-                                setState(() {
-                                  // eliminar de 'snapshot' la descripcion
-                                  snapshot.data!.remove(option);
-                                  // eliminamos la descripcion de la base de datos
-                                  salesController.deleteFixedDescription(description: option);
-                                });
-                              },
-                            ),
-                          );
-                        },  
-                      ),
+                    return Wrap(
+                      spacing: 3.0, // espacio entre chips
+                      runSpacing: 1.0, // espacio entre líneas de chips
+                      children: snapshot.data!.map((option) {
+                        return InputChip( 
+                          label: Text(option), 
+                          onPressed: () {
+                            textEditingController.text = option;
+                          },
+                          deleteIcon: const Icon(Icons.close, size: 20),
+                          onDeleted: () {
+                            setState(() {
+                              // eliminar de 'snapshot' la descripcion
+                              snapshot.data!.remove(option);
+                              // eliminamos la descripcion de la base de datos
+                              salesController.deleteFixedDescription(description: option);
+                            });
+                          },
+                        );
+                      }).toList(),
                     );
                   }
                 },
@@ -1606,6 +1633,131 @@ class _ViewAddDiscountState extends State<ViewAddDiscount> {
           ),
         ),
       ],
+    );
+  }
+}
+
+
+
+class ViewScanBarCode extends StatefulWidget {
+  const ViewScanBarCode({super.key});
+
+  @override
+  State<ViewScanBarCode> createState() => _ViewScanBarCodeState();
+}
+
+class _ViewScanBarCodeState extends State<ViewScanBarCode> {
+
+  // controllers
+  SalesController sellController = Get.find<SalesController>(); 
+  // var
+  String code = '';
+ 
+  @override
+  void initState() {
+    super.initState();  
+    // controller : configuramos el escaner de código de barra
+    sellController.cameraScanBarCodeController = MobileScannerController(
+      detectionSpeed: DetectionSpeed.normal, 
+      detectionTimeoutMs: 2000, // tiempo de espera para detectar un código de barra 
+      formats: [BarcodeFormat.ean13, BarcodeFormat.ean8, BarcodeFormat.upcA, BarcodeFormat.upcE, BarcodeFormat.code128 ], 
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    
+    return ElasticIn(
+      child: viewScanBarCode(),
+    );
+  }
+
+  Widget viewScanBarCode() {
+    // var
+    final Size size = MediaQuery.of(context).size;
+    // vista : escaner de código de barra
+    return SizedBox(
+      width: size.width,
+      height: 150,
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 12),
+        elevation: 0,
+        clipBehavior: Clip.antiAlias,
+        child: Stack( 
+          clipBehavior: Clip.antiAlias,
+          alignment: Alignment.center,
+          children: [
+            ImageFiltered(
+              enabled: code!='',
+              imageFilter: ImageFilter.blur(sigmaX: 5, sigmaY: 5,tileMode: TileMode.clamp),
+              //
+              // MobileScanner
+              //
+              child: MobileScanner( 
+                fit: BoxFit.cover,  
+                overlay: code ==''?AnimatedLine(width: size.width*0.8, height: 100):null, 
+                controller: sellController.cameraScanBarCodeController, 
+                onDetect: (capture) {  
+                  setState(() {
+                    sellController.playSoundScan();
+                    code = capture.barcodes[0].rawValue.toString(); 
+                    sellController.verifyExistenceInSelectedScanResult(id:code); 
+                  });  
+                  // esperamos 2 segundos para limpiar el código de barra
+                  Future.delayed(const Duration(seconds: 2), () => setState(()=> code = '')); 
+                },  
+              ),
+            ),
+            Center(child: Text(code,style: const TextStyle(color: Colors.white,fontSize: 24)),),
+          ],
+        ),
+      ),
+    );
+  }
+
+  
+}
+ 
+
+class AnimatedLine extends StatefulWidget {
+  // description : creamos una animacion simple de una linea que se mueve de arriba hacia abajo
+  final double width;
+  final double height;
+  const AnimatedLine({Key? key, required this.width, required this.height}) : super(key: key);
+  @override
+  State<AnimatedLine> createState() => _AnimatedLineState();
+}
+
+class _AnimatedLineState extends State<AnimatedLine> with TickerProviderStateMixin {
+  // controllers
+  late AnimationController _controller;
+  late Animation<double> _animacionY;
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(duration: const Duration(seconds: 2),vsync: this)..repeat(reverse: true); 
+    _animacionY = Tween<double>(begin:widget.height,end: 0,).animate(_controller);
+  }
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: widget.width,
+      height: widget.height,
+      child: Stack(
+        clipBehavior: Clip.antiAlias,
+        alignment: Alignment.center, 
+        children: [  
+          AnimatedBuilder( 
+            animation: _animacionY,
+            builder: (context, child) => Positioned(bottom: _animacionY.value,child: Container(width: widget.width,height: 0.7,color: Colors.red)),
+          ),
+        ],
+      ),
     );
   }
 }

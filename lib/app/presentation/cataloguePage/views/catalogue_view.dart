@@ -265,7 +265,7 @@ class CataloguePage extends StatelessWidget {
   }
   // WIDGETS COMPONENTS
   Widget floatingActionButton({required CataloguePageController controller}) {
-    return FloatingActionButton(
+    return FloatingActionButton( 
         backgroundColor: controller.homeController.getUserAnonymous?Colors.grey:Colors.blue,
         onPressed: (){ 
 
@@ -342,13 +342,7 @@ class CataloguePage extends StatelessWidget {
           ],
         ):Container(),
         // text : favorito
-        Row(
-          children: [
-            item.favorite? Text('Favorito',style: TextStyle(color: Colors.yellow.shade800)):Container(),
-            item.favorite && alertStockText != ''? dividerCircle:Container(),
-            alertStockText == '' ? Container() : Text(alertStockText),
-          ],
-        ),
+        alertStockText == '' ? Container() : Text(alertStockText),
         // text : fecha de la ultima actualización
         Text( valueDataUpdate ,style: textStyleSecundary.copyWith(fontSize: 12)),
       ],
@@ -402,14 +396,21 @@ class CataloguePage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    ImageProductAvatarApp(url: item.image,size: 80,favorite: item.favorite),
+                    ImageProductAvatarApp(url:item.local?'': item.image,size: 80,favorite: item.favorite),
                     Flexible( 
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start, 
                           children: [
-                            Text(item.description, maxLines: 1,overflow:TextOverflow.ellipsis,style: textStylePrimery.copyWith( fontSize: titleSize)),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                !item.favorite?Container():const Icon(Icons.star_purple500_sharp,size: 12,color: Colors.orange),
+                                !item.favorite?Container():const SizedBox(width: 2),
+                                Flexible(child: Text(item.description, maxLines: 1,overflow:TextOverflow.ellipsis,style: textStylePrimery.copyWith( fontSize: titleSize))),
+                              ],
+                            ),
                             description,
                           ],
                         ),

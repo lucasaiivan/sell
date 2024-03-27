@@ -16,16 +16,36 @@ import 'package:sell/app/core/utils/widgets_utils.dart';
 import 'package:uuid/uuid.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../domain/entities/ticket_model.dart';
-import '../views/sell_view.dart'; 
+import '../views/sell_view.dart';  
+import 'package:mobile_scanner/mobile_scanner.dart';
+
+
+
 
 class SalesController extends GetxController {
 
   // controllers views //
-  final HomeController homeController = Get.find();
-  
+  final HomeController homeController = Get.find(); 
 
   // titulo del Appbar //
   String titleText = 'Vender'; 
+
+  // state view barcodescan //
+  final RxBool _stateViewBarCodeScan = false.obs;
+  bool get getStateViewBarCodeScan => _stateViewBarCodeScan.value;
+  set setStateViewBarCodeScan(bool value) {
+    _stateViewBarCodeScan.value = value;
+    update();
+  }
+  late MobileScannerController cameraScanBarCodeController;
+
+  // state flash camera scan bar code //
+  final RxBool _stateFlashCameraScanBarCode = false.obs;
+  bool get getStateFlashCameraScanBarCode => _stateFlashCameraScanBarCode.value;
+  set setStateFlashCameraScanBarCode(bool value) {
+    _stateFlashCameraScanBarCode.value = value;
+    update();
+  }
 
   //  cash register  // 
   void deleteFixedDescription({required String description}){
@@ -163,15 +183,19 @@ class SalesController extends GetxController {
   void animateAdd({bool itemListAnimated=true }){
     try{
       if(itemListAnimated){newProductSelectedAnimationController.repeat();}
+      floatingActionButtonAnimateController.repeat();
     }catch(_){}
-    floatingActionButtonAnimateController.repeat();
+
   }
 
   // productos seleccionados recientemente  //
   List<ProductCatalogue> get getRecentlySelectedProductsList => homeController.getProductsOutstandingList;
 
-  // efecto de sonido para escaner
-  void playSoundScan() async {AudioCache cache = AudioCache();cache.load("soundBip.mp3");}
+  // sound : efecto de sonido para escaner
+  void playSoundScan() async {
+    final player = AudioPlayer(); // "soundBip.mp3"
+    await player.play(AssetSource("soundBip.mp3")); 
+  }
 
   // text field controllers 
   final MoneyMaskedTextController textEditingControllerAddFlashPrice = MoneyMaskedTextController(leftSymbol: '\$',decimalSeparator: ',',thousandSeparator: '.',precision:2);
@@ -290,7 +314,9 @@ class SalesController extends GetxController {
     getTicket.creation = Timestamp.now();
 
     // registramos el monto en caja
-    cashRegisterSetTransaction(amount: getTicket.priceTotal,discount: getTicket.discount);
+    if( homeController.getIsSubscribedPremium ){
+      cashRegisterSetTransaction(amount: getTicket.priceTotal,discount: getTicket.discount);
+    }
     
     // set firestore : guarda la transacción
     Database.refFirestoretransactions(idAccount: homeController.getIdAccountSelected).doc(getTicket.id).set(getTicket.toJson());
@@ -299,10 +325,10 @@ class SalesController extends GetxController {
       // obj
       ProductCatalogue product = ProductCatalogue.fromMap(data as Map<String, dynamic>);
 
-      // set firestore : hace un incremento en el valor sales'ventas'  del producto
+      // set firestore : hace un incremento de las ventas del producto
       Database.dbProductStockSalesIncrement(idAccount: homeController.getIdAccountSelected,idProduct: product.id,quantity: product.quantity );
       // set firestore : hace un descremento en el valor 'stock' del producto si es que tiene stock habilitado
-      if (product.stock) {
+      if (product.stock && homeController.getIsSubscribedPremium ) {
         // set firestore : hace un descremento en el valor 'stock'
         Database.dbProductStockDecrement(idAccount: homeController.getIdAccountSelected,idProduct: product.id,quantity: product.quantity);
       }
@@ -319,8 +345,11 @@ class SalesController extends GetxController {
     );
 
   }
+
   
-  Future<void>  scanBarcodeNormal() async {  
+  
+  Future<void>  scanBarcodeNormal() async {   
+ 
     // Escanner Code - Abre en pantalla completa la camara para escanear el código
     try {
       late String barcodeScanRes;
@@ -337,7 +366,7 @@ class SalesController extends GetxController {
       verifyExistenceInSelectedScanResult(id:barcodeScanRes);
     } on PlatformException {
       Get.snackbar('scanBarcode', 'Failed to get platform version');
-    }
+    } 
   }
 
   void selectedProduct({required ProductCatalogue item}) { 
@@ -1097,7 +1126,8 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
                     // set query
                     query = element.name;
                   },
-                  child: Chip( 
+                  child: Chip(  
+                    avatar: element.image==''?null:CircleAvatar(backgroundImage: NetworkImage(element.image),),
                     label: Text(element.name,style: textStyleSecundary), 
                     shape: RoundedRectangleBorder(side: BorderSide(color: primaryTextColor.withOpacity(0.5)),borderRadius: BorderRadius.circular(5)),
                     backgroundColor: Colors.transparent,   
@@ -1224,7 +1254,7 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
               crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 // image
-                ImageProductAvatarApp(url: product.image,size: 75,favorite:product.favorite),
+                ImageProductAvatarApp(url: product.local?'':product.image,size: 75,favorite:product.favorite),
                 // text : datos del producto
                 Flexible(
                   child: Padding(
@@ -1234,7 +1264,7 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(product.description,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(fontWeight: FontWeight.w500)),
-                      product.nameMark==''?Container():Text(product.nameMark,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(color: Colors.blue)),
+                      product.nameMark==''?Container():Text(product.nameMark,maxLines: 1,overflow: TextOverflow.clip,style: TextStyle(color: product.verified?Colors.blue:null)),
                       Wrap(
                         crossAxisAlignment: WrapCrossAlignment.start,
                         direction: Axis.horizontal,
@@ -1281,3 +1311,5 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
     );
   }
 }
+
+

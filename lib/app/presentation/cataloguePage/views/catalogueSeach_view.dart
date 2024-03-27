@@ -111,6 +111,7 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
                     setQuery = element.name;
                   },
                   child: Chip( 
+                    avatar: element.image==''?null:CircleAvatar(backgroundImage: NetworkImage(element.image),),
                     label: Text(element.name,style: textStyleSecundary), 
                     shape: RoundedRectangleBorder(side: BorderSide(color: primaryTextColor.withOpacity(0.5)),borderRadius: BorderRadius.circular(5)),
                     backgroundColor: Colors.transparent,   
@@ -139,6 +140,7 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
                     setQuery = element.name;
                   },
                   child: Chip( 
+                    
                     label: Text(element.name,style: textStyleSecundary), 
                     shape: RoundedRectangleBorder(side: BorderSide(color: primaryTextColor.withOpacity(0.5)),borderRadius: BorderRadius.circular(5)),
                     backgroundColor: Colors.transparent,   
@@ -266,7 +268,7 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
                 crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   // image
-                  ImageProductAvatarApp(url: product.image,size: 75,favorite:product.favorite),
+                  ImageProductAvatarApp(url:product.local?'':product.image,size: 75,favorite:product.favorite),
                   // text : datos del producto
                   Flexible(
                     child: Padding(
