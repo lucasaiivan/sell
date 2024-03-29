@@ -1,10 +1,13 @@
  
-import 'package:cloud_firestore/cloud_firestore.dart'; 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart'; 
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart'; 
 import 'package:intl/intl.dart'; 
 import 'package:sell/app/core/utils/fuctions.dart';
-import 'package:sell/app/core/utils/widgets_utils.dart'; 
+import 'package:sell/app/core/utils/widgets_utils.dart';
+import 'package:sell/app/domain/entities/catalogo_model.dart'; 
 import '../../../domain/entities/ticket_model.dart';
 import '../../../core/utils/dynamicTheme_lb.dart'; 
 import '../controller/transactions_controller.dart';
@@ -58,6 +61,7 @@ class TransactionsView extends StatelessWidget {
       centerTitle: false,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       title: const Text('Transacciones',textAlign: TextAlign.center),
+      bottom: transactionsController.getLoading?ComponentApp().linearProgressBarApp():null,
       actions: [
         
         PopupMenuButton( 
@@ -96,7 +100,7 @@ class TransactionsView extends StatelessWidget {
     // define una variable currentDate para realizar el seguimiento de la fecha actual en la que se está construyendo la lista. Inicializa esta variable con la fecha de la primera transacción en la lista
     DateTime currentDate = transactionsController.getVisibilityTransactionsList[0].creation.toDate();
     // lista de widgets List<Widget> donde se almacenarán los elementos de la lista
-    List<Widget> transactions = []; 
+    List<Widget> transactions = [];  
     // add : Itera sobre la lista de transacciones y verifica si la fecha de la transacción actual es diferente a la fecha actual. Si es así, crea un elemento Divider y actualiza la fecha actual
     for (int i = 0; i < transactionsController.getVisibilityTransactionsList.length; i++) {
       // condition : si es la primera transacción
@@ -219,7 +223,7 @@ class TransactionsView extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           //  text : cantidad de items ( productos )
-                          Text('${ticketModel.getLengh()} artículos',style:textStyleSecundary), 
+                          Text('${ticketModel.getProductsQuantity()} artículos',style:textStyleSecundary), 
                           // text : valor del vuelto
                           ticketModel.valueReceived == 0? Container(): Row(
                             mainAxisSize: MainAxisSize.min,
@@ -308,34 +312,37 @@ class TransactionsView extends StatelessWidget {
     const double opacity = 0.8;
     Widget divider = ComponentApp().divider();
     Widget spacer = const SizedBox(height:6);
-    TextStyle textStyleDescription = const TextStyle(fontWeight: FontWeight.w300,fontFamily: 'Courier',);
-    TextStyle textStyleValue = const TextStyle(fontWeight: FontWeight.w600,fontFamily: 'Courier',);
+    TextStyle textStyleDescription = const TextStyle(fontWeight: FontWeight.w300);
+    TextStyle textStyleValue = const TextStyle(fontWeight: FontWeight.w600);
 
-  //  showDialog : mostrar detalles de la transacción
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog( 
-          contentPadding: const EdgeInsets.all(5), 
-          // bordes : 
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0.1)),
-          //  SingleChildScrollView : para que el contenido de la alerta se pueda desplazar
-          content: SizedBox(
-            // establece el ancho a toda la pantalla
-            width:  MediaQuery.of(context).size.width,
-            // SingleChildScrollView : permite hacer scroll en el contenido
-            child: SingleChildScrollView(
+    // view
+    Widget content = Scaffold(
+      appBar: AppBar(
+        title: const Text('Transacción'),
+        // boton de retroceso
+        leading: Container(), 
+        leadingWidth: 0,
+        actions: [
+          // button : close
+          IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () {
+              Get.back();
+            },
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          // view : informacion de la transacción
+          Expanded(
+            child: SingleChildScrollView( 
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    // text : titulo de la alerta
-                    const Padding(
-                      padding: EdgeInsets.only(bottom: 12),
-                      child: Text("Ticket",textAlign: TextAlign.center, style: TextStyle(fontSize: 18,fontWeight: FontWeight.w400,fontFamily: 'Courier')),
-                    ),
+                  children: <Widget>[ 
                     const SizedBox(height: 20),
                     // text
                     Row(
@@ -344,13 +351,13 @@ class TransactionsView extends StatelessWidget {
                         const Spacer(),
                         Text(id,style: textStyleValue),
                       ],
-                    ),
+                    ), 
                     spacer,
                     Row(
                       children: <Widget>[
                         Opacity(opacity:opacity,child: Text("Fecha: ",style: textStyleDescription)),
                         const Spacer(),
-                        Text(formattedCreationDate,style: textStyleValue,overflow:TextOverflow.ellipsis),
+                        Text(formattedCreationDate,style: textStyleValue,overflow:TextOverflow.ellipsis)
                       ],
                     ),
                     spacer,
@@ -368,17 +375,7 @@ class TransactionsView extends StatelessWidget {
                         const Spacer(),
                         Text(seller,style: textStyleValue,overflow:TextOverflow.ellipsis),
                       ],
-                    ),
-                    spacer,  
-                    divider,
-                    spacer,  
-                    Row(
-                      children: <Widget>[
-                        Opacity(opacity:opacity,child: Text("Artículos: ",style: textStyleDescription)),
-                        const Spacer(),
-                        Text("${ticket.getLengh()}",style: textStyleValue),
-                      ],
-                    ),
+                    ), 
                     spacer,
                     Row(
                       children: <Widget>[
@@ -388,7 +385,7 @@ class TransactionsView extends StatelessWidget {
                       ],
                     ),
                     spacer,  
-                    divider,
+                    const Divider(),
                     spacer,  
                     // text : descuentos
                     ticket.discount==0?Container():
@@ -447,31 +444,88 @@ class TransactionsView extends StatelessWidget {
                         Text( Publications.getFormatoPrecio(monto: changeAmount,moneda: currencySymbol),style: textStyleValue),
                       ],
                     ),
-                    
+                    const Divider(),
+                    Row(
+                      children: <Widget>[
+                        Opacity(opacity:opacity,child: Text("Artículos ",style: textStyleDescription)),
+                        const Spacer(),
+                        Text("Total: ${ticket.getProductsQuantity()}",style: textStyleValue),
+                      ],
+                    ),
+                    // crear items de los productos vendidos 
+                    Column(
+                      children: ticket.listPoduct.map((product) { 
+                        // style 
+                        TextStyle style = const TextStyle(fontWeight: FontWeight.bold,fontSize: 12);
+
+                        // obj
+                        ProductCatalogue productCatalogue = ProductCatalogue.fromMap(product);
+                        return Column(
+                          children: [ 
+                            ListTile(
+                              title: Text(productCatalogue.description,style: style),
+                              leading: Opacity(opacity: 0.5,child: Text('${productCatalogue.quantity} x',style: style)),
+                              trailing: Opacity(opacity: 0.5,child: Text(Publications.getFormatoPrecio(monto: productCatalogue.salePrice*productCatalogue.quantity,moneda: currencySymbol),style: style)),
+                            ),
+                            const Divider(height: 0.5,thickness: 0.3),
+                          ],
+                        );
+                      }).toList(),
+                    ),
+
                   ],
                 ),
               ),
             ),
+          ), 
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 12),
+            child: Row(
+              children: [
+                //  button : ver ticket
+                ElevatedButton.icon(
+                  onPressed: (){}, 
+                  icon: const Icon(Icons.receipt), 
+                  label: const Text('Ticket'),
+                  style: ElevatedButton.styleFrom(  
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      
+                    ),
+                  ),
+                ),
+                const SizedBox(width:20),
+                // button : eliminar transaccion
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      backgroundColor: Colors.red.withOpacity(0.05),
+                      visualDensity: VisualDensity.standard,
+                    ),
+                    onPressed: () { 
+                      Navigator.of(context).pop();
+                      transactionsController.deleteSale(ticketModel: ticket);
+                    },
+                    child: const Text('Eliminar Transacción',style: TextStyle(color: Colors.red),),
+                  ),
+                ),
+              ],
+            ),
           ),
-          actions: <Widget>[
-            TextButton(
-              child: Text("Eliminar",style: TextStyle(color: Colors.red.shade400),),
-              onPressed: () {
-                Navigator.of(context).pop();
-                transactionsController.deleteSale(ticketModel: ticket);
-              },
-            ),
-            TextButton(
-              child: const Text("Cerrar"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            
-          ],
-        );
-      },
+        ],
+      ),
     );
+
+    // creamos un dialog con GetX
+    Get.dialog(
+      ClipRRect(
+        borderRadius: const  BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12), bottomLeft: Radius.circular(0), bottomRight: Radius.circular(0)),
+        child: content,
+      ),
+    );   
   }
 }
 

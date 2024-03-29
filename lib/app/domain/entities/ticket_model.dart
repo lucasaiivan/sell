@@ -27,7 +27,7 @@ class TicketModel {
     required this.listPoduct,
     required this.creation,
   });
-  int getLengh() {
+  int getProductsQuantity() {
     int count = 0;
     for (var element in listPoduct) {
       count += element['quantity'] as int;

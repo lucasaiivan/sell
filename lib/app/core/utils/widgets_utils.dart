@@ -696,7 +696,7 @@ class ComponentApp extends StatelessWidget {
     return Container();
   }
   // view : grafico de barra para mostrar el progreso de carga de la app
-  PreferredSize linearProgressBarApp({Color color = Colors.purple}) {
+  PreferredSize linearProgressBarApp({Color color = Colors.blue}) {
     return PreferredSize(
         preferredSize: const Size.fromHeight(0.0),
         child: LinearProgressIndicator(
@@ -794,7 +794,7 @@ class ComponentApp extends StatelessWidget {
         width: width,
         child: ElevatedButton.icon(
           onPressed: disable?null:onPressed,
-          style: ElevatedButton.styleFrom(
+          style: ElevatedButton.styleFrom(  
             elevation:defaultStyle?0: elevation,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
             padding: const EdgeInsets.all(20.0),

@@ -42,8 +42,7 @@ class _StaticsCardsState extends State<StaticsCards> {
         icon:  const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.attach_money_rounded,color: Colors.white,size:14)))),
         titleText: 'Facturación', 
         valueText: transactionsController.getInfoAmountTotalFilter,
-        description: 'Balance total', 
-        content: MiniLineChart(prices: transactionsController.getBillingByDateList.reversed.toList(),positionIndex: transactionsController.positionIndex),
+        description: 'Balance total',  
         ), 
       // card : transacciones
       CardAnalityc( 
@@ -60,7 +59,7 @@ class _StaticsCardsState extends State<StaticsCards> {
       CardAnalityc( 
         isPremium: homeController.getIsSubscribedPremium,
         backgroundColor: cardColor,
-        icon:  const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.show_chart_rounded,color: Colors.white,size:14)))),
+        icon:  const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Color.fromARGB(31, 94, 43, 43),shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.show_chart_rounded,color: Colors.white,size:14)))),
         //content: transactionsController.viewPercentageBarValue(text:'%${transactionsController.getPercentEarningsTotal()}',value: transactionsController.getEarningsTotal,total: transactionsController.getAmountTotalFilter),
         titleText: 'Ganancia',
         subtitle: '%${transactionsController.getPercentEarningsFilteredTotal()}',
