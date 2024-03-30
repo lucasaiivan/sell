@@ -859,7 +859,7 @@ class ControllerProductsEdit extends GetxController {
         DateTime date2 = product.upgrade.toDate().copyWith(hour: 0,minute: 0,millisecond: 0,second: 0,microsecond: 0);
         if (date1.isBefore(date2)  ) {
           // se notifica que existen datos actualizados del producto
-          setMessageNotification = 'Producto actualizado \n ${Publications.getFechaPublicacionFormating(dateTime: date1)} \n ${Publications.getFechaPublicacionFormating(dateTime: date2)}';
+          setMessageNotification = 'Producto actualizado';
         } 
 
         //  set

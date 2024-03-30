@@ -128,7 +128,7 @@ class ProductEdit extends StatelessWidget {
               onPressed: () { 
                 if (!controller.getLoadingData) { 
                   controller.setFavorite = !controller.getFavorite;
-                 }
+                }
                 
               },
             ),

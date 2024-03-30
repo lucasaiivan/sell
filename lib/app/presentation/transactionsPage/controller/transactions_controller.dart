@@ -681,7 +681,7 @@ class TransactionsController extends GetxController {
             onPressed: () {
               // firebase : elimina la transacción
               Database.refFirestoretransactions(idAccount: homeController.getIdAccountSelected).doc(ticketModel.id).delete();
-              Get.back();
+              Get.back();Get.back();
             },
             child: const Text('si, eliminar')),
       ]),

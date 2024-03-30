@@ -196,7 +196,7 @@ class HomeController extends GetxController {
     _markList.clear();
     for (ProductCatalogue item in _catalogueBusiness) {
       // object : obtenemos los datos de la marca
-      Mark mark = Mark(id: item.idMark, name: item.nameMark,creation: Timestamp.now(),upgrade: Timestamp.now());
+      Mark mark = Mark(id: item.idMark, name: item.nameMark,image: item.imageMark,creation: Timestamp.now(),upgrade: Timestamp.now());
       // condition : validamos la marca del producto
       if(mark.id !='' && mark.name != ''){
         // condition : si la marca no esta en la lista la añadimos
@@ -905,14 +905,13 @@ class HomeController extends GetxController {
   void showModalBottomSheetSubcription({String id = 'premium'}) {
     // bottomSheet : muestre la hoja inferior modal de getx
     Get.bottomSheet(
-      SizedBox(height: 600, child: WidgetBottomSheet(id: id)),
+      SizedBox(height: 600, 
+      child: WidgetBottomSheet(id: id)),
       backgroundColor: Get.theme.scaffoldBackgroundColor,
       isScrollControlled: true,
       enableDrag: true,
       isDismissible: true,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20), topRight: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
     );
   }
 }

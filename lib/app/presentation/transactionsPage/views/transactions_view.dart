@@ -288,6 +288,32 @@ class TransactionsView extends StatelessWidget {
 
   // DIALOG : mostrar detalles de la transacción
   void showAlertDialogTransactionInformation(BuildContext context, TicketModel ticket) {
+    
+    
+ 
+
+    // creamos un dialog con GetX
+    Get.dialog(
+      ClipRRect(
+        borderRadius: const  BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12), bottomLeft: Radius.circular(0), bottomRight: Radius.circular(0)),
+        child: TransactionInfoView(ticket: ticket),
+      ),
+    );   
+  }
+}
+
+
+
+
+class TransactionInfoView extends StatelessWidget { 
+
+  final TicketModel ticket; 
+  const TransactionInfoView({Key? key,required this.ticket}) : super(key: key);
+
+  
+  @override
+  Widget build(BuildContext context) {
+    
     String id = ticket.id;
     String seller = ticket.seller;
     String cashRegister = ticket.cashRegisterName == ''?'sin especificar':ticket.cashRegisterName;
@@ -309,228 +335,221 @@ class TransactionsView extends StatelessWidget {
     // var 
     Map payModeMap =transactionsController.getPayMode(idMode: payMode);
     // styles
-    const double opacity = 0.8;
-    Widget divider = ComponentApp().divider();
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    const double opacity = 0.8; 
     Widget spacer = const SizedBox(height:6);
     TextStyle textStyleDescription = const TextStyle(fontWeight: FontWeight.w300);
     TextStyle textStyleValue = const TextStyle(fontWeight: FontWeight.w600);
 
-    // view
-    Widget content = Scaffold(
+  return Scaffold(
       appBar: AppBar(
-        title: const Text('Transacción'),
-        // boton de retroceso
-        leading: Container(), 
-        leadingWidth: 0,
+        title: const Text('Transacción'), 
         actions: [
           // button : close
           IconButton(
-            icon: const Icon(Icons.close),
+            icon: const Icon(Icons.delete_forever),
+            onPressed: () {
+              transactionsController.deleteSale(ticketModel: ticket);
+            },
+          ),
+        ],
+        
+      ),
+      floatingActionButton: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // button : eliminar
+          FloatingActionButton(
             onPressed: () {
               Get.back();
+            },
+            backgroundColor:isDarkMode?Colors.grey.shade500:Colors.grey.shade500,
+            child: const Icon(Icons.close,color: Colors.white),
+          ),
+          const SizedBox(width: 10),
+          //  button : ver ticket 
+          FloatingActionButton.extended(
+            onPressed: () { 
+
+              // creamos un dialog con GetX
+              Get.dialog(
+                ClipRRect(
+                  borderRadius: const  BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12), bottomLeft: Radius.circular(0), bottomRight: Radius.circular(0)),
+                  child: TicketView(ticket: ticket),
+                ),
+              );  
+
+            }, 
+            icon: const Icon(Icons.receipt,color: Colors.white),
+            label: const Text('Ver ticket',style: TextStyle(color: Colors.white)),
+          ), 
+          
+        ],
+      ),
+      body: SingleChildScrollView( 
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[ 
+              const SizedBox(height: 20),
+              // text
+              Row(
+                children: <Widget>[
+                  Opacity(opacity:opacity,child: Text("Id: ",style: textStyleDescription)),
+                  const Spacer(),
+                  Text(id,style: textStyleValue),
+                ],
+              ), 
+              spacer,
+              Row(
+                children: <Widget>[
+                  Opacity(opacity:opacity,child: Text("Fecha: ",style: textStyleDescription)),
+                  const Spacer(),
+                  Text(formattedCreationDate,style: textStyleValue,overflow:TextOverflow.ellipsis)
+                ],
+              ),
+              spacer,
+              Row(
+                children: <Widget>[
+                  Opacity(opacity:opacity,child: Text("Vendedor: ",style: textStyleDescription,overflow:TextOverflow.ellipsis)),
+                  const Spacer(),
+                  Text(seller,style: textStyleValue,overflow:TextOverflow.ellipsis),
+                ],
+              ), 
+              spacer,
+              Row(
+                children: <Widget>[
+                  Opacity(opacity:opacity,child: Text("Caja: ",style: textStyleDescription)),
+                  const Spacer(),
+                  Text(cashRegister,style: textStyleValue),
+                ],
+              ),
+              spacer,
+              Row(
+                children: <Widget>[
+                  Opacity(opacity:opacity,child: Text("Modo de pago: ",style: textStyleDescription)),
+                  const Spacer(),
+                  Text("${ payModeMap['name'] }",style: textStyleValue,overflow:TextOverflow.ellipsis),
+                ],
+              ),
+              spacer,  
+              const Divider(),
+              spacer,  
+              // text : descuentos
+              ticket.discount==0?Container():
+              Row(
+                children: <Widget>[
+                  const Spacer(),
+                  Opacity(opacity:opacity,child: Text("Descuentos:  ",style: textStyleDescription)),
+                  Text(Publications.getFormatoPrecio(monto: ticket.discount,moneda: currencySymbol),overflow:TextOverflow.ellipsis,style: textStyleValue.copyWith(color: Colors.red.shade400)),
+                ],
+              ),
+              spacer, 
+              // text : precio total
+              Row(
+                children: [
+                  const Spacer(),
+                  Container(
+                    color: Colors.black12,
+                    child: Row(
+                      children: <Widget>[ 
+                        Opacity(opacity:opacity,child: Text("Total:  ",style: textStyleDescription)),
+                        Text( Publications.getFormatoPrecio(monto: priceTotal,moneda: currencySymbol),overflow:TextOverflow.ellipsis,style: textStyleValue ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              spacer,
+              // text : ganancias
+              ticket.getProfit==0?Container():
+              Row(
+                children: <Widget>[
+                  const Spacer(),
+                  Opacity(opacity:opacity,child: Text("Ganancias:  ",style: textStyleDescription)),
+                  Text( Publications.getFormatoPrecio(monto: ticket.getProfit,moneda: currencySymbol),overflow:TextOverflow.ellipsis,style: textStyleValue.copyWith(color: Colors.green)),
+                ],
+              ),
+              spacer,
+              // text : valor recibido
+              valueReceived==0?Container():
+              Row(
+                children: <Widget>[
+                  const Spacer(),
+                  Opacity(opacity:opacity,child: Text("Valor recibido:  ",style: textStyleDescription)),
+                  Text(Publications.getFormatoPrecio(monto: valueReceived,moneda: currencySymbol),style: textStyleValue),
+                ],
+              ),
+              spacer,
+              // text : valor del vuelto
+              changeAmount == 0?Container():
+              Row(
+                children: <Widget>[
+                  const Spacer(),
+                  Opacity(opacity:opacity,child: Text("Vuelto:  ",style: textStyleDescription)),
+                  Text( Publications.getFormatoPrecio(monto: changeAmount,moneda: currencySymbol),style: textStyleValue),
+                ],
+              ),
+              const Divider(),
+              Row(
+                children: <Widget>[
+                  Opacity(opacity:opacity,child: Text("Artículos  ",style: textStyleDescription)),
+                  const Spacer(),
+                  Text("Total:  ",style: textStyleDescription),
+                  Text("${ticket.getProductsQuantity()}",style: textStyleValue),
+                ],
+              ),
+              // crear items de los productos vendidos 
+              Column(
+                children: ticket.listPoduct.map((product) { 
+                  // style 
+                  TextStyle style = const TextStyle(fontWeight: FontWeight.bold,fontSize: 12);
+                  // obj
+                  ProductCatalogue productCatalogue = ProductCatalogue.fromMap(product);
+                  return Column(
+                    children: [ 
+                      ListTile(
+                        title: Opacity(opacity: 0.7,child: Text(productCatalogue.description,style: style)),
+                        leading: Opacity(opacity: 0.5,child: Text('x${productCatalogue.quantity}',style: style)),
+                        trailing: Opacity(opacity: 0.6,child: Text(Publications.getFormatoPrecio(monto: productCatalogue.salePrice*productCatalogue.quantity,moneda: currencySymbol),style: style)),
+                      ),
+                      const Divider(height: 0.5,thickness: 0.3),
+                    ],
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 75),
+            
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+class TicketView extends StatelessWidget {
+  final TicketModel ticket; 
+  const TicketView({Key? key,required this.ticket}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Ticket'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.print),
+            onPressed: () {
+              // print
             },
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // view : informacion de la transacción
-          Expanded(
-            child: SingleChildScrollView( 
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[ 
-                    const SizedBox(height: 20),
-                    // text
-                    Row(
-                      children: <Widget>[
-                        Opacity(opacity:opacity,child: Text("Id: ",style: textStyleDescription)),
-                        const Spacer(),
-                        Text(id,style: textStyleValue),
-                      ],
-                    ), 
-                    spacer,
-                    Row(
-                      children: <Widget>[
-                        Opacity(opacity:opacity,child: Text("Fecha: ",style: textStyleDescription)),
-                        const Spacer(),
-                        Text(formattedCreationDate,style: textStyleValue,overflow:TextOverflow.ellipsis)
-                      ],
-                    ),
-                    spacer,
-                    Row(
-                      children: <Widget>[
-                        Opacity(opacity:opacity,child: Text("Caja: ",style: textStyleDescription)),
-                        const Spacer(),
-                        Text(cashRegister,style: textStyleValue),
-                      ],
-                    ),
-                    spacer,
-                    Row(
-                      children: <Widget>[
-                        Opacity(opacity:opacity,child: Text("Vendedor: ",style: textStyleDescription,overflow:TextOverflow.ellipsis)),
-                        const Spacer(),
-                        Text(seller,style: textStyleValue,overflow:TextOverflow.ellipsis),
-                      ],
-                    ), 
-                    spacer,
-                    Row(
-                      children: <Widget>[
-                        Opacity(opacity:opacity,child: Text("Modo de pago: ",style: textStyleDescription)),
-                        const Spacer(),
-                        Text("${ payModeMap['name'] }",style: textStyleValue,overflow:TextOverflow.ellipsis),
-                      ],
-                    ),
-                    spacer,  
-                    const Divider(),
-                    spacer,  
-                    // text : descuentos
-                    ticket.discount==0?Container():
-                    Row(
-                      children: <Widget>[
-                        Opacity(opacity:opacity,child: Text("Descuentos: ",style: textStyleDescription)),
-                        const Spacer(),
-                        Text(Publications.getFormatoPrecio(monto: ticket.discount,moneda: currencySymbol),overflow:TextOverflow.ellipsis,style: textStyleValue.copyWith(color: Colors.red.shade400)),
-                      ],
-                    ),
-                    spacer, 
-                    // text : precio total
-                    Container(
-                      color: Colors.black12,
-                      child: Row(
-                        children: <Widget>[
-                          Opacity(opacity:opacity,child: Text("Total: ",style: textStyleDescription)),
-                          const Spacer(),
-                          Text( Publications.getFormatoPrecio(monto: priceTotal,moneda: currencySymbol),overflow:TextOverflow.ellipsis,style: textStyleValue ),
-                        ],
-                      ),
-                    ),
-                    spacer,
-                    // text : ganancias
-                    ticket.getProfit==0?Container():
-                    Row(
-                      children: <Widget>[
-                        Opacity(opacity:opacity,child: Text("Ganancias: ",style: textStyleDescription)),
-                        const Spacer(),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.auto_graph_outlined,size: 14,color: Colors.green),
-                            Text( Publications.getFormatoPrecio(monto: ticket.getProfit,moneda: currencySymbol),overflow:TextOverflow.ellipsis,style: textStyleValue.copyWith(color: Colors.green)),
-                          ],
-                        ),
-                      ],
-                    ),
-                    spacer,
-                    // text : valor recibido
-                    valueReceived==0?Container():
-                    Row(
-                      children: <Widget>[
-                        Opacity(opacity:opacity,child: Text("Valor recibido: ",style: textStyleDescription)),
-                        const Spacer(),
-                        Text(Publications.getFormatoPrecio(monto: valueReceived,moneda: currencySymbol),style: textStyleValue),
-                      ],
-                    ),
-                    spacer,
-                    // text : valor del vuelto
-                    changeAmount == 0?Container():
-                    Row(
-                      children: <Widget>[
-                        Opacity(opacity:opacity,child: Text("Vuelto: ",style: textStyleDescription)),
-                        const Spacer(),
-                        Text( Publications.getFormatoPrecio(monto: changeAmount,moneda: currencySymbol),style: textStyleValue),
-                      ],
-                    ),
-                    const Divider(),
-                    Row(
-                      children: <Widget>[
-                        Opacity(opacity:opacity,child: Text("Artículos ",style: textStyleDescription)),
-                        const Spacer(),
-                        Text("Total: ${ticket.getProductsQuantity()}",style: textStyleValue),
-                      ],
-                    ),
-                    // crear items de los productos vendidos 
-                    Column(
-                      children: ticket.listPoduct.map((product) { 
-                        // style 
-                        TextStyle style = const TextStyle(fontWeight: FontWeight.bold,fontSize: 12);
-
-                        // obj
-                        ProductCatalogue productCatalogue = ProductCatalogue.fromMap(product);
-                        return Column(
-                          children: [ 
-                            ListTile(
-                              title: Text(productCatalogue.description,style: style),
-                              leading: Opacity(opacity: 0.5,child: Text('${productCatalogue.quantity} x',style: style)),
-                              trailing: Opacity(opacity: 0.5,child: Text(Publications.getFormatoPrecio(monto: productCatalogue.salePrice*productCatalogue.quantity,moneda: currencySymbol),style: style)),
-                            ),
-                            const Divider(height: 0.5,thickness: 0.3),
-                          ],
-                        );
-                      }).toList(),
-                    ),
-
-                  ],
-                ),
-              ),
-            ),
-          ), 
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 12),
-            child: Row(
-              children: [
-                //  button : ver ticket
-                ElevatedButton.icon(
-                  onPressed: (){}, 
-                  icon: const Icon(Icons.receipt), 
-                  label: const Text('Ticket'),
-                  style: ElevatedButton.styleFrom(  
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      
-                    ),
-                  ),
-                ),
-                const SizedBox(width:20),
-                // button : eliminar transaccion
-                Expanded(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      backgroundColor: Colors.red.withOpacity(0.05),
-                      visualDensity: VisualDensity.standard,
-                    ),
-                    onPressed: () { 
-                      Navigator.of(context).pop();
-                      transactionsController.deleteSale(ticketModel: ticket);
-                    },
-                    child: const Text('Eliminar Transacción',style: TextStyle(color: Colors.red),),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+      body: const Center(
+        child: Text('no se puede cargar los datos'),
       ),
     );
-
-    // creamos un dialog con GetX
-    Get.dialog(
-      ClipRRect(
-        borderRadius: const  BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12), bottomLeft: Radius.circular(0), bottomRight: Radius.circular(0)),
-        child: content,
-      ),
-    );   
   }
 }
-
-
-
-
-
-

@@ -666,15 +666,14 @@ class SalesController extends GetxController {
                 //var
                 double valueReceived = textEditingControllerTicketMount.text == '' ? 0.0 : double.parse(textEditingControllerTicketMount.text);
                 // condition : verificar si el usaurio ingreso un monto valido y que sea mayor al monto total del ticket
-                if (valueReceived >= getTicket.getTotalPrice &&
-                    textEditingControllerTicketMount.text != '') {
-                      setValueReceivedTicket = valueReceived;
-                      textEditingControllerTicketMount.text = '';
-                      setPayModeTicket = 'effective';
-                      Get.back();
-                } else {
-                  ComponentApp().showMessageAlertApp( title: '😔', message: 'Tiene que ingresar un monto valido');
+                if (valueReceived >= getTicket.getTotalPrice && textEditingControllerTicketMount.text != '') {
+                  setValueReceivedTicket = valueReceived;
+                  textEditingControllerTicketMount.text = '';
+                  setPayModeTicket = 'effective';
+                  
                 }
+              Get.back();
+
               },
               child: const Text('aceptar')),
         ),
@@ -717,7 +716,7 @@ class SalesController extends GetxController {
                   ), 
                   // chip : efectivo '1000'
                   getTicket.getTotalPrice > 1000 ? Container() :ChoiceChip(
-                    label: const Text('1000'),
+                    label: const Text('1.000'),
                     selected: false,
                     onSelected: (bool value) {
                       setPayModeTicket = 'effective';
@@ -727,7 +726,7 @@ class SalesController extends GetxController {
                   ), 
                   // chip : efectivo '1500'
                   getTicket.getTotalPrice > 1500 ? Container() :ChoiceChip(
-                    label: const Text('1500'),
+                    label: const Text('1.500'),
                     selected: false,
                     onSelected: (bool value) {
                       setPayModeTicket = 'effective';
@@ -737,7 +736,7 @@ class SalesController extends GetxController {
                   ),
                   // chip : efectivo '2000'
                   getTicket.getTotalPrice > 2000 ? Container() :ChoiceChip(
-                    label: const Text('2000'),
+                    label: const Text('2.000'),
                     selected: false,
                     onSelected: (bool value) {
                       setPayModeTicket = 'effective';
@@ -745,6 +744,36 @@ class SalesController extends GetxController {
                       Get.back();
                     },
                   ), 
+                  // chip : efectivo '5000'
+                  getTicket.getTotalPrice > 5000 ? Container() :ChoiceChip(
+                    label: const Text('5.000'),
+                    selected: false,
+                    onSelected: (bool value) {
+                      setPayModeTicket = 'effective';
+                      setValueReceivedTicket = 5000;
+                      Get.back();
+                    },
+                  ),
+                  // chip : efectivo '10000'
+                  getTicket.getTotalPrice > 10000 ? Container() :ChoiceChip(
+                    label: const Text('10.000'),
+                    selected: false,
+                    onSelected: (bool value) {
+                      setPayModeTicket = 'effective';
+                      setValueReceivedTicket = 10000;
+                      Get.back();
+                    },
+                  ),
+                  // chip : efectivo '20000'
+                  getTicket.getTotalPrice > 20000 ? Container() :ChoiceChip(
+                    label: const Text('20.000'),
+                    selected: false,
+                    onSelected: (bool value) {
+                      setPayModeTicket = 'effective';
+                      setValueReceivedTicket = 20000;
+                      Get.back();
+                    },
+                  ),
                 ],
               ),
             ),
@@ -775,9 +804,8 @@ class SalesController extends GetxController {
                     textEditingControllerTicketMount.text = '';
                     setPayModeTicket = 'effective';
                     Get.back();
-                  } else {
-                    ComponentApp().showMessageAlertApp( title: '😔', message: 'Tiene que ingresar un monto valido');
-                  }
+                  }  
+                  Get.back();
                 },
               ),
             ),
@@ -1093,9 +1121,7 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
   Widget buildResults(BuildContext context) {
     return ListView.builder(
       itemCount: _filteredItems.length, 
-      itemBuilder: (context, index) { 
-        // Aquí puedes construir el diseño de cada resultado.
-        // Por ejemplo: ListTile, Container, Card, etc.
+      itemBuilder: (context, index) {  
         return item(product:_filteredItems[index]);
       },
     );
@@ -1263,7 +1289,7 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(product.description,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(fontWeight: FontWeight.w500)),
+                      Text(product.description,maxLines:2,overflow: TextOverflow.clip,style: const TextStyle(fontWeight: FontWeight.w500)),
                       product.nameMark==''?Container():Text(product.nameMark,maxLines: 1,overflow: TextOverflow.clip,style: TextStyle(color: product.verified?Colors.blue:null)),
                       Wrap(
                         crossAxisAlignment: WrapCrossAlignment.start,
