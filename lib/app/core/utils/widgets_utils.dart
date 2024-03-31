@@ -980,11 +980,11 @@ class ImageProductAvatarApp extends StatelessWidget {
   Widget build(BuildContext context) { 
 
 
-     // var
-     final bool darkMode = Theme.of(context).brightness==Brightness.dark;
-     // style 
-     Color backgroundColor = Colors.grey.withOpacity(0.2);
-     Color iconColor = darkMode?Colors.white38 :Colors.white70;
+    // var
+    final bool darkMode = Theme.of(context).brightness==Brightness.dark;
+    // style 
+    Color backgroundColor = Colors.grey.withOpacity(0.2);
+    Color iconColor = darkMode?Colors.white38 :Colors.white70;
 
 
     /// widgets
@@ -993,7 +993,7 @@ class ImageProductAvatarApp extends StatelessWidget {
       imageDefault = AnimatedContainer(
       duration: const Duration(milliseconds: 500),
       color: backgroundColor,
-      child: Icon( Icons.add_a_photo,color: iconColor,));
+      child: Icon( Icons.add_a_photo,color: iconColor));
     }else {
       imageDefault = AnimatedContainer(
       duration: const Duration(milliseconds: 500),
@@ -1006,15 +1006,12 @@ class ImageProductAvatarApp extends StatelessWidget {
         child: Container(
           width: 75,
           height: 75,
-          decoration: BoxDecoration(
+          decoration: BoxDecoration( 
             borderRadius: BorderRadius.circular(8.0),
-            border: Border.all(
-              color: favorite?Colors.yellow.shade700:Colors.transparent,
-              width: favorite?2:0,
-            ),
+            border: Border.all(color: favorite?Colors.yellow.shade700:Colors.transparent,width: favorite?2:0),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(6.0),
+            borderRadius: BorderRadius.circular(6.0), 
             child: InkWell(
               onTap: onTap,
               child: CachedNetworkImage(

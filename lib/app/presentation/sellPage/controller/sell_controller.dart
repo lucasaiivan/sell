@@ -16,8 +16,7 @@ import 'package:sell/app/core/utils/widgets_utils.dart';
 import 'package:uuid/uuid.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../domain/entities/ticket_model.dart';
-import '../views/sell_view.dart';  
-import 'package:mobile_scanner/mobile_scanner.dart';
+import '../views/sell_view.dart';   
 
 
 
@@ -36,8 +35,7 @@ class SalesController extends GetxController {
   set setStateViewBarCodeScan(bool value) {
     _stateViewBarCodeScan.value = value;
     update();
-  }
-  late MobileScannerController cameraScanBarCodeController;
+  } 
 
   // state flash camera scan bar code //
   final RxBool _stateFlashCameraScanBarCode = false.obs;
@@ -273,6 +271,10 @@ class SalesController extends GetxController {
   final RxBool _stateConfirmPurchase = false.obs;
   bool get getStateConfirmPurchase => _stateConfirmPurchase.value;
   set setStateConfirmPurchase(bool value) => _stateConfirmPurchase.value = value;
+  // stete ticket confirm purchase ticket complete
+  final RxBool _stateConfirmPurchaseComplete = false.obs;
+  bool get getStateConfirmPurchaseComplete => _stateConfirmPurchaseComplete.value;
+  set setStateConfirmPurchaseComplete(bool value) => _stateConfirmPurchaseComplete.value = value;
 
   // state ticket view
   final RxBool _ticketView = false.obs;
@@ -319,20 +321,23 @@ class SalesController extends GetxController {
     }
     
     // set firestore : guarda la transacción
-    Database.refFirestoretransactions(idAccount: homeController.getIdAccountSelected).doc(getTicket.id).set(getTicket.toJson());
-    
-    for (dynamic data in getTicket.listPoduct) { 
-      // obj
-      ProductCatalogue product = ProductCatalogue.fromMap(data as Map<String, dynamic>);
+    Database.refFirestoretransactions(idAccount: homeController.getIdAccountSelected).doc(getTicket.id).set(getTicket.toJson()).whenComplete((){
+      // incrementamos la cantidad de venta y descrementamos el stock de los productos del catálogo
+      for (dynamic data in getTicket.listPoduct) { 
+        // obj
+        ProductCatalogue product = ProductCatalogue.fromMap(data as Map<String, dynamic>);
 
-      // set firestore : hace un incremento de las ventas del producto
-      Database.dbProductStockSalesIncrement(idAccount: homeController.getIdAccountSelected,idProduct: product.id,quantity: product.quantity );
-      // set firestore : hace un descremento en el valor 'stock' del producto si es que tiene stock habilitado
-      if (product.stock && homeController.getIsSubscribedPremium ) {
-        // set firestore : hace un descremento en el valor 'stock'
-        Database.dbProductStockDecrement(idAccount: homeController.getIdAccountSelected,idProduct: product.id,quantity: product.quantity);
+        // firestore : hace un incremento de las ventas del producto
+        Database.dbProductStockSalesIncrement(idAccount: homeController.getIdAccountSelected,idProduct: product.id,quantity: product.quantity );
+        // condition :  hace un descremento en el valor 'stock' del producto si es que tiene stock habilitado
+        if (product.stock && homeController.getIsSubscribedPremium ) {
+          //  firestore : hace un descremento en el valor 'stock'
+          Database.dbProductStockDecrement(idAccount: homeController.getIdAccountSelected,idProduct: product.id,quantity: product.quantity);
+        }
       }
-    }
+      setStateConfirmPurchaseComplete = true;
+    });
+    
   }
 
   // FUCTIONS 
@@ -352,18 +357,21 @@ class SalesController extends GetxController {
  
     // Escanner Code - Abre en pantalla completa la camara para escanear el código
     try {
+      //  var
       late String barcodeScanRes;
-      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-        "#ff6666",
-        "Cancel",
-        true,
-        ScanMode.BARCODE,
-      );
-      if(barcodeScanRes == '-1'){ return;}
+      // scan
+      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode('#ff6666','Cancel',true,ScanMode.BARCODE);
+      if(barcodeScanRes == '-1'){ 
+        setStateViewBarCodeScan = false;
+        return;
+      }else{
+        setStateViewBarCodeScan = true;
+      }
       // sound
       playSoundScan();
       // verifica el código de barra
       verifyExistenceInSelectedScanResult(id:barcodeScanRes);
+    
     } on PlatformException {
       Get.snackbar('scanBarcode', 'Failed to get platform version');
     } 
@@ -405,12 +413,19 @@ class SalesController extends GetxController {
         coincidence = true;
         update();
         animateAdd();
+        
       }
     }
     
     if (coincidence == false) {
       // el producto no esta en la lista de productos seleccionados del ticket
       verifyExistenceInCatalogue(id: id);
+    }else{ 
+      if( getStateViewBarCodeScan){ 
+        Future.delayed(const Duration(milliseconds:500),(){
+          scanBarcodeNormal();
+        });
+      }
     }
   }
 
@@ -418,6 +433,7 @@ class SalesController extends GetxController {
     // verificamos si el producto esta en el catálogo de productos de la cuenta
     bool coincidence = false;
     final listCatalogue =  homeController.getCataloProducts..toList();
+    // recorremos la lista de productos del catálogo para verificar si el producto se encuentra
     for (final ProductCatalogue product in listCatalogue) {
       // si el producto se encuentra en el cátalgo de la cuenta se agrega a la lista de productos seleccionados
       if (product.id == id) {
@@ -429,6 +445,12 @@ class SalesController extends GetxController {
     // si el producto no se encuentra en el cátalogo de la cuenta se va consultar en la base de datos de productos publicos
     if (coincidence == false) {
       queryProductDbPublic(id: id);
+    }else{
+      if( getStateViewBarCodeScan){ 
+        Future.delayed(const Duration(milliseconds:500),(){
+          scanBarcodeNormal();
+        });
+      }
     }
   }
 
@@ -511,12 +533,16 @@ class SalesController extends GetxController {
     // el [Usuario] procede a confirmar la venta del ticket 
     //
 
+    // el usuario confirmo su venta
+    setStateConfirmPurchase = true;  
+
     // condition : registramos la venta si el usuario esta logueado
     if(homeController.getUserAnonymous == false){
       registerTransaction();
-    }  
-    // el usuario confirmo su venta
-    setStateConfirmPurchase = true;  
+    }else{
+      setStateConfirmPurchaseComplete = true;
+    }
+    
   }
 
   void showDialogAddProductNew({ required ProductCatalogue productCatalogue}) {
@@ -1002,31 +1028,37 @@ class _NewProductViewState extends State<NewProductView> {
     // button 
     final Widget buttonConfirm = Padding(
       padding: const EdgeInsets.all(12.0),
-      child:ComponentApp().button(
+      child:  ComponentApp().button(
         onPressed: () {
-            // variables de condiciones
-            bool conditionDescription = widget.productCatalogue.verified?true:descriptionFormKey.currentState!.validate();
-            bool conditionPrice = priceFormKey.currentState!.validate();
-            // condition : validamos los campos del formulario
-            if (  conditionPrice && conditionDescription) {
-              // set 
-              widget.productCatalogue.description = controllerTextEditDescripcion.text;
-              widget.productCatalogue.salePrice = controllerTextEditPrecioVenta.numberValue;
-              //
-              // condition : si el usuario quiere agregar el producto a la lista de productos del catálogo
-              // entonces lo agregamos a la lista de productos del catálogo y a la colección de productos publica de la DB
-              //
-              if(checkAddCatalogue && homeController.getUserAnonymous == false){
-                // add product to catalogue
-                homeController.addProductToCatalogue(product: widget.productCatalogue,isProductNew: isProductNew);
-              }
-              // add : agregamos el producto a la lista de productos seleccionados
-              salesController.addProductsSelected(product: widget.productCatalogue);
-              // close dialog
-              Get.back();
+          // variables de condiciones
+          bool conditionDescription = widget.productCatalogue.verified?true:descriptionFormKey.currentState!.validate();
+          bool conditionPrice = priceFormKey.currentState!.validate();
+          // condition : validamos los campos del formulario
+          if (  conditionPrice && conditionDescription) {
+            // set 
+            widget.productCatalogue.description = controllerTextEditDescripcion.text;
+            widget.productCatalogue.salePrice = controllerTextEditPrecioVenta.numberValue;
+            //
+            // condition : si el usuario quiere agregar el producto a la lista de productos del catálogo
+            // entonces lo agregamos a la lista de productos del catálogo y a la colección de productos publica de la DB
+            //
+            if(checkAddCatalogue && homeController.getUserAnonymous == false){
+              // add product to catalogue
+              homeController.addProductToCatalogue(product: widget.productCatalogue,isProductNew: isProductNew);
             }
-          },
-          text: 'Confirmar',
+            // add : agregamos el producto a la lista de productos seleccionados
+            salesController.addProductsSelected(product: widget.productCatalogue);
+            // close dialog
+            Get.back();
+            // condition  : si el usuario no cancelo el escaneo consecutivo 
+            if(salesController.getStateViewBarCodeScan){ 
+              Future.delayed(const Duration(milliseconds:500),(){
+                salesController.scanBarcodeNormal();
+              });
+            }
+          }
+        },
+        text: 'Confirmar',
       ), 
     );
     
@@ -1059,6 +1091,7 @@ class _NewProductViewState extends State<NewProductView> {
             widgetTextFieldPrice,
             // widget :  permiso para guardar el producto nuevo en mi cátalogo (app catalogo)
             Padding(padding: const EdgeInsets.all(12.0),child: checkboxAddProductToCatalogue),
+            // button 
             SizedBox(width: double.infinity,child: buttonConfirm),
           ],
         ),
@@ -1146,14 +1179,14 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
             for (Mark element in homeController.getMarkList)
               // chip
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal:3),
+                padding: const EdgeInsets.symmetric(horizontal:2,vertical:1),
                 child: GestureDetector(
                   onTap: (){
                     // set query
                     query = element.name;
                   },
                   child: Chip(  
-                    avatar: element.image==''?null:CircleAvatar(backgroundImage: NetworkImage(element.image),),
+                    avatar: element.image==''?null:CircleAvatar(backgroundImage: NetworkImage(element.image),backgroundColor:primaryTextColor.withOpacity(0.1) ),
                     label: Text(element.name,style: textStyleSecundary), 
                     shape: RoundedRectangleBorder(side: BorderSide(color: primaryTextColor.withOpacity(0.5)),borderRadius: BorderRadius.circular(5)),
                     backgroundColor: Colors.transparent,   
