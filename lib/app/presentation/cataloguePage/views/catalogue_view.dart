@@ -139,7 +139,7 @@ class CataloguePage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         TextButton(onPressed:()=>homeController.showModalBottomSheetSubcription(id: 'stock'), child: const  Text('Controla tu inventario')),
-                        LogoPremium(id: 'stock',personalize: true,accentColor: Colors.amber),
+                        LogoPremium(id: 'stock'),
                       ],
                     ),
                   ),
@@ -354,12 +354,12 @@ class CataloguePage extends StatelessWidget {
         // text : monto de la ganancia
         item.getBenefits==''?Container():Text(item.getBenefits,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w300)),
         // text : porcentaje de ganancia
-        item.getPorcentage==''?Container():Opacity(opacity:0.7,
+        item.getPorcentageFormat==''?Container():Opacity(opacity:0.7,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               const Icon(Icons.arrow_upward_rounded,size: 14,color: Colors.green),
-              Text(item.getPorcentage,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w300)),
+              Text(item.getPorcentageFormat,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w300)),
             ],
           )),
         // text : precio de venta

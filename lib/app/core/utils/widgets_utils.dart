@@ -600,12 +600,47 @@ Widget body({required BuildContext context}){
             //  redireccionara para la tienda de aplicaciones
             await launchUrl(uri,mode: LaunchMode.externalApplication);
           },
-        ), 
-        //  option :  cambiar el brillo del tema de la app
-        ListTile(
-          leading: Icon(Theme.of(context).brightness==Brightness.dark?Icons.light_mode_outlined:Icons.mode_night_outlined),
-          title: Text(Theme.of(context).brightness==Brightness.dark?'Tema claro':'Tema oscuro'),
-          onTap: ()=> ThemeService.switchTheme,
+        ),  
+        const SizedBox(height: 20),
+        // view : dos [textbutton] para cambiar el brillo de la aplicacion
+        Row(
+          children: [
+            // textbutton : tema claro
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: TextButton.icon(
+                  onPressed: () => {
+                    if(Theme.of(context).brightness==Brightness.dark){
+                      ThemeService.switchTheme
+                    } 
+                  }, 
+                  icon: Icon(  Icons.light_mode ,color: Theme.of(context).brightness==Brightness.light?Colors.blue:Colors.black54),
+                  label: Text('Claro',style: TextStyle(color: Theme.of(context).brightness==Brightness.light?Colors.blue:Colors.black54)),
+                ),
+              ),
+            ),
+            // textbutton : tema oscuro 
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: TextButton(
+                  onPressed: () => {
+                    if(Theme.of(context).brightness==Brightness.light){
+                      ThemeService.switchTheme
+                    } 
+                  },
+                  child: Row(
+                    children: [
+                      Icon(Icons.nightlight,color: Theme.of(context).brightness==Brightness. dark?Colors.blue:Colors.black54,),
+                      const SizedBox(width: 5),
+                      Text('Oscuro',style: TextStyle(color: Theme.of(context).brightness==Brightness.dark?Colors.blue:Colors.black54),),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       const SizedBox(height: 20)
       ],
@@ -916,29 +951,29 @@ class LogoPremium extends StatelessWidget {
   late bool visible;
   late double size;
   late Color accentColor;
+  late Color backgroundColor;
   late final bool personalize;
   late String id;
 
-  LogoPremium({Key? key,this.personalize=false,this.accentColor=Colors.amber,this.size=14,this.visible=false,this.id='premium'}) : super(key: key);
+  LogoPremium({Key? key,this.personalize=false,this.backgroundColor=Colors.amber,this.accentColor=Colors.white,this.size=14,this.visible=false,this.id='premium'}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
 
     // others controllers
-    final HomeController homeController = Get.find();
-    
-    // value
-    if( personalize  == false ){ 
-      // valores por defecto
-      accentColor = Theme.of(context).brightness==Brightness.dark?Colors.white70:Colors.black87; 
-    }
+    final HomeController homeController = Get.find(); 
+    bool isDarkMode = Get.theme.brightness == Brightness.dark;
+
+    backgroundColor = isDarkMode?Colors.black26:backgroundColor;
+    accentColor = isDarkMode?Colors.amber:accentColor;
 
 
     return Padding(
       padding: const EdgeInsets.all(2.0),
       child: Material( 
         clipBehavior: Clip.antiAlias,
-        color: Theme.of(context).brightness==Brightness.dark?Colors.black26:Colors.amber.shade50,
+        // background color
+        color:backgroundColor,
         borderRadius: const BorderRadius.all(Radius.circular(6.0)),
         child: InkWell(
           onTap: () => homeController.showModalBottomSheetSubcription(id:id ),

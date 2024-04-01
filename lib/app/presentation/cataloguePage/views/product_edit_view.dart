@@ -158,7 +158,7 @@ class ProductEdit extends StatelessWidget {
                 children: [
                   const Icon(Icons.new_releases_outlined),
                   const SizedBox(width: 8),
-                  Text(controller.getMessageNotification,style: const TextStyle(fontWeight: FontWeight.w400)),
+                  Text( controller.getMessageNotification ,style: const TextStyle(fontWeight: FontWeight.w400)),
                 ],
               ),
               // view : item de actualizacion de producto desde la base de datos publica
@@ -420,12 +420,12 @@ class ProductEdit extends StatelessWidget {
                       checkColor: Colors.white,
                       activeColor: Colors.blue,
                       value: controller.homeController.getIsSubscribedPremium?controller.getStock:false,
-                      title: Text(controller.getHomeController.getIsSubscribedPremium?controller.getStock?'Quitar control de stock':'Agregar control de stock':'Control de stock'),
+                      title: const Text('Control de stock'),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          controller.getHomeController.getIsSubscribedPremium?Container():LogoPremium(personalize: true,id: 'stock'),
-                          controller.getStock?Container():const Opacity(opacity: 0.5,child: Text('Controla el inventario de este producto')),
+                          controller.getHomeController.getIsSubscribedPremium?Container():LogoPremium(id: 'stock'),
+                          const Opacity(opacity: 0.5,child: Text('Controla el inventario de este producto')),
                         ],
                       ), 
                       onChanged: (value) {
@@ -441,16 +441,13 @@ class ProductEdit extends StatelessWidget {
                         }
                         
                       },
-                    ),  
-                    ComponentApp().divider(),
+                    ),    
+                    // spacer
                     controller.getStock && controller.homeController.getIsSubscribedPremium? space : Container(), 
+                    // view : entradas de valores del stock
                     controller.getStock && controller.homeController.getIsSubscribedPremium?Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Padding(
-                          padding: EdgeInsets.only(left: 12.0,bottom: 12),
-                          child: Opacity(opacity: 0.5,child: Text('Controla el inventario de este producto')),
-                        ),
+                      children: [ 
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 12,),
                           child: Form(
@@ -467,8 +464,7 @@ class ProductEdit extends StatelessWidget {
                                 border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                                 enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
                               ),
-                              textInputAction: TextInputAction.done,
-                              //style: textStyle,
+                              textInputAction: TextInputAction.done, 
                               controller: controller.controllerTextEditQuantityStock,
                               // validator: validamos el texto que el usuario ha ingresado.
                               validator: (value) {
@@ -480,24 +476,24 @@ class ProductEdit extends StatelessWidget {
                         ),
                         space,
                         Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
-                              child: TextField(
-                                style: valueTextStyle,
-                                enabled: !controller.getLoadingData,
-                                keyboardType: TextInputType.number,
-                                onChanged: (value) =>controller.setAlertStock = int.parse(controller.controllerTextEditAlertStock.text),
-                                decoration: InputDecoration(
-                                  filled: true,fillColor: fillColor,hoverColor: Colors.blue,
-                                  disabledBorder: InputBorder.none,
-                                  labelText: "Alerta de stock (opcional)", 
-                                  border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
-                                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
-                                ),
-                                textInputAction: TextInputAction.done,
-                                //style: textStyle,
-                                controller: controller.controllerTextEditAlertStock,
-                              ),
-                            ) ,
+                          padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
+                          child: TextField(
+                            style: valueTextStyle,
+                            enabled: !controller.getLoadingData,
+                            keyboardType: TextInputType.number,
+                            onChanged: (value) => controller.setAlertStock = int.parse(controller.controllerTextEditAlertStock.text),
+                            decoration: InputDecoration(
+                              filled: true,fillColor: fillColor,hoverColor: Colors.blue,
+                              disabledBorder: InputBorder.none,
+                              labelText: "Alerta de stock (opcional)", 
+                              border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
+                            ),
+                            textInputAction: TextInputAction.done,
+                            //style: textStyle,
+                            controller: controller.controllerTextEditAlertStock,
+                          ),
+                        ) ,
                       ],
                     ):Container(),
                   ],

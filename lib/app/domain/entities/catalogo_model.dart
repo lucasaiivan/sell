@@ -478,7 +478,7 @@ class ProductCatalogue {
   }
   
   // Fuction
-  String get getPorcentage{
+  String get getPorcentageFormat{
     // description : obtenemos el porcentaje de las ganancias
     if ( purchasePrice == 0 || salePrice == 0) {
       return '';
@@ -488,10 +488,18 @@ class ProductCatalogue {
     double porcentajeDeGanancia = (ganancia / purchasePrice) * 100;
     
     if (ganancia % 1 != 0) {
-      return '${porcentajeDeGanancia.toStringAsFixed(2)}%';
+      return '${porcentajeDeGanancia.toInt()}%';
     } else {
       return '${porcentajeDeGanancia.toInt()}%';
     }
+  }
+  int get getPorcentageValue{
+    // description : obtenemos el porcentaje de las ganancias
+    if ( purchasePrice == 0 || salePrice == 0) { return 0; } 
+    double ganancia = salePrice - purchasePrice;
+    double porcentajeDeGanancia = (ganancia / purchasePrice) * 100; 
+    return porcentajeDeGanancia.toInt();
+
   }
   String get getBenefits{
     // description : obtenemos las ganancias 

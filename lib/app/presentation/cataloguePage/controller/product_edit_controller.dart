@@ -327,7 +327,7 @@ class ControllerProductsEdit extends GetxController {
 
     
     if (ganancia % 1 != 0) {
-      return '${porcentajeGanancia.toStringAsFixed(2)}%';
+      return '${porcentajeGanancia.toInt()}%';
     } else {
       return '${porcentajeGanancia.toInt()}%';
     }
@@ -651,13 +651,21 @@ class ControllerProductsEdit extends GetxController {
 
     //var 
     final ButtonStyle buttonStyle = ButtonStyle(padding: MaterialStateProperty.all(const EdgeInsets.all(12)));
-    final TextEditingController controller = TextEditingController();
+    TextEditingController controller = TextEditingController(text: getProduct.getPorcentageValue.toString());
 
     // widgets
     Widget content = Scaffold(
       appBar: AppBar(
         title: const Text('Porcentaje de beneficio'), 
         automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () {
+              Get.back();
+            },
+          ),
+        ],
         ),
         body: Column(
           children: [
@@ -669,15 +677,19 @@ class ControllerProductsEdit extends GetxController {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: TextField(
-                      controller: controller,
+                      
+                      controller: controller, 
                       autofocus: true, 
                       keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                      // icoono de porcentaje
+
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp('[1234567890]'))
                       ],
                       decoration: const InputDecoration( 
                         hintText: '%',
                         labelText: "Porcentaje",
+                        prefixIcon: Icon(Icons.percent),
                       ),
                       style: const TextStyle(fontSize: 20.0),
                       textInputAction: TextInputAction.next,
