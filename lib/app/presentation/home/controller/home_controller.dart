@@ -73,7 +73,11 @@ class HomeController extends GetxController {
  
   // inicia la identificación de id de usario para revenuecat 
   void initIdentityRevenueCat() async {
-    //  configure el SDK de RevvenueCat con una ID de usuario de la aplicación personalizada  
+    //  ------------------------------------------------------------------------------------  //
+    //  configure el SDK de RevvenueCat con una ID de usuario de la aplicación personalizada  //
+    //  ------------------------------------------------------------------------------------  //
+
+    // var
     clientRevenueCatID= getProfileAccountSelected.id;  
     if(clientRevenueCatID == ''){
       // si no hay una cuenta seleccionada
@@ -95,13 +99,17 @@ class HomeController extends GetxController {
       // get : obtenemos los productos de compra
       result.customerInfo.entitlements.all.forEach((key, value) { 
         // conditionm : si la subcripcion es premium esta activa
-        if(key == entitlementID){ setIsSubscribedPremium = value.isActive; }  
+        if(key == entitlementID){ 
+          setIsSubscribedPremium = value.isActive;
+          Get.snackbar('RevenueCat', value.isActive?'Suscripción premium activa':'Suscripción premium inactiva');  
+        }  
       }); 
     }catch(e){
       // ignore: avoid_print
       print('Error en initIdentityRevenueCat: $e');
+      Get.snackbar('Error RevenueCat', 'Error en initIdentityRevenueCat: $e');
     }
-  }
+  } 
 
   // brillo de la pantalla
   bool _darkMode = false;
@@ -905,13 +913,14 @@ class HomeController extends GetxController {
   void showModalBottomSheetSubcription({String id = 'premium'}) {
     // bottomSheet : muestre la hoja inferior modal de getx
     Get.bottomSheet(
-      SizedBox(height: 600, 
-      child: WidgetBottomSheet(id: id)),
-      backgroundColor: Get.theme.scaffoldBackgroundColor,
-      isScrollControlled: true,
-      enableDrag: true,
-      isDismissible: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
+      SizedBox(
+        height: 600, 
+        child: WidgetBottomSheet(id: id)),
+        backgroundColor: Get.theme.scaffoldBackgroundColor,
+        isScrollControlled: true,
+        enableDrag: true,
+        isDismissible: true,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
     );
   }
 }
@@ -995,9 +1004,7 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
 
     // values
     Color colorCard = Get.isDarkMode?Get.theme.scaffoldBackgroundColor:const Color.fromARGB(255, 243, 238, 228); 
-    setData(id: widget.id);
- 
- 
+    setData(id: widget.id); 
 
     return Card(
       margin: const EdgeInsets.all(0),
@@ -1110,6 +1117,17 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
               const SizedBox(height:200),
             ],
           ),
+          // icon : cerrar dialog
+          Positioned(
+            top: 0,
+            right: 0,
+            child: IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () {
+                Get.back();
+              },
+            ),
+          ),
           // view : buton para subcribirse a Premium en la app 
           //
           // Positioned : para posicionar el boton en la parte inferior de la pantalla
@@ -1117,23 +1135,9 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
             bottom: 0,left: 0,right: 0,
             child: Container(   
               // color : gradient de un color y transparent 
-              decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.transparent,Theme.of(context).scaffoldBackgroundColor.withOpacity(0.5)], begin: Alignment.topCenter,end: Alignment.bottomCenter),),
+              decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.transparent,Theme.of(context).scaffoldBackgroundColor ], begin: Alignment.topCenter,end: Alignment.bottomCenter,stops: const [0.0,0.6])),
               // condition : comprobar que 'offerings' esta inicializado
-              child:  true ?// homeController.offerings==null? 
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ComponentApp().button(
-                  elevation: 0,
-                  colorButton: Colors.yellow.shade700 ,
-                  onPressed: () { 
-                    homeController.setIsSubscribedPremium = true;
-                    Get.back();
-                  },
-                  text: 'Subscribirse a Premium',
-                  fontSize: 18,
-                ),
-              )
-                :Column(
+              child: Column(
                 children: [
                   ListView.builder(
                     physics: const BouncingScrollPhysics(),

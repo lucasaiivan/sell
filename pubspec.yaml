@@ -48,7 +48,7 @@ dependencies:
   # Google Pay
   in_app_review: ^2.0.8
   # RevanueCat  
-  purchases_flutter: ^6.21.0 # Un complemento de Flutter para la API de compras de RevenueCat.
+  purchases_flutter: ^6.25.0 # Un complemento de Flutter para la API de compras de RevenueCat.
 
   # state controller
   get: ^4.6.6 # GetX es una solución potente y extraligera para Flutter. Combina la gestión del estado de alto rendimiento, la inyección inteligente de dependencias y la gestión de rutas de forma rápida y práctica.

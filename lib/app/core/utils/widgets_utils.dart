@@ -506,7 +506,17 @@ Widget body({required BuildContext context}){
     
     return ListView( 
       children: [
-        const SizedBox(height: 50),
+        Row(
+          children: [
+            const Spacer(),
+            // icon : cambia el tema de la  app
+            IconButton(
+              onPressed: () => ThemeService.switchTheme,
+              icon: Icon(Theme.of(context).brightness == Brightness.dark?Icons.light_mode:Icons.nightlight),
+            ),
+            const SizedBox(width: 10),
+          ],
+        ),
         isAnonymous?textButtonLogin
           :ListTile(
           leading: Container(padding: const EdgeInsets.all(0.0),child: ComponentApp().userAvatarCircle(urlImage: homeController.getProfileAccountSelected.image)),
@@ -514,23 +524,22 @@ Widget body({required BuildContext context}){
           subtitle: homeController.getIdAccountSelected == ''? null: Row(
             crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment:  MainAxisAlignment.start,
             children: [
-              user.name==''?Container():const Flexible(child: Text( 'ivan de turno manana',overflow: TextOverflow.ellipsis,maxLines: 1)),
-              // view : punto de seracion
-              user.name==''?Container():const Icon(Icons.arrow_right_rounded), 
-              Text( user.admin? 'Administrador': 'Usuario estandar',overflow: TextOverflow.ellipsis,maxLines: 1),
+              user.name==''?Container():Flexible(child: Text(user.name,overflow: TextOverflow.ellipsis,maxLines: 1)),
             ],
           ),
-          trailing: const Icon(Icons.arrow_forward_ios_rounded),
+          trailing: const Icon(Icons.arrow_right),
           onTap: () {
             homeController.showModalBottomSheetSelectAccount();
           },
         ),  
+        // ----------------- //
         // funciones premium //
+        // ----------------- //
         // condition : si el usuario de la cuenta no es administrador no se muestra el boton de suscribirse a premium
         user.admin==false?Container():
         isAnonymous?Container():
           ListTile(
-            tileColor: homeController.getIsSubscribedPremium?null:Colors.amber.withOpacity(0.05),
+            tileColor: Colors.amber.withOpacity(homeController.getIsSubscribedPremium?0.02:0.05),
             iconColor:  Colors.amber, 
             //titleTextStyle: const TextStyle(fontWeight: FontWeight.bold),
               leading: const Icon(Icons.star_rounded),
@@ -539,7 +548,7 @@ Widget body({required BuildContext context}){
                 // action : mostrar modal bottom sheet con  las funciones premium
                 homeController.showModalBottomSheetSubcription();
               }),
-        isAnonymous?Container():const Opacity(opacity: 0.3,child: Divider(height:0)),
+        isAnonymous?const Opacity(opacity: 0.3,child: Divider(height:0)):Container(),
         const SizedBox(height: 20),
         // vender 
         ListTile(
@@ -600,49 +609,8 @@ Widget body({required BuildContext context}){
             //  redireccionara para la tienda de aplicaciones
             await launchUrl(uri,mode: LaunchMode.externalApplication);
           },
-        ),  
-        const SizedBox(height: 20),
-        // view : dos [textbutton] para cambiar el brillo de la aplicacion
-        Row(
-          children: [
-            // textbutton : tema claro
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: TextButton.icon(
-                  onPressed: () => {
-                    if(Theme.of(context).brightness==Brightness.dark){
-                      ThemeService.switchTheme
-                    } 
-                  }, 
-                  icon: Icon(  Icons.light_mode ,color: Theme.of(context).brightness==Brightness.light?Colors.blue:Colors.black54),
-                  label: Text('Claro',style: TextStyle(color: Theme.of(context).brightness==Brightness.light?Colors.blue:Colors.black54)),
-                ),
-              ),
-            ),
-            // textbutton : tema oscuro 
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: TextButton(
-                  onPressed: () => {
-                    if(Theme.of(context).brightness==Brightness.light){
-                      ThemeService.switchTheme
-                    } 
-                  },
-                  child: Row(
-                    children: [
-                      Icon(Icons.nightlight,color: Theme.of(context).brightness==Brightness. dark?Colors.blue:Colors.black54,),
-                      const SizedBox(width: 5),
-                      Text('Oscuro',style: TextStyle(color: Theme.of(context).brightness==Brightness.dark?Colors.blue:Colors.black54),),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      const SizedBox(height: 20)
+        ),   
+        const SizedBox(height: 20)
       ],
     );
   }

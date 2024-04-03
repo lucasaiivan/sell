@@ -336,6 +336,8 @@ class SalesController extends GetxController {
         }
       }
       setStateConfirmPurchaseComplete = true;
+      // set : default values  
+      setTicket = TicketModel(creation: Timestamp.now(), listPoduct: []);
     });
     
   }

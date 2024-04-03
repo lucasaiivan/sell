@@ -125,7 +125,7 @@ class SalesView extends StatelessWidget {
       //  LayoutBuilder : control de vista
       body: LayoutBuilder(builder: (context, constraints) {
         // var : logica de la vista para la web
-        int crossAxisCount = constraints.maxWidth<700?3:constraints.maxWidth<900?4:5;
+        int crossAxisCount = constraints.maxWidth<700?3:constraints.maxWidth<900?4:6;
 
         return GridView.builder( 
           padding: const EdgeInsets.all(12),
@@ -133,7 +133,7 @@ class SalesView extends StatelessWidget {
               crossAxisCount: crossAxisCount,
               crossAxisSpacing: 1.0,
               mainAxisSpacing: 1.0),
-          itemCount: controller.getTicket.listPoduct.length + 15,
+          itemCount: controller.getTicket.listPoduct.length + 18,
           itemBuilder: (context, index) {
             // mostramos un número de elementos vacíos de los cuales el primero tendrá un icono 'add'
             List list = controller.getTicket.listPoduct.reversed.toList();
@@ -778,25 +778,7 @@ class SalesView extends StatelessWidget {
                       color: background.withOpacity(0.0),
                       child: Column( 
                         children: [
-                          const SizedBox(height: 20),
-                          // elevateButton : boton con un icon y un texto  que diga 'Recibo'
-                          /* ComponentApp().button( 
-                            elevation: 0,
-                            text: 'Recibo',
-                            colorAccent: buttomReceiptAccentColor,
-                            padding: const EdgeInsets.symmetric(horizontal: 12,vertical:5),
-                            icon: Icon(salesController.homeController.getIsSubscribedPremium==false?Icons.star_rounded:Icons.receipt_long_outlined,color: buttomReceiptAccentColor),
-                            colorButton: buttomReceiptColor,  
-                            onPressed: () {
-                              if(salesController.homeController.getIsSubscribedPremium==false){
-                                homeController.showModalBottomSheetSubcription();
-                              }else{
-                                //views 
-                                salesController.setStateConfirmPurchase = false;
-                                salesController.setTicketView = false; 
-                              }
-                            },
-                          ),  */
+                          const SizedBox(height: 20), 
                           // elevateButton : boton con un icon y un texto  que diga 'ok'
                           !salesController.getStateConfirmPurchaseComplete?
                             const CircularProgressIndicator()
@@ -811,8 +793,7 @@ class SalesView extends StatelessWidget {
                               salesController.setStateConfirmPurchase = false;
                               salesController.setTicketView = false; 
                               salesController.setStateConfirmPurchaseComplete = false;
-                              // set : default values  
-                              salesController.setTicket = TicketModel(creation: Timestamp.now(), listPoduct: []);
+                              
                             },
                           ), 
                         const SizedBox(height: 20), 
