@@ -44,7 +44,7 @@ class HistoryCashRegisterView extends StatelessWidget {
       title: const Text('Historial de caja', textAlign: TextAlign.center),
       actions: [
         PopupMenuButton( 
-            icon:ComponentApp().buttonAppbar(
+            icon: ComponentApp().buttonAppbar(
               context: context,
               text: historyCashRegisterController.getTextFilter,
               iconTrailing: Icons.filter_list,  
@@ -55,6 +55,7 @@ class HistoryCashRegisterView extends StatelessWidget {
             itemBuilder: (BuildContext ctx) => [
                   const PopupMenuItem(value: 'Hoy', child: Text('Hoy')),
                   const PopupMenuItem(value: 'Ayer', child: Text('Ayer')),
+                  const PopupMenuItem(value: 'Últimos 7 Días', child: Text('Últimos 7 Días')),
                   // opciones premium //
                   historyCashRegisterController.homeController.getIsSubscribedPremium?const PopupMenuItem(child: null,height: 0):const PopupMenuItem(value: 'premium', child: Text('Opciones Premium',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.amber))),
                   PopupMenuItem(value: 'Últimos 30 Días',enabled: historyCashRegisterController.homeController.getIsSubscribedPremium, child: const Text('Últimos 30 Días')),

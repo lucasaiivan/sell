@@ -42,25 +42,30 @@ class CataloguePage extends StatelessWidget {
     return AppBar(
       elevation: 0,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      title: Text(catalogueController.getTextTitleAppBar),
+      //title: Text(catalogueController.getTextTitleAppBar),
+      title: ComponentApp().buttonAppbar(
+        context:  context,
+        onTap: () => catalogueController.showSeach(context: context), 
+        text: 'Cátalogo',
+        iconLeading: Icons.search,
+        colorBackground: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+        colorAccent: Theme.of(context).textTheme.bodyLarge?.color,
+        ),
       // bottom : vista de productos seleccionados
       bottom: catalogueController.buttonAppBar,
-      actions: [
-        // iconButton : buscar un producto del cátalogo
-        IconButton(icon: const Icon(Icons.search),onPressed: (() => catalogueController.showSeach(context: context))),
+      actions: [ 
         // buttons : filter list
-        catalogueController.filterState?IconButton(onPressed: catalogueController.catalogueFilter, icon: const Icon(Icons.close),padding: const EdgeInsets.all(0))
-        : PopupMenuButton( 
+        PopupMenuButton( 
           icon: ComponentApp().buttonAppbar(
             context: context,
-            text: 'Filtrar',
+            text:  catalogueController.getTextFilter,
             iconTrailing: Icons.filter_list,  
           ), 
             onSelected: (selectedValue) => catalogueController.popupMenuButtonCatalogueFilter(key: selectedValue),
             itemBuilder: (BuildContext ctx) => [
                   const PopupMenuItem(value: '0', child: Text('Mostrar todos')),
                   const PopupMenuItem(value: '2', child: Text('Mostrar favoritos')),
-                  const PopupMenuItem(value: '5', child: Text('Hace más de 5 meses')),
+                  const PopupMenuItem(value: '5', child: Text('Actualizado hace más de 5 meses')),
                   homeController.getIsSubscribedPremium?const PopupMenuItem(child: null,height: 0): const PopupMenuItem(value: 'premium',child: Text('Opciones Premium',style: TextStyle(color: Colors.amber,fontWeight: FontWeight.w600),)),
                   PopupMenuItem(value: '1',enabled: catalogueController.homeController.getIsSubscribedPremium, child: const Text('Mostrar con stock')),
                   PopupMenuItem(value: '3',enabled: catalogueController.homeController.getIsSubscribedPremium, child: const Text('Mostrar con stock bajos')),

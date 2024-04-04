@@ -111,7 +111,7 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
                     setQuery = element.name;
                   },
                   child: Chip( 
-                    avatar: element.image==''?null:CircleAvatar(backgroundImage: NetworkImage(element.image),),
+                    avatar: element.image==''?null:CircleAvatar(backgroundImage: NetworkImage(element.image),backgroundColor:Colors.black.withOpacity(0.06)),
                     label: Text(element.name,style: textStyleSecundary), 
                     shape: RoundedRectangleBorder(side: BorderSide(color: primaryTextColor.withOpacity(0.5)),borderRadius: BorderRadius.circular(5)),
                     backgroundColor: Colors.transparent,   
@@ -277,7 +277,15 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(product.description,maxLines: 1,overflow: TextOverflow.ellipsis,style: const TextStyle(fontWeight: FontWeight.w500)),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // icon : favorito
+                            product.favorite?const Icon(Icons.star_rounded,color: Colors.amber,size: 14,):Container(),
+                            // text : nombre del producto
+                            Text(product.description,maxLines: 1,overflow: TextOverflow.ellipsis,style: const TextStyle(fontWeight: FontWeight.w500)),
+                          ],
+                        ),
                         // view : marca del producto y proveedor
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,

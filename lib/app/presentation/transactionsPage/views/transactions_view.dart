@@ -335,6 +335,7 @@ class TransactionInfoView extends StatelessWidget {
     // var 
     Map payModeMap =transactionsController.getPayMode(idMode: payMode);
     // styles
+    Color separatorColor = Colors.black.withOpacity(0.03);
     bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     const double opacity = 0.8; 
     Widget spacer = const SizedBox(height:6);
@@ -403,12 +404,15 @@ class TransactionInfoView extends StatelessWidget {
                 ],
               ), 
               spacer,
-              Row(
-                children: <Widget>[
-                  Opacity(opacity:opacity,child: Text("Fecha: ",style: textStyleDescription)),
-                  const Spacer(),
-                  Text(formattedCreationDate,style: textStyleValue,overflow:TextOverflow.ellipsis)
-                ],
+              Container(
+                color: separatorColor,
+                child: Row(
+                  children: <Widget>[
+                    Opacity(opacity:opacity,child: Text("Fecha: ",style: textStyleDescription)),
+                    const Spacer(),
+                    Text(formattedCreationDate,style: textStyleValue,overflow:TextOverflow.ellipsis)
+                  ],
+                ),
               ),
               spacer,
               Row(
@@ -419,12 +423,15 @@ class TransactionInfoView extends StatelessWidget {
                 ],
               ), 
               spacer,
-              Row(
-                children: <Widget>[
-                  Opacity(opacity:opacity,child: Text("Caja: ",style: textStyleDescription)),
-                  const Spacer(),
-                  Text(cashRegister,style: textStyleValue),
-                ],
+              Container(
+                color: separatorColor,
+                child: Row(
+                  children: <Widget>[
+                    Opacity(opacity:opacity,child: Text("Caja: ",style: textStyleDescription)),
+                    const Spacer(),
+                    Text(cashRegister,style: textStyleValue),
+                  ],
+                ),
               ),
               spacer,
               Row(

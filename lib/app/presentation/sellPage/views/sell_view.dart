@@ -835,8 +835,7 @@ class SalesView extends StatelessWidget {
           heroTag: 'uniqueTag2',
           key: homeController.floatingActionButtonScanCodeBarKey,
           backgroundColor: Colors.blue,
-          onPressed: (){
-            // controller.setStateViewBarCodeScan = !controller.getStateViewBarCodeScan; 
+          onPressed: (){ 
             controller.scanBarcodeNormal(); 
           },
           child: SizedBox(width: 30,height: 30,child: Image.asset('assets/scanbarcode.png',color: Colors.white) ),
@@ -1052,12 +1051,12 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
       children: [
         const SizedBox(height: 12),
         // textfield : efectivo inicial de la caja
-        const Text('Escriba el monto',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400)),
+        const Text('Escriba el monto', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400)),
         const SizedBox(height: 8),
         TextField(
           controller: moneyMaskedTextController,
           keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly], // Permite solo dígitos
           decoration: const InputDecoration(
             border: UnderlineInputBorder(),
             enabledBorder: UnderlineInputBorder(),
@@ -1113,6 +1112,7 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
 
   Widget get detailContent {
     // var
+    Color separatorColor = Colors.grey.withOpacity(0.04);
     ButtonStyle buttonStyle = ButtonStyle(
         backgroundColor:
             MaterialStateProperty.all(confirmCloseState ? Colors.blue : null),
@@ -1138,14 +1138,17 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
 
               // view info : fecha
               const SizedBox(height: 12),
-              Row(children: [
-                Text('Apertura', style: textStyleDescription),
-                const Spacer(),
-                Text(
-                    Publications.getFechaPublicacionFormating(
-                        dateTime: homeController.cashRegisterActive.opening),
-                    style: textStyleValue)
-              ]),
+              Container(
+                color: separatorColor,
+                child: Row(children: [
+                  Text('Apertura', style: textStyleDescription),
+                  const Spacer(),
+                  Text(
+                      Publications.getFechaPublicacionFormating(
+                          dateTime: homeController.cashRegisterActive.opening),
+                      style: textStyleValue)
+                ]),
+              ),
               // view info : efectivo incial
               const SizedBox(height: 12),
               Row(children: [
@@ -1158,12 +1161,15 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
               ]),
               // view info : cantidad de ventas
               const SizedBox(height: 12),
-              Row(children: [
-                Text('Ventas', style: textStyleDescription),
-                const Spacer(),
-                Text(homeController.cashRegisterActive.sales.toString(),
-                    style: textStyleValue)
-              ]),
+              Container(
+                color: separatorColor,
+                child: Row(children: [
+                  Text('Ventas', style: textStyleDescription),
+                  const Spacer(),
+                  Text(homeController.cashRegisterActive.sales.toString(),
+                      style: textStyleValue)
+                ]),
+              ),
               // view info : facturacion
               const SizedBox(height: 12),
               Row(children: [
@@ -1176,11 +1182,14 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
               ]),
               // view info : descuentos
               const SizedBox(height: 12),
-              Row(children: [
-                Text('Descuentos', style: textStyleDescription),
-                const Spacer(),
-                Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.discount),style: textStyleValue.copyWith(color: Colors.red.shade300))
-              ]),
+              Container(
+                color: separatorColor,
+                child: Row(children: [
+                  Text('Descuentos', style: textStyleDescription),
+                  const Spacer(),
+                  Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.discount),style: textStyleValue.copyWith(color: Colors.red.shade300))
+                ]),
+              ),
               // view info : egresos
               const SizedBox(height: 12),
               Row(children: [
@@ -1190,17 +1199,20 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
               ]),
               // view info : ingresos
               const SizedBox(height: 12),
-              Row(children: [
-                Text('Ingresos', style: textStyleDescription),
-                const Spacer(),
-                Text(
-                    Publications.getFormatoPrecio(
-                        monto: homeController.cashRegisterActive.cashInFlow),
-                    style: textStyleValue)
-              ]),
+              Container(
+                color: separatorColor,
+                child: Row(children: [
+                  Text('Ingresos', style: textStyleDescription),
+                  const Spacer(),
+                  Text(
+                      Publications.getFormatoPrecio(
+                          monto: homeController.cashRegisterActive.cashInFlow),
+                      style: textStyleValue)
+                ]),
+              ),
               // divider
               const SizedBox(height: 20),
-              ComponentApp().divider(thickness: 1),
+              ComponentApp().divider(thickness:0.5),
               // view info : monto esperado en la caja
               const SizedBox(height: 12),
               Row(children: [

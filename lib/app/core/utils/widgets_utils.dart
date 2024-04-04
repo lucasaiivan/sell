@@ -326,7 +326,7 @@ class _ProductoItemState extends State<ProductoItem> {
                   alignment: Alignment.topLeft,
                   child: IconButton(
                     onPressed: (){
-                     salesController.setIdProductSelected = widget.producto.id;
+                      salesController.setIdProductSelected = widget.producto.id;
                     },
                     icon: CircleAvatar(
                       backgroundColor: Colors.black,
@@ -439,23 +439,12 @@ class _ProductoItemState extends State<ProductoItem> {
         : Padding(
             padding: const EdgeInsets.all(5.0),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(widget.producto.description,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.normal,
-                        fontSize: 14.0,
-                        color: Colors.grey),
-                    overflow: TextOverflow.clip,
-                    softWrap: false),
-                Text(
-                    Publications.getFormatoPrecio(
-                        monto: widget.producto.salePrice *
-                            widget.producto.quantity),
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.0,
-                        color: Colors.black),
+                Text(widget.producto.description,style: const TextStyle(fontWeight: FontWeight.normal,fontSize: 14.0,color: Colors.grey),maxLines: 2),
+                Text( Publications.getFormatoPrecio(monto: widget.producto.salePrice * widget.producto.quantity),
+                    style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 17.0,color: Colors.black),
                     overflow: TextOverflow.clip,
                     softWrap: false),
               ],
@@ -583,7 +572,7 @@ Widget body({required BuildContext context}){
         user.multiuser || isAnonymous?ListTile(
           enabled: !isAnonymous,
           selected: homeController.getIndexPage == 4,
-          leading: const Icon(Icons.add_moderator_outlined),
+          leading: const Icon(Icons.group_add_outlined),
           trailing: homeController.getIndexPage != 4 ? null : const Icon(Icons.circle,size: 8),
           title: const Text('Multi Usuario'),
           onTap: () {
@@ -777,7 +766,7 @@ class ComponentApp extends StatelessWidget {
                 iconLeading==null?Container():Icon(iconLeading,color: colorAccent,size: 24),
                 iconLeading==null?Container():const SizedBox(width:8),
                 // text
-                Text(text,style: TextStyle(color: colorAccent,fontSize: 16 )), 
+                Text(text,style: TextStyle(color: colorAccent,fontSize: 16 ),overflow: TextOverflow.clip), 
                 iconTrailing==null?Container():const SizedBox(width:8),
                 // icon trailing
                 iconTrailing==null?Container():Icon(iconTrailing,color: colorAccent,size: 24),

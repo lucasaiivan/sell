@@ -33,23 +33,20 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     return color;
   }
   // titulo del appbar
-  String _titleAppBar = 'Cátalogo';
-  String get getTextTitleAppBar => _titleAppBar;
-  set setTitleAppBar(String value) => _titleAppBar = value;
-
-  // state filter activado 
-  bool filterState = false;
+  String _textFilter = 'Filtrar';
+  String get getTextFilter => _textFilter;
+  set setTextFilter(String value) => _textFilter = value;
 
   // proveedor seleccionado para filtrar en el cátalogo 
   set setSelectedSupplier(Provider value) { 
-    setTitleAppBar  = value.name;
+    setTextFilter  = value.name;
     catalogueFilter(filter: value.id);
     update();
   }
 
   // categoria seleccionada para filtrar en el cátalogo 
   set setSelectedCategory(Category value) { 
-    setTitleAppBar = value.name;
+    setTextFilter = value.name;
     catalogueFilter(filter: value.id);
     update();
   }
@@ -87,20 +84,18 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
   // FUCTIONS CATALOGUE VIEW 
   //
   void catalogueFilter({String filter = ''}) {
-
+    //  var
     List<ProductCatalogue> list = [];
 
-    //filter
-    if (filter != '') {
-      filterState = true;
+    //  filter
+    if (filter != '') { 
       for (var element in homeController.getCataloProducts) {
         if (filter == element.category || filter == element.provider) {
           list.add(element);
         }
       }
     } else {
-      setTitleAppBar = 'Cátalogo';
-      filterState = false;
+      setTextFilter = 'Filtrar'; 
       list = homeController.getCataloProducts;
     }
     // set
@@ -113,7 +108,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
 
     //filter
     if( key==''){
-        setTitleAppBar = 'Cátalogo';
+        setTextFilter = 'Filtrar';
         list = homeController.getCataloProducts;
       }else{
         switch(key){
@@ -121,37 +116,37 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
             homeController.showModalBottomSheetSubcription(id:'analytic');
             break;
           case '0': // Mostrar todos
-            setTitleAppBar = 'Cátalogo';
+            setTextFilter = 'Filtrar';
             list = homeController.getCataloProducts;
             break; 
           case '1': //  Mostrar productos con stock
-            setTitleAppBar = 'Stock';
+            setTextFilter = 'Con stock';
             List<ProductCatalogue> listSFilter = [];
             for(ProductCatalogue item in homeController.getCataloProducts){if(item.stock)listSFilter.add(item);}
             for(ProductCatalogue item in listSFilter){list.add(item);}
             break;
           case '2': //  Mostrar productos favoritos
-            setTitleAppBar = 'Favoritos';
+            setTextFilter = 'Favoritos';
             List<ProductCatalogue> listSFilter = [];
             for(ProductCatalogue item in homeController.getCataloProducts){if(item.favorite)listSFilter.add(item);}
             for(ProductCatalogue item in listSFilter){list.add(item);}
             break;
           case '3': // Mostrar productos con stock bajos
-            setTitleAppBar = 'Stock Bajo';
+            setTextFilter = 'Stock Bajos';
             List<ProductCatalogue> listSFilter = [];
             for(ProductCatalogue item in homeController.getCataloProducts){if(item.stock){if(item.quantityStock<=item.alertStock){listSFilter.add(item);}}}
             for(ProductCatalogue item in listSFilter){list.add(item);}
             break;
-          case '4': // Mostrar productos actualizados hace más de 90 días
-            setTitleAppBar = 'Filtro';
+          case '4': // Mostrar productos actualizados hace más de 2 meses
+            setTextFilter = 'Actualizados hace más de 2 meses';
             list = homeController.getCataloProducts.where((producto) {
               DateTime fechaActualizacion = producto.upgrade.toDate();
-              return fechaActualizacion.isBefore(DateTime.now().subtract( const Duration(days: 90)));
+              return fechaActualizacion.isBefore(DateTime.now().subtract( const Duration(days: 2 * 30)));
             }).toList();
           
             break;
-          case '5': // Mostrar productos actualizados hace más de 150 días
-            setTitleAppBar = 'Filtro';
+          case '5': // Mostrar productos actualizados hace más 5 meses
+            setTextFilter = 'Actualizados hace más de 5 meses';
             list = homeController.getCataloProducts.where((producto) {
               DateTime fechaActualizacion = producto.upgrade.toDate();
               return fechaActualizacion.isBefore( DateTime.now().subtract( const Duration(days: 5 * 30)) );
@@ -159,13 +154,13 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
           break; 
 
           case '6': // mostrar los productos que no estan verificados
-            setTitleAppBar = 'Sin verificar';
+            setTextFilter = 'Sin verificar';
             list = homeController.getCataloProducts.where((producto) {
               return producto.verified==false;
             }).toList();
           break;
           case '7': // obtener los los porductos de la base de datos publica 'Database.readProductsFuture()'
-            setTitleAppBar = 'Base de Datos'; 
+            setTextFilter = 'Base de datos'; 
             // obtenemos todos los documentos de la base de datos publica
             Database.readProductsFuture().then((value) {
               // obtenemos los productos de la cuenta del negocio  
@@ -173,14 +168,16 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
               // condition : si la lista de productos no esta vacia
               if (value.docs.isNotEmpty) {
                 for (var element in value.docs) {
-                  // condition : si el producto no esta en la lista de productos del negocio
-                  if(element.data().containsKey('id')){ 
-                    // get : object product
-                    ProductCatalogue product = Product.fromMap( element.data() ).convertProductCatalogue();
-                    // add : agrega el producto a la lista  
-                    if(isProductCatalogue(id: product.id) == false){
-                      list.add(product);
-                    }
+                  // get : object product
+                  ProductCatalogue product = Product.fromMap( element.data() ).convertProductCatalogue();
+
+                  // condition : si el producto no tiene id se le asigna el id del documento
+                  if(product.id == ''){
+                    product.id = element.id;
+                  }
+                  // add : agrega el producto a la lista  
+                  if(isProductCatalogue(id: product.id) == false){
+                    list.add(product);
                   }
                   
                 } 
@@ -189,7 +186,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
             });
           break;
           case '8': // obtener los los porductos de la base de datos publica 'Database.readProductsFuture()'
-            setTitleAppBar = 'Productos sin verificar'; 
+            setTextFilter = 'Base de Datos sin verificar'; 
             // obtenemos todos los documentos de la base de datos publica
             Database.readProductsFutureNoVerified().then((value) {
               // obtenemos los productos de la cuenta del negocio   
@@ -197,15 +194,16 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
               // condition : si la lista de productos no esta vacia
               if (value.docs.isNotEmpty) {
                 for (var element in value.docs) {
-                  // condition : si el producto no esta en la lista de productos del negocio
-                  if(element.data().containsKey('id')){ 
-                    // get : object product
+                  // get : object product
                     ProductCatalogue product = Product.fromMap( element.data() ).convertProductCatalogue(); 
+                    // condition : si el producto no tiene id se le asigna el id del documento
+                    if(product.id == ''){
+                      product.id = element.id;
+                    }
                     // add
                     if(isProductCatalogue(id: product.id) == false){
                       list.add(product);
                     } 
-                  }
                   
                 } 
                 update();
@@ -329,7 +327,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
       }
     }
     getProductsSelectedList.clear();
-  }
+  } 
   void updatePricePurchaseAndSales({required List<ProductCatalogue> list,required double pricePurchase,required double priceSales}){
     // firebase : actualiza el precio de compra y venta de todos los productos de la lista pasado por parametro
     for (var element in list) {
@@ -574,7 +572,8 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
         onPressed: (){ 
           // dialog : confirmar la eliminación de los productos seleccionados
           confirmDeleteProductDialog();
-        }),
+        }), 
+
         // textButton : descartar los productos seleccionados
         TextButton(onPressed: (){ 
           catalogueController.getProductsSelectedList.clear();
@@ -596,6 +595,8 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
           // subtitle: un Wrap con la marca en color azul si esta verificado, codigo del producto, precio de venta y precio de compra con un icon de circulo pequeño como dividor
           subtitle: Column(
             children: [
+              // text : id
+              Text(product.id),
               Row(
                 children: [
                   // text : marca del producto 

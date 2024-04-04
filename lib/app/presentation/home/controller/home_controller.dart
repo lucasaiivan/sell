@@ -690,7 +690,14 @@ class HomeController extends GetxController {
       List<ProductCatalogue> list = [];
       if (value.docs.isNotEmpty) {
         for (var element in value.docs) {
-          list.add(ProductCatalogue.fromMap(element.data()));
+          // obj
+          ProductCatalogue product = ProductCatalogue.fromMap(element.data()); 
+          // condition : si el producto no tiene id se le asigna el id del documento
+          if(product.id == ''){
+            product.id = element.id;
+          }
+          // add
+          list.add(product);
         }
       }
       //  obtenemos los productos más vendidos
@@ -1029,6 +1036,15 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
                   // text : titulo
                   Text(title,textAlign: TextAlign.center,style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
                   const SizedBox(height: 5),
+                  // TODO : delete button release
+                  TextButton(
+                    child: const Text('Activar suscripción'),
+                    onPressed: () {
+                      // activa la suscripción solo en la app en tiempo de ejecución de manera local
+                      homeController.setIsSubscribedPremium = true;
+                      Get.back();
+                    },
+                  ),
                   // text : descripción
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),

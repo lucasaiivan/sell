@@ -363,6 +363,7 @@ class SalesController extends GetxController {
       late String barcodeScanRes;
       // scan
       barcodeScanRes = await FlutterBarcodeScanner.scanBarcode('#ff6666','Cancel',true,ScanMode.BARCODE);
+      // condition : si el usuario cancela el escaneo
       if(barcodeScanRes == '-1'){ 
         setStateViewBarCodeScan = false;
         return;
@@ -1303,8 +1304,7 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
         InkWell(
           // color del cliqueable
           splashColor: Colors.blue, 
-          highlightColor: highlightColor.withOpacity(0.1),
-
+          highlightColor: highlightColor.withOpacity(0.1), 
           onTap: () {
             salesController.selectedProduct(item: product);
             Get.back();
@@ -1324,7 +1324,15 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(product.description,maxLines:2,overflow: TextOverflow.clip,style: const TextStyle(fontWeight: FontWeight.w500)),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // icon : favorito 
+                          product.favorite?const Icon(Icons.star_rate_rounded,color: Colors.amber,size:14,):Container(),
+                          // text : nombre del producto
+                          Text(product.description,maxLines:2,overflow: TextOverflow.clip,style: const TextStyle(fontWeight: FontWeight.w500)),
+                        ],
+                      ),
                       product.nameMark==''?Container():Text(product.nameMark,maxLines: 1,overflow: TextOverflow.clip,style: TextStyle(color: product.verified?Colors.blue:null)),
                       Wrap(
                         crossAxisAlignment: WrapCrossAlignment.start,
@@ -1337,15 +1345,7 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
                                 dividerCircle,
                                 Text(product.code,style: textStyleSecundary),
                               ],
-                            ),
-                            // favorite
-                            product.favorite?Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                dividerCircle,
-                                Text('Favorito',style: textStyleSecundary),
-                              ],
-                            ):Container(),
+                            ), 
                           //  text : alert stockv
                             alertStockText != ''?Row(
                               mainAxisSize: MainAxisSize.min,
@@ -1355,10 +1355,9 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
                               ],
                             ):Container(),
                         ],
-                      ),
-                              
+                      ), 
                     ],
-                                  ),
+                    ),
                   ),
                 ),
                 // text : precio
