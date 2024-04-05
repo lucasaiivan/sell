@@ -15,8 +15,8 @@ class CashRegister {
   double cashOutFlow; // monto de egresos (numero negativo)
   double expectedBalance; // monto esperado
   double balance; // monto de cierre
-  List<dynamic> cashInFlowList; // lista de ingresos de caja
-  List<dynamic> cashOutFlowList; // lista de egresos de caja
+  List<dynamic> cashInFlowList; // lista de ingresos de caja [CashFlow]
+  List<dynamic> cashOutFlowList; // lista de egresos de caja [CashFlow]
 
   CashRegister({
     required this.id,

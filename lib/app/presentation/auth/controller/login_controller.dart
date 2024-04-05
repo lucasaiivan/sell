@@ -94,14 +94,13 @@ class LoginController extends GetxController {
 class CustomFullScreenDialog {
   static void showDialog() {
     Get.dialog(
-      WillPopScope(
-        child: const Center(
+      const PopScope(
+        canPop: false,
+        child: Center(
           child: CircularProgressIndicator(
             valueColor: AlwaysStoppedAnimation(Colors.yellowAccent),
           ),
-        ),
-        // onWillPop - Se llama cada ves que el usuario intenta descartar el ModalRoute adjunta
-        onWillPop: () => Future.value(false),
+        ), // deshabilitar el botón de retroceso del dispositivo
       ),
       barrierDismissible: false,
       barrierColor: const Color(0xff141A31).withOpacity(.3),

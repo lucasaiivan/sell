@@ -12,6 +12,7 @@ import 'package:sell/app/core/utils/widgets_utils.dart';
 import 'package:sell/app/domain/entities/ticket_model.dart'; 
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../domain/entities/cashRegister_model.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../core/utils/dynamicTheme_lb.dart';
 import '../../home/controller/home_controller.dart';
@@ -473,8 +474,7 @@ class SalesView extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Row(
               children: [
-                Text('Caja ${homeController.cashRegisterActive.description}',
-                    style: TextStyle(color: homeController.getDarkMode? Colors.black: Colors.white)),
+                Text('Caja ${homeController.cashRegisterActive.description}',style: TextStyle(color: homeController.getDarkMode? Colors.black: Colors.white)),
                 const SizedBox(width: 5),
                 Icon(Icons.keyboard_arrow_down_rounded,
                     color: homeController.getDarkMode? Colors.black: Colors.white),
@@ -1047,34 +1047,39 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
     bool isEgreso = false,
   }) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 12),
-        // textfield : efectivo inicial de la caja
-        const Text('Escriba el monto', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400)),
-        const SizedBox(height: 8),
-        TextField(
-          controller: moneyMaskedTextController,
-          keyboardType: TextInputType.number,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly], // Permite solo dígitos
-          decoration: const InputDecoration(
-            border: UnderlineInputBorder(),
-            enabledBorder: UnderlineInputBorder(),
-            labelText: 'Monto',
+        Expanded(
+          child: ListView( 
+            children: [
+              const SizedBox(height: 12),
+              // textfield : efectivo inicial de la caja
+              const Text('Escriba el monto', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400)),
+              const SizedBox(height: 8),
+              TextField(
+                controller: moneyMaskedTextController,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly], // Permite solo dígitos
+                decoration: const InputDecoration(
+                  border: UnderlineInputBorder(),
+                  enabledBorder: UnderlineInputBorder(),
+                  labelText: 'Monto',
+                ),
+              ),
+              // textfield : descripcion (opcional)
+              const SizedBox(height: 20),
+              TextField(
+                controller: textEditingController,
+                keyboardType: TextInputType.text,
+                decoration: const InputDecoration(
+                  border: UnderlineInputBorder(),
+                  enabledBorder: UnderlineInputBorder(),
+                  labelText: 'Descripción (opcional)',
+                ),
+              ),  
+              const SizedBox(height: 20),
+            ],
           ),
         ),
-        // textfield : descripcion (opcional)
-        const SizedBox(height: 20),
-        TextField(
-          controller: textEditingController,
-          keyboardType: TextInputType.text,
-          decoration: const InputDecoration(
-            border: UnderlineInputBorder(),
-            enabledBorder: UnderlineInputBorder(),
-            labelText: 'Descripción (opcional)',
-          ),
-        ),
-        const Spacer(),
         // button : iniciar caja
         Container(
           padding: const EdgeInsets.only(bottom: 20),
@@ -1092,7 +1097,7 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
                         amount: moneyMaskedTextController.numberValue,
                         description: textEditingController.text);
                   }
-
+    
                   Get.back();
                 }
                 Get.back();
@@ -1150,29 +1155,26 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
                 ]),
               ),
               // view info : efectivo incial
-              const SizedBox(height: 12),
-              Row(children: [
+              homeController.cashRegisterActive.expectedBalance==0?Container():const SizedBox(height: 12),
+              homeController.cashRegisterActive.expectedBalance==0?Container():Row(children: [
                 Text('Efectivo inicial', style: textStyleDescription),
                 const Spacer(),
-                Text(
-                    Publications.getFormatoPrecio(
-                        monto: homeController.cashRegisterActive.expectedBalance),
-                    style: textStyleValue)
+                Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.expectedBalance),style: textStyleValue)
               ]),
               // view info : cantidad de ventas
-              const SizedBox(height: 12),
-              Container(
+              homeController.cashRegisterActive.sales==0?Container():const SizedBox(height: 12),
+              homeController.cashRegisterActive.sales==0?Container():Container(
                 color: separatorColor,
                 child: Row(children: [
-                  Text('Ventas', style: textStyleDescription),
+                  Text('Transacciones', style: textStyleDescription),
                   const Spacer(),
                   Text(homeController.cashRegisterActive.sales.toString(),
                       style: textStyleValue)
                 ]),
               ),
               // view info : facturacion
-              const SizedBox(height: 12),
-              Row(children: [
+              homeController.cashRegisterActive.billing==0?Container():const SizedBox(height: 12),
+              homeController.cashRegisterActive.billing==0?Container():Row(children: [
                 Text('Facturación', style: textStyleDescription),
                 const Spacer(),
                 Text(
@@ -1181,8 +1183,9 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
                     style: textStyleValue)
               ]),
               // view info : descuentos
+              homeController.cashRegisterActive.discount==0?Container():
               const SizedBox(height: 12),
-              Container(
+              homeController.cashRegisterActive.discount==0?Container():Container(
                 color: separatorColor,
                 child: Row(children: [
                   Text('Descuentos', style: textStyleDescription),
@@ -1191,25 +1194,58 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
                 ]),
               ),
               // view info : egresos
-              const SizedBox(height: 12),
-              Row(children: [
-                Text('Egresos', style: textStyleDescription),
-                const Spacer(),
-                Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.cashOutFlow),style: textStyleValue.copyWith(color: Colors.red.shade300))
-              ]),
-              // view info : ingresos
-              const SizedBox(height: 12),
-              Container(
-                color: separatorColor,
-                child: Row(children: [
-                  Text('Ingresos', style: textStyleDescription),
-                  const Spacer(),
-                  Text(
-                      Publications.getFormatoPrecio(
-                          monto: homeController.cashRegisterActive.cashInFlow),
-                      style: textStyleValue)
-                ]),
-              ),
+              const SizedBox(height: 12),  
+              homeController.cashRegisterActive.cashOutFlowList.isEmpty
+                  ? Container()
+                  : ExpansionTile(
+                    childrenPadding: const EdgeInsets.all(0),
+                    tilePadding: const EdgeInsets.all(0),
+                    visualDensity: VisualDensity.compact,
+                    title: Row(
+                      children: [
+                        Text('Egresos',style: textStyleDescription),
+                        const Spacer(),
+                        Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.cashOutFlow),style: textStyleValue.copyWith(color: Colors.red.shade300)),
+                      ],
+                    ),  
+                    children: List.generate(
+                        homeController.cashRegisterActive.cashOutFlowList.length,
+                        (index) { 
+                          // obj
+                          CashFlow cashFlow = CashFlow.fromMap(homeController.cashRegisterActive.cashOutFlowList[index]);
+                          return ListTile(
+                            title: Text( cashFlow.description),
+                            trailing: Text(Publications.getFormatoPrecio(monto: cashFlow.amount),style: textStyleValue.copyWith(color: Colors.red.shade300)),
+                          );
+                      }),
+                    ),
+              // view info : ingresos 
+              homeController.cashRegisterActive.cashInFlowList.isEmpty
+                  ? Container()
+                  : ExpansionTile(
+                    childrenPadding: const EdgeInsets.all(0),
+                    tilePadding: const EdgeInsets.all(0),
+                    visualDensity: VisualDensity.compact,
+                    // divider 
+                    
+                    title: Row(
+                      children: [
+                        Text('Ingresos',style: textStyleDescription),
+                        const Spacer(),
+                        Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.cashInFlow),style: textStyleValue.copyWith(color: Colors.green.shade300)),
+                      ],
+                    ),  
+                    children: List.generate(
+                        homeController.cashRegisterActive.cashInFlowList.length,
+                        (index) { 
+                          // obj
+                          CashFlow cashFlow = CashFlow.fromMap(homeController.cashRegisterActive.cashInFlowList[index]);
+                          return ListTile(
+                            title: Text( cashFlow.description),
+                            trailing: Text(Publications.getFormatoPrecio(monto: cashFlow.amount),style: textStyleValue.copyWith(color: Colors.green.shade300)),
+                          );
+                      }),
+                    ),
               // divider
               const SizedBox(height: 20),
               ComponentApp().divider(thickness:0.5),

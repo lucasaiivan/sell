@@ -531,10 +531,8 @@ class SalesController extends GetxController {
     return Publications.getFormatoPrecio(monto: getValueReceivedTicket);
   }
 
-  void confirmedPurchase() {
-    //
-    // el [Usuario] procede a confirmar la venta del ticket 
-    //
+  void confirmedPurchase() { 
+    // el [Usuario] procede a confirmar la venta del ticket  //
 
     // el usuario confirmo su venta
     setStateConfirmPurchase = true;  
@@ -1140,8 +1138,7 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
   } 
   // texto de ayuda del textfield de busqueda
   @override
-  String get searchFieldLabel => 'Buscar';
-
+  String get searchFieldLabel => 'Buscar'; 
 
   @override
   Widget buildLeading(BuildContext context) {

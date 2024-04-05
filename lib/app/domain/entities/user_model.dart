@@ -11,6 +11,8 @@ class UserModel {
     this.personalized = false,  
     required this.creation,
     required this.lastUpdate,
+    this.startTime = const {},
+    this.endTime = const {},
     // ... 
     this.arqueo = false,  
     this.historyArqueo = false, 
@@ -28,6 +30,8 @@ class UserModel {
   bool admin = false; // permiso de administrador 
   Timestamp creation = Timestamp.now(); // Fecha en la que se creo la cuenta
   Timestamp lastUpdate = Timestamp.now(); // Fecha en la que se actualizo la cuenta
+  Map<String,dynamic> startTime = {}; // hora de acceso habilitada para el usuario
+  Map<String,dynamic> endTime = {}; // hora de cierre de acceso para el usuario
   // permisos personalizados
   bool personalized = false;
   // ...  
@@ -51,6 +55,8 @@ class UserModel {
       personalized: data.containsKey("personalized") ? doc["personalized"] : false,
       creation: data.containsKey("creation") ? doc["creation"] : Timestamp.now(),
       lastUpdate: data.containsKey("lastUpdate") ? doc["lastUpdate"] : Timestamp.now(),
+      startTime: data.containsKey("startTime") ? doc["startTime"] : {},
+      endTime: data.containsKey("endTime") ? doc["endTime"] : {},
       // ... 
       arqueo: data.containsKey("arqueo") ? doc["arqueo"] : false,
       historyArqueo: data.containsKey("historyArqueo") ? doc["historyArqueo"] : false,
@@ -72,6 +78,8 @@ class UserModel {
     "admin": admin,
     'creation': creation,
     'lastUpdate': lastUpdate,
+    'startTime': startTime,
+    'endTime': endTime,
     // permisos personalizados
     "personalized": personalized, 
     "arqueo": arqueo,
@@ -93,6 +101,8 @@ class UserModel {
       personalized: data['personalized'] ?? false,
       creation: data['creation'] ?? Timestamp.now(),
       lastUpdate: data['lastUpdate'] ?? Timestamp.now(),
+      startTime: data['startTime'] ?? {},
+      endTime: data['endTime'] ?? {},
       // ... 
       arqueo: data['arqueo'] ?? false,
       historyArqueo: data['historyArqueo'] ?? false,
@@ -118,6 +128,8 @@ class UserModel {
     personalized = data.containsKey('personalized') ? data['personalized'] : false;
     creation = data.containsKey('creation') ? data['creation'] : Timestamp.now();
     lastUpdate = data.containsKey('lastUpdate') ? data['lastUpdate'] : Timestamp.now();
+    startTime = data.containsKey('startTime') ? data['startTime'] : {};
+    endTime = data.containsKey('endTime') ? data['endTime'] : {};
     // ... 
     arqueo = data.containsKey('arqueo') ? data['arqueo'] : false;
     historyArqueo = data.containsKey('historyArqueo') ? data['historyArqueo'] : false;
@@ -137,6 +149,8 @@ class UserModel {
     bool? personalized,
     Timestamp? creation,
     Timestamp? lastUpdate,
+    Map<String,dynamic>? startTime,
+    Map<String,dynamic>? endTime,
     // ...
     bool? sell,
     bool? arqueo,
@@ -156,6 +170,8 @@ class UserModel {
       personalized: personalized ?? this.personalized,
       creation: creation ?? this.creation,
       lastUpdate: lastUpdate ?? this.lastUpdate,
+      startTime: startTime ?? this.startTime,
+      endTime: endTime ?? this.endTime,
       // ... 
       arqueo: arqueo ?? this.arqueo,
       historyArqueo: historyArqueo ?? this.historyArqueo,
@@ -164,6 +180,22 @@ class UserModel {
       multiuser: multiuser ?? this.multiuser,
       editAccount: editAccount ?? this.editAccount,
     );
+  }
+
+
+  String get getAccessTimeFormat {
+    // devuelve la hora de acceso del usuario con formato de 24 horas [hh:mm] 
+    if (startTime.isEmpty && endTime.isEmpty) return "";
+    
+    return "${startTime['hour'].toString().padLeft(2, '0')}:${startTime['minute'].toString().padLeft(2, '0')} - ${endTime['hour'].toString().padLeft(2, '0')}:${endTime['minute'].toString().padLeft(2, '0')}";
+  }
+  bool get hasAccessBySchedule{
+    // devuelve verdadero si el usuario tiene acceso a la cuenta dentro del horario establecido
+    if (startTime.isEmpty && endTime.isEmpty) return false;
+    DateTime now = DateTime.now();
+    DateTime start = DateTime(now.year, now.month, now.day, startTime['hour'], startTime['minute']);
+    DateTime end = DateTime(now.year, now.month, now.day, endTime['hour'], endTime['minute']);
+    return now.isAfter(start) && now.isBefore(end);
   }
 }
 

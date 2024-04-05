@@ -200,8 +200,7 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
     return Scaffold(
       appBar: AppBar(
         title: Text( newUser?'Nuevo usuario':'Actualizar usuario',
-        textAlign: TextAlign.center),
-        automaticallyImplyLeading: false,// desabilitamos el boton de regresar
+        textAlign: TextAlign.center), 
         actions: [
           IconButton(
             onPressed: () {
@@ -239,7 +238,7 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
                       style: valueTextStyle,
                       enabled: enableEmailTextField,
                       controller: _emailTextFieldController,
-                      decoration: const InputDecoration(labelText: "Email" ),
+                      decoration: InputDecoration(labelText: "Email",filled: enableEmailTextField ),
                       onChanged: (value) {
                         widget.user.email = value;
                       },
@@ -250,7 +249,7 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
               ), 
               const SizedBox(height:12),
               // CheckboxListTile : opcipn de inactivar el usuario
-              CheckboxListTile(  
+              widget.user.superAdmin?Container():CheckboxListTile(  
                 enabled: !widget.user.superAdmin,
                 title:const Text('Inactivar usuario'),
                 subtitle: const Opacity(opacity: 0.5,child: Text('Permite bloquear el usuario')),
@@ -261,7 +260,57 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
                   });
                 },
               ),
-              const Divider(thickness: 8),
+              widget.user.superAdmin?Container():const Divider(thickness:0.5,height: 0),
+              // button : seleccionar rango de horario de acceso
+              ListTile(
+                leading: const Icon(Icons.access_time_rounded),
+                title:const Text('Horario de acceso'),
+                subtitle: Text((widget.user.startTime.isEmpty && widget.user.endTime.isEmpty )?'Selecciona el rango de horario en el que el usuario puede acceder a la cuenta':'Inicio: ${widget.user.getAccessTimeFormat} '),
+                trailing:const Icon(Icons.arrow_right),
+                onTap: () async{
+                  // Primera invocación para seleccionar la hora de inicio
+                  TimeOfDay? startTime = await showTimePicker( 
+                    context: context,
+                    initialTime: TimeOfDay.now(), 
+                    helpText: 'Selecciona la hora de inicio', 
+                    builder: (BuildContext context, Widget? child) {
+                      return MediaQuery(
+                        data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+                        child: child!,
+                      );
+                    },
+                  );
+
+                  // Segunda invocación para seleccionar la hora de finalización
+                  TimeOfDay? endTime = await showTimePicker(
+                    // ignore: use_build_context_synchronously
+                    context: context,  
+                    initialTime: const TimeOfDay(hour: 0, minute: 0),  
+                    helpText: 'Hora de finalización',
+                    builder: (BuildContext context, Widget? child) {
+                      return MediaQuery(
+                        data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true,),
+                        child: child!,
+                      );
+                    },
+                  );
+                  // condition : si se selecciono un rango de horario correcto
+                  if(startTime!=null && endTime!=null && startTime.hour<endTime.hour){
+                    setState(() {
+                      // obtenemos los datos en formato de 24 horas
+                      widget.user.startTime = {'hour':startTime.hour,'minute':startTime.minute};
+                      widget.user.endTime = {'hour':endTime.hour,'minute':endTime.minute};
+                      // message 
+                      Get.snackbar('Horario de acceso definido exitosamente', 'Inicio: ${widget.user.startTime['hour']}:${widget.user.startTime['minute']} - Fin: ${widget.user.endTime['hour']}:${widget.user.endTime['minute'] } ');
+                  });
+                  }else{
+                    Get.snackbar('Horario de acceso','Debes seleccionar un rango de horario');
+                  }
+                  
+                  
+                },
+              ),
+              widget.user.superAdmin?Container():const Divider(thickness:0.5,height: 0),
               // text : permisos
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 12,vertical: 12),
@@ -385,7 +434,7 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
                   });
                 },
               ), 
-              const SizedBox(height: 100),
+              const SizedBox(height: 120),
             ],
           ),
           // elevateButton : crear o actualizar
@@ -398,19 +447,25 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
               decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.transparent,Theme.of(context).scaffoldBackgroundColor.withOpacity(0.3),Theme.of(context).scaffoldBackgroundColor], begin: Alignment.topCenter,end: Alignment.bottomCenter),),
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
-                child: ComponentApp().button(
-                  defaultStyle: true,
-                  icon: Text(newUser?'Crear usuario':'Actualizar'),
+                child: ComponentApp().button( 
+                  text: newUser?'Crear usuario':'Actualizar',
+                  colorButton: homeController.getIsSubscribedPremium?null:Colors.amber,
+                  colorAccent:homeController.getIsSubscribedPremium?Colors.blue:Colors.amber,
                   onPressed: (){ 
-
+                    // condition : comprueba si la cuenta tiene una suscripción premium
                     if(homeController.getIsSubscribedPremium==false){
                       // no es premium
                       Get.back();
                       homeController.showModalBottomSheetSubcription(id: 'multiuser');
                       return;
                     }
+                    // condition : valida el email
+                    if(!EmailValidator.validate(widget.user.email) ){ 
+                      Get.snackbar('E-mail invalido','Debe proporcionar un correo electrónico válido, asegúrese de que no contenga espacios vacios');
+                      return;
+                    }
 
-                    if(EmailValidator.validate(widget.user.email) ){ 
+                    if(widget.user.getAccessTimeFormat.isNotEmpty){ 
                       // condition : nos aseguramos que se haya seleccionado un tipo de permiso
                       if( widget.user.admin==true || widget.user.personalized==true){ 
     
@@ -442,7 +497,7 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
                         Get.snackbar('Permiso del usuario','Elige qué tipo de permisos tiene este usuario');
                       }
                     }else{
-                      Get.snackbar('E-mail invalido','Debe proporcionar un correo electrónico válido, asegúrese de que no contenga espacios vacios');
+                      Get.snackbar('Horario de acceso invalido','Debes seleccionar un rango de horario de acceso');
                     }
                     }, 
                 ),

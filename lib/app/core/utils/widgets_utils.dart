@@ -708,17 +708,17 @@ class ComponentApp extends StatelessWidget {
     return Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child:Icon(Icons.circle,size:size, color: color.withOpacity(0.4)));
   }
   // view : imagen avatar del usuario
-  Widget userAvatarCircle({bool empty=false,String urlImage='',String text = '', double radius = 20.0}) {
+  Widget userAvatarCircle({ Color? background,IconData? iconData,bool empty=false,String urlImage='',String text = '', double radius = 20.0}) {
     
     // style
-    Color backgroundColor = Get.theme.dividerColor.withOpacity(empty?0.03:0.5);
+    Color backgroundColor =background??Get.theme.dividerColor.withOpacity(empty?0.03:0.5);
     // widgets
     late Widget avatar;
-    Widget iconDedault = Icon(Icons.person_outline_rounded,color: Colors.white,size: radius*1.5,);
+    Widget iconDedault = Icon( Icons.person_outline_rounded,color: Colors.white,size: radius*1.5,);
     if(empty){
       iconDedault = Container();
     }else if(urlImage == '' && text == ''){
-      iconDedault = Icon(Icons.person_outline_rounded,color: Colors.white,size: radius*1 );
+      iconDedault = Icon(iconData??Icons.person_outline_rounded,color: Colors.white,size: radius*1 );
     }else if(urlImage == '' && text != ''){
       iconDedault = Text( text.substring( 0,1),style: const TextStyle(color: Colors.white));
     }
@@ -777,7 +777,8 @@ class ComponentApp extends StatelessWidget {
       ),
     );
   } 
-  Widget button( {bool defaultStyle = false,double elevation=0,double fontSize = 14,double width = double.infinity,bool disable = false, Widget? icon, String text = '',required dynamic onPressed,EdgeInsets padding =const EdgeInsets.symmetric(horizontal: 12, vertical: 12),Color colorButton = Colors.blue,Color colorAccent = Colors.white}) {
+  Widget button( {bool defaultStyle = false,double elevation=0,double fontSize = 14,double width = double.infinity,bool disable = false, Widget? icon, String text = '',required dynamic onPressed,EdgeInsets padding =const EdgeInsets.symmetric(horizontal: 12, vertical: 12),Color? colorButton,Color colorAccent = Colors.white}) {
+     
     // button : personalizado
     return FadeIn(
         child: Padding(
@@ -790,7 +791,7 @@ class ComponentApp extends StatelessWidget {
             elevation:defaultStyle?0: elevation,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
             padding: const EdgeInsets.all(20.0),
-            backgroundColor:defaultStyle?null: colorButton,
+            backgroundColor: colorButton,
             textStyle: TextStyle(color: colorAccent,fontWeight: FontWeight.w700),
           ),  
           icon: icon??Container(),

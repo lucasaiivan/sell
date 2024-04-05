@@ -1,12 +1,12 @@
-
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+ 
+import 'package:flutter/material.dart'; 
+import 'package:get/get.dart'; 
 import 'package:observe_internet_connectivity/observe_internet_connectivity.dart';
 import 'package:sell/app/presentation/historyCashRegisterPage/views/historyCashRegister_view.dart';
 import 'package:sell/app/presentation/sellPage/views/sell_view.dart';
 import 'package:sell/app/presentation/cataloguePage/views/catalogue_view.dart';
 import 'package:sell/app/presentation/transactionsPage/views/transactions_view.dart';
-import '../../../core/utils/widgets_utils.dart';
+import '../../../core/utils/widgets_utils.dart'; 
 import '../../multiuser/views/multiuser_view.dart';  
 import '../controller/home_controller.dart';
 
@@ -50,7 +50,7 @@ class HomeView extends GetView<HomeController> {
       if (controller.getProfileAccountSelected.id == '' && controller.getFirebaseAuth.currentUser!.isAnonymous == false ){
         // viewDefault : se muestra la vista por defecto para iniciar sesión de una cuenta existente o crear una nueva cuenta
         return viewDefault();
-      }
+      } 
 
       // PopScope : nos permite controlar el botón de retroceso del dispositivo
       return PopScope( 
