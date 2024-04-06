@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 class UserModel {
   UserModel({
@@ -13,6 +14,7 @@ class UserModel {
     required this.lastUpdate,
     this.startTime = const {},
     this.endTime = const {},
+    this.daysOfWeek = const [],
     // ... 
     this.arqueo = false,  
     this.historyArqueo = false, 
@@ -32,6 +34,7 @@ class UserModel {
   Timestamp lastUpdate = Timestamp.now(); // Fecha en la que se actualizo la cuenta
   Map<String,dynamic> startTime = {}; // hora de acceso habilitada para el usuario
   Map<String,dynamic> endTime = {}; // hora de cierre de acceso para el usuario
+  List daysOfWeek = []; // dias de la semana habilitados al acceso
   // permisos personalizados
   bool personalized = false;
   // ...  
@@ -57,6 +60,7 @@ class UserModel {
       lastUpdate: data.containsKey("lastUpdate") ? doc["lastUpdate"] : Timestamp.now(),
       startTime: data.containsKey("startTime") ? doc["startTime"] : {},
       endTime: data.containsKey("endTime") ? doc["endTime"] : {},
+      daysOfWeek: data.containsKey("daysOfWeek") ? doc["daysOfWeek"] : [],
       // ... 
       arqueo: data.containsKey("arqueo") ? doc["arqueo"] : false,
       historyArqueo: data.containsKey("historyArqueo") ? doc["historyArqueo"] : false,
@@ -80,6 +84,7 @@ class UserModel {
     'lastUpdate': lastUpdate,
     'startTime': startTime,
     'endTime': endTime,
+    'daysOfWeek': daysOfWeek,
     // permisos personalizados
     "personalized": personalized, 
     "arqueo": arqueo,
@@ -103,6 +108,7 @@ class UserModel {
       lastUpdate: data['lastUpdate'] ?? Timestamp.now(),
       startTime: data['startTime'] ?? {},
       endTime: data['endTime'] ?? {},
+      daysOfWeek: data['daysOfWeek'] ?? [],
       // ... 
       arqueo: data['arqueo'] ?? false,
       historyArqueo: data['historyArqueo'] ?? false,
@@ -130,6 +136,7 @@ class UserModel {
     lastUpdate = data.containsKey('lastUpdate') ? data['lastUpdate'] : Timestamp.now();
     startTime = data.containsKey('startTime') ? data['startTime'] : {};
     endTime = data.containsKey('endTime') ? data['endTime'] : {};
+    daysOfWeek = data.containsKey('daysOfWeek') ? data['daysOfWeek'] : [];
     // ... 
     arqueo = data.containsKey('arqueo') ? data['arqueo'] : false;
     historyArqueo = data.containsKey('historyArqueo') ? data['historyArqueo'] : false;
@@ -151,6 +158,7 @@ class UserModel {
     Timestamp? lastUpdate,
     Map<String,dynamic>? startTime,
     Map<String,dynamic>? endTime,
+    List<String>? daysOfWeek,
     // ...
     bool? sell,
     bool? arqueo,
@@ -172,6 +180,7 @@ class UserModel {
       lastUpdate: lastUpdate ?? this.lastUpdate,
       startTime: startTime ?? this.startTime,
       endTime: endTime ?? this.endTime,
+      daysOfWeek: daysOfWeek ?? this.daysOfWeek,
       // ... 
       arqueo: arqueo ?? this.arqueo,
       historyArqueo: historyArqueo ?? this.historyArqueo,
@@ -189,13 +198,52 @@ class UserModel {
     
     return "${startTime['hour'].toString().padLeft(2, '0')}:${startTime['minute'].toString().padLeft(2, '0')} - ${endTime['hour'].toString().padLeft(2, '0')}:${endTime['minute'].toString().padLeft(2, '0')}";
   }
-  bool get hasAccessBySchedule{
-    // devuelve verdadero si el usuario tiene acceso a la cuenta dentro del horario establecido
-    if (startTime.isEmpty && endTime.isEmpty) return false;
+  bool get hasAccess{
+    // var
     DateTime now = DateTime.now();
+    bool hourAccess = false;
+    bool dayAccess = false;
+    // devuelve verdadero si el usuario tiene acceso a la cuenta dentro del horario establecido
+    if (startTime.isEmpty && endTime.isEmpty) return false; 
     DateTime start = DateTime(now.year, now.month, now.day, startTime['hour'], startTime['minute']);
     DateTime end = DateTime(now.year, now.month, now.day, endTime['hour'], endTime['minute']);
-    return now.isAfter(start) && now.isBefore(end);
+    hourAccess = now.isAfter(start) && now.isBefore(end);
+
+    // devuelve verdadero si el usuario tiene acceso a la cuenta en el día de la semana establecido
+    if (daysOfWeek.isEmpty) return false; 
+    String dayName = DateFormat('EEEE', 'en_US').format(now); 
+    dayAccess = daysOfWeek.contains(dayName);
+
+    return hourAccess && dayAccess;
+  } 
+  List get getDaysOfWeek{
+    // devuelve los días de la semana en español
+    List<String> days = [];
+    for (var day in daysOfWeek) {
+      days.add(translateDay(day: day));
+    }
+    return days;
+  }
+  String translateDay({required String day}){
+    // devuelve el dia de la semana en español
+    switch (day) {
+      case 'monday':
+        return 'Lunes';
+      case 'tuesday':
+        return 'Martes';
+      case 'wednesday':
+        return 'Miércoles';
+      case 'thursday':
+        return 'Jueves';
+      case 'friday':
+        return 'Viernes';
+      case 'saturday':
+        return 'Sábado';
+      case 'sunday':
+        return 'Domingo';
+      default:
+        return '';
+    }
   }
 }
 

@@ -651,6 +651,7 @@ class SalesController extends GetxController {
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: ComponentApp().button( 
+                  colorButton: Colors.blue,
                   text: 'Agregar',
                   onPressed: () {
                     addSaleFlash();

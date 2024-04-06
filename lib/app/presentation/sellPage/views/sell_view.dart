@@ -374,10 +374,9 @@ class SalesView extends StatelessWidget {
       ),
     );
   }
-
-  // WIDGETS COMPONENTS
-   
-
+  // ------------------ //
+  // WIDGETS COMPONENTS //
+  // ------------------ //
   
   Widget cashRegisterNumberPopupMenuButton() { 
 
@@ -1085,7 +1084,7 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
           padding: const EdgeInsets.only(bottom: 20),
           child: SizedBox(
             width: double.infinity,
-            child: ElevatedButton(
+            child: ComponentApp().button(
               onPressed: () {
                 if (moneyMaskedTextController.numberValue > 0) {
                   if (isEgreso) {
@@ -1102,12 +1101,8 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
                 }
                 Get.back();
               },
-              style: ButtonStyle(
-                  padding: MaterialStateProperty.all(const EdgeInsets.all(20)),
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(2)))),
-              child: const Text('Confirmar'),
+              colorButton: Colors.blue,
+              text: isEgreso ? 'Egreso' : 'Ingreso',
             ),
           ),
         ), 
@@ -1117,13 +1112,7 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
 
   Widget get detailContent {
     // var
-    Color separatorColor = Colors.grey.withOpacity(0.04);
-    ButtonStyle buttonStyle = ButtonStyle(
-        backgroundColor:
-            MaterialStateProperty.all(confirmCloseState ? Colors.blue : null),
-        padding: MaterialStateProperty.all(const EdgeInsets.all(20)),
-        shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(borderRadius: BorderRadius.circular(2))));
-    TextStyle textStylebutton = TextStyle(color: confirmCloseState ? Colors.white : Colors.blue);
+    Color separatorColor = Colors.grey.withOpacity(0.04);  
     TextStyle textStyleDescription = const TextStyle(fontWeight: FontWeight.w300);
     TextStyle textStyleValue = const TextStyle(fontSize: 18, fontWeight: FontWeight.w600);
 
@@ -1298,7 +1287,9 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
           padding: const EdgeInsets.only(bottom: 20, top: 20),
           child: SizedBox(
             width: double.infinity,
-            child: ElevatedButton(
+            child: ComponentApp().button( 
+              colorButton: Colors.blue,
+              text: confirmCloseState ? 'Cerrar caja' : 'Confirmar',
               onPressed: () {
                 // comprobamos si el usuario ya confirmo el cierre de caja
                 if (confirmCloseState) {
@@ -1317,12 +1308,7 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
                   });
                 }
               },
-              style: buttonStyle,
-              child: Text(
-                  confirmCloseState
-                      ? 'Confirmar cierre de caja'
-                      : 'Cerrar caja',
-                  style: textStylebutton),
+            
             ),
           ),
         ), 
@@ -1416,6 +1402,7 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
           child: SizedBox(
             width: double.infinity,
             child: ComponentApp().button(
+              colorButton: Colors.blue,
               text: 'Inciar caja',
               onPressed: () {
                 // recordamos la descripcion ingresada por el usuario

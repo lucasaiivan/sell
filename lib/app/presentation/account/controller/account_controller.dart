@@ -103,11 +103,6 @@ class AccountController extends GetxController {
   }
 
   @override
-  void onReady() {
-    super.onReady();
-  }
-
-  @override
   void onClose() {}
 
   void verifyAccount( ) { 
@@ -183,6 +178,10 @@ class AccountController extends GetxController {
         email: homeController.getUserAuth.email ?? '',
         superAdmin: true,
         admin: true,
+        daysOfWeek: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        startTime: {'hour':0, 'minute': 0},
+        endTime: {'hour':23, 'minute': 59},
+        name: data.name,
         arqueo: true,
         catalogue: true,
         editAccount: true,
@@ -192,6 +191,7 @@ class AccountController extends GetxController {
         transactions: true,
         creation: Timestamp.now(),
         lastUpdate: Timestamp.now(), 
+        
       );
     //...
     if (data.id != '') {

@@ -49,7 +49,7 @@ class HomeView extends GetView<HomeController> {
       //  condition : si el usuario no ha seleccionado una cuenta
       if (controller.getProfileAccountSelected.id == '' && controller.getFirebaseAuth.currentUser!.isAnonymous == false ){
         // viewDefault : se muestra la vista por defecto para iniciar sesión de una cuenta existente o crear una nueva cuenta
-        return viewDefault();
+        return viewSelectedAccount();
       } 
 
       // PopScope : nos permite controlar el botón de retroceso del dispositivo

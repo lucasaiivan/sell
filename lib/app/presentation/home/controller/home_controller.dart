@@ -1,5 +1,6 @@
 import 'dart:io'; 
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -727,22 +728,25 @@ class HomeController extends GetxController {
       // error
     });
   }
-
+  
   void readDataAdminUser({required String idAccount, required String email}) {
     // obtenemos los datos de los permisos del usuario en la cuenta
     Database.readFutureAdminUser(idAccount: idAccount, email: email).then((value) {
-      if (value.exists) {
+      if (value.exists) { 
         // set : datos de los permisos del usuario en la cuenta
         setProfileAdminUser = UserModel.fromDocumentSnapshot(documentSnapshot: value); 
 
         // condition : comprobar que el usuario no este inactivo
         if(getProfileAdminUser.inactivate == true){
-          //  acceso inactivo por el administrador
+          //  ------------------------------------  //
+          //  acceso inactivo por el administrador  //
+          //  ------------------------------------  //
           Get.dialog(
             PopScope( 
               canPop: false, // Evita que el diálogo se cierre cuando se presiona el botón de retroceso
               child: Center(
                 child: AlertDialog(
+                  icon: const Icon(Icons.lock),
                   title: const Text('Usuario inactivo'),
                   content: const Text('Tu acceso a la cuenta ha sido restringido ponte en contacto con el administrador'),
                   actions: [
@@ -765,15 +769,32 @@ class HomeController extends GetxController {
             barrierColor: const Color(0xff141A31).withOpacity(.3),
             useSafeArea: true, navigatorKey: Get.key,
           );
-        }else if(getProfileAdminUser.hasAccessBySchedule == false && getProfileAdminUser.superAdmin == false){
-          // acceso restringido por horario de acceso
+
+        }else if(getProfileAdminUser.hasAccess == false && getProfileAdminUser.superAdmin == false){
+          //  --------------------------------------  //
+          // acceso restringido por horario de acceso //
+          //  --------------------------------------  //
           Get.dialog(
             PopScope( 
               canPop: false, // Evita que el diálogo se cierre cuando se presiona el botón de retroceso
               child: Center(
                 child: AlertDialog(
+                  icon: const Icon(Icons.lock_clock),
                   title: const Text('No tienes acceso'),
-                  content: Text('Tu horario es de ${getProfileAdminUser.getAccessTimeFormat}'),
+                  content: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // text : horario
+                      Text('Tu horario es de ${getProfileAdminUser.getAccessTimeFormat}'),
+                      const SizedBox(height: 10),
+                      // text : dias con acceso 
+                      Wrap(
+                        spacing: 4,
+                        children: getProfileAdminUser.getDaysOfWeek.map((e) => Chip(label: Text(e),backgroundColor: Colors.transparent)).toList(),
+                      )
+                    ],
+                  ),
                   actions: [
                     // button : cambiar de cuenta
                     TextButton(

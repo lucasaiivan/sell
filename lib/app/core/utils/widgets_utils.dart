@@ -2,6 +2,7 @@
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -299,6 +300,34 @@ class _ProductoItemState extends State<ProductoItem> {
                   // action : selecciona producto de la lista de productos del ticket
                   salesController.setIdProductSelected = widget.producto.id; 
                 }, 
+                onLongPress:(){
+                  // action : abre el dialogo para mostrar la informacion completa basica (imagen,codigo y descripcion) del producto
+                  Get.dialog(
+                    AlertDialog(
+                      title: Text(widget.producto.code),
+                      content: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CachedNetworkImage(
+                            imageUrl: widget.producto.image,
+                            placeholder: (context, url) => const CircularProgressIndicator(),
+                            errorWidget: (context, url, error) => const Icon(Icons.error),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(widget.producto.description,style: const TextStyle(fontSize: 18,fontWeight: FontWeight.normal) ),
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Get.back(),
+                          child: const Text('Cerrar'),
+                        ),
+                      ],
+                    
+                    )
+                  );
+                },
               ),
             ),
           ),
@@ -442,7 +471,7 @@ class _ProductoItemState extends State<ProductoItem> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(widget.producto.description,style: const TextStyle(fontWeight: FontWeight.normal,fontSize: 14.0,color: Colors.grey),maxLines: 2),
+                Text(widget.producto.description,style: const TextStyle(fontWeight: FontWeight.normal,color: Colors.grey ,overflow:TextOverflow.ellipsis),maxLines:1),
                 Text( Publications.getFormatoPrecio(monto: widget.producto.salePrice * widget.producto.quantity),
                     style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 17.0,color: Colors.black),
                     overflow: TextOverflow.clip,
@@ -606,7 +635,7 @@ Widget body({required BuildContext context}){
 
 }
 
-Widget viewDefault() {
+Widget viewSelectedAccount() {
 
   // description  : vista por defecto que se le muestra al usuario para que seleccione un cuenta
 
@@ -665,7 +694,14 @@ Widget viewDefault() {
         // textButton : cerrar sesion
         Padding(
           padding: const EdgeInsets.all(20.0),
-          child: TextButton(onPressed: homeController.showDialogCerrarSesion, child: const Text('Cerrar sesión')),
+          child: Column(
+            children: [
+              // text : email del usuario
+              Opacity(opacity:0.5,child: Text(homeController.getFirebaseAuth.currentUser!.email??'')),
+              // button : cerrar sesion
+              TextButton(onPressed: homeController.showDialogCerrarSesion, child: const Text('Cerrar sesión')),
+            ],
+          ),
         ),
       ],
     )),
@@ -791,7 +827,7 @@ class ComponentApp extends StatelessWidget {
             elevation:defaultStyle?0: elevation,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
             padding: const EdgeInsets.all(20.0),
-            backgroundColor: colorButton,
+            backgroundColor: colorButton ,
             textStyle: TextStyle(color: colorAccent,fontWeight: FontWeight.w700),
           ),  
           icon: icon??Container(),
