@@ -1,6 +1,7 @@
 
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
@@ -259,8 +260,7 @@ class _ProductoItemState extends State<ProductoItem> {
   @override
   Widget build(BuildContext context) {
 
-    //  values
-    bool isSelect = salesController.getIdProductSelected == widget.producto.id;
+    //  values 
     final String alertStockText = widget.producto.stock && salesController.homeController.getIsSubscribedPremium ? (widget.producto.quantityStock >=0 ? widget.producto.quantityStock<=widget.producto.alertStock?'Stock bajo':'' : 'Sin stock'): '';
 
     // aparición animada
@@ -296,126 +296,15 @@ class _ProductoItemState extends State<ProductoItem> {
               color: Colors.transparent,
               child: InkWell(
                 mouseCursor: MouseCursor.uncontrolled,
-                onTap: (){
-                  // action : selecciona producto de la lista de productos del ticket
-                  salesController.setIdProductSelected = widget.producto.id; 
-                }, 
-                onLongPress:(){
+                onTap: (){ 
                   // action : abre el dialogo para mostrar la informacion completa basica (imagen,codigo y descripcion) del producto
                   Get.dialog(
-                    AlertDialog(
-                      title: Text(widget.producto.code),
-                      content: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CachedNetworkImage(
-                            imageUrl: widget.producto.image,
-                            placeholder: (context, url) => const CircularProgressIndicator(),
-                            errorWidget: (context, url, error) => const Icon(Icons.error),
-                          ),
-                          const SizedBox(height: 10),
-                          Text(widget.producto.description,style: const TextStyle(fontSize: 18,fontWeight: FontWeight.normal) ),
-                        ],
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Get.back(),
-                          child: const Text('Cerrar'),
-                        ),
-                      ],
-                    
-                    )
-                  );
+                      EditProductSelectedDialogView(product: widget.producto),
+                    ); 
                 },
               ),
             ),
           ),
-          // color selected
-          isSelect ?Positioned.fill(child: Container(color: Colors.black26,)):Container(),
-          // button delete
-          isSelect
-              ? Align(
-                  alignment: Alignment.topRight,
-                  child: IconButton(
-                      onPressed: () {
-                        salesController.getTicket.removeProduct(product: widget.producto);
-                        salesController.update();
-                      },
-                      icon: const CircleAvatar(
-                          backgroundColor: Colors.red,
-                          child: Icon(
-                            Icons.close,
-                            color: Colors.white,
-                          ))))
-              : Container(),
-          // value quantity
-          widget.producto.quantity > 1 || isSelect
-              ? Align(
-                  alignment: Alignment.topLeft,
-                  child: IconButton(
-                    onPressed: (){
-                      salesController.setIdProductSelected = widget.producto.id;
-                    },
-                    icon: CircleAvatar(
-                      backgroundColor: Colors.black,
-                      child: Padding(
-                        padding: const EdgeInsets.all(2.0),
-                        child: CircleAvatar(
-                            backgroundColor: Colors.white,
-                            child: Center(
-                              child:
-                                  Text(widget.producto.quantity.toString(),style: const TextStyle(color: Colors.black),),
-                            )),
-                      ),
-                    ),
-                  ))
-              : Container(),
-          // button  subtract quantity
-          isSelect
-              ? Align(
-                  alignment: Alignment.bottomLeft,
-                  child: IconButton(
-                      onPressed: () {
-                        salesController.getTicket.decrementProduct(product: widget.producto);
-                        salesController.update();
-                      },
-                      icon: const CircleAvatar(
-                          backgroundColor: Colors.blue,
-                          child: Icon(
-                            Icons.horizontal_rule,
-                            color: Colors.white,
-                          ))))
-              : Container(),
-          // button  increase quantity
-          isSelect
-              ? Align(
-                  alignment: Alignment.bottomRight,
-                  child: IconButton(
-                      onPressed: () {
-                        salesController.getTicket.incrementProduct(product: widget.producto);
-                        salesController.update();
-                      },
-                      icon: const CircleAvatar(
-                          backgroundColor: Colors.blue,
-                          child: Icon(
-                            Icons.add,
-                            color: Colors.white,
-                          ))))
-              : Container(),
-          // button  deselect
-          isSelect
-              ? Align(
-                  alignment: Alignment.center,
-                  child: IconButton(
-                      onPressed: () {
-                        salesController.setIdProductSelected = '';
-                      },
-                      icon: const Icon(
-                        Icons.close,
-                        color: Colors.white,
-                      )))
-              : Container(),
         ],
       ),
     );
@@ -1064,5 +953,130 @@ class ImageProductAvatarApp extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+// view : dialog para editar item del producto seleccionado
+class EditProductSelectedDialogView extends StatefulWidget {
+  
+  final ProductCatalogue product;
+  const EditProductSelectedDialogView({Key? key,required this.product}) : super(key: key);
+
+  @override
+  State<EditProductSelectedDialogView> createState() => _EditProductSelectedDialogViewState();
+}
+
+class _EditProductSelectedDialogViewState extends State<EditProductSelectedDialogView> {
+  
+  // controllers
+  final SalesController controller = Get.find<SalesController>();
+
+  
+  
+  @override
+  Widget build(BuildContext context) { 
+
+    return AlertDialog(
+      title: const Text('Cantidad'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: ImageProductAvatarApp(url: widget.product.image),
+            title: Text(widget.product.description,style: const TextStyle(fontWeight: FontWeight.bold),maxLines: 3,overflow: TextOverflow.ellipsis),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // button : disminuir cantidad
+              FloatingActionButton(
+                onPressed: () {
+                  controller.getTicket.decrementProduct(product: widget.product); 
+                  controller.update();
+                  if(widget.product.quantity>1){
+                    setState(() {widget.product.quantity--;});
+                  }
+                },
+                child: const Icon(Icons.horizontal_rule),
+              
+              ),
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Text(widget.product.quantity.toString(),style: const TextStyle(fontSize: 20)),
+              ),
+              // button : aumentar cantidad
+              FloatingActionButton(
+                onPressed: () {
+                  controller.getTicket.incrementProduct(product: widget.product); 
+                  controller.update();
+                  setState(() {widget.product.quantity++;});
+                },
+                child: const Icon(Icons.add),
+              ),  
+            ],
+          ),
+        ],
+      ),
+      actions: [
+        // butoom : eliminar
+        TextButton(
+          onPressed: () {
+            controller.getTicket.removeProduct(product: widget.product); 
+            controller.update();
+            Get.back();
+          },
+          child: const Text('Eliminar',style: TextStyle(color: Colors.red)),
+        ),
+        // button : cancelar
+        TextButton(
+          onPressed: () {
+            Get.back();
+          },
+          child: const Text('Cancelar'),
+        ),
+        
+      ],
+    );
+
+    return Material( 
+      child: Column(
+        children: [
+          ListTile(
+            // leading : imagen del producto
+            leading: ImageProductAvatarApp(url: widget.product.image,size: 50),
+            // title : nombre del producto
+            title: Text(widget.product.description,style: const TextStyle(fontWeight: FontWeight.bold)),
+            // trailing : buttons para incrementar y disminuir la cantidad del producto
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  onPressed: () {
+                    Get.find<SalesController>().getTicket.decrementProduct(product: widget.product);
+                    Get.back();
+                  },
+                  icon: const Icon(Icons.horizontal_rule),
+                ),
+                Text(widget.product.quantity.toString()),
+                IconButton(
+                  onPressed: () {
+                    Get.find<SalesController>().getTicket.incrementProduct(product: widget.product);
+                    Get.back();
+                  },
+                  icon: const Icon(Icons.add),
+                ),
+              ],
+            ),
+
+          ),
+        ],
+      ),
+    );
+  }
+
+  // views
+  Widget body({required BuildContext context}) {
+    return Container();
   }
 }

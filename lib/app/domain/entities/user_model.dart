@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 class UserModel {
@@ -198,23 +200,28 @@ class UserModel {
     
     return "${startTime['hour'].toString().padLeft(2, '0')}:${startTime['minute'].toString().padLeft(2, '0')} - ${endTime['hour'].toString().padLeft(2, '0')}:${endTime['minute'].toString().padLeft(2, '0')}";
   }
-  bool get hasAccess{
+  bool get hasAccessHour{
     // var
-    DateTime now = DateTime.now();
-    bool hourAccess = false;
-    bool dayAccess = false;
+    DateTime now = DateTime.now(); 
     // devuelve verdadero si el usuario tiene acceso a la cuenta dentro del horario establecido
-    if (startTime.isEmpty && endTime.isEmpty) return false; 
+    if (startTime.isEmpty || endTime.isEmpty) return false; 
     DateTime start = DateTime(now.year, now.month, now.day, startTime['hour'], startTime['minute']);
     DateTime end = DateTime(now.year, now.month, now.day, endTime['hour'], endTime['minute']);
-    hourAccess = now.isAfter(start) && now.isBefore(end);
+    return now.isAfter(start) && now.isBefore(end); 
+  } 
+  bool get hasAccessDay{
+    // var
+    DateTime now = DateTime.now(); 
+    bool dayAccess = false;  
+    // devuelve verdadero si el usuario tiene acceso a la cuenta en el día de la semana establecido 
+    String dayName = DateFormat('EEEE', 'en_US').format(now).toString().toLowerCase().replaceAll(' ', '');  
+    for (var day in daysOfWeek) {  
+      if (day.toString().toLowerCase().replaceAll(' ', '') == dayName.toString().toLowerCase().replaceAll(' ', '') ) {
+        dayAccess = true; 
+      }
+    }
 
-    // devuelve verdadero si el usuario tiene acceso a la cuenta en el día de la semana establecido
-    if (daysOfWeek.isEmpty) return false; 
-    String dayName = DateFormat('EEEE', 'en_US').format(now); 
-    dayAccess = daysOfWeek.contains(dayName);
-
-    return hourAccess && dayAccess;
+    return dayAccess;
   } 
   List get getDaysOfWeek{
     // devuelve los días de la semana en español

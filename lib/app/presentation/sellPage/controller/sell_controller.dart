@@ -1328,7 +1328,7 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
                           // icon : favorito 
                           product.favorite?const Icon(Icons.star_rate_rounded,color: Colors.amber,size:14,):Container(),
                           // text : nombre del producto
-                          Text(product.description,maxLines:2,overflow: TextOverflow.clip,style: const TextStyle(fontWeight: FontWeight.w500)),
+                          Flexible(child: Text(product.description,maxLines:2,overflow: TextOverflow.ellipsis,style: const TextStyle(fontWeight: FontWeight.w500))),
                         ],
                       ),
                       product.nameMark==''?Container():Text(product.nameMark,maxLines: 1,overflow: TextOverflow.clip,style: TextStyle(color: product.verified?Colors.blue:null)),

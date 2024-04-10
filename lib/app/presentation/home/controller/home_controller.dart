@@ -103,13 +103,13 @@ class HomeController extends GetxController {
         // conditionm : si la subcripcion es premium esta activa
         if(key == entitlementID){ 
           setIsSubscribedPremium = value.isActive;
-          Get.snackbar('RevenueCat', value.isActive?'Suscripción premium activa':'Suscripción premium inactiva');  
+          //Get.snackbar('RevenueCat', value.isActive?'Suscripción premium activa':'Suscripción premium inactiva');  
         }  
       }); 
     }catch(e){
       // ignore: avoid_print
       print('Error en initIdentityRevenueCat: $e');
-      Get.snackbar('Error RevenueCat', 'Error en initIdentityRevenueCat: $e');
+      //Get.snackbar('Error RevenueCat', 'Error en initIdentityRevenueCat: $e');
     }
   } 
 
@@ -735,7 +735,7 @@ class HomeController extends GetxController {
       if (value.exists) { 
         // set : datos de los permisos del usuario en la cuenta
         setProfileAdminUser = UserModel.fromDocumentSnapshot(documentSnapshot: value); 
-
+ 
         // condition : comprobar que el usuario no este inactivo
         if(getProfileAdminUser.inactivate == true){
           //  ------------------------------------  //
@@ -770,7 +770,9 @@ class HomeController extends GetxController {
             useSafeArea: true, navigatorKey: Get.key,
           );
 
-        }else if(getProfileAdminUser.hasAccess == false && getProfileAdminUser.superAdmin == false){
+        // condition : denegar el acceso si esta fuera de horario o dia [hasAccessDay, hasAccessHour] a menos que sea [superAdmin, admin]
+        }else if( getProfileAdminUser.hasAccessDay == false && getProfileAdminUser.superAdmin == false  || getProfileAdminUser.hasAccessHour == false && getProfileAdminUser.superAdmin == false){ 
+          
           //  --------------------------------------  //
           // acceso restringido por horario de acceso //
           //  --------------------------------------  //
@@ -784,15 +786,17 @@ class HomeController extends GetxController {
                   content: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // text : horario
-                      Text('Tu horario es de ${getProfileAdminUser.getAccessTimeFormat}'),
+                    children: [ 
+                      // text : dias con acceso
+                      const Text('Días de acceso:'),
                       const SizedBox(height: 10),
                       // text : dias con acceso 
                       Wrap(
                         spacing: 4,
                         children: getProfileAdminUser.getDaysOfWeek.map((e) => Chip(label: Text(e),backgroundColor: Colors.transparent)).toList(),
-                      )
+                      ),
+                      // text : horario de acceso
+                      Text('Horario: ${getProfileAdminUser.getAccessTimeFormat}'),
                     ],
                   ),
                   actions: [
@@ -818,16 +822,16 @@ class HomeController extends GetxController {
         }
         
       }
+    }).onError((error, stackTrace) {
+      // message : verificamos si hay conexión a internet
+      Get.snackbar('Error', 'Error al obtener los datos, verifica tu conexión a internet');
+
     });
   }
 
-  void readUserAccountsList({required String email}) {
-    // var : logica de lectura completa de la lista de cuentas administradas por el usuario
-    int documentsLength = 0;
-    int documentsRead = 0;
+  void readUserAccountsList({required String email}) { 
     // firebase : obtenemos la lista de cuentas del usuario
-    Database.refFirestoreUserAccountsList(email: email).get().then((value) {
-      documentsLength = value.docs.length;
+    Database.refFirestoreUserAccountsList(email: email).get().then((value) { 
       //  recorre la lista de cuentas
       for (var element in value.docs){
         
@@ -836,17 +840,12 @@ class HomeController extends GetxController {
         // condition : si el id de la cuenta es diferente de vacio para evitar errores de consulta inexistentes
         if (userModel.account != '') {
           // firebase : obtenemos los datos de la cuenta
-          Database.readProfileAccountModelFuture(userModel.account).then((value) {
-            documentsRead++;
+          Database.readProfileAccountModelFuture(userModel.account).then((value) { 
             // get : obtenemos los perfiles de las cuentas administradas
             ProfileAccountModel profileAccountModel = ProfileAccountModel.fromDocumentSnapshot(documentSnapshot:value);
             // set
-            addManagedAccountsList = profileAccountModel; 
-            // condition : si ya se leyeron todos los documentos
-            if (documentsRead == documentsLength) {
-              // set : estado de la lista de cuentas administradas
-              setLoadedManagedAccountsList = true;
-            }
+            addManagedAccountsList = profileAccountModel;  
+            setLoadedManagedAccountsList = true;
           });
         }
       } 

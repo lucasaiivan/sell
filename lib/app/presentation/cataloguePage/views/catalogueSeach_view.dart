@@ -283,7 +283,7 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
                             // icon : favorito
                             product.favorite?const Icon(Icons.star_rounded,color: Colors.amber,size: 14,):Container(),
                             // text : nombre del producto
-                            Text(product.description,maxLines: 1,overflow: TextOverflow.ellipsis,style: const TextStyle(fontWeight: FontWeight.w500)),
+                            Flexible(child: Text(product.description,maxLines:2,overflow: TextOverflow.ellipsis,style: const TextStyle(fontWeight: FontWeight.w500))),
                           ],
                         ),
                         // view : marca del producto y proveedor

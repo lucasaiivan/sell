@@ -350,15 +350,23 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
                           homeController.showModalBottomSheetSubcription(id: 'multiuser');
                           return;
                         }
-                        // condition : seteamos los dias de la semana
+                        // condition : si es [superAdmin] se le asignan todos los permisos sin restricciones
                         if(widget.user.superAdmin){
                           // si es super administrador le asignamos todos los permisos sin restricciones
                           widget.user.daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
                           widget.user.startTime = {'hour':0, 'minute': 0};
                           widget.user.endTime = {'hour':23, 'minute': 59}; 
                           daysOfWeekFilter = DayOfWeek.values.toSet();
+                          // permisos
+                          widget.user.arqueo = true;
+                          widget.user.historyArqueo = true;
+                          widget.user.catalogue = true;
+                          widget.user.transactions = true;
+                          widget.user.multiuser = true;
+                          widget.user.editAccount = true;
+                          widget.user.admin = true; 
                         }else{
-                          widget.user.daysOfWeek = daysOfWeekFilter.map((day) => day.toString().split('.').last).toList();
+                          widget.user.daysOfWeek = daysOfWeekFilter.map((day) => day.toString().toLowerCase().replaceAll(' ', '').split('.').last).toList();
                         }
                         // condition : valida el email
                         if(!EmailValidator.validate(widget.user.email) ){ 

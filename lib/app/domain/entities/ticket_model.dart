@@ -213,6 +213,7 @@ class TicketModel {
         return;
       }
     }
+    
   }
   // void : decrementa el producto seleccionado del ticket
   void decrementProduct({required ProductCatalogue product}) {

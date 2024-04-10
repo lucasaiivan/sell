@@ -191,6 +191,7 @@ class AccountController extends GetxController {
         transactions: true,
         creation: Timestamp.now(),
         lastUpdate: Timestamp.now(), 
+        inactivate: false,
         
       );
     //...
