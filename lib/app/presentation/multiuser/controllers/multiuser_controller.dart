@@ -632,7 +632,7 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
         CheckboxListTile(
           enabled: !widget.user.superAdmin,
           title:const Text('Editar cuenta'),
-          subtitle: const Opacity(opacity: 0.5,child: Text('Permite editar o eliminar los datos de la cuenta para siempre')),
+          subtitle: const Opacity(opacity: 0.5,child: Text('Permite editar o eliminar datos  de la cuenta')),
           value: widget.user.editAccount, 
           onChanged: (value){
             setState(() {

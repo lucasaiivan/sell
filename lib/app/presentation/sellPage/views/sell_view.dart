@@ -400,8 +400,8 @@ class SalesView extends StatelessWidget {
       ); 
     }
 
-    // condition : si el usuario de la cuenta no es administrador no se muestra el boton de suscribirse a premium
-      if(  homeController.getProfileAdminUser.arqueo == false){
+    // condition : si el usuario de la cuenta no es administrador y tampoco es premium, no se muestra el boton de iniciar caja
+      if(  homeController.getProfileAdminUser.admin == false && isPremium==false){
         return Container();
       }
       
@@ -1289,7 +1289,7 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
             width: double.infinity,
             child: ComponentApp().button( 
               colorButton: Colors.blue,
-              text: confirmCloseState ? 'Cerrar caja' : 'Confirmar',
+              text: confirmCloseState ? 'Confirmar':'Cerrar caja',
               onPressed: () {
                 // comprobamos si el usuario ya confirmo el cierre de caja
                 if (confirmCloseState) {

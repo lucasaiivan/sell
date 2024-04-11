@@ -298,10 +298,28 @@ class _ProductoItemState extends State<ProductoItem> {
                 mouseCursor: MouseCursor.uncontrolled,
                 onTap: (){ 
                   // action : abre el dialogo para mostrar la informacion completa basica (imagen,codigo y descripcion) del producto
-                  Get.dialog(
-                      EditProductSelectedDialogView(product: widget.producto),
-                    ); 
+                  Get.dialog( EditProductSelectedDialogView(product: widget.producto) ); 
                 },
+                onLongPress: (){
+                  // action : abre el dialogo para mostrar la informacion completa basica (imagen,codigo y descripcion) del producto
+                  Get.dialog( EditProductSelectedDialogView(product: widget.producto) ); 
+                },
+              ),
+            ),
+          ),
+          // view : cantidad de productos seleccionados
+          widget.producto.quantity==1 ?  Container()
+          :Positioned(
+            top:5,
+            right:5,
+            child: CircleAvatar(
+              backgroundColor: Colors.black87,
+              child: Padding(
+                padding: const EdgeInsets.all(1.0),
+                child: CircleAvatar(  
+                  backgroundColor: Colors.white,
+                  child: Text(widget.producto.quantity.toString(),style: const TextStyle(color: Colors.black,fontWeight: FontWeight.bold)),
+                ),
               ),
             ),
           ),
@@ -508,7 +526,7 @@ Widget body({required BuildContext context}){
           tileColor: Colors.blue.withOpacity(0.05),
           leading: const Icon(Icons.messenger_outline_sharp,color: Colors.green),
           title: const Text('Escribenos tu opinión 😃'),
-          subtitle: const Text('Tu opinión o sugerencia es importante'),
+          subtitle: const Text('Tu opinión o sugerencia es importante para mejorar esta app'),
           onTap: () async {
             
             // values
@@ -976,16 +994,26 @@ class _EditProductSelectedDialogViewState extends State<EditProductSelectedDialo
   @override
   Widget build(BuildContext context) { 
 
+    // widgets
+    Widget titleWidget = Text(widget.product.description,style: const TextStyle(fontWeight: FontWeight.bold),maxLines: 5,overflow: TextOverflow.ellipsis);
+    Widget subtitleWidget = Text(Publications.getFormatoPrecio(monto: widget.product.salePrice * widget.product.quantity),style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 20,color: Colors.blue ));
+
     return AlertDialog(
-      title: const Text('Cantidad'),
+      title: Text(widget.product.code==''?'Item':widget.product.code,style: const TextStyle(fontWeight: FontWeight.bold)),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           ListTile(
             leading: ImageProductAvatarApp(url: widget.product.image),
-            title: Text(widget.product.description,style: const TextStyle(fontWeight: FontWeight.bold),maxLines: 3,overflow: TextOverflow.ellipsis),
-          ),
-          const SizedBox(height: 20),
+            title:widget.product.description==''?subtitleWidget:titleWidget,
+            // subtitle : codigo del producto si es q existe 
+            subtitle: widget.product.description==''? null:subtitleWidget,
+          ), 
+          const SizedBox(height: 12),
+          const Divider(thickness:0.6,),
+          // text : cantidad
+          const Text('Cantidad'),
+          const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -998,11 +1026,11 @@ class _EditProductSelectedDialogViewState extends State<EditProductSelectedDialo
                     setState(() {widget.product.quantity--;});
                   }
                 },
-                child: const Icon(Icons.horizontal_rule),
+                child: const Icon(Icons.horizontal_rule,color: Colors.white),
               
               ),
               Padding(
-                padding: const EdgeInsets.all(12.0),
+                padding: const EdgeInsets.all(18.0),
                 child: Text(widget.product.quantity.toString(),style: const TextStyle(fontSize: 20)),
               ),
               // button : aumentar cantidad
@@ -1012,7 +1040,7 @@ class _EditProductSelectedDialogViewState extends State<EditProductSelectedDialo
                   controller.update();
                   setState(() {widget.product.quantity++;});
                 },
-                child: const Icon(Icons.add),
+                child: const Icon(Icons.add,color: Colors.white),
               ),  
             ],
           ),
@@ -1026,14 +1054,14 @@ class _EditProductSelectedDialogViewState extends State<EditProductSelectedDialo
             controller.update();
             Get.back();
           },
-          child: const Text('Eliminar',style: TextStyle(color: Colors.red)),
+          child: Text('Eliminar',style: TextStyle(color: Colors.red.shade400)),
         ),
         // button : cancelar
         TextButton(
           onPressed: () {
             Get.back();
           },
-          child: const Text('Cancelar'),
+          child: const Text('Ok'),
         ),
         
       ],
