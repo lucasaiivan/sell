@@ -402,8 +402,8 @@ class CataloguePage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal:item.image==''?16:0),
-                      child: ImageProductAvatarApp(url:item.local?'': item.image,size:item.image==''?50: 80,favorite: item.favorite),
+                      padding: EdgeInsets.symmetric(horizontal:item.image==''?27:0),
+                      child: ImageProductAvatarApp(url:item.local?'': item.image,size:item.image==''?25: 80,favorite: item.favorite),
                     ),
                     Flexible( 
                       child: Padding(

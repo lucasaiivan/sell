@@ -201,6 +201,8 @@ class ProductEdit extends StatelessWidget {
               controller.getProduct.verified?const SizedBox(width:2):Container(), 
               // text : codigo
               controller.getProduct.code != ""?Text(controller.getProduct.code,style: const TextStyle(height: 1,fontSize: 14,fontWeight: FontWeight.w400)):Container(),
+              // text : etiqueta de producto local (en el cátalogo)
+              !controller.getProduct.local?Container():const Opacity(opacity: 0.4,child: Text(' (Cátalogo) ',style: TextStyle(height: 1,fontSize: 14,fontWeight: FontWeight.w400))),
               // barra separadora 
               controller.getProduct.local?Container():
               const Opacity(opacity: 0.4,child: Text(' | ',style: TextStyle(height: 1,fontSize: 14,fontWeight: FontWeight.w400))) ,
@@ -222,7 +224,7 @@ class ProductEdit extends StatelessWidget {
                 child: controller.loadImage(size:100),
               ),
               // view : codigo,icon de verificaciones, descripcion y marca del producto
-              Flexible(
+              controller.getProduct.local?Container():Flexible(
                 child: textfielBottomSheetListOptions( 
                   contentPadding: const EdgeInsets.only(bottom: 12,top: 12,left: 12,right: 12),
                   stateEdit: controller.getLoadingData? false: controller.getEditModerator || controller.getProduct.verified==false,

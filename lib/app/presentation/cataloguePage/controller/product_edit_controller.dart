@@ -349,7 +349,7 @@ class ControllerProductsEdit extends GetxController {
   Future<void> save() async {
     if (getProduct.id != '') {
       if ( controllerTextEditDescripcion.text != '') {
-        if (getMarkSelected.id != '' && getMarkSelected.name != '') {
+        if (getMarkSelected.id != '' && getMarkSelected.name != '' || getProduct.local == true ) {
           if (controllerTextEditPrecioVenta.numberValue > 0 ) {
             if ( getStock ? (getQuantityStock >= 1) : true) { 
               

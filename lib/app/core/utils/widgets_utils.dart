@@ -720,7 +720,7 @@ class ComponentApp extends StatelessWidget {
       ),
     );
   } 
-  Widget button( {bool defaultStyle = false,double elevation=0,double fontSize = 14,double width = double.infinity,bool disable = false, Widget? icon, String text = '',required dynamic onPressed,EdgeInsets padding =const EdgeInsets.symmetric(horizontal: 12, vertical: 12),Color? colorButton,Color colorAccent = Colors.white}) {
+  Widget button( {bool defaultStyle = false,double elevation=0,double fontSize = 14,double width = double.infinity,bool disable = false, Widget? icon, String text = '',required dynamic onPressed,EdgeInsets padding =const EdgeInsets.symmetric(horizontal: 12, vertical: 12),Color? colorButton= Colors.blue,Color colorAccent = Colors.white}) {
      
     // button : personalizado
     return FadeIn(
@@ -898,6 +898,7 @@ class LogoPremium extends StatelessWidget {
 }
 
 class ImageProductAvatarApp extends StatelessWidget { 
+  late final  Widget? icon;
   late final bool iconAdd;
   late final bool favorite;
   late final String url;
@@ -908,7 +909,7 @@ class ImageProductAvatarApp extends StatelessWidget {
   final VoidCallback?  onTap;
   late final Color canvasColor;
   // ignore: prefer_const_constructors_in_immutables
-  ImageProductAvatarApp({Key? key,this.iconAdd=false,this.canvasColor=Colors.black12,this.favorite=false,this.url='',this.size=50,this.radius=12,this.description='',this.path='', this.onTap }) : super(key: key);
+  ImageProductAvatarApp({Key? key,this.url='', this.size = 75, this.radius = 6.0, this.description = '', this.path = '', this.onTap, this.iconAdd = false, this.favorite = false, this.canvasColor = Colors.grey,this.icon }) : super(key: key);
 
   // avatar que se va usar en toda la app, especialemnte en los 'ListTile'
 
@@ -934,7 +935,7 @@ class ImageProductAvatarApp extends StatelessWidget {
       imageDefault = AnimatedContainer(
       duration: const Duration(milliseconds: 500),
       color: backgroundColor,
-      child: Image.asset('assets/default_image.png',fit: BoxFit.cover,color: iconColor));
+      child:icon??Image.asset('assets/default_image.png',fit: BoxFit.cover,color: iconColor));
     }
     return SizedBox(
       width: size,height: size,
@@ -942,10 +943,7 @@ class ImageProductAvatarApp extends StatelessWidget {
         child: Container(
           width: 75,
           height: 75,
-          decoration: BoxDecoration( 
-            borderRadius: BorderRadius.circular(8.0),
-            border: Border.all(color: favorite?Colors.yellow.shade700:Colors.transparent,width: favorite?2:0),
-          ),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(8.0),border: Border.all(color: favorite?Colors.yellow.shade700:Colors.transparent,width: favorite?2:0)),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(6.0), 
             child: InkWell(

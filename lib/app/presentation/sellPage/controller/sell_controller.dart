@@ -923,6 +923,14 @@ class _NewProductViewState extends State<NewProductView> {
         const SizedBox(width: 5),
         // text :  crear un rich text para poder darle estilo al texto
         Text(widget.productCatalogue.code,style: textStyle.copyWith(fontWeight: FontWeight.bold,fontSize: 16)),
+        const Spacer(),
+        TextButton(
+          child: const Text('Volver a escanear'),
+          onPressed: () {
+            Get.back();
+            salesController.scanBarcodeNormal();
+          }, 
+        ),
       ],
     ), 
     ); 
@@ -1031,6 +1039,9 @@ class _NewProductViewState extends State<NewProductView> {
     final Widget buttonConfirm = Padding(
       padding: const EdgeInsets.all(12.0),
       child:  ComponentApp().button(
+        text: 'Confirmar',
+        colorAccent: Colors.white,
+        colorButton: Colors.blue,
         onPressed: () {
           // variables de condiciones
           bool conditionDescription = widget.productCatalogue.verified?true:descriptionFormKey.currentState!.validate();
@@ -1059,8 +1070,7 @@ class _NewProductViewState extends State<NewProductView> {
               });
             }
           }
-        },
-        text: 'Confirmar',
+        }, 
       ), 
     );
     

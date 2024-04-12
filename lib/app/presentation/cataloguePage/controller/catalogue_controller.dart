@@ -365,8 +365,8 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
   void updatePricePurchaseAndSalesWithPercentage({required List<ProductCatalogue> list,required double percentage}){
     // con un porcentaje actualiza el precio de compra y venta de todos los productos de la lista pasado por parametro y redondear al numero mas sercano 
     for (var element in list) {
-      element.purchasePrice = 
       element.salePrice = element.salePrice + (element.salePrice * percentage / 100); // actualizamos el precio de venta
+      element.purchasePrice =  element.purchasePrice = element.purchasePrice + (element.purchasePrice * percentage / 100); // actualizamos el precio de compra 
       element.upgrade = Timestamp.now(); // actualizamos la fecha de actualizacion
       // firebase 
       Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(element.id).set(element.toJson());
@@ -536,6 +536,7 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
       child: Scaffold(
         appBar: appbar,
         body: body,
+        floatingActionButton: floatingActionButtons,
       ),
     );
   }
@@ -544,45 +545,69 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
   // WIDGETS VIEW
   //
   PreferredSizeWidget get appbar{
-    return AppBar(
-      title: const Text('Productos seleccionados'), 
-    );
+    return AppBar( 
+      title: const Text('Seleccionados'),
+      actions: [
+        // iconButton : cerrar dialogo
+        IconButton(
+          onPressed: () { 
+            Get.back();
+          },
+          icon: const Icon(Icons.close),
+        ),
+      ],
+      );
   }
   Widget get body{ 
-    return Column(
+    return Flexible(
+      child: ListView.builder(
+        itemCount: catalogueController.getProductsSelectedList.length,
+        itemBuilder: (context, index) {
+          return itemProduct(product: catalogueController.getProductsSelectedList[index] );
+        },
+      ),
+    );
+  }
+  Widget get floatingActionButtons{
+    return Row( 
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Flexible(
-          child: ListView.builder(
-            itemCount: catalogueController.getProductsSelectedList.length,
-            itemBuilder: (context, index) {
-              return itemProduct(product: catalogueController.getProductsSelectedList[index] );
-            },
-          ),
+        // iconButton : eliminar
+        FloatingActionButton.extended(
+          backgroundColor: Colors.red.shade300,
+          onPressed: () {
+            Get.back();
+            confirmDeleteProductDialog();
+          },
+          label: const Text('Eliminar de mi catálogo',style: TextStyle(color: Colors.white)), 
+          icon: const Icon(Icons.delete,color: Colors.white)
         ),
-        // button : abre un dialog para actualizar el precio de venta de los productos seleccionados
-        ComponentApp().button(text: 'Actualizar', onPressed: (){
-          Get.back();
-          updateDialog();
-        }),
-        // button : abre un dialog para eliminar los productos seleccionados
-        ComponentApp().button(
-          defaultStyle: false,
-          icon: const Text('Eliminar de mi catálogo',style: TextStyle(color: Colors.white)), 
-          colorButton: Colors.red.shade300,
-        onPressed: (){ 
-          // dialog : confirmar la eliminación de los productos seleccionados
-          confirmDeleteProductDialog();
-        }), 
-
-        // textButton : descartar los productos seleccionados
-        TextButton(onPressed: (){ 
-          catalogueController.getProductsSelectedList.clear();
-          Get.back();
-          }, child: Text('Descartar',style: TextStyle(color: Colors.red.shade400))),
+        const SizedBox(width: 10), 
+        // iconButton : descartar
+        FloatingActionButton.extended(
+          backgroundColor: Colors.grey,
+          onPressed: () {
+            catalogueController.getProductsSelectedList.clear();
+            Get.back();
+          },
+          label: const Text('Descartar',style: TextStyle(color: Colors.white)),
+          icon: const Icon(Icons.close,color: Colors.white,),
+        ),
+        const SizedBox(width: 10),
+        // iconButton : actualizar
+        FloatingActionButton.extended(
+          onPressed: () { 
+            Get.back();
+            updateDialog();
+          },
+          label: const Text('Actualizar',style: TextStyle(color: Colors.white)),
+          icon: const Icon(Icons.update,color: Colors.white,),
+        ),
+        const SizedBox(width: 10),
+        
       ],
     );
   }
-
   // 
   // WIDGETS COMPONENTS
   //
@@ -594,9 +619,7 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
           title: Text(product.description,maxLines: 1,),
           // subtitle: un Wrap con la marca en color azul si esta verificado, codigo del producto, precio de venta y precio de compra con un icon de circulo pequeño como dividor
           subtitle: Column(
-            children: [
-              // text : id
-              Text(product.id),
+            children: [ 
               Row(
                 children: [
                   // text : marca del producto 
@@ -626,7 +649,7 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
                 catalogueController.deleteProductSelected(code: product.code);
               });
             },
-            icon: const Icon(Icons.close),
+            icon: const Icon(Icons.delete),
           ),
         ),
         ComponentApp().divider(),
@@ -640,7 +663,7 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
   void updateDialog(){
     Get.dialog(
       AlertDialog(
-        title: const Text('Actualización cátalogo'),  
+        title: const Text('Actualización'),  
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -656,17 +679,17 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
             TextButton(onPressed: () {
               Get.back();
               updateSalesPriceDialog();
-            },child: const Text('Actualizar precio de venta al público')), 
+            },child: const Text('Precio de venta al público')), 
             // textButton : actualizar ambos precios
             TextButton(onPressed: () {
               Get.back();
               updatePricePurchaseAndSalesDialog(); 
-            },child: const Text('Actualizar ambos precios')),
+            },child: const Text('Ambos precios')),
             // textButton : actualizar precio de compra y venta con porcentaje
             TextButton(onPressed: () {
               Get.back();
               updatePricePurchaseAndSalesWithPercentageDialog();
-            },child: const Text('Actualizar ambos precios con porcentaje')),
+            },child: const Text('Ambos precios con porcentaje')),
           ],
         ),
         actions: [
@@ -836,7 +859,7 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
 
     Get.dialog(
       AlertDialog(
-        title: const Text('Actualizar precios con porcentaje'),  
+        title: const Text('Actualizar costo y venta'),  
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -873,7 +896,7 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
               // var
               double percentage = double.parse(percentageController.value.text);
 
-              // function : actualizar precio de compra de los productos seleccionados
+              // function : actualizar ambos precios con un porcentaje
               catalogueController.updatePricePurchaseAndSalesWithPercentage( list: catalogueController.getProductsSelectedList,percentage: percentage);
             
               Get.back();
