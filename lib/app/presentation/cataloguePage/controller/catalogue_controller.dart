@@ -548,24 +548,23 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
     return AppBar( 
       title: const Text('Seleccionados'),
       actions: [
-        // iconButton : cerrar dialogo
-        IconButton(
-          onPressed: () { 
+        // textbutton : descartar
+        TextButton(
+          onPressed: () {
+            catalogueController.getProductsSelectedList.clear();
             Get.back();
           },
-          icon: const Icon(Icons.close),
+          child: const Text('Descartar'),
         ),
       ],
       );
   }
   Widget get body{ 
-    return Flexible(
-      child: ListView.builder(
-        itemCount: catalogueController.getProductsSelectedList.length,
-        itemBuilder: (context, index) {
-          return itemProduct(product: catalogueController.getProductsSelectedList[index] );
-        },
-      ),
+    return ListView.builder(
+      itemCount: catalogueController.getProductsSelectedList.length,
+      itemBuilder: (context, index) {
+        return itemProduct(product: catalogueController.getProductsSelectedList[index] );
+      },
     );
   }
   Widget get floatingActionButtons{
@@ -579,20 +578,9 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
             Get.back();
             confirmDeleteProductDialog();
           },
-          label: const Text('Eliminar de mi catálogo',style: TextStyle(color: Colors.white)), 
+          label: const Text('Eliminar',style: TextStyle(color: Colors.white)), 
           icon: const Icon(Icons.delete,color: Colors.white)
-        ),
-        const SizedBox(width: 10), 
-        // iconButton : descartar
-        FloatingActionButton.extended(
-          backgroundColor: Colors.grey,
-          onPressed: () {
-            catalogueController.getProductsSelectedList.clear();
-            Get.back();
-          },
-          label: const Text('Descartar',style: TextStyle(color: Colors.white)),
-          icon: const Icon(Icons.close,color: Colors.white,),
-        ),
+        ), 
         const SizedBox(width: 10),
         // iconButton : actualizar
         FloatingActionButton.extended(
@@ -604,6 +592,14 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
           icon: const Icon(Icons.update,color: Colors.white,),
         ),
         const SizedBox(width: 10),
+        // iconButton : descartar
+        FloatingActionButton(
+          backgroundColor: Colors.grey,
+          onPressed: () { 
+            Get.back();
+          }, 
+          child: const Icon(Icons.close,color: Colors.white,),
+        ),
         
       ],
     );
@@ -927,7 +923,7 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
             onPressed: () {
               Get.back();
             },
-            child: const Text('Cerrar'),
+            child: const Text('Cancelar'),
           ),
           TextButton(
             onPressed: () {

@@ -97,8 +97,7 @@ class _StaticsCardsState extends State<StaticsCards> {
         backgroundColor: cardColor,
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.payment_rounded,color: Colors.white,size:14)))),
         content: transactionsController.viewPercentageBarCharTextDataHorizontal(chartData:  transactionsController.getAnalyticsMeansOfPayment.entries.toList()),
-        titleText: 'Medio de pago', 
-        //description:'${transactionsController.getPreferredPaymentMethod()['name']} más usado',
+        titleText: 'Medio de pago',  
         modalContent: PaymentMethodView(),
         ),
       // card : rentabilidad
@@ -282,7 +281,7 @@ class CardAnalityc extends StatelessWidget {
                 Positioned(
                   bottom: 8,
                   right: 8,
-                  child: modalContent is SizedBox ?Container(): Padding(padding: const EdgeInsets.only(left: 8),child: CircleAvatar(backgroundColor: Colors.black26,maxRadius: 16,child: Icon(Icons.expand_circle_down_sharp,size: 24,color:buttonColor),) ),
+                  child: modalContent is SizedBox ?Container(): Padding(padding: const EdgeInsets.only(left: 8),child: CircleAvatar(backgroundColor: Colors.black26,maxRadius: 14,child: Icon(Icons.expand_circle_down_sharp,size: 24,color:buttonColor),) ),
                 ),
               ],
             ),
@@ -571,7 +570,7 @@ class PaymentMethodView extends StatelessWidget {
       // converit chartData en una nuevo Map
       List<Map> map = [];
       for (var item in chartData) {
-        map.add({'name':transactionsController.getPayMode(idMode: item.key)['name'],'value':item.value,'priceTotal':Publications.getFormatoPrecio(monto: item.value),'color':transactionsController.getPayMode(idMode: item.key)['color']});
+        map.add({'name':transactionsController.getPayMode(idMode: item.key)['name'],'value':item.value,'priceTotal':Publications.getFormatoPrecio(monto: item.value),'color':transactionsController.getPayMode(idMode: item.key)['color'],'iconData':transactionsController.getPayMode(idMode: item.key)['iconData']});
       } 
       
       // var
@@ -590,12 +589,25 @@ class PaymentMethodView extends StatelessWidget {
       for (var i = 0; i < chartData.length; i++) {
         map[i]['porcent'] = listPorcent[i];
       }
+
+      // determinar el index que mayor valor tiene
+      int indexMax = 0;
+      for (var i = 0; i < map.length; i++) {
+        if(map[i]['porcent'] > map[indexMax]['porcent']) indexMax = i;
+      }
   
 
       return ListView( 
         physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
         children: List.generate(chartData.length, (index) {
+
+          // var 
+          height = indexMax == index ? height+6 : height;
+          Widget icon = map[index]['iconData']!=null?Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 5),
+            child: Icon(map[index]['iconData'],color: Colors.white),
+          ):Container();
 
           // obtener el porcentaje formateado  redondeado sin reciduo
           String porcent = map[index]['porcent'] % 1 == 0 ? '${map[index]['porcent'].round()}%' : '${map[index]['porcent']}%';
@@ -632,7 +644,14 @@ class PaymentMethodView extends StatelessWidget {
                     percentageBar,
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                      child: Text( '$porcent $priceTotal',style: textStyle.copyWith(color: Colors.white),overflow: TextOverflow.ellipsis),
+                      child: Row(
+                        children: [
+                          // icon : icono de medio de pago si es que existe
+                          icon,
+                          // text : porcentaje y monto total
+                          Text( '$porcent $priceTotal',style: textStyle.copyWith(color: Colors.white),overflow: TextOverflow.ellipsis),
+                        ],
+                      ),
                     ),
                   ],
                 ),

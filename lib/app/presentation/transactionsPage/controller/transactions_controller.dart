@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart'; 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart'; 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sell/app/core/utils/widgets_utils.dart';
@@ -813,6 +814,7 @@ class TransactionsController extends GetxController {
           'value':item.value,
           'priceTotal':Publications.getFormatoPrecio(monto: item.value),
           'color':getPayMode(idMode: item.key)['color'],
+          'iconData':getPayMode(idMode: item.key)['iconData'],
           });
       } 
       
@@ -832,11 +834,23 @@ class TransactionsController extends GetxController {
       for (var i = 0; i < chartData.length; i++) {
         map[i]['porcent'] = listPorcent[i];
       }
+
+      // determinar el index que mayor valor tiene
+      int indexMax = 0;
+      for (var i = 0; i < map.length; i++) {
+        if(map[i]['porcent'] > map[indexMax]['porcent']) indexMax = i;
+      }
   
 
       return ListView(
         shrinkWrap: true,
-        children: List.generate(chartData.length, (index) {
+        children: List.generate(chartData.length, (index) { 
+          // var 
+          height = indexMax == index ? height+6 : height;
+          Widget icon = indexMax == index ?map[index]['iconData'] == null ? Container() : Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 5),
+            child: Icon(map[index]['iconData'],color: Colors.white ,size: 20),
+          ):Container();
 
           // obtener el porcentaje formateado  redondeado sin reciduo
           String porcent = map[index]['porcent'] % 1 == 0 ? '${map[index]['porcent'].round()}%' : '${map[index]['porcent']}%';
@@ -849,10 +863,10 @@ class TransactionsController extends GetxController {
           );
           // crear un [Material] con el color del 'chartData[index]['color']'  y pintado segun el porcentaje 
           Widget percentageBar = Material( 
-            borderRadius: BorderRadius.circular(3),
+            borderRadius: BorderRadius.circular(3), 
             color: map[index]['color'],
             child: FractionallySizedBox(
-              widthFactor: map[index]['porcent'] / 100,  
+              widthFactor: map[index]['porcent'] /  100,  
               child:  Container(height:height),
             ),
           );
@@ -866,7 +880,14 @@ class TransactionsController extends GetxController {
                 percentageBar,
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                  child: Text(map[index]['name']+' '+porcent+' '+priceTotal,style: textStyle,overflow: TextOverflow.ellipsis),
+                  child: Row(
+                    children: [
+                      // icon : muestra el icono solo del medio de pago que tiene el mayor porcentaje
+                      icon,
+                      // text : medio de pago, porcentaje y monto total
+                      Flexible(child: Text(map[index]['name']+' '+porcent+' '+priceTotal,style: textStyle,overflow: TextOverflow.ellipsis)),
+                    ],
+                  ),
                 ),
               ],
             ),
