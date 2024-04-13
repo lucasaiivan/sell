@@ -136,8 +136,8 @@ class CashRegister {
     double? cashOutFlow,
     double? expectedBalance,
     double? balance,
-    List<dynamic>? cashInFlowList,
-    List<dynamic>? cashOutFlowList,
+    List<dynamic>? cashInFlowList, // lista de ingresos de caja [CashFlow]
+    List<dynamic>? cashOutFlowList, // lista de egresos de caja [CashFlow]
   }) {
     return CashRegister(
       id: id ?? this.id,

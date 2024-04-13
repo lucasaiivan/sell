@@ -643,6 +643,10 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
               setState(() {
                 // fuction : eliminar producto de la lista de productos seleccionados
                 catalogueController.deleteProductSelected(code: product.code);
+                // condition : si es el ultimo producto seleccionado se cierra la vista
+                if(catalogueController.getProductsSelectedList.isEmpty){
+                  Get.back();
+                }
               });
             },
             icon: const Icon(Icons.delete),

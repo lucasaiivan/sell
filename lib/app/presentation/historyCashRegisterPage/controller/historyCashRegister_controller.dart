@@ -6,6 +6,7 @@ import '../../../core/utils/widgets_utils.dart';
 import '../../../data/datasource/database_cloud.dart';
 import '../../../domain/entities/cashRegister_model.dart';
 import '../../home/controller/home_controller.dart';
+import '../views/historyCashRegister_view.dart';
 
 class HistoryCashRegisterController extends GetxController {
   // others controllers
@@ -317,217 +318,17 @@ class HistoryCashRegisterController extends GetxController {
               child: Icon(Icons.arrow_right_outlined, size: 16))
         ],
       ),
-      onTap: () {
-        showDialog(
-          context: Get.context!,
-          builder: (BuildContext context) => viewDetails(cashRegister: cashRegister),
-        );
+      onTap: () { 
+        Get.dialog(
+          ClipRRect(
+            borderRadius: const  BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12), bottomLeft: Radius.circular(0), bottomRight: Radius.circular(0)),
+            child: CashRegisterDetailView(cashRegister: cashRegister),
+          ),
+        ); 
       },
     );
   }
 
-  Widget viewDetails({required CashRegister cashRegister}) {
-    // others controllers
-    final HistoryCashRegisterController transactionsController = Get.find();
-
-    // var
-    Color separatorColor = Colors.black.withOpacity(.04);
-    TextStyle textStyleDescription = const TextStyle(fontWeight: FontWeight.w300);
-    TextStyle textStyleValue = const TextStyle(fontSize: 16, fontWeight: FontWeight.w600);
-
-    // var : tiempo de apertura de caja
-    int hour = cashRegister.closure.difference(cashRegister.opening).inHours;
-    int minutes = cashRegister.closure.difference(cashRegister.opening).inMinutes.remainder(60);
-    String time = hour==0?' $minutes minutos':'$hour horas y $minutes minutos';
-
-    return AlertDialog(
-      content: SizedBox(
-        // establece el ancho a toda la pantalla
-        width: Get.width,
-        // SingleChildScrollView : permite hacer scroll en el contenido
-        child: SingleChildScrollView(
-          child: Column(
-            //padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 20),
-            children: [
-              // text : titulo de la alerta
-              const Padding(
-                padding: EdgeInsets.only(bottom: 12),
-                child: Text("Información de arqueo",
-                    textAlign: TextAlign.center,
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.w400)),
-              ),
-              const SizedBox(height: 20),
-              // view info : descripcion
-              Row(children: [
-                Text('Descripción', style: textStyleDescription),
-                const Spacer(),
-                Text(cashRegister.description, style: textStyleValue)
-              ]),
-              // view info : fecha de inicio
-              const SizedBox(height: 12),
-              Container(
-                color: separatorColor,
-                child: Row(children: [
-                  Text('Inicio', style: textStyleDescription),
-                  const Spacer(),
-                  Text(
-                      Publications.getFechaPublicacionFormating(
-                          dateTime: cashRegister.opening),
-                      style: textStyleValue)
-                ]),
-              ),
-              // view info : fecha de cierre
-              const SizedBox(height: 12),
-              Row(children: [
-                Text('Cierre', style: textStyleDescription),
-                const Spacer(),
-                Text(
-                    Publications.getFechaPublicacionFormating(
-                        dateTime: cashRegister.closure),
-                    style: textStyleValue)
-              ]),
-              // view info : tiempo de apertura
-              const SizedBox(height: 12),
-              Container(
-                color: separatorColor,
-                child: Row(children: [
-                  Text('Tiempo', style: textStyleDescription),
-                  const Spacer(),
-                  Text(time, style: textStyleValue)
-                ]),
-              ),
-              // view info : efectivo incial
-              const SizedBox(height: 12),
-              Row(children: [
-                Text('Efectivo inicial', style: textStyleDescription),
-                const Spacer(),
-                Text(
-                    Publications.getFormatoPrecio(
-                        monto: cashRegister.expectedBalance),
-                    style: textStyleValue)
-              ]),
-              //  view info : cantidad de venta
-              const SizedBox(height: 12),
-              Container(
-                color: separatorColor,
-                child: Row(children: [
-                  Text('Cantidad de ventas', style: textStyleDescription),
-                  const Spacer(),
-                  Text(cashRegister.sales.toString(), style: textStyleValue)
-                ]),
-              ),
-              // view info : facturacion
-              const SizedBox(height: 12),
-              Row(children: [
-                Text('Facturación', style: textStyleDescription),
-                const Spacer(),
-                Text(Publications.getFormatoPrecio(monto: cashRegister.billing),
-                    style: textStyleValue)
-              ]),
-              // view info : egresos
-              const SizedBox(height: 12),
-              Container(
-                color: separatorColor,
-                child: Row(children: [
-                  Text('Egresos', style: textStyleDescription),
-                  const Spacer(),
-                  Text(
-                      Publications.getFormatoPrecio(
-                          monto: cashRegister.cashOutFlow),
-                      style: textStyleValue.copyWith(color: Colors.red.shade300))
-                ]),
-              ),
-              // view info : ingresos
-              const SizedBox(height: 12),
-              Row(children: [
-                Text('Ingresos', style: textStyleDescription),
-                const Spacer(),
-                Text(
-                    Publications.getFormatoPrecio(
-                        monto: cashRegister.cashInFlow),
-                    style: textStyleValue.copyWith(
-                        color: cashRegister.cashInFlow == 0
-                            ? null
-                            : Colors.green.shade300))
-              ]),
-              // view info : monto esperado en la caja
-              const SizedBox(height: 12),
-              const Divider(),
-              Row(children: [
-                const Spacer(),
-                Text('Monto esperado: ', style: textStyleDescription), 
-                Text(
-                    Publications.getFormatoPrecio(
-                        monto: cashRegister.getExpectedBalance),
-                    style: textStyleValue)
-              ]),
-              const SizedBox(height: 12),
-              cashRegister.balance == 0
-                  ? Container()
-                  : Row(children: [
-                      const Spacer(),
-                      Text('Monto de cierre:  ', style: textStyleDescription),
-                      Text( Publications.getFormatoPrecio(monto: cashRegister.balance),style: textStyleValue)
-                    ]),
-              cashRegister.balance == 0
-                  ? Container()
-                  : const SizedBox(height: 12),
-              cashRegister.balance == 0
-                  ? Container()
-                  : Row(children: [
-                      const Spacer(),
-                      Text('Diferencia:  ', style: textStyleDescription),
-                      Text(
-                          Publications.getFormatoPrecio(
-                              monto: cashRegister.getDifference),
-                          style: textStyleValue.copyWith(
-                              color: cashRegister.getDifference == 0
-                                  ? null
-                                  : cashRegister.getDifference < 0
-                                      ? Colors.red.shade300
-                                      : Colors.green.shade300))
-                    ]),
-            ],
-          ),
-        ),
-      ),
-      actions: [ 
-        // textButton : eliminar
-        TextButton(
-          onPressed: () {
-            Get.dialog(AlertDialog(
-              title: const Text('Eliminar informe de caja'),
-              content: const Text('¿Está seguro de eliminarlo?'),
-              actions: [
-                TextButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    child: const Text('Cancelar')),
-                TextButton(
-                    onPressed: () {
-                      // delete : eliminar caja
-                      transactionsController.deleteCashRegister(
-                          cashRegister: cashRegister);
-                      Get.back();
-                      Get.back();
-                    },
-                    child: const Text('Si, eliminar')),
-              ],
-            ));
-          },
-          child: Text('Eliminar', style: TextStyle(color: Colors.red.shade300)),
-        ),
-        // textButton : cancelar
-        TextButton(
-            onPressed: () {
-              Get.back();
-            },
-            child: const Text('Cancelar')),
-      ],
-    );
-  }
 
   @override
   void onInit() async {

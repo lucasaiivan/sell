@@ -50,9 +50,7 @@ class CataloguePage extends StatelessWidget {
         iconLeading: Icons.search,
         colorBackground: Theme.of(context).colorScheme.outline.withOpacity(0.2),
         colorAccent: Theme.of(context).textTheme.bodyLarge?.color,
-        ),
-      // bottom : vista de productos seleccionados
-      bottom: catalogueController.buttonAppBar,
+        ), 
       actions: [ 
         // buttons : filter list
         PopupMenuButton( 
@@ -270,24 +268,53 @@ class CataloguePage extends StatelessWidget {
   }
   // WIDGETS COMPONENTS
   Widget floatingActionButton({required CataloguePageController controller}) {
-    return FloatingActionButton( 
-        backgroundColor: controller.homeController.getUserAnonymous?Colors.grey:Colors.blue,
-        onPressed: (){ 
 
-          switch (controller.tabController.index) {
-            case 0:
-              controller.toSeachProduct();
-              break;
-            case 1:
-              showDialogSetCategoria(categoria: Category());
-              break;
-            case 2:
-              showDialogSetProvider(supplier: Provider());
-              break;
-            default:
-          }
-        },
-        child: const Icon(Icons.add,color: Colors.white));
+    // var
+    Widget icon = controller.getProductsSelectedList.isNotEmpty?Text(controller.getProductsSelectedList.length.toString(),style: const TextStyle(fontSize: 24,fontWeight: FontWeight.bold,color: Colors.white),): const Icon(Icons.add,color: Colors.white);
+    return Row(
+      mainAxisAlignment:  MainAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min, 
+      children: [
+        // button : limpia la lista de productos seleccionados
+        controller.getProductsSelectedList.isEmpty?const Spacer():
+        FloatingActionButton( 
+            backgroundColor:Colors.grey,
+            onPressed: (){    
+              controller.getProductsSelectedList.clear();
+            },
+            child: const Icon(Icons.clear,color: Colors.white),
+          ),
+        controller.getProductsSelectedList.isEmpty?const Spacer():const SizedBox(width: 10),
+        // button : multifuncion (agregar producto, categoria o proveedor y vista de productos seleccionados)
+        FloatingActionButton( 
+            backgroundColor: controller.homeController.getUserAnonymous?Colors.grey:Colors.blue,
+            onPressed: (){  
+              // condition : si hay productos seleccionados
+              if(controller.getProductsSelectedList.isNotEmpty){
+                // dialog : vista de productos seleccionados
+                Get.dialog( const ViewProductsSelected()); 
+                return;
+              } 
+              switch (controller.tabController.index) {
+                case 0:
+                // navigation : agregar producto
+                  controller.toSeachProduct();
+                  break;
+                case 1:
+                // dialog : agregar categoria
+                  showDialogSetCategoria(categoria: Category());
+                  break;
+                case 2:
+                // dialog : agregar proveedor
+                  showDialogSetProvider(supplier: Provider());
+                  break;
+                default:
+              }
+            },
+            child: icon,
+          ),
+      ],
+    );
   }
 
   Widget listTileProduct({required ProductCatalogue item}) {

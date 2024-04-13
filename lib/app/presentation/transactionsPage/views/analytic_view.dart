@@ -263,10 +263,7 @@ class CardAnalityc extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min, 
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [ 
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: content,
-                          ),
+                          content,
                           subtitle==''?Container(): Flexible(child: Opacity(opacity: 0.7, child: Text(subtitle,style: subtitleStyle))),
                           valueText==''?Container():Flexible(child: Text(valueText,maxLines:2, textAlign: TextAlign.start, style: valueTextStyle)),
                           description==''?Container():Flexible(child: Opacity(opacity: 0.7, child: Text(description, style: descriptionStyle))),

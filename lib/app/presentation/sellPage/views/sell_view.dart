@@ -1086,6 +1086,10 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
             width: double.infinity,
             child: ComponentApp().button(
               onPressed: () {
+                // values : description
+                if(textEditingController.text==''){
+                  textEditingController.text = 'Sin especificar';
+                }
                 if (moneyMaskedTextController.numberValue > 0) {
                   if (isEgreso) {
                     salesController.cashRegisterOutFlow(
@@ -1182,62 +1186,18 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
                   Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.discount),style: textStyleValue.copyWith(color: Colors.red.shade300))
                 ]),
               ),
-              // view info : egresos
-              const SizedBox(height: 12),  
-              homeController.cashRegisterActive.cashOutFlowList.isEmpty
-                  ? Container()
-                  : ExpansionTile(
-                    childrenPadding: const EdgeInsets.all(0),
-                    tilePadding: const EdgeInsets.all(0),
-                    visualDensity: VisualDensity.compact,
-                    title: Row(
-                      children: [
-                        Text('Egresos',style: textStyleDescription),
-                        const Spacer(),
-                        Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.cashOutFlow),style: textStyleValue.copyWith(color: Colors.red.shade300)),
-                      ],
-                    ),  
-                    children: List.generate(
-                        homeController.cashRegisterActive.cashOutFlowList.length,
-                        (index) { 
-                          // obj
-                          CashFlow cashFlow = CashFlow.fromMap(homeController.cashRegisterActive.cashOutFlowList[index]);
-                          return ListTile(
-                            title: Text( cashFlow.description),
-                            trailing: Text(Publications.getFormatoPrecio(monto: cashFlow.amount),style: textStyleValue.copyWith(color: Colors.red.shade300)),
-                          );
-                      }),
-                    ),
-              // view info : ingresos 
-              homeController.cashRegisterActive.cashInFlowList.isEmpty
-                  ? Container()
-                  : ExpansionTile(
-                    childrenPadding: const EdgeInsets.all(0),
-                    tilePadding: const EdgeInsets.all(0),
-                    visualDensity: VisualDensity.compact,
-                    // divider 
-                    
-                    title: Row(
-                      children: [
-                        Text('Ingresos',style: textStyleDescription),
-                        const Spacer(),
-                        Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.cashInFlow),style: textStyleValue.copyWith(color: Colors.green.shade300)),
-                      ],
-                    ),  
-                    children: List.generate(
-                        homeController.cashRegisterActive.cashInFlowList.length,
-                        (index) { 
-                          // obj
-                          CashFlow cashFlow = CashFlow.fromMap(homeController.cashRegisterActive.cashInFlowList[index]);
-                          return ListTile(
-                            title: Text( cashFlow.description),
-                            trailing: Text(Publications.getFormatoPrecio(monto: cashFlow.amount),style: textStyleValue.copyWith(color: Colors.green.shade300)),
-                          );
-                      }),
-                    ),
-              // divider
-              const SizedBox(height: 20),
-              ComponentApp().divider(thickness:0.5),
+              // view info : ingresos y egresos
+              homeController.cashRegisterActive.cashOutFlowList.isEmpty && homeController.cashRegisterActive.cashInFlowList.isEmpty
+              ? Container()
+              : Column(
+                children: [
+                  const SizedBox(height: 12),
+                  ComponentApp().divider(thickness:0.5),
+                  egressAndEntryExpansionPanelListView, 
+                  ComponentApp().divider(thickness:0.5),
+                  const SizedBox(height: 12),
+                ],
+              ),  
               // view info : monto esperado en la caja
               const SizedBox(height: 12),
               Row(children: [
@@ -1416,6 +1376,84 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
                 Get.back();
               },),
           ),
+        ),
+      ],
+    );
+  }
+
+  // WIDGETS COMPONENTS
+  Widget get egressAndEntryExpansionPanelListView{
+
+    // style 
+    TextStyle textStyleValue = const TextStyle(fontSize: 14);
+    TextStyle textStyleDescription = const TextStyle(fontWeight: FontWeight.w300);
+
+    return ExpansionPanelList.radio(
+      elevation:0,  
+      dividerColor: Colors.transparent,
+      materialGapSize:0,// separacion entre los elementos 
+      expandedHeaderPadding: EdgeInsets.zero,
+      children: [
+        // ExpansionPanelRadio : ingresos 
+        ExpansionPanelRadio(
+          canTapOnHeader: true,
+          value: 1,
+          headerBuilder: (BuildContext context, bool isExpanded) {
+            return Row(
+              children: [
+                Text('Ingresos',style: textStyleDescription,),
+                const Spacer(),
+                Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.cashInFlow),style: textStyleValue.copyWith(color: homeController.cashRegisterActive.cashInFlow == 0? null: Colors.green.shade300)),
+              ],
+            );
+          },
+          body: ListView.builder(
+            shrinkWrap: true,
+            itemCount: homeController.cashRegisterActive.cashInFlowList.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 3),
+                child: ListTile( 
+                  tileColor: Colors.blueGrey.withOpacity(0.08),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12), 
+                  dense: true,
+                  visualDensity: VisualDensity.compact,
+                  title: Text(homeController.cashRegisterActive.cashInFlowList[index]['description'],style: textStyleValue,overflow: TextOverflow.ellipsis,maxLines:3),
+                  trailing: Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.cashInFlowList[index]['amount']),style: textStyleValue.copyWith(color: Colors.green.shade300)),
+                ),
+              );
+            },
+          ), 
+        ),
+        // ExpansionPanelRadio : egresos
+        ExpansionPanelRadio(
+          value: 2,
+          canTapOnHeader: true,
+          headerBuilder: (BuildContext context, bool isExpanded) {
+            return Row(
+              children: [
+                Text('Egresos',style: textStyleDescription,),
+                const Spacer(),
+                Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.cashOutFlow),style: textStyleValue.copyWith(color:  homeController.cashRegisterActive.cashOutFlow == 0? null: Colors.red.shade300)),
+              ]);
+          },
+          body: ListView.builder(
+            shrinkWrap: true,
+            itemCount: homeController.cashRegisterActive.cashOutFlowList.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 3),
+                child: ListTile(
+                  tileColor: Colors.blueGrey.withOpacity(0.08),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12), 
+                  dense: true,
+                  visualDensity: VisualDensity.compact,
+                  title: Text(homeController.cashRegisterActive.cashOutFlowList[index]['description'],style: textStyleValue),
+                  trailing: Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.cashOutFlowList[index]['amount']),style: textStyleValue.copyWith(color: Colors.red.shade300)),
+                ),
+              );
+            },
+          ), 
         ),
       ],
     );
