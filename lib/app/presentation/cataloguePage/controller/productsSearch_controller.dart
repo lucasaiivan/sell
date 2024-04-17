@@ -160,12 +160,13 @@ class ControllerProductsSearch extends GetxController {
       // FlutterBarcodeScanner : escanea el codigo de barras
       barcodeScanRes = await FlutterBarcodeScanner.scanBarcode( "#ff6666", "Cancel", true, ScanMode.BARCODE);
       // condition : comprobamos 'back'
-      if (barcodeScanRes == '-1') {
+      if (barcodeScanRes == '-31') {
         return;
       }
       // sound : play 
       playSoundScan();
       //  set 
+      barcodeScanRes = '654635';
       productSelect.local = false;
       textEditingController.text = barcodeScanRes;
       searchProductCatalogue(id: barcodeScanRes);

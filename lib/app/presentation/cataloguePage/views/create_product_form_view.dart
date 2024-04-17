@@ -44,8 +44,9 @@ class ProductNewFormView extends StatelessWidget {
                 titleTextStyle: TextStyle(
                     color: controller.darkMode ? Colors.white : Colors.white))),
         // WillPopScope : nos permite controlar el botón de retroceso del dispositivo
-        child: WillPopScope(
-          onWillPop: () => controller.onBackPressed(context: context),
+        child: PopScope(
+          canPop: false, // si se puede retroceder
+          onPopInvoked: (_) => controller.onBackPressed(context: context),
           //  Scaffold : proporciona una estructura visual básica para la aplicación
           child: GetBuilder<ControllerCreateProductForm>(
             init: ControllerCreateProductForm(),
@@ -396,10 +397,10 @@ class ProductNewFormView extends StatelessWidget {
                     FilteringTextInputFormatter.allow(
                         RegExp(r'[a-zA-ZÀ-ÿ0-9\- .³%]'))
                   ],
-                  decoration: const InputDecoration(
-                      border: UnderlineInputBorder(),
+                  decoration: InputDecoration(
+                      border: const UnderlineInputBorder(),
                       labelText: 'Descripción',
-                      helperText: 'Visibilidad pública'),
+                      helperText: controller.getProduct.local?'':'Visibilidad pública'),
                   onChanged: (value) {
                     controller.formEditing =
                         true; // validamos que el usuario ha modificado el formulario
@@ -472,7 +473,7 @@ class ProductNewFormView extends StatelessWidget {
                 decoration: InputDecoration(
                   border: const UnderlineInputBorder(),  
                   labelText: controller.controllerTextEditMark.text == '' ? 'Seleccionar' : 'Marca',
-                  helperText: 'Visibilidad pública', 
+                  helperText: controller.getProduct.local?'':'Visibilidad pública', 
                   
                 ), 
 

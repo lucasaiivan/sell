@@ -348,11 +348,11 @@ class ControllerCreateProductForm extends GetxController{
       _onBackPressed = !_onBackPressed;
       return false;
     }
-
-    if(getCurrentSlide!=0 && !getProduct.local){
+    // condition : si el slide actual es distinto de 0
+    if( getCurrentSlide !=0 && getProduct.local == false || getCurrentSlide !=1 && getProduct.local == true){
       previousPage();
       return false;
-    }
+    } 
 
     //  si _onBackPressed es true se puede salir 
     if(getCurrentSlide==0 || (getProduct.local && getCurrentSlide==1)){
@@ -379,7 +379,7 @@ class ControllerCreateProductForm extends GetxController{
           },
         );
         return shouldPop!;
-        }
+    }
     return true;
         
   } 

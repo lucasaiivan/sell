@@ -11,8 +11,7 @@ import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:sell/app/core/utils/widgets_utils.dart';
 import 'package:sell/app/domain/entities/ticket_model.dart'; 
 import 'package:shimmer/shimmer.dart';
-import 'package:url_launcher/url_launcher.dart';
-import '../../../domain/entities/cashRegister_model.dart';
+import 'package:url_launcher/url_launcher.dart'; 
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../core/utils/dynamicTheme_lb.dart';
 import '../../home/controller/home_controller.dart';
@@ -74,7 +73,7 @@ class SalesView extends StatelessWidget {
       titleSpacing: 0.0,
       title: ComponentApp().buttonAppbar(
         context:  buildContext,
-        onTap: ()=> controller.showSeach(context: buildContext), 
+        onTap: () => controller.showSeach(context: buildContext), 
         text: 'Vender',
         iconLeading: Icons.search,
         colorBackground: Theme.of(buildContext).colorScheme.outline.withOpacity(0.2),//Colors.blueGrey.shade300.withOpacity(0.4),
@@ -1397,7 +1396,7 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
         // ExpansionPanelRadio : ingresos 
         ExpansionPanelRadio(
           canTapOnHeader: true,
-          value: 1,
+          value: 1, 
           headerBuilder: (BuildContext context, bool isExpanded) {
             return Row(
               children: [
@@ -1416,7 +1415,7 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
                 child: ListTile( 
                   tileColor: Colors.blueGrey.withOpacity(0.08),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 12), 
-                  dense: true,
+                  dense: true, 
                   visualDensity: VisualDensity.compact,
                   title: Text(homeController.cashRegisterActive.cashInFlowList[index]['description'],style: textStyleValue,overflow: TextOverflow.ellipsis,maxLines:3),
                   trailing: Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.cashInFlowList[index]['amount']),style: textStyleValue.copyWith(color: Colors.green.shade300)),

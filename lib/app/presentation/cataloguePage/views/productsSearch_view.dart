@@ -216,6 +216,7 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
     return ElasticIn(
       curve: Curves.fastLinearToSlowEaseIn,
       child: TextField( 
+        readOnly: !controller.productSelect.local &&  controller.getproductDoesNotExist?true:false,
         focusNode: controller.textFieldCodeFocusNode,
         controller: controller.textEditingController,
         keyboardType: const TextInputType.numberWithOptions(decimal: false),
