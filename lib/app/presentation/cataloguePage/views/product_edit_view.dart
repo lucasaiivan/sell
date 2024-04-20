@@ -165,7 +165,7 @@ class ProductEdit extends StatelessWidget {
               controller.getProductPublicUpdateStatus?updateProductTile():Container(),
               // view : descripcion del producto
               productDataView(), 
-              ComponentApp().divider(),
+              ComponentApp().divider(thickness: 1),
               productFromView(),
             ],
           ),

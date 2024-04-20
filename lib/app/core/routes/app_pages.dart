@@ -12,6 +12,7 @@ import '../../presentation/auth/views/login_view.dart';
 import '../../presentation/cataloguePage/bindings/catalogue_binding.dart';
 import '../../presentation/cataloguePage/views/create_product_form_view.dart';
 import '../../presentation/cataloguePage/views/product_edit_view.dart';
+import '../../presentation/cataloguePage/views/product_view.dart';
 import '../../presentation/cataloguePage/views/productsSearch_view.dart';
 import '../../presentation/multiuser/bindings/multiuser_binding.dart';
 import '../../presentation/multiuser/views/multiuser_view.dart';
@@ -21,36 +22,31 @@ class AppPages {
   AppPages._();
 
   // ignore: constant_identifier_names
-  static const INITIAL = Routes.SPLASH;
+  static const INITIAL = Routes.splash;
 
   static final routes = [
     GetPage(
-      name: Routes.ACCOUNT,
+      name: Routes.account,
       page: () => AccountView(),
       binding: AccountBinding(),
     ),
     GetPage(
-      name: Routes.LOGIN,
+      name: Routes.login,
       page: () => AuthView(),
       binding: LoginBinding(),
     ),
     GetPage(
-      name: Routes.SPLASH,
+      name: Routes.splash,
       page: () => const SplashInit(),
       binding: SplashBinding(),
     ),
     GetPage(
-      name: Routes.HOME,
+      name: Routes.home,
       page: () => HomeView(),
       binding: HomeBinding(),
-    ),
+    ), 
     GetPage(
-      name: Routes.HOME,
-      page: () => HomeView(),
-      binding: HomeBinding(),
-    ),
-    GetPage(
-      name: Routes.EDITPRODUCT,
+      name: Routes.editProduct,
       page: () => ProductEdit(),
       binding: ProductsEditBinding(),
     ),
@@ -60,14 +56,19 @@ class AppPages {
       binding: ProductsFormCreateBinding(),
     ),
     GetPage(
-      name: Routes.SEACH_PRODUCT,
+      name: Routes.searchProduct,
       page: () => ProductsSearch(),
       binding: ProductsSarchBinding(),
     ),
     GetPage(
-      name: Routes.MULTIUSER,
+      name: Routes.multiuser,
       page: () => MultiUser(),
       binding: MultiUserBinding(),
     ), 
+    GetPage(
+      name: Routes.product,
+      page: () => const ProductView(),
+      binding: ProductControllerBinding(),
+    ),
   ];
 }

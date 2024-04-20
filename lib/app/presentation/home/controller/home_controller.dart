@@ -415,7 +415,7 @@ class HomeController extends GetxController {
       // Una vez que haya iniciado sesión, devuelva el UserCredential
       await firebaseAuth.signInWithCredential(oAuthCredential);
       // navigation : navegamos a la pantalla principal
-      Get.offAllNamed(Routes.HOME, arguments: {
+      Get.offAllNamed(Routes.home, arguments: {
         'currentUser': firebaseAuth.currentUser,
         'idAccount': ''
       });
@@ -433,7 +433,7 @@ class HomeController extends GetxController {
     // signOut : Cierra la sesión del usuario actual.
     await firebaseAuth.signOut();
     // navigation : navegamos a la pantalla principal
-    Get.offAllNamed(Routes.LOGIN);
+    Get.offAllNamed(Routes.login);
     // finalizamos el diálogo alerta
     CustomFullScreenDialog.cancelDialog();
   }
@@ -754,7 +754,7 @@ class HomeController extends GetxController {
                     TextButton(
                       onPressed: () {
                         // navigation : navegamos a la pantalla de inicio de sesión
-                        Get.offAllNamed(Routes.HOME, arguments: {
+                        Get.offAllNamed(Routes.home, arguments: {
                           'currentUser': getUserAuth,
                           'idAccount': ''
                         });
@@ -804,7 +804,7 @@ class HomeController extends GetxController {
                     TextButton(
                       onPressed: () {
                         // navigation : navegamos a la pantalla de inicio de sesión
-                        Get.offAllNamed(Routes.HOME, arguments: {
+                        Get.offAllNamed(Routes.home, arguments: {
                           'currentUser': getUserAuth,
                           'idAccount': ''
                         });
@@ -936,7 +936,7 @@ class HomeController extends GetxController {
     // save key/values Storage
     await GetStorage().write('idAccount', idAccount);
     // navegar hacia otra pantalla
-    Get.offAllNamed(Routes.HOME,arguments: {'currentUser': getUserAuth, 'idAccount': idAccount} );
+    Get.offAllNamed(Routes.home,arguments: {'currentUser': getUserAuth, 'idAccount': idAccount} );
   }
 
   // BottomSheet - Getx

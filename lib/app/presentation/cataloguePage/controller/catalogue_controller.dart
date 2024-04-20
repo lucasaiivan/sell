@@ -230,11 +230,11 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     //values default
     ProductCatalogue productCatalogue = ProductCatalogue(id: id, code: id, creation: Timestamp.now(), upgrade: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now());
     // navega hacia una nueva vista para crear un nuevo producto
-    Get.toNamed(Routes.EDITPRODUCT,arguments: {'new': true, 'product': productCatalogue});
+    Get.toNamed(Routes.editProduct,arguments: {'new': true, 'product': productCatalogue});
   }
 
   void toSeachProduct() {
-    Get.toNamed(Routes.SEACH_PRODUCT, arguments: {'id': ''});
+    Get.toNamed(Routes.searchProduct, arguments: {'id': ''});
   }
 
   Future<void> categoryDelete({required String idCategory}) async => await Database.refFirestoreCategory(idAccount: homeController.getProfileAccountSelected.id).doc(idCategory).delete();
@@ -255,8 +255,14 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     // firestore : Actualizamos los datos
     documentReferencer.set(Map<String, dynamic>.from(provider.toJson()),SetOptions(merge: true));
   }
-  void toNavigationProductEdit({required ProductCatalogue productCatalogue}) {
-    Get.toNamed(Routes.EDITPRODUCT, arguments: {'product': productCatalogue.copyWith()});
+  void toNavigationProduct({required ProductCatalogue productCatalogue}) {
+    // condition : verifica si es un producto local
+    if(productCatalogue.local){
+      // navega hacia la vista de producto
+      Get.toNamed(Routes.editProduct, arguments: {'product': productCatalogue.copyWith()});
+    }else{
+      Get.toNamed(Routes.product, arguments: {'product': productCatalogue.copyWith()});
+    }
   }
   void showSeach({required BuildContext context}) {
     // dialog : Busca entre los productos de mi catálogo 

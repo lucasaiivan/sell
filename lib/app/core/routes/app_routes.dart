@@ -2,25 +2,27 @@ part of 'app_pages.dart';
 
 abstract class Routes {
   Routes._();
-  static const SPLASH = _Paths.SPLASH;
-  static const LOGIN = _Paths.LOGIN;
-  static const HOME = _Paths.HOME;
-  static const EDITPRODUCT = _Paths.EDITPRODUCT;
+  static const splash = _Paths.splash;
+  static const login = _Paths.login;
+  static const home = _Paths.home;
+  static const editProduct = _Paths.editProduc;
   static const createProductForm = _Paths.createProductForm;
-  static const SEACH_PRODUCT = _Paths.SEACH_PRODUCT;
-  static const ACCOUNT = _Paths.ACCOUNT;
-  static const MULTIUSER = _Paths.MULTIUSER;
-  static const HISTORY_CASH_TERHGISTER = _Paths.HISTORY_CASH_TERHGISTER;
+  static const searchProduct = _Paths.searchProduct;
+  static const account = _Paths.account;
+  static const multiuser = _Paths.multiuser;
+  static const historyCashTerhgister = _Paths.historyCashTerhgister;
+  static const product = _Paths.product;
 }
 
 abstract class _Paths {
-  static const SPLASH = '/splash';
-  static const LOGIN = '/login';
-  static const HOME = '/home';
+  static const splash = '/splash';
+  static const login = '/login';
+  static const home = '/home';
   static const createProductForm = '/createProductForm';
-  static const EDITPRODUCT = '/editProduct';
-  static const SEACH_PRODUCT = '/seachProduct';
-  static const ACCOUNT = '/account';
-  static const MULTIUSER = '/multiuser';
-  static const HISTORY_CASH_TERHGISTER = '/historyCashRegister';
+  static const editProduc = '/editProduct';
+  static const searchProduct = '/seachProduct';
+  static const account = '/account';
+  static const multiuser = '/multiuser';
+  static const historyCashTerhgister = '/historyCashRegister';
+  static const product = '/product';
 }

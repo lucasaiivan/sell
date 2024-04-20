@@ -268,7 +268,7 @@ class ControllerProductsSearch extends GetxController {
     Get.back();
      // TODO :  comrpobar si el producto esta en el cátalogo
      // ...
-    Get.toNamed(Routes.EDITPRODUCT, arguments: {'product': porduct.copyWith()});
+    Get.toNamed(Routes.editProduct, arguments: {'product': porduct.copyWith()});
   }
 
   void toProductNew({required String id}) {

@@ -253,7 +253,7 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
             if(catalogueController.getProductsSelectedList.isEmpty){ 
               Get.back(); // cierra el dialogo
               // navigation : editar producto
-              homeController.getUserAnonymous?null:catalogueController.toNavigationProductEdit(productCatalogue: product);
+              homeController.getUserAnonymous?null:catalogueController.toNavigationProduct(productCatalogue: product);
             }else{ 
               // selecciona el producto
               catalogueController.selectedProduct(product: product); 

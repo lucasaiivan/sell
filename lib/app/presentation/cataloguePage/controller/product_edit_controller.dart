@@ -263,7 +263,7 @@ class ControllerProductsEdit extends GetxController {
     setAccountAuth = homeController.getIdAccountSelected != ''; 
     // obtenemos el producto por parametro
     ProductCatalogue productFinal = Get.arguments['product'] ?? ProductCatalogue(documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now(),upgrade: Timestamp.now(), creation: Timestamp.now());
-    //  finalmente  asigna el producto
+    //  set : copiamos el producto para evitar problemas de referencia en memoria con el producto original
     setProduct = productFinal.copyWith();
     // load data product
     setTextAppBar = 'Editar';

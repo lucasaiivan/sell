@@ -93,7 +93,7 @@ class WidgetButtonListTile extends StatelessWidget {
       title: const Text("Crear perfil de mi negocio", style: TextStyle(fontSize: 16.0)),
       onTap: () {
         Get.back();
-        Get.toNamed(Routes.ACCOUNT);
+        Get.toNamed(Routes.account);
       },
     );
   }
@@ -132,7 +132,7 @@ class WidgetButtonListTile extends StatelessWidget {
                   // condition : si el usuario es superAdmin y el perfil seleccionado es el mismo que el perfil que se esta mostrando
                   if(homeController.getProfileAdminUser.superAdmin && homeController.getProfileAccountSelected.id == perfilNegocio.id){
                     Get.back();
-                    Get.toNamed(Routes.ACCOUNT);
+                    Get.toNamed(Routes.account);
                   }else{
                     // action : ir a la cuenta seleccionada 
                     controller.accountChange(idAccount: perfilNegocio.id);
@@ -207,7 +207,7 @@ class WidgetButtonListTile extends StatelessWidget {
           subtitle: homeController.getProfileAccountSelected.id != perfilNegocio.id ? null  : Text( editAccount ?'Administrador':'Tienes que ser administrador para editar esta cuenta'  ),
           trailing:  editAccount ? TextButton(onPressed: (){
               Get.back();
-              Get.toNamed(Routes.ACCOUNT);
+              Get.toNamed(Routes.account);
           }, child: const Text('Editar')): Radio(
             activeColor: Colors.blue,
             value: controller.isSelected(id: perfilNegocio.id) ? 0 : 1,
@@ -215,7 +215,7 @@ class WidgetButtonListTile extends StatelessWidget {
             onChanged: (val) {
               if(homeController.getProfileAdminUser.superAdmin && homeController.getProfileAccountSelected.id == perfilNegocio.id){
                 Get.back();
-                Get.toNamed(Routes.ACCOUNT);
+                Get.toNamed(Routes.account);
               }else{
                 controller.accountChange(idAccount: perfilNegocio.id);
               }
@@ -225,7 +225,7 @@ class WidgetButtonListTile extends StatelessWidget {
           onTap: () {
             if(homeController.getProfileAdminUser.superAdmin && homeController.getProfileAccountSelected.id == perfilNegocio.id){
                 Get.back();
-                Get.toNamed(Routes.ACCOUNT);
+                Get.toNamed(Routes.account);
               }else{
                 controller.accountChange(idAccount: perfilNegocio.id);
               }
@@ -576,7 +576,7 @@ Widget viewSelectedAccount() {
                   disable: homeController.getProfileAdminUser.superAdmin,
                   text: 'Crear perfil de mi negocio',
                   onPressed: () { 
-                    Get.toNamed(Routes.ACCOUNT);
+                    Get.toNamed(Routes.account);
                   },
                 ),
                 // lista de cuentas administradas o boton para crear una cuenta
@@ -668,15 +668,16 @@ class ComponentApp extends StatelessWidget {
     
     // crear avatar
     avatar = urlImage == ''
-      ? CircleAvatar(backgroundColor:backgroundColor,child: Center(child: iconDedault))
+      ? CircleAvatar(backgroundColor:backgroundColor,radius:radius, child: Center(child: iconDedault))
         : CachedNetworkImage(
           imageUrl: urlImage,
-          placeholder: (context, url) => CircleAvatar(backgroundColor:backgroundColor,child:iconDedault),
-          imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: CircleAvatar(backgroundImage: image)),
+          placeholder: (context, url) => CircleAvatar(backgroundColor:backgroundColor,radius:radius, child:iconDedault),
+          imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: CircleAvatar(backgroundImage: image,radius:radius)),
           errorWidget: (context, url, error) {
             // return : un circleView con la inicial de nombre como icon 
             return CircleAvatar(
               backgroundColor: backgroundColor,
+              radius:radius,
               child: Center(child: iconDedault),
               );
           },
@@ -787,7 +788,7 @@ class WidgetSuggestionProduct extends StatelessWidget {
         !searchButton
             ? Container()
             : InkWell(
-                onTap: () => Get.toNamed(Routes.SEACH_PRODUCT,arguments: {'id': ''}),
+                onTap: () => Get.toNamed(Routes.searchProduct,arguments: {'id': ''}),
                 borderRadius: BorderRadius.circular(50),
                 child: Padding(
                   padding: const EdgeInsets.all(5.0),
@@ -811,7 +812,7 @@ class WidgetSuggestionProduct extends StatelessWidget {
                     return Align(
                       widthFactor: 0.5,
                       child: InkWell(
-                        onTap: () => homeController.toNavigationProductEdit(productCatalogue: list[index].convertProductCatalogue()),
+                        onTap: () => homeController.toNavigationProduct(productCatalogue: list[index].convertProductCatalogue()),
                         borderRadius: BorderRadius.circular(50),
                         child: Padding(
                           padding: const EdgeInsets.all(5.0),
@@ -945,7 +946,7 @@ class ImageProductAvatarApp extends StatelessWidget {
           height: 75,
           decoration: BoxDecoration(borderRadius: BorderRadius.circular(8.0),border: Border.all(color: favorite?Colors.yellow.shade700:Colors.transparent,width: favorite?2:0)),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(6.0), 
+            borderRadius: BorderRadius.circular(radius),  
             child: InkWell(
               onTap: onTap,
               child: CachedNetworkImage(

@@ -407,7 +407,7 @@ class CataloguePage extends StatelessWidget {
           // condition : si no hay productos seleccionados
           if(catalogueController.getProductsSelectedList.isEmpty){
             // navigation : editar producto
-            catalogueController.toNavigationProductEdit(productCatalogue: item); 
+            catalogueController.toNavigationProduct(productCatalogue: item);
           }else{ 
             // selecciona el producto
             catalogueController.selectedProduct(product: item); 
