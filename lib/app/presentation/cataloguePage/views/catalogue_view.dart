@@ -346,13 +346,15 @@ class CataloguePage extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            item.verified?const Icon(Icons.verified,size: 11,color: Colors.blue):Container(),
+            item.verified ? const SizedBox(width:1):Container(),
             //text : nombre de la marca
             item.nameMark==''?Container():Text(
                 item.nameMark,
                 maxLines: 2,
                 overflow: TextOverflow.clip,
                 style: TextStyle(color: item.verified?Colors.blue:null),
-              ),
+              ), 
             //text : nombre del proveedor
             item.nameProvider==''?Container(): dividerCircle,
             item.nameProvider==''?Container():Flexible(
@@ -364,10 +366,10 @@ class CataloguePage extends StatelessWidget {
                 ),
             ),
           ],
-        ), 
-        // view : texts
-        
-        // text : favorito
+        ),  
+        //  text : codigo
+        Text(item.code,style: textStyleSecundary.copyWith(fontSize: 12)),
+        // text : stock
         alertStockText == '' ? Container() : Text(alertStockText),
         // text : fecha de la ultima actualización
         Text( valueDataUpdate ,style: textStyleSecundary.copyWith(fontSize: 12)),
@@ -438,7 +440,7 @@ class CataloguePage extends StatelessWidget {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start, 
                                     children: [
-                                      // text and icon
+                                      // text and icon of favorite
                                       Row(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
