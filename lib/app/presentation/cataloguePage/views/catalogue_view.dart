@@ -1,6 +1,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart'; 
 import 'package:get/get.dart';
 import 'package:sell/app/presentation/cataloguePage/controller/catalogue_controller.dart';
 import 'package:sell/app/presentation/home/controller/home_controller.dart';
@@ -335,8 +336,7 @@ class CataloguePage extends StatelessWidget {
     final TextStyle textStylePrimery = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
     final TextStyle textStyleSecundary = TextStyle(color: secundayTextColor,fontWeight: FontWeight.w400);
     // widgets
-    final Widget dividerCircle = ComponentApp().dividerDot(color: secundayTextColor);
-    Widget divider = ComponentApp().divider();
+    final Widget dividerCircle = ComponentApp().dividerDot(color: secundayTextColor); 
 
     // widgets 
     Widget description = Column(
@@ -366,13 +366,7 @@ class CataloguePage extends StatelessWidget {
           ],
         ), 
         // view : texts
-        homeController.getIsSubscribedPremium==false?Container():
-        item.stock?Row(
-          children: [
-            Text(item.quantityStock.toString(),style: textStylePrimery.copyWith(color: catalogueController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
-            Text(' Disponible ',style: textStylePrimery.copyWith(color: catalogueController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
-          ],
-        ):Container(),
+        
         // text : favorito
         alertStockText == '' ? Container() : Text(alertStockText),
         // text : fecha de la ultima actualización
@@ -384,7 +378,7 @@ class CataloguePage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         // text : monto de la ganancia
-        item.getBenefits==''?Container():Text(item.getBenefits,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w300)),
+        item.getBenefits==''?Container():Text(item.getBenefits,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.bold)),
         // text : porcentaje de ganancia
         item.getPorcentageFormat==''?Container():Opacity(opacity:0.7,
           child: Row(
@@ -394,9 +388,7 @@ class CataloguePage extends StatelessWidget {
               Text(item.getPorcentageFormat,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w300)),
             ],
           )),
-        // text : precio de venta
-        Text(Publications.getFormatoPrecio(monto: item.salePrice),style: TextStyle(fontSize: 18,color: homeController.getDarkMode?Colors.white:Colors.black )),
-        const SizedBox(width: 5),
+        
         
       ],
     );
@@ -428,37 +420,73 @@ class CataloguePage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    // image : avatar del producto
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal:item.image==''?27:0),
                       child: ImageProductAvatarApp(url:item.local?'': item.image,size:item.image==''?25: 80,favorite: item.favorite),
                     ),
-                    Flexible( 
+                    // view : contenido
+                    Flexible(
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start, 
                           children: [
                             Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                !item.favorite?Container():const Icon(Icons.star_purple500_sharp,size: 12,color: Colors.orange),
-                                !item.favorite?Container():const SizedBox(width: 2),
-                                Flexible(child: Text(item.description, maxLines: 1,overflow:TextOverflow.ellipsis,style: textStylePrimery.copyWith( fontSize: titleSize))),
+                                // view : description y icon favorite
+                                Flexible( 
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start, 
+                                    children: [
+                                      // text and icon
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          !item.favorite?Container():const Icon(Icons.star_purple500_sharp,size: 12,color: Colors.orange),
+                                          !item.favorite?Container():const SizedBox(width: 2),
+                                          Flexible(child: Text(item.description, maxLines: 1,overflow:TextOverflow.ellipsis,style: textStylePrimery.copyWith( fontSize: titleSize))),
+                                        ],
+                                      ),
+                                      description,
+                                    ],
+                                  ),
+                                ),
+                                // view : datos de precios y ganancia
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 10),
+                                  child: priceWidget,
+                                ),
                               ],
                             ),
-                            description,
+                            // 
+                            // text : precio de venta
+                            Row(
+                              children: [
+                                Text(Publications.getFormatoPrecio(monto: item.salePrice),style: TextStyle(fontSize: 20,fontWeight:FontWeight.bold,color: homeController.getDarkMode?Colors.white:Colors.black )),
+                                const Spacer(),
+                                // button : editar producto
+                                OutlinedButton(
+                                  onPressed: ()=>catalogueController.toNavigationProductEdit(productCatalogue: item), 
+                                  child: Text('Editar',style: TextStyle(color: Get.isDarkMode?Colors.white:Colors.black))
+                                ),
+                              ],
+                            ),
+                            // text : stock
+                            homeController.getIsSubscribedPremium==false?Container():
+                            item.stock?Row(
+                              children: [
+                                Text(item.quantityStock.toString(),style: textStylePrimery.copyWith(color: catalogueController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
+                                Text(' Disponible ',style: textStylePrimery.copyWith(color: catalogueController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
+                              ],
+                            ):Container(),
                           ],
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10),
-                      child: priceWidget,
-                    ),
                   ],
                 ),
               ),
-              divider,
+              const Opacity(opacity: 0.3,child: Divider(height: 0)),
             ],
           ),
         ),

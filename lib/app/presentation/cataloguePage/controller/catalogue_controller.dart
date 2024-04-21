@@ -21,7 +21,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
    Color? getStockColor( {required ProductCatalogue productCatalogue,Color color = Colors.black }){
 
     // var 
-    Color? color = Get.theme.listTileTheme.textColor;
+    Color? color = Colors.orange;
 
     // disponibilidad baja
     if( productCatalogue.stock){
@@ -255,6 +255,13 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     // firestore : Actualizamos los datos
     documentReferencer.set(Map<String, dynamic>.from(provider.toJson()),SetOptions(merge: true));
   }
+
+  // ---------------------------- //
+  // -------- NAVIGATION -------- //
+  // ---------------------------- //
+  void toNavigationProductEdit({required ProductCatalogue productCatalogue}) {
+    Get.toNamed(Routes.editProduct, arguments: {'product': productCatalogue.copyWith()});
+  }
   void toNavigationProduct({required ProductCatalogue productCatalogue}) {
     // condition : verifica si es un producto local
     if(productCatalogue.local){
@@ -264,6 +271,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
       Get.toNamed(Routes.product, arguments: {'product': productCatalogue.copyWith()});
     }
   }
+
   void showSeach({required BuildContext context}) {
     // dialog : Busca entre los productos de mi catálogo 
     Get.dialog( const ViewSeachProductsCataloguie()); 
@@ -669,18 +677,24 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
   void updateDialog(){
     Get.dialog(
       AlertDialog(
-        title: const Text('Actualización'),  
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Actualizar'),
+            const SizedBox(width:5),
+            // avatar : cantidad de items que se van a actualizar 
+            CircleAvatar(child: Text(catalogueController.getProductsSelectedList.length.toString())),
+          ],
+        ),  
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // text : texto informativo de la cantidad de productos seleccionados
-            Text( catalogueController.getProductsSelectedList.length==1?'${ catalogueController.getProductsSelectedList.length} producto seleccionado':'${ catalogueController.getProductsSelectedList.length} productos seleccionados' ,style: const TextStyle(fontWeight: FontWeight.w400)),
+          children: [ 
             // textbutton : actualizar precio de compra
             TextButton(onPressed: () { 
               Get.back();
               updatePricePurchaseDialog();
-            },child: const Text('Actualizar precio de costo')),
+            },child: const Text('Precio de costo')),
             // textbutton : actualizar precio de venta al público
             TextButton(onPressed: () {
               Get.back();

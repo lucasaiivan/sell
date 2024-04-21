@@ -30,6 +30,10 @@ class ProductController extends GetxController {
   List<ProductCatalogue> get getListProductsProvider => _listProductsProvider;
   set setListProductsProvider(List<ProductCatalogue> value) => _listProductsProvider.value = value;
 
+  // - productos de la misma marca -//
+  final RxList<ProductCatalogue> _listProductsMark = <ProductCatalogue>[].obs;
+  List<ProductCatalogue> get getListProductsMark => _listProductsMark;
+  set setListProductsMark(List<ProductCatalogue> value) => _listProductsMark.value = value;
 
   //-  mark  -//
   Mark _markSelected = Mark(upgrade: Timestamp.now(), creation: Timestamp.now());
@@ -44,7 +48,7 @@ class ProductController extends GetxController {
   // - prices of product publicated for other users (cuentas)
   final RxList<ProductPrice> _listPricesForProduct = <ProductPrice>[].obs;
   List<ProductPrice> get getListPricesForProduct => _listPricesForProduct;
-  set setListPricesForProduct(List<ProductPrice> value) => _listPricesForProduct.value = value;
+  set setListPricesForProduct(List<ProductPrice> value) => _listPricesForProduct.value = value;  
 
   //- variable para saber si el producto ya esta o no en el cátalogo -//
   bool _itsInTheCatalogue = false;
@@ -170,6 +174,14 @@ class ProductController extends GetxController {
       }
     }
   }
+  void getProductByMark({required idMark}){
+    // function : obtiene los productos de la misma marca
+    for (var element in homeController.getCataloProducts) {
+      if (element.idMark == idMark && element.idMark!='') {
+        getListProductsMark.add(element);
+      }
+    }
+  }
   void readListPricesForProduct({bool limit = false}) {
     // devuelve una lista con los precios más actualizados del producto
     Database.readListPricesProductFuture(id: getProduct.id, limit: limit ? 9 : 25)
@@ -204,6 +216,7 @@ class ProductController extends GetxController {
     readListPricesForProduct();
     getProductByCategory(idCategory: getProduct.category);
     getProductByProvider(idProvider: getProduct.provider);
+    getProductByMark(idMark: getProduct.idMark);
     // obtenemos los datos del producto de la base de datos global
     getDataProduct(id: getProduct.id);
     
