@@ -389,8 +389,8 @@ class ControllerProductsEdit extends GetxController {
                 await ref.getDownloadURL().then((value) => getProduct.image = value); // obtenemos la url de la imagen
               }
               // procede agregrar en la base de datos global de productos
-              // TODO : delete release
-              if ( getEditModerator && getProduct.local == false) {
+              // TODO : delete release (getEditModerator)
+              if ( getEditModerator || getProduct.local == false) {
                   setProductPublicFirestore( );
               }
               // condition : verifica si el producto es global publico

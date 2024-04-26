@@ -355,7 +355,7 @@ class ControllerCreateProductForm extends GetxController{
     } 
 
     //  si _onBackPressed es true se puede salir 
-    if(getCurrentSlide==0 || (getProduct.local && getCurrentSlide==1)){
+    if( getCurrentSlide==0 && getProduct.local==false || (getProduct.local && getCurrentSlide==1)){
       final  shouldPop = await showDialog<bool>(
           context: context,
           builder: (context) {

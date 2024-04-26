@@ -2,7 +2,8 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; 
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart'; 
 import 'package:get/get.dart';
 import 'package:sell/app/presentation/cataloguePage/controller/catalogue_controller.dart';
 import 'package:url_launcher/url_launcher.dart';  
@@ -97,7 +98,7 @@ class ProductEdit extends StatelessWidget {
       iconTheme: Theme.of(contextPrincipal).iconTheme.copyWith(color: appBarTextColor),
       title: controller.getLoadingData
           ? Text(controller.getTextAppBar,style: TextStyle(fontSize: 18.0, color: appBarTextColor))
-          : Text(controller.getItsInTheCatalogue ? 'Editar' :'Nuevo producto',style: TextStyle(fontSize: 18.0, color: appBarTextColor)),
+          : Text(controller.getItsInTheCatalogue ? 'Editar' :'Nuevo',style: TextStyle(fontSize: 18.0, color: appBarTextColor)),
       actions: <Widget>[
         // TODO : delete release
         // 
@@ -188,30 +189,7 @@ class ProductEdit extends StatelessWidget {
       padding: const EdgeInsets.only(left: 12.0,right: 12.0,top: 12.0,bottom: 12.0),
       child: Column( 
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [  
-          // view : codigo del producto
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.start,
-
-            children: [ 
-              // icon : verificacion
-              controller.getProduct.verified?const Icon(Icons.verified_rounded,size: 16,color: Colors.blue):Container(),
-              // spacer si esta verificado
-              controller.getProduct.verified?const SizedBox(width:2):Container(), 
-              // text : codigo
-              controller.getProduct.code != ""?Text(controller.getProduct.code,style: const TextStyle(height: 1,fontSize: 14,fontWeight: FontWeight.w400)):Container(),
-              // text : etiqueta de producto local (en el cátalogo)
-              !controller.getProduct.local?Container():const Opacity(opacity: 0.4,child: Text(' (Cátalogo) ',style: TextStyle(height: 1,fontSize: 14,fontWeight: FontWeight.w400))),
-              // barra separadora 
-              controller.getProduct.local?Container():
-              const Opacity(opacity: 0.4,child: Text(' | ',style: TextStyle(height: 1,fontSize: 14,fontWeight: FontWeight.w400))) ,
-              // text : cantidad de comercios que tienen el producto
-              controller.getProduct.local?Container():
-              Opacity(opacity: 0.4,child: Text('${Publications.getFormatAmount(value: controller.getProduct.followers)} ${controller.getProduct.followers == 1 ? 'comercio' : 'comercios'}')),
-            ],
-          ),
-          const SizedBox(height: 12),
+        children: [   
           // view : texto y imagen
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -223,17 +201,42 @@ class ProductEdit extends StatelessWidget {
                 padding: const EdgeInsets.only(right: 12.0),
                 child: controller.loadImage(size:100),
               ),
-              // view : codigo,icon de verificaciones, descripcion y marca del producto
-              controller.getProduct.local?Container():Flexible(
-                child: textfielBottomSheetListOptions( 
-                  contentPadding: const EdgeInsets.only(bottom: 12,top: 12,left: 12,right: 12),
-                  stateEdit: controller.getLoadingData? false: controller.getEditModerator || controller.getProduct.verified==false,
-                  textValue: controller.getMarkSelected.name ,
-                  labelText: controller.getMarkSelected.id == ''? 'Seleccionar una marca': 'Marca',
-                  onTap: controller.getProduct.verified==false || controller.getEditModerator? controller.showModalSelectMarca : () {},
-                  suffix: controller.getMarkSelected.toString().isNotEmpty
-                      ? ComponentApp().userAvatarCircle(urlImage: controller.getMarkSelected.image,empty: true)
-                      : null,
+              Expanded(
+                child: Column( 
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // view : codigo del producto
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                
+                      children: [ 
+                        // icon : verificacion
+                        controller.getProduct.verified?const Icon(Icons.verified_rounded,size: 16,color: Colors.blue):const Text('código: ',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w400)),
+                        // spacer si esta verificado
+                        controller.getProduct.verified?const SizedBox(width:2):Container(), 
+                        // text : codigo
+                        controller.getProduct.code != ""?Text(controller.getProduct.code,style: const TextStyle(height: 1,fontSize: 14,fontWeight: FontWeight.w400)):Container(),
+                        // text : etiqueta de producto local (en el cátalogo)
+                        !controller.getProduct.local?Container():const Opacity(opacity: 0.4,child: Text(' - Cátalogo ',style: TextStyle(height: 1,fontSize: 14,fontWeight: FontWeight.w400))),
+                        
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    // view : marca del producto
+                    controller.getProduct.local?Container():Flexible(
+                      child: textfielBottomSheetListOptions( 
+                        contentPadding: const EdgeInsets.only(bottom: 12,top: 12,left: 12,right: 12),
+                        stateEdit: controller.getLoadingData? false: controller.getEditModerator || controller.getProduct.verified==false,
+                        textValue: controller.getMarkSelected.name ,
+                        labelText: controller.getMarkSelected.id == ''? 'Seleccionar una marca': 'Marca',
+                        onTap: controller.getProduct.verified==false || controller.getEditModerator? controller.showModalSelectMarca : () {},
+                        suffix: controller.getMarkSelected.toString().isNotEmpty
+                            ? ComponentApp().userAvatarCircle(urlImage: controller.getMarkSelected.image,empty: true)
+                            : null,
+                      ),
+                    ),
+                  ],
                 ),
               )
             ],
@@ -501,7 +504,7 @@ class ProductEdit extends StatelessWidget {
                   ],
                   ),
                 ),
-
+          
                 // text : marca de tiempo de la ultima actualización del documento
                 !controller.getItsInTheCatalogue ? Container() :  Padding(
                   padding: const EdgeInsets.only(top: 50),

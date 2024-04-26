@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; 
-import 'package:flutter/material.dart';  
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart'; 
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';  
 import 'package:get/get.dart';
 import 'package:sell/app/domain/entities/catalogo_model.dart'; 
 import 'package:snapping_sheet/snapping_sheet.dart';
@@ -118,79 +120,92 @@ class ProductView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
-            children: [
+            children: [ 
               // view : precio de venta al publico del producto si es esta en el catalogo
-              !controller.getItsInTheCatalogue? TextButton(onPressed:(){controller.toNavigationProductEdit();}, child: const Text('Agregar a mi catálogo')):
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
+              !controller.getItsInTheCatalogue?
+              // sino esta en el catalogo
+              Center(child: Material(
+                color: Colors.grey.withOpacity(0.4),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Icon(Icons.monetization_on_outlined,color:colorText),
+                )))
+              // si esta en el catalogo
+              :Expanded(   
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    !controller.getItsInTheCatalogue?Container():
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            // text : precio de venta al publico del producto si es esta en el catalogo
-                            Text(
-                                Publications.getFormatoPrecio( monto: controller.getProduct.salePrice),
-                                style: const TextStyle(color: colorText,fontSize: 30, fontWeight: FontWeight.bold),textAlign: TextAlign.end),
-                            // text : fecha de publicacion
-                            Padding(
-                              padding: const EdgeInsets.symmetric( horizontal: 12, vertical: 8),
-                              child: Text(Publications.getFechaPublicacion(fechaActual: Timestamp.now().toDate(),fechaPublicacion:controller.getProduct.upgrade.toDate()).toLowerCase(),
-                              style: const TextStyle(color: colorText),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          textDirection: TextDirection.ltr,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // text : porcentaje de ganancia
-                            controller.getProduct.purchasePrice != 0.0
-                                ? Text(controller.getProduct.getPorcentageFormat,
-                                    style: const TextStyle(
-                                        color: Colors.green,
-                                        fontSize: 12.0,
-                                        fontWeight: FontWeight.bold))
-                                : Container(),
-                            controller.getProduct.purchasePrice != 0.0
-                                ? const Text(" > ",
-                                    style: TextStyle(
-                                        color: Colors.green, fontSize: 14.0))
-                                : Container(),
-                            // text : monto de beneficio de ganancia
-                            controller.getProduct.purchasePrice != 0.0
-                                ? Text(
-                                    '${controller.getProduct.getBenefits} de Ganancia',
-                                    style: TextStyle(
-                                        color: controller.getProduct.purchasePrice <
-                                                controller.getProduct.salePrice
-                                            ? Colors.green
-                                            : Colors.red,
-                                        fontSize: 14.0,
-                                        fontWeight: FontWeight.bold))
-                                : Container(),
-                          ],
+                        // text : precio de venta al publico del producto si es esta en el catalogo
+                        Text(
+                            Publications.getFormatoPrecio( monto: controller.getProduct.salePrice ),
+                            style: const TextStyle(color: colorText,fontSize: 30, fontWeight: FontWeight.bold),textAlign: TextAlign.end),
+                        // text : fecha de publicacion
+                        Padding(
+                          padding: const EdgeInsets.symmetric( horizontal: 12, vertical: 8),
+                          child: Text(Publications.getFechaPublicacion(fechaActual: Timestamp.now().toDate(),fechaPublicacion:controller.getProduct.upgrade.toDate()).toLowerCase(),
+                          style: const TextStyle(color: colorText),
+                          ),
                         ),
                       ],
                     ),
-                  ), 
-                  // button : editar
-                  TextButton(
-                    onPressed: () {
-                      controller.toNavigationProductEdit();
-                    },
-                    child: const Text('Editar'),
-                  ),
-                ],
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      textDirection: TextDirection.ltr,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // text : porcentaje de ganancia
+                        controller.getProduct.purchasePrice != 0.0
+                            ? Material(
+                              color: Colors.green.withOpacity(0.5),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical:1.0),
+                                child: Text(controller.getProduct.getPorcentageFormat,
+                                    style: const TextStyle(
+                                        color: Colors.green,
+                                        fontSize: 12.0,
+                                        fontWeight: FontWeight.bold)),
+                              ),
+                            )
+                            : Container(), 
+                        controller.getProduct.purchasePrice != 0.0?const SizedBox(width: 8):Container(),
+                        // text : monto de beneficio de ganancia
+                        controller.getProduct.purchasePrice != 0.0
+                            ? Text.rich(
+                                TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: controller.getProduct.getBenefits,
+                                      style: TextStyle(
+                                          color: Colors.green.withOpacity(0.9),
+                                          fontSize: 14.0,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    TextSpan(
+                                      text: ' de Ganancia',
+                                      style: TextStyle(
+                                          color: Colors.green.withOpacity(0.8), fontSize: 12.0),
+                                    ),
+                                    
+                                  ],
+                                ),
+                              )
+                            : Container(),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-              const Icon(Icons.keyboard_arrow_up),
+              const Icon(Icons.keyboard_arrow_up,color: colorText,),
               const Opacity(
                 opacity: 0.5,
                 child: Text(
@@ -236,9 +251,9 @@ class ProductView extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center, 
             children: [
-              //  avatar : imagen del producto
-              controller.getProduct.local? Container():Padding(padding: const EdgeInsets.only(right: 12.0),child: ImageProductAvatarApp(url: controller.getProduct.image,size:100,radius:15)),
-              // textField  : descripción del producto
+              //  image : avatar del producto
+              controller.getProduct.local? Container():Padding(padding: const EdgeInsets.only(right: 12.0),child: ImageProductAvatarApp(url: controller.getProduct.image,size:75,radius:15)),
+              // text  : descripción del producto
               Expanded(
                 child: Column( 
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -275,33 +290,59 @@ class ProductView extends StatelessWidget {
                 ),
               ),
             ],
-          ),    
-          const SizedBox(height: 12),
+          ),  
           // view : etiquetas
-          Wrap( 
-            spacing: 2,
+          Padding(
+            padding: const EdgeInsets.only(top: 12,bottom: 12),
+            child: Wrap( 
+              spacing: 2,
+              children: [
+                // etiques : [Chip] favorito
+                controller.getProduct.local?Container():const SizedBox(height: 12),
+                controller.getProduct.favorite?Chip( 
+                  side: BorderSide(color: Colors.amber.withOpacity(0.1),width: 1),
+                  // icon 
+                  avatar: const Icon(Icons.star,size: 16,color: Colors.amber), 
+                  label: const Text('Favorito'),
+                  backgroundColor: Colors.amber.withOpacity(0.2),
+                ):Container(),
+                // etiqueta : [Chip] cantidad de stock si es que es premium
+                controller.homeController.getIsSubscribedPremium?const SizedBox(height: 12):Container(),
+                controller.homeController.getIsSubscribedPremium && controller.getProduct.stock?Chip( 
+                  side: BorderSide(color:controller.getProduct.quantityStock<=controller.getProduct.alertStock? Colors.red.withOpacity(0.1):Colors.orange.withOpacity(0.1),width: 1),
+                  // icon 
+                  avatar: Icon(Icons.archive_rounded,size: 16 ,color: Get.theme.textTheme.bodyLarge?.color,), 
+                  label: Text('${controller.getProduct.quantityStock} Disponibles'),
+                  backgroundColor: controller.getProduct.quantityStock<=controller.getProduct.alertStock?Colors.red.withOpacity(0.2):Colors.orange.withOpacity(0.2),
+                ):Container(),
+              ],
+            ),
+          ), 
+          // buttons : actions in catalogue
+          controller.getDataUploadStatusProduct==false? const Center(child: SizedBox(height: 24,width: 24,child: CircularProgressIndicator()))
+          :Row(
             children: [
-              // etiques : [Chip] favorito
-              controller.getProduct.local?Container():const SizedBox(height: 12),
-              controller.getProduct.favorite?Chip( 
-                side: BorderSide(color: Colors.amber.withOpacity(0.1),width: 1),
-                // icon 
-                avatar: const Icon(Icons.star,size: 16,color: Colors.amber), 
-                label: const Text('Favorito'),
-                backgroundColor: Colors.amber.withOpacity(0.2),
-              ):Container(),
-              // etiqueta : [Chip] cantidad de stock si es que es premium
-              controller.homeController.getIsSubscribedPremium?const SizedBox(height: 12):Container(),
-              controller.homeController.getIsSubscribedPremium && controller.getProduct.stock?Chip( 
-                side: BorderSide(color:controller.getProduct.quantityStock<=controller.getProduct.alertStock? Colors.red.withOpacity(0.1):Colors.orange.withOpacity(0.1),width: 1),
-                // icon 
-                avatar: Icon(Icons.archive_rounded,size: 16 ,color: Get.theme.textTheme.bodyLarge?.color,), 
-                label: Text('${controller.getProduct.quantityStock} Disponibles'),
-                backgroundColor: controller.getProduct.quantityStock<=controller.getProduct.alertStock?Colors.red.withOpacity(0.2):Colors.orange.withOpacity(0.2),
-              ):Container(),
+              // button 
+              Expanded(
+                flex: 2, 
+                child:ComponentApp().button(
+                  padding: const EdgeInsets.symmetric(vertical:0,horizontal: 0),
+                  margin: const EdgeInsets.all(0),
+                  text: controller.getItsInTheCatalogue?'Editar':'Agregar a mi catálogo',
+                  onPressed: () {
+                    controller.toNavigationProductEdit(); 
+                  }, 
+                ),
+              ),
+              // button : setting 
+              !controller.getItsInTheCatalogue?Container():
+              IconButton(
+                icon: const Icon(Icons.more_vert_rounded),
+                onPressed: () { 
+                },
+              ),
             ],
-          ),
-
+          ),  
 
         ],
       ),
@@ -436,10 +477,8 @@ class ProductView extends StatelessWidget {
 
     if (controller.getListPricesForProduct.isNotEmpty) { 
 
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          controller.getListPricesForProduct.isEmpty
+      return controller.getListPricesForProduct.isEmpty
+              // view : no hay precios
               ? const Padding(
                   padding: EdgeInsets.symmetric(
                       vertical: 8.0, horizontal: 12.0),
@@ -449,10 +488,9 @@ class ProductView extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                 )
-              : Container(),
-          Expanded(
-            child: ListView.builder( 
-              physics: const NeverScrollableScrollPhysics(),
+              // view : si hay precios del producto
+              :ListView.builder( 
+              //physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.symmetric(vertical: 0.16),
               shrinkWrap: true,
               itemCount: controller.getListPricesForProduct.length,
@@ -504,25 +542,23 @@ class ProductView extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: <Widget>[
+                          //vtext : fecha de publicacion
                           Text(
-                            Publications.getFechaPublicacion(
-                                    fechaActual: Timestamp.now().toDate(),
-                                    fechaPublicacion: controller
-                                        .getListPricesForProduct[index].time
-                                        .toDate())
-                                .toLowerCase(),
+                            Publications.getFechaPublicacion(fechaActual: Timestamp.now().toDate(),fechaPublicacion: controller.getListPricesForProduct[index].time.toDate()).toLowerCase(),
                             textAlign: TextAlign.end,
-                            style: TextStyle(
-                                fontStyle: FontStyle.normal,
-                                fontSize: 12,
-                                color: colorText.withOpacity(0.4)),
-                          ),
+                            style: TextStyle(fontStyle: FontStyle.normal,fontSize: 12,color: colorText.withOpacity(0.4))),
                           const SizedBox(height: 4),
-                          Text(
-                              "En ${controller.getListPricesForProduct[index].town.isEmpty ? controller.getListPricesForProduct[index].province.toString() : controller.getListPricesForProduct[index].town.toString()}",
-                              style: const TextStyle(
-                                  color: colorText,
-                                  fontWeight: FontWeight.bold)),
+                          // view : icon and text
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // icon
+                              const Opacity(opacity: 0.7,child: Icon(Icons.location_on_rounded,size: 12,color: Colors.white)),
+                              const SizedBox(width: 4),
+                              // text : ubicacion de la ciudad  del precio
+                              Text(controller.getListPricesForProduct[index].town.isEmpty ? controller.getListPricesForProduct[index].province.toString() : controller.getListPricesForProduct[index].town.toString(),style: const TextStyle(color: colorText,fontWeight: FontWeight.bold)),
+                            ],
+                          ),
                         ],
                       ),
                       onTap: () {},
@@ -541,10 +577,7 @@ class ProductView extends StatelessWidget {
                   ],
                 );
               },
-            ),
-          ),
-        ],
-      );
+            );
     } else {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
@@ -570,8 +603,16 @@ class ProductView extends StatelessWidget {
       child: InkWell(
         borderRadius:  BorderRadius.circular(8),
         onTap: () {
-          // navegar a la vista del producto seleccionado
-          controller.toNavigationProduct(product: product);
+          // condition : si el producto es local
+          if(product.local){
+            // navegar a la vista del producto seleccionado
+            controller.toNavigationProductEdit();
+            return;
+          }else{
+            // navegar a la vista del producto seleccionado
+            controller.toNavigationProduct(product: product);
+          }
+            
         },
         child: direction==Axis.vertical?Column(
           crossAxisAlignment: CrossAxisAlignment.start,

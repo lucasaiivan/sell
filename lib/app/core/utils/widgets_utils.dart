@@ -721,12 +721,12 @@ class ComponentApp extends StatelessWidget {
       ),
     );
   } 
-  Widget button( {bool defaultStyle = false,double elevation=0,double fontSize = 14,double width = double.infinity,bool disable = false, Widget? icon, String text = '',required dynamic onPressed,EdgeInsets padding =const EdgeInsets.symmetric(horizontal: 12, vertical: 12),Color? colorButton= Colors.blue,Color colorAccent = Colors.white}) {
+  Widget button( {bool defaultStyle = false,double elevation=0,double fontSize = 14,double width = double.infinity,bool disable = false, Widget? icon, String text = '',required dynamic onPressed,EdgeInsets padding =const EdgeInsets.symmetric(horizontal: 12, vertical: 12),Color? colorButton= Colors.blue,Color colorAccent = Colors.white , EdgeInsets margin =const EdgeInsets.symmetric(horizontal: 12, vertical: 12)}) {
      
     // button : personalizado
     return FadeIn(
         child: Padding(
-      padding: padding,
+      padding: margin,
       child: SizedBox(
         width: width,
         child: ElevatedButton.icon(
@@ -734,7 +734,7 @@ class ComponentApp extends StatelessWidget {
           style: ElevatedButton.styleFrom(  
             elevation:defaultStyle?0: elevation,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-            padding: const EdgeInsets.all(20.0),
+            padding: padding,
             backgroundColor: colorButton ,
             textStyle: TextStyle(color: colorAccent,fontWeight: FontWeight.w700),
           ),  
@@ -762,9 +762,10 @@ class ComponentApp extends StatelessWidget {
 class WidgetSuggestionProduct extends StatelessWidget {
 
   // ignore: prefer_const_constructors_in_immutables
-  WidgetSuggestionProduct({Key? key, required this.list, this.searchButton = false}): super(key: key);
+  WidgetSuggestionProduct({Key? key, required this.list, this.searchButton = false,this.positionDinamic=false}): super(key: key);
 
   //values
+  final bool positionDinamic;
   final bool searchButton ;
   final List<Product> list ; 
    
@@ -777,7 +778,7 @@ class WidgetSuggestionProduct extends StatelessWidget {
     if (list.isEmpty) return Container();
 
     // values
-    Color? colorAccent = Get.theme.textTheme.titleMedium?.color;
+    Color? colorAccent = Get.theme.textTheme.titleMedium!.color?.withOpacity(0.1);
     double radius = 32.0;
 
     return Row(
@@ -800,7 +801,38 @@ class WidgetSuggestionProduct extends StatelessWidget {
                   ),
                 ),
               ),
-        SizedBox(
+        // condition : si la posicion es dinamica
+        positionDinamic?
+        CustomAvatarRow(
+          width: Get.size.width,
+          height: 100,
+          avatars: list.map((e) => CircleAvatar(
+            backgroundColor: colorAccent,
+            foregroundColor: colorAccent,
+            radius: radius,
+            child: CircleAvatar(
+                backgroundColor: Colors.grey[100],
+                foregroundColor: Colors.grey[100],
+                radius: radius-2,
+                child: ClipRRect(
+                  borderRadius:BorderRadius.circular(50),
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(50),  
+                   onTap: () => homeController.toNavigationProduct(productCatalogue: e.convertProductCatalogue()),
+                    child: CachedNetworkImage(
+                      fadeInDuration: const Duration( milliseconds: 200),
+                      fit: BoxFit.cover,
+                      imageUrl: e.image,
+                      placeholder: (context, url) =>CircleAvatar(backgroundColor:Colors.grey[100],foregroundColor:Colors.grey[100]),
+                      errorWidget:(context, url, error) =>CircleAvatar(backgroundColor:Colors.grey[100],foregroundColor:Colors.grey[100]),
+                    ),
+                  ),
+                )),
+          )).toList(),
+        )
+        // si la posicion no es dinamica
+        :SizedBox(
             width: Get.size.width,
             height: 100,
             child: Center(
@@ -842,6 +874,39 @@ class WidgetSuggestionProduct extends StatelessWidget {
                   }),
             )),
       ],
+    );
+  }
+}
+class CustomAvatarRow extends StatelessWidget {
+  final double width;
+  final double height;
+  final List<CircleAvatar> avatars;
+
+  const CustomAvatarRow({super.key, 
+    required this.width,
+    required this.height,
+    required this.avatars,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: width,
+      height: height,
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal:20.0),
+        scrollDirection: Axis.horizontal,
+        itemCount: avatars.length,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.all(2.0),
+            child: Align(
+              alignment: index % 2 == 0 ? Alignment.topCenter : Alignment.bottomCenter,
+              child: avatars[index],
+            ),
+          );
+        },
+      ),
     );
   }
 }
@@ -941,7 +1006,8 @@ class ImageProductAvatarApp extends StatelessWidget {
     return SizedBox(
       width: size,height: size,
       child: path =='' ?InkWell(
-        child: Container(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 500),
           width: 75,
           height: 75,
           decoration: BoxDecoration(borderRadius: BorderRadius.circular(8.0),border: Border.all(color: favorite?Colors.yellow.shade700:Colors.transparent,width: favorite?2:0)),

@@ -166,7 +166,7 @@ class ControllerProductsSearch extends GetxController {
       // sound : play 
       playSoundScan();
       //  set 
-      barcodeScanRes = '654635';
+      barcodeScanRes = barcodeScanRes;
       productSelect.local = false;
       textEditingController.text = barcodeScanRes;
       searchProductCatalogue(id: barcodeScanRes);

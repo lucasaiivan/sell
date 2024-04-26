@@ -77,9 +77,10 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.max, 
           children: [
-            const SizedBox(height:50),
+            const SizedBox(height:50), 
             // view : sugerencias de productos
-            controller.getWriteCode||controller.getproductDoesNotExist? Container(): WidgetSuggestionProduct(list: controller.getListProductsSuggestions),
+            controller.getWriteCode||controller.getproductDoesNotExist? Container(): WidgetSuggestionProduct(positionDinamic: true,list: controller.getListProductsSuggestions),
+            controller.getWriteCode||controller.getproductDoesNotExist? Container(): const SizedBox(height: 20), 
             // view : image 
             controller.getproductDoesNotExist?Container():
             const Card(
@@ -219,13 +220,13 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
         readOnly: !controller.productSelect.local &&  controller.getproductDoesNotExist?true:false,
         focusNode: controller.textFieldCodeFocusNode,
         controller: controller.textEditingController,
-        keyboardType: const TextInputType.numberWithOptions(decimal: false),
+        keyboardType: const TextInputType.numberWithOptions(decimal: false), 
         inputFormatters: [FilteringTextInputFormatter.allow(RegExp('[1234567890]'))],
         decoration: InputDecoration(
           fillColor: controller.getColorFondo,
             suffixIcon: controller.textEditingController.value.text == ""?null:IconButton(onPressed: ()=>controller.clean(),icon: Icon(Icons.clear, color: controller.getColorTextField)),
             filled: true,
-            hintText: 'ej. 77565440001743',
+            hintText: 'ej. 775654001743',
             hintStyle: TextStyle(color: Get.theme.hintColor.withOpacity(0.3)),
             enabledBorder: OutlineInputBorder(borderRadius: const BorderRadius.all(Radius.circular(16.0)),borderSide: BorderSide(color: controller.getColorTextField)),
             border: OutlineInputBorder(borderRadius: const BorderRadius.all(Radius.circular(16.0)),borderSide: BorderSide(color: controller.getColorTextField)),
@@ -250,4 +251,5 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
    
   
 }
+
 

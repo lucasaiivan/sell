@@ -3,8 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
-import 'package:get/get_rx/get_rx.dart'; 
+import 'package:get/get.dart'; 
 import '../../../core/routes/app_pages.dart'; 
 import '../../../data/datasource/database_cloud.dart';
 import '../../../domain/entities/catalogo_model.dart';
@@ -14,6 +13,11 @@ class ProductController extends GetxController {
 
   // others controllers
   final HomeController homeController = Get.find();
+
+  // state load data product
+  bool _dataUploadStatusProduct = false;
+  set setDataUploadStatusProduct(bool value) => _dataUploadStatusProduct = value;
+  bool get getDataUploadStatusProduct => _dataUploadStatusProduct;
 
   // product 
   ProductCatalogue _product = ProductCatalogue(upgrade: Timestamp.now(), creation: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now());
@@ -57,15 +61,7 @@ class ProductController extends GetxController {
   //-  estado de carga de datos -//
   bool _loadingData = false;
   set setLoadingData(bool value) => _loadingData = value;
-  bool get getLoadingData => _loadingData;
-  // estado de carga de datos del producto
-  bool _dataUploadStatusProduct = false;
-  // estado de carga de datos de la marca 
-  bool _dataUploadStatusMark = false; 
-  // estado de carga de datos del proveedor 
-  bool _dataUploadStatusProvider = false;
-  // estado de carga de datos de la categoria 
-  bool _dataUploadStatusCategory = false;
+  bool get getLoadingData => _loadingData; 
   // ---------------------------- //
   // -------- NAVIGATION -------- //
   // ---------------------------- //
@@ -108,53 +104,29 @@ class ProductController extends GetxController {
         systemNavigationBarDividerColor: Get.theme.scaffoldBackgroundColor,
       ));
     }
-  }
-  void checkDataUploadStatusProduct({bool? dataUploadStatusProduct, bool? dataUploadStatusMark, bool? dataUploadStatusProvider, bool? dataUploadStatusCategory}) {
-    // descrioption : chequea si se cargaron los datos del producto, marca, proveedor y categoria
-    
-    // set : valores
-    _dataUploadStatusProduct = dataUploadStatusProduct ?? _dataUploadStatusProduct;
-    _dataUploadStatusMark = dataUploadStatusMark ?? _dataUploadStatusMark;
-    _dataUploadStatusProvider = dataUploadStatusProvider ?? _dataUploadStatusProvider;
-    _dataUploadStatusCategory = dataUploadStatusCategory ?? _dataUploadStatusCategory;
-    // condition : comprobamos si se cargaron todos los datos necesarios del producto
-    if (_dataUploadStatusProduct && _dataUploadStatusMark && _dataUploadStatusProvider && _dataUploadStatusCategory) {
-      setLoadingData = false; // Los datos se cargaron
-    }else{
-      setLoadingData = true; // no se cargaron todos los datos no cargados
-    } 
-
-    // actualizamos la vista
-    update(['updateAll']);
-  }
+  } 
   // ---------------------------- //
   // -------- Data Source ------- //
   // ---------------------------- //
   void getDataProduct({required String id}) {
-    // function : obtiene los datos del producto de la base de datos y los carga en el formulario de edición 
+    // function : obtiene los datos del producto de la base de datos global 
     if (id != '') {
       // firebase : obtiene los datos del producto
       Database.readProductPublicFuture(id: id).then((value) {
         //  get
-        Product product = Product.fromMap(value.data() as Map); 
-        // commprobar que las fechas de actualización sean diferentes
-        DateTime date1 = getProduct.documentUpgrade.toDate().copyWith(hour: 0,minute: 0,millisecond: 0,second: 0,microsecond: 0  );
-        DateTime date2 = product.upgrade.toDate().copyWith(hour: 0,minute: 0,millisecond: 0,second: 0,microsecond: 0);
-        if (date1.isBefore(date2)  ) {
-          // se notifica que existen datos actualizados del producto
-          //-setMessageNotification = 'Producto actualizado';
-        } 
+        Product product = Product.fromMap(value.data() as Map);  
 
         //  set
-        setProduct = getProduct.updateData(product: product);
-        //loadDataFormProduct(); // carga los datos del producto en el formulario
-        // actualiza la vista ui
-        //checkDataUploadStatusProduct(dataUploadStatusProduct: true);
+        getProduct.updateData(product: product); 
+        setDataUploadStatusProduct = true;
+        // update ui  
+        update();
         
       }).catchError((error) {
-        //checkDataUploadStatusProduct(dataUploadStatusProduct: false);
+        setDataUploadStatusProduct = true;
+
       }).onError((error, stackTrace) {
-        //checkDataUploadStatusProduct(dataUploadStatusProduct: false);
+        setDataUploadStatusProduct = true;
       });
     }
   }
