@@ -596,7 +596,10 @@ class SalesView extends StatelessWidget {
     const double height = 120;
     final bool viewDefault = controller.getProductsOutstandingList.isEmpty;
     final int itemCount = viewDefault?6:controller.getProductsOutstandingList.length + numItemDefault;
-    
+    // condition : si no ahi productos destacados ni recientes
+    if (viewDefault) {
+      return const SizedBox(height:20,width: double.infinity);
+    }
     // views : load widget mientras se carga la data
     if(homeController.productsBestSellersLoadComplete.value == false ){
       return SizedBox(

@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart'; 
+import 'package:cloud_firestore/cloud_firestore.dart'; 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';  
 import 'package:get/get.dart';
@@ -34,7 +33,7 @@ class ProductView extends StatelessWidget {
       children: [
         controller.getProduct.imageMark==''?Container():ComponentApp().userAvatarCircle(urlImage: controller.getProduct.imageMark,radius: 12,empty: true),
         controller.getProduct.imageMark==''?Container():const SizedBox(width: 8),
-        Text(controller.getProduct.nameMark),
+        Flexible(child: Text(controller.getProduct.nameMark,overflow: TextOverflow.ellipsis,maxLines: 1)),
       ],
     );
 

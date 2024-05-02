@@ -1246,6 +1246,11 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
       // control de vista
       SystemChannels.textInput.invokeMethod('TextInput.hide'); // quita el foco
 
+      // condition : si no hay ningun producto en el catalogo
+      if(filteredSuggestions.isEmpty){
+        return const Center(child: Opacity(opacity: 0.5,child: Text('aun no hay productos en el catálogo',)));
+      }
+
       return Padding(
         padding: const EdgeInsets.only(top: 20,left: 12,right: 12),
         child: ListView(
@@ -1259,9 +1264,7 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
     // condition : si se consulto pero no se obtuvieron resultados
     if(filteredSuggestions.isEmpty && query.isNotEmpty){
       return const Center(child: Text('No se encontraron resultados'));
-    }
-
-
+    } 
     return ListView.builder(
       itemCount: filteredSuggestions.length,
       itemBuilder: (context, index) { 

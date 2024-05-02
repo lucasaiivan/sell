@@ -405,12 +405,7 @@ class WidgetDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     
-    return GetBuilder<HomeController>( 
-      initState: (_) {},
-      builder: (_) {
-        return  body(context: context); 
-      },
-    );
+    return body(context: context); 
 }
 
 // WIDGETS VIEWS
@@ -429,115 +424,115 @@ Widget body({required BuildContext context}){
       child: SizedBox(width: double.infinity,child: FloatingActionButton(onPressed: homeController.signOutFirebase,elevation: 0,child: const Text('Iniciar sesión',style: TextStyle(color: Colors.white),))),
     );  
     
-    return ListView( 
-      children: [
-        Row(
+    return Obx(() => ListView( 
           children: [
-            const Spacer(),
-            // icon : cambia el tema de la  app
-            IconButton(
-              onPressed: () => ThemeService.switchTheme,
-              icon: Icon(Theme.of(context).brightness == Brightness.dark?Icons.light_mode:Icons.nightlight),
+            Row(
+              children: [
+                const Spacer(),
+                // icon : cambia el tema de la  app
+                IconButton(
+                  onPressed: () => ThemeService.switchTheme,
+                  icon: Icon(Theme.of(context).brightness == Brightness.dark?Icons.light_mode:Icons.nightlight),
+                ),
+                const SizedBox(width: 10),
+              ],
             ),
-            const SizedBox(width: 10),
+            isAnonymous?textButtonLogin
+              :ListTile(
+              leading: Container(padding: const EdgeInsets.all(0.0),child: ComponentApp().userAvatarCircle(urlImage: homeController.getProfileAccountSelected.image)),
+              title: Text(homeController.getIdAccountSelected == ''? 'Seleccionar una cuenta': homeController.getProfileAccountSelected.name,maxLines: 1,overflow: TextOverflow.ellipsis),
+              subtitle: homeController.getIdAccountSelected == ''? null: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment:  MainAxisAlignment.start,
+                children: [
+                  user.name==''?Container():Flexible(child: Text(user.name,overflow: TextOverflow.ellipsis,maxLines: 1)),
+                ],
+              ),
+              trailing: const Icon(Icons.arrow_right),
+              onTap: () {
+                homeController.showModalBottomSheetSelectAccount();
+              },
+            ),  
+            // ----------------- //
+            // funciones premium //
+            // ----------------- //
+            // condition : si el usuario de la cuenta no es administrador no se muestra el boton de suscribirse a premium
+            user.admin==false?Container():
+            isAnonymous?Container():
+              ListTile(
+                tileColor: Colors.amber.withOpacity(homeController.getIsSubscribedPremium?0.02:0.05),
+                iconColor:  Colors.amber, 
+                //titleTextStyle: const TextStyle(fontWeight: FontWeight.bold),
+                  leading: const Icon(Icons.star_rounded),
+                  title: Text(homeController.getIsSubscribedPremium?'Premium':'Funciones Premium'),
+                  onTap: (){
+                    // action : mostrar modal bottom sheet con  las funciones premium
+                    homeController.showModalBottomSheetSubcription();
+                  }),
+            isAnonymous?const Opacity(opacity: 0.3,child: Divider(height:0)):Container(),
+            const SizedBox(height: 20),
+            // vender 
+            ListTile(
+              selected: homeController.getIndexPage == 0,
+                leading: const Icon(Icons.attach_money_rounded),
+                trailing: homeController.getIndexPage != 0 ? null : const Icon(Icons.circle,size: 8),
+                title: const Text('Vender'),
+                onTap: () => homeController.setIndexPage = 0),
+            // historial de caja
+            user.historyArqueo || isAnonymous ?ListTile( 
+              enabled: !isAnonymous,
+              selected: homeController.getIndexPage == 1,
+              leading: const Icon(Icons.manage_search_rounded),
+              trailing: homeController.getIndexPage != 1 ? null : const Icon(Icons.circle,size: 8),
+              title: const Text('Historial de caja'),
+              onTap: () => homeController.setIndexPage = 1):Container(),
+            // transacciones
+            user.transactions || isAnonymous?ListTile(
+              enabled: !isAnonymous,
+              selected: homeController.getIndexPage == 2,
+              leading: const Icon(Icons.receipt_long_rounded),
+              trailing: homeController.getIndexPage != 2 ? null : const Icon(Icons.circle,size: 8),
+              title: const Text('Transacciones'),
+              onTap: () => homeController.setIndexPage = 2):Container(),
+            user.catalogue || isAnonymous?ListTile(
+              enabled: !isAnonymous,
+              selected: homeController.getIndexPage == 3,
+              leading: const Icon(Icons.apps_rounded),
+              trailing: homeController.getIndexPage != 3 ? null : const Icon(Icons.circle,size: 8),
+              title: const Text('Catálogo'),
+              onTap: () => homeController.setIndexPage = 3):Container(),
+            user.multiuser || isAnonymous?ListTile(
+              enabled: !isAnonymous,
+              selected: homeController.getIndexPage == 4,
+              leading: const Icon(Icons.group_add_outlined),
+              trailing: homeController.getIndexPage != 4 ? null : const Icon(Icons.circle,size: 8),
+              title: const Text('Multi Usuario'),
+              onTap: () {
+                if( homeController.getProfileAccountSelected.subscribed ){
+                  homeController.setIndexPage = 4;
+                }else{
+                  Get.back(); // cierra drawer
+                  homeController.showModalBottomSheetSubcription(id: 'multiuser');
+                }
+                
+              }):Container(),
+            const SizedBox(height: 20),
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+              tileColor: Colors.blue.withOpacity(0.05),
+              leading: const Icon(Icons.messenger_outline_sharp,color: Colors.green),
+              title: const Text('Escribenos tu opinión 😃'),
+              subtitle: const Text('Tu opinión o sugerencia es importante para mejorar esta app'),
+              onTap: () async {
+                
+                // values
+                Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.logicabooleana.sell');
+                //  redireccionara para la tienda de aplicaciones
+                await launchUrl(uri,mode: LaunchMode.externalApplication);
+              },
+            ),   
+            const SizedBox(height: 20)
           ],
-        ),
-        isAnonymous?textButtonLogin
-          :ListTile(
-          leading: Container(padding: const EdgeInsets.all(0.0),child: ComponentApp().userAvatarCircle(urlImage: homeController.getProfileAccountSelected.image)),
-          title: Text(homeController.getIdAccountSelected == ''? 'Seleccionar una cuenta': homeController.getProfileAccountSelected.name,maxLines: 1,overflow: TextOverflow.ellipsis),
-          subtitle: homeController.getIdAccountSelected == ''? null: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment:  MainAxisAlignment.start,
-            children: [
-              user.name==''?Container():Flexible(child: Text(user.name,overflow: TextOverflow.ellipsis,maxLines: 1)),
-            ],
-          ),
-          trailing: const Icon(Icons.arrow_right),
-          onTap: () {
-            homeController.showModalBottomSheetSelectAccount();
-          },
-        ),  
-        // ----------------- //
-        // funciones premium //
-        // ----------------- //
-        // condition : si el usuario de la cuenta no es administrador no se muestra el boton de suscribirse a premium
-        user.admin==false?Container():
-        isAnonymous?Container():
-          ListTile(
-            tileColor: Colors.amber.withOpacity(homeController.getIsSubscribedPremium?0.02:0.05),
-            iconColor:  Colors.amber, 
-            //titleTextStyle: const TextStyle(fontWeight: FontWeight.bold),
-              leading: const Icon(Icons.star_rounded),
-              title: Text(homeController.getIsSubscribedPremium?'Premium':'Funciones Premium'),
-              onTap: (){
-                // action : mostrar modal bottom sheet con  las funciones premium
-                homeController.showModalBottomSheetSubcription();
-              }),
-        isAnonymous?const Opacity(opacity: 0.3,child: Divider(height:0)):Container(),
-        const SizedBox(height: 20),
-        // vender 
-        ListTile(
-          selected: homeController.getIndexPage == 0,
-            leading: const Icon(Icons.attach_money_rounded),
-            trailing: homeController.getIndexPage != 0 ? null : const Icon(Icons.circle,size: 8),
-            title: const Text('Vender'),
-            onTap: () => homeController.setIndexPage = 0),
-        // historial de caja
-        user.historyArqueo || isAnonymous ?ListTile( 
-          enabled: !isAnonymous,
-          selected: homeController.getIndexPage == 1,
-          leading: const Icon(Icons.manage_search_rounded),
-          trailing: homeController.getIndexPage != 1 ? null : const Icon(Icons.circle,size: 8),
-          title: const Text('Historial de caja'),
-          onTap: () => homeController.setIndexPage = 1):Container(),
-        // transacciones
-        user.transactions || isAnonymous?ListTile(
-          enabled: !isAnonymous,
-          selected: homeController.getIndexPage == 2,
-          leading: const Icon(Icons.receipt_long_rounded),
-          trailing: homeController.getIndexPage != 2 ? null : const Icon(Icons.circle,size: 8),
-          title: const Text('Transacciones'),
-          onTap: () => homeController.setIndexPage = 2):Container(),
-        user.catalogue || isAnonymous?ListTile(
-          enabled: !isAnonymous,
-          selected: homeController.getIndexPage == 3,
-          leading: const Icon(Icons.apps_rounded),
-          trailing: homeController.getIndexPage != 3 ? null : const Icon(Icons.circle,size: 8),
-          title: const Text('Catálogo'),
-          onTap: () => homeController.setIndexPage = 3):Container(),
-        user.multiuser || isAnonymous?ListTile(
-          enabled: !isAnonymous,
-          selected: homeController.getIndexPage == 4,
-          leading: const Icon(Icons.group_add_outlined),
-          trailing: homeController.getIndexPage != 4 ? null : const Icon(Icons.circle,size: 8),
-          title: const Text('Multi Usuario'),
-          onTap: () {
-            if( homeController.getProfileAccountSelected.subscribed ){
-              homeController.setIndexPage = 4;
-            }else{
-              Get.back(); // cierra drawer
-              homeController.showModalBottomSheetSubcription(id: 'multiuser');
-            }
-            
-          }):Container(),
-        const SizedBox(height: 20),
-        ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-          tileColor: Colors.blue.withOpacity(0.05),
-          leading: const Icon(Icons.messenger_outline_sharp,color: Colors.green),
-          title: const Text('Escribenos tu opinión 😃'),
-          subtitle: const Text('Tu opinión o sugerencia es importante para mejorar esta app'),
-          onTap: () async {
-            
-            // values
-            Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.logicabooleana.sell');
-            //  redireccionara para la tienda de aplicaciones
-            await launchUrl(uri,mode: LaunchMode.externalApplication);
-          },
-        ),   
-        const SizedBox(height: 20)
-      ],
-    );
+        ));
   }
 
 }

@@ -69,7 +69,7 @@ class ProductController extends GetxController {
     Get.offAndToNamed(Routes.editProduct, arguments: {'product': getProduct.copyWith()});
   }
   void toNavigationProduct({required ProductCatalogue product}) { 
-    Get.offAndToNamed(Routes.product, arguments: {'product':  product.copyWith() });
+    Get.offAndToNamed(Routes.product, arguments: {'product':  product.copyWith() } );
   }
 
   //-------------------------------//
@@ -182,7 +182,7 @@ class ProductController extends GetxController {
     // obtenemos el producto por parametro
     ProductCatalogue productFinal = Get.arguments['product'] ?? ProductCatalogue(documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now(),upgrade: Timestamp.now(), creation: Timestamp.now());
     //  set : copiamos el producto para evitar problemas de referencia en memoria con el producto original
-    setProduct = productFinal.copyWith();
+    setProduct = productFinal.copyWith(); 
     // comprobamos si el producto esta en el catalogo de la cuenta y obtenemos los datos
     isCatalogue();
     readListPricesForProduct();

@@ -271,7 +271,7 @@ class ProfileAccountModel {
 
   // location
   String countrycode = "";
-  String country = "";
+  String country = ""; // pais
   String province = ""; // provincia o estado
   String town = ""; // ciudad o pueblo 
 

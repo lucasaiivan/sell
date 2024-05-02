@@ -9,6 +9,8 @@ import 'package:sell/app/presentation/account/controller/account_controller.dart
 import '../../../core/utils/fuctions.dart';
 import '../../../core/utils/widgets_utils.dart';
 
+
+
 class AccountView extends GetView<AccountController> {
   // VAriables
 
@@ -17,8 +19,8 @@ class AccountView extends GetView<AccountController> {
   AccountView({super.key});
 
   @override
-  Widget build(BuildContext buildContext) {
-    return scaffold(buildContext: buildContext);
+  Widget build(BuildContext context) {
+    return scaffold(buildContext: context);
   }
 
   Widget scaffold({required BuildContext buildContext}) {
@@ -27,44 +29,13 @@ class AccountView extends GetView<AccountController> {
         builder: (_) {
           return Scaffold(
             appBar: appBar(context: buildContext),
-            body: controller.stateLoding
-                ? const Center(
-                    child: Text('cargando...'),
-                  )
-                : ListView(
-                    padding: const EdgeInsets.all(12.0),
-                    keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                    children: [
-                      Column(
-                        children: <Widget>[
-                          // text : informativo
-                          controller.newAccount?widgetText(text: 'Dinos un poco de tu negocio\n\n 👇'): Container(),
-                          const SizedBox(height: 12.0),
-                          // imagen : avatar del negocio
-                          widgetsImagen(),
-                          // button  : actualizart imagen
-                          controller.getSavingIndicator
-                              ? Container()
-                              : Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: TextButton(
-                                    onPressed: () {
-                                      if (controller.getSavingIndicator == false) {_showModalBottomSheetCambiarImagen(context: buildContext);}
-                                    },
-                                    child: const Text("actualizar imagen")
-                                  ),
-                              ),
-                          // TextFuield views
-                          widgetFormEditText(context: buildContext),
-                        ],
-                      ),
-                    ],
-                  ),
+            body: body(buildContext: buildContext),
           );
         });
   }
-
-  // WIDGET
+  // ------------ //
+  // WIDGET VIEW  //
+  // ------------ //
   PreferredSizeWidget appBar({required BuildContext context}) {
     return AppBar(
       backgroundColor: Get.theme.scaffoldBackgroundColor,
@@ -72,7 +43,8 @@ class AccountView extends GetView<AccountController> {
       iconTheme: Theme.of(context).iconTheme.copyWith(color: Theme.of(context).textTheme.bodyLarge!.color),
       title: Text(controller.newAccount ? 'Perfil de mi negocio' : 'Perfil',
           style: TextStyle(fontSize: 18.0,color: Theme.of(context).textTheme.bodyLarge!.color)),
-      actions: <Widget>[
+      actions: <Widget>[ 
+        // icon : guardar
         IconButton(
           icon: controller.getSavingIndicator
               ? Container()
@@ -84,30 +56,81 @@ class AccountView extends GetView<AccountController> {
     );
   }
 
-  void _showModalBottomSheetCambiarImagen({required BuildContext context}) {
-    showModalBottomSheet(
-        context: context,
-        builder: (BuildContext bc) {
-          return Wrap(
-            children: <Widget>[
-              ListTile(
-                  leading: const Icon(Icons.camera),
-                  title: const Text('Capturar una imagen'),
-                  onTap: () {
-                    Navigator.pop(bc);
-                    controller.setImageSource(imageSource: ImageSource.camera);
-                  }),
-              ListTile(
-                leading: const Icon(Icons.image),
-                title: const Text('Seleccionar desde la galería de fotos'),
-                onTap: () {
-                  Navigator.pop(bc);
-                  controller.setImageSource(imageSource: ImageSource.gallery);
-                },
-              ),
-            ],
-          );
-        });
+  Widget body({required BuildContext buildContext}) {
+    return Stack(
+      fit: StackFit.expand,
+      children: <Widget>[
+        // container : fondo
+        ListView(
+          padding: const EdgeInsets.all(12.0),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          children: [
+            Column(
+              children: <Widget>[
+                const SizedBox(height: 12.0),
+                // text : informativo
+                controller.newAccount?widgetText(text: 'Dinos un poco de tu negocio\n\n 👇'): Container(),
+                // imagen : avatar del negocio
+                widgetsImagen(),
+                // button  : actualizart imagen
+                controller.getSavingIndicator
+                    ? Container()
+                    : Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: TextButton(
+                          onPressed: () {
+                            if (controller.getSavingIndicator == false) {showModalBottomSheetCambiarImagen();}
+                          },
+                          child: const Text("actualizar imagen")
+                        ),
+                    ),
+                // TextFuield views
+                widgetFormEditText(context: buildContext),
+              ],
+            ),
+          ],
+        ),
+        // container : fondo cuando se muestra el indicador de progreso
+        controller.getSavingIndicator ? Container(color: Colors.black26) : Container()
+      ],
+    
+    );
+  }
+
+ 
+  void showModalBottomSheetCambiarImagen() {
+    Widget widget =   Wrap(
+      children: <Widget>[
+        ListTile(
+          contentPadding: const EdgeInsets.only(top: 12,left: 12,right: 12),
+          leading: const Icon(Icons.camera),
+          title: const Text('Capturar una imagen'),
+          onTap: () {
+            Get.back();
+            controller.setImageSource(imageSource: ImageSource.camera);
+            
+          }),
+        ListTile(
+          contentPadding: const EdgeInsets.only(top: 12,left: 12,right: 12,bottom: 20),
+          leading: const Icon(Icons.image),
+          title: const Text('Galería de fotos'),
+          onTap: () {
+            Get.back();
+            controller.setImageSource(imageSource: ImageSource.gallery);
+          },
+        ),
+      ],
+    );
+    // muestre la hoja inferior modal de getx
+    Get.bottomSheet( 
+      widget,
+      elevation: 0,
+      clipBehavior: Clip.antiAlias,
+      backgroundColor: Get.theme.scaffoldBackgroundColor,
+      enableDrag: true,
+      isDismissible: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
+    );
   }
 
   Widget widgetText({required String text}) {
@@ -280,14 +303,14 @@ class AccountView extends GetView<AccountController> {
               ),
               divider,
               // textfiel: ciudad
-              TextField(
+              TextField( 
                 enabled: !controller.getSavingIndicator,
                 onChanged: (value) => controller.profileAccount.town = value,
                 decoration: const InputDecoration(
                   labelText: "Ciudad (opcional)",
                   filled: true,
                 ),
-                controller: TextEditingController(text: controller.profileAccount.town),
+                controller: controller.getControllerTextEditTwon,
               ),
               const Divider(color: Colors.transparent, thickness: 1), 
               // text : marca de tiempo de la ultima actualización del documento
@@ -295,15 +318,17 @@ class AccountView extends GetView<AccountController> {
                 padding: const EdgeInsets.only(top: 50),
                 child: Opacity(opacity: 0.5,child: Center(child: Text('Te uniste ${Publications.getFechaPublicacion(fechaPublicacion: controller.profileAccount.creation.toDate(), fechaActual: Timestamp.now().toDate()).toLowerCase()}'))),
               ),
-              const SizedBox(height: 75),
-              // text : informativo 
-              controller.newAccount?controller.getSavingIndicator?Container():Column(
-                children: [ 
-                  TextButton(onPressed:controller.saveAccount, child: const Text('Guardar')),
-                  const SizedBox(height: 50),
-                ],
-              ): Container(),
-              
+              const SizedBox(height: 50),
+              // button : guardar
+              controller.newAccount?controller.getSavingIndicator?Container():Center(child: TextButton(onPressed:controller.saveAccount, child: const Text('Guardar'))): Container(),
+              // button : eliminar cuenta
+              controller.newAccount?Container():Center(
+                child: TextButton( 
+                  onPressed: controller.dialogDeleteAccount,
+                  child: const Text('Eliminar cuenta',style: TextStyle(color: Colors.red)),
+                ),
+              ),
+              const SizedBox(height: 20),
               
             ],
           ),
