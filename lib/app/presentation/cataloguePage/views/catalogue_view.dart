@@ -425,7 +425,7 @@ class CataloguePage extends StatelessWidget {
                     // image : avatar del producto
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal:item.image==''?27:0),
-                      child: ImageProductAvatarApp(url:item.local?'': item.image,size:item.image==''?25: 80,favorite: item.favorite),
+                      child: ImageProductAvatarApp(url:item.local?'': item.image,size:item.image==''?25: 80 ),
                     ),
                     // view : contenido
                     Flexible(

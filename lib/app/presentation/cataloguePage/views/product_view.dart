@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; 
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';  
+import 'package:flutter/material.dart'; 
 import 'package:get/get.dart';
 import 'package:sell/app/domain/entities/catalogo_model.dart'; 
 import 'package:snapping_sheet/snapping_sheet.dart';
@@ -10,7 +9,8 @@ import '../../../core/utils/widgets_utils.dart';
 import '../controller/product_controller.dart';
 
 class ProductView extends StatelessWidget {
-  const ProductView({super.key});
+  const ProductView({super.key}); 
+
 
   @override
   Widget build(BuildContext context) {
@@ -42,17 +42,17 @@ class ProductView extends StatelessWidget {
       title: titleWidget,
       actions: [
         IconButton(
-          icon: const  Icon(Icons.report),
-          onPressed: (){},
+          icon: const  Icon(Icons.report_gmailerrorred),
+          onPressed:showDialogProductReport,
         ),
       ],
     );
   }
 
-  Widget get body {
+  Widget get body { 
 
-    // controller 
-    final ScrollController listViewController = ScrollController();
+    // controller
+    final controller = Get.find<ProductController>();
 
     return SnappingSheet(
       lockOverflowDrag: true,  
@@ -85,11 +85,12 @@ class ProductView extends StatelessWidget {
       sheetBelow: SnappingSheetContent(
         draggable: true,  
         sizeBehavior: const SheetSizeFill(), // sirve para que el contenido se ajuste al tamaño del contenido
-        childScrollController: listViewController, 
+        
         child: expandableContent, // contenido expandible
       ),
       // child : contenido principal
-      child: ListView(
+      child: ListView(  
+        controller: controller.scrollController,
         children: [
           productDataView, 
           categoryView,
@@ -100,7 +101,9 @@ class ProductView extends StatelessWidget {
       ),  
     );
   }
-
+  // ------------------  //
+  // -- WIDGETS VIEWS -- //
+  // ------------------  //
   Widget get persistentHeader {
     // controller
     final controller = Get.find<ProductController>();
@@ -219,7 +222,6 @@ class ProductView extends StatelessWidget {
       ),
     );
   }
-
   Widget get expandableContent {
     // style
     const Color colorBackground = Colors.black;
@@ -232,7 +234,6 @@ class ProductView extends StatelessWidget {
       ),
     );
   }
-
   Widget get productDataView {
 
     // controller
@@ -321,10 +322,10 @@ class ProductView extends StatelessWidget {
           controller.getDataUploadStatusProduct==false? const Center(child: SizedBox(height: 24,width: 24,child: CircularProgressIndicator()))
           :Row(
             children: [
-              // button 
-              Expanded(
-                flex: 2, 
-                child:ComponentApp().button(
+              // button : editar producto
+              Flexible(
+                flex: 1,
+                child: ComponentApp().button(
                   padding: const EdgeInsets.symmetric(vertical:0,horizontal: 0),
                   margin: const EdgeInsets.all(0),
                   text: controller.getItsInTheCatalogue?'Editar':'Agregar a mi catálogo',
@@ -333,13 +334,25 @@ class ProductView extends StatelessWidget {
                   }, 
                 ),
               ),
-              // button : setting 
-              !controller.getItsInTheCatalogue?Container():
-              IconButton(
+              // button : iconbutton con tres puntitos
+              controller.getItsInTheCatalogue?PopupMenuButton(
                 icon: const Icon(Icons.more_vert_rounded),
-                onPressed: () { 
+                itemBuilder: (context) => [
+                  // item : eliminar del catalogo
+                  const PopupMenuItem(
+                    value: 1,
+                    child: Text('Eliminar del catálogo'),
+                  ),
+                ],
+                onSelected: (value) {
+                  // switch : opciones del menu
+                  switch (value) {
+                    case 1:
+                      showDialogDelete();
+                      break;
+                  }
                 },
-              ),
+              ):Container(),
             ],
           ),  
 
@@ -588,8 +601,51 @@ class ProductView extends StatelessWidget {
       );
     }
   }
-   
-  // -- WIDGET COMPONENTS -- // 
+  // ----------------------  //
+  // ---- WIDGET DIALOG ---- //
+  // ----------------------  //
+  void showDialogProductReport(){  
+    // dialog : permite al usuario reportar un producto
+    showDialog(
+      context: Get.context!,
+      builder: (context) {
+        return const ProductReportAlertDialog();
+      },
+    );
+  }
+  // dialog : muestra el dialogo para eliminar el producto
+  void showDialogDelete() {
+    // controller
+    final controller = Get.find<ProductController>();
+    // widget
+    Widget widget = AlertDialog(
+      title: const Text(
+          "¿Seguro que quieres eliminar este producto de tu catálogo?"),
+      content: const Text(
+          "El producto será eliminado de tu catálogo y toda la información acumulada"),
+      actions: <Widget>[
+        // usually buttons at the bottom of the dialog
+        TextButton(
+          child: const Text('Cancelar'),
+          onPressed: () {
+            Get.back();
+          },
+        ),
+        TextButton(
+          onPressed: (){
+            Get.back();
+            controller.deleteProductInCatalogue();
+          },
+          child: const Text('Si, eliminar'),
+        ),
+      ],
+    );
+
+    Get.dialog(widget);
+  }
+  // ----------------------  //
+  // -- WIDGET COMPONENTS -- //
+  // ----------------------  // 
   Widget itemProduct({required ProductCatalogue product,Axis direction = Axis.vertical}){
 
     // controllers
@@ -609,7 +665,8 @@ class ProductView extends StatelessWidget {
             return;
           }else{
             // navegar a la vista del producto seleccionado
-            controller.toNavigationProduct(product: product);
+            controller.loadData(product: product);
+            controller.scrollController.animateTo(0, duration: const Duration(milliseconds: 500), curve: Curves.easeIn);
           }
             
         },
@@ -650,5 +707,124 @@ class ProductView extends StatelessWidget {
       ),
     );
   }
+
+}
+
+class ProductReportAlertDialog extends StatefulWidget {
+  // crea un ui [AlertDialog] con opciones ([CheckboxListTile]) y un mensaje ([textfield]) para reportar un producto por el usuario
+ 
+  const ProductReportAlertDialog({super.key});
+
+  @override
+  State<ProductReportAlertDialog> createState() => _ProductReportAlertDialogState();
+}
+
+class _ProductReportAlertDialogState extends State<ProductReportAlertDialog> {
+
+  // controller
+  final controller = Get.find<ProductController>();
+
+  // var
+  bool stateLoading = false;
+  final TextEditingController controller0 = TextEditingController();
+  final List<String> listOptions = ['Imagen','Descripción','Marca'];
+  final List<bool> listCheck = [false,false,false];
+
+  // ----------- fuctions -----------  //
+  void sendReport(){ 
+    // function : envia el reporte del producto
+    controller.sendReportProduct(
+      reports: listOptions.where((element) => listCheck[listOptions.indexOf(element)]).toList(),
+      description: controller0.text,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    return body;
+  }
+  // ----------------------  //
+  // ----- WIDGET VIEW ----- //
+  // ----------------------  //
+  Widget get body {
+    return AlertDialog(
+      title: const Row(
+        children: [
+          // text
+          Text('Reportar producto',style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold)),
+          SizedBox(width: 8),
+          // icon
+          Icon(Icons.report_gmailerrorred),
+        ],
+      ), 
+      
+      content: SingleChildScrollView(
+        child:stateLoading? const Center(child: CircularProgressIndicator()): Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [ 
+            // text : descripcion del reporte
+            const Text('Selecciona las opciones que consideres que no corresponde al código del producto'),
+            const SizedBox(height: 12),
+            // checkbutton : opciones
+            Column(
+              children: List.generate(listOptions.length, (index) {
+                return CheckboxListTile(
+                  title: Text(listOptions[index]),
+                  value: listCheck[index],
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 0,vertical: 0),
+                  
+                  onChanged: (value) {
+                    // set : valor de la opcion
+                    listCheck[index] = value!; 
+                    setState(() {});
+                    
+                  },
+                );
+              }),
+            ),
+            const SizedBox(height: 12),
+            // textfield : mensaje
+            TextField(
+              controller: controller0,
+              maxLines:2, 
+              maxLength: 100,
+              decoration: const InputDecoration(
+                hintText: 'Escribe tu mensaje',
+                labelText: 'Mensaje (opcional)',
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: stateLoading?null: [
+        TextButton(
+          onPressed: () {
+            Get.back();
+          },
+          child: const Text('Cancelar'),
+        ),
+        TextButton(
+          onPressed: () {
+            // condition : comprobar si hay opciones seleccionadas
+            if(listCheck.every((element) => element==false)){
+              // mostrar mensaje de error
+              Get.snackbar('Debes seleccionar una opción','');
+              return;
+            }else{
+              setState(() {
+                stateLoading = true;
+                sendReport();
+              });
+              // cerrar el dialogo
+              Get.back();
+            }
+          },
+          child: const Text('Enviar'),
+        ),
+      ],
+    );
+  } 
+
 
 }

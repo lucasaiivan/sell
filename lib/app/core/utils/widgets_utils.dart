@@ -960,8 +960,7 @@ class LogoPremium extends StatelessWidget {
 
 class ImageProductAvatarApp extends StatelessWidget { 
   late final  Widget? icon;
-  late final bool iconAdd;
-  late final bool favorite;
+  late final bool iconAdd; 
   late final String url;
   late final double size;
   late final double radius;
@@ -970,7 +969,7 @@ class ImageProductAvatarApp extends StatelessWidget {
   final VoidCallback?  onTap;
   late final Color canvasColor;
   // ignore: prefer_const_constructors_in_immutables
-  ImageProductAvatarApp({Key? key,this.url='', this.size = 75, this.radius = 6.0, this.description = '', this.path = '', this.onTap, this.iconAdd = false, this.favorite = false, this.canvasColor = Colors.grey,this.icon }) : super(key: key);
+  ImageProductAvatarApp({Key? key,this.url='', this.size = 75, this.radius = 6.0, this.description = '', this.path = '', this.onTap, this.iconAdd = false, this.canvasColor = Colors.grey,this.icon }) : super(key: key);
 
   // avatar que se va usar en toda la app, especialemnte en los 'ListTile'
 
@@ -1005,7 +1004,7 @@ class ImageProductAvatarApp extends StatelessWidget {
           duration: const Duration(milliseconds: 500),
           width: 75,
           height: 75,
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(8.0),border: Border.all(color: favorite?Colors.yellow.shade700:Colors.transparent,width: favorite?2:0)),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(8.0),border: Border.all(color: Colors.transparent,width: 0)),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(radius),  
             child: InkWell(
@@ -1127,40 +1126,6 @@ class _EditProductSelectedDialogViewState extends State<EditProductSelectedDialo
       ],
     );
 
-    return Material( 
-      child: Column(
-        children: [
-          ListTile(
-            // leading : imagen del producto
-            leading: ImageProductAvatarApp(url: widget.product.image,size: 50),
-            // title : nombre del producto
-            title: Text(widget.product.description,style: const TextStyle(fontWeight: FontWeight.bold)),
-            // trailing : buttons para incrementar y disminuir la cantidad del producto
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  onPressed: () {
-                    Get.find<SalesController>().getTicket.decrementProduct(product: widget.product);
-                    Get.back();
-                  },
-                  icon: const Icon(Icons.horizontal_rule),
-                ),
-                Text(widget.product.quantity.toString()),
-                IconButton(
-                  onPressed: () {
-                    Get.find<SalesController>().getTicket.incrementProduct(product: widget.product);
-                    Get.back();
-                  },
-                  icon: const Icon(Icons.add),
-                ),
-              ],
-            ),
-
-          ),
-        ],
-      ),
-    );
   }
 
   // views

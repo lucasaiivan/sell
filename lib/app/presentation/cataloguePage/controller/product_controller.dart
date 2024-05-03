@@ -2,7 +2,7 @@
 import 'dart:io'; 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/services.dart'; 
 import 'package:get/get.dart'; 
 import '../../../core/routes/app_pages.dart'; 
 import '../../../data/datasource/database_cloud.dart';
@@ -13,6 +13,7 @@ class ProductController extends GetxController {
 
   // others controllers
   final HomeController homeController = Get.find();
+  final ScrollController scrollController = ScrollController();
 
   // state load data product
   bool _dataUploadStatusProduct = false;
@@ -67,15 +68,13 @@ class ProductController extends GetxController {
   // ---------------------------- //
   void toNavigationProductEdit() {
     Get.offAndToNamed(Routes.editProduct, arguments: {'product': getProduct.copyWith()});
-  }
-  void toNavigationProduct({required ProductCatalogue product}) { 
-    Get.offAndToNamed(Routes.product, arguments: {'product':  product.copyWith() } );
-  }
+  } 
 
   //-------------------------------//
   // ---------- FUCTIONS ----------//
   //-------------------------------//
   isCatalogue() {
+    setItsInTheCatalogue = false;
     // return : si el producto esta en el catalogo
     for (var element in homeController.getCataloProducts) {
       if (element.id == getProduct.id) {
@@ -86,6 +85,40 @@ class ProductController extends GetxController {
       }
     }
   } 
+  void deleteProductInCatalogue() async{ 
+
+    // showDialog : dialogo de carga de eliinacion 
+    showDialog(
+      context: Get.context!,
+      useRootNavigator: false,
+      barrierDismissible: false,
+      builder: (context) {
+        return const Center(child: CircularProgressIndicator());
+      },
+    );
+    
+    
+    // firebase : eliminar registro de precio de la base de datos publica
+    await Database.refFirestoreRegisterPrice(idProducto: getProduct.id, isoPAis: 'ARG').doc(homeController.getProfileAccountSelected.id).delete();
+    // firebase : elimina el producto del cátalogo de la cuenta
+    await Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id)
+      .doc(getProduct.id)
+      .delete()
+      .whenComplete(() {
+        // eliminar localmente de la lista de productos del cátalogo
+        homeController.getCataloProducts.removeWhere((element) => element.id == getProduct.id);
+        // Firebase : descontamos el valor de los seguidores del producto
+        if (getProduct.followers > 0){
+          Database.refFirestoreProductPublic().doc(getProduct.id).update({'followers': FieldValue.increment(-1)});
+        }  
+        // volvemos a navegar a la misma pantalla para que se actualice la vista
+        loadData(product: getProduct);
+        
+        Get.back();
+      })
+      .onError((error, stackTrace) => Get.back())
+      .catchError((ex) => Get.back());
+  }
   // ---------------------------- //
   // ---------- LOGIC ----------- //
   // ---------------------------- //
@@ -106,8 +139,21 @@ class ProductController extends GetxController {
     }
   } 
   // ---------------------------- //
-  // -------- Data Source ------- //
+  // ------- Data Source -------- //
   // ---------------------------- //
+  void loadData({required ProductCatalogue product}){
+    
+    //  set : copiamos el producto para evitar problemas de referencia en memoria con el producto original
+    setProduct = product.copyWith(); 
+    // comprobamos si el producto esta en el catalogo de la cuenta y obtenemos los datos
+    isCatalogue();
+    readListPricesForProduct();
+    getProductByCategory(idCategory: getProduct.category);
+    getProductByProvider(idProvider: getProduct.provider);
+    getProductByMark(idMark: getProduct.idMark);
+    // obtenemos los datos del producto de la base de datos global
+    getDataProduct(id: getProduct.id);
+  }
   void getDataProduct({required String id}) {
     // function : obtiene los datos del producto de la base de datos global 
     if (id != '') {
@@ -168,8 +214,29 @@ class ProductController extends GetxController {
       setListPricesForProduct = list.cast<ProductPrice>();
     });
   }
+  void sendReportProduct({required List reports, required String description}){
 
-  // override onready
+    // generate id  : code mas id de firebase 
+    String id = '${getProduct.code}-${homeController.getUserAuth.uid}';
+    // function : envia un reporte del producto
+    Database.refFirestoreReportProduct().doc(id).set(
+      ReportProduct(
+        id: id,
+        idProduct: getProduct.code,
+        idUserReport: homeController.getUserAuth.uid,
+        time: Timestamp.now(),
+        description:description,
+        reports: reports, 
+      ).toJson()
+    ).then((value) {
+      Get.snackbar('Reporte enviado', 'Gracias por tu reporte');
+    }).catchError((error) {
+      Get.snackbar('Error', 'No se pudo enviar el reporte');
+    });
+  }
+  // --------------------------- //
+  // -------  @override -------- //
+  // --------------------------- //
   @override
   void onReady() {
     super.onReady();
@@ -181,16 +248,8 @@ class ProductController extends GetxController {
 
     // obtenemos el producto por parametro
     ProductCatalogue productFinal = Get.arguments['product'] ?? ProductCatalogue(documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now(),upgrade: Timestamp.now(), creation: Timestamp.now());
-    //  set : copiamos el producto para evitar problemas de referencia en memoria con el producto original
-    setProduct = productFinal.copyWith(); 
-    // comprobamos si el producto esta en el catalogo de la cuenta y obtenemos los datos
-    isCatalogue();
-    readListPricesForProduct();
-    getProductByCategory(idCategory: getProduct.category);
-    getProductByProvider(idProvider: getProduct.provider);
-    getProductByMark(idMark: getProduct.idMark);
-    // obtenemos los datos del producto de la base de datos global
-    getDataProduct(id: getProduct.id);
+    
+    loadData(product: productFinal);
     
   }
   @override

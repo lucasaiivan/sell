@@ -666,10 +666,11 @@ class Mark {
 }
 
 class ReportProduct {
-  String id = ''; // idUser=idUserReport
-  String idProduct = '';
-  String idUserReport = '';
-  String description = '';
+  String id = ''; // el id se conforma por (idProduct +'/'+ idUserReport)
+  String idProduct = ''; // id/code del producto
+  String idUserReport = ''; // id del usuario que reporto el producto
+  String description = '';  // descripcion del reporte (opcional)
+  List reports = []; // lista de reportes
   late Timestamp time; // Marca de tiempo ( hora en que se reporto el producto )
 
   ReportProduct({
@@ -677,6 +678,7 @@ class ReportProduct {
     this.idProduct = "",
     this.idUserReport = "",
     this.description = "",
+    this.reports = const [],
     required this.time,
   });
   Map<String, dynamic> toJson() => {
@@ -684,6 +686,7 @@ class ReportProduct {
         "idProduct": idProduct,
         "idUserReport": idUserReport,
         "description": description,
+        "reports": reports,
         "time": time,
       };
   factory ReportProduct.fromMap(Map<String, dynamic> data) {
@@ -692,6 +695,7 @@ class ReportProduct {
       idProduct: data['name'] ?? '',
       idUserReport: data['idUserReport'] ?? '',
       description: data['description'] ?? '',
+      reports: data['reports'] ?? [],
       time: data['time'],
     );
   }
@@ -703,6 +707,7 @@ class ReportProduct {
     idProduct = data['name'] ?? '';
     idUserReport = data['idUserReport'] ?? '';
     description = data['description'] ?? '';
+    reports = data['reports'] ?? [];
     time = data['time'];
   }
 }
