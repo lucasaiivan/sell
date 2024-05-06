@@ -110,8 +110,10 @@ class ProductView extends StatelessWidget {
     // style
     const Color colorBackground = Colors.black;
     const Color colorText = Colors.white; 
+    // var 
+    String numberOfStoresText = controller.getListPricesForProduct.isEmpty? '':'${Publications.getFormatAmount(value: controller.getListPricesForProduct.length )}${controller.getListPricesForProduct.length == 1 ? ' comercio publicó su precio' : ' comercios publicaron su precio'}';
 
-    return ClipRRect(
+    Widget content = ClipRRect(
       borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
       child: Container(
         color: colorBackground,
@@ -207,13 +209,41 @@ class ProductView extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.keyboard_arrow_up,color: colorText,),
-              const Opacity(
-                opacity: 0.5,
-                child: Text(
-                  'Deslice hacia arriba para ver los últimos precios publicados',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: colorText, fontSize: 12.0)
+              const Icon(Icons.keyboard_arrow_up,color: colorText), 
+              Opacity(
+                opacity: 0.6,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,  
+                  children: [
+                    // text : cantidad de precios publicados
+                    numberOfStoresText==''?Container()
+                    :Material( 
+                      color: Colors.white.withOpacity(0.2),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical:1,horizontal:5),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.store_mall_directory_rounded,size:14,color: colorText),
+                            const SizedBox(width: 4),
+                            Text(
+                              numberOfStoresText,
+                              style: const TextStyle(color: colorText, fontSize: 12.0),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    // text : accion
+                    const Text(
+                      'Deslice hacia arriba para ver',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: colorText, fontSize: 12.0)
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -221,6 +251,8 @@ class ProductView extends StatelessWidget {
         ),
       ),
     );
+
+    return content;
   }
   Widget get expandableContent {
     // style

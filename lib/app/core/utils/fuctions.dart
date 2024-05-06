@@ -23,24 +23,27 @@ class Publications {
     return formatter.format(monto.abs());
   }
 
-
+  
   static String getFormatAmount({required int value}){
-    String price = value.toString();
-    String priceInText ='';
-    int counter = 0;
-    for(int i = (price.length - 1);  i >= 0; i--){
-        counter++;
-        String str = price[i];
-        if((counter % 3) != 0 && i !=0){
-          priceInText = "$str$priceInText";
-        }else if(i == 0 ){
-          priceInText = "$str$priceInText";
-        
-        }else{
-          priceInText = ".$str$priceInText";
-        }
+    final formatCurrency = NumberFormat('#,##0', 'es_ES');
+    /// Formatea un número entero a una cadena de texto con abreviaturas 'K' y 'M'.
+    ///
+    /// Si el número es menor que 10,000, se devuelve como está.
+    /// Si el número es 10,000 o más, pero menos que 1,000,000, se divide por 1,000 y se agrega 'K' al final.
+    /// Si el número es 1,000,000 o más, se divide por 1,000,000 y se agrega 'M' al final.
+    ///
+    /// [value] es el número entero que se va a formatear.
+    /// 
+    if (value < 10000) {
+      // Si el número es menor que 10000, simplemente devuélvelo como una cadena.
+      return formatCurrency.format(value);
+    } else if (value < 1000000) {
+      // Si el número es 10000 o más, pero menos que 1000000, divídelo por 1000 y agrega 'K' al final.
+      return '${formatCurrency.format(value / 1000)}K';
+    } else {
+      // Si el número es 1000000 o más, divídelo por 1000000 y agrega 'M' al final.
+      return '${formatCurrency.format(value / 1000000)}M';
     }
-    return priceInText.trim();
   }
 
   // Recibe la fecha y la decha actual para devolver hace cuanto tiempo se publico
@@ -71,7 +74,7 @@ class Publications {
     return 'Hoy';
   }
 } 
-static String getFechaPublicacion({required DateTime fechaPublicacion, required DateTime fechaActual}) {
+  static String getFechaPublicacion({required DateTime fechaPublicacion, required DateTime fechaActual}) {
   /** 
     Obtiene la fecha de publicación en formato legible para el usuario.
     @param fechaPublicacion La fecha de publicación del contenido.
