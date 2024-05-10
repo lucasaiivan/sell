@@ -1,23 +1,32 @@
 import 'dart:async';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart'; 
+import 'dart:io';  
+import 'package:cloud_firestore/cloud_firestore.dart'; 
+import 'package:flutter/foundation.dart'; 
+import 'package:screenshot/screenshot.dart'; 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sell/app/core/utils/widgets_utils.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
-import 'package:sell/app/domain/entities/catalogo_model.dart'; 
+import 'package:sell/app/domain/entities/catalogo_model.dart';
+import 'package:sell/app/presentation/transactionsPage/views/transactions_view.dart'; 
 import '../../../domain/entities/cashRegister_model.dart';
 import '../../../domain/entities/ticket_model.dart';
 import '../../home/controller/home_controller.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:fl_chart/fl_chart.dart'; 
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+
+
 
 
 class TransactionsController extends GetxController {
 
-  // others controllers
-  final HomeController homeController = Get.find();
+  // Create an instance controllers
+  final HomeController homeController = Get.find(); 
+  final ScreenshotController screenshotController = ScreenshotController(); 
 
   // stream  
   StreamSubscription?  streamSubscription;
@@ -117,16 +126,6 @@ class TransactionsController extends GetxController {
   bool get getTicketView => _ticketView.value;
   set setTicketView(bool value) => _ticketView.value = value;
 
-
-
-  @override
-  void onInit() async {
-    super.onInit();
-    filterList(key: 'hoy');
-  }
-
-  @override
-  void onClose() {}
 
   // set/get
   void filterList({required String key}) {
@@ -526,7 +525,8 @@ class TransactionsController extends GetxController {
     setCashiersList = Map.fromEntries( getCashiersList.entries.toList() ..sort((e1, e2) => e1.key.compareTo(e2.key)));
   }
 
-  // FUCTIONS
+  // FUCTIONS  
+
   void readBestSellingProduct(){
     // description : obtenemos los productos más vendidos  por cantidad  
 
@@ -1042,6 +1042,18 @@ class TransactionsController extends GetxController {
 
 
   }
+
+  // ----------------------- //
+  // ------ OVERRIDE-------- //
+  // ----------------------- //
+  @override
+  void onInit() async {
+    super.onInit();
+    filterList(key: 'hoy');
+  }
+
+  @override
+  void onClose() {}
  
 
 }

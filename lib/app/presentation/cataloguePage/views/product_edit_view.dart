@@ -847,7 +847,7 @@ class _SelectProviderState extends State<SelectProvider> {
         itemCount: welcomeController.getProviderList.length,
         itemBuilder: (BuildContext context, int index) {
           //  values
-          Provider provider =welcomeController.getProviderList[index];
+          Provider provider = welcomeController.getProviderList[index];
           
           return Column(
                   children: <Widget>[

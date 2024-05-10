@@ -125,17 +125,32 @@ class ProductView extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [ 
+              // view : line de Bottom sheets
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white70,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
               // view : precio de venta al publico del producto si es esta en el catalogo
               !controller.getItsInTheCatalogue?
               // sino esta en el catalogo
-              Center(child: Material(
-                color: Colors.grey.withOpacity(0.4),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                
-                child: const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Icon(Icons.monetization_on_outlined,color:colorText),
-                )))
+              Flexible(
+                fit: FlexFit.loose,  
+                child: Center(child: Opacity(
+                  opacity: 0.6,
+                  child: Material(
+                    color: Colors.grey.withOpacity(0.4),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    
+                    child: const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Icon(Icons.monetization_on_outlined,color:colorText),
+                    )),
+                )),
+              )
               // si esta en el catalogo
               :Expanded(   
                 child: Column(

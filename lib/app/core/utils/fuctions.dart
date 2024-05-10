@@ -1,9 +1,17 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
+import 'package:screenshot/screenshot.dart';
+import 'package:share_plus/share_plus.dart';
+import '../../domain/entities/ticket_model.dart';
+import '../../presentation/transactionsPage/views/transactions_view.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:path_provider/path_provider.dart';
 
 class Publications {
 
@@ -164,5 +172,42 @@ class Utils {
 }
 
 
+  void getTicketScreenShot({required TicketModel ticketModel,required BuildContext context }) async {
 
+    // widget
+    var myLongWidget = Builder(builder: (context) {return TicketView(ticket: ticketModel).getBody(context: context);});
+    final ScreenshotController screenshotController = ScreenshotController(); 
+    screenshotController.captureFromLongWidget(
+          Material(child: SizedBox(
+            width: 400,
+            child: myLongWidget)),
+          delay: const Duration(milliseconds: 100),
+          pixelRatio: 2, 
+          context:context,  
+      ).then((capturedImage) async {
+        // crear un pdf y compartirlo
+        createPdfAndShare(data: capturedImage, id: ticketModel.id);
+        /* final directory =  await getTemporaryDirectory(); // directorio temporal
+        final imagePath = await File('${directory.path}/ticketTemporaryPrint.png').create(); // archivo variable
+        await imagePath.writeAsBytes(capturedImage); // escribimos la captura de pantalla en el archivo
+
+        /// Share Plugin : compartir la captura de pantalla
+        await Share.shareXFiles([XFile(imagePath.path)], text: 'Compartir Ticket'); */
+      
+  }); 
+  }    
+
+  Future<void> createPdfAndShare({required Uint8List data,required String id}) async {
+    // description : crea un pdf y lo comparte
+    final pdf = pw.Document();
+    pdf.addPage(pw.Page(build: (pw.Context context) => pw.Center(child: pw.Image(pw.MemoryImage(data))),
+    pageFormat: PdfPageFormat.a4, 
+    ));
+
+    final output = await getTemporaryDirectory();
+    final file = File("${output.path}/${id}Ticket.pdf");
+    await file.writeAsBytes(await pdf.save());
+
+    Share.shareXFiles([XFile(file.path)], text: 'Compartir Ticket',subject: 'hello',sharePositionOrigin: Rect.zero );
+  }
 }

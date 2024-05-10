@@ -1,8 +1,6 @@
  
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart'; 
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; 
+import 'package:flutter/material.dart'; 
 import 'package:get/get.dart'; 
 import 'package:intl/intl.dart'; 
 import 'package:sell/app/core/utils/fuctions.dart';
@@ -10,6 +8,7 @@ import 'package:sell/app/core/utils/widgets_utils.dart';
 import 'package:sell/app/domain/entities/catalogo_model.dart'; 
 import '../../../domain/entities/ticket_model.dart';
 import '../../../core/utils/dynamicTheme_lb.dart'; 
+import '../../home/controller/home_controller.dart';
 import '../controller/transactions_controller.dart';
 import 'package:animate_do/animate_do.dart';
 
@@ -52,7 +51,7 @@ class TransactionsView extends StatelessWidget {
   // WIDGETS VIEWS
   PreferredSizeWidget appbar({required BuildContext context}) {
 
-    // others controllers
+    // controllers
     final TransactionsController transactionsController = Get.find();
 
  
@@ -288,8 +287,7 @@ class TransactionsView extends StatelessWidget {
 
   // DIALOG : mostrar detalles de la transacción
   void showAlertDialogTransactionInformation(BuildContext context, TicketModel ticket) {
-    
-    
+     
  
 
     // creamos un dialog con GetX
@@ -378,7 +376,7 @@ class TransactionInfoView extends StatelessWidget {
                   borderRadius: const  BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12), bottomLeft: Radius.circular(0), bottomRight: Radius.circular(0)),
                   child: TicketView(ticket: ticket),
                 ),
-              );  
+              ); 
 
             }, 
             icon: const Icon(Icons.receipt,color: Colors.white),
@@ -540,23 +538,231 @@ class TicketView extends StatelessWidget {
   final TicketModel ticket; 
   const TicketView({Key? key,required this.ticket}) : super(key: key);
 
+  Widget getBody({required BuildContext context}) {
+    return Theme(
+      data: ThemeData.light(),
+      child: body(context: context));
+  } 
+  
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Ticket'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.print),
-            onPressed: () {
-              // print
-            },
-          ),
-        ],
+    return Scaffold( 
+      backgroundColor: Colors.white,
+      appBar: appBar,
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal:12.0),
+        child: body(context: context),
       ),
-      body: const Center(
-        child: Text('no se puede cargar los datos'),
-      ),
+      floatingActionButton: floatingActionButton(context:context),
     );
   }
+    // -- VIEW WIDGETS -- //
+    PreferredSizeWidget get appBar {
+      return AppBar(title: const Text('Ticket'));
+    }
+    Widget body({required BuildContext context}) {
+
+    String id = ticket.id;
+    String seller = ticket.seller;
+    String cashRegister = ticket.cashRegisterName == ''?'sin especificar':ticket.cashRegisterName; 
+    double priceTotal = ticket.priceTotal;
+    double valueReceived = ticket.valueReceived;
+    double changeAmount = valueReceived==0?0.0: valueReceived - priceTotal;
+    String currencySymbol = ticket.currencySymbol; 
+    Timestamp creation = ticket.creation;
+
+    // controllers
+    final HomeController homeController = Get.find();
+
+    // Formatear marca de tiempo como fecha
+    var formatter = DateFormat('dd/MM/yyyy  HH:mm');
+    var formattedCreationDate = formatter.format(creation.toDate());
+ 
+
+    // var 
+    String payModeName =ticket.getNamePayMode ;
+    String town = homeController.getProfileAccountSelected.town;
+    String province = homeController.getProfileAccountSelected.province; 
+    String direction = town == ''?province:'$town, $province';
+    // styles
+    Color separatorColor = Colors.black.withOpacity(0.03); 
+    const double opacity = 0.8; 
+    Widget spacer = const SizedBox(height:2);
+    TextStyle textStyleDescription = const TextStyle(fontWeight: FontWeight.w300,fontFamily: 'Monospace',letterSpacing: -1.0,color: Colors.black);
+    TextStyle textStyleValue = const TextStyle(fontWeight: FontWeight.w600,fontFamily: 'Monospace',letterSpacing: -0.9,color: Colors.black);
+
+      
+      return SingleChildScrollView( 
+        child: Container(
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[ 
+                const SizedBox(height: 10),
+                // text : nombre del negocio 
+                Text(homeController.getProfileAccountSelected.name,style: textStyleValue.copyWith(fontWeight: FontWeight.bold,fontSize: 20,fontFamily: 'Monospace',letterSpacing: -1.0)),
+                // text : dirección del negocio 
+                Text(direction,style: textStyleValue.copyWith(fontWeight: FontWeight.w300,fontSize: 14,fontFamily: 'Monospace')),
+                const SizedBox(height: 20),
+                // item view : id de la transacción
+                Row(
+                  children: <Widget>[
+                    Opacity(opacity:opacity,child: Text("Id: ",style: textStyleDescription)),
+                    const Spacer(),
+                    Text(id,style: textStyleValue),
+                  ],
+                ), 
+                spacer,
+                // item view : fecha de la transacción
+                Container(
+                  color: separatorColor,
+                  child: Row(
+                    children: <Widget>[
+                      Opacity(opacity:opacity,child: Text("Fecha: ",style: textStyleDescription)),
+                      const Spacer(),
+                      Text(formattedCreationDate,style: textStyleValue,overflow:TextOverflow.ellipsis)
+                    ],
+                  ),
+                ),
+                spacer,
+                // item view : vendedor y caja
+                Row(
+                  children: <Widget>[
+                    Opacity(opacity:opacity,child: Text("Vendedor: ",style: textStyleDescription,overflow:TextOverflow.ellipsis)),
+                    const Spacer(),
+                    Text(seller,style: textStyleValue,overflow:TextOverflow.ellipsis),
+                  ],
+                ), 
+                spacer,
+                Container(
+                  color: separatorColor,
+                  child: Row(
+                    children: <Widget>[
+                      Opacity(opacity:opacity,child: Text("Caja: ",style: textStyleDescription)),
+                      const Spacer(),
+                      Text(cashRegister,style: textStyleValue),
+                    ],
+                  ),
+                ),
+                spacer, 
+                const Divider(),
+                Row(
+                  children: <Widget>[
+                    Opacity(opacity:opacity,child: Text("Artículos  ",style: textStyleDescription)),
+                    const Spacer(),
+                    Text("Total:  ",style: textStyleDescription),
+                    Text("${ticket.getProductsQuantity()}",style: textStyleValue),
+                  ],
+                ),
+                // -------------------------------------------------- //
+                // -- view : crear items de los productos vendidos -- //
+                Column(
+                  children: ticket.listPoduct.asMap().map((index, product) { 
+                    // style 
+                    TextStyle style = textStyleValue.copyWith(fontWeight: FontWeight.bold,fontSize: 12,fontFamily: 'Monospace',letterSpacing: -1.0);
+                    // obj
+                    ProductCatalogue productCatalogue = ProductCatalogue.fromMap(product);
+          
+                    return MapEntry(index, Column(
+                      children: [ 
+                        Row(
+                          children: [
+                            Opacity(opacity: 0.5,child: Text('x${productCatalogue.quantity}',style: style)),
+                            const SizedBox(width: 10),
+                            Flexible(fit: FlexFit.tight,child: Opacity(opacity: 0.7,child: Text(productCatalogue.description,style: style,maxLines:1,overflow:TextOverflow.ellipsis,))),
+                            const SizedBox(width: 12),
+                            Opacity(opacity: 0.6,child: Text(Publications.getFormatoPrecio(monto: productCatalogue.salePrice*productCatalogue.quantity,moneda: currencySymbol),style: style)),
+                          ],
+                        ),
+                        // condition : si es el ultimo item , no agregar un divider
+                        if (index != ticket.listPoduct.length - 1) const Padding(padding: EdgeInsets.symmetric(vertical:2),child: Divider(height: 0.5,thickness: 0.3)),
+                      ],
+                    ));
+                  }).values.toList(),
+                ),
+                const SizedBox(height: 20), 
+                spacer, 
+                // view : precio total del ticket
+                Container(
+                  // dibujar borde con una linea negra
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black54 ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: Row(
+                      children: <Widget>[ 
+                        Opacity(opacity:opacity,child: Text("Total:  ",style: textStyleDescription.copyWith(fontSize: 20))),
+                        const Spacer(),
+                        Text( Publications.getFormatoPrecio(monto: priceTotal,moneda: currencySymbol),overflow:TextOverflow.ellipsis,style: textStyleValue.copyWith(fontSize: 24) ),
+                      ],
+                    ),
+                  ),
+                ),
+                spacer,
+                // text : descuentos
+                ticket.discount==0?Container():
+                Row(
+                  children: <Widget>[
+                    const Spacer(),
+                    Opacity(opacity:opacity,child: Text("Descuentos:  ",style: textStyleDescription)),
+                    Text(Publications.getFormatoPrecio(monto: ticket.discount,moneda: currencySymbol),overflow:TextOverflow.ellipsis,style: textStyleValue.copyWith(color: Colors.red.shade400)),
+                  ],
+                ), 
+                spacer,
+                // text : valor recibido
+                valueReceived==0?Container():
+                Row(
+                  children: <Widget>[
+                    const Spacer(),
+                    Opacity(opacity:opacity,child: Text("Valor recibido:  ",style: textStyleDescription)),
+                    Text(Publications.getFormatoPrecio(monto: valueReceived,moneda: currencySymbol),style: textStyleValue),
+                  ],
+                ),
+                spacer,
+                // text : valor del vuelto
+                changeAmount == 0?Container():
+                Row(
+                  children: <Widget>[
+                    const Spacer(),
+                    Opacity(opacity:opacity,child: Text("Vuelto:  ",style: textStyleDescription)),
+                    Text( Publications.getFormatoPrecio(monto: changeAmount,moneda: currencySymbol),style: textStyleValue),
+                  ],
+                ), 
+                // view : modo de pago
+                Row(
+                  children: <Widget>[
+                    const Spacer(),
+                    Opacity(opacity:opacity,child: Text("Modo de pago: ",style: textStyleDescription)),
+                    Text(payModeName,style: textStyleValue,overflow:TextOverflow.ellipsis),
+                  ],
+                ), 
+                const SizedBox(height: 12),
+                const Divider(),
+                // text : 'Gracias por su compra'
+                const SizedBox(height: 12),
+                Text('Gracias por su compra',style:textStyleValue.copyWith(fontSize: 18,fontWeight: FontWeight.w500)),
+                const SizedBox(height: 75),
+              
+              ],
+            ),
+          ),
+        ),
+      );
+    
+  }
+    Widget floatingActionButton ({required BuildContext context}) { 
+
+      return FloatingActionButton(
+        backgroundColor: Colors.blue,
+        onPressed: () { 
+          Utils().getTicketScreenShot( ticketModel: ticket,context: context); 
+        },
+        child: const Icon(Icons.share,color: Colors.white),
+      );
+    }
 }

@@ -138,7 +138,7 @@ class ProductCatalogue {
   // variables del catalogo de la cuenta
   bool local = false; // producto local
   Timestamp creation =Timestamp.now(); // Marca de tiempo ( hora en que se creo el documento en el catalogo de la cuenta  )
-  Timestamp upgrade = Timestamp.now(); // Marca de tiempo ( hora en que se actualizo el documento en el catalogo de la cuenta  )
+  Timestamp upgrade = Timestamp.now(); // Marca de tiempo ( hora en que se actualizo el precio de venta al publico ) 
   bool favorite = false;  
   String category = ""; // ID de la categoria del producto
   String provider = ""; // ID del proveedor del producto

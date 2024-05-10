@@ -57,7 +57,7 @@ dependencies:
   flutter_secure_storage: ^9.0.0
 
   # app info 
-  package_info_plus: ^5.0.1 # Un complemento de Flutter para obtener información sobre el paquete actual, como el nombre, la versión y el número de compilación.
+  package_info_plus: ^8.0.0 # Un complemento de Flutter para obtener información sobre el paquete actual, como el nombre, la versión y el número de compilación.
   # others   
   observe_internet_connectivity: ^1.0.2 # Un paquete de Flutter que proporciona un widget de conexión a Internet que se puede usar para verificar la conectividad a Internet
   fast_cached_network_image: ^1.2.0
@@ -90,7 +90,13 @@ dependencies:
   fl_chart: ^0.66.1 # Un paquete de Flutter que proporciona un widget de gráfico de datos.
   flutter_cache: ^0.1.0   
   snapping_sheet: ^3.1.0  # Esta es una hoja inferior con una altura que se puede arrastrar  
-  
+  screenshot: ^2.3.0 
+  share_plus: ^8.0.1
+  pdf: ^3.10.8
+
+
+
+
 flutter_icons:
   android: true
   ios: false

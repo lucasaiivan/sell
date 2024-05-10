@@ -1,7 +1,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart'; 
+import 'package:flutter/material.dart'; 
 import 'package:get/get.dart';
 import 'package:sell/app/presentation/cataloguePage/controller/catalogue_controller.dart';
 import 'package:sell/app/presentation/home/controller/home_controller.dart';
@@ -47,10 +46,10 @@ class CataloguePage extends StatelessWidget {
       title: ComponentApp().buttonAppbar(
         context:  context,
         onTap: () => catalogueController.showSeach(context: context), 
-        text: 'Cátalogo',
+        text: 'Catálogo',
         iconLeading: Icons.search,
-        colorBackground: Theme.of(context).colorScheme.outline.withOpacity(0.2),
-        colorAccent: Theme.of(context).textTheme.bodyLarge?.color,
+        colorBackground: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+        colorAccent: Theme.of(context).textTheme.bodyLarge!.color?.withOpacity(0.7),
         ), 
       actions: [ 
         // buttons : filter list
@@ -91,19 +90,13 @@ class CataloguePage extends StatelessWidget {
           child: TabBar(
               controller: controller.tabController,
               labelColor: Get.theme.textTheme.bodyMedium?.color,
-              tabs: [
+              tabs: const [
                 // tab : productos
-                Tab(child: Row(children: [
-                  const Flexible(child: Text("Productos",overflow: TextOverflow.ellipsis)),
-                  controller.getCataloProducts.isEmpty?Container():Padding(
-                    padding: const EdgeInsets.only(left: 5                                                                                                                                                                                                                ),
-                    child: Container(padding: const EdgeInsets.symmetric(horizontal:3,vertical: 1),decoration: BoxDecoration(borderRadius: BorderRadius.circular(5), color: Colors.blue.withOpacity(0.1)), child: Text(controller.getCataloProducts.length.toString(), style: const TextStyle(color: Colors.blue, fontSize: 12),)),
-                  ),
-                ],)),
+                Tab(text: 'Productos'),
                 // tab : categorias
-                const Tab(text: "Cátegorias"),
+                Tab(text: "Cátegorias"),
                 // tab : proveedores
-                const Tab(text: "Proveedores"),
+                Tab(text: "Proveedores"),
               ]),
         ),
         Flexible(
@@ -129,6 +122,40 @@ class CataloguePage extends StatelessWidget {
         child: Text('Sin productos'),
       );
     }
+    // widget 
+    Widget infoChips =  Padding(
+      padding: const EdgeInsets.all(12),
+      child: Wrap( 
+        spacing: 10,
+        children: [
+          // chip : cantidad de articulos del catalogo y filtrados
+          Chip(  
+            side: const BorderSide(color: Colors.transparent), 
+            visualDensity: VisualDensity.compact,
+            label: Column(
+              children: [
+                Text(controller.getCataloProducts.length.toString(),style: const TextStyle(fontWeight: FontWeight.bold)),
+                const Text('Artículos',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w400)),
+              ],
+            ),
+            backgroundColor: Get.theme.colorScheme.secondary.withOpacity(0.1),
+          ), 
+          // chip : monto total del inventario
+          Chip(  
+            side: BorderSide(color: Get.theme.colorScheme.secondary.withOpacity(0.0)),   
+            visualDensity: VisualDensity.compact,
+            label: Column(
+              children: [
+                Text(controller.getTotalInventory,style: const TextStyle(fontWeight: FontWeight.bold)),
+                const Text('Valor del inventario',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w400)),
+              ],
+            ),
+            backgroundColor: Get.theme.colorScheme.secondary.withOpacity(0.1),
+          ),
+      
+        ],
+      ),
+    );
 
     return Obx(() => ListView.builder(
           itemCount: controller.getCataloProducts.length,
@@ -137,6 +164,7 @@ class CataloguePage extends StatelessWidget {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  // view : control de inventario
                   homeController.getIsSubscribedPremium?controller.viewStockAlert:Padding(
                     padding: const EdgeInsets.all(20.0),
                     child: Row(
@@ -147,6 +175,9 @@ class CataloguePage extends StatelessWidget {
                       ],
                     ),
                   ),
+                  // view : informacion del inventario
+                  controller.getCataloProducts.isNotEmpty?infoChips:Container(), 
+                  // view : lista de productos
                   listTileProduct(item: controller.getCataloProducts[index]),
                 ],
               );

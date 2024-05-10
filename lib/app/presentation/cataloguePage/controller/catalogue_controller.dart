@@ -63,26 +63,31 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
   List<ProductCatalogue> get getProductsSelectedList => _productsSelectedList; 
 
   
-  
-  @override
-  void onInit() async {
-    super.onInit();
-    tabController = TabController(vsync: this, length:3);
-    readProductsCatalogue();
-  }
+   
 
-  @override
-  void onClose() {}
-
-  // FIREBASE
+  // --------- DATASOURCE -------------- //
   void readProductsCatalogue() {
     // obtenemos los obj(productos) del catalogo de la cuenta del negocio
     setCatalogueProducts = homeController.getCataloProducts;
   }
    
-  //
-  // FUCTIONS CATALOGUE VIEW 
-  //
+  // ----------- FUCTIONS --------------- // 
+  String get getTotalInventory {
+    // description : obtiene el total del inventario formateado en moneda 
+    // var
+    double total = 0;
+    // loop : recorre los productos del catalogo
+    for (var element in getCataloProducts) {
+      // condition : verificar que [element.quantityStock] sea mayor a 0
+      if (element.quantityStock > 0 && element.stock && homeController.getIsSubscribedPremium) {
+        total += element.salePrice *  element.quantityStock;
+      }else{
+        total += element.salePrice; 
+      } 
+    }
+    return Publications.getFormatoPrecio(monto: total);
+  }
+
   void catalogueFilter({String filter = ''}) {
     //  var
     List<ProductCatalogue> list = [];
@@ -388,6 +393,24 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
       publishSalePricePublic(productCatalogue: element);
     }
   }
+  void updateProvider({required List<ProductCatalogue> list,required String idProvider}){
+    // firebase : actualiza el proveedor de todos los productos de la lista pasado por parametro
+    for (var element in list) {
+      element.provider = idProvider; // actualizamos el proveedor
+      element.upgrade = Timestamp.now(); // actualizamos la fecha de actualizacion
+      Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(element.id).set(element.toJson());
+    }
+    getProductsSelectedList.clear();
+  }
+  void updateCategory({required List<ProductCatalogue> list,required String idCategory}){
+    // firebase : actualiza la categoria de todos los productos de la lista pasado por parametro
+    for (var element in list) {
+      element.category = idCategory; // actualizamos la categoria
+      element.upgrade = Timestamp.now(); // actualizamos la fecha de actualizacion
+      Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(element.id).set(element.toJson());
+    }
+    getProductsSelectedList.clear();
+  }
   void publishSalePricePublic({ required ProductCatalogue productCatalogue}){
     // description : publica el precio de venta de un producto en la base de datos publica
     // Registra el precio en una colección publica
@@ -523,7 +546,24 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
         ),
       );
   }
+
+  // ---------------------------- //
+  // -------- OVERRIDE ---------- //
+  // ---------------------------- //
+  @override
+  void onInit() async {
+    super.onInit();
+    tabController = TabController(vsync: this, length:3);
+    readProductsCatalogue();
+  }
+
+  @override
+  void onClose() {}
 }
+
+// -------------------------------------------- //
+// ui : vista de productos seleccionados       //
+// -------------------------------------------- //
 
 // StatelessWidget : lista de productos seleccionados con opcion de eliminar de la lista
 class ViewProductsSelected extends StatefulWidget {
@@ -536,7 +576,7 @@ class ViewProductsSelected extends StatefulWidget {
 
 class _ViewProductsSelectedState extends State<ViewProductsSelected> {
 
-  // controllers
+  // controllers 
   final CataloguePageController catalogueController = Get.find<CataloguePageController>();
 
   // Widget
@@ -600,7 +640,7 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
         FloatingActionButton.extended(
           onPressed: () { 
             Get.back();
-            updateDialog();
+            showUpdateDialog();
           },
           label: const Text('Actualizar',style: TextStyle(color: Colors.white)),
           icon: const Icon(Icons.update,color: Colors.white,),
@@ -674,7 +714,7 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
   // 
   // DIALOG
   //
-  void updateDialog(){
+  void showUpdateDialog(){
     Get.dialog(
       AlertDialog(
         title: Row(
@@ -683,7 +723,7 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
             const Text('Actualizar'),
             const SizedBox(width:5),
             // avatar : cantidad de items que se van a actualizar 
-            CircleAvatar(child: Text(catalogueController.getProductsSelectedList.length.toString())),
+            CircleAvatar(child: Text(catalogueController.getProductsSelectedList.length.toString(),style: const TextStyle(color: Colors.white))),
           ],
         ),  
         content: Column(
@@ -710,6 +750,14 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
               Get.back();
               updatePricePurchaseAndSalesWithPercentageDialog();
             },child: const Text('Ambos precios con porcentaje')),
+            // textButton : actualizar proveedor
+            TextButton(onPressed: (){
+              Get.back();
+              updateProviderDialog();},child: const Text('Proveedor')),
+            // textButton : actualizar categoria
+            TextButton(onPressed: () { 
+              Get.back();
+              updateCategoryDialog();},child: const Text('Categoria')),
           ],
         ),
         actions: [
@@ -929,6 +977,114 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
     );
  
   } 
+  void updateProviderDialog(){ 
+    // controllers
+    final HomeController homeController = Get.find<HomeController>();
+    // var  
+    String idCategory='';
+    
+
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Actualizar proveedor'),  
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // text : texto informativo de la cantidad de productos seleccionados
+            Text( catalogueController.getProductsSelectedList.length==1?'${ catalogueController.getProductsSelectedList.length} producto seleccionado':'${ catalogueController.getProductsSelectedList.length} productos seleccionados' ,style: const TextStyle(fontWeight: FontWeight.w400)),
+            const SizedBox(height: 10),
+            // dropdownButton : proveedor [welcomeController.getProviderList]
+            homeController.getProviderList.isEmpty? Container()
+            :DropdownButtonFormField<String>( 
+              items: homeController.getProviderList.map((e) => DropdownMenuItem(
+                value: e.id, 
+                child: Text(e.name))).toList(),
+              onChanged: (value) {
+                idCategory = value!;
+              },
+              decoration: const InputDecoration(filled: true,labelText:'Proveedor',prefixIcon: Icon(Icons.person_rounded)),
+            ),
+
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: const Text('Cerrar'),
+          ),
+          TextButton(
+            onPressed: () {
+              if(idCategory==''){
+                Get.snackbar('Inválido', 'Debe seleccionar un proveedor');
+                return;
+              }
+              // function : actualizar proveedor de los productos seleccionados
+              catalogueController.updateProvider(list: catalogueController.getProductsSelectedList,idProvider: idCategory);
+              Get.back();
+            },
+            child: const Text('Actualizar'),
+          ),
+        ],
+      ),
+      
+    );
+  }
+  void updateCategoryDialog(){
+    // controllers
+    final HomeController homeController = Get.find<HomeController>();
+    // var
+    String idCategory='';
+
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Actualizar categoría'),  
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // text : texto informativo de la cantidad de productos seleccionados
+            Text( catalogueController.getProductsSelectedList.length==1?'${ catalogueController.getProductsSelectedList.length} producto seleccionado':'${ catalogueController.getProductsSelectedList.length} productos seleccionados' ,style: const TextStyle(fontWeight: FontWeight.w400)),
+            const SizedBox(height: 10),
+            // dropdownButton : categoria [homeController.getCategoryList]
+            homeController.getCatalogueCategoryList.isEmpty? Container()
+            :DropdownButtonFormField<String>( 
+              items: homeController.getCatalogueCategoryList.map((e) => DropdownMenuItem(
+                value: e.id, 
+                child: Text(e.name))).toList(),
+              onChanged: (value) {
+                idCategory = value!;
+              },
+              decoration: const InputDecoration(filled: true,labelText:'Categoría',prefixIcon: Icon(Icons.category_rounded)),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: const Text('Cerrar'),
+          ),
+          TextButton(
+            onPressed: () {
+              if(idCategory==''){
+                Get.snackbar('Inválido', 'Debe seleccionar una categoría');
+                return;
+              }
+              // function : actualizar categoria de los productos seleccionados
+              catalogueController.updateCategory(list: catalogueController.getProductsSelectedList,idCategory: idCategory);
+              Get.back();
+            },
+            child: const Text('Actualizar'),
+          ),
+        ],
+      ),
+      
+    );
+  }
   void confirmDeleteProductDialog(){
     Get.dialog(
       AlertDialog(

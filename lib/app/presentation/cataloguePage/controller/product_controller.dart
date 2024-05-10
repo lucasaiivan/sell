@@ -177,6 +177,8 @@ class ProductController extends GetxController {
     }
   }
   void getProductByCategory({required idCategory}){
+    // clean 
+    getListProductsCategory.clear();
     // function : obtiene los productos de la misma marca
     for (var element in homeController.getCataloProducts) {
       if (element.category == idCategory && element.category!='') {
@@ -185,6 +187,8 @@ class ProductController extends GetxController {
     }
   }
   void getProductByProvider({required idProvider}){
+    // clean
+    getListProductsProvider.clear();
     // function : obtiene los productos del mismo proveedor
     for (var element in homeController.getCataloProducts) {
       if (element.provider == idProvider && element.provider!='') {
@@ -193,6 +197,8 @@ class ProductController extends GetxController {
     }
   }
   void getProductByMark({required idMark}){
+    // clean
+    getListProductsMark.clear();
     // function : obtiene los productos de la misma marca
     for (var element in homeController.getCataloProducts) {
       if (element.idMark == idMark && element.idMark!='') {

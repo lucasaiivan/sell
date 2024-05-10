@@ -4,6 +4,7 @@ import 'package:sell/app/domain/entities/catalogo_model.dart';
 class TicketModel {
   String id = '';
   String seller = ''; // nombre del vendedor
+  String sellerId = ''; // id del vendedor
   String cashRegisterName = '1'; // nombre o numero de caja que se efectuo la venta
   String cashRegisterId = ''; // id de la caja que se efectuo la venta
   String payMode = ''; // efective (Efectivo) - mercadopago (Mercado Pago) - card (Tarjeta De Crédito/Débito)
@@ -19,6 +20,7 @@ class TicketModel {
     this.payMode = "",
     this.currencySymbol = "\$",
     this.seller = "",
+    this.sellerId = "",
     this.cashRegisterName = "",
     this.cashRegisterId = "",
     this.priceTotal = 0.0,
@@ -55,6 +57,7 @@ class TicketModel {
         "payMode": payMode,
         "currencySymbol": currencySymbol,
         "seller": seller,
+        'sellerId' : sellerId,
         "cashRegisterName": cashRegisterName,
         'cashRegisterId' : cashRegisterId,
         "priceTotal": priceTotal,
@@ -70,6 +73,7 @@ class TicketModel {
         "payMode": payMode,
         "currencySymbol": currencySymbol,
         "seller": seller,
+        'sellerId' : sellerId,
         "cashRegisterName": cashRegisterName,
         'cashRegisterId' : cashRegisterId,
         "priceTotal": priceTotal,
@@ -83,6 +87,7 @@ class TicketModel {
       id: data.containsKey('id') ? data['id'] : '',
       payMode: data.containsKey('payMode') ? data['payMode'] : '',
       seller: data.containsKey('seller') ? data['seller'] : '',
+      sellerId: data.containsKey('sellerId') ? data['sellerId'] : '',
       currencySymbol: data.containsKey('currencySymbol') ? data['currencySymbol'] : '\$',
       cashRegisterName: data.containsKey('cashRegisterName') ? data['cashRegisterName'] : '',
       cashRegisterId: data.containsKey('cashRegisterId') ? data['cashRegisterId'] : '',
@@ -100,6 +105,7 @@ class TicketModel {
       id: data.containsKey('id') ? data['id'] : '',
       payMode: data.containsKey('payMode') ? data['payMode'] : '',
       seller: data.containsKey('seller') ? data['seller'] : '',
+      sellerId: data.containsKey('sellerId') ? data['sellerId'] : '',
       currencySymbol: data.containsKey('currencySymbol') ? data['currencySymbol'] : '\$',
       cashRegisterName: data.containsKey('cashRegisterName') ? data['cashRegisterName'] : '',
       cashRegisterId: data.containsKey('cashRegisterId') ? data['cashRegisterId'] : '',
@@ -116,6 +122,7 @@ class TicketModel {
     id = data['id'] ?? '';
     payMode = data['payMode'] ?? '';
     seller = data['seller'] ?? '';
+    sellerId = data['sellerId'] ?? '';
     currencySymbol = data['currencySymbol'] ?? '\$';
     cashRegisterName = data['cashRegister'] ?? '';
     cashRegisterId = data['cashRegisterId'] ?? '';

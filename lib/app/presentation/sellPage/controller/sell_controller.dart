@@ -311,6 +311,7 @@ class SalesController extends GetxController {
     getTicket.cashRegisterName = homeController.cashRegisterActive.description.toString(); // nombre de la caja registradora
     getTicket.cashRegisterId = homeController.cashRegisterActive.id; // id de la caja registradora
     getTicket.seller = homeController.getUserAuth.email!; 
+    getTicket.sellerId = homeController.getProfileAdminUser.name;
     getTicket.priceTotal = getTicket.getTotalPrice;
     getTicket.valueReceived = getValueReceivedTicket; 
     getTicket.creation = Timestamp.now();

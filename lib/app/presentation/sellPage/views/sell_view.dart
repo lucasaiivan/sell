@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:get/get.dart'; 
@@ -69,15 +70,21 @@ class SalesView extends StatelessWidget {
 
   // WIDGETS VIEWS
   PreferredSizeWidget appbar({required SalesController controller}) {
+
+    // var 
+    bool loadingProfile = homeController.getProfileAdminUser.email != ''; // estado de carga del perfil del usauario
+
     return AppBar( 
       titleSpacing: 0.0,
-      title: ComponentApp().buttonAppbar(
+      // icon drawer  
+      leading: loadingProfile?null: const Center(child: SizedBox(width: 24,height: 24,child: CircularProgressIndicator())),
+      title: ComponentApp().buttonAppbar( 
         context:  buildContext,
         onTap: () => controller.showSeach(context: buildContext), 
         text: 'Vender',
         iconLeading: Icons.search,
-        colorBackground: Theme.of(buildContext).colorScheme.outline.withOpacity(0.2),//Colors.blueGrey.shade300.withOpacity(0.4),
-        colorAccent: Theme.of(buildContext).textTheme.bodyLarge?.color,
+        colorBackground: Theme.of(buildContext).colorScheme.outline.withOpacity(0.1),//Colors.blueGrey.shade300.withOpacity(0.4),
+        colorAccent: Theme.of(buildContext).textTheme.bodyLarge!.color?.withOpacity(0.7),
         ),
       centerTitle: false,
       actions: [
@@ -780,6 +787,18 @@ class SalesView extends StatelessWidget {
                       child: Column( 
                         children: [
                           const SizedBox(height: 20), 
+                          // elevatedButton : boton con un icon y un texto  que diga 'compartir' 
+                          ComponentApp().button( 
+                            defaultStyle: false,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(horizontal: 12,vertical:5),
+                            icon: const Text('Compartir ticket',style:TextStyle(color: Colors.black)),
+                            colorButton: Colors.white,  
+                            onPressed: () {
+                              Utils().getTicketScreenShot( ticketModel: salesController.getLastTicket,context: Get.context!); 
+                              
+                            },
+                          ),
                           // elevateButton : boton con un icon y un texto  que diga 'ok'
                           !salesController.getStateConfirmPurchaseComplete?
                             const CircularProgressIndicator()
@@ -787,7 +806,7 @@ class SalesView extends StatelessWidget {
                             defaultStyle: false,
                             elevation: 0,
                             padding: const EdgeInsets.symmetric(horizontal: 12,vertical:5),
-                            icon: Text('Ok',style:TextStyle(color: background)),
+                            icon: const Text('Ok',style:TextStyle(color: Colors.black)),
                             colorButton: Colors.white,  
                             onPressed: () {
                               //views
