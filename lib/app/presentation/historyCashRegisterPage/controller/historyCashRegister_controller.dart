@@ -322,11 +322,64 @@ class HistoryCashRegisterController extends GetxController {
         Get.dialog(
           ClipRRect(
             borderRadius: const  BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12), bottomLeft: Radius.circular(0), bottomRight: Radius.circular(0)),
-            child: CashRegisterDetailView(cashRegister: cashRegister),
+            child: Scaffold(
+              appBar:AppBar(),
+              body: CashRegisterDetailView(cashRegister: cashRegister),
+              floatingActionButton: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  // button : eliminar
+                  FloatingActionButton(
+                    heroTag: 'delete',
+                    onPressed: () {
+                      registerDeleteConfirmDialog(cashRegister: cashRegister);
+                    },
+                    backgroundColor: Colors.grey.shade400,
+                    child: const Icon(Icons.delete,color: Colors.white,),
+                  ),
+                  const SizedBox(width: 10),
+                  // button : cerrar
+                  FloatingActionButton(
+                    heroTag: 'Compartir',
+                    onPressed: () { 
+                      Utils().getDetailArqueoScreenShot(context: Get.context!,cashRegister: cashRegister);
+                    },
+                    backgroundColor: Colors.blue,
+                    child: const Icon(Icons.share,color: Colors.white,),
+                  ),
+                  
+                  
+                ],
+              ),
+              ),
+            
           ),
         ); 
       },
     );
+    
+  }  
+  void registerDeleteConfirmDialog({required CashRegister cashRegister}){
+    // dialog : confirmar eliminacion
+    Get.dialog(AlertDialog(
+      title: const Text('Eliminar informe de caja'),
+      content: const Text('¿Está seguro de eliminarlo?'),
+      actions: [
+        TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: const Text('Cancelar')),
+        TextButton(
+            onPressed: () {
+              // delete : eliminar caja
+              deleteCashRegister( cashRegister: cashRegister);
+              Get.back();
+              Get.back();
+            },
+            child: const Text('Si, eliminar')),
+      ],
+    ));
   }
 
 

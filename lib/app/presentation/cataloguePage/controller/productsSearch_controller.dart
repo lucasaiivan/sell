@@ -186,11 +186,12 @@ class ControllerProductsSearch extends GetxController {
       bool thereIsACoincidence = false;
       for (var element in homeController.getCataloProducts) {
         if (element.id == id) {
-          toProductView(porduct: element);
+          toNavigationProduct(porduct: element);
           thereIsACoincidence = true;
         }
       }
       if(!thereIsACoincidence){
+        // buscamos en la base de datos publica
         searchProductDBPublic(id: id);
       }
     }else{
@@ -211,8 +212,8 @@ class ControllerProductsSearch extends GetxController {
 
         // obtenemos el obj
         Product product = Product.fromMap(value.data() as Map);
-        // convertimos el obj a product catalogue
-        toProductView(porduct: product.convertProductCatalogue());
+        // convertimos el obj a product catalogue 
+        toNavigationProduct(porduct: product.convertProductCatalogue());
 
       }).onError((error, stackTrace) {
         setproductDoesNotExist = true;
@@ -263,12 +264,15 @@ class ControllerProductsSearch extends GetxController {
       });
     }
   }
-
-  void toProductView({required ProductCatalogue porduct}) {
-    Get.back();
-     // TODO :  comrpobar si el producto esta en el cátalogo
-     // ...
-    Get.toNamed(Routes.editProduct, arguments: {'product': porduct.copyWith()});
+ 
+  void toNavigationProduct({required ProductCatalogue porduct}) {
+    // condition : verifica si es un producto local
+    if(porduct.local){
+      // navega hacia la vista de producto
+      Get.toNamed(Routes.editProduct, arguments: {'product': porduct.copyWith()});
+    }else{
+      Get.toNamed(Routes.product, arguments: {'product': porduct.copyWith()});
+    }
   }
 
   void toProductNew({required String id}) {

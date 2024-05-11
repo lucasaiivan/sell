@@ -211,7 +211,7 @@ class TransactionsView extends StatelessWidget {
                         Text('caja ${ticketModel.cashRegisterName}',style:textStyleSecundary),
                         dividerCircle,
                         // text : id del vendedor
-                        Text(ticketModel.seller.split('@')[0],style:textStyleSecundary), 
+                        Text(ticketModel.sellerName.split('@')[0],style:textStyleSecundary), 
                         
                       ],
                     ), 
@@ -313,7 +313,7 @@ class TransactionInfoView extends StatelessWidget {
   Widget build(BuildContext context) {
     
     String id = ticket.id;
-    String seller = ticket.seller;
+    String seller = ticket.sellerName;
     String cashRegister = ticket.cashRegisterName == ''?'sin especificar':ticket.cashRegisterName;
     String payMode = ticket.payMode;
     double priceTotal = ticket.priceTotal;
@@ -537,13 +537,7 @@ class TransactionInfoView extends StatelessWidget {
 class TicketView extends StatelessWidget {
   final TicketModel ticket; 
   const TicketView({Key? key,required this.ticket}) : super(key: key);
-
-  Widget getBody({required BuildContext context}) {
-    return Theme(
-      data: ThemeData.light(),
-      child: body(context: context));
-  } 
-  
+ 
 
   @override
   Widget build(BuildContext context) {
@@ -564,11 +558,11 @@ class TicketView extends StatelessWidget {
     Widget body({required BuildContext context}) {
 
     String id = ticket.id;
-    String seller = ticket.seller;
+    String seller = ticket.sellerName;
     String cashRegister = ticket.cashRegisterName == ''?'sin especificar':ticket.cashRegisterName; 
     double priceTotal = ticket.priceTotal;
     double valueReceived = ticket.valueReceived;
-    double changeAmount = valueReceived==0?0.0: valueReceived - priceTotal;
+    double changeAmount =  valueReceived - priceTotal;
     String currencySymbol = ticket.currencySymbol; 
     Timestamp creation = ticket.creation;
 

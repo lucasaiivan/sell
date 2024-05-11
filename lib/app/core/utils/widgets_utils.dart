@@ -498,7 +498,7 @@ Widget body({required BuildContext context}){
               selected: homeController.getIndexPage == 3,
               leading: const Icon(Icons.apps_rounded),
               trailing: homeController.getIndexPage != 3 ? null : const Icon(Icons.circle,size: 8),
-              title: const Text('Catálogo de Productos'),
+              title: const Text('Catálogo'),
               onTap: () => homeController.setIndexPage = 3):Container(),
             user.multiuser || isAnonymous?ListTile(
               enabled: !isAnonymous,

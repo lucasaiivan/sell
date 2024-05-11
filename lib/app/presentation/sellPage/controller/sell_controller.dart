@@ -301,20 +301,19 @@ class SalesController extends GetxController {
   void registerTransaction() {
 
     // Procederemos a guardar un documento con la transacción
-
-    // get values    
-
-    // set  : asignamos el ticket a la variable que recibe el ticket
-    setLastTicket = TicketModel.fromMap(getTicket.toJson()); 
+ 
     //  set values
     getTicket.id = Publications.generateUid(); // generate id  
     getTicket.cashRegisterName = homeController.cashRegisterActive.description.toString(); // nombre de la caja registradora
     getTicket.cashRegisterId = homeController.cashRegisterActive.id; // id de la caja registradora
-    getTicket.seller = homeController.getUserAuth.email!; 
-    getTicket.sellerId = homeController.getProfileAdminUser.name;
+    getTicket.sellerName = homeController.getProfileAdminUser.name; 
+    getTicket.sellerId = homeController.getProfileAdminUser.email;
     getTicket.priceTotal = getTicket.getTotalPrice;
     getTicket.valueReceived = getValueReceivedTicket; 
     getTicket.creation = Timestamp.now();
+
+    // set  : replicamos el ticket actual temporalmente  
+    setLastTicket = TicketModel.fromMap(getTicket.toJson()); 
 
     // registramos el monto en caja
     if( homeController.getIsSubscribedPremium ){

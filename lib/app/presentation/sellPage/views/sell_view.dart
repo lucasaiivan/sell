@@ -3,8 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/services.dart'; 
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:get/get.dart'; 
@@ -77,7 +76,7 @@ class SalesView extends StatelessWidget {
     return AppBar( 
       titleSpacing: 0.0,
       // icon drawer  
-      leading: loadingProfile?null: const Center(child: SizedBox(width: 24,height: 24,child: CircularProgressIndicator())),
+      leading: loadingProfile?null: Center(child: SizedBox(width: 24,height: 24,child: InkWell(child: const CircularProgressIndicator(),onTap: (){homeController.update();}))),
       title: ComponentApp().buttonAppbar( 
         context:  buildContext,
         onTap: () => controller.showSeach(context: buildContext), 
@@ -767,59 +766,87 @@ class SalesView extends StatelessWidget {
               child: ElasticIn(
                 child: Column(
                   children: [
+                    // view : card con la facturacion de la venta
                     Expanded(
-                      child: 
+                      child:  
                       Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const SizedBox(height: 50),
-                          const Icon(Icons.check_circle_outline_sharp, size: 100, color: accentColor),
-                          const SizedBox(height: 12),
-                          const Text('Hecho',style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold,color: accentColor)),
-                          // text : monto del precio total del ticket 
-                          Expanded(child: Center( child: Text( 'Total ${Publications.getFormatoPrecio(monto: salesController.getLastTicket.getTotalPrice)}',style: TextStyle(color: colorText,fontSize: 30,fontWeight: FontWeight.w300)))),
+                          // iconbutton : close
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              IconButton(
+                                iconSize: 30,
+                                onPressed: () {
+                                  // views
+                                  salesController.setStateConfirmPurchase = false;
+                                  salesController.setTicketView = false;
+                                  salesController.setStateConfirmPurchaseComplete = false;
+                                },
+                                icon: const Icon(Icons.close_rounded,color: Colors.white),
+                              ),
+                            ],
+                          ),
+                          const Spacer(), 
+                          // view : card con la facturacion de la venta
+                          Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Card(
+                              color: Colors.white,
+                              elevation: 0,
+                              child: Column(
+                                children: [
+                                  ListTile(
+                                    // avatar : icono de check
+                                    leading: const Icon(Icons.check_circle_outline_rounded,color: Colors.green),
+                                    // title : texto 'Facturado' con tono mas claro y '$3.445' en negrita
+                                    title: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text('Facturado  ',style: TextStyle(color: Colors.black54,fontWeight: FontWeight.w400)),
+                                        Text(Publications.getFormatoPrecio(monto: salesController.getLastTicket.getTotalPrice),style: const TextStyle(color: Colors.black,fontWeight: FontWeight.bold)),
+                                      ],
+                                    ),  
+                                  ),
+                                  // elevatedButton : boton con un icon y un texto  que diga 'compartir' 
+                                  ComponentApp().button( 
+                                    defaultStyle: false,
+                                    elevation: 0, 
+                                    padding: const EdgeInsets.symmetric(horizontal: 12,vertical:10),
+                                    icon: const Row(
+                                      children: [
+                                        Icon(Icons.share_outlined,color: Colors.white),
+                                        SizedBox(width:8),
+                                        Text('Compartir comprobante',style:TextStyle(color: Colors.white,fontWeight: FontWeight.w400)),
+                                      ],
+                                    ),
+                                    colorButton: Colors.blue,  
+                                    onPressed: () => Utils().getTicketScreenShot( ticketModel: salesController.getLastTicket,context: Get.context!),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const Spacer(),
                         ],
                       ),
                     ), 
                     //view : buttons
-                    Container(
-                      color: background.withOpacity(0.0),
-                      child: Column( 
-                        children: [
-                          const SizedBox(height: 20), 
-                          // elevatedButton : boton con un icon y un texto  que diga 'compartir' 
-                          ComponentApp().button( 
-                            defaultStyle: false,
-                            elevation: 0,
-                            padding: const EdgeInsets.symmetric(horizontal: 12,vertical:5),
-                            icon: const Text('Compartir ticket',style:TextStyle(color: Colors.black)),
-                            colorButton: Colors.white,  
-                            onPressed: () {
-                              Utils().getTicketScreenShot( ticketModel: salesController.getLastTicket,context: Get.context!); 
-                              
-                            },
-                          ),
-                          // elevateButton : boton con un icon y un texto  que diga 'ok'
-                          !salesController.getStateConfirmPurchaseComplete?
-                            const CircularProgressIndicator()
-                          :ComponentApp().button( 
-                            defaultStyle: false,
-                            elevation: 0,
-                            padding: const EdgeInsets.symmetric(horizontal: 12,vertical:5),
-                            icon: const Text('Ok',style:TextStyle(color: Colors.black)),
-                            colorButton: Colors.white,  
-                            onPressed: () {
-                              //views
-                              salesController.setStateConfirmPurchase = false;
-                              salesController.setTicketView = false; 
-                              salesController.setStateConfirmPurchaseComplete = false;
-                              
-                            },
-                          ), 
-                        const SizedBox(height: 20), 
-                        ],
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: TextButton(
+                          onPressed: () {
+                            //views
+                            salesController.setStateConfirmPurchase = false;
+                            salesController.setTicketView = false; 
+                            salesController.setStateConfirmPurchaseComplete = false;
+                          },
+                          child: const Text('Volver a vender',style: TextStyle(color: Colors.white)),
+                        ),
                       ),
-                    ), 
+                    )
                   ],
                 ),
               ),
@@ -957,9 +984,11 @@ class ViewCashRegister extends StatefulWidget {
 }
 
 class _ViewCashRegisterState extends State<ViewCashRegister> {
+
   // controllers views
   final HomeController homeController = Get.find<HomeController>();
   final SalesController salesController = Get.find<SalesController>();
+
   // others controllers
   final MoneyMaskedTextController moneyMaskedTextController =
       MoneyMaskedTextController(
@@ -969,13 +998,14 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
           precision: 2);
   final TextEditingController textEditingController = TextEditingController();
   final FocusNode _amountCashRegisterFocusNode = FocusNode();
-  // var
+  // var 
+  bool checkShare = false;
   String titleAppBar = '';
   bool confirmCloseState = false;
   late Widget view;   
 
   // void
-  void loadData() {
+  void loadData({required BuildContext buildContext}) {
     switch (widget.id) {
       case 'apertura':
         titleAppBar = 'Apertura de caja';
@@ -983,12 +1013,12 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
         break;
       case 'detalles':
         titleAppBar = 'Arqueo de caja';
-        view = detailContent;
+        view = detailContent(buildContext: buildContext);
         break;
       case 'cierre':
         confirmCloseState = true;
         titleAppBar = 'Cierre de caja';
-        view = detailContent;
+        view = detailContent(buildContext: buildContext);
         break;
       case 'ingreso':
         titleAppBar = 'Ingreso';
@@ -1023,7 +1053,9 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
 
   @override
   Widget build(BuildContext context) {
-    loadData();
+
+    // var 
+    loadData(buildContext: context);
 
     return Builder(
       builder: (context) {
@@ -1135,7 +1167,7 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
     );
   }
 
-  Widget get detailContent {
+  Widget detailContent({required BuildContext buildContext}) {
     // var
     Color separatorColor = Colors.grey.withOpacity(0.04);  
     TextStyle textStyleDescription = const TextStyle(fontWeight: FontWeight.w300);
@@ -1268,28 +1300,51 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
           padding: const EdgeInsets.only(bottom: 20, top: 20),
           child: SizedBox(
             width: double.infinity,
-            child: ComponentApp().button( 
-              colorButton: Colors.blue,
-              text: confirmCloseState ? 'Confirmar':'Cerrar caja',
-              onPressed: () {
-                // comprobamos si el usuario ya confirmo el cierre de caja
-                if (confirmCloseState) {
-                  // comprobamos si el usuario ingreso un monto en caja
-                  if (moneyMaskedTextController.numberValue != 0) {
-                    homeController.cashRegisterActive.balance =
-                        moneyMaskedTextController.numberValue;
-                  }
-                  // cerramos la caja
-                  salesController.closeCashRegisterDefault();
-                  Get.back();
-                } else {
-                  setState(() {
-                    confirmCloseState = !confirmCloseState;
-                    _amountCashRegisterFocusNode.requestFocus();
-                  });
-                }
-              },
-            
+            child: Column(
+              children: [
+                // checkBox : compartir comprobante
+                !confirmCloseState?Container():
+                CheckboxListTile( 
+                  secondary: const Icon(Icons.share_outlined),
+                  title: const Text('Compartir comprobante'),
+                  value: checkShare,
+                  onChanged: (value) {
+                    setState(() {
+                      checkShare = value!;
+                    });
+                  },
+                ),
+                // button : confirmar o cerrar caja
+                ComponentApp().button( 
+                  colorButton: Colors.blue,
+                  text: confirmCloseState ? 'Confirmar':'Cerrar caja',
+                  onPressed: () {
+                    // comprobamos si el usuario ya confirmo el cierre de caja
+                    if (confirmCloseState) {
+                      // comprobamos si el usuario ingreso un monto en caja
+                      if (moneyMaskedTextController.numberValue != 0) {
+                        homeController.cashRegisterActive.balance = moneyMaskedTextController.numberValue;
+                      }
+                      homeController.setCashRegisterActiveTemp = homeController.cashRegisterActive;
+                      // cerramos la caja
+                     // salesController.closeCashRegisterDefault();
+                      // comprobamos si el usuario quiere compartir el comprobante
+                      if (checkShare) {
+                        Utils().getDetailArqueoScreenShot(cashRegister: homeController.getCashRegisterActiveTemp,context:buildContext);
+                      }
+
+                      //Get.back();
+                      
+                    } else {
+                      setState(() {
+                        confirmCloseState = !confirmCloseState;
+                        _amountCashRegisterFocusNode.requestFocus();
+                      });
+                    }
+                  },
+                
+                ),
+              ],
             ),
           ),
         ), 

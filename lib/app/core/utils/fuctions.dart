@@ -7,7 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../domain/entities/cashRegister_model.dart';
 import '../../domain/entities/ticket_model.dart';
+import '../../presentation/historyCashRegisterPage/views/historyCashRegister_view.dart';
 import '../../presentation/transactionsPage/views/transactions_view.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -171,16 +173,33 @@ class Utils {
   return capitalizedWords.join(' ');
 }
 
+  void getDetailArqueoScreenShot({required BuildContext context,required CashRegister cashRegister}) async {
+    // widget : ticket
+    var myLongWidget = Builder(builder: (context) {return CashRegisterDetailView(cashRegister:cashRegister).body;});
+    // controller
+    final ScreenshotController screenshotController = ScreenshotController(); 
+    
+    screenshotController.captureFromLongWidget(
+          Material(child: SizedBox(width: 400,child: myLongWidget)),
+          delay: const Duration(milliseconds: 100),
+          pixelRatio: 2, 
+          context:context,  
+      ).then((capturedImage) async {
+        // crear un pdf y compartirlo
+        createPdfAndShare(data: capturedImage, id: cashRegister.id); 
+      
+  }); 
+  }
 
   void getTicketScreenShot({required TicketModel ticketModel,required BuildContext context }) async {
 
-    // widget
-    var myLongWidget = Builder(builder: (context) {return TicketView(ticket: ticketModel).getBody(context: context);});
+    // widget : ticket
+    var myLongWidget = Builder(builder: (context) {return TicketView(ticket: ticketModel).body(context: context);});
+    // controller
     final ScreenshotController screenshotController = ScreenshotController(); 
+    
     screenshotController.captureFromLongWidget(
-          Material(child: SizedBox(
-            width: 400,
-            child: myLongWidget)),
+          Material(child: SizedBox(width: 400,child: myLongWidget)),
           delay: const Duration(milliseconds: 100),
           pixelRatio: 2, 
           context:context,  

@@ -140,6 +140,9 @@ class HomeController extends GetxController {
   }
 
   // cash register  //
+  late CashRegister cashRegisterActiveTemp; 
+  set setCashRegisterActiveTemp(CashRegister value) => cashRegisterActiveTemp = value; 
+  CashRegister get getCashRegisterActiveTemp => cashRegisterActiveTemp;
   CashRegister cashRegisterActive = CashRegister(
       id: '',
       sales: 0,
