@@ -178,7 +178,7 @@ class Utils {
     var myLongWidget = Builder(builder: (context) {return CashRegisterDetailView(cashRegister:cashRegister).body;});
     // controller
     final ScreenshotController screenshotController = ScreenshotController(); 
-    
+    // captura de pantalla
     screenshotController.captureFromLongWidget(
           Material(child: SizedBox(width: 400,child: myLongWidget)),
           delay: const Duration(milliseconds: 100),

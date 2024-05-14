@@ -790,25 +790,15 @@ class ControllerProductsEdit extends GetxController {
   // dialog : muestra el dialogo para eliminar el producto
   void showDialogDelete() {
     Widget widget = AlertDialog(
-      title: const Text(
-          "¿Seguro que quieres eliminar este producto de tu catálogo?"),
-      content: const Text(
-          "El producto será eliminado de tu catálogo y toda la información acumulada"),
+      title: const Text("¿Seguro que quieres eliminar este producto de tu catálogo?"),
+      content: const Text("El producto será eliminado de tu catálogo y toda la información acumulada"),
       actions: <Widget>[
         // usually buttons at the bottom of the dialog
-        TextButton(
-          child: const Text('Cancelar'),
-          onPressed: () {
-            Get.back();
-          },
-        ),
-        TextButton(
-          onPressed: ()=> deleteProductInCatalogue(),
-          child: const Text('Si, eliminar'),
-        ),
+        TextButton(child: const Text('Cancelar'),onPressed: () {Get.back(); }),
+        TextButton(onPressed: ()=> deleteProductInCatalogue(),child: const Text('Si, eliminar')),
       ],
     );
-
+    // muestre el dialogo
     Get.dialog(widget);
   }
   // bottomSheet : muestra el modal para seleccionar la categoria
@@ -862,9 +852,10 @@ class ControllerProductsEdit extends GetxController {
   void getDataProduct({required String id}) {
     // function : obtiene los datos del producto de la base de datos y los carga en el formulario de edición 
     if (id != '') {
-      // firebase : obtiene los datos del producto
+      print('------------------------- Firebase db public -----------------------------------');
+      // firebase : obtiene los datos del producto 
       Database.readProductPublicFuture(id: id).then((value) {
-        //  get
+        //  get 
         Product product = Product.fromMap(value.data() as Map); 
         // commprobar que las fechas de actualización sean diferentes
         DateTime date1 = getProduct.documentUpgrade.toDate().copyWith(hour: 0,minute: 0,millisecond: 0,second: 0,microsecond: 0  );
@@ -887,7 +878,7 @@ class ControllerProductsEdit extends GetxController {
       });
     }
   }
-  void increaseFollowersProductPublic() {
+  void increaseFollowersProductPublic() { 
     // function : aumenta el valor de los seguidores del producto publico
     Database.refFirestoreProductPublic().doc(getProduct.id).update({'followers': FieldValue.increment(1)});
     // actualizamos el valor de los seguidores del producto
@@ -903,16 +894,11 @@ class ControllerProductsEdit extends GetxController {
   }
   void showDialogSaveOPTDeveloper() {
     Get.dialog(AlertDialog(
-      title:
-          const Text("¿Seguro que quieres actualizar este docuemnto? (Mods)"),
-      content: const Text(
-          "El producto será actualizado de tu catálogo ,de la base de dato global y toda la información acumulada menos el historial de precios registrado"),
+      title: const Text("¿Seguro que quieres actualizar este docuemnto? (Mods)"),
+      content: const Text( "El producto será actualizado de tu catálogo ,de la base de dato global y toda la información acumulada menos el historial de precios registrado"),
       actions: <Widget>[
         // usually buttons at the bottom of the dialog
-        TextButton(
-          child: const Text("Cancelar"),
-          onPressed: () => Get.back(),
-        ),
+        TextButton(child: const Text("Cancelar"),onPressed: () => Get.back()),
         TextButton(
           child: const Text("Si, actualizar"),
           onPressed: () {
@@ -922,8 +908,7 @@ class ControllerProductsEdit extends GetxController {
         ),
       ],
     ));
-  }
-
+  } 
 }
 
 // select mark
@@ -1140,6 +1125,8 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
   // functions
   loadMarks() async {
     if (controllerProductsEdit.getMarks.isEmpty) {
+      print('------------------------- Firebase db public product brands -----------------------------------');
+      // firebase : obtiene las marcas de la base de datos
       await Database.readListMarksFuture().then((value) {
         setState(() {
           for (var element in value.docs) {

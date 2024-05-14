@@ -147,16 +147,17 @@ class ProductController extends GetxController {
     setProduct = product.copyWith(); 
     // comprobamos si el producto esta en el catalogo de la cuenta y obtenemos los datos
     isCatalogue();
-    readListPricesForProduct();
+    readListPricesForProduct(); 
     getProductByCategory(idCategory: getProduct.category);
     getProductByProvider(idProvider: getProduct.provider);
-    getProductByMark(idMark: getProduct.idMark);
+    getProductByMark(idMark: getProduct.idMark); 
     // obtenemos los datos del producto de la base de datos global
     getDataProduct(id: getProduct.id);
   }
   void getDataProduct({required String id}) {
     // function : obtiene los datos del producto de la base de datos global 
     if (id != '') {
+      print('------------------------- Firebase db public product : doc -----------------------------------');
       // firebase : obtiene los datos del producto
       Database.readProductPublicFuture(id: id).then((value) {
         //  get
@@ -207,16 +208,20 @@ class ProductController extends GetxController {
     }
   }
   void readListPricesForProduct({bool limit = false}) {
+    print('------------------------- Firebase db public prices : querySnapshop -----------------------------------');
     // devuelve una lista con los precios más actualizados del producto
     Database.readListPricesProductFuture(id: getProduct.id, limit: limit ? 9 : 25)
         .then((value) {
+          // var
       int averagePrice = 0;
       List<ProductPrice> list = [];
+      // for : recorremos los precios
       for (var element in value.docs) {
         ProductPrice price = ProductPrice.fromMap(element.data());
         list.add(price);
         averagePrice = averagePrice + price.price.toInt();
       } 
+      // set
       setListPricesForProduct = list.cast<ProductPrice>();
     });
   }

@@ -1327,13 +1327,13 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
                       }
                       homeController.setCashRegisterActiveTemp = homeController.cashRegisterActive;
                       // cerramos la caja
-                     // salesController.closeCashRegisterDefault();
+                      salesController.closeCashRegisterDefault();
                       // comprobamos si el usuario quiere compartir el comprobante
                       if (checkShare) {
                         Utils().getDetailArqueoScreenShot(cashRegister: homeController.getCashRegisterActiveTemp,context:buildContext);
                       }
 
-                      //Get.back();
+                      Get.back();
                       
                     } else {
                       setState(() {
@@ -1458,6 +1458,52 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
   }
 
   // WIDGETS COMPONENTS
+  Widget egressAndEntryView({required String description,required String value,Color ?colorValue ,required List<dynamic> items}){
+    // description : visualiza los egresos o ingresos de la caja con su respectiva descripción, monto y lista de items
+    
+    // style 
+    TextStyle textStyleValue = const TextStyle(fontSize: 14);
+    TextStyle textStyleDescription = const TextStyle(fontWeight: FontWeight.w300);
+    
+    if(items.isEmpty){return Container();}
+    return Column(
+      children: [
+        Row(
+          children: [ 
+            // text : description
+            Text(description,style: textStyleDescription),
+            const Spacer(),
+            // text : cantidad de items
+            Text('(${items.length}) ',style: textStyleValue),
+            // text : value
+            Text(value,style: textStyleValue.copyWith(color: colorValue)),
+          ],
+        ),  
+        const Divider(), 
+        // list : items
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: items.map((item) {
+            return Opacity(
+              opacity: 0.8,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical:2,horizontal:12),
+                child: Row(
+                  children: [
+                    Text(item['description'],style: textStyleValue),
+                    const Spacer(),
+                    Text(Publications.getFormatoPrecio(monto: item['amount']),style: textStyleValue),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        )
+        
+      ],
+    );
+
+  }
   Widget get egressAndEntryExpansionPanelListView{
 
     // style 
@@ -1488,20 +1534,21 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
             itemCount: homeController.cashRegisterActive.cashInFlowList.length,
             itemBuilder: (BuildContext context, int index) {
               return Padding(
-                padding: const EdgeInsets.only(bottom: 3),
-                child: ListTile( 
-                  tileColor: Colors.blueGrey.withOpacity(0.08),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12), 
-                  dense: true, 
-                  visualDensity: VisualDensity.compact,
-                  title: Text(homeController.cashRegisterActive.cashInFlowList[index]['description'],style: textStyleValue,overflow: TextOverflow.ellipsis,maxLines:3),
-                  trailing: Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.cashInFlowList[index]['amount']),style: textStyleValue.copyWith(color: Colors.green.shade300)),
+                padding: const EdgeInsets.symmetric(vertical:1,horizontal:12),
+                child: Row(
+                  children: [
+                    // text : description
+                    Text(homeController.cashRegisterActive.cashInFlowList[index]['description'],style: textStyleValue),
+                    const Spacer(),
+                    // text : value
+                    Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.cashInFlowList[index]['amount']),style: textStyleValue),
+                  ],
                 ),
               );
             },
           ), 
         ),
-        // ExpansionPanelRadio : egresos
+        // ExpansionPanelRadio : egresos 
         ExpansionPanelRadio(
           value: 2,
           canTapOnHeader: true,
@@ -1519,13 +1566,14 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
             itemBuilder: (BuildContext context, int index) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 3),
-                child: ListTile(
-                  tileColor: Colors.blueGrey.withOpacity(0.08),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12), 
-                  dense: true,
-                  visualDensity: VisualDensity.compact,
-                  title: Text(homeController.cashRegisterActive.cashOutFlowList[index]['description'],style: textStyleValue),
-                  trailing: Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.cashOutFlowList[index]['amount']),style: textStyleValue.copyWith(color: Colors.red.shade300)),
+                child: Row(
+                  children: [
+                    // text : description
+                    Text(homeController.cashRegisterActive.cashOutFlowList[index]['description'],style: textStyleValue),
+                    const Spacer(),
+                    // text : value
+                    Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.cashOutFlowList[index]['amount']),style: textStyleValue),
+                  ],
                 ),
               );
             },

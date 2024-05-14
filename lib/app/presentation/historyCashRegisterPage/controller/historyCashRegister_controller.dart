@@ -320,39 +320,38 @@ class HistoryCashRegisterController extends GetxController {
       ),
       onTap: () { 
         Get.dialog(
-          ClipRRect(
-            borderRadius: const  BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12), bottomLeft: Radius.circular(0), bottomRight: Radius.circular(0)),
-            child: Scaffold(
-              appBar:AppBar(),
-              body: CashRegisterDetailView(cashRegister: cashRegister),
-              floatingActionButton: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  // button : eliminar
-                  FloatingActionButton(
-                    heroTag: 'delete',
-                    onPressed: () {
-                      registerDeleteConfirmDialog(cashRegister: cashRegister);
-                    },
-                    backgroundColor: Colors.grey.shade400,
-                    child: const Icon(Icons.delete,color: Colors.white,),
-                  ),
-                  const SizedBox(width: 10),
-                  // button : cerrar
-                  FloatingActionButton(
-                    heroTag: 'Compartir',
-                    onPressed: () { 
-                      Utils().getDetailArqueoScreenShot(context: Get.context!,cashRegister: cashRegister);
-                    },
-                    backgroundColor: Colors.blue,
-                    child: const Icon(Icons.share,color: Colors.white,),
-                  ),
-                  
-                  
-                ],
-              ),
-              ),
-            
+          Theme(
+            data: ThemeData.light(),
+            child: ClipRRect(
+              borderRadius: const  BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12), bottomLeft: Radius.circular(0), bottomRight: Radius.circular(0)),
+              child: Scaffold(
+                backgroundColor: Colors.white,
+                appBar:AppBar(
+                  backgroundColor: Colors.white,
+                  actions: [
+                    // button : eliminar
+                    IconButton(
+                      icon: const Icon(Icons.delete_forever_rounded),
+                      onPressed: () {
+                        registerDeleteConfirmDialog(cashRegister: cashRegister);
+                        
+                      },
+                    ),
+                    
+                  ],
+                ),
+                body: CashRegisterDetailView(cashRegister: cashRegister),
+                floatingActionButton: FloatingActionButton(
+                  heroTag: 'Compartir',
+                  onPressed: () { 
+                    Utils().getDetailArqueoScreenShot(context: Get.context!,cashRegister: cashRegister);
+                  },
+                  backgroundColor: Colors.blue,
+                  child: const Icon(Icons.share,color: Colors.white,),
+                ),
+                ),
+              
+            ),
           ),
         ); 
       },

@@ -98,24 +98,26 @@ class HistoryCashRegisterView extends StatelessWidget {
 
 
 
+// ignore: must_be_immutable
 class CashRegisterDetailView extends StatelessWidget {
+
   final CashRegister cashRegister;
-  const CashRegisterDetailView({Key? key, required this.cashRegister}) : super(key: key);
+  CashRegisterDetailView({Key? key, required this.cashRegister}) : super(key: key);
+
+  // style 
+  TextStyle textStyleDescription = const TextStyle(fontWeight: FontWeight.w300 ,color: Colors.black);
+  TextStyle textStyleValue = const TextStyle(fontWeight: FontWeight.w600,fontFamily: 'Monospace',letterSpacing: -0.9,color: Colors.black);
  
   @override
   Widget build(BuildContext context) {
-    return Scaffold(  
-      body: body, 
-    );
+    return body;
   }
   // WIDGETS VIEWS
   Widget get body{
 
     // var
     Color separatorColor = Colors.blueGrey.withOpacity(.06);
-    TextStyle textStyleDescription = const TextStyle(fontWeight: FontWeight.w300,color: Colors.black);
-    TextStyle textStyleValue = const TextStyle(fontSize: 16, fontWeight: FontWeight.w500,color: Colors.black);
-
+   
     // var : tiempo de apertura de caja
     int hour = cashRegister.closure.difference(cashRegister.opening).inHours;
     int minutes = cashRegister.closure.difference(cashRegister.opening).inMinutes.remainder(60);
@@ -131,7 +133,7 @@ class CashRegisterDetailView extends StatelessWidget {
             children: [   
               const SizedBox(height: 12),
               // text : 'Detalle de arqueo'
-              Text('Detalle de arqueo',style: textStyleValue),
+              Text('Detalle de arqueo',style: textStyleDescription.copyWith(fontSize: 18,fontWeight: FontWeight.w600)),
               const Divider(),
               // view info : descripcion
               Row(children: [
@@ -189,57 +191,50 @@ class CashRegisterDetailView extends StatelessWidget {
                   Text(cashRegister.sales.toString(), style: textStyleValue)
                 ]),
               ),
-              // view info : facturacion
-              const SizedBox(height: 12),
-              Row(children: [
-                Text('Monto esperado', style: textStyleDescription),
-                const Spacer(),
-                Text(Publications.getFormatoPrecio(monto: cashRegister.expectedBalance),
-                    style: textStyleValue)
-              ]),
-              cashRegister.cashOutFlowList.isEmpty && cashRegister.cashInFlowList.isEmpty? Container()
-              :Column(
-                children: [
-                  const Divider(),
-                  // view : egresos e ingresos
-                  egressAndEntryExpansionPanelListView,  
-                ],
+              
+              cashRegister.cashOutFlowList.isEmpty ? Container():const SizedBox(height: 12),
+              // view info : egresos
+              cashRegister.cashOutFlowList.isEmpty ? Container()
+              :egressAndEntryView(description: 'Egresos',value: Publications.getFormatoPrecio(monto: cashRegister.cashOutFlow),colorValue: Colors.red.shade300,items: cashRegister.cashOutFlowList),
+              cashRegister.cashInFlowList.isEmpty ? Container():const SizedBox(height: 12),
+              // view info : ingresos
+              cashRegister.cashInFlowList.isEmpty ? Container()
+              :egressAndEntryView(description: 'Ingresos',value: Publications.getFormatoPrecio(monto: cashRegister.cashInFlow),colorValue: Colors.green.shade300,items: cashRegister.cashInFlowList),
+              const SizedBox(height: 12), 
+              Container(
+                // borde 
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black ),
+                  borderRadius: BorderRadius.circular(1),
+                ),
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  children: [
+                    Row(children: [
+                      const Spacer(),
+                      Text('Facturación:   ', style: textStyleDescription), 
+                      Text(Publications.getFormatoPrecio(monto: cashRegister.billing),style: textStyleValue)]),
+                    const SizedBox(height: 12),
+                    // view info : monto esperado 
+                    Row(children: [
+                      const Spacer(),
+                      Text('Monto esperado:   ', style: textStyleDescription),
+                      Text(Publications.getFormatoPrecio(monto: cashRegister.expectedBalance),
+                          style: textStyleValue)
+                    ]),
+                    const SizedBox(height: 12),
+                    // text : monto de cierre
+                    cashRegister.balance == 0?Container():Row(children: [const Spacer(),Text('Monto de cierre:  ', style: textStyleDescription),Text( Publications.getFormatoPrecio(monto: cashRegister.balance),style: textStyleValue)]),
+                    cashRegister.balance == 0? Container(): const SizedBox(height: 12),
+                    cashRegister.balance == 0
+                        ? Container()
+                        : Row(children: [
+                            const Spacer(),
+                            Text('Diferencia:  ', style: textStyleDescription),
+                            Text(Publications.getFormatoPrecio(monto: cashRegister.getDifference),style: textStyleValue.copyWith(color: cashRegister.getDifference == 0? null: cashRegister.getDifference < 0? Colors.red.shade300: Colors.green.shade300)) ]),
+                  ],
+                ),
               ),
-              const Divider(),
-              Row(children: [
-                const Spacer(),
-                Text('Facturación:   ', style: textStyleDescription), 
-                Text(
-                    Publications.getFormatoPrecio(
-                        monto: cashRegister.billing),
-                    style: textStyleValue)
-              ]),
-              const SizedBox(height: 12),
-              cashRegister.balance == 0
-                  ? Container()
-                  : Row(children: [
-                      const Spacer(),
-                      Text('Monto de cierre:  ', style: textStyleDescription),
-                      Text( Publications.getFormatoPrecio(monto: cashRegister.balance),style: textStyleValue)
-                    ]),
-              cashRegister.balance == 0
-                  ? Container()
-                  : const SizedBox(height: 12),
-              cashRegister.balance == 0
-                  ? Container()
-                  : Row(children: [
-                      const Spacer(),
-                      Text('Diferencia:  ', style: textStyleDescription),
-                      Text(
-                          Publications.getFormatoPrecio(
-                              monto: cashRegister.getDifference),
-                          style: textStyleValue.copyWith(
-                              color: cashRegister.getDifference == 0
-                                  ? null
-                                  : cashRegister.getDifference < 0
-                                      ? Colors.red.shade300
-                                      : Colors.green.shade300))
-                    ]),
               const SizedBox(height:50),
             ],
           ),
@@ -248,11 +243,48 @@ class CashRegisterDetailView extends StatelessWidget {
     );
   }
   // WIDGETS COMPONENTS
-  Widget get egressAndEntryExpansionPanelListView{
+  Widget egressAndEntryView({required String description,required String value,Color ?colorValue ,required List<dynamic> items}){
+    // description : visualiza los egresos o ingresos de la caja con su respectiva descripción, monto y lista de items
+    if(items.isEmpty){return Container();}
+    return Column(
+      children: [
+        Row(
+          children: [ 
+            // text : description
+            Text(description,style: textStyleDescription),
+            const Spacer(),
+            // text : cantidad de items
+            Text('(${items.length}) ',style: textStyleValue),
+            // text : value
+            Text(value,style: textStyleValue.copyWith(color: colorValue)),
+          ],
+        ),  
+        const Divider(), 
+        // list : items
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: items.map((item) {
+            return Opacity(
+              opacity: 0.8,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical:2,horizontal:12),
+                child: Row(
+                  children: [
+                    Text(item['description'],style: textStyleValue),
+                    const Spacer(),
+                    Text(Publications.getFormatoPrecio(monto: item['amount']),style: textStyleValue),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        )
+        
+      ],
+    );
 
-    // style 
-    TextStyle textStyleValue = const TextStyle(fontSize: 14);
-    TextStyle textStyleDescription = const TextStyle(fontWeight: FontWeight.w300);
+  }
+  Widget get egressAndEntryExpansionPanelListView{ 
 
     return ExpansionPanelList.radio(
       elevation:0,  
@@ -260,16 +292,16 @@ class CashRegisterDetailView extends StatelessWidget {
       materialGapSize:0,// separacion entre los elementos 
       expandedHeaderPadding: EdgeInsets.zero,
       children: [
-        // ExpansionPanelRadio : ingresos
+        // ExpansionPanelRadio : ingresos 
         ExpansionPanelRadio(
           canTapOnHeader: true,
-          value: 1,
+          value: 1, 
           headerBuilder: (BuildContext context, bool isExpanded) {
             return Row(
               children: [
                 Text('Ingresos',style: textStyleDescription,),
                 const Spacer(),
-                Text(Publications.getFormatoPrecio(monto: cashRegister.cashInFlow),style: textStyleValue.copyWith(color: cashRegister.cashInFlow == 0? null: Colors.green.shade300)),
+                Text(Publications.getFormatoPrecio(monto: cashRegister.cashInFlow),style: textStyleValue.copyWith(color:cashRegister.cashInFlow == 0? null: Colors.green.shade300)),
               ],
             );
           },
@@ -278,20 +310,21 @@ class CashRegisterDetailView extends StatelessWidget {
             itemCount: cashRegister.cashInFlowList.length,
             itemBuilder: (BuildContext context, int index) {
               return Padding(
-                padding: const EdgeInsets.only(bottom: 3),
-                child: ListTile( 
-                  tileColor: Colors.blueGrey.withOpacity(0.08),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12), 
-                  dense: true,
-                  visualDensity: VisualDensity.compact,
-                  title: Text(cashRegister.cashInFlowList[index]['description'],style: textStyleValue,overflow: TextOverflow.ellipsis,maxLines:3),
-                  trailing: Text(Publications.getFormatoPrecio(monto: cashRegister.cashInFlowList[index]['amount']),style: textStyleValue.copyWith(color: Colors.green.shade300)),
+                padding: const EdgeInsets.symmetric(vertical:1,horizontal:12),
+                child: Row(
+                  children: [
+                    // text : description
+                    Text(cashRegister.cashInFlowList[index]['description'],style: textStyleValue),
+                    const Spacer(),
+                    // text : value
+                    Text(Publications.getFormatoPrecio(monto:cashRegister.cashInFlowList[index]['amount']),style: textStyleValue),
+                  ],
                 ),
               );
             },
           ), 
         ),
-        // ExpansionPanelRadio : egresos
+        // ExpansionPanelRadio : egresos 
         ExpansionPanelRadio(
           value: 2,
           canTapOnHeader: true,
@@ -300,22 +333,23 @@ class CashRegisterDetailView extends StatelessWidget {
               children: [
                 Text('Egresos',style: textStyleDescription,),
                 const Spacer(),
-                Text(Publications.getFormatoPrecio(monto: cashRegister.cashOutFlow),style: textStyleValue.copyWith(color:  cashRegister.cashOutFlow == 0? null: Colors.red.shade300)),
+                Text(Publications.getFormatoPrecio(monto:cashRegister.cashOutFlow),style: textStyleValue.copyWith(color: cashRegister.cashOutFlow == 0? null: Colors.red.shade300)),
               ]);
           },
           body: ListView.builder(
             shrinkWrap: true,
-            itemCount: cashRegister.cashOutFlowList.length,
+            itemCount:cashRegister.cashOutFlowList.length,
             itemBuilder: (BuildContext context, int index) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 3),
-                child: ListTile(
-                  tileColor: Colors.blueGrey.withOpacity(0.08),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12), 
-                  dense: true,
-                  visualDensity: VisualDensity.compact,
-                  title: Text(cashRegister.cashOutFlowList[index]['description'],style: textStyleValue),
-                  trailing: Text(Publications.getFormatoPrecio(monto: cashRegister.cashOutFlowList[index]['amount']),style: textStyleValue.copyWith(color: Colors.red.shade300)),
+                child: Row(
+                  children: [
+                    // text : description
+                    Text(cashRegister.cashOutFlowList[index]['description'],style: textStyleValue),
+                    const Spacer(),
+                    // text : value
+                    Text(Publications.getFormatoPrecio(monto:cashRegister.cashOutFlowList[index]['amount']),style: textStyleValue),
+                  ],
                 ),
               );
             },
@@ -324,6 +358,7 @@ class CashRegisterDetailView extends StatelessWidget {
       ],
     );
   }
+  
 
   
 }
