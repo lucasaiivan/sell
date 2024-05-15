@@ -1054,11 +1054,21 @@ class _EditProductSelectedDialogViewState extends State<EditProductSelectedDialo
   Widget build(BuildContext context) { 
 
     // widgets
-    Widget titleWidget = Text(widget.product.description,style: const TextStyle(fontWeight: FontWeight.bold),maxLines: 5,overflow: TextOverflow.ellipsis);
+    Widget titleWidget = Text(widget.product.description,style: const TextStyle(fontWeight: FontWeight.w500),maxLines: 5,overflow: TextOverflow.ellipsis);
     Widget subtitleWidget = Text(Publications.getFormatoPrecio(monto: widget.product.salePrice * widget.product.quantity),style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 20,color: Colors.blue ));
 
     return AlertDialog(
-      title: Text(widget.product.code==''?'Item':widget.product.code,style: const TextStyle(fontWeight: FontWeight.bold)),
+      title: Row(
+        children: [
+          Flexible(
+            fit: FlexFit.tight,
+            child: Text(widget.product.code==''?'Item':widget.product.code,style: const TextStyle(fontWeight: FontWeight.w400))),
+          IconButton(
+            onPressed: Get.back,
+            icon: const Icon(Icons.close),
+          ),
+        ],
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -1078,6 +1088,7 @@ class _EditProductSelectedDialogViewState extends State<EditProductSelectedDialo
             children: [
               // button : disminuir cantidad
               FloatingActionButton(
+                elevation: 3,
                 onPressed: () {
                   controller.getTicket.decrementProduct(product: widget.product); 
                   controller.update();
@@ -1094,6 +1105,7 @@ class _EditProductSelectedDialogViewState extends State<EditProductSelectedDialo
               ),
               // button : aumentar cantidad
               FloatingActionButton(
+                elevation: 3,
                 onPressed: () {
                   controller.getTicket.incrementProduct(product: widget.product); 
                   controller.update();

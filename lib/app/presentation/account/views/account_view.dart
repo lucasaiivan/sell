@@ -236,7 +236,7 @@ class AccountView extends GetView<AccountController> {
                   keyboardType: TextInputType.multiline,
                   enabled: false,
                   decoration: const InputDecoration(
-                    labelText: "Signo de moneda",
+                    labelText: "Simbolo de moneda",
                     filled: true,
                     prefixIcon: Icon(Icons.monetization_on_outlined),
                   ),
@@ -395,17 +395,19 @@ class AccountView extends GetView<AccountController> {
         context: context,
         builder: (context) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Seleccione el signo de la moneda')),
+            appBar: AppBar(title: const Text('Simbolo monetario')),
             body: ListView(
                 shrinkWrap: true,
                 children: List<Widget>.generate(
                     list.length,
                     (int index) => ListTile(
                           minVerticalPadding: 12,
-                          title: Text(list[index]),
+                          title: Text(list[index]['code']),
+                          subtitle: Text(list[index]['description']),
+                          trailing: Text(list[index]['symbol'],style: const  TextStyle(fontSize: 20)),
                           onTap: () {
-                            controller.profileAccount.currencySign = list[index];
-                            controller.getControllerTextEditSignoMoneda.text =list[index];
+                            controller.profileAccount.currencySign = list[index]['symbol'];
+                            controller.getControllerTextEditSignoMoneda.text =list[index]['symbol'];
                             Get.back();
                           },
                         )),

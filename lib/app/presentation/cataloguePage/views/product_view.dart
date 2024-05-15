@@ -85,7 +85,6 @@ class ProductView extends StatelessWidget {
       sheetBelow: SnappingSheetContent(
         draggable: true,  
         sizeBehavior: const SheetSizeFill(), // sirve para que el contenido se ajuste al tamaño del contenido
-        
         child: expandableContent, // contenido expandible
       ),
       // child : contenido principal
@@ -529,10 +528,12 @@ class ProductView extends StatelessWidget {
 
   }
   Widget get latestPricesUI {
+
     // controllers
     final controller = Get.find<ProductController>();
     // style 
     const Color colorText = Colors.white; 
+ 
 
     if (controller.getListPricesForProduct.isNotEmpty) { 
 
@@ -554,6 +555,12 @@ class ProductView extends StatelessWidget {
               shrinkWrap: true,
               itemCount: controller.getListPricesForProduct.length,
               itemBuilder: (context, index) {
+
+                // var 
+                String town = controller.getListPricesForProduct[index].town;
+                String province = controller.getListPricesForProduct[index].province;
+                String location = town == '' ? province : '$town, $province';
+
                 return Column(
                   children: <Widget>[
                     ListTile(
@@ -593,10 +600,10 @@ class ProductView extends StatelessWidget {
                           style: const TextStyle(
                               color: colorText,
                               fontSize: 24.0,
-                              fontWeight: FontWeight.bold)),
+                              fontWeight: FontWeight.w400)),
                       subtitle: Text(
                           controller.getListPricesForProduct[index].nameAccount,
-                          style: TextStyle(color: colorText.withOpacity(0.7))),
+                          style: TextStyle(color: colorText.withOpacity(0.7),overflow: TextOverflow.ellipsis,fontWeight: FontWeight.w300)),
                       trailing: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.end,
@@ -607,26 +614,26 @@ class ProductView extends StatelessWidget {
                             textAlign: TextAlign.end,
                             style: TextStyle(fontStyle: FontStyle.normal,fontSize: 12,color: colorText.withOpacity(0.4))),
                           const SizedBox(height: 4),
-                          // view : icon and text
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // icon
-                              const Opacity(opacity: 0.7,child: Icon(Icons.location_on_rounded,size: 12,color: Colors.white)),
-                              const SizedBox(width: 4),
-                              // text : ubicacion de la ciudad  del precio
-                              Text(controller.getListPricesForProduct[index].town.isEmpty ? controller.getListPricesForProduct[index].province.toString() : controller.getListPricesForProduct[index].town.toString(),style: const TextStyle(color: colorText,fontWeight: FontWeight.bold)),
-                            ],
+                          // view : dato de la ubicacion del precio registrado
+                          Opacity(
+                            opacity: 0.8,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // icon
+                                const Opacity(opacity: 0.7,child: Icon(Icons.location_on_rounded,size: 12,color:colorText)),
+                                const SizedBox(width: 4),
+                                // text : ubicacion de la ciudad  del precio
+                                Text(location,style: const TextStyle(color: colorText,fontWeight: FontWeight.w400)),
+                              ],
+                            ),
                           ),
                         ],
                       ),
                       onTap: () {},
                     ),
-                    const SizedBox(
-                      height: 5.0,
-                    ),
-                    (index + 1) == 9 &&
-                            controller.getListPricesForProduct.length == 9
+                    const SizedBox(height: 5.0),
+                    (index + 1) == 9 && controller.getListPricesForProduct.length == 9
                         ? TextButton(
                             onPressed: () {
                               controller.readListPricesForProduct(limit: false);

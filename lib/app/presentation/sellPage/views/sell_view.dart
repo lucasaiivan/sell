@@ -751,10 +751,8 @@ class SalesView extends StatelessWidget {
 
     // controllers
     final SalesController salesController = Get.find();
-    // values
-    const Color accentColor = Colors.white;
-    Color background = Colors.green.shade400; 
-    Color colorText = Colors.white;
+    // values 
+    Color background = Colors.green.shade400;  
 
     return Theme(
       data: ThemeData(brightness: Brightness.dark),
@@ -1538,7 +1536,9 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
                 child: Row(
                   children: [
                     // text : description
-                    Text(homeController.cashRegisterActive.cashInFlowList[index]['description'],style: textStyleValue),
+                    Flexible(
+                      fit: FlexFit.tight,
+                      child: Text(homeController.cashRegisterActive.cashInFlowList[index]['description'],style: textStyleValue,overflow: TextOverflow.ellipsis,maxLines:2)),
                     const Spacer(),
                     // text : value
                     Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.cashInFlowList[index]['amount']),style: textStyleValue),
@@ -1569,8 +1569,10 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
                 child: Row(
                   children: [
                     // text : description
-                    Text(homeController.cashRegisterActive.cashOutFlowList[index]['description'],style: textStyleValue),
-                    const Spacer(),
+                    Flexible(
+                      fit: FlexFit.tight,
+                      child: Text(homeController.cashRegisterActive.cashOutFlowList[index]['description'],style: textStyleValue,overflow: TextOverflow.ellipsis,maxLines:2)),
+                    
                     // text : value
                     Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.cashOutFlowList[index]['amount']),style: textStyleValue),
                   ],

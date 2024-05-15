@@ -173,6 +173,7 @@ class Utils {
   return capitalizedWords.join(' ');
 }
 
+
   void getDetailArqueoScreenShot({required BuildContext context,required CashRegister cashRegister}) async {
     // widget : ticket
     var myLongWidget = Builder(builder: (context) {return CashRegisterDetailView(cashRegister:cashRegister).body;});
@@ -189,8 +190,7 @@ class Utils {
         createPdfAndShare(data: capturedImage, id: cashRegister.id); 
       
   }); 
-  }
-
+  } 
   void getTicketScreenShot({required TicketModel ticketModel,required BuildContext context }) async {
 
     // widget : ticket
@@ -206,13 +206,14 @@ class Utils {
       ).then((capturedImage) async {
         // crear un pdf y compartirlo
         createPdfAndShare(data: capturedImage, id: ticketModel.id);
-        /* final directory =  await getTemporaryDirectory(); // directorio temporal
+        /* 
+        final directory =  await getTemporaryDirectory(); // directorio temporal
         final imagePath = await File('${directory.path}/ticketTemporaryPrint.png').create(); // archivo variable
         await imagePath.writeAsBytes(capturedImage); // escribimos la captura de pantalla en el archivo
 
         /// Share Plugin : compartir la captura de pantalla
-        await Share.shareXFiles([XFile(imagePath.path)], text: 'Compartir Ticket'); */
-      
+        await Share.shareXFiles([XFile(imagePath.path)], text: 'Compartir Ticket'); 
+       */
   }); 
   }    
 
