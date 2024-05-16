@@ -1,6 +1,4 @@
-import 'dart:io'; 
-import 'package:flutter/widgets.dart';
-import 'package:intl/intl.dart';
+import 'dart:io';  
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -53,6 +51,17 @@ class HomeController extends GetxController {
   get getUrlPlayStore {
     return _urlPlayStore == '' ? '' : _urlPlayStore;
   }
+  // modo cajero 
+  set setCashierMode(bool value) { 
+    // guardar dato en el almacenamiento local [SharedPreferences]
+    GetStorage().write('cashierMode', value);
+  }
+  bool get getCashierMode{
+    // obtener dato en el almacenamiento local [SharedPreferences]  
+    return GetStorage().hasData('cashierMode') ? GetStorage().read('cashierMode') : false;
+  
+  }
+  
  // estado de actualización de la app
   bool _updateApp = false;
   set setUpdateApp(bool value) {
@@ -680,7 +689,7 @@ class HomeController extends GetxController {
       setProductsOutstandingList = finalList;
       try {
         // actualizamos la vista de ventas
-        SalesController salesController = Get.find();
+        SellController salesController = Get.find();
         salesController.update();
       } catch (_) {}
     });

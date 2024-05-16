@@ -456,14 +456,11 @@ class TransactionInfoView extends StatelessWidget {
               Row(
                 children: [
                   const Spacer(),
-                  Container(
-                    color: Colors.black12,
-                    child: Row(
-                      children: <Widget>[ 
-                        Opacity(opacity:opacity,child: Text("Total:  ",style: textStyleDescription)),
-                        Text( Publications.getFormatoPrecio(monto: priceTotal,moneda: currencySymbol),overflow:TextOverflow.ellipsis,style: textStyleValue ),
-                      ],
-                    ),
+                  Row(
+                    children: <Widget>[ 
+                      Opacity(opacity:opacity,child: Text("Total:  ",style: textStyleDescription)),
+                      Text( Publications.getFormatoPrecio(monto: priceTotal,moneda: currencySymbol),overflow:TextOverflow.ellipsis,style: textStyleValue ),
+                    ],
                   ),
                 ],
               ),
@@ -513,10 +510,13 @@ class TransactionInfoView extends StatelessWidget {
                   TextStyle style = const TextStyle(fontWeight: FontWeight.bold,fontSize: 12);
                   // obj
                   ProductCatalogue productCatalogue = ProductCatalogue.fromMap(product);
+                  // var
+                  String description = productCatalogue.description == ''?'sin especificar':productCatalogue.description;
+
                   return Column(
                     children: [ 
                       ListTile(
-                        title: Opacity(opacity: 0.7,child: Text(productCatalogue.description,style: style)),
+                        title: Opacity(opacity: 0.7,child: Text(description,style: style)),
                         leading: Opacity(opacity: 0.5,child: Text('x${productCatalogue.quantity}',style: style)),
                         trailing: Opacity(opacity: 0.6,child: Text(Publications.getFormatoPrecio(monto: productCatalogue.salePrice*productCatalogue.quantity,moneda: currencySymbol),style: style)),
                       ),
@@ -562,7 +562,7 @@ class TicketView extends StatelessWidget {
     String cashRegister = ticket.cashRegisterName == ''?'sin especificar':ticket.cashRegisterName; 
     double priceTotal = ticket.priceTotal;
     double valueReceived = ticket.valueReceived;
-    double changeAmount =  valueReceived - priceTotal;
+    double changeAmount =  valueReceived == 0 ? 0.0 : valueReceived - priceTotal;
     String currencySymbol = ticket.currencySymbol; 
     Timestamp creation = ticket.creation;
 
@@ -660,6 +660,8 @@ class TicketView extends StatelessWidget {
                     TextStyle style = textStyleValue.copyWith(fontWeight: FontWeight.bold,fontSize: 12,fontFamily: 'Monospace',letterSpacing: -1.0);
                     // obj
                     ProductCatalogue productCatalogue = ProductCatalogue.fromMap(product);
+                    // var 
+                    String description = productCatalogue.description == ''?'sin especificar':productCatalogue.description;
           
                     return MapEntry(index, Column(
                       children: [ 
@@ -667,7 +669,7 @@ class TicketView extends StatelessWidget {
                           children: [
                             Opacity(opacity: 0.5,child: Text('x${productCatalogue.quantity}',style: style)),
                             const SizedBox(width: 10),
-                            Flexible(fit: FlexFit.tight,child: Opacity(opacity: 0.7,child: Text(productCatalogue.description,style: style,maxLines:1,overflow:TextOverflow.ellipsis,))),
+                            Flexible(fit: FlexFit.tight,child: Opacity(opacity: 0.7,child: Text(description,style: style,maxLines:1,overflow:TextOverflow.ellipsis,))),
                             const SizedBox(width: 12),
                             Opacity(opacity: 0.6,child: Text(Publications.getFormatoPrecio(monto: productCatalogue.salePrice*productCatalogue.quantity,moneda: currencySymbol),style: style)),
                           ],

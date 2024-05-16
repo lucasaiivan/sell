@@ -32,12 +32,12 @@ class SalesView extends StatelessWidget {
     // set
     buildContext = context; 
 
-    return GetBuilder<SalesController>(
-      init: SalesController(),
+    return GetBuilder<SellController>(
+      init: SellController(),
       // initState : se activa cuando se crea el widget
       initState: (_) {
         // init : inicializamos el controlador
-        Get.put(SalesController());
+        Get.put(SellController());
       },
       builder: (controller) {
         return Obx(() {
@@ -68,7 +68,7 @@ class SalesView extends StatelessWidget {
   }
 
   // WIDGETS VIEWS
-  PreferredSizeWidget appbar({required SalesController controller}) {
+  PreferredSizeWidget appbar({required SellController controller}) {
 
     // var 
     bool loadingProfile = homeController.getProfileAdminUser.email != ''; // estado de carga del perfil del usauario
@@ -97,7 +97,7 @@ class SalesView extends StatelessWidget {
       ],  
     );
   }
-  Widget body({required SalesController controller}) {
+  Widget body({required SellController controller}) {
     // Widgets
     Widget updateview = homeController.getUpdateApp
         ? InkWell(
@@ -161,7 +161,7 @@ class SalesView extends StatelessWidget {
     );
   }
 
-  Widget drawerTicket({required SalesController controller}) {
+  Widget drawerTicket({required SellController controller}) {
     // values
     const EdgeInsets padding = EdgeInsets.symmetric(horizontal: 20, vertical:1);
     final TicketModel ticket = controller.getTicket;
@@ -388,7 +388,7 @@ class SalesView extends StatelessWidget {
     // opcion premium : esta funcionalidad de arqueo de caja solo esta disponible en la version premium
     bool isPremium = homeController.getIsSubscribedPremium;
     // controllers
-    final controller = Get.find<SalesController>();
+    final controller = Get.find<SellController>();
  
     // condition : si el esta en modo de prueba, solo muestra el boton de inciar caja
     if( homeController.getUserAnonymous){
@@ -678,7 +678,7 @@ class SalesView extends StatelessWidget {
   Widget circleAvatarProduct({required ProductCatalogue productCatalogue}) {
 
     // controller
-    final SalesController salesController = Get.find();
+    final SellController salesController = Get.find();
 
     // values
     bool defaultValues = productCatalogue.id == '';
@@ -750,7 +750,7 @@ class SalesView extends StatelessWidget {
     //---------------------------//  
 
     // controllers
-    final SalesController salesController = Get.find();
+    final SellController salesController = Get.find();
     // values 
     Color background = Colors.green.shade400;  
 
@@ -769,7 +769,7 @@ class SalesView extends StatelessWidget {
                       child:  
                       Column(
                         mainAxisSize: MainAxisSize.min,
-                        children: [
+                        children: [ 
                           // iconbutton : close
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
@@ -787,6 +787,11 @@ class SalesView extends StatelessWidget {
                             ],
                           ),
                           const Spacer(), 
+                          const Icon(Icons.check_circle_outline_rounded,color: Colors.white,size: 60),
+                          const SizedBox(height: 12),
+                          // text : '¡Listo!'
+                          const Text('¡Listo! Transacción exitosa',style: TextStyle(color: Colors.white,fontSize: 16,fontWeight: FontWeight.w300)),
+                          const SizedBox(height: 20),
                           // view : card con la facturacion de la venta
                           Padding(
                             padding: const EdgeInsets.all(20.0),
@@ -855,7 +860,7 @@ class SalesView extends StatelessWidget {
     );
   }
 
-  Widget floatingActionButton({required SalesController controller}) {
+  Widget floatingActionButton({required SellController controller}) {
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -908,7 +913,7 @@ class SalesView extends StatelessWidget {
     );
   }
 
-  Widget floatingActionButtonTicket({required SalesController controller}) {
+  Widget floatingActionButtonTicket({required SellController controller}) {
     return controller.getStateConfirmPurchase
         ? Container()
         : Row(
@@ -985,7 +990,7 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
 
   // controllers views
   final HomeController homeController = Get.find<HomeController>();
-  final SalesController salesController = Get.find<SalesController>();
+  final SellController salesController = Get.find<SellController>();
 
   // others controllers
   final MoneyMaskedTextController moneyMaskedTextController =
@@ -1597,7 +1602,7 @@ class ViewAddDiscount extends StatefulWidget {
 class _ViewAddDiscountState extends State<ViewAddDiscount> {
 
   // controllers
-  final SalesController salesController = Get.find<SalesController>();
+  final SellController salesController = Get.find<SellController>();
   final MoneyMaskedTextController textEditingDiscountController = MoneyMaskedTextController(leftSymbol: '\$',decimalSeparator: ',',thousandSeparator: '.',precision:2);
   final TextEditingController textEditingPorcentController = TextEditingController();
   FocusNode focusNodeDiscount = FocusNode();

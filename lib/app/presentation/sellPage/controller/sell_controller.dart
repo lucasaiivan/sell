@@ -21,7 +21,7 @@ import '../views/sell_view.dart';
 
 
 
-class SalesController extends GetxController {
+class SellController extends GetxController {
 
   // controllers views //
   final HomeController homeController = Get.find(); 
@@ -865,7 +865,7 @@ class _NewProductViewState extends State<NewProductView> {
   
   // controllers 
   final HomeController homeController = Get.find<HomeController>();
-  final SalesController salesController = Get.find<SalesController>();
+  final SellController salesController = Get.find<SellController>();
   late TextEditingController controllerTextEditDescripcion = TextEditingController(text: widget.productCatalogue.description);
   late MoneyMaskedTextController controllerTextEditPrecioVenta = MoneyMaskedTextController(initialValue: widget.productCatalogue.salePrice);
   // keys form
@@ -1125,7 +1125,7 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
 
   // controllers
   HomeController homeController = Get.find<HomeController>();
-  SalesController salesController = Get.find<SalesController>();
+  SellController salesController = Get.find<SellController>();
 
   @override
   List<Widget> buildActions(BuildContext context) {

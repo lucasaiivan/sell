@@ -1,6 +1,5 @@
 import 'dart:ui';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/utils/fuctions.dart';
@@ -346,55 +345,52 @@ class SoldProductsView extends StatelessWidget {
   );
   // widget : obtener un maximo de productos vendidos`
   Widget get bestSellingProduct { 
-    // obtener un maximo de 3 producto de transactionsController.getBestSellingProductList
+    // var
     List<Widget> list = [];
+    // obtenemos la informacion de los productos
     for (var i = 0; i < transactionsController.getMostSelledProducts.length; i++) {
-      if(i<5){
-        list.add(
-          Padding(
-            padding: const EdgeInsets.only(top: 5,bottom: 5),
-            child: Column(
-              children: [
-                // view : item del producto
-                Row(
-                  children: [ 
-                    // imagen del producto
-                    ImageProductAvatarApp(size: 35,url:transactionsController.getMostSelledProducts[i].image),
-                    const SizedBox(width:8),
-                    // text : nombre
-                    Flexible(
-                      fit: FlexFit.tight,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(transactionsController.getMostSelledProducts[i].description,textAlign: TextAlign.center,style: const TextStyle(fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1),
-                          // text : codigo
-                          const SizedBox(width:2),
-                          Text(transactionsController.getMostSelledProducts[i].code,textAlign: TextAlign.center,style: const TextStyle(fontSize: 10,fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1),
-                        ],
-                      ),
+      list.add(
+        Padding(
+          padding: const EdgeInsets.only(top: 5,bottom: 5),
+          child: Column(
+            children: [
+              // view : item del producto
+              Row(
+                children: [ 
+                  // imagen del producto
+                  ImageProductAvatarApp(size: 35,url:transactionsController.getMostSelledProducts[i].image),
+                  const SizedBox(width:8),
+                  // text : nombre
+                  Flexible(
+                    fit: FlexFit.tight,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(transactionsController.getMostSelledProducts[i].description,textAlign: TextAlign.center,style: const TextStyle(fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1),
+                        // text : codigo
+                        const SizedBox(width:2),
+                        Text(transactionsController.getMostSelledProducts[i].code,textAlign: TextAlign.center,style: const TextStyle(fontSize: 10,fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1),
+                      ],
                     ),
-                    const Spacer(),
-                    // text : cantidad
-                    Text('x${transactionsController.getMostSelledProducts[i].quantity.toString()}',style: const TextStyle(fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: ComponentApp().divider(),
-                ),
-              ],
-            ),
+                  ),
+                  const Spacer(),
+                  // text : cantidad
+                  Text('x${transactionsController.getMostSelledProducts[i].quantity.toString()}',style: const TextStyle(fontWeight: FontWeight.bold)),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: ComponentApp().divider(),
+              ),
+            ],
           ),
-        );
-      }
+        ),
+      );
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [ 
-        Text( list.length==1?'El más vendido':'Los ${list.length} más vendidos por cantidad',style: const TextStyle( fontWeight: FontWeight.w300)),
-        const SizedBox(height: 12),
+      children: [  
         ...list,
       ],
     );
@@ -439,78 +435,75 @@ class ProfitabilityProductsView extends StatelessWidget {
       double revenue = transactionsController.getBestSellingProductWithHighestProfit[i].revenue;
       double priceTotal = transactionsController.getBestSellingProductWithHighestProfit[i].salePrice*transactionsController.getBestSellingProductWithHighestProfit[i].quantity;
       int percentage = ((revenue/priceTotal)*100).round();
-      // condition  : mostramos 4 productos
-      if(i<5){
-        list.add(
-          Padding(
-            padding: const EdgeInsets.only(top: 5,bottom: 5),
-            child: Column(
-              children: [
-                Row(
-                  children: [ 
-                    // imagen del producto
-                    ImageProductAvatarApp(size: 35,url:transactionsController.getBestSellingProductWithHighestProfit[i].image),
-                    const SizedBox(width:8),
-                    // text : nombre
-                    Flexible(
-                      fit: FlexFit.tight,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(transactionsController.getBestSellingProductWithHighestProfit[i].description,textAlign: TextAlign.center,style: const TextStyle(fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1),
-                          // text : codigo
-                          const SizedBox(width:2),
-                          Text(transactionsController.getBestSellingProductWithHighestProfit[i].code,textAlign: TextAlign.center,style: const TextStyle(fontSize: 10,fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1),
-                        ],
-                      ),
-                    ),
-                    const Spacer(),
-                    // view : monto total y ganancia
-                    Column(
-                      mainAxisAlignment:  MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.end,
+      // agregamos el item a la lista
+      list.add(
+        Padding(
+          padding: const EdgeInsets.only(top: 5,bottom: 5),
+          child: Column(
+            children: [
+              Row(
+                children: [ 
+                  // imagen del producto
+                  ImageProductAvatarApp(size: 35,url:transactionsController.getBestSellingProductWithHighestProfit[i].image),
+                  const SizedBox(width:8),
+                  // text : nombre
+                  Flexible(
+                    fit: FlexFit.tight,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // text : cantidad y monto total
-                        Text('x${transactionsController.getBestSellingProductWithHighestProfit[i].quantity} ${Publications.getFormatoPrecio(monto: priceTotal)}',style: const TextStyle(fontWeight: FontWeight.bold)),
-                        // view : en un row el monto total de la ganancia y el porcentaje de ganancia de color verde
-                        revenue==0?Container():Row(
-                          mainAxisAlignment:  MainAxisAlignment.end,
-
-                          children: [
-                            // text : monto total de la ganancia
-                            Text(Publications.getFormatoPrecio(monto: revenue),style: const TextStyle(fontWeight: FontWeight.bold,color: Colors.green)),
-                            const SizedBox(width: 5),
-                            // text : porcentaje de ganancia
-                            Row(
-                              children: [
-                                const Icon(Icons.arrow_outward_rounded,size: 14,color: Colors.green),
-                                const SizedBox(width: 2),
-                                Text('%$percentage',style: const TextStyle(fontWeight: FontWeight.bold,color: Colors.green)),
-                              ],
-                            ),
-                            
-                          ],
-                        ),
+                        Text(transactionsController.getBestSellingProductWithHighestProfit[i].description,textAlign: TextAlign.center,style: const TextStyle(fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1),
+                        // text : codigo
+                        const SizedBox(width:2),
+                        Text(transactionsController.getBestSellingProductWithHighestProfit[i].code,textAlign: TextAlign.center,style: const TextStyle(fontSize: 10,fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1),
                       ],
                     ),
-                    
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: ComponentApp().divider(),
-                ),
-              ],
-            ),
+                  ),
+                  const Spacer(),
+                  // view : monto total y ganancia
+                  Column(
+                    mainAxisAlignment:  MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      // text : cantidad y monto total
+                      Text('x${transactionsController.getBestSellingProductWithHighestProfit[i].quantity} ${Publications.getFormatoPrecio(monto: priceTotal)}',style: const TextStyle(fontWeight: FontWeight.bold)),
+                      // view : en un row el monto total de la ganancia y el porcentaje de ganancia de color verde
+                      revenue==0?Container():Row(
+                        mainAxisAlignment:  MainAxisAlignment.end,
+
+                        children: [
+                          // text : monto total de la ganancia
+                          Text(Publications.getFormatoPrecio(monto: revenue),style: const TextStyle(fontWeight: FontWeight.bold,color: Colors.green)),
+                          const SizedBox(width: 5),
+                          // text : porcentaje de ganancia
+                          Row(
+                            children: [
+                              const Icon(Icons.arrow_outward_rounded,size: 14,color: Colors.green),
+                              const SizedBox(width: 2),
+                              Text('%$percentage',style: const TextStyle(fontWeight: FontWeight.bold,color: Colors.green)),
+                            ],
+                          ),
+                          
+                        ],
+                      ),
+                    ],
+                  ),
+                  
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: ComponentApp().divider(),
+              ),
+            ],
           ),
-        );
-      }
+        ),
+      );
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [  
-        Text(list.length==1?'Con mayor beneficio':'Los ${list.length} productos con mayor ganancia',style: const TextStyle( fontWeight: FontWeight.w300)),
+      children: [   
         const SizedBox(height: 12),
         ...list,
       ],
@@ -823,99 +816,3 @@ class CashRegisterView extends StatelessWidget {
   }
 }
 
-
-
-
-
-
-
-
-
-
-// ignore: must_be_immutable
-class MiniLineChart extends StatelessWidget {
-
-  List<double> prices=[];
-  int positionIndex=0;
-  
-  MiniLineChart({Key? key,required this.prices,this.positionIndex=0}) : super(key: key);
- 
-
-  @override
-  Widget build(BuildContext context) {
-
-    if(prices.isEmpty) return Container();
- 
-    return SizedBox(
-      height: 30,
-      width: double.infinity,
-      child: LineChart(
-        LineChartData( 
-          lineTouchData: LineTouchData(  
-            handleBuiltInTouches: true, // habilita el touch
-            longPressDuration: const Duration(milliseconds: 100), // duracion del touch
-
-            touchTooltipData: LineTouchTooltipData(  
-              tooltipPadding: const EdgeInsets.all(2), 
-              getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
-                return touchedBarSpots.map((barSpot) {
-                  final flSpot = barSpot; 
-                  return LineTooltipItem(
-                    formatValue(flSpot.y),
-                    const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                  );
-                }).toList();
-              }, 
-            ),
-          ),
-          lineBarsData: [
-            LineChartBarData(  
-              spots: [
-                for (int i = 0; i < prices.length; i++)
-                  FlSpot(i.toDouble(), prices[i]),
-              ],   
-              isCurved: true,
-              color:Colors.blue,
-              barWidth: 2,
-              dotData: FlDotData(
-                show: true, 
-                getDotPainter: (spot, percent, barData, index) {
-                  return FlDotCirclePainter(
-                    radius: index==0?4: index == positionIndex ? 6 : 4,
-                    color:Colors.blue,
-                    strokeColor: Colors.white ,
-                    strokeWidth: index==0?0: index == positionIndex ? 2 : 0,
-
-                  );
-                },
-        ),  
-            ),
-            
-            
-          ],
-          gridData: const FlGridData(
-            show: false,
-          ),
-          borderData: FlBorderData(
-            show: false,
-          ),
-          titlesData: const FlTitlesData(
-            show: false,
-          ),
-        ),
-        
-      ),
-    );
-  }
-
-  String formatValue(double value) {
-    // return : devuelve el valor formateado en miles 
-    if (value >= 1000) {
-      return '\$${(value /1000).toStringAsFixed(1)}k';
-    } else {
-      return '\$${value.toStringAsFixed(0)}';
-    }
-  } 
-
-
-}
