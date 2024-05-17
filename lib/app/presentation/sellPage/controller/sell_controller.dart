@@ -297,7 +297,6 @@ class SellController extends GetxController {
 
 
   // FIREBASE
-  
   void registerTransaction() {
 
     // Procederemos a guardar un documento con la transacción
@@ -341,9 +340,8 @@ class SellController extends GetxController {
     });
     
   }
-
-  // FUCTIONS 
   
+  // FUCTIONS  
   void showSeach({required BuildContext context}) {
     // Busca entre los productos de mi catálogo 
     showSearch(
@@ -352,9 +350,6 @@ class SellController extends GetxController {
     );
 
   }
-
-  
-  
   Future<void>  scanBarcodeNormal() async {   
  
     // Escanner Code - Abre en pantalla completa la camara para escanear el código
@@ -518,7 +513,7 @@ class SellController extends GetxController {
       ComponentApp().showMessageAlertApp(title: '😔No se puedo agregar 😔',message: 'Debe ingresar un valor distinto a 0');
     }
   }
-
+  // Getters //
   String getValueChange() {
 
     // text format : devuelte un texto formateado del monto del cambio que tiene que recibir el cliente
@@ -545,7 +540,9 @@ class SellController extends GetxController {
     }
     
   }
-
+  //  ------------------------  //
+  // --------- dialog --------  //
+  //  ------------------------  // 
   void showDialogAddProductNew({ required ProductCatalogue productCatalogue}) {
     // dialog : muestra este dialog cuando el producto no se encuentra en el cáatalogo de la cuenta
 
@@ -556,9 +553,7 @@ class SellController extends GetxController {
         child: NewProductView(productCatalogue: productCatalogue),
       ),
     ); 
-  }
-
-  
+  }  
   void showDialogAddDiscount() {
 
     // dialog : añadir descuento al ticket 
@@ -841,12 +836,10 @@ class SellController extends GetxController {
         ));
   }
 }
-
-//
+ 
 //
 // WIDGETS CLASS
-//
-//
+// 
 class NewProductView extends StatefulWidget {
   
   // parametro obligatorio
@@ -1382,5 +1375,6 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
     );
   }
 }
+ 
 
 

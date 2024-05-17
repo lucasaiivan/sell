@@ -15,6 +15,7 @@ import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart';
 import '../../domain/entities/catalogo_model.dart';
 import '../../domain/entities/user_model.dart';
 import '../../presentation/cataloguePage/controller/catalogue_controller.dart';
+import '../../presentation/sellPage/views/sell_view.dart';
 import '../routes/app_pages.dart';
 
 /// Un widget que muestra una imagen
@@ -430,6 +431,7 @@ Widget body({required BuildContext context}){
         Flexible(
           child: ListView( 
                 children: [
+                  // view : header
                   Row(
                     children: [
                       const Spacer(),
@@ -441,6 +443,7 @@ Widget body({required BuildContext context}){
                       const SizedBox(width: 10),
                     ],
                   ),
+                  // view : avatar y datos la cuenta y del usuario
                   isAnonymous?textButtonLogin
                     :ListTile(
                     leading: Container(padding: const EdgeInsets.all(0.0),child: ComponentApp().userAvatarCircle(urlImage: homeController.getProfileAccountSelected.image)),
@@ -462,17 +465,19 @@ Widget body({required BuildContext context}){
                         )),
                       ],
                     ),
-                    trailing: const Icon(Icons.arrow_right),
-                    onTap: () {
+                    trailing: homeController.getCashierMode?null: const Icon(Icons.arrow_right),
+                    onTap: homeController.getCashierMode?null: () {
                       homeController.showModalBottomSheetSelectAccount();
                     },
                   ),  
+                  homeController.getCashierMode?const Divider(height:0,thickness:.5):Container(),
                   // ----------------- //
                   // funciones premium //
                   // ----------------- //
                   // condition : si el usuario de la cuenta no es administrador no se muestra el boton de suscribirse a premium
                   user.admin==false?Container():
                   isAnonymous?Container():
+                  homeController.getCashierMode?Container():
                     Container(
                       // color degradado de izquierda a derecha [amber,transparent]
                       decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.amber.withOpacity(0.1),Colors.amber.withOpacity(0.01) ],begin: Alignment.centerLeft,end: Alignment.centerRight)),
@@ -560,9 +565,22 @@ Widget body({required BuildContext context}){
           trailing: Switch(
             value: homeController.getCashierMode,
             activeColor: Colors.blue,
-            onChanged: (value) { 
-              homeController.setCashierMode = value;
-              sellController.update();
+            onChanged: (value) {  
+              // condition : para desactivar el modo cajero introducir la pin
+              if(value == false ){
+                // show dialog : introducir pin para desactivar el modo cajero
+                Get.dialog( const PinCheckAlertDialog(),barrierDismissible: false);
+              }else{
+                // condition : primero verificar que existe un pin 
+                if(homeController.getProfileAccountSelected.pin == ''){
+                  // show dialog : introducir pin para desactivar el modo cajero
+                  Get.dialog(  const PinCheckAlertDialog(),barrierDismissible: false);
+                }else{
+                  // action : activar el modo cajero
+                  homeController.setCashierMode = value;
+                  sellController.update();
+                } 
+              }
             },
           ),
         ),

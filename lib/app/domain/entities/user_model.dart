@@ -1,6 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; 
 import 'package:intl/intl.dart';
 
 class UserModel {
@@ -255,6 +253,7 @@ class UserModel {
 }
 
 class ProfileAccountModel {
+
   // Informacion de la cuenta
   Timestamp creation = Timestamp.now(); // Fecha en la que se creo la cuenta
   String id = ""; // el ID de la cuenta por defecto es el ID del usuario quien lo creo
@@ -268,6 +267,7 @@ class ProfileAccountModel {
   bool blockingAccount = false;
   String blockingMessage = "";
   bool verifiedAccount = false; // Cuenta verificada
+  String pin = ''; // pin de seguridad
 
   // location
   String countrycode = "";
@@ -290,6 +290,7 @@ class ProfileAccountModel {
     this.blockingAccount = false,
     this.blockingMessage = "",
     this.verifiedAccount = false, // Cuenta verificada 
+    this.pin = '',
     this.country = "",
     this.province = "",
     this.town = "", 
@@ -309,7 +310,8 @@ class ProfileAccountModel {
     String? currencySign,
     bool? blockingAccount,
     String? blockingMessage,
-    bool? verifiedAccount, // Cuenta verificada 
+    bool? verifiedAccount, 
+    String? pin,
     String? country,
     String? province,
     String? town, 
@@ -329,7 +331,8 @@ class ProfileAccountModel {
       currencySign: currencySign ?? this.currencySign,
       blockingAccount: blockingAccount ?? this.blockingAccount,
       blockingMessage: blockingMessage ?? this.blockingMessage,
-      verifiedAccount: verifiedAccount ?? this.verifiedAccount, // Cuenta verificada 
+      verifiedAccount: verifiedAccount ?? this.verifiedAccount, 
+      pin: pin ?? this.pin,
       country: country ?? this.country,
       province: province ?? this.province,
       town: town ?? this.town, 
@@ -356,6 +359,7 @@ class ProfileAccountModel {
     verifiedAccount = data.containsKey('verifiedAccount')
         ? data['verifiedAccount']
         : data['cuenta_verificada'];
+    pin =  data.containsKey('pin') ? data['pin'] : '';
     countrycode = data.containsKey('countrycode')
         ? data['countrycode']
         : data['codigo_pais']; 
@@ -375,6 +379,7 @@ class ProfileAccountModel {
         "blockingAccount": blockingAccount,
         "blockingMessage": blockingMessage,
         "verifiedAccount": verifiedAccount,
+        "pin": pin,
         "countrycode": countrycode,
         "country": country,
         "province": province,
@@ -408,6 +413,7 @@ class ProfileAccountModel {
     verifiedAccount = data.containsKey('verifiedAccount')
         ? data['verifiedAccount']
         : data["cuenta_verificada"] ?? false;
+    pin = data.containsKey('pin') ? data['pin'] : '';
     countrycode = data.containsKey('countrycode')
         ? data['countrycode']
         : data["codigo_pais"] ?? '';

@@ -412,6 +412,10 @@ class SalesView extends StatelessWidget {
       
     // condition : si no es premium se muestra el boton de suscribirse a premium 
     if(isPremium==false ){ 
+      // condition : comprobar si esta en [modo cajero]  
+      if(homeController.getCashierMode  ){
+        return Container();
+      }
       
       // button : suscribirse a premium
       return Padding(
@@ -1591,7 +1595,7 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
   }
 }
 
-// VIEW : ViewAddDiscount
+// VIEW : agregar descuento
 class ViewAddDiscount extends StatefulWidget {
   const ViewAddDiscount({super.key});
 
@@ -1754,3 +1758,299 @@ class _ViewAddDiscountState extends State<ViewAddDiscount> {
   }
 }
 
+// DIALOG 
+class PinCheckAlertDialog extends StatefulWidget {
+  const PinCheckAlertDialog({super.key});
+
+  @override
+  State<PinCheckAlertDialog> createState() => _PinCheckAlertDialogState();
+}
+
+class _PinCheckAlertDialogState extends State<PinCheckAlertDialog> {
+
+  //  controllers
+  final HomeController homeController = Get.find<HomeController>();
+  final SellController salesController = Get.find<SellController>();
+  final TextEditingController textFieldController0 = TextEditingController();
+  final TextEditingController textFieldController1 = TextEditingController();
+  final TextEditingController textFieldController2 = TextEditingController();
+
+  // var : textfield
+  String errorTextField0 = '';
+  String errorTextField1 = '';
+  String errorTextField2 = ''; 
+  // var : logic
+  bool updatePinAction = false;
+  
+  @override
+  Widget build(BuildContext context) { 
+    return homeController.getProfileAccountSelected.pin.isEmpty?createPindialog:updatePinAction?updatePinDialog:entryPinDialog;
+  }
+
+  // VIEW 
+  Widget get entryPinDialog{
+    // AlertDialog : pide pin para desactivar el modo cajero
+    return AlertDialog(
+      title: const Text('Desactivar modo cajero'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          // text : informacion
+          const Text('Para desactivar el modo cajero, por favor ingrese su pin'),
+          const SizedBox(height: 20),
+          // textfield : pin
+          TextField(
+            controller: textFieldController0,
+            autofocus: true,
+            obscureText: true, 
+            maxLength: 4,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration( 
+              prefixIcon: const Icon(Icons.security_sharp),
+              labelText: 'Pin', 
+              errorText: errorTextField0!=''? errorTextField0 : null,
+            ),
+          ), 
+          // textbutton : actualizar pin
+          TextButton(
+            onPressed: () {
+              setState(() {
+                updatePinAction = true;
+              });
+            },
+            child: const Text('Actualizar PIN'),
+          ),
+        ],
+      ),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () {
+            Get.back();
+          },
+          child: const Text('Cancelar'),
+        ),
+        TextButton(
+          onPressed: () { 
+            // condition : verificar si el pin tiene 4 digitos 
+            if(textFieldController0.text.length < 4){
+              setState(() {
+                errorTextField0 = 'El pin debe tener 4 digitos';
+              });
+              return;
+            }else{
+              // condition : verificar si el pin es correcto
+              if(homeController.pinSegurityCheck(pin: textFieldController0.text)){
+                homeController.setCashierMode = false;
+                salesController.update();
+                Get.back();
+              }else{
+                setState(() {
+                  errorTextField0 = 'El pin es incorrecto';
+                });
+                return;
+              }
+            }
+          },
+          child: const Text('Desactivar'),
+        ),
+      ],
+    );
+  }
+  Widget get createPindialog{
+    // AlertDialog : pide pin para crear un pin
+    return AlertDialog(
+      title: const Text('Crear PIN de seguridad'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            // text : informacion
+            const Text('Por favor ingresa un pin numérico de 4 dígitos'),
+            const SizedBox(height: 20),
+            // textfield : pin
+            TextField(
+              controller: textFieldController0,
+              autofocus: true,
+              obscureText: true, 
+              maxLength: 4,  
+              textInputAction: TextInputAction.next,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(  
+                prefixIcon: const Icon(Icons.security_sharp),
+                labelText: 'PIN',  
+                errorText: errorTextField0!=''? errorTextField0 : null,
+              ),
+            ), 
+            // textfield : confirmar pin
+            TextField(
+              controller: textFieldController1,
+              obscureText: true, 
+              maxLength: 4,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration( 
+                prefixIcon:  const Icon(Icons.security_sharp),
+                labelText: 'Vuelve a introducir el PIN', 
+                errorText: errorTextField0!=''? errorTextField0 : null,
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () {
+            Get.back();
+          },
+          child: const Text('Cancelar'),
+        ),
+        TextButton(
+          onPressed: () { 
+            // condition : verificar si el pin tiene 4 digitos 
+            if(textFieldController0.text.length < 4){
+              setState(() {
+                errorTextField0 = 'El pin debe tener 4 digitos';
+              });
+              return;
+            }else{
+              // condition : verifica que coincidan los pines
+              if(textFieldController0.text != textFieldController1.text){
+                setState(() {
+                  errorTextField0 = 'Los pines no coinciden';
+                });
+                return;
+              }else{
+                // creamos el pin
+                homeController.createPin(pin: textFieldController0.text); 
+                salesController.update();
+                Get.back();
+              } 
+            }
+
+          },
+          child: const Text('Crear'),
+        ),
+      ],
+    );
+  }
+  Widget get updatePinDialog{
+ 
+    // AlertDialog : pide pin para actualizar el pin
+    return AlertDialog(
+      title: const Text('Actualizar PIN'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            // text : informacion
+            const Text('Para actualizar su PIN, por favor ingrese su pin actual'),
+            const SizedBox(height: 20),
+            // textfield : pin actual
+            TextField( 
+              controller: textFieldController0, 
+              autofocus: true,
+              obscureText: true, 
+              maxLength: 4,
+              textInputAction: TextInputAction.next, 
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration( 
+                prefixIcon: const Icon(Icons.security_sharp),
+                labelText: 'PIN',
+                errorText: errorTextField0!=''? errorTextField0 : null,
+              ), 
+            ),  
+            const SizedBox(height:5),
+            // textfield : nuevo pin
+            TextField( 
+              controller: textFieldController1,
+              obscureText: true, 
+              maxLength: 4,
+              keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.next, 
+              decoration: InputDecoration( 
+                prefixIcon: const Icon(Icons.security_sharp),
+                labelText: 'Nuevo PIN', 
+                errorText: errorTextField1!=''? errorTextField1 : null,
+              ), 
+            ), 
+            const SizedBox(height:5),
+            // textfield : confirmar pin
+            TextField( 
+              controller: textFieldController2,
+              obscureText: true, 
+              maxLength: 4,
+              keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.next, 
+              decoration: InputDecoration( 
+                prefixIcon: const Icon(Icons.security_sharp),
+                labelText: 'Confirmar nuevo PIN', 
+                errorText: errorTextField2!=''? errorTextField2 : null,
+              ), 
+            ),
+          ],
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () {
+            Get.back();
+          },
+          child: const Text('Cancelar'),
+        ),
+        TextButton(
+          onPressed: () {
+            // condition : verificar textofield 0
+            if(textFieldController0.text.length < 4){
+              setState(() {
+                errorTextField0 = 'El pin debe tener 4 digitos';
+              }); 
+            }else if(homeController.pinSegurityCheck(pin: textFieldController0.text) == false ){
+              setState(() {
+                errorTextField0 = 'El pin es incorrecto';
+              }); 
+            }else{
+              setState(() {
+                errorTextField0 = '';
+              });
+            }
+            // condition : verificar textofield 1
+            if(textFieldController1.text.length < 4){
+              setState(() {
+                errorTextField1 = 'El pin debe tener 4 digitos';
+              }); 
+            }else{
+              setState(() {
+                errorTextField1 = '';
+              });
+            }
+            // condition : verificar textofield 2
+            if(textFieldController2.text.length < 4){
+              setState(() {
+                errorTextField2 = 'El pin debe tener 4 digitos';
+              }); 
+            }else{
+              setState(() {
+                errorTextField2 = '';
+              });
+            }
+            // condition : verificar si los pines coinciden
+            if(textFieldController1.text != textFieldController2.text){
+              setState(() {
+                errorTextField1 = 'No coinciden';
+                errorTextField2 = 'No coinciden';
+              }); 
+            }
+            // condition : verificar si no hay errores
+            if(errorTextField0.isEmpty && errorTextField1.isEmpty && errorTextField2.isEmpty){
+              // actualizamos el pin
+              homeController.createPin(pin: textFieldController1.text);
+              salesController.update();
+              Get.back();
+            }
+          },
+          child: const Text('Actualizar'),
+        ),
+      ],
+    );
+  }
+}

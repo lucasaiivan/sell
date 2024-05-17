@@ -50,7 +50,8 @@ class HomeController extends GetxController {
   set setUrlPlayStore(String value) => _urlPlayStore = value;
   get getUrlPlayStore {
     return _urlPlayStore == '' ? '' : _urlPlayStore;
-  }
+  } 
+
   // modo cajero 
   set setCashierMode(bool value) { 
     // guardar dato en el almacenamiento local [SharedPreferences]
@@ -334,6 +335,22 @@ class HomeController extends GetxController {
     super.onClose(); 
   }
 
+  // GETTERS //
+  bool pinSegurityCheck({required String pin}) {
+    // verifica si el pin ingresado es correcto
+    return getProfileAccountSelected.pin == pin;
+  }
+  bool isCatalogue({required String id}) {
+    bool iscatalogue = false;
+    List list = getCataloProducts;
+    for (var element in list) {
+      if (element.id == id) {
+        iscatalogue = true;
+      }
+    }
+    return iscatalogue;
+  }
+
 
   // FUNCTIONS
   Future<bool> onBackPressed({required BuildContext context}) async {
@@ -374,16 +391,8 @@ class HomeController extends GetxController {
     return shouldPop!;
   }
 
-  bool isCatalogue({required String id}) {
-    bool iscatalogue = false;
-    List list = getCataloProducts;
-    for (var element in list) {
-      if (element.id == id) {
-        iscatalogue = true;
-      }
-    }
-    return iscatalogue;
-  }
+
+  
 
   ProductCatalogue getProductCatalogue({required String id}) {
     ProductCatalogue product = ProductCatalogue(
@@ -516,10 +525,17 @@ class HomeController extends GetxController {
     }
   }
 
-  //
-  // QUERIES FIRESTORE
-  //
+  // FIRESTORE //
+  void createPin({required String pin}) { 
+    // ref
+     CollectionReference referenceCollection = Database.refFirestoreAccount();
+    // set
+    getProfileAccountSelected.pin = pin;
 
+    // firebase : guarda el pin en la cuenta
+    referenceCollection.doc(getProfileAccountSelected.id).update({'pin': pin});
+    
+  }
   Future<void> isAppUpdated() async {
     try {
       final packageInfo = await PackageInfo.fromPlatform();

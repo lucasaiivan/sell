@@ -18,7 +18,7 @@ publish_to: 'none' # Quite esta línea si desea publicar en pub.dev
 version: 1.1.0+4
 
 environment:
-  sdk: '^3.0.0'
+  sdk: '^3.0.0' 
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -37,10 +37,10 @@ dependencies:
  
 
   # Google
-  google_sign_in: ^6.1.6
+  google_sign_in: ^6.2.1
   # Firebase
-  cloud_firestore: ^4.13.3
-  firebase_storage: ^11.5.3
+  cloud_firestore: ^4.17.3
+  firebase_storage: ^11.7.5
   firebase_core: ^2.24.0
   firebase_crashlytics: ^3.4.6
   firebase_auth: ^4.15.0
@@ -90,7 +90,7 @@ dependencies:
   fl_chart: ^0.66.1 # Un paquete de Flutter que proporciona un widget de gráfico de datos.
   flutter_cache: ^0.1.0   
   snapping_sheet: ^3.1.0  # Esta es una hoja inferior con una altura que se puede arrastrar  
-  screenshot: ^2.3.0 
+  screenshot: ^3.0.0 
   share_plus: ^8.0.1
   pdf: ^3.10.8
 

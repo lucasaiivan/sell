@@ -43,9 +43,12 @@ class Database {
   static Stream<QuerySnapshot<Map<String, dynamic>>> readProvidersQueryStream({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/PROVIDER') .snapshots();
   static Stream<QuerySnapshot<Map<String, dynamic>>> readQueryStreamAdminsUsers({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/USERS') .snapshots();
   static Stream<QuerySnapshot<Map<String, dynamic>>>readCashRegistersStream({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/CASHREGISTERS/').snapshots();
+ 
   // STORAGE reference
   static Reference referenceStorageAccountImageProfile({required String id}) => FirebaseStorage.instance.ref().child("ACCOUNTS").child(id).child("PROFILE").child("imageProfile");
   static Reference referenceStorageProductPublic({required String id}) => FirebaseStorage.instance.ref().child("APP").child("ARG").child("PRODUCTOS").child(id);
+  // FIRESTORE reference
+  static Reference referenceFirestoreAccountProfile({required String id}) => FirebaseStorage.instance.ref().child("ACCOUNTS").child(id).child("PROFILE").child("imageProfile");
   
   // Firestore - CollectionReference
   static CollectionReference refFirestoreAccountsUsersList({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/USERS');

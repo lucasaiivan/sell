@@ -1,23 +1,16 @@
-import 'dart:async';
-import 'dart:io';  
-import 'package:cloud_firestore/cloud_firestore.dart'; 
-import 'package:flutter/foundation.dart'; 
+import 'dart:async'; 
+import 'package:cloud_firestore/cloud_firestore.dart';  
 import 'package:screenshot/screenshot.dart'; 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sell/app/core/utils/widgets_utils.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
-import 'package:sell/app/domain/entities/catalogo_model.dart';
-import 'package:sell/app/presentation/transactionsPage/views/transactions_view.dart'; 
+import 'package:sell/app/domain/entities/catalogo_model.dart'; 
 import '../../../domain/entities/cashRegister_model.dart';
 import '../../../domain/entities/ticket_model.dart';
 import '../../home/controller/home_controller.dart';
-import 'package:fl_chart/fl_chart.dart'; 
-import 'package:share_plus/share_plus.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
+import 'package:fl_chart/fl_chart.dart';  
 
 
 
