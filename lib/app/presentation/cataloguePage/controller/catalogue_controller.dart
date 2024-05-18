@@ -595,9 +595,7 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
     );
   }
 
-  //
-  // WIDGETS VIEW
-  //
+  // WIDGETS VIEW //
   PreferredSizeWidget get appbar{
     return AppBar( 
       title: const Text('Seleccionados'),
@@ -658,9 +656,8 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
       ],
     );
   }
-  // 
-  // WIDGETS COMPONENTS
-  //
+  
+  // WIDGETS COMPONENTS // 
   Widget itemProduct({required ProductCatalogue product}){
 
     return Column(
@@ -710,10 +707,8 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
       ],
     );
   }
-
-  // 
-  // DIALOG
-  //
+ 
+  // DIALOG //
   void showUpdateDialog(){
     Get.dialog(
       AlertDialog(

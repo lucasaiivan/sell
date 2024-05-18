@@ -94,7 +94,7 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text('Escanear código de barra',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold )),  
-                    Text('Encuentra muchos productos precargados en la base de datos',style: TextStyle(fontSize: 16),textAlign: TextAlign.center),
+                    Text('Encuentra muchos productos disponibles en nuestra base de datos',style: TextStyle(fontSize: 16),textAlign: TextAlign.center),
                   ],
                 ),
               ),
@@ -136,7 +136,7 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text('El código escrito aún no existe',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white )),  
-                          Text('Crea el producto en tu catálogo y se te notificará cuando haya un producto verificado',style: TextStyle(fontSize: 16,color: Colors.white70),textAlign: TextAlign.center,),
+                          Text('Crea el producto en tu catálogo y se te notificará cuando sus datos sean verificado',style: TextStyle(fontSize: 16,color: Colors.white70),textAlign: TextAlign.center,),
                         ],
                       ),
                     ),

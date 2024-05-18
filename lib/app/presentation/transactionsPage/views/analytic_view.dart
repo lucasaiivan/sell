@@ -59,7 +59,6 @@ class _StaticsCardsState extends State<StaticsCards> {
         isPremium: homeController.getIsSubscribedPremium,
         backgroundColor: cardColor,
         icon:  const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Color.fromARGB(31, 94, 43, 43),shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.show_chart_rounded,color: Colors.white,size:14)))),
-        //content: transactionsController.viewPercentageBarValue(text:'%${transactionsController.getPercentEarningsTotal()}',value: transactionsController.getEarningsTotal,total: transactionsController.getAmountTotalFilter),
         titleText: 'Ganancia',
         subtitle: '%${transactionsController.getPercentEarningsFilteredTotal()}',
         valueText:  transactionsController.getEarningsTotalFilteredFormat,
@@ -373,10 +372,17 @@ class SoldProductsView extends StatelessWidget {
                         Text(transactionsController.getMostSelledProducts[i].code,textAlign: TextAlign.center,style: const TextStyle(fontSize: 10,fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1),
                       ],
                     ),
-                  ),
-                  const Spacer(),
+                  ), 
+                  const SizedBox(width:50),
                   // text : cantidad
-                  Text('x${transactionsController.getMostSelledProducts[i].quantity.toString()}',style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Container( 
+                    // circular
+                    decoration: BoxDecoration(
+                      color: Colors.black12,
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    padding:  const EdgeInsets.symmetric(horizontal: 5,vertical: 2),
+                    child: Text(transactionsController.getMostSelledProducts[i].quantity.toString(),style: const TextStyle(fontWeight: FontWeight.bold))),
                 ],
               ),
               Padding(
@@ -477,13 +483,13 @@ class ProfitabilityProductsView extends StatelessWidget {
                           Text(Publications.getFormatoPrecio(monto: revenue),style: const TextStyle(fontWeight: FontWeight.bold,color: Colors.green)),
                           const SizedBox(width: 5),
                           // text : porcentaje de ganancia
-                          Row(
-                            children: [
-                              const Icon(Icons.arrow_outward_rounded,size: 14,color: Colors.green),
-                              const SizedBox(width: 2),
-                              Text('%$percentage',style: const TextStyle(fontWeight: FontWeight.bold,color: Colors.green)),
-                            ],
-                          ),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.green.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal:3,vertical:1),
+                            child: Text('%$percentage',style: const TextStyle(fontWeight: FontWeight.bold,color: Colors.green))),
                           
                         ],
                       ),
@@ -623,10 +629,12 @@ class PaymentMethodView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // text : nombre del medio de pago
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 5.0,vertical:5),
                   child: Text(map[index]['name'] ,style: textStyle,overflow: TextOverflow.ellipsis),
                 ),
+                // view :  datos de porcentaje y monto total
                 Stack(  
                   alignment: Alignment.centerLeft, // centrar contenido
                   children: [

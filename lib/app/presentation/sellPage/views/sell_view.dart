@@ -806,12 +806,12 @@ class SalesView extends StatelessWidget {
                                 children: [
                                   ListTile(
                                     // avatar : icono de check
-                                    leading: const Icon(Icons.check_circle_outline_rounded,color: Colors.green),
+                                    leading: const Icon(Icons.check,color: Colors.green),
                                     // title : texto 'Facturado' con tono mas claro y '$3.445' en negrita
                                     title: Row(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        const Text('Facturado  ',style: TextStyle(color: Colors.black54,fontWeight: FontWeight.w400)),
+                                        const Text('Facturado  ',style: TextStyle(color: Colors.black87,fontWeight: FontWeight.w300)),
                                         Text(Publications.getFormatoPrecio(monto: salesController.getLastTicket.getTotalPrice),style: const TextStyle(color: Colors.black,fontWeight: FontWeight.bold)),
                                       ],
                                     ),  
@@ -1760,7 +1760,12 @@ class _ViewAddDiscountState extends State<ViewAddDiscount> {
 
 // DIALOG 
 class PinCheckAlertDialog extends StatefulWidget {
-  const PinCheckAlertDialog({super.key});
+
+  late bool create;
+  late bool update;
+  late bool entry;
+  
+  PinCheckAlertDialog({super.key,this.create=false,this.update=false,this.entry=true});
 
   @override
   State<PinCheckAlertDialog> createState() => _PinCheckAlertDialogState();
@@ -1784,7 +1789,7 @@ class _PinCheckAlertDialogState extends State<PinCheckAlertDialog> {
   
   @override
   Widget build(BuildContext context) { 
-    return homeController.getProfileAccountSelected.pin.isEmpty?createPindialog:updatePinAction?updatePinDialog:entryPinDialog;
+    return widget.create?createPindialog:widget.update?updatePinDialog:entryPinDialog;
   }
 
   // VIEW 
@@ -1811,16 +1816,7 @@ class _PinCheckAlertDialogState extends State<PinCheckAlertDialog> {
               labelText: 'Pin', 
               errorText: errorTextField0!=''? errorTextField0 : null,
             ),
-          ), 
-          // textbutton : actualizar pin
-          TextButton(
-            onPressed: () {
-              setState(() {
-                updatePinAction = true;
-              });
-            },
-            child: const Text('Actualizar PIN'),
-          ),
+          ),  
         ],
       ),
       actions: <Widget>[
@@ -1955,7 +1951,7 @@ class _PinCheckAlertDialogState extends State<PinCheckAlertDialog> {
               keyboardType: TextInputType.number,
               decoration: InputDecoration( 
                 prefixIcon: const Icon(Icons.security_sharp),
-                labelText: 'PIN',
+                labelText: 'PIN actual',
                 errorText: errorTextField0!=''? errorTextField0 : null,
               ), 
             ),  

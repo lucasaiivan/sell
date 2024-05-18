@@ -6,6 +6,7 @@ import 'package:sell/app/presentation/historyCashRegisterPage/views/historyCashR
 import 'package:sell/app/presentation/sellPage/views/sell_view.dart';
 import 'package:sell/app/presentation/cataloguePage/views/catalogue_view.dart';
 import 'package:sell/app/presentation/transactionsPage/views/transactions_view.dart';
+import '../../../core/routes/app_pages.dart';
 import '../../../core/utils/widgets_utils.dart'; 
 import '../../multiuser/views/multiuser_view.dart';  
 import '../controller/home_controller.dart';
@@ -90,3 +91,85 @@ class HomeView extends GetView<HomeController> {
     });
   }
 }
+
+class MyConfigView extends StatelessWidget {
+  MyConfigView({super.key});
+
+  // controllers 
+  final HomeController homeController = Get.find();
+
+  @override
+  Widget build(BuildContext context) {
+    return body;
+  }
+  Widget get body{
+    return Column(
+      children: [
+        Flexible( 
+          child: ListView( 
+            children: [ 
+              // text : titulo  y iconobutton
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Row(
+                  children: [
+                    // text : titulo
+                    const Text('Configuración',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w600)),
+                    const Spacer(),
+                    // icon : close
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () {
+                        Get.back();
+                      },
+                    ),
+                  ],
+                ),
+              ), 
+              ComponentApp().divider(),
+              // listitle : item de la cuenta
+              ListTile(
+                title: const Text('Información del negocio'),
+                subtitle: Text(homeController.getProfileAccountSelected.name),
+                leading: const Icon(Icons.storefront_sharp),
+                trailing: const Icon(Icons.arrow_forward_ios_rounded),
+                onTap: () {
+                  Get.back();
+                  // navigation : navegamos a la pantalla de la cuenta
+                  Get.toNamed(Routes.account);
+                },
+              ),
+              ComponentApp().divider(),
+              // listitle : actualizar pin de seguridad o sino existe crearlo
+              ListTile(
+                title: const Text('PIN de seguridad'),
+                subtitle: const Text('Protege tu cuenta con un pin de seguridad'),
+                leading: const Icon(Icons.security_rounded),
+                trailing: const Icon(Icons.arrow_forward_ios_rounded),
+                onTap: () { 
+                  // show dialog : introducir pin para desactivar el modo cajero
+                  if(homeController.getProfileAccountSelected.pin == ''){
+                    Get.dialog(  PinCheckAlertDialog(create: false),barrierDismissible: false);
+                  }else{ 
+                    Get.dialog(  PinCheckAlertDialog(update: true),barrierDismissible: false);
+                  }
+                },
+              ),
+            ],
+          ),
+        ),
+        const Divider(height: 0),
+        // ListTile : cerrar sesión
+        ListTile(
+          title: const Text('Cerrar sesión'),
+          subtitle: Text(homeController.getUserAuth.email ?? ''),
+          trailing: const Icon(Icons.login_rounded),
+          onTap: homeController.showDialogCerrarSesion,
+        ),
+      ],
+    );
+  }
+}
+
+
+

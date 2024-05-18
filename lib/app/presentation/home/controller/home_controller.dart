@@ -1,4 +1,5 @@
-import 'dart:io';  
+import 'dart:io';   
+import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -17,7 +18,8 @@ import '../../../domain/entities/cashRegister_model.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../domain/entities/user_model.dart';
 import '../../../core/utils/widgets_utils.dart';
-import '../../auth/controller/login_controller.dart';
+import '../../auth/controller/login_controller.dart'; 
+import '../views/home_view.dart';
 
 class HomeController extends GetxController {
 
@@ -712,10 +714,18 @@ class HomeController extends GetxController {
   }
 
   void readProductsCatalogue({required String idAccount}) {
+
     // obtenemos los obj(productos) del catalogo de la cuenta del negocio
     Stream<QuerySnapshot<Map<String, dynamic>>> streamSubscription = Database.readProductsCatalogueStream(id: idAccount);
     // stream : escuchamos los cambios en los productos de cátalogo
     streamSubscription.listen((value) {
+
+      // TODO : delete for release
+      // sharedPreference : incrementamos el valor de veces que se obtuvo datos de la db o en su defecto creamos la variable en el almacenamiento local
+      String dateId = DateFormat('ddMMyyyy').format(Timestamp.now().toDate()).toString();
+      int count = GetStorage().hasData(dateId) ? GetStorage().read(dateId) : 0;
+      GetStorage().write(dateId, count + value.docs.length );
+
       //  values
       List<ProductCatalogue> list = [];
       if (value.docs.isNotEmpty) {
@@ -959,17 +969,33 @@ class HomeController extends GetxController {
     }
   }
 
-  // void : funcion para cambiar de cuenta en la app
   void accountChange({required String idAccount}) async {
     // save key/values Storage
     await GetStorage().write('idAccount', idAccount);
     // navegar hacia otra pantalla
     Get.offAllNamed(Routes.home,arguments: {'currentUser': getUserAuth, 'idAccount': idAccount} );
   }
-
-  // BottomSheet - Getx
+  // GETTERS //
+  // TODO : delete for release
+  int  get dbQueryAmoun {
+    String dateId = DateFormat('ddMMyyyy').format(Timestamp.now().toDate()).toString();
+    return GetStorage().hasData(dateId)?GetStorage().read(dateId):0;
+  }
+  // DIALOGS //
+  void showModalBottomSheetConfig() {  
+    
+    // muestre la hoja inferior modal de getx
+    Get.bottomSheet(
+      MyConfigView(),
+      clipBehavior: Clip.antiAlias,
+      backgroundColor: Get.theme.scaffoldBackgroundColor,
+      enableDrag: true,
+      isDismissible: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
+    );
+  }
   void showModalBottomSheetSelectAccount() {
-    // muestra las cuentas en el que el usuario tiene accesos
+    // description : muestra las cuentas en el que el usuario tiene accesos
 
     // widgets
     Widget widget = !checkAccountExistence
@@ -977,10 +1003,24 @@ class HomeController extends GetxController {
       : Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(bottom: 12, left: 12, right: 12, top: 20),
-            child: Text('Tienes acceso a estas cuentas'),
-          ),
+          // text : titulo  y iconobutton
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              children: [
+                // text : titulo
+                const Text('Cuentas',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w600)),
+                const Spacer(),
+                // icon : close
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () {
+                    Get.back();
+                  },
+                ),
+              ],
+            ),
+          ), 
           ListView.builder(
             padding: const EdgeInsets.symmetric(),
             shrinkWrap: true,
@@ -1005,15 +1045,7 @@ class HomeController extends GetxController {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              // button : cerrar sesion
-              ListTile(
-                title: const Text('Cerrar sesión'),
-                subtitle: Text(getUserAuth.email.toString(),
-                    maxLines: 1, overflow: TextOverflow.ellipsis),
-                trailing: const Icon(Icons.arrow_forward_ios_rounded),
-                onTap: showDialogCerrarSesion,
-              ),
+            children: [ 
               ComponentApp().divider(),
               widget,
             ],
@@ -1027,13 +1059,12 @@ class HomeController extends GetxController {
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
     );
   }
-
   void showModalBottomSheetSubcription({String id = 'premium'}) {
     // bottomSheet : muestre la hoja inferior modal de getx
     Get.bottomSheet(
       SizedBox(
         height: 600, 
-        child: WidgetBottomSheet(id: id)),
+        child: WidgetBottomSheetSubcription(id: id)),
         backgroundColor: Get.theme.scaffoldBackgroundColor,
         isScrollControlled: true,
         enableDrag: true,
@@ -1043,16 +1074,15 @@ class HomeController extends GetxController {
   }
 }
 
-class WidgetBottomSheet extends StatefulWidget {
+class WidgetBottomSheetSubcription extends StatefulWidget {
   late final String id;
   // ignore: prefer_const_constructors_in_immutables
-  WidgetBottomSheet({Key? key, required this.id}) : super(key: key);
+  WidgetBottomSheetSubcription({Key? key, required this.id}) : super(key: key);
 
   @override
-  State<WidgetBottomSheet> createState() => _WidgetBottomSheetState();
+  State<WidgetBottomSheetSubcription> createState() => _WidgetBottomSheetSubcriptionState();
 }
-
-class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
+class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcription> {
   // others controllers
   final HomeController homeController = Get.find();
 
@@ -1336,8 +1366,4 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
     );
   }
 }
-
-
-
-
 

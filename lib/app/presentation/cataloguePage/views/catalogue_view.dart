@@ -164,6 +164,11 @@ class CataloguePage extends StatelessWidget {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  // text : cantidad de veces que se consulta la db del catalogo
+                  homeController.dbQueryAmoun==0?Container():Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Text('query database: ${homeController.dbQueryAmoun}',style: const TextStyle(fontSize: 12,fontWeight: FontWeight.w300)),
+                  ),
                   // view : control de inventario
                   homeController.getIsSubscribedPremium?controller.viewStockAlert:Padding(
                     padding: const EdgeInsets.all(20.0),
