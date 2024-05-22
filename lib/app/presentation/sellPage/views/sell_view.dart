@@ -1929,9 +1929,15 @@ class _PinCheckAlertDialogState extends State<PinCheckAlertDialog> {
       ],
     );
   }
-  Widget get updatePinDialog{
- 
-    // AlertDialog : pide pin para actualizar el pin
+  Widget get updatePinDialog{ 
+    // AlertDialog : si no es superusuario (propietario) pide pin actual para actualizar 
+
+    // var 
+    bool isSuperUser = homeController.getProfileAdminUser.superAdmin;
+    
+    // set
+    textFieldController0.text = isSuperUser?homeController.getProfileAccountSelected.pin: '';
+
     return AlertDialog(
       title: const Text('Actualizar PIN'),
       content: SingleChildScrollView(
@@ -1942,10 +1948,11 @@ class _PinCheckAlertDialogState extends State<PinCheckAlertDialog> {
             const Text('Para actualizar su PIN, por favor ingrese su pin actual'),
             const SizedBox(height: 20),
             // textfield : pin actual
-            TextField( 
+            TextField(
+              enabled: isSuperUser?false:true,
               controller: textFieldController0, 
               autofocus: true,
-              obscureText: true, 
+              obscureText: true,
               maxLength: 4,
               textInputAction: TextInputAction.next, 
               keyboardType: TextInputType.number,

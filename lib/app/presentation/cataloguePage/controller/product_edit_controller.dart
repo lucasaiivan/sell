@@ -459,24 +459,7 @@ class ControllerProductsEdit extends GetxController {
 
     // firebase: actualizar el documento del producto publico
     Database.refFirestoreProductPublic().doc(product.id).update(product.toJson());
-  }
-  void setProductPublicFirestoreAndBack() { 
-    // esta función procede a guardar el documento de una colleción publica
-
-    // valores
-    Product product = getProduct.convertProductoDefault();
-    
-    //  set : marca de tiempo que se actualizo el documento
-    product.upgrade = Timestamp.fromDate(DateTime.now()); 
-    //  set : id del usuario que actualizo el documento
-    product.idUserUpgrade = homeController.getProfileAdminUser.email;
-
-    // firebase: actualizar el documento del producto publico
-    Database.refFirestoreProductPublic().doc(product.id).update(product.toJson());
-    // actualizar vista
-    updateAll();
-    Get.back();
-  }
+  } 
   void deleteProductInCatalogue() async{
     // activate indicator load
     setLoadingData = true;

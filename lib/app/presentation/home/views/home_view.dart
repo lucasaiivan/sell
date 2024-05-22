@@ -12,6 +12,7 @@ import '../../multiuser/views/multiuser_view.dart';
 import '../controller/home_controller.dart';
 
 
+// ignore: must_be_immutable
 class HomeView extends GetView<HomeController> {
   // ignore: prefer_const_constructors_in_immutables
   HomeView({Key? key}) : super(key: key);

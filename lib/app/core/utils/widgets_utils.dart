@@ -105,9 +105,9 @@ class WidgetButtonListTile extends StatelessWidget {
     final HomeController homeController = Get.find();
 
     // var 
-    bool isSelected =  homeController.getProfileAccountSelected.id == perfilNegocio.id; 
-    bool isAdmin = homeController.getProfileAdminUser.admin;
-    bool isSuperAdmin = homeController.getProfileAdminUser.superAdmin;
+    final bool isSelected =  homeController.getProfileAccountSelected.id == perfilNegocio.id; 
+    final bool isAdmin = homeController.getProfileAdminUser.admin;
+    final bool isSuperAdmin = homeController.getProfileAdminUser.superAdmin;
 
     // condition : si el perfil de negocio no tiene id no se muestra
     if (perfilNegocio.id == '') { return Container(); }
@@ -115,7 +115,7 @@ class WidgetButtonListTile extends StatelessWidget {
     // row : si la vista es en forma de lista horizontal , se muesta una vista reducida de el avatar y el nombre debajo
     if(row){
       return InkWell(
-        onTap: () {
+        onTap: () { 
           controller.accountChange(idAccount: perfilNegocio.id);
         },
         // touch round
@@ -213,8 +213,8 @@ class WidgetButtonListTile extends StatelessWidget {
             child: Icon(Icons.check_circle_outline_rounded,color: Colors.blue),
           ):null,
           onTap: () {
-            if(homeController.getProfileAdminUser.superAdmin && homeController.getProfileAccountSelected.id == perfilNegocio.id){
-                 
+            if(homeController.getProfileAccountSelected.id == perfilNegocio.id){
+                 // no hace ninguna acción
               }else{
                 controller.accountChange(idAccount: perfilNegocio.id);
               }
@@ -503,6 +503,7 @@ Widget body({required BuildContext context}){
                     trailing: homeController.getIndexPage != 2 ? null : const Icon(Icons.circle,size: 8),
                     title: const Text('Transacciones'),
                     onTap: () => homeController.setIndexPage = 2):Container(),
+                  // catalogo
                   user.catalogue || isAnonymous?homeController.getCashierMode?Container():ListTile(
                     enabled: !isAnonymous,
                     selected: homeController.getIndexPage == 3,
@@ -510,6 +511,18 @@ Widget body({required BuildContext context}){
                     trailing: homeController.getIndexPage != 3 ? null : const Icon(Icons.circle,size: 8),
                     title: const Text('Catálogo'),
                     onTap: () => homeController.setIndexPage = 3):Container(),
+                  // TODO : desabilitar visualizacion para produccion
+                  ListTile(
+                    enabled: !isAnonymous,
+                    selected: homeController.getIndexPage == 5,
+                    leading: const Icon(Icons.admin_panel_settings_outlined),
+                    trailing: homeController.getIndexPage != 5 ? null : const Icon(Icons.circle,size: 8),
+                    title: const Text('Moderador'),
+                    onTap: () {
+                      Get.toNamed(Routes.moderator); 
+                    },
+                  ),
+                  // multiusuario
                   user.multiuser || isAnonymous?homeController.getCashierMode?Container():ListTile(
                     enabled: !isAnonymous,
                     selected: homeController.getIndexPage == 4,
@@ -694,6 +707,7 @@ Widget viewSelectedAccount() {
                     Get.toNamed(Routes.account);
                   },
                 ),
+
                 // lista de cuentas administradas o boton para crear una cuenta
                 !homeController.getLoadedManagedAccountsList?const CircularProgressIndicator(): homeController.getManagedAccountsList.isEmpty? Container()
                 :Flexible(  
@@ -712,7 +726,7 @@ Widget viewSelectedAccount() {
               ],
             ),
           ),
-        ),
+        ), 
         // textButton : cerrar sesion
         Padding(
           padding: const EdgeInsets.all(20.0),

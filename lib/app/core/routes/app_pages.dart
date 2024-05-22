@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:sell/app/presentation/auth/bindings/login_binding.dart'; 
 import 'package:sell/app/presentation/home/bindings/home_binding.dart';
 import 'package:sell/app/presentation/home/views/home_view.dart';
+import 'package:sell/app/presentation/moderator/view/moderator_view.dart';
 import 'package:sell/app/presentation/splash/bindings/splash_binding.dart';
 import 'package:sell/app/presentation/splash/views/splash_view.dart';
 
@@ -14,6 +15,7 @@ import '../../presentation/cataloguePage/views/create_product_form_view.dart';
 import '../../presentation/cataloguePage/views/product_edit_view.dart';
 import '../../presentation/cataloguePage/views/product_view.dart';
 import '../../presentation/cataloguePage/views/productsSearch_view.dart';
+import '../../presentation/moderator/bindings/moderator_binding.dart';
 import '../../presentation/multiuser/bindings/multiuser_binding.dart';
 import '../../presentation/multiuser/views/multiuser_view.dart';
 part 'app_routes.dart';
@@ -69,6 +71,11 @@ class AppPages {
       name: Routes.product,
       page: () => const ProductView(),
       binding: ProductControllerBinding(),
+    ),
+    GetPage(
+      name: Routes.moderator,
+      page: () => ModeratorView(),
+      binding: ModeratorBinding(),
     ),
   ];
 }

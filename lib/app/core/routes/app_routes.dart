@@ -12,6 +12,7 @@ abstract class Routes {
   static const multiuser = _Paths.multiuser;
   static const historyCashTerhgister = _Paths.historyCashTerhgister;
   static const product = _Paths.product;
+  static const moderator = _Paths.moderator;
 }
 
 abstract class _Paths {
@@ -25,4 +26,5 @@ abstract class _Paths {
   static const multiuser = '/multiuser';
   static const historyCashTerhgister = '/historyCashRegister';
   static const product = '/product';
+  static const moderator = '/moderator';
 }
