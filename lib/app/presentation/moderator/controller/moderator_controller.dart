@@ -1,4 +1,5 @@
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart'; 
 import '../../../core/routes/app_pages.dart';
 import '../../../data/datasource/database_cloud.dart';
@@ -53,8 +54,20 @@ class ModeratorController extends GetxController {
    int get totalProducts => products.length;
   int get totalVerifiedProducts => products.where((element) => element.verified).length;
   int get totalUnverifiedProducts => products.where((element) => !element.verified).length;
+  Product? getProduct({required String id}) { 
+    // description : obtenemos un producto por su id
+    for (var element in products) {
+      if (element.id == id) {
+        return element;
+      }
+    }
+    return null;
+  }
   // DATA SOURCE
   void loadDB() {
+    // default values
+    setLoading = true; 
+    products.clear();
     // description : obtenemos toda la dabase de los productos
     Database.readProductsFuture().then((value) {  
       for (var element in value.docs) { 
@@ -77,6 +90,8 @@ class ModeratorController extends GetxController {
     });
   }
   void loadMarks(){
+    //  values default 
+    getMarks.clear();
     // description : obtenemos toda la dabase de las marcas
     Database.readListMarksFuture().then((value) { 
       for (var element in value.docs) { 
@@ -92,6 +107,8 @@ class ModeratorController extends GetxController {
     });
   }
   void loadReports(){
+    // default 
+    getReports.clear();
     // description : obtenemos toda la dabase de los reportes
     Database.readReportsProductFuture().then((value) { 
       for (var element in value.docs) { 
@@ -145,6 +162,12 @@ class ModeratorController extends GetxController {
     update();
      
   } 
+  void deleteReport({required String id}) {
+    // description : eliminamos el reporte
+    Database.refFirestoreReportProduct().doc(id).delete().then((value) {
+      loadReports();
+    });
+  }
   // DIALOG
   void showSeachDialog() {
     // description : dialogo de busqueda de productos

@@ -53,6 +53,11 @@ class ModeratorView extends GetView<ModeratorController> {
                 controller.setFilterText = 'No verificados';
                 controller.filterProducts(verified: false);
                 break;
+              case 'reports':
+                controller.setFilterText = 'Reportes';
+                controller.viewReports = true;
+                controller.update();
+                break;
               default:
                 controller.setFilterText = 'Todos';
                 controller.filterProducts();
@@ -63,7 +68,7 @@ class ModeratorView extends GetView<ModeratorController> {
                 const PopupMenuItem(value: 'all', child: Text('Mostrar todos')),
                 const PopupMenuItem(value: 'verified', child: Text('Verificados')),
                 const PopupMenuItem(value: 'noVerified', child: Text('Sin verificar')), 
-                
+                const PopupMenuItem(value: 'reports', child: Text('Reportes')),
               ]),
     ], 
     );
@@ -205,17 +210,27 @@ class ModeratorView extends GetView<ModeratorController> {
         wrapChipsFilterIdUserCreations,
       ],
     );
-
+    // condition : si esta cargando
     if(controller.getLoading){
       return const Center(child: CircularProgressIndicator());
     }
+    // condition : muestra los reportes de los usuarios
     if(controller.viewReports){ 
+      // condition : si no hay reportes
+      if(controller.getReports.isEmpty){
+        return Column(
+          children:[
+            chipsDataView,
+            const Flexible(child: Center(child: Text('Sin reportes',style: TextStyle(fontWeight: FontWeight.w300)))),
+          ]
+        );
+      }
 
       return ListView.builder(
         itemCount: controller.getReports.length,
         itemBuilder: (BuildContext context, int index) {
           // var
-          String description = controller.getReports[index].description == '' ? 'Descripción: sin datos' : 'Descripción: ${controller.getReports[index].description}';
+          String description = controller.getReports[index].description == '' ? 'sin datos' : controller.getReports[index].description;
 
           return Column(
             children: [
@@ -227,7 +242,17 @@ class ModeratorView extends GetView<ModeratorController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // text : descripcion del reporte
-                    Text(description),
+                    RichText(
+                      text: TextSpan( 
+                        style: DefaultTextStyle.of(context).style,  
+                        children: <TextSpan>[
+                          TextSpan(text:'Description: ', style: TextStyle(color: DefaultTextStyle.of(context).style.color?.withOpacity(0.5))), 
+                          TextSpan(text:description, style: const TextStyle(fontWeight: FontWeight.w300)), 
+                        ],
+                      ),
+                    ),
+                    // text : datos reportados
+                    Text('Datos reportados:',style: TextStyle(color: DefaultTextStyle.of(context).style.color?.withOpacity(0.5))),
                     // text : reportes items
                     controller.getReports.isEmpty?Container():Row(
                       children: controller.getReports[index].reports.map((e) => Padding(
@@ -244,7 +269,39 @@ class ModeratorView extends GetView<ModeratorController> {
                     ),
                   ],
                 ), 
-                onTap: (){},
+                leading: Column(
+                  children: [
+                    // avatar : product 
+                    ImageProductAvatarApp(url: controller.getProduct(id: controller.getReports[index].idProduct)!.image,size: 40),
+                    // text : descripcion del producto
+                    SizedBox(
+                      width: 75,
+                      child: Text(controller.getProduct(id: controller.getReports[index].idProduct)!.description,style: const TextStyle(fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1)),
+                  ],
+                ),
+                // trailing : eliminar reporte
+                trailing: PopupMenuButton<String>(
+                  onSelected: (value) {
+                    // condition : si se selecciona eliminar reporte
+                    if(value=='Eliminar reporte'){
+                      controller.deleteReport(id: controller.getReports[index].id);
+                    }
+                    // condition : si se selecciona navegar al producto
+                    if(value=='Ver producto'){
+                      controller.goToProductEdit(controller.getProduct(id: controller.getReports[index].idProduct)!);
+                    }
+
+                  },
+                  itemBuilder: (BuildContext context) {
+                    return ['Ver producto', 'Eliminar reporte', ''].map((String choice) {
+                      return PopupMenuItem<String>(
+                        value: choice,
+                        child: Text(choice),
+                      );
+                    }).toList();
+                  },
+                ),
+                onTap: ()=> controller.goToProductEdit(controller.getProduct(id: controller.getReports[index].idProduct)!),
                  
               ),
               const Divider(height: 0,thickness:0.4),
@@ -253,6 +310,7 @@ class ModeratorView extends GetView<ModeratorController> {
         },
       );
     }
+    // condition : si no hay productos
     if(controller.getProductsFiltered.isEmpty){
       return Column(
         children: [
