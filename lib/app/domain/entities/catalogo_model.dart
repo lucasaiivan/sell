@@ -455,7 +455,7 @@ class ProductCatalogue {
     productoDefault.nameMark =  nameMark;
     productoDefault.imageMark = imageMark;
     productoDefault.description =  description;
-    productoDefault.code = code;
+    productoDefault.code = code; 
     return productoDefault;
   }
 
@@ -683,7 +683,7 @@ class ReportProduct {
   });
   Map<String, dynamic> toJson() => {
         "id": id,
-        "idProduct": idProduct,
+        "idProduct": idProduct, 
         "idUserReport": idUserReport,
         "description": description,
         "reports": reports,
@@ -692,7 +692,7 @@ class ReportProduct {
   factory ReportProduct.fromMap(Map<String, dynamic> data) {
     return ReportProduct(
       id: data['id'] ?? '',
-      idProduct: data['name'] ?? '',
+      idProduct: data['idProduct'] ?? '',
       idUserReport: data['idUserReport'] ?? '',
       description: data['description'] ?? '',
       reports: data['reports'] ?? [],

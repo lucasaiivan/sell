@@ -922,6 +922,7 @@ class HomeController extends GetxController {
       // el producto no existe 
       product.creation = Timestamp.fromDate(DateTime.now()); // fecha de creación del producto
       product.followers++; // incrementamos el contador de los seguidores del producto publico 
+   
     }else{
       // el producto ya existe
       //
@@ -937,9 +938,16 @@ class HomeController extends GetxController {
     // Firebase : se actualiza el documento del producto del cátalogo
     Database.refFirestoreCatalogueProduct(idAccount: getProfileAccountSelected.id).doc(product.id).set(product.toJson());
     
-    // condition : si el producto no esta verificado se procede a crear un documento en la colección publica
-    if (product.verified == false) {
-      addProductToCollectionPublic(isNew: isProductNew, product: product.convertProductoDefault());
+    // condition : si el producto no esta verificado o no existe 
+    if (product.verified == false || isProductNew ) {
+      Product productPublic = product.convertProductoDefault();
+      if(isProductNew) productPublic.creation = Timestamp.fromDate(DateTime.now());
+      productPublic.upgrade = Timestamp.fromDate(DateTime.now());
+      if(isProductNew) productPublic.idAccount = getProfileAccountSelected.id;
+      if(isProductNew) productPublic.idUserCreation = getProfileAdminUser.email;
+      productPublic.idUserUpgrade = getProfileAdminUser.email;
+      // fuction : se crea un documento en la colección publica
+      addProductToCollectionPublic(isNew: isProductNew, product: productPublic);
     }
   }
 
