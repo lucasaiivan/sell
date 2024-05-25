@@ -458,7 +458,7 @@ class ControllerProductsEdit extends GetxController {
     product.idUserUpgrade = homeController.getProfileAdminUser.email;
 
     // firebase: actualizar el documento del producto publico
-    Database.refFirestoreProductPublic().doc(product.id).update(product.toJson());
+    Database.refFirestoreProductPublic().doc(product.id).update(product.toJsonUpdate());
   } 
   void deleteProductInCatalogue() async{
     // activate indicator load

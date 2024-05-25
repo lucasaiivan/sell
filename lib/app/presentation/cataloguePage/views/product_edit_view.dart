@@ -2,8 +2,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart'; 
+import 'package:flutter/services.dart'; 
 import 'package:get/get.dart';
 import 'package:sell/app/presentation/cataloguePage/controller/catalogue_controller.dart';
 import 'package:url_launcher/url_launcher.dart';  
@@ -1059,7 +1058,7 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
                     Opacity(opacity:!controller.getEditModerator?0.3:1,child: Text(Publications.getFormatAmount(value: controller.getProduct.followers))),
                     // button : incrementar seguidores
                     TextButton(
-                        onPressed: !controller.getEditModerator?null: ()=> setState(()=>controller.increaseFollowersProductPublic() ),
+                        onPressed: !controller.getEditModerator? null : ()=> setState( ()=> controller.increaseFollowersProductPublic() ),
                         child: const Icon(Icons.add_box_rounded),
                     ),
                     

@@ -16,16 +16,14 @@ class Product {
   bool verified = false; // estado de verificación  al un moderador
   Timestamp creation =Timestamp.now(); // Marca de tiempo ( hora en que se creo el producto )
   Timestamp upgrade =Timestamp.now(); // Marca de tiempo ( hora en que se edito el producto )
-  // datos del usuario y cuenta 
-  String idAccount = ''; // ID del negocios que actualizo el documento
+  // datos del usuario y cuenta  
   String idUserCreation =''; // id del usuario que creo el documento
   String idUserUpgrade = '' ; // id del usuario que actualizo el documento
 
   Product({
     this.id = "",
     this.followers = 0,
-    this.idUserCreation = '',
-    this.idAccount = '',
+    this.idUserCreation = '', 
     this.idUserUpgrade = '',
     this.verified = false,
     this.outstanding = false,
@@ -41,8 +39,7 @@ class Product {
 
   Map<String, dynamic> toJson() => {
         "id": id,
-        'followers':followers,
-        'idAccount': idAccount,
+        'followers':followers, 
         'idUserCreation': idUserCreation,
         'idUserUpgrade': idUserUpgrade,
         "verified": verified,
@@ -56,12 +53,27 @@ class Product {
         "creation": creation,
         "upgrade": upgrade,
       };
+    Map<String, dynamic> toJsonUpdate() => {
+        "id": id,
+        'followers':followers, 
+        //'idUserCreation': idUserCreation,
+        'idUserUpgrade': idUserUpgrade,
+        "verified": verified,
+        "outstanding": outstanding, 
+        "idMark": idMark,
+        'nameMark': nameMark,
+        'imageMark':imageMark,
+        "image": image,
+        "description": description,
+        //"code": code,
+        //"creation": creation,
+        "upgrade": upgrade,
+      };
 
   factory Product.fromMap(Map data) {
     return Product(
       id: data.containsKey('id')? data['id'] :'',
-      followers: data.containsKey('followers')? data['followers'] : 0,
-      idAccount: data.containsKey('idAccount')? data['idAccount']: '',
+      followers: data.containsKey('followers')? data['followers'] : 0, 
       idUserCreation: data.containsKey('idUserCreation')? data['idUserCreation'] : '',
       idUserUpgrade: data.containsKey('idUserUpgrade')? data['idUserUpgrade'] : '',
       verified: data.containsKey('verified')? data['verified']: false,
@@ -82,8 +94,7 @@ class Product {
     Map data = documentSnapshot.data() as Map;
     // set
     id = data['id'] ?? '';
-    followers = data.containsKey('followers')? data['followers'] : 0;
-    idAccount = data.containsKey('idAccount')? data['idAccount']: data['id_negocio'] ?? '';
+    followers = data.containsKey('followers')? data['followers'] : 0; 
     idUserCreation = data['idUserCreation'] ?? '';
     idUserUpgrade = data['idUserUpgrade'] ?? '';
     verified = data.containsKey('verified')? data['verified']: data['verificado'] ?? false;
@@ -455,7 +466,7 @@ class ProductCatalogue {
     productoDefault.nameMark =  nameMark;
     productoDefault.imageMark = imageMark;
     productoDefault.description =  description;
-    productoDefault.code = code; 
+    productoDefault.code = code;  
     return productoDefault;
   }
 

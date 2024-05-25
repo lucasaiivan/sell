@@ -24,8 +24,8 @@ class ModeratorView extends GetView<ModeratorController> {
 
 
     return AppBar(
-    title: const Text('Base de datos'),
-    actions: [ 
+    title: const Text('Data Base'),
+    actions: [    
       // icon : search
         IconButton(
           icon: const Icon(Icons.search),
@@ -58,9 +58,11 @@ class ModeratorView extends GetView<ModeratorController> {
                 controller.viewReports = true;
                 controller.update();
                 break;
-              default:
-                controller.setFilterText = 'Todos';
-                controller.filterProducts();
+              case 'noData':
+                controller.setFilterText = 'Datos faltantes';
+                controller.filterProducts(noData: true);
+                break;
+              default: 
             }
             
           },
@@ -68,7 +70,15 @@ class ModeratorView extends GetView<ModeratorController> {
                 const PopupMenuItem(value: 'all', child: Text('Mostrar todos')),
                 const PopupMenuItem(value: 'verified', child: Text('Verificados')),
                 const PopupMenuItem(value: 'noVerified', child: Text('Sin verificar')), 
-                const PopupMenuItem(value: 'reports', child: Text('Reportes')),
+                const PopupMenuItem(value: 'noData', child: Text('Datos faltantes')), 
+                const PopupMenuItem(value: '', child: Divider()),
+                const PopupMenuItem(value: 'reports', child: Row(
+                  children: [
+                    Icon(Icons.report_gmailerrorred),
+                    SizedBox(width: 10),
+                    Text('Reportes de usuarios'),
+                  ],
+                )),
               ]),
     ], 
     );
@@ -84,82 +94,51 @@ class ModeratorView extends GetView<ModeratorController> {
         runSpacing: 10,
         children: [
           // chip : cantidad de articulos del catalogo y filtrados
-          ActionChip(
-            onPressed: (){
+          chipReport(
+            value: controller.totalProducts,
+            description: 'Productos',
+            onTap: (){
               controller.setFilterText = 'Todos';
               controller.filterProducts();
             },
-            side: const BorderSide(color: Colors.transparent),
-            visualDensity: VisualDensity.compact,
-            label: Column(
-              children: [
-                Text(Publications.getFormatAmount(value: controller.totalProducts),
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
-                const Text('Artículos',
-                    style:
-                        TextStyle(fontSize: 12, fontWeight: FontWeight.w400)),
-              ],
-            ),
-            backgroundColor: Get.theme.colorScheme.secondary.withOpacity(0.1),
           ),
           // chip : total de productos verificados
-          ActionChip(
-            onPressed: (){
+          chipReport(
+            value: controller.totalVerifiedProducts,
+            description: 'Verificados',
+            onTap: (){
               controller.setFilterText = 'Verificados';
               controller.filterProducts(verified: true);
             },
-            side: BorderSide( color: Get.theme.colorScheme.secondary.withOpacity(0.0)),
-            visualDensity: VisualDensity.compact,
-            label: Column(
-              children: [
-                Text(Publications.getFormatAmount(value: controller.totalVerifiedProducts),
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
-                const Text('Verificados',
-                    style:
-                        TextStyle(fontSize: 12, fontWeight: FontWeight.w400)),
-              ],
-            ),
-            backgroundColor: Get.theme.colorScheme.secondary.withOpacity(0.1),
           ),
           // chip : total de productos no verificados
-          ActionChip(
-            onPressed: (){
+          chipReport(
+            value: controller.totalUnverifiedProducts,
+            description: 'No verificados',
+            onTap: (){
               controller.setFilterText = 'No verificados';
               controller.filterProducts(verified: false);
             },
-            side: BorderSide( color: Get.theme.colorScheme.secondary.withOpacity(0.0)),
-            visualDensity: VisualDensity.compact,
-            label: Column(
-              children: [
-                Text(Publications.getFormatAmount(value: controller.totalUnverifiedProducts),
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
-                const Text('No verificados',
-                    style:
-                        TextStyle(fontSize: 12, fontWeight: FontWeight.w400)),
-              ],
-            ),
-            backgroundColor: Get.theme.colorScheme.secondary.withOpacity(0.1),
+          ),  
+          // chip : total de productos sin algun dato
+          chipReport(
+            value: controller.totalProductsNoData,
+            description: 'Datos faltantes',
+            onTap: (){
+              controller.setFilterText = 'Sin datos';
+              controller.filterProducts(noData: true);
+            },
           ), 
           // chip : total de reportes
-          ActionChip(
-            onPressed: (){ 
+          chipReport(
+            value: controller.getReports.length,
+            description: 'Reportes',
+            onTap: (){
               controller.setFilterText = 'Reportes';
               controller.viewReports = true;
               controller.update();
             },
-            side: BorderSide( color: Get.theme.colorScheme.secondary.withOpacity(0.0)),
-            visualDensity: VisualDensity.compact,
-            label: Column(
-              children: [
-                Text(Publications.getFormatAmount(value: controller.getReports.length),
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
-                const Text('Reportes',
-                    style:
-                        TextStyle(fontSize: 12, fontWeight: FontWeight.w400)),
-              ],
-            ),
-            backgroundColor: Get.theme.colorScheme.secondary.withOpacity(0.1),
-          ),
+          ), 
         ],
       ),
     ); 
@@ -354,16 +333,11 @@ class ModeratorView extends GetView<ModeratorController> {
     double titleSize = 16;
     String valueDataUpdate ='Actualizado ${Publications.getFechaPublicacion(fechaPublicacion: product.upgrade.toDate(), fechaActual: Timestamp.now().toDate())}';
 
-
     // styles
     final Color primaryTextColor = Get.isDarkMode ? Colors.white : Colors.black;
-    final Color secundayTextColor = Get.isDarkMode
-        ? Colors.white.withOpacity(0.5)
-        : Colors.black.withOpacity(0.5);
-    final TextStyle textStylePrimery =
-        TextStyle(color: primaryTextColor, fontWeight: FontWeight.w400);
-    final TextStyle textStyleSecundary =
-        TextStyle(color: secundayTextColor, fontWeight: FontWeight.w400);
+    final Color secundayTextColor = Get.isDarkMode ? Colors.white.withOpacity(0.5)  : Colors.black.withOpacity(0.5);
+    final TextStyle textStylePrimery = TextStyle(color: primaryTextColor, fontWeight: FontWeight.w400);
+    final TextStyle textStyleSecundary = TextStyle(color: secundayTextColor, fontWeight: FontWeight.w400);
 
     // widgets
     Widget description = Column(
@@ -394,9 +368,32 @@ class ModeratorView extends GetView<ModeratorController> {
         // text : fecha de la ultima actualización
         Text(valueDataUpdate, style: textStyleSecundary.copyWith(fontSize: 12)),
         // Text : id del usuario que creo el producto
-        product.idUserCreation==''?Container():Text('creado por ${product.idUserCreation}', style: textStyleSecundary.copyWith(fontSize: 12)),
+        product.idUserCreation==''?Container():Row(
+          children: [
+            Text('Creado por ', style: textStyleSecundary.copyWith(fontSize: 12)),
+            Flexible(
+              child: Container(
+                color: Colors.blue.withOpacity(0.05),
+                padding: const EdgeInsets.symmetric(horizontal:5),
+                child: Text(product.idUserCreation, style: textStyleSecundary.copyWith(fontSize: 12))),
+            ),
+          ],
+        ),
         // text : id del usuario que actualizo el producto\
-        product.idUserUpgrade==''?Container():Text('actualizado por ${product.idUserUpgrade}', style: textStyleSecundary.copyWith(fontSize: 12)),
+        product.idUserUpgrade==''?Container():Padding(
+          padding: const EdgeInsets.only(top:2),
+          child: Row(
+            children: [
+              Text('Modificado por ', style: textStyleSecundary.copyWith(fontSize: 12)),
+              Flexible(
+                child: Container(
+                  color: Colors.blue.withOpacity(0.05),
+                  padding: const EdgeInsets.symmetric(horizontal:5),
+                  child: Text(product.idUserUpgrade, style: textStyleSecundary.copyWith(fontSize: 12))),
+              ),
+            ],
+          ),
+        ),
       ],
     );
 
@@ -412,13 +409,7 @@ class ModeratorView extends GetView<ModeratorController> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // image : avatar del producto
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                        horizontal: product.image == '' ? 27 : 0),
-                    child: ImageProductAvatarApp(
-                        url: product.image,
-                        size: product.image == '' ? 25 : 80),
-                  ),
+                  Padding(padding: EdgeInsets.symmetric(horizontal: product.image == '' ? 27 : 0),child: ImageProductAvatarApp(url: product.image,size: product.image == '' ? 25 : 80)),
                   // view : contenido
                   Flexible(
                     child: Padding(
@@ -434,25 +425,10 @@ class ModeratorView extends GetView<ModeratorController> {
                                   children: [
                                     // text and icon of favorite
                                     Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      crossAxisAlignment:CrossAxisAlignment.start,
                                       children: [
-                                        !product.outstanding
-                                            ? Container()
-                                            : const Icon(
-                                                Icons.star_purple500_sharp,
-                                                size: 12,
-                                                color: Colors.orange),
-                                        !product.outstanding
-                                            ? Container()
-                                            : const SizedBox(width: 2),
-                                        Flexible(
-                                            child: Text(product.description,
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style:
-                                                    textStylePrimery.copyWith(
-                                                        fontSize: titleSize))),
+                                        !product.outstanding? Container(): const Icon(Icons.star_purple500_sharp,size: 12,color: Colors.orange),!product.outstanding? Container() : const SizedBox(width: 2),
+                                        Flexible(child: Text(product.description,maxLines: 1,overflow: TextOverflow.ellipsis,style:textStylePrimery.copyWith(fontSize: titleSize))),
                                       ],
                                     ),
                                     description,
@@ -472,6 +448,23 @@ class ModeratorView extends GetView<ModeratorController> {
           ],
         ),
       ),
+    );
+  }
+  Widget chipReport({required int value,required String description,required Function() onTap}) {
+    // description : chip con la cantidad de reportes
+    return ActionChip(
+      onPressed: onTap,
+      side: const BorderSide(color: Colors.transparent),
+      visualDensity: VisualDensity.compact,
+      label: Column(
+        children: [
+          Text(Publications.getFormatAmount(value: value),
+              style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(description,
+              style:const  TextStyle(fontSize: 12, fontWeight: FontWeight.w400)),
+        ],
+      ),
+      backgroundColor: Get.theme.colorScheme.secondary.withOpacity(0.1),
     );
   }
 }
@@ -618,98 +611,128 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
   //
   // WIDGETS COMPONENTS
   //
-  Widget item({required Product  product}){
+  Widget item({required Product product}) {
+    // description : ListTile con detalles del producto
 
-    // var 
-    String valueDataUpdate ='Actualizado ${Publications.getFechaPublicacion(fechaPublicacion:product.upgrade.toDate(),fechaActual:  Timestamp.now().toDate() )}'; 
-
+    // var
+    double titleSize = 16;
+    String valueDataUpdate ='Actualizado ${Publications.getFechaPublicacion(fechaPublicacion: product.upgrade.toDate(), fechaActual: Timestamp.now().toDate())}';
 
     // styles
-    final Color highlightColor = Get.isDarkMode?Colors.white:Colors.black;
-    final Color primaryTextColor  = Get.isDarkMode?Colors.white54:Colors.black45;
-    final TextStyle textStyleSecundary = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
+    final Color primaryTextColor = Get.isDarkMode ? Colors.white : Colors.black;
+    final Color secundayTextColor = Get.isDarkMode ? Colors.white.withOpacity(0.5)  : Colors.black.withOpacity(0.5);
+    final TextStyle textStylePrimery = TextStyle(color: primaryTextColor, fontWeight: FontWeight.w400);
+    final TextStyle textStyleSecundary = TextStyle(color: secundayTextColor, fontWeight: FontWeight.w400);
+
     // widgets
-    final Widget dividerCircle = ComponentApp().dividerDot(color: primaryTextColor);
- 
-    return Column(
+    Widget description = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        InkWell( 
-          // color del cliqueable
-          splashColor: Colors.blue, 
-          highlightColor: highlightColor.withOpacity(0.1), 
-          onTap: () {
-            controller.goToProductEdit(product); 
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                // image
-                ImageProductAvatarApp(url: product.image,size: 75 ),
-                // text : datos del producto
-                Flexible(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal:12),
-                    child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // icon : favorito
-                          product.outstanding?const Icon(Icons.star_rounded,color: Colors.amber,size: 14,):Container(),
-                          // text : nombre del producto
-                          Flexible(child: Text(product.description,maxLines:2,overflow: TextOverflow.ellipsis,style: const TextStyle(fontWeight: FontWeight.w500))),
-                        ],
-                      ),
-                      // view : marca del producto y proveedor
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        //text : nombre de la marca
-                        product.nameMark==''?Container():Text(
-                            product.nameMark,
-                            maxLines: 2,
-                            overflow: TextOverflow.clip,
-                            style: TextStyle(color: product.verified?Colors.blue:null),
-                          ), 
-                      ],
-                    ), 
-                      Wrap(
-                        crossAxisAlignment: WrapCrossAlignment.start,
-                        direction: Axis.horizontal,
-                        children: <Widget>[
-                          // text : code
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                dividerCircle,
-                                Text(product.code,style: textStyleSecundary),
-                              ],
-                            ),  
-                          // text : fecha de actualizacion
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                dividerCircle,
-                                Text(valueDataUpdate,style: textStyleSecundary),
-                              ],
-                            ),
-                        ],
-                      ),
-                              
-                    ],
-                                  ),
+        // view : marca del producto y proveedor
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            product.verified
+                ? const Icon(Icons.verified, size: 11, color: Colors.blue)
+                : Container(),
+            product.verified ? const SizedBox(width: 1) : Container(),
+            //text : nombre de la marca
+            product.nameMark == ''
+                ? Container()
+                : Text(
+                    product.nameMark,
+                    maxLines: 2,
+                    overflow: TextOverflow.clip,
+                    style:
+                        TextStyle(color: product.verified ? Colors.blue : null),
                   ),
-                ),
-              ],
+          ],
+        ),
+        //  text : codigo
+        Text(product.code, style: textStyleSecundary.copyWith(fontSize: 12)),
+        // text : fecha de la ultima actualización
+        Text(valueDataUpdate, style: textStyleSecundary.copyWith(fontSize: 12)),
+        // Text : id del usuario que creo el producto
+        product.idUserCreation==''?Container():Row(
+          children: [
+            Text('Creado por ', style: textStyleSecundary.copyWith(fontSize: 12)),
+            Flexible(
+              child: Container(
+                color: Colors.blue.withOpacity(0.05),
+                padding: const EdgeInsets.symmetric(horizontal:5),
+                child: Text(product.idUserCreation, style: textStyleSecundary.copyWith(fontSize: 12))),
             ),
+          ],
+        ),
+        // text : id del usuario que actualizo el producto\
+        product.idUserUpgrade==''?Container():Padding(
+          padding: const EdgeInsets.only(top:2),
+          child: Row(
+            children: [
+              Text('Modificado por ', style: textStyleSecundary.copyWith(fontSize: 12)),
+              Flexible(
+                child: Container(
+                  color: Colors.blue.withOpacity(0.05),
+                  padding: const EdgeInsets.symmetric(horizontal:5),
+                  child: Text(product.idUserUpgrade, style: textStyleSecundary.copyWith(fontSize: 12))),
+              ),
+            ],
           ),
-        ), 
-      ComponentApp().divider(), 
+        ),
       ],
+    );
+
+    return ElasticIn(
+      child: InkWell(
+        onTap: ()=> controller.goToProductEdit(product),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // image : avatar del producto
+                  Padding(padding: EdgeInsets.symmetric(horizontal: product.image == '' ? 27 : 0),child: ImageProductAvatarApp(url: product.image,size: product.image == '' ? 25 : 80)),
+                  // view : contenido
+                  Flexible(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              // view : description y icon favorite
+                              Flexible(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // text and icon of favorite
+                                    Row(
+                                      crossAxisAlignment:CrossAxisAlignment.start,
+                                      children: [
+                                        !product.outstanding? Container(): const Icon(Icons.star_purple500_sharp,size: 12,color: Colors.orange),!product.outstanding? Container() : const SizedBox(width: 2),
+                                        Flexible(child: Text(product.description,maxLines: 1,overflow: TextOverflow.ellipsis,style:textStylePrimery.copyWith(fontSize: titleSize))),
+                                      ],
+                                    ),
+                                    description,
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Opacity(opacity: 0.3, child: Divider(height: 0)),
+          ],
+        ),
+      ),
     );
   }
 

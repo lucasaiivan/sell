@@ -54,6 +54,7 @@ class ModeratorController extends GetxController {
    int get totalProducts => products.length;
   int get totalVerifiedProducts => products.where((element) => element.verified).length;
   int get totalUnverifiedProducts => products.where((element) => !element.verified).length;
+  int get totalProductsNoData => products.where((element) => element.code == '' || element.idMark == '' || element.description == '' || element.image == '' ).length;
   Product? getProduct({required String id}) { 
     // description : obtenemos un producto por su id
     for (var element in products) {
@@ -63,6 +64,7 @@ class ModeratorController extends GetxController {
     }
     return null;
   }
+  
   // DATA SOURCE
   void loadDB() {
     // default values
@@ -84,7 +86,7 @@ class ModeratorController extends GetxController {
             addIdUserCreations(correo: product.idUserCreation);
           }
         } catch (e) {}
-      }
+      } 
       setLoading = false; 
       filterProducts();
     });
@@ -123,9 +125,11 @@ class ModeratorController extends GetxController {
       update();
     });
   }
+  
   // FUNCTION  
-  void filterProducts({bool? verified,String? idUserCreator}) {
+  void filterProducts({bool? verified,String? idUserCreator,bool? noData}) {
     // description : filtramos la lista de productos con los parametros dados
+    // advertencia : solo se puede filtrar por un parametro a la vez 
     
     // var 
     final List<Product> newList = [];
@@ -133,7 +137,7 @@ class ModeratorController extends GetxController {
     viewReports = false;
     getProductsFiltered.clear();
     
-    if (verified==null && idUserCreator==null) { 
+    if (verified==null && idUserCreator==null && noData==null) { 
       // add : agregamos todos los productos
       newList.addAll(getProducts);  
     } else { 
@@ -148,6 +152,12 @@ class ModeratorController extends GetxController {
         // idUserCreator
         if (idUserCreator != null) {
           if (element.idUserCreation == idUserCreator) {
+            newList.add(element); 
+          }
+        }
+        // noData
+        if (noData != null) {
+          if (element.code == '' || element.idMark == '' || element.description == '' || element.image == '' ) {
             newList.add(element); 
           }
         }
@@ -168,11 +178,47 @@ class ModeratorController extends GetxController {
       loadReports();
     });
   }
+  
+  void createDbBackup() {
+    // description : creamos una copia de seguridad de un producto
+    for (var element in getProducts) {
+      // firebase : creamos una copia de seguridad
+      Database.refFirestoreProductPublicBackup().doc(element.id).set(element.toJson(), SetOptions(merge: true));
+    }
+    // description : creamos una copia de seguridad de las marcas
+    for (var element in getMarks) {
+      // firebase : creamos una copia de seguridad
+      Database.refFirestoreBrandsBackup().doc(element.id).set(element.toJson(), SetOptions(merge: true));
+    }
+  }
+  /* void refactorDB() {
+    // description : volvemos a actualizar cada producto en la base de datos con los mismo datos actuales
+    for (var element in getProducts) {
+      // actualizamos el producto nombre de la marca 
+      if(element.idUserCreation==''){ 
+        element.idUserCreation = 'logica.booleana.2019@gmail.com';
+
+      }
+      // firebase : actualizamos el producto
+      Database.refFirestoreProductPublic().doc(element.id).set(element.toJson(), SetOptions(merge: true));
+    }
+  }
+  String getNameMark({required String id}) {
+    // description : obtenemos el nombre de la marca por su id
+    for (var element in getMarks) {
+      if (element.id == id) {
+        return element.name;
+      }
+    }
+    return '';
+  }  */
+  
   // DIALOG
   void showSeachDialog() {
     // description : dialogo de busqueda de productos
     Get.dialog(const ViewSeachProductsCataloguie());
   }
+  
   // NAVIGATION
   void goToProductEdit(Product product) { 
     // item
@@ -186,7 +232,6 @@ class ModeratorController extends GetxController {
   }
   
   // OVERRIDE METHODS
-
   @override
   void onInit() {
     super.onInit();

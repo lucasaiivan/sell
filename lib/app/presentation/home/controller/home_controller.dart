@@ -309,34 +309,6 @@ class HomeController extends GetxController {
   int get getIndexPage => _indexPage.value;
   set setIndexPage(int value) => _indexPage.value = value;
 
-  @override
-  void onInit() async {
-    super.onInit(); 
-  
-    // inicialización de la variable
-    setFirebaseAuth = FirebaseAuth.instance; // inicializamos la autenticación de firebase
-    isAppUpdated(); // verificamos si la app esta actualizada 
-    
-    // condition : comprobamos si el usuario esta autenticado o es un usuario anonimo
-    if (getFirebaseAuth.currentUser.isAnonymous) {
-      // obtenemos datos de prueba para que el usaurio pueda probar la app sin autenticarse
-      readAccountsInviteData();
-    } else {
-      // GetX : obtenemos por parametro los datos de la cuenta de atentificación
-      final Map arguments = Get.arguments;
-      // verificamos y obtenemos los datos pasados por parametro
-      setUserAuth = arguments['currentUser'];
-      // obtenemos el id de la cuenta seleccionada si es que existe 
-      readAccountsData(idAccount: arguments['idAccount']);
-    }
-  }
-
-  @override
-  void onClose() { 
-    // ...
-    super.onClose(); 
-  }
-
   // GETTERS //
   bool pinSegurityCheck({required String pin}) {
     // verifica si el pin ingresado es correcto
@@ -920,7 +892,7 @@ class HomeController extends GetxController {
     // condition : si el producto es nuevo se le asigna los valores de creación
     if(isProductNew){
       // el producto no existe 
-      product.creation = Timestamp.fromDate(DateTime.now()); // fecha de creación del producto
+      product.creation = Timestamp.fromDate(DateTime.now()); // fecha de creación del producto 
       product.followers++; // incrementamos el contador de los seguidores del producto publico 
    
     }else{
@@ -939,15 +911,9 @@ class HomeController extends GetxController {
     Database.refFirestoreCatalogueProduct(idAccount: getProfileAccountSelected.id).doc(product.id).set(product.toJson());
     
     // condition : si el producto no esta verificado o no existe 
-    if (product.verified == false || isProductNew ) {
-      Product productPublic = product.convertProductoDefault();
-      if(isProductNew) productPublic.creation = Timestamp.fromDate(DateTime.now());
-      productPublic.upgrade = Timestamp.fromDate(DateTime.now());
-      if(isProductNew) productPublic.idAccount = getProfileAccountSelected.id;
-      if(isProductNew) productPublic.idUserCreation = getProfileAdminUser.email;
-      productPublic.idUserUpgrade = getProfileAdminUser.email;
+    if (product.verified == false || isProductNew ) { 
       // fuction : se crea un documento en la colección publica
-      addProductToCollectionPublic(isNew: isProductNew, product: productPublic);
+      addProductToCollectionPublic(isNew: isProductNew, product: product.convertProductoDefault());
     }
   }
 
@@ -957,8 +923,7 @@ class HomeController extends GetxController {
 
     // condition : si el producto es nuevo se le asigna los valores de creación
     if (isNew && product.verified == false) {
-      // datos de creación por primera vez
-      product.idAccount = getProfileAccountSelected.id;
+      // datos de creación por primera vez 
       product.idUserCreation = getProfileAdminUser.email;
       product.creation = Timestamp.fromDate(DateTime.now());
     }
@@ -973,7 +938,7 @@ class HomeController extends GetxController {
       Database.refFirestoreProductPublic().doc(product.id).set(product.toJson());
     } else {
       // firebase : se actualiza un documento en la colección publica
-      Database.refFirestoreProductPublic().doc(product.id).update(product.toJson());
+      Database.refFirestoreProductPublic().doc(product.id).update(product.toJsonUpdate());
     }
   }
 
@@ -1080,6 +1045,37 @@ class HomeController extends GetxController {
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
     );
   }
+
+
+  // OVERRIDE //
+  @override
+  void onInit() async {
+    super.onInit(); 
+  
+    // inicialización de la variable
+    setFirebaseAuth = FirebaseAuth.instance; // inicializamos la autenticación de firebase
+    isAppUpdated(); // verificamos si la app esta actualizada 
+    
+    // condition : comprobamos si el usuario esta autenticado o es un usuario anonimo
+    if (getFirebaseAuth.currentUser.isAnonymous) {
+      // obtenemos datos de prueba para que el usaurio pueda probar la app sin autenticarse
+      readAccountsInviteData();
+    } else {
+      // GetX : obtenemos por parametro los datos de la cuenta de atentificación
+      final Map arguments = Get.arguments;
+      // verificamos y obtenemos los datos pasados por parametro
+      setUserAuth = arguments['currentUser'];
+      // obtenemos el id de la cuenta seleccionada si es que existe 
+      readAccountsData(idAccount: arguments['idAccount']);
+    }
+  }
+
+  @override
+  void onClose() { 
+    // ...
+    super.onClose(); 
+  }
+
 }
 
 class WidgetBottomSheetSubcription extends StatefulWidget {

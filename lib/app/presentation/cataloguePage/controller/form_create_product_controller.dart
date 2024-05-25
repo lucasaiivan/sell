@@ -480,8 +480,7 @@ class ControllerCreateProductForm extends GetxController{
     // valores
     Product product = getProduct.convertProductoDefault();
     
-    // asignamos los valores de creación
-    product.idAccount = homeController.getProfileAccountSelected.id;
+    // asignamos los valores de creación 
     product.idUserCreation = homeController.getProfileAdminUser.email;
     product.creation = Timestamp.fromDate(DateTime.now());
     //  set : marca de tiempo que se actualizo el documento

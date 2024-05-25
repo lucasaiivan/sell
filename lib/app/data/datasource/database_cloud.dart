@@ -14,7 +14,7 @@ class Database {
   //  de lo contrario usaremos Stream, ya que sincronizará automáticamente los datos cada vez que se modifiquen en la base de datos.
   // future - QuerySnapshot
   static Future<QuerySnapshot<Map<String, dynamic>>> readProductsFavoritesFuture({int limit = 0}) =>limit != 0? FirebaseFirestore.instance.collection('APP/ARG/PRODUCTOS').where('outstanding',isEqualTo:true).limit(limit).get(): FirebaseFirestore.instance.collection('APP/ARG/PRODUCTOS').where('outstanding',isEqualTo:true).get();
-  static Future<QuerySnapshot<Map<String, dynamic>>> readProductsFuture({int limit = 0}) =>limit != 0? FirebaseFirestore.instance.collection('APP/ARG/PRODUCTOS').limit(limit).get(): FirebaseFirestore.instance.collection('APP/ARG/PRODUCTOS').get();
+  static Future<QuerySnapshot<Map<String, dynamic>>> readProductsFuture({int limit = 0}) =>limit != 0? FirebaseFirestore.instance.collection('APP/ARG/PRODUCTOS').limit(limit).get(): FirebaseFirestore.instance.collection('APP/ARG/PRODUCTOS').orderBy("upgrade", descending: true).get();
   static Future<QuerySnapshot<Map<String, dynamic>>> readProductsFutureNoVerified() =>FirebaseFirestore.instance.collection('APP/ARG/PRODUCTOS').where("verified", isEqualTo: false).get();
   static Future<QuerySnapshot<Map<String, dynamic>>> readProductsForMakFuture({required String idMark, int limit = 0}) =>limit != 0? FirebaseFirestore.instance.collection('APP/ARG/PRODUCTOS').where("idMark", isEqualTo: idMark).limit(limit).get() : FirebaseFirestore.instance.collection('APP/ARG/PRODUCTOS').where("idMark", isEqualTo: idMark).get();
   static Future<QuerySnapshot<Map<String, dynamic>>>readListPricesProductFuture({required String id, String isoPAis = 'ARG', int limit = 50}) =>FirebaseFirestore.instance.collection('APP/$isoPAis/PRODUCTOS/$id/PRICES').limit(limit).orderBy("time", descending: true).get();
@@ -63,9 +63,11 @@ class Database {
   static CollectionReference refFirestoreCashRegisters({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/CASHREGISTERS/'); // cajas registradoras activas
   static CollectionReference refFirestoreFixedDescriptions({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/FIXERDESCRIPTIONS/');  // fixed descriptions
   static CollectionReference refFirestoreProductPublic() =>FirebaseFirestore.instance.collection('/APP/ARG/PRODUCTOS');
+  static CollectionReference refFirestoreProductPublicBackup() =>FirebaseFirestore.instance.collection('/APP/ARG/PRODUCTOS_BACKUP');
   static CollectionReference refFirestoreRegisterPrice({required String idProducto, String isoPAis = 'ARG'}) =>FirebaseFirestore.instance.collection('/APP/$isoPAis/PRODUCTOS/$idProducto/PRICES/');
   static CollectionReference refFirestoreMark() =>FirebaseFirestore.instance.collection('/APP/ARG/MARCAS/');
-  static CollectionReference refFirestoreReportProduct() =>FirebaseFirestore.instance.collection('/APP/ARG/REPORTS/');
+  static CollectionReference refFirestoreBrandsBackup() =>FirebaseFirestore.instance.collection('/APP/ARG/BRANDS_BACKUP');
+  static CollectionReference refFirestoreReportProduct() =>FirebaseFirestore.instance.collection('/APP/ARG/REPORTS');
 
   // set - Firestore
   static Future dbProductStockSalesIncrement({required String idAccount, required String idProduct,int quantity=1}) =>FirebaseFirestore.instance.collection('ACCOUNTS/$idAccount/CATALOGUE/').doc(idProduct).update({"sales": FieldValue.increment(quantity)}); 
