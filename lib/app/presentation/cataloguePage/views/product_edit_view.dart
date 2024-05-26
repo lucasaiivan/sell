@@ -1013,32 +1013,49 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
-        child: ListView(  
+        child: ListView(   
           children: [  
             // view :botones de busqueda en google
-            Row(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                // text 
-                const Text('Buscar en google:'),
-                const Spacer(),
-                // button : textButton : buscar en google
-                TextButton(
-                    onPressed: () async {
-                      String clave = controller.controllerTextEditDescripcion.text;
-                      Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
-                      await launchUrl(uri,mode: LaunchMode.externalApplication);
-                    },
-                    child: const Text('Descripción' )),
-                // textButton : buscar en google
-                TextButton(
-                    onPressed: () async {
-                      String clave = controller.getProduct.code;
-                      Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
-                      await launchUrl(uri,mode: LaunchMode.externalApplication);
-                    },
-                    child: const Text('Código')),
+                Row(
+                  children: [
+                    // text 
+                    const Text('Buscar en google:'),
+                    const Spacer(),
+                    // button : textButton : buscar en google
+                    TextButton(
+                        onPressed: () async {
+                          String clave = controller.controllerTextEditDescripcion.text;
+                          Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
+                          await launchUrl(uri,mode: LaunchMode.externalApplication);
+                        },
+                        child: const Text('Descripción' )),
+                    // textButton : buscar en google
+                    TextButton(
+                        onPressed: () async {
+                          String clave = controller.getProduct.code;
+                          Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
+                          await launchUrl(uri,mode: LaunchMode.externalApplication);
+                        },
+                        child: const Text('Código' )),
+                  ],
+                ),
+                // buttom : edicion de imagen
+              TextButton( 
+                onPressed: () async{
+                  // values
+                  Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.camerasideas.instashot');
+                  //  redireccionara para la tienda de aplicaciones
+                  await launchUrl(uri,mode: LaunchMode.externalApplication);
+                },
+                child: const Text('Editar imagen con InstaShot'),
+
+              ),
               ],
             ), 
+            
             const Divider(), 
             // view : cantidad de comercios que tienen el producto
             Row(
