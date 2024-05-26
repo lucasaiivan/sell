@@ -1,5 +1,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart'; 
 import '../../../core/routes/app_pages.dart';
 import '../../../data/datasource/database_cloud.dart';
@@ -8,10 +9,11 @@ import '../../home/controller/home_controller.dart';
 import '../view/moderator_view.dart';
 
 class ModeratorController extends GetxController {
+  
+  // VARIABLES //
 
   // controllers
   final HomeController homeController = Get.find<HomeController>();
-
   // estado de carga de la base de datos
   final RxBool loading = true.obs;
   set setLoading(bool value) => loading.value = value;
@@ -39,6 +41,7 @@ class ModeratorController extends GetxController {
     } 
   }
   // lista de marcas de los productos
+  bool viewBrands = false;
   final List<Mark> marks = <Mark>[];
   set setMarks(List<Mark> value) => marks.addAll(value);
   List<Mark> get getMarks => marks; 
@@ -46,9 +49,7 @@ class ModeratorController extends GetxController {
   bool viewReports = false;
   final List<ReportProduct> reports = <ReportProduct>[];
   set setReports(List<ReportProduct> value) => reports.addAll(value);
-  List<ReportProduct> get getReports => reports;
-
-
+  List<ReportProduct> get getReports => reports;  
 
 // GETTERS
    int get totalProducts => products.length;
@@ -135,6 +136,7 @@ class ModeratorController extends GetxController {
     final List<Product> newList = [];
     // default values 
     viewReports = false;
+    viewBrands = false;
     getProductsFiltered.clear();
     
     if (verified==null && idUserCreator==null && noData==null) { 
@@ -217,6 +219,17 @@ class ModeratorController extends GetxController {
   void showSeachDialog() {
     // description : dialogo de busqueda de productos
     Get.dialog(const ViewSeachProductsCataloguie());
+  }
+  void showEditBrandDialogFullscreen({required Mark mark}) {
+    // description : dialogo de edicion de marca
+    showDialog(
+      context: Get.context!,
+      builder: (BuildContext context) {
+        return Dialog.fullscreen(
+          child: CreateMark(mark: mark),
+        );
+      },
+    );
   }
   
   // NAVIGATION

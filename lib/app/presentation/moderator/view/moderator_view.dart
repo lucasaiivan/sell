@@ -1,9 +1,17 @@
+import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart'; 
+import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:uuid/uuid.dart'; 
 import '../../../core/utils/dynamicTheme_lb.dart';
 import '../../../core/utils/fuctions.dart';
 import '../../../core/utils/widgets_utils.dart';
+import '../../../data/datasource/database_cloud.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../controller/moderator_controller.dart';
 
@@ -139,6 +147,16 @@ class ModeratorView extends GetView<ModeratorController> {
               controller.update();
             },
           ), 
+          // chip : marcas de los productos
+          chipReport(
+            value: controller.getMarks.length,
+            description: 'Marcas',
+            onTap: (){
+              controller.setFilterText = 'Marcas';
+              controller.viewBrands = true;
+              controller.update();
+            },
+          ),
         ],
       ),
     ); 
@@ -193,6 +211,23 @@ class ModeratorView extends GetView<ModeratorController> {
     if(controller.getLoading){
       return const Center(child: CircularProgressIndicator());
     }
+    // condition : muestra las marcas
+    if(controller.viewBrands){
+      if(controller.getMarks.isNotEmpty){
+        return ListView.builder(
+          itemCount: controller.getMarks.length,
+          itemBuilder: (BuildContext context, int index) { 
+            return Column(
+              children: [
+                index==0?chipsDataView:Container(),
+                listTileBrand(item: controller.getMarks[index]),
+                const Divider(height: 0,thickness:0.4),
+              ],
+            );
+          },
+        );
+      }
+    }
     // condition : muestra los reportes de los usuarios
     if(controller.viewReports){ 
       // condition : si no hay reportes
@@ -207,82 +242,12 @@ class ModeratorView extends GetView<ModeratorController> {
 
       return ListView.builder(
         itemCount: controller.getReports.length,
-        itemBuilder: (BuildContext context, int index) {
-          // var
-          String description = controller.getReports[index].description == '' ? 'sin datos' : controller.getReports[index].description;
+        itemBuilder: (BuildContext context, int index) { 
 
           return Column(
             children: [
-              index==0?chipsDataView:Container(),
-              //const Divider(height: 0),
-              ListTile(
-                title: Text(controller.getReports[index].idProduct),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // text : descripcion del reporte
-                    RichText(
-                      text: TextSpan( 
-                        style: DefaultTextStyle.of(context).style,  
-                        children: <TextSpan>[
-                          TextSpan(text:'Description: ', style: TextStyle(color: DefaultTextStyle.of(context).style.color?.withOpacity(0.5))), 
-                          TextSpan(text:description, style: const TextStyle(fontWeight: FontWeight.w300)), 
-                        ],
-                      ),
-                    ),
-                    // text : datos reportados
-                    Text('Datos reportados:',style: TextStyle(color: DefaultTextStyle.of(context).style.color?.withOpacity(0.5))),
-                    // text : reportes items
-                    controller.getReports.isEmpty?Container():Row(
-                      children: controller.getReports[index].reports.map((e) => Padding(
-                        padding: const EdgeInsets.only(right: 4),
-                        child: Material(
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                          color: Colors.blue.withOpacity(0.09),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4,vertical:1),
-                            child: Text('$e'),
-                          ),
-                        ),
-                      )).toList(),
-                    ),
-                  ],
-                ), 
-                leading: Column(
-                  children: [
-                    // avatar : product 
-                    ImageProductAvatarApp(url: controller.getProduct(id: controller.getReports[index].idProduct)!.image,size: 40),
-                    // text : descripcion del producto
-                    SizedBox(
-                      width: 75,
-                      child: Text(controller.getProduct(id: controller.getReports[index].idProduct)!.description,style: const TextStyle(fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1)),
-                  ],
-                ),
-                // trailing : eliminar reporte
-                trailing: PopupMenuButton<String>(
-                  onSelected: (value) {
-                    // condition : si se selecciona eliminar reporte
-                    if(value=='Eliminar reporte'){
-                      controller.deleteReport(id: controller.getReports[index].id);
-                    }
-                    // condition : si se selecciona navegar al producto
-                    if(value=='Ver producto'){
-                      controller.goToProductEdit(controller.getProduct(id: controller.getReports[index].idProduct)!);
-                    }
-
-                  },
-                  itemBuilder: (BuildContext context) {
-                    return ['Ver producto', 'Eliminar reporte', ''].map((String choice) {
-                      return PopupMenuItem<String>(
-                        value: choice,
-                        child: Text(choice),
-                      );
-                    }).toList();
-                  },
-                ),
-                onTap: ()=> controller.goToProductEdit(controller.getProduct(id: controller.getReports[index].idProduct)!),
-                 
-              ),
+              index==0?chipsDataView:Container(), 
+              listTileReport(context: context,item: controller.getReports[index] ),
               const Divider(height: 0,thickness:0.4),
             ],
           );
@@ -375,7 +340,7 @@ class ModeratorView extends GetView<ModeratorController> {
               child: Container(
                 color: Colors.blue.withOpacity(0.05),
                 padding: const EdgeInsets.symmetric(horizontal:5),
-                child: Text(product.idUserCreation, style: textStyleSecundary.copyWith(fontSize: 12))),
+                child: Text(product.idUserCreation, style: textStyleSecundary.copyWith(fontSize: 12),maxLines: 1)),
             ),
           ],
         ),
@@ -389,7 +354,7 @@ class ModeratorView extends GetView<ModeratorController> {
                 child: Container(
                   color: Colors.blue.withOpacity(0.05),
                   padding: const EdgeInsets.symmetric(horizontal:5),
-                  child: Text(product.idUserUpgrade, style: textStyleSecundary.copyWith(fontSize: 12))),
+                  child: Text(product.idUserUpgrade, style: textStyleSecundary.copyWith(fontSize: 12),maxLines: 1)),
               ),
             ],
           ),
@@ -448,6 +413,88 @@ class ModeratorView extends GetView<ModeratorController> {
           ],
         ),
       ),
+    );
+  }
+  Widget listTileReport({required ReportProduct item,required BuildContext context}){
+
+    // var 
+    String description = item.description == '' ? 'sin datos' :item.description;
+
+    return ListTile(
+      title: Text(item.idProduct),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // text : descripcion del reporte
+          RichText(
+            text: TextSpan( 
+              style: DefaultTextStyle.of(context).style,  
+              children: <TextSpan>[
+                TextSpan(text:'Description: ', style: TextStyle(color: DefaultTextStyle.of(context).style.color?.withOpacity(0.5))), 
+                TextSpan(text:description, style: const TextStyle(fontWeight: FontWeight.w300)), 
+              ],
+            ),
+          ),
+          // text : datos reportados
+          Text('Datos reportados:',style: TextStyle(color: DefaultTextStyle.of(context).style.color?.withOpacity(0.5))),
+          // text : reportes items
+          controller.getReports.isEmpty?Container():Row(
+            children: item.reports.map((e) => Padding(
+              padding: const EdgeInsets.only(right: 4),
+              child: Material(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                color: Colors.blue.withOpacity(0.09),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4,vertical:1),
+                  child: Text('$e'),
+                ),
+              ),
+            )).toList(),
+          ),
+        ],
+      ), 
+      leading: Column(
+        children: [
+          // avatar : product 
+          ImageProductAvatarApp(url: controller.getProduct(id: item.idProduct)!.image,size: 40),
+          // text : descripcion del producto
+          SizedBox(
+            width: 75,
+            child: Text(controller.getProduct(id: item.idProduct)!.description,style: const TextStyle(fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1)),
+        ],
+      ),
+      // trailing : eliminar reporte
+      trailing: PopupMenuButton<String>(
+        onSelected: (value) {
+          // condition : si se selecciona eliminar reporte
+          if(value=='Eliminar reporte'){
+            controller.deleteReport(id: item.id);
+          }
+          // condition : si se selecciona navegar al producto
+          if(value=='Ver producto'){
+            controller.goToProductEdit(controller.getProduct(id: item.idProduct)!);
+          }
+
+        },
+        itemBuilder: (BuildContext context) {
+          return ['Ver producto', 'Eliminar reporte', ''].map((String choice) {
+            return PopupMenuItem<String>(
+              value: choice,
+              child: Text(choice),
+            );
+          }).toList();
+        },
+      ),
+      onTap: ()=> controller.goToProductEdit(controller.getProduct(id: item.idProduct)!),
+        
+    );
+  }
+  Widget listTileBrand({required Mark item}){
+    return ListTile(
+      title: Text(item.name),
+      subtitle: item.description.isEmpty?null:Text(item.description),
+      leading: ImageProductAvatarApp(url: item.image,size: 40), 
+      onTap: ()=> controller.showEditBrandDialogFullscreen(mark: item),
     );
   }
   Widget chipReport({required int value,required String description,required Function() onTap}) {
@@ -757,3 +804,209 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
   }
   
 }
+
+
+class CreateMark extends StatefulWidget {
+  final Mark mark;
+  const CreateMark({required this.mark, Key? key}) : super(key: key);
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _CreateMarkState createState() => _CreateMarkState();
+}
+class _CreateMarkState extends State<CreateMark> {
+
+  // others controllers 
+  final ModeratorController controllerModerator = Get.find<ModeratorController>();
+
+  //var
+  var uuid = const Uuid();
+  bool newMark = false;
+  String title = 'Nueva marca';
+  bool load = false;
+  TextStyle textStyle = const TextStyle(fontSize: 24.0);
+  final ImagePicker _picker = ImagePicker();
+  XFile xFile = XFile('');
+
+  @override
+  void initState() {
+    newMark = widget.mark.id == '';
+    title = newMark ? 'Nueva marca' : 'Editar';
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: appbar(),
+      body: body(),
+    );
+  }
+
+  PreferredSizeWidget appbar() {
+    Color? colorAccent = Get.theme.textTheme.bodyLarge!.color;
+
+    return AppBar(
+      backgroundColor: Get.theme.scaffoldBackgroundColor,
+      elevation: 0,
+      title: Text(title, style: TextStyle(color: colorAccent)),
+      iconTheme: Get.theme.iconTheme.copyWith(color: colorAccent),
+      actions: [
+        newMark || load ? Container(): IconButton(onPressed: delete, icon: const Icon(Icons.delete)),
+        load? Container() : IconButton(icon: const Icon(Icons.check),onPressed: save),
+      ],
+      bottom: load ? ComponentApp().linearProgressBarApp() : null,
+    );
+  }
+
+  Widget body() {
+
+    // widgets
+    Widget circleAvatarDefault = CircleAvatar(backgroundColor: Colors.grey.shade300,radius: 75.0);
+
+    // var
+    final Color fillColor = Get.isDarkMode?Colors.white.withOpacity(0.03):Colors.black.withOpacity(0.03);
+    
+    return ListView(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            children: [
+              xFile.path != ''
+                  ? CircleAvatar(backgroundImage: FileImage(File(xFile.path)),radius: 76,)
+                  : CachedNetworkImage(
+                      fit: BoxFit.cover,
+                      imageUrl: widget.mark.image,
+                      placeholder: (context, url) => circleAvatarDefault,
+                      imageBuilder: (context, image) => CircleAvatar(backgroundImage: image,radius: 75.0),
+                      errorWidget: (context, url, error) => circleAvatarDefault,
+                    ),
+              load ? Container(): TextButton(onPressed: getLoadImageMark,child: const Text("Cambiar imagen")),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: TextField(
+            enabled: !load,
+            controller: TextEditingController(text: widget.mark.name),
+            onChanged: (value) => widget.mark.name = value,
+            decoration: InputDecoration(
+                filled: true, 
+                fillColor: fillColor,
+                labelText: "Nombre de la marca"),
+            style: textStyle,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: TextField(
+            enabled: !load,
+            controller: TextEditingController(text: widget.mark.description),
+            onChanged: (value) => widget.mark.description = value,
+            decoration: InputDecoration(
+                filled: true, 
+                fillColor: fillColor,
+                labelText: "Descripción (opcional)"),
+            style: textStyle,
+          ),
+        ),
+      ],
+    );
+  }
+
+  //  MARK CREATE
+  void getLoadImageMark() {
+    _picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 720.0,
+      maxHeight: 720.0,
+      imageQuality: 55,
+    ).then((value) {
+      setState(() => xFile = value!);
+    });
+  }
+
+  void delete() async {
+    setState(() {
+      load = true;
+      title = 'Eliminando...';
+    });
+
+    if (widget.mark.id != '') {
+      // delele archive storage
+      await Database.referenceStorageProductPublic(id: widget.mark.id).delete().catchError((_) => null);
+      // delete document firestore
+      await Database.refFirestoreMark().doc(widget.mark.id).delete()
+          .then((value) {
+        // eliminar el objeto de la lista manualmente para evitar hacer una consulta innecesaria
+        controllerModerator.getMarks.remove(widget.mark);
+        Get.back();
+      });
+    }
+  }
+
+  void save() async {
+    setState(() {
+      load = true;
+      title = newMark ? 'Guardando...' : 'Actualizando...';
+    });
+
+    // set values
+    widget.mark.verified = true;
+    if (newMark) {
+      // generate Id
+      widget.mark.id = uuid.v1();
+      // en el caso que la ID siga siendo '' generar un ID con la marca del tiempo
+      if (widget.mark.id == '') {widget.mark.id = DateTime.now().millisecondsSinceEpoch.toString();}
+    }
+    if (widget.mark.name != '') {
+      // image save
+      // Si el "path" es distinto '' procede a guardar la imagen en la base de dato de almacenamiento
+      if (xFile.path != '') {
+        Reference ref = Database.referenceStorageProductPublic(id: widget.mark.id);
+        // referencia de la imagen
+        UploadTask uploadTask = ref.putFile(File(xFile.path));
+        // cargamos la imagen a storage
+        await uploadTask;
+        // obtenemos la url de la imagen guardada
+        await ref.getDownloadURL().then((value) => widget.mark.image = value);
+      } 
+      
+      // mark save
+      if( newMark ){
+        // creamos un docuemnto nuevo
+        await Database.refFirestoreMark().doc(widget.mark.id).set(widget.mark.toJson()).whenComplete(() {
+ 
+          // agregar el obj manualmente para evitar consulta a la db  innecesaria
+          controllerModerator.getMarks.add(widget.mark);
+          controllerModerator.update();
+          Get.back();
+        });
+      }else{
+        // actualizamos un documento existente
+        await Database.refFirestoreMark().doc(widget.mark.id).update(widget.mark.toJson()).whenComplete(() {
+ 
+          // eliminamos la marca de la lista
+          controllerModerator.getMarks.removeWhere((element) => (element.id == widget.mark.id));
+          // agregamos la nueva marca actualizada a la lista
+          controllerModerator.getMarks.add(widget.mark);
+          controllerModerator.update();
+          Get.back();
+        });
+      }
+
+    } else {
+      Get.snackbar('', 'Debes escribir un nombre de la marca');
+    }
+  }
+
+}
+
+

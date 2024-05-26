@@ -268,6 +268,8 @@ class ControllerProductsSearch extends GetxController {
   void toNavigationProduct({required ProductCatalogue porduct}) {
     // condition : verifica si es un producto local
     if(porduct.local){
+      // TODO : disable for release [local]
+      porduct.local = false;
       // navega hacia la vista de producto
       Get.toNamed(Routes.editProduct, arguments: {'product': porduct.copyWith()});
     }else{
