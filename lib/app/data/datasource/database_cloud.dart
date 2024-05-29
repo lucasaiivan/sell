@@ -19,8 +19,8 @@ class Database {
   static Future<QuerySnapshot<Map<String, dynamic>>> readProductsForMakFuture({required String idMark, int limit = 0}) =>limit != 0? FirebaseFirestore.instance.collection('APP/ARG/PRODUCTOS').where("idMark", isEqualTo: idMark).limit(limit).get() : FirebaseFirestore.instance.collection('APP/ARG/PRODUCTOS').where("idMark", isEqualTo: idMark).get();
   static Future<QuerySnapshot<Map<String, dynamic>>>readListPricesProductFuture({required String id, String isoPAis = 'ARG', int limit = 50}) =>FirebaseFirestore.instance.collection('APP/$isoPAis/PRODUCTOS/$id/PRICES').limit(limit).orderBy("time", descending: true).get();
   static Future<QuerySnapshot<Map<String, dynamic>>> readCategoryListFuture({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/CATEGORY').get();
-  static Future<QuerySnapshot<Map<String, dynamic>>> readListMarksFuture() =>FirebaseFirestore.instance.collection('/APP/ARG/MARCAS').get();
-  static Future<QuerySnapshot<Map<String, dynamic>>> readReportsProductFuture() =>FirebaseFirestore.instance.collection('/APP/ARG/REPORTS').get();
+  static Future<QuerySnapshot<Map<String, dynamic>>> readListMarksFuture() =>FirebaseFirestore.instance.collection('/APP/ARG/MARCAS').orderBy('upgrade',descending:true).get();
+  static Future<QuerySnapshot<Map<String, dynamic>>> readReportsProductFuture() =>FirebaseFirestore.instance.collection('/APP/ARG/REPORTS').orderBy('time',descending:true).get();
   // transactions
   static Future<QuerySnapshot<Map<String, dynamic>>> readTransactionsFuture({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/TRANSACTIONS').orderBy("creation", descending: true).get();
   static Future<QuerySnapshot<Map<String, dynamic>>> readProductsVerifiedFuture() => FirebaseFirestore.instance.collection('APP/ARG/PRODUCTOS').where("verified", isEqualTo: false).get();

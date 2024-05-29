@@ -1,4 +1,7 @@
  
+import 'dart:async';
+import 'dart:io';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart'; 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -28,6 +31,11 @@ class SellController extends GetxController {
 
   // titulo del Appbar //
   String titleText = 'Vender'; 
+
+  //  state load data admin user // 
+  final RxBool _stateLoadDataAdminUserComplete = false.obs; 
+  set setStateLoadDataAdminUserComplete(bool value) => _stateLoadDataAdminUserComplete.value = value;
+  bool get getStateLoadDataAdminUserComplete => _stateLoadDataAdminUserComplete.value;
 
   // state view barcodescan //
   final RxBool _stateViewBarCodeScan = false.obs;
@@ -286,17 +294,9 @@ class SellController extends GetxController {
   double get getValueReceivedTicket => _valueReceivedTicket.value;
   set setValueReceivedTicket(double value) {_valueReceivedTicket.value = value; }
 
- 
-  @override
-  void onClose() {
-    textEditingControllerAddFlashDescription.dispose();
-    textEditingControllerAddFlashPrice.dispose();
-    textEditingControllerTicketMount.dispose();
-    super.dispose();
-  }
 
 
-  // FIREBASE
+  // FIREBASE 
   void registerTransaction() {
 
     // Procederemos a guardar un documento con la transacción
@@ -540,9 +540,8 @@ class SellController extends GetxController {
     }
     
   }
-  //  ------------------------  //
-  // --------- dialog --------  //
-  //  ------------------------  // 
+  
+  // DIALOG // 
   void showDialogAddProductNew({ required ProductCatalogue productCatalogue}) {
     // dialog : muestra este dialog cuando el producto no se encuentra en el cáatalogo de la cuenta
 
@@ -669,7 +668,6 @@ class SellController extends GetxController {
       ),
     );  
   }
-
   void dialogSelectedIncomeCash() {
 
     // Dialog view : Cantidad del total del ingreso abonado
@@ -834,6 +832,30 @@ class SellController extends GetxController {
             ),
           ],
         ));
+  }
+
+  void checkDataAdminUser() {
+  Timer.periodic(const Duration(seconds: 1), (timer) {
+    if ( homeController.getProfileAdminUser.email != '') {
+      setStateLoadDataAdminUserComplete = true; 
+      timer.cancel(); // Detiene el temporizador cuando _stateConfirmPurchaseComplete es true
+    }
+  });
+}
+
+  // OVERRIDE //
+  @override
+  void onInit() { 
+    // chequeamos cada segundo si se cargo los datos del usuario admin hasta que se cargue
+    checkDataAdminUser();
+    super.onInit();
+  }
+  @override
+  void onClose() {
+    textEditingControllerAddFlashDescription.dispose();
+    textEditingControllerAddFlashPrice.dispose();
+    textEditingControllerTicketMount.dispose();
+    super.dispose();
   }
 }
  

@@ -1,4 +1,5 @@
 import 'dart:io';   
+import 'package:get/get_rx/get_rx.dart';
 import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:purchases_flutter/object_wrappers.dart';
 import 'package:purchases_flutter/purchases_flutter.dart'; 
 import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart'; 
@@ -31,7 +33,7 @@ class HomeController extends GetxController {
   final GlobalKey floatingActionButtonScanCodeBarKey = GlobalKey();
   final GlobalKey floatingActionButtonSelectedCajaKey = GlobalKey();
   final GlobalKey buttonsPaymenyMode = GlobalKey();
-  
+ 
   // estado de la conexión a internet
   bool _internetConnection = false;
   set setInternetConnection(bool value) => _internetConnection = value;
@@ -744,8 +746,7 @@ class HomeController extends GetxController {
     Database.readFutureAdminUser(idAccount: idAccount, email: email).then((value) {
       if (value.exists) { 
         // set : datos de los permisos del usuario en la cuenta
-        setProfileAdminUser = UserModel.fromDocumentSnapshot(documentSnapshot: value); 
- 
+        setProfileAdminUser = UserModel.fromDocumentSnapshot(documentSnapshot: value);   
         // condition : comprobar que el usuario no este inactivo
         if(getProfileAdminUser.inactivate == true){
           //  ------------------------------------  //
@@ -1045,7 +1046,16 @@ class HomeController extends GetxController {
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
     );
   }
-
+  // NAVIGATION //
+  void navigationToPage({required ProductCatalogue productCatalogue}) {
+    // condition : verifica si es un producto local
+    if(productCatalogue.local){
+      // navega hacia la vista de producto
+      Get.toNamed(Routes.editProduct, arguments: {'product': productCatalogue.copyWith()});
+    }else{
+      Get.toNamed(Routes.product, arguments: {'product': productCatalogue.copyWith()});
+    }
+  }
 
   // OVERRIDE //
   @override

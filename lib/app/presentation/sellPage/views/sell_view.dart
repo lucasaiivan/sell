@@ -68,15 +68,12 @@ class SalesView extends StatelessWidget {
   }
 
   // WIDGETS VIEWS
-  PreferredSizeWidget appbar({required SellController controller}) {
-
-    // var 
-    bool loadingProfile = homeController.getProfileAdminUser.email != ''; // estado de carga del perfil del usauario
+  PreferredSizeWidget appbar({required SellController controller}) { 
 
     return AppBar( 
       titleSpacing: 0.0,
       // icon drawer  
-      leading: loadingProfile?null: Center(child: SizedBox(width: 24,height: 24,child: InkWell(child: const CircularProgressIndicator(),onTap: (){homeController.update();}))),
+      leading: controller.getStateLoadDataAdminUserComplete?null: const Center(child: SizedBox(width: 24,height: 24,child: CircularProgressIndicator())),
       title: ComponentApp().buttonAppbar( 
         context:  buildContext,
         onTap: () => controller.showSeach(context: buildContext), 

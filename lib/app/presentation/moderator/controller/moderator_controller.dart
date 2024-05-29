@@ -1,7 +1,8 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart'; 
+import 'package:get/get.dart';
+import 'package:search_page/search_page.dart'; 
 import '../../../core/routes/app_pages.dart';
 import '../../../data/datasource/database_cloud.dart';
 import '../../../domain/entities/catalogo_model.dart';
@@ -12,6 +13,10 @@ class ModeratorController extends GetxController {
   
   // VARIABLES //
 
+  RxInt updateCount = 0.obs; 
+  set setUpdateCount(int value) => updateCount.value = value;
+  int get getUpdateCount => updateCount.value;
+
   // controllers
   final HomeController homeController = Get.find<HomeController>();
   // estado de carga de la base de datos
@@ -19,6 +24,7 @@ class ModeratorController extends GetxController {
   set setLoading(bool value) => loading.value = value;
   bool get getLoading => loading.value;
   // lista de productos filtrados
+  bool viewProducts = true;
   final RxList<Product> productsFiltered = <Product>[].obs;
   set setProductsFiltered(List<Product> value) => productsFiltered.addAll(value);
   List<Product> get getProductsFiltered => productsFiltered;
@@ -26,6 +32,31 @@ class ModeratorController extends GetxController {
   final List<Product> products = <Product>[].obs; 
   set setProducts(List<Product> value) => products.addAll(value); 
   List<Product> get getProducts => products; 
+  updateProducts({required Product product}){
+    bool noExist = false;
+    // description : actualizamos un producto en la lista original
+    for (var i = 0; i < getProducts.length; i++) {
+      if (getProducts[i].id == product.id) {
+        getProducts[i] = product;
+        noExist = true;
+        break;
+      }
+    } 
+    // actualizamos la lista de productos filtrados
+    for (var i = 0; i < getProductsFiltered.length; i++) {
+      if (getProductsFiltered[i].id == product.id) {
+        getProductsFiltered[i] = product;
+        noExist = true;
+        break;
+      }
+    }
+    // si no existe el producto lo agregamos
+    if (!noExist) {
+      getProducts.insert(0, product);
+      getProductsFiltered.insert(0, product);
+    }
+    update();
+  }
   // texto de filtro
   final RxString filterText = 'Filtrar'.obs;
   set setFilterText(String value) => filterText.value = value;
@@ -137,6 +168,7 @@ class ModeratorController extends GetxController {
     // default values 
     viewReports = false;
     viewBrands = false;
+    viewProducts =true;
     getProductsFiltered.clear();
     
     if (verified==null && idUserCreator==null && noData==null) { 
@@ -231,7 +263,31 @@ class ModeratorController extends GetxController {
       },
     );
   }
-  
+  void showSeachMarks({required BuildContext context}){
+
+    // buscar cátegoria
+
+    // var
+    Color colorAccent = Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
+
+
+    showSearch(
+      context: context,
+      delegate: SearchPage<Mark>(
+        searchStyle: TextStyle(color: colorAccent),
+        barTheme: Get.theme.copyWith(hintColor: colorAccent, highlightColor: colorAccent,inputDecorationTheme: const InputDecorationTheme(filled: false)),
+        items: getMarks,
+        searchLabel: 'Buscar marca',
+        suggestion: const Center(child: Text('ej. Miller')),
+        failure: const Center(child: Text('No se encontro :(')),
+        filter: (product) => [product.name,product.description],
+        builder: (mark) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[
+          ModeratorView().listTileBrand(item: mark),
+          const Divider(),
+          ]),
+      ),
+    );
+  }
   // NAVIGATION
   void goToProductEdit(Product product) { 
     // item
@@ -242,6 +298,9 @@ class ModeratorController extends GetxController {
       }
     } 
     Get.toNamed(Routes.editProduct, arguments: {'product': productCatalogue});
+  } 
+  void goToSeachProduct() {
+    Get.toNamed(Routes.searchProduct, arguments: {'id': ''});
   }
   
   // OVERRIDE METHODS
@@ -251,16 +310,6 @@ class ModeratorController extends GetxController {
     loadDB();
     loadMarks();
     loadReports();
-  }
-
-  @override
-  void onReady() {
-    super.onReady();
-  }
-
-  @override
-  void onClose() {
-    super.onClose();
-  }
+  } 
   
 }

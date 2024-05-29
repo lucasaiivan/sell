@@ -998,7 +998,7 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
           // iconButton : editar opciones
           controller.getEditModerator?Container():IconButton(
             onPressed:() => setState(()=>controller.setEditModerator = !controller.getEditModerator), 
-            icon: const Icon(Icons.edit_square,color: Colors.amber,),
+            icon: const Icon(Icons.edit_outlined),
           ),
           // button : actualizar documento
           controller.getLoadingData ||  !controller.getEditModerator
@@ -1046,7 +1046,7 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
               TextButton( 
                 onPressed: () async{
                   // values
-                  Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.camerasideas.instashot');
+                  Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.camerasideas.instashot&pcampaignid=web_share');
                   //  redireccionara para la tienda de aplicaciones
                   await launchUrl(uri,mode: LaunchMode.externalApplication);
                 },

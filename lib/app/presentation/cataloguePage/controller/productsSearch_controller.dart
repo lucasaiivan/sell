@@ -267,9 +267,7 @@ class ControllerProductsSearch extends GetxController {
  
   void toNavigationProduct({required ProductCatalogue porduct}) {
     // condition : verifica si es un producto local
-    if(porduct.local){
-      // TODO : disable for release [local]
-      porduct.local = false;
+    if(porduct.local){ 
       // navega hacia la vista de producto
       Get.toNamed(Routes.editProduct, arguments: {'product': porduct.copyWith()});
     }else{
@@ -278,6 +276,10 @@ class ControllerProductsSearch extends GetxController {
   }
 
   void toProductNew({required String id}) {
+
+    // TODO : disable for release [local]
+    productSelect.local = false;
+
     //values default
     clean();
     //set

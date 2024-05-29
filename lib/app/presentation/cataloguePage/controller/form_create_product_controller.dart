@@ -17,7 +17,8 @@ import '../../../core/utils/fuctions.dart';
 import '../../../core/utils/widgets_utils.dart';
 import '../../../data/datasource/database_cloud.dart';
 import '../../../domain/entities/catalogo_model.dart';
-import '../../home/controller/home_controller.dart'; 
+import '../../home/controller/home_controller.dart';
+import '../../moderator/controller/moderator_controller.dart'; 
 
 class ControllerCreateProductForm extends GetxController{
 
@@ -492,6 +493,16 @@ class ControllerCreateProductForm extends GetxController{
     product.followers++;  
     // crear el documento del producto publico
     await Database.refFirestoreProductPublic().doc(product.id).set(product.toJson());
+
+    // condition : verifica si existe el controlador
+    if (Get.isRegistered<ModeratorController>()) {
+      // si accedemos desde la vista de moderador
+      // controllers
+      final ModeratorController controller = Get.find<ModeratorController>(); 
+      // actualizamos el producto modificado
+      controller.updateProducts(product: product);
+    }
+    
   }
   void deleteProductInCatalogue() async{
     // activate indicator load

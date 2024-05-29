@@ -903,7 +903,7 @@ class WidgetSuggestionProduct extends StatelessWidget {
   Widget build(BuildContext context) {
 
     // controllers
-    CataloguePageController homeController = Get.find<CataloguePageController>();
+    HomeController controller = Get.find();
 
     if (list.isEmpty) return Container();
 
@@ -950,7 +950,7 @@ class WidgetSuggestionProduct extends StatelessWidget {
                   clipBehavior: Clip.antiAlias,
                   child: InkWell(
                     borderRadius: BorderRadius.circular(50),  
-                   onTap: () => homeController.toNavigationProduct(productCatalogue: e.convertProductCatalogue()),
+                   onTap: () => controller.navigationToPage(productCatalogue: e.convertProductCatalogue()),
                     child: CachedNetworkImage(
                       fadeInDuration: const Duration( milliseconds: 200),
                       fit: BoxFit.cover,
@@ -975,7 +975,7 @@ class WidgetSuggestionProduct extends StatelessWidget {
                     return Align(
                       widthFactor: 0.5,
                       child: InkWell(
-                        onTap: () => homeController.toNavigationProduct(productCatalogue: list[index].convertProductCatalogue()),
+                        onTap: () => controller.navigationToPage(productCatalogue: list[index].convertProductCatalogue()),
                         borderRadius: BorderRadius.circular(50),
                         child: Padding(
                           padding: const EdgeInsets.all(5.0),

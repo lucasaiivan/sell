@@ -2,9 +2,8 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:firebase_storage/firebase_storage.dart'; 
+import 'package:flutter/material.dart'; 
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -16,30 +15,38 @@ import '../../../data/datasource/database_cloud.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../controller/moderator_controller.dart';
 
-class ModeratorView extends GetView<ModeratorController> {
+class ModeratorView extends StatelessWidget {
   // ignore: prefer_const_constructors_in_immutables
   ModeratorView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() => Scaffold(
-          appBar: appbar(context: context),
-          body: body,
-        ));
+    return GetBuilder<ModeratorController>(
+      init: ModeratorController(), 
+      builder: (controller) {
+        return Scaffold(
+          appBar: appbar(context: context,controller: controller),
+          body: Obx(() => body(controller: controller)),
+          floatingActionButton:floatingActionButton ,
+        );
+      },
+    );
   }
 
   // WIDGETS VIEWS
-  PreferredSizeWidget appbar({ required BuildContext context}) {
+  PreferredSizeWidget appbar({ required BuildContext context,required ModeratorController controller}) {
 
 
     return AppBar(
-    title: const Text('Data Base'),
-    actions: [    
-      // icon : search
-        IconButton(
-          icon: const Icon(Icons.search),
-          onPressed: () => controller.showSeachDialog(),
+    title: ComponentApp().buttonAppbar(
+        context:  context,
+        onTap: () => controller.viewBrands?controller.showSeachMarks(context:context): controller.showSeachDialog(),
+        text: controller.viewBrands?'Buscar':'Data Base',
+        iconLeading: Icons.search,
+        colorBackground: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+        colorAccent: Theme.of(context).textTheme.bodyLarge!.color?.withOpacity(0.7),
         ),
+    actions: [     
       // buttons : filter list
       PopupMenuButton( 
         icon: ComponentApp().buttonAppbar(
@@ -92,7 +99,7 @@ class ModeratorView extends GetView<ModeratorController> {
     ], 
     );
   }
-  Widget get body {
+  Widget body({required ModeratorController controller}) {
 
     // widget
     Widget wrapChipsInfo = Padding(
@@ -145,6 +152,7 @@ class ModeratorView extends GetView<ModeratorController> {
             onTap: (){
               controller.setFilterText = 'Reportes';
               controller.viewReports = true;
+              controller.viewProducts = false;
               controller.update();
             },
           ), 
@@ -155,6 +163,7 @@ class ModeratorView extends GetView<ModeratorController> {
             onTap: (){
               controller.setFilterText = 'Marcas';
               controller.viewBrands = true;
+               controller.viewProducts = false;
               controller.update();
             },
           ),
@@ -294,7 +303,8 @@ class ModeratorView extends GetView<ModeratorController> {
   // WIDGETS COMPONENTS
   Widget listTileProduct({required Product product}) {
     // description : ListTile con detalles del producto
-
+    // controlles 
+    final ModeratorController controller = Get.find<ModeratorController>();
     // var
     double titleSize = 16;
     String valueDataUpdate ='Actualizado ${Publications.getFechaPublicacion(fechaPublicacion: product.upgrade.toDate(), fechaActual: Timestamp.now().toDate())}';
@@ -418,6 +428,8 @@ class ModeratorView extends GetView<ModeratorController> {
   }
   Widget listTileReport({required ReportProduct item,required BuildContext context}){
 
+    // controlles 
+    final ModeratorController controller = Get.find<ModeratorController>();
     // var 
     String description = item.description == '' ? 'sin datos' :item.description;
 
@@ -491,9 +503,13 @@ class ModeratorView extends GetView<ModeratorController> {
     );
   }
   Widget listTileBrand({required Mark item}){
+
+    // controlles 
+    final ModeratorController controller = Get.find<ModeratorController>();
+
     return ListTile(
-      title: Text(item.name),
-      subtitle: item.description.isEmpty?null:Text(item.description),
+      title: Text(item.name,maxLines:1),
+      subtitle: item.description.isEmpty?null:Opacity(opacity: 0.7,child: Text(item.description,maxLines:2)),
       leading: ImageProductAvatarApp(url: item.image,size: 40), 
       onTap: ()=> controller.showEditBrandDialogFullscreen(mark: item),
     );
@@ -515,6 +531,30 @@ class ModeratorView extends GetView<ModeratorController> {
       backgroundColor: Get.theme.colorScheme.secondary.withOpacity(0.1),
     );
   }
+  Widget get floatingActionButton{
+    // controllers
+    final ModeratorController controller = Get.find<ModeratorController>();
+
+    if(controller.viewProducts == false && controller.viewBrands == false){
+      return Container();
+    }
+
+    return  FloatingActionButton(
+      onPressed: (){
+        if(controller.viewProducts){
+          // crear producto
+          controller.goToSeachProduct();
+        }
+        if(controller.viewBrands){
+          // crear marca
+          controller.showEditBrandDialogFullscreen(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now()));
+        }
+
+      },
+      backgroundColor: Colors.blue, 
+      child: const Icon(Icons.add,color: Colors.white,),
+    );
+  }
 }
 
 
@@ -525,11 +565,7 @@ class ViewSeachProductsCataloguie extends StatefulWidget {
   @override
   State<ViewSeachProductsCataloguie> createState() => _ViewSeachProductsCataloguieState();
 }
-
 class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCataloguie> {
-
-
-  
 
   // controllers  
   final ModeratorController controller = Get.find<ModeratorController>();
@@ -806,7 +842,6 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
   
 }
 
-
 class CreateMark extends StatefulWidget {
   final Mark mark;
   const CreateMark({required this.mark, Key? key}) : super(key: key);
@@ -892,6 +927,7 @@ class _CreateMarkState extends State<CreateMark> {
             ],
           ),
         ),
+        // view : nombre de la marca
         Padding(
           padding: const EdgeInsets.all(20.0),
           child: TextField(
@@ -905,23 +941,30 @@ class _CreateMarkState extends State<CreateMark> {
             style: textStyle,
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: TextField(
-            enabled: !load,
-            controller: TextEditingController(text: widget.mark.description),
-            onChanged: (value) => widget.mark.description = value,
-            decoration: InputDecoration(
-                filled: true, 
-                fillColor: fillColor,
-                labelText: "Descripción (opcional)"),
-            style: textStyle,
+        // view : descripcion de la marca
+        Flexible(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: TextField(
+              enabled: !load,
+              controller: TextEditingController(text: widget.mark.description),
+              onChanged: (value) => widget.mark.description = value, 
+              minLines: 1, // Definir el mínimo de líneas
+              maxLines: null, // Permitir cualquier cantidad de líneas
+              maxLength: 160,
+              decoration: InputDecoration(
+                  filled: true, 
+                  fillColor: fillColor,
+                  labelText: "Descripción (opcional)"),
+              style: textStyle,
+            ),
           ),
         ),
         // view : botones de edicion
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               // view : buscar en google
               Row(
@@ -936,7 +979,7 @@ class _CreateMarkState extends State<CreateMark> {
                         Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
                         await launchUrl(uri,mode: LaunchMode.externalApplication);
                       },
-                      child: const Text('Por Nombre' )),
+                      child: const Text('Imagen del logo' )),
                   // textButton : buscar en google
                   TextButton(
                       onPressed: () async {
@@ -944,14 +987,14 @@ class _CreateMarkState extends State<CreateMark> {
                         Uri uri = Uri.parse("https://www.google.com/search?q=$clave");
                         await launchUrl(uri,mode: LaunchMode.externalApplication);
                       },
-                      child: const Text('Por Descripción')),
+                      child: const Text('Información')),
                 ],
               ),
               // buttom : edicion de imagen
               TextButton(
                 onPressed: () async{
                   // values
-                  Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.camerasideas.instashot');
+                  Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.camerasideas.instashot&pcampaignid=web_share');
                   //  redireccionara para la tienda de aplicaciones
                   await launchUrl(uri,mode: LaunchMode.externalApplication);
                 },
@@ -1024,26 +1067,34 @@ class _CreateMarkState extends State<CreateMark> {
       
       // mark save
       if( newMark ){
+        // set
+        widget.mark.creation = Timestamp.now();
+        widget.mark.upgrade = Timestamp.now();
         // creamos un docuemnto nuevo
         await Database.refFirestoreMark().doc(widget.mark.id).set(widget.mark.toJson()).whenComplete(() {
- 
+          
           // agregar el obj manualmente para evitar consulta a la db  innecesaria
-          controllerModerator.getMarks.add(widget.mark);
-          controllerModerator.update();
+          controllerModerator.getMarks.add(widget.mark); 
           Get.back();
         });
       }else{
+        // set
+        widget.mark.upgrade = Timestamp.now();
         // actualizamos un documento existente
         await Database.refFirestoreMark().doc(widget.mark.id).update(widget.mark.toJson()).whenComplete(() {
  
-          // eliminamos la marca de la lista
-          controllerModerator.getMarks.removeWhere((element) => (element.id == widget.mark.id));
-          // agregamos la nueva marca actualizada a la lista
-          controllerModerator.getMarks.add(widget.mark);
-          controllerModerator.update();
+          // actualizar el objeto manualmente para evitar consulta a la db  innecesaria
+          for (var element in controllerModerator.getMarks) {
+            if(element.id == widget.mark.id){
+              element = widget.mark;
+            }
+          }
           Get.back();
         });
       }
+      // logic : actualizamos la vista 
+      controllerModerator.setUpdateCount = controllerModerator.getUpdateCount + 1;
+      controllerModerator.update();
 
     } else {
       Get.snackbar('', 'Debes escribir un nombre de la marca');

@@ -10,11 +10,13 @@ import 'package:image_picker/image_picker.dart';
 import 'package:search_page/search_page.dart';
 import 'package:sell/app/core/utils/fuctions.dart'; 
 import 'package:shimmer/shimmer.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../data/datasource/database_cloud.dart';
 import '../../../core/utils/widgets_utils.dart';
-import '../../home/controller/home_controller.dart'; 
+import '../../home/controller/home_controller.dart';
+import '../../moderator/controller/moderator_controller.dart'; 
 
 class ControllerProductsEdit extends GetxController {
 
@@ -459,6 +461,15 @@ class ControllerProductsEdit extends GetxController {
 
     // firebase: actualizar el documento del producto publico
     Database.refFirestoreProductPublic().doc(product.id).update(product.toJsonUpdate());
+
+    // condition : verifica si existe el controlador
+    if (Get.isRegistered<ModeratorController>()) {
+      // si accedemos desde la vista de moderador
+      // controllers
+      final ModeratorController controller = Get.find<ModeratorController>(); 
+      // actualizamos el producto modificado
+      controller.updateProducts(product: product);
+    } 
   } 
   void deleteProductInCatalogue() async{
     // activate indicator load
@@ -1233,6 +1244,7 @@ class _CreateMarkState extends State<CreateMark> {
             ],
           ),
         ),
+        // view : nombre de la marca
         Padding(
           padding: const EdgeInsets.all(20.0),
           child: TextField(
@@ -1246,19 +1258,68 @@ class _CreateMarkState extends State<CreateMark> {
             style: textStyle,
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: TextField(
-            enabled: !load,
-            controller: TextEditingController(text: widget.mark.description),
-            onChanged: (value) => widget.mark.description = value,
-            decoration: InputDecoration(
-                filled: true, 
-                fillColor: fillColor,
-                labelText: "Descripción (opcional)"),
-            style: textStyle,
+        // view : descripcion de la marca
+        Flexible(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: TextField(
+              enabled: !load,
+              controller: TextEditingController(text: widget.mark.description),
+              onChanged: (value) => widget.mark.description = value, 
+              minLines: 1, // Definir el mínimo de líneas
+              maxLines: null, // Permitir cualquier cantidad de líneas
+              maxLength: 160,
+              decoration: InputDecoration(
+                  filled: true, 
+                  fillColor: fillColor,
+                  labelText: "Descripción (opcional)"),
+              style: textStyle,
+            ),
           ),
         ),
+        // view : botones de edicion
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              // view : buscar en google
+              Row(
+                children: [
+                  // text 
+                  const Text('Buscar en google:'),
+                  const Spacer(),
+                  // button : textButton : buscar en google
+                  TextButton(
+                      onPressed: () async {
+                        String clave = 'logo ${widget.mark.name}';
+                        Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
+                        await launchUrl(uri,mode: LaunchMode.externalApplication);
+                      },
+                      child: const Text('Imagen del logo' )),
+                  // textButton : buscar en google
+                  TextButton(
+                      onPressed: () async {
+                        String clave = 'que industria es la marca ${widget.mark.name}?';
+                        Uri uri = Uri.parse("https://www.google.com/search?q=$clave");
+                        await launchUrl(uri,mode: LaunchMode.externalApplication);
+                      },
+                      child: const Text('Información')),
+                ],
+              ),
+              // buttom : edicion de imagen
+              TextButton(
+                onPressed: () async{
+                  // values
+                  Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.camerasideas.instashot&pcampaignid=web_share');
+                  //  redireccionara para la tienda de aplicaciones
+                  await launchUrl(uri,mode: LaunchMode.externalApplication);
+                },
+                child: const Text('Editar imagen con InstaShot'),
+              ),
+            ],
+          ),
+        ), 
       ],
     );
   }
@@ -1323,10 +1384,13 @@ class _CreateMarkState extends State<CreateMark> {
       
       // mark save
       if( newMark ){
+        // set
+        widget.mark.creation = Timestamp.now();
+        widget.mark.upgrade = Timestamp.now();
         // creamos un docuemnto nuevo
         await Database.refFirestoreMark().doc(widget.mark.id).set(widget.mark.toJson()).whenComplete(() {
 
-          // set values 
+          // set values  
           controllerProductsEdit.setUltimateSelectionMark = widget.mark;
           controllerProductsEdit.setMarkSelected = widget.mark;
           // agregar el obj manualmente para evitar consulta a la db  innecesaria
@@ -1334,6 +1398,9 @@ class _CreateMarkState extends State<CreateMark> {
           Get.back();
         });
       }else{
+        //set 
+        widget.mark.upgrade = Timestamp.now();
+
         // actualizamos un documento existente
         await Database.refFirestoreMark().doc(widget.mark.id).update(widget.mark.toJson()).whenComplete(() {
 
