@@ -53,8 +53,13 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
 
   // catalogue
   final RxList<ProductCatalogue> _catalogueBusiness = <ProductCatalogue>[].obs;
-  List<ProductCatalogue> get getCataloProducts => _catalogueBusiness;
+  List<ProductCatalogue> get getCataloProducts { 
+    return _catalogueBusiness;
+  
+  }
   set setCatalogueProducts(List<ProductCatalogue> products) {
+    // ordenar los productos por fecha de actualizacion
+    products.sort((a, b) => b.upgrade.compareTo(a.upgrade));
     _catalogueBusiness.value = products;
     //...filter
   }

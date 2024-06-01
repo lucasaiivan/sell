@@ -395,6 +395,8 @@ class HomeController extends GetxController {
       }
       if (!exist) { addToListProductSelecteds(item: product);}
     }
+    // ordenamos por fecha de actualización
+    getCataloProducts.sort((a, b) => b.upgrade.compareTo(a.upgrade));
   }
   // login
   void login() async {

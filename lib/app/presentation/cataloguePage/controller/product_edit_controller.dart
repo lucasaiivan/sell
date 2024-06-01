@@ -127,6 +127,7 @@ class ControllerProductsEdit extends GetxController {
   set setDescription(String value) {
     _description = value;
     getProduct.description = value;
+    controllerTextEditDescripcion.text = value;
     update(['updateAll']);
   }
   get getDescription => _description;
@@ -820,7 +821,7 @@ class ControllerProductsEdit extends GetxController {
                     padding: const EdgeInsets.symmetric(horizontal:0),
                     child: TextFormField(
                       style: valueTextStyle,
-                      autofocus: false, 
+                      autofocus: true, 
                       controller:  controllerTextEditDescripcion,
                       enabled: true, 
                       maxLines: null, 
@@ -894,7 +895,7 @@ class ControllerProductsEdit extends GetxController {
                   // mount textfield
                   TextFormField(
                     style: valueTextStyle,
-                    autofocus: false, 
+                    autofocus: true, 
                     controller:  controllerTextEditPrecioVenta,
                     enabled: true,
                     autovalidateMode: AutovalidateMode.onUserInteraction, 
@@ -970,7 +971,7 @@ class ControllerProductsEdit extends GetxController {
                   // mount textfield
                   TextFormField(
                     style: valueTextStyle,
-                    autofocus: false, 
+                    autofocus: true, 
                     controller:  controllerTextEditPrecioCosto,
                     enabled: true,
                     autovalidateMode: AutovalidateMode.onUserInteraction, 
