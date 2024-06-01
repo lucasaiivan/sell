@@ -224,9 +224,9 @@ class ProductEdit extends StatelessWidget {
                     const SizedBox(height: 12),
                     // view : marca del producto
                     controller.getProduct.local?Container():Flexible(
-                      child: textfielBottomSheetListOptions( 
+                      child: textfielBottomSheetListOptions(  
                         contentPadding: const EdgeInsets.only(bottom: 12,top: 12,left: 12,right: 12),
-                        stateEdit: controller.getLoadingData? false: controller.getEditModerator || controller.getProduct.verified==false,
+                        stateEdit: controller.getLoadingData? false: enableEdit,
                         textValue: controller.getMarkSelected.name ,
                         labelText: controller.getMarkSelected.id == ''? 'Seleccionar una marca': 'Marca',
                         onTap: controller.getProduct.verified==false || controller.getEditModerator? controller.showModalSelectMarca : () {},
@@ -242,28 +242,30 @@ class ProductEdit extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           // textField  : descripción del producto
-          TextField(
-            enabled: enableEdit,
-            minLines: 1,
-            maxLines: 5,
-            style: TextStyle(height: 2,color: textDescriptionStyleColor),
-            keyboardType: TextInputType.multiline,
-            onChanged: (value) => controller.setDescription = value,
-            // desabilitar autofocus
-            autofocus: false,
-            decoration: InputDecoration(   
-              border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
-              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color:boderLineColor),), 
-              disabledBorder: UnderlineInputBorder(borderSide: BorderSide(color:!enableEdit?Colors.transparent:boderLineColor)),
-              contentPadding: const EdgeInsets.only(bottom: 12,top: 12,left: 12,right: 12),
-              filled: enableEdit,
-              fillColor: enableEdit?null:Colors.transparent,
-              hoverColor: Colors.blue, 
-              labelText: "Descripción del producto"),
-              inputFormatters: [ FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\- .³%]')) ],
-              textInputAction: TextInputAction.done,
-              controller: controller.controllerTextEditDescripcion,
-            ),
+          GestureDetector(
+            onTap: enableEdit?()=>controller.showDialogDescription():null,
+            child: TextField(
+              enabled: false,
+              minLines: 1,
+              maxLines: 5,
+              style: TextStyle(height: 2,color: textDescriptionStyleColor),
+              keyboardType: TextInputType.multiline,
+              onChanged: (value) => controller.setDescription = value,
+              autofocus: false, 
+              decoration: InputDecoration(   
+                border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color:boderLineColor),), 
+                disabledBorder: UnderlineInputBorder(borderSide: BorderSide(color:!enableEdit?Colors.transparent:boderLineColor)),
+                contentPadding: const EdgeInsets.only(bottom: 12,top: 12,left: 12,right: 12),
+                filled: enableEdit,
+                fillColor: enableEdit?null:Colors.transparent,
+                hoverColor: Colors.blue, 
+                labelText: "Descripción del producto"),
+                inputFormatters: [ FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ0-9\- .³%]')) ],
+                textInputAction: TextInputAction.done,
+                controller: controller.controllerTextEditDescripcion,
+              ),
+          ),
         ],
       ),
     );
@@ -349,29 +351,34 @@ class ProductEdit extends StatelessWidget {
                       flex: 1,
                       child: Form(
                         key: controller.purchasePriceFormKey,
-                        child: TextFormField(
-                          style: valueTextStyle,
-                          autofocus: false,
-                          focusNode:controller.purchasePriceTextFormFieldfocus,
-                          controller: controller.controllerTextEditPrecioCosto,
-                          enabled: true,
-                          autovalidateMode: AutovalidateMode.onUserInteraction, 
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          decoration: InputDecoration( 
-                            filled: true,
-                            fillColor: fillColor,
-                            labelText: 'Costo',
-                            border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
-                            enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
-                            ),      
-                          onChanged: (value) {   
-                            controller.updateAll();
-                          } ,   
-                          // validator: validamos el texto que el usuario ha ingresado.
-                          validator: (value) {
-                            // if (value == null || value.isEmpty) { return 'Por favor, escriba un precio de compra'; }
-                            return null; 
+                        child: GestureDetector(
+                          onTap: (){
+                            // dialog 
+                            controller.showDialogPricePurchase();
                           },
+                          child: TextFormField(
+                            style: valueTextStyle,
+                            autofocus: false, 
+                            controller: controller.controllerTextEditPrecioCosto,
+                            enabled: false,
+                            autovalidateMode: AutovalidateMode.onUserInteraction, 
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            decoration: InputDecoration( 
+                              filled: true,
+                              fillColor: fillColor,
+                              labelText: 'Costo',
+                              border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                              ),      
+                            onChanged: (value) {   
+                              controller.updateAll();
+                            } ,   
+                            // validator: validamos el texto que el usuario ha ingresado.
+                            validator: (value) {
+                              // if (value == null || value.isEmpty) { return 'Por favor, escriba un precio de compra'; }
+                              return null; 
+                            },
+                          ),
                         ),
                       ),
                     ), 
@@ -382,27 +389,29 @@ class ProductEdit extends StatelessWidget {
                       flex: 2,
                       child: Form(
                         key: controller.salePriceFormKey, 
-                        child: TextFormField(
-                          style: valueTextStyle,
-                          autofocus: false,
-                          focusNode:controller.salePriceTextFormFieldfocus,
-                          controller: controller.controllerTextEditPrecioVenta,
-                          enabled: true,
-                          autovalidateMode: AutovalidateMode.onUserInteraction, 
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: fillColor,
-                            labelText: 'Precio de venta al público',
-                            border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
-                            enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
-                          ),   
-                          onChanged: (value) { controller.updateAll(); },
-                          // validator: validamos el texto que el usuario ha ingresado.
-                          validator: (value) {
-                            if ( controller.controllerTextEditPrecioVenta.numberValue == 0.0) { return 'Por favor, escriba un precio de venta'; }
-                            return null;
-                          },
+                        child: GestureDetector(
+                          onTap: ()=> controller.showDialogPriceSale(),
+                          child: TextFormField(
+                            style: valueTextStyle,
+                            autofocus: false, 
+                            controller: controller.controllerTextEditPrecioVenta,
+                            enabled: false,
+                            autovalidateMode: AutovalidateMode.onUserInteraction, 
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: fillColor,
+                              labelText: 'Precio de venta al público',
+                              border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
+                            ),   
+                            onChanged: (value) { controller.updateAll(); },
+                            // validator: validamos el texto que el usuario ha ingresado.
+                            validator: (value) {
+                              if ( controller.controllerTextEditPrecioVenta.numberValue == 0.0) { return 'Por favor, escriba un precio de venta'; }
+                              return null;
+                            },
+                          ),
                         ),
                       ),
                     ),

@@ -106,6 +106,13 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                 children: [ 
                   // textfield : código de barra
                   textFieldCodeBar(), 
+                  controller.copyClipboard==''?Container()
+                  :FadeInRight(child: TextButton(
+                    onPressed: (){
+                      controller.textEditingController.text = controller.copyClipboard;
+                      controller.searchProductCatalogue(id: controller.copyClipboard);
+                    },
+                    child: const Text('Pegar código'))),
                   const SizedBox(height: 12.0),
                   // button : buscar código
                   controller.getWriteCode||controller.getproductDoesNotExist?Container():

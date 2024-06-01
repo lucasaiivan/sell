@@ -1,4 +1,5 @@
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -28,7 +29,7 @@ Future<void> main() async {
     await Purchases.setLogLevel(LogLevel.debug); // debug : para ver los errores en la consola
     PurchasesConfiguration configuration = PurchasesConfiguration(googleApiKey)..observerMode = false;
     await Purchases.configure(configuration); // configuramos la compra
-  }
+  } 
   // GetStorage : local storage
   await GetStorage.init(); 
   SplashBinding().dependencies(); 

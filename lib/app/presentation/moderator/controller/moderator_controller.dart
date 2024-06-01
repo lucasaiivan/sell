@@ -83,7 +83,7 @@ class ModeratorController extends GetxController {
   List<ReportProduct> get getReports => reports;  
 
 // GETTERS
-   int get totalProducts => products.length;
+  int get totalProducts => products.length;
   int get totalVerifiedProducts => products.where((element) => element.verified).length;
   int get totalUnverifiedProducts => products.where((element) => !element.verified).length;
   int get totalProductsNoData => products.where((element) => element.code == '' || element.idMark == '' || element.description == '' || element.image == '' ).length;
@@ -96,7 +96,17 @@ class ModeratorController extends GetxController {
     }
     return null;
   }
-  
+  int totalNumberOfBrandedProducts({required String idBrand}){
+    // description : obtenemos el numero de productos de una marca
+    int count = 0;
+    for (var element in products) {
+      if (element.idMark == idBrand) {
+        count++;
+      }
+    }
+    return count;
+    
+  }
   // DATA SOURCE
   void loadDB() {
     // default values
@@ -212,7 +222,6 @@ class ModeratorController extends GetxController {
       loadReports();
     });
   }
-  
   void createDbBackup() {
     // description : creamos una copia de seguridad de un producto
     for (var element in getProducts) {

@@ -325,14 +325,19 @@ class SellController extends GetxController {
       for (dynamic data in getTicket.listPoduct) { 
         // obj
         ProductCatalogue product = ProductCatalogue.fromMap(data as Map<String, dynamic>);
+        ProductCatalogue productCatalogue = homeController.getProductCatalogue(id: product.id).copyWith(); // obtenemos el producto del catálogo con los datos actualizados
 
-        // firestore : hace un incremento de las ventas del producto
-        Database.dbProductStockSalesIncrement(idAccount: homeController.getIdAccountSelected,idProduct: product.id,quantity: product.quantity );
+        // firestore : hace un incremento de 1 en el valor 'sales' del producto
+        productCatalogue.sales ++;
+        Database.dbProductStockSalesIncrement(idAccount: homeController.getIdAccountSelected,idProduct: product.id,quantity: 1 );
         // condition :  hace un descremento en el valor 'stock' del producto si es que tiene stock habilitado
         if (product.stock && homeController.getIsSubscribedPremium ) {
           //  firestore : hace un descremento en el valor 'stock'
+          productCatalogue.quantityStock -= product.quantity;
           Database.dbProductStockDecrement(idAccount: homeController.getIdAccountSelected,idProduct: product.id,quantity: product.quantity);
         }
+        // actualizamos la lista de producto de  catálogo  en memoria de la app
+        homeController.sincronizeCatalogueProducts(product: productCatalogue);
       }
       setStateConfirmPurchaseComplete = true;
       // set : default values  

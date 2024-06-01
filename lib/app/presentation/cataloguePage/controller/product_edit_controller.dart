@@ -48,11 +48,7 @@ class ControllerProductsEdit extends GetxController {
   GlobalKey<FormState> purchasePriceFormKey = GlobalKey<FormState>();
   GlobalKey<FormState> salePriceFormKey = GlobalKey<FormState>(); 
   GlobalKey<FormState> quantityStockFormKey = GlobalKey<FormState>(); 
-
-  // var : TextFormField focus
-  final descriptionTextFormFieldfocus = FocusNode(); 
-  final purchasePriceTextFormFieldfocus = FocusNode(); 
-  final salePriceTextFormFieldfocus = FocusNode(); 
+ 
 
   // state internet
   bool connected = false;
@@ -173,6 +169,7 @@ class ControllerProductsEdit extends GetxController {
   double _purchasePrice = 0.0;
   set setPurchasePrice(double value) {
     _purchasePrice = value;
+    controllerTextEditPrecioCosto.updateValue(value);
     update(['updateAll']);
   }
   get getPurchasePrice => _purchasePrice;
@@ -180,7 +177,7 @@ class ControllerProductsEdit extends GetxController {
   double _salePrice = 0.0;
   set setSalePrice(double value) {
     _salePrice = value;
-    controllerTextEditPrecioVenta.updateValue(value);
+    controllerTextEditPrecioVenta.updateValue(value); 
     update(['updateAll']);
   }
   get getSalePrice => _salePrice;
@@ -422,8 +419,10 @@ class ControllerProductsEdit extends GetxController {
 
               // Firebase set : se crea los datos del producto del cátalogo de la cuenta
               Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id)
-                .set(getProduct.toJson())
-                .whenComplete(() async {
+                .set(getProduct.toJson()).whenComplete(() async {
+                  // actualiza la lista de productos del cátalogo en la memoria de la app
+                  homeController.sincronizeCatalogueProducts(product: getProduct);
+                  // sleep : espera 3 segundos para que se actualice la vista
                   await Future.delayed(const Duration(seconds: 3)).then((value) {setLoadingData = false; Get.back(); });
               }).onError((error, stackTrace) => setLoadingData = false).catchError((_) => setLoadingData = false);
 
@@ -484,6 +483,8 @@ class ControllerProductsEdit extends GetxController {
       .doc(getProduct.id)
       .delete()
       .whenComplete(() {
+        // actualiza la lista de productos del cátalogo en la memoria de la app
+        homeController.sincronizeCatalogueProducts(product: getProduct, delete: true);
         // Firebase : descontamos el valor de los seguidores del producto
         if (getProduct.followers > 0){
           Database.refFirestoreProductPublic().doc(getProduct.id).update({'followers': FieldValue.increment(-1)});
@@ -703,8 +704,8 @@ class ControllerProductsEdit extends GetxController {
                   if(controller.text != ''){
                     double porcentajeDeGanancia  = double.parse(controller.text); 
                     double ganancia = controllerTextEditPrecioCosto.numberValue * (porcentajeDeGanancia / 100);
-                    setSalePrice = controllerTextEditPrecioCosto.numberValue + ganancia; 
-                    update(['updateAll']);
+                    setSalePrice = controllerTextEditPrecioCosto.numberValue + ganancia;  
+                    
                   }
                   //  action : cierra el dialogo
                   Get.back();
@@ -781,7 +782,7 @@ class ControllerProductsEdit extends GetxController {
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
     );
   }
-  // dialog : muestra el dialogo para eliminar el producto
+  // DIALOG // 
   void showDialogDelete() {
     Widget widget = AlertDialog(
       title: const Text("¿Seguro que quieres eliminar este producto de tu catálogo?"),
@@ -795,7 +796,234 @@ class ControllerProductsEdit extends GetxController {
     // muestre el dialogo
     Get.dialog(widget);
   }
-  // bottomSheet : muestra el modal para seleccionar la categoria
+  void showDialogDescription(){
+    // Dialog view :  muestra el dialogo para agregar la descripción del producto
+
+    // var
+    final Color boderLineColor = Get.isDarkMode?Colors.white.withOpacity(0.3):Colors.black.withOpacity(0.3);
+    final Color fillColor = Get.isDarkMode?Colors.white.withOpacity(0.03):Colors.black.withOpacity(0.03);
+    // style  
+    TextStyle valueTextStyle = TextStyle(color: Get.isDarkMode?Colors.white:Colors.black,fontSize: 18,fontWeight: FontWeight.w400);
+    // controllers
+    final TextEditingController controllerTextEditDescripcion = TextEditingController(text: getProduct.description);
+    // widgets
+    Widget content = AlertDialog( 
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Column(
+                children: [
+                  // mount textfield
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal:0),
+                    child: TextFormField(
+                      style: valueTextStyle,
+                      autofocus: false, 
+                      controller:  controllerTextEditDescripcion,
+                      enabled: true, 
+                      maxLines: null, 
+                      autovalidateMode: AutovalidateMode.onUserInteraction, 
+                      keyboardType: TextInputType.text,
+                      decoration: InputDecoration( 
+                        filled: true,
+                        fillColor: fillColor,
+                        labelText: 'Descripción',
+                        border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                        ),      
+                      onChanged: (value) {   
+                        setDescription = controllerTextEditDescripcion.text;
+                      } ,   
+                      // validator: validamos el texto que el usuario ha ingresado.
+                      validator: (value) {
+                        // if (value == null || value.isEmpty) { return 'Por favor, escriba un precio de compra'; }
+                        return null; 
+                      },
+                    ),
+                  ),  
+                ],
+              ),
+            ), 
+            // buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                TextButton( onPressed: () { Get.back();}, child: const Text('Cancelar',textAlign: TextAlign.center)),
+                TextButton( onPressed: () {
+                  //  function : guarda el nuevo porcentaje de ganancia
+                  setDescription = controllerTextEditDescripcion.text;
+                  //  action : cierra el dialogo
+                  Get.back();
+                },
+                child: const Text('ok',textAlign: TextAlign.center)),
+              ],
+            ),
+          ],
+        ),
+    );
+
+    // dialog
+    showDialog(
+      context: Get.context!,
+      builder: (BuildContext context) {
+        return content;
+      },
+    );
+  }
+  void showDialogPriceSale(){
+    // Dialog view :  muestra el dialogo para agregar el porcentaje de ganancia
+
+    // var
+    final Color boderLineColor = Get.isDarkMode?Colors.white.withOpacity(0.3):Colors.black.withOpacity(0.3);
+    final Color fillColor = Get.isDarkMode?Colors.white.withOpacity(0.03):Colors.black.withOpacity(0.03);
+    // style  
+    TextStyle valueTextStyle = TextStyle(color: Get.isDarkMode?Colors.white:Colors.black,fontSize: 18,fontWeight: FontWeight.w400);
+    // controllers
+    final MoneyMaskedTextController controllerTextEditPrecioVenta = MoneyMaskedTextController(initialValue: getProduct.salePrice,leftSymbol: homeController.getProfileAccountSelected.currencySign);
+    // widgets
+    Widget content = AlertDialog( 
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Column(
+                children: [
+                  // mount textfield
+                  TextFormField(
+                    style: valueTextStyle,
+                    autofocus: false, 
+                    controller:  controllerTextEditPrecioVenta,
+                    enabled: true,
+                    autovalidateMode: AutovalidateMode.onUserInteraction, 
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration( 
+                      filled: true,
+                      fillColor: fillColor,
+                      labelText: 'Precio de venta',
+                      border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                      ),      
+                    onChanged: (value) {   
+                      updateAll();
+                    } ,   
+                    // validator: validamos el texto que el usuario ha ingresado.
+                    validator: (value) {
+                      // if (value == null || value.isEmpty) { return 'Por favor, escriba un precio de compra'; }
+                      return null; 
+                    },
+                  ),  
+                ],
+              ),
+            ), 
+            // buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                TextButton( onPressed: () { Get.back();}, child: const Text('Cancelar',textAlign: TextAlign.center)),
+                TextButton( onPressed: () {
+                  //  function : guarda el nuevo porcentaje de ganancia
+                  if(controllerTextEditPrecioVenta.numberValue != 0
+                  ){
+                    double precioVenta  = controllerTextEditPrecioVenta.numberValue; 
+                    setSalePrice = precioVenta;  
+                  }
+                  //  action : cierra el dialogo
+                  Get.back();
+                },
+                child: const Text('ok',textAlign: TextAlign.center)),
+              ],
+            ),
+          ],
+        ),
+    );
+
+    // dialog
+    showDialog(
+      context: Get.context!,
+      builder: (BuildContext context) {
+        return content;
+      },
+    );
+  }
+  void showDialogPricePurchase(){
+    // Dialog view :  muestra el dialogo para agregar el porcentaje de ganancia
+
+    // var
+    final Color boderLineColor = Get.isDarkMode?Colors.white.withOpacity(0.3):Colors.black.withOpacity(0.3);
+    final Color fillColor = Get.isDarkMode?Colors.white.withOpacity(0.03):Colors.black.withOpacity(0.03);
+    // style  
+    TextStyle valueTextStyle = TextStyle(color: Get.isDarkMode?Colors.white:Colors.black,fontSize: 18,fontWeight: FontWeight.w400);
+    // controllers
+    final MoneyMaskedTextController controllerTextEditPrecioCosto = MoneyMaskedTextController(initialValue: getProduct.purchasePrice,leftSymbol: homeController.getProfileAccountSelected.currencySign);
+    // widgets
+    Widget content = AlertDialog( 
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Column(
+                children: [
+                  // mount textfield
+                  TextFormField(
+                    style: valueTextStyle,
+                    autofocus: false, 
+                    controller:  controllerTextEditPrecioCosto,
+                    enabled: true,
+                    autovalidateMode: AutovalidateMode.onUserInteraction, 
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration( 
+                      filled: true,
+                      fillColor: fillColor,
+                      labelText: 'Costo',
+                      border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                      ),      
+                    onChanged: (value) {   
+                      updateAll();
+                    } ,   
+                    // validator: validamos el texto que el usuario ha ingresado.
+                    validator: (value) {
+                      // if (value == null || value.isEmpty) { return 'Por favor, escriba un precio de compra'; }
+                      return null; 
+                    },
+                  ),  
+                ],
+              ),
+            ), 
+            // buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                TextButton( onPressed: () { Get.back();}, child: const Text('Cancelar',textAlign: TextAlign.center)),
+                TextButton( onPressed: () {
+                  //  function : guarda el nuevo porcentaje de ganancia
+                  if(controllerTextEditPrecioCosto.numberValue != 0){
+                    double precioCosto  = controllerTextEditPrecioCosto.numberValue; 
+                    setPurchasePrice = precioCosto;  
+                  }
+                  //  action : cierra el dialogo
+                  Get.back();
+                }, 
+                child: const Text('ok',textAlign: TextAlign.center)),
+              ],
+            ),
+          ],
+        ),
+    );
+
+    // dialog
+    showDialog(
+      context: Get.context!,
+      builder: (BuildContext context) {
+        return content;
+      },
+    );
+  }
+  // BOTTONSHET //
   void showModalSelectMarca() {
     // widget
     Widget widget = const WidgetSelectMark();
@@ -1259,25 +1487,23 @@ class _CreateMarkState extends State<CreateMark> {
           ),
         ),
         // view : descripcion de la marca
-        Flexible(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: TextField(
-              enabled: !load,
-              controller: TextEditingController(text: widget.mark.description),
-              onChanged: (value) => widget.mark.description = value, 
-              minLines: 1, // Definir el mínimo de líneas
-              maxLines: null, // Permitir cualquier cantidad de líneas
-              maxLength: 160,
-              decoration: InputDecoration(
-                  filled: true, 
-                  fillColor: fillColor,
-                  labelText: "Descripción (opcional)"),
-              style: textStyle,
-            ),
+        Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: TextField(
+            enabled: !load,
+            controller: TextEditingController(text: widget.mark.description),
+            onChanged: (value) => widget.mark.description = value, 
+            minLines: 1, // Definir el mínimo de líneas
+            maxLines: null, // Permitir cualquier cantidad de líneas
+            maxLength: 160,
+            decoration: InputDecoration(
+                filled: true, 
+                fillColor: fillColor,
+                labelText: "Descripción (opcional)"),
+            style: textStyle,
           ),
         ),
-        // view : botones de edicion
+        // view : botones de edicionales
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(

@@ -18,9 +18,6 @@ class ViewSeachProductsCataloguie extends StatefulWidget {
 
 class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCataloguie> {
 
-
-  
-
   // controllers
   final HomeController homeController = Get.find<HomeController>();
   final CataloguePageController catalogueController = Get.find<CataloguePageController>();

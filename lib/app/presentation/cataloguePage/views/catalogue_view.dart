@@ -140,6 +140,20 @@ class CataloguePage extends StatelessWidget {
             ),
             backgroundColor: Get.theme.colorScheme.secondary.withOpacity(0.1),
           ), 
+          // chip : cantidad de productos con stock incluido
+          // conditiom : comprobar subscripcion premium
+          !homeController.getIsSubscribedPremium?const SizedBox():
+          Chip(  
+            side: BorderSide(color: Get.theme.colorScheme.secondary.withOpacity(0.0)),   
+            visualDensity: VisualDensity.compact,
+            label: Column(
+              children: [
+                Text(controller.getInventoryTotal.toString(),style: const TextStyle(fontWeight: FontWeight.bold)),
+                const Text('Inventario',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w400)),
+              ],
+            ),
+            backgroundColor: Get.theme.colorScheme.secondary.withOpacity(0.1),
+          ),
           // chip : monto total del inventario
           Chip(  
             side: BorderSide(color: Get.theme.colorScheme.secondary.withOpacity(0.0)),   

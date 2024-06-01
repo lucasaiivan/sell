@@ -163,7 +163,7 @@ class ModeratorView extends StatelessWidget {
             onTap: (){
               controller.setFilterText = 'Marcas';
               controller.viewBrands = true;
-               controller.viewProducts = false;
+              controller.viewProducts = false;
               controller.update();
             },
           ),
@@ -511,6 +511,7 @@ class ModeratorView extends StatelessWidget {
       title: Text(item.name,maxLines:1),
       subtitle: item.description.isEmpty?null:Opacity(opacity: 0.7,child: Text(item.description,maxLines:2)),
       leading: ImageProductAvatarApp(url: item.image,size: 40), 
+      trailing: CircleAvatar(backgroundColor: Colors.blue.withOpacity(0.1), child: Text(controller.totalNumberOfBrandedProducts(idBrand: item.id).toString())),
       onTap: ()=> controller.showEditBrandDialogFullscreen(mark: item),
     );
   }
@@ -942,22 +943,17 @@ class _CreateMarkState extends State<CreateMark> {
           ),
         ),
         // view : descripcion de la marca
-        Flexible(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: TextField(
-              enabled: !load,
-              controller: TextEditingController(text: widget.mark.description),
-              onChanged: (value) => widget.mark.description = value, 
-              minLines: 1, // Definir el mínimo de líneas
-              maxLines: null, // Permitir cualquier cantidad de líneas
-              maxLength: 160,
-              decoration: InputDecoration(
-                  filled: true, 
-                  fillColor: fillColor,
-                  labelText: "Descripción (opcional)"),
-              style: textStyle,
-            ),
+        Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: TextField(
+            enabled: !load,
+            controller: TextEditingController(text: widget.mark.description),
+            onChanged: (value) => widget.mark.description = value, 
+            minLines: 1, // Definir el mínimo de líneas
+            maxLines: null, // se expandirá automáticamente
+            maxLength: 160,
+            decoration: InputDecoration(filled: true,fillColor: fillColor,labelText: "Descripción (opcional)"),
+            style: textStyle,
           ),
         ),
         // view : botones de edicion

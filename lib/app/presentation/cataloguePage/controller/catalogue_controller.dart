@@ -72,6 +72,19 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
   }
    
   // ----------- FUCTIONS --------------- // 
+  int get getInventoryTotal {
+    // description : obtiene el inventario total de productos
+    int count = 0;
+    for (var element in getCataloProducts) {
+      if (element.stock) {
+        count+=element.quantityStock;
+      }else{
+        count++;
+      
+      }
+    }
+    return count;
+  }
   String get getTotalInventory {
     // description : obtiene el total del inventario formateado en moneda 
     // var
@@ -344,40 +357,49 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
         // firebase : descontamos un seguirdor del producto de la base de datos publica
         Database.refFirestoreProductPublic().doc(element.id).update({'followers': FieldValue.increment(-1)});
       }
+      // actualiza la lista de productos del cátalogo en la memoria de la app
+      homeController.sincronizeCatalogueProducts(product: element,delete: true);
     }
     getProductsSelectedList.clear();
   } 
   void updatePricePurchaseAndSales({required List<ProductCatalogue> list,required double pricePurchase,required double priceSales}){
-    // firebase : actualiza el precio de compra y venta de todos los productos de la lista pasado por parametro
+    // recorremos los productos seleccionados
     for (var element in list) {
       element.purchasePrice = pricePurchase; // actualizamos el precio de compra
       element.salePrice = priceSales; // actualizamos el precio de venta
       element.upgrade = Timestamp.now(); // actualizamos la fecha de actualizacion
+      // firebase : actualizamos el producto
       Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(element.id).set(element.toJson());
+      // actualiza la lista de productos del cátalogo en la memoria de la app
+      homeController.sincronizeCatalogueProducts(product: element );
       // publicamos el precio de venta
       publishSalePricePublic(productCatalogue: element);
     } 
     getProductsSelectedList.clear();
   }
   void updateSalesPriceProducts({required List<ProductCatalogue> list,required double price}){
-    // firebase : actualiza el precio de venta de todos los productos de la lista pasado por parametro
+    // recorremos los productos seleccionados
     for (var element in list) {
       element.salePrice = price; // actualizamos el precio de venta
       element.upgrade = Timestamp.now(); // actualizamos la fecha de actualizacion
+      // firebase : actualizamos el producto
       Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(element.id).set(element.toJson());
       // publicamos el precio de venta
       publishSalePricePublic(productCatalogue: element);
+      // actualiza la lista de productos del cátalogo en la memoria de la app
+      homeController.sincronizeCatalogueProducts(product: element );
     }
     getProductsSelectedList.clear();
   }
   void updatePurchasePriceProducts({required List<ProductCatalogue> list,required double price}){
-    // firebase : actualiza el precio de compra de todos los productos de la lista pasado por parametro
+    // recorremos los productos seleccionados
     for (ProductCatalogue element in list) {
       element.purchasePrice = price; // actualizamos el precio de compra
       element.upgrade = Timestamp.now(); // actualizamos la fecha de actualizacion
+      // firebase : actualizamos el producto
       Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(element.id).set(element.toJson());
-
-    
+      // actualiza la lista de productos del cátalogo en la memoria de la app
+      homeController.sincronizeCatalogueProducts(product: element );
     }
     getProductsSelectedList.clear();
   }
@@ -389,25 +411,33 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
       element.upgrade = Timestamp.now(); // actualizamos la fecha de actualizacion
       // firebase 
       Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(element.id).set(element.toJson());
+      // actualiza la lista de productos del cátalogo en la memoria de la app
+      homeController.sincronizeCatalogueProducts(product: element );
       // publicamos el precio de venta
       publishSalePricePublic(productCatalogue: element);
     }
   }
   void updateProvider({required List<ProductCatalogue> list,required String idProvider}){
-    // firebase : actualiza el proveedor de todos los productos de la lista pasado por parametro
+    // recorremos los productos seleccionados
     for (var element in list) {
       element.provider = idProvider; // actualizamos el proveedor
       element.upgrade = Timestamp.now(); // actualizamos la fecha de actualizacion
+      // firebase : actualizamos el producto
       Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(element.id).set(element.toJson());
+      // actualiza la lista de productos del cátalogo en la memoria de la app
+      homeController.sincronizeCatalogueProducts(product: element );
     }
     getProductsSelectedList.clear();
   }
   void updateCategory({required List<ProductCatalogue> list,required String idCategory}){
-    // firebase : actualiza la categoria de todos los productos de la lista pasado por parametro
-    for (var element in list) {
+    // recorremos los productos seleccionados
+    for (var element in list) { 
       element.category = idCategory; // actualizamos la categoria
       element.upgrade = Timestamp.now(); // actualizamos la fecha de actualizacion
+      // firebase : actualizamos el producto
       Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(element.id).set(element.toJson());
+      // actualiza la lista de productos del cátalogo en la memoria de la app
+      homeController.sincronizeCatalogueProducts(product: element );
     }
     getProductsSelectedList.clear();
   }
@@ -619,6 +649,8 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
       },
     );
   }
+
+  // WIDGETS COMPONENTS // 
   Widget get floatingActionButtons{
     return Row( 
       mainAxisAlignment: MainAxisAlignment.end,
@@ -656,8 +688,6 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
       ],
     );
   }
-  
-  // WIDGETS COMPONENTS // 
   Widget itemProduct({required ProductCatalogue product}){
 
     return Column(

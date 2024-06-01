@@ -366,10 +366,6 @@ class HomeController extends GetxController {
     );
     return shouldPop!;
   }
-
-
-  
-
   ProductCatalogue getProductCatalogue({required String id}) {
     ProductCatalogue product = ProductCatalogue(
         creation: Timestamp.now(),
@@ -383,7 +379,23 @@ class HomeController extends GetxController {
     }
     return product;
   }
-
+  void sincronizeCatalogueProducts({required ProductCatalogue product,bool delete = false}) {
+    // sincronizamos los productos del catálogo
+    bool exist = false;
+    if(delete){
+      // eliminamos el producto del catálogo
+      getCataloProducts.removeWhere((element) => element.id == product.id);
+    }else{
+      for (int i = 0; i < getCataloProducts.length; i++) {
+        if (getCataloProducts[i].id == product.id) {
+          getCataloProducts[i] = product;
+          exist = true;
+          break;
+        }
+      }
+      if (!exist) { addToListProductSelecteds(item: product);}
+    }
+  }
   // login
   void login() async {
     // Inicio de sesión con Google
@@ -689,9 +701,38 @@ class HomeController extends GetxController {
 
   void readProductsCatalogue({required String idAccount}) {
 
-    // obtenemos los obj(productos) del catalogo de la cuenta del negocio
-    Stream<QuerySnapshot<Map<String, dynamic>>> streamSubscription = Database.readProductsCatalogueStream(id: idAccount);
-    // stream : escuchamos los cambios en los productos de cátalogo
+    // stream : obtenemos los obj(productos) del catalogo de la cuenta del negocio
+    //Stream<QuerySnapshot<Map<String, dynamic>>> streamSubscription = Database.readProductsCatalogueStream(id: idAccount);
+    
+    // future : obtenemos los productos del catálogo una sola ves
+    CollectionReference referenceCollectionCatalogue = Database.refFirestoreCatalogueProduct(idAccount: idAccount); 
+    referenceCollectionCatalogue.get().then((value) {
+
+      // TODO : delete for release
+      // incrementamos el valor de veces que se obtuvo datos de la db o en su defecto creamos la variable en el almacenamiento local
+      String dateId = DateFormat('ddMMyyyy').format(Timestamp.now().toDate()).toString();
+      int count = GetStorage().hasData(dateId) ? GetStorage().read(dateId) : 0;
+      GetStorage().write(dateId, count + value.docs.length );
+
+      // values
+      List<ProductCatalogue> list = [];
+      if (value.docs.isNotEmpty) {
+        for (var element in value.docs) {
+          // obj
+          ProductCatalogue product = ProductCatalogue.fromMap(element.data() as Map<String, dynamic>);
+          // add
+          list.add(product);
+        }
+      }
+      //  obtenemos los productos más vendidos
+      getTheBestSellingProducts(idAccount: idAccount);
+      setCatalogueProducts = list;
+    }).onError((error, stackTrace) {
+      // error
+      setCatalogueProducts = [];
+    }
+    );
+    /* // stream : escuchamos los cambios en los productos de cátalogo
     streamSubscription.listen((value) {
 
       // TODO : delete for release
@@ -721,7 +762,7 @@ class HomeController extends GetxController {
     }).onError((error) {
       // error
       setCatalogueProducts = [];
-    });
+    }); */
   }
 
   void readAdminsUsers({required String idAccount}) {

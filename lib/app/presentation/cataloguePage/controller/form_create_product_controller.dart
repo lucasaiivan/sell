@@ -12,6 +12,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:search_page/search_page.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart'; 
 import '../../../core/utils/fuctions.dart';
 import '../../../core/utils/widgets_utils.dart';
@@ -1342,6 +1343,49 @@ class _CreateMarkState extends State<CreateMark> {
             style: textStyle,
           ),
         ),
+        // view : botones de edicionales
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              // view : buscar en google
+              Row(
+                children: [
+                  // text 
+                  const Text('Buscar en google:'),
+                  const Spacer(),
+                  // button : textButton : buscar en google
+                  TextButton(
+                      onPressed: () async {
+                        String clave = 'logo ${widget.mark.name}';
+                        Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
+                        await launchUrl(uri,mode: LaunchMode.externalApplication);
+                      },
+                      child: const Text('Imagen del logo' )),
+                  // textButton : buscar en google
+                  TextButton(
+                      onPressed: () async {
+                        String clave = 'que industria es la marca ${widget.mark.name}?';
+                        Uri uri = Uri.parse("https://www.google.com/search?q=$clave");
+                        await launchUrl(uri,mode: LaunchMode.externalApplication);
+                      },
+                      child: const Text('Información')),
+                ],
+              ),
+              // buttom : edicion de imagen
+              TextButton(
+                onPressed: () async{
+                  // values
+                  Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.camerasideas.instashot&pcampaignid=web_share');
+                  //  redireccionara para la tienda de aplicaciones
+                  await launchUrl(uri,mode: LaunchMode.externalApplication);
+                },
+                child: const Text('Editar imagen con InstaShot'),
+              ),
+            ],
+          ),
+        ), 
       ],
     );
   }
