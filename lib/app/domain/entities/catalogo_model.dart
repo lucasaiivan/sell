@@ -14,6 +14,7 @@ class Product {
   int followers = 0; // seguidores
   bool outstanding = false; // producto destacado
   bool verified = false; // estado de verificación  al un moderador
+  bool reviewed = false; // estado de revisado por un moderador
   Timestamp creation =Timestamp.now(); // Marca de tiempo ( hora en que se creo el producto )
   Timestamp upgrade =Timestamp.now(); // Marca de tiempo ( hora en que se edito el producto )
   // datos del usuario y cuenta  
@@ -26,6 +27,7 @@ class Product {
     this.idUserCreation = '', 
     this.idUserUpgrade = '',
     this.verified = false,
+    this.reviewed = false,
     this.outstanding = false,
     this.idMark = "",
     this.nameMark = '',
@@ -43,6 +45,7 @@ class Product {
         'idUserCreation': idUserCreation,
         'idUserUpgrade': idUserUpgrade,
         "verified": verified,
+        'reviewed' : reviewed,
         "outstanding": outstanding,
         "idMark": idMark,
         'nameMark': nameMark,
@@ -59,6 +62,7 @@ class Product {
         //'idUserCreation': idUserCreation,
         'idUserUpgrade': idUserUpgrade,
         "verified": verified,
+        'reviewed' : reviewed,
         "outstanding": outstanding, 
         "idMark": idMark,
         'nameMark': nameMark,
@@ -77,6 +81,7 @@ class Product {
       idUserCreation: data.containsKey('idUserCreation')? data['idUserCreation'] : '',
       idUserUpgrade: data.containsKey('idUserUpgrade')? data['idUserUpgrade'] : '',
       verified: data.containsKey('verified')? data['verified']: false,
+      reviewed: data.containsKey('reviewed')? data['reviewed']: false,
       outstanding: data.containsKey('outstanding')? data['outstanding'] : false,
       idMark: data.containsKey('idMark') ? data['idMark'] : data.containsKey('id_marca') ?data['id_marca'] :'',
       nameMark: data.containsKey('nameMark') ? data['nameMark'] : '',
@@ -85,7 +90,7 @@ class Product {
       description: data.containsKey('description')? data['description']: data.containsKey('descripcion')?data['descripcion']:'',
       code: data.containsKey('code') ? data['code'] :  data.containsKey('codigo') ?data['codigo']:'',
       upgrade: data.containsKey('upgrade')? data['upgrade']: Timestamp.now(),
-      creation: data.containsKey('creation')? data['creation']: Timestamp.now(),
+      creation: data.containsKey('creation')? data['creation']: Timestamp.now(), 
     );
     
   }
@@ -98,6 +103,7 @@ class Product {
     idUserCreation = data['idUserCreation'] ?? '';
     idUserUpgrade = data['idUserUpgrade'] ?? '';
     verified = data.containsKey('verified')? data['verified']: data['verificado'] ?? false;
+    reviewed = data.containsKey('reviewed')? data['reviewed']: data['revisado'] ?? false;
     outstanding = data['outstanding'] ?? false;
     idMark =data.containsKey('idMark') ? data['idMark'] : data['id_marca'] ?? '';
     nameMark = data['nameMark'] ?? '';
@@ -116,6 +122,7 @@ class Product {
     productCatalogue.followers = followers;
     productCatalogue.image = image;
     productCatalogue.verified = verified;
+    productCatalogue.reviewed = reviewed;
     productCatalogue.outstanding = outstanding;
     productCatalogue.idMark = idMark;
     productCatalogue.nameMark = nameMark;
@@ -143,6 +150,7 @@ class ProductCatalogue {
   
   // variables del producto global
   bool verified = false; // estado de verificación por un moderador
+  bool reviewed = false; // estado de revisado por un moderador
   bool outstanding = false; // producto destacado en la DB global
   int followers = 0; // seguidores
   
@@ -176,6 +184,7 @@ class ProductCatalogue {
     // Valores del producto
     this.id = "",
     this.verified = false,
+    this.reviewed = false,
     this.followers = 0,
     this.favorite = false,
     this.outstanding = false,
@@ -243,6 +252,7 @@ class ProductCatalogue {
   return ProductCatalogue(
     id: id ?? this.id,
     verified: verified ?? this.verified,
+    reviewed: reviewed,
     followers: followers ?? this.followers,
     favorite: favorite ?? this.favorite,
     outstanding: outstanding ?? this.outstanding,
@@ -280,6 +290,7 @@ class ProductCatalogue {
       // Valores del producto
       id: data.containsKey('id')? data['id'] :'',
       verified: data.containsKey('verified')? data['verified']: data['verificado'] ?? false,
+      reviewed: data.containsKey('reviewed')? data['reviewed']: data['revisado'] ?? false,
       followers: data.containsKey('followers')? data['followers']: data['seguidores'] ?? 0,
       outstanding: data.containsKey('outstanding')? data['outstanding']: data['destacado'] ?? false,
       favorite: data.containsKey('favorite')? data['favorite']: data['favorito'] ?? false,
@@ -319,6 +330,7 @@ class ProductCatalogue {
       id: data.containsKey('id')? data['id'] :'',
       local: data.containsKey('local')? data['local'] : false,
       verified: data.containsKey('verified')? data['verified']: data['verificado'] ?? false,
+      reviewed: data.containsKey('reviewed')? data['reviewed']: data['revisado'] ?? false,
       followers: data.containsKey('followers')? data['followers']: data['seguidores'] ?? 0,
       outstanding: data.containsKey('outstanding')? data['outstanding']: data['destacado'] ?? false,
       favorite: data.containsKey('favorite')? data['favorite']: data['favorito'] ?? false,
@@ -357,6 +369,7 @@ class ProductCatalogue {
         "id": id,
         'local':local,
         "verified": verified,
+        'reviewed': reviewed,
         'followers':followers,
         'outstanding':outstanding,
         "favorite": favorite,
@@ -390,6 +403,7 @@ class ProductCatalogue {
         "id": id,
         'local':local,
         "verified": verified,
+        'reviewed': reviewed,
         'followers':followers,
         'outstanding':outstanding,
         "favorite": favorite,
@@ -423,6 +437,7 @@ class ProductCatalogue {
       id: data['id'] ?? '',
       local: data['local'] ?? false,
       verified: data['verified'] ?? false,
+      reviewed: data['reviewed'] ?? false,
       followers: data['followers'] ?? 0,
       favorite: data['favorite'] ?? false,
       outstanding: data['outstanding'] ?? false,
@@ -461,12 +476,14 @@ class ProductCatalogue {
     productoDefault.followers = followers;
     productoDefault.image = image;
     productoDefault.verified = verified;
+    productoDefault.reviewed = reviewed;
     productoDefault.outstanding = outstanding;
     productoDefault.idMark =  idMark;
     productoDefault.nameMark =  nameMark;
     productoDefault.imageMark = imageMark;
     productoDefault.description =  description;
     productoDefault.code = code;  
+    productoDefault.upgrade = documentUpgrade;
     return productoDefault;
   }
 
@@ -477,6 +494,7 @@ class ProductCatalogue {
     followers = product.followers;
     image = product.image;
     verified = product.verified;
+    reviewed = product.verified;
     outstanding = product.outstanding;
     idMark = product.idMark;
     nameMark = product.nameMark;

@@ -32,6 +32,11 @@ class ControllerProductsEdit extends GetxController {
   // var : obtenemos el precio de venta al publico original para determinar si se actualizo
   double priceSaleOriginal = 0.0;
 
+  // datos del producto estan actualizados
+  bool _dataProductUpdate = false;
+  set setDataProductUpdate(bool value) => _dataProductUpdate = value;
+  bool get getDataProductUpdate => _dataProductUpdate;
+
   // var : message notification
   String _messageNotification = '';
   set setMessageNotification(String value) => _messageNotification = value;
@@ -358,6 +363,9 @@ class ControllerProductsEdit extends GetxController {
               setTextAppBar = 'Espere por favor...';
               updateAll();
 
+              // marca de tiempo 
+              Timestamp time = Timestamp.now();  
+
               // set : values 
               getProduct.description = Utils().capitalize(controllerTextEditDescripcion.text); // format : actualiza a mayuscula la primera letra de cada palabra
               getProduct.code = getProduct.code == '' ? getProduct.id : getProduct.code;
@@ -372,11 +380,11 @@ class ControllerProductsEdit extends GetxController {
               getProduct.provider = getProvider.id;
               getProduct.nameProvider = getProvider.name;
               getProduct.category = getCategory.id; 
-              getProduct.nameCategory = getCategory.name;
+              getProduct.nameCategory = getCategory.name; 
               if(controllerTextEditAlertStock.text!=''){getProduct.alertStock  = int.parse( controllerTextEditAlertStock.text );}
               // se actualiza la marca de tiempo si se actualiza el precio de venta al publico
-              if (priceSaleOriginal != getProduct.salePrice) {
-                getProduct.upgrade = Timestamp.now();
+              if (priceSaleOriginal != getProduct.salePrice || getDataProductUpdate ) {
+                getProduct.upgrade = time;
               } 
 
               // actualización de la imagen del producto
@@ -391,6 +399,7 @@ class ControllerProductsEdit extends GetxController {
               // procede agregrar en la base de datos global de productos
               // TODO : delete release (getEditModerator)
               if ( getEditModerator || getProduct.local == false) {
+
                   setProductPublicFirestore( );
               }
               // condition : verifica si el producto es global publico
@@ -452,10 +461,7 @@ class ControllerProductsEdit extends GetxController {
     // esta función procede a guardar el documento de una colleción publica
 
     // valores
-    Product product = getProduct.convertProductoDefault();
-     
-    //  set : marca de tiempo que se actualizo el documento
-    product.upgrade = Timestamp.fromDate(DateTime.now()); 
+    Product product = getProduct.convertProductoDefault(); 
     //  set : id del usuario que actualizo el documento
     product.idUserUpgrade = homeController.getProfileAdminUser.email;
 
@@ -646,7 +652,7 @@ class ControllerProductsEdit extends GetxController {
     // Dialog view :  muestra el dialogo para agregar el porcentaje de ganancia
 
     //var 
-    final ButtonStyle buttonStyle = ButtonStyle(padding: MaterialStateProperty.all(const EdgeInsets.all(12)));
+    final ButtonStyle buttonStyle = ButtonStyle(padding: WidgetStateProperty.all(const EdgeInsets.all(12)));
     TextEditingController controller = TextEditingController(text: getProduct.getPorcentageValue.toString());
 
     // widgets
@@ -833,10 +839,7 @@ class ControllerProductsEdit extends GetxController {
                         labelText: 'Descripción',
                         border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                         enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
-                        ),      
-                      onChanged: (value) {   
-                        setDescription = controllerTextEditDescripcion.text;
-                      } ,   
+                        ),        
                       // validator: validamos el texto que el usuario ha ingresado.
                       validator: (value) {
                         // if (value == null || value.isEmpty) { return 'Por favor, escriba un precio de compra'; }
@@ -882,7 +885,7 @@ class ControllerProductsEdit extends GetxController {
     // style  
     TextStyle valueTextStyle = TextStyle(color: Get.isDarkMode?Colors.white:Colors.black,fontSize: 18,fontWeight: FontWeight.w400);
     // controllers
-    final MoneyMaskedTextController controllerTextEditPrecioVenta = MoneyMaskedTextController(initialValue: getProduct.salePrice,leftSymbol: homeController.getProfileAccountSelected.currencySign);
+    final MoneyMaskedTextController controllerTextEditPrecioVenta = MoneyMaskedTextController(initialValue: getProduct.salePrice,leftSymbol: '${homeController.getProfileAccountSelected.currencySign} ');
     // widgets
     Widget content = AlertDialog( 
         content: Column(
@@ -906,10 +909,7 @@ class ControllerProductsEdit extends GetxController {
                       labelText: 'Precio de venta',
                       border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                       enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
-                      ),      
-                    onChanged: (value) {   
-                      updateAll();
-                    } ,   
+                      ),        
                     // validator: validamos el texto que el usuario ha ingresado.
                     validator: (value) {
                       // if (value == null || value.isEmpty) { return 'Por favor, escriba un precio de compra'; }
@@ -958,7 +958,7 @@ class ControllerProductsEdit extends GetxController {
     // style  
     TextStyle valueTextStyle = TextStyle(color: Get.isDarkMode?Colors.white:Colors.black,fontSize: 18,fontWeight: FontWeight.w400);
     // controllers
-    final MoneyMaskedTextController controllerTextEditPrecioCosto = MoneyMaskedTextController(initialValue: getProduct.purchasePrice,leftSymbol: homeController.getProfileAccountSelected.currencySign);
+    final MoneyMaskedTextController controllerTextEdit = MoneyMaskedTextController(initialValue: getProduct.purchasePrice,leftSymbol: '${homeController.getProfileAccountSelected.currencySign} ');
     // widgets
     Widget content = AlertDialog( 
         content: Column(
@@ -972,20 +972,17 @@ class ControllerProductsEdit extends GetxController {
                   TextFormField(
                     style: valueTextStyle,
                     autofocus: true, 
-                    controller:  controllerTextEditPrecioCosto,
+                    controller:  controllerTextEdit,
                     enabled: true,
                     autovalidateMode: AutovalidateMode.onUserInteraction, 
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     decoration: InputDecoration( 
                       filled: true,
                       fillColor: fillColor,
-                      labelText: 'Costo',
+                      labelText: 'Precio de Costo',
                       border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
                       enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
-                      ),      
-                    onChanged: (value) {   
-                      updateAll();
-                    } ,   
+                      ),        
                     // validator: validamos el texto que el usuario ha ingresado.
                     validator: (value) {
                       // if (value == null || value.isEmpty) { return 'Por favor, escriba un precio de compra'; }
@@ -1002,9 +999,83 @@ class ControllerProductsEdit extends GetxController {
                 TextButton( onPressed: () { Get.back();}, child: const Text('Cancelar',textAlign: TextAlign.center)),
                 TextButton( onPressed: () {
                   //  function : guarda el nuevo porcentaje de ganancia
-                  if(controllerTextEditPrecioCosto.numberValue != 0){
-                    double precioCosto  = controllerTextEditPrecioCosto.numberValue; 
-                    setPurchasePrice = precioCosto;  
+                  if(controllerTextEdit.numberValue != 0
+                  ){
+                    double price  = controllerTextEdit.numberValue; 
+                    setPurchasePrice = price;  
+                  }
+                  //  action : cierra el dialogo
+                  Get.back();
+                },
+                child: const Text('ok',textAlign: TextAlign.center)),
+              ],
+            ),
+          ],
+        ),
+    );
+
+    // dialog
+    showDialog(
+      context: Get.context!,
+      builder: (BuildContext context) {
+        return content;
+      },
+    );
+  }
+  void showDialogStockAlert(){
+    // Dialog view :  muestra el dialogo para introducir la cantidad del control de stock bajos
+
+    // var
+    final Color boderLineColor = Get.isDarkMode?Colors.white.withOpacity(0.3):Colors.black.withOpacity(0.3);
+    final Color fillColor = Get.isDarkMode?Colors.white.withOpacity(0.03):Colors.black.withOpacity(0.03);
+    // style  
+    TextStyle valueTextStyle = TextStyle(color: Get.isDarkMode?Colors.white:Colors.black,fontSize: 18,fontWeight: FontWeight.w400);
+    // controllers
+    final TextEditingController controllerTextEdit = TextEditingController(text: getProduct.alertStock.toString());
+    // widgets
+    Widget content = AlertDialog( 
+      title: const Text('Alerta de bajo stock'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Column(
+                children: [
+                  // mount textfield
+                  TextFormField(
+                    style: valueTextStyle,
+                    autofocus: true, 
+                    controller:  controllerTextEdit,
+                    enabled: true,
+                    autovalidateMode: AutovalidateMode.onUserInteraction, 
+                    keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                    decoration: InputDecoration( 
+                      filled: true,
+                      fillColor: fillColor,
+                      labelText: 'Cantidad',
+                      border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                      ),   
+                    // validator: validamos el texto que el usuario ha ingresado.
+                    validator: (value) {
+                      // if (value == null || value.isEmpty) { return 'Por favor, escriba un precio de compra'; }
+                      return null; 
+                    },
+                  ),  
+                ],
+              ),
+            ), 
+            // buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                TextButton( onPressed: () { Get.back();}, child: const Text('Cancelar',textAlign: TextAlign.center)),
+                TextButton( onPressed: () {
+                  //  function : guarda el nuevo porcentaje de ganancia
+                  if(controllerTextEdit.text != ''){
+                    int cantidad  = int.parse(controllerTextEdit.text); 
+                    setAlertStock = cantidad;  
                   }
                   //  action : cierra el dialogo
                   Get.back();
@@ -1086,6 +1157,7 @@ class ControllerProductsEdit extends GetxController {
         if (date1.isBefore(date2)  ) {
           // se notifica que existen datos actualizados del producto
           setMessageNotification = 'Producto actualizado';
+          setDataProductUpdate = true;
         } 
 
         //  set
@@ -1132,6 +1204,7 @@ class ControllerProductsEdit extends GetxController {
       ],
     ));
   } 
+
 }
 
 // select mark

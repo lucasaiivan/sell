@@ -108,7 +108,7 @@ class ProductEdit extends StatelessWidget {
         controller.getLoadingData
             ? Container()
             :IconButton(
-              icon: const Icon(Icons.admin_panel_settings_outlined),
+              icon: Icon(Icons.admin_panel_settings_outlined,color: controller.getProduct.verified? Colors.blue:null),
               onPressed: (){
                 Get.bottomSheet(
                   const OptionsModeratorsWidget(),
@@ -242,7 +242,8 @@ class ProductEdit extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           // textField  : descripción del producto
-          GestureDetector(
+          InkWell(
+            borderRadius: BorderRadius.circular(2),
             onTap: enableEdit?()=>controller.showDialogDescription():null,
             child: TextField(
               enabled: false,
@@ -288,7 +289,8 @@ class ProductEdit extends StatelessWidget {
           !controller.getAccountAuth? Container():const Text('Personaliza tu producto',style: TextStyle(fontSize: 18.0)),
           space,
           // textfield : seleccionar proveedor
-          !controller.getAccountAuth? Container(): GestureDetector(
+          !controller.getAccountAuth? Container():InkWell(
+              borderRadius: BorderRadius.circular(2),
               onTap: SelectProvider.show, 
               child: TextFormField(
                 autofocus: false,
@@ -311,7 +313,8 @@ class ProductEdit extends StatelessWidget {
             ),
           space, 
           // textfield : seleccionar cátegoria
-          !controller.getAccountAuth? Container(): GestureDetector(
+          !controller.getAccountAuth? Container(): InkWell(
+              borderRadius: BorderRadius.circular(2),
               onTap: SelectCategory.show, 
               child: TextFormField(
                 autofocus: false,
@@ -351,7 +354,8 @@ class ProductEdit extends StatelessWidget {
                       flex: 1,
                       child: Form(
                         key: controller.purchasePriceFormKey,
-                        child: GestureDetector(
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(2),
                           onTap: (){
                             // dialog 
                             controller.showDialogPricePurchase();
@@ -389,7 +393,8 @@ class ProductEdit extends StatelessWidget {
                       flex: 2,
                       child: Form(
                         key: controller.salePriceFormKey, 
-                        child: GestureDetector(
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(2),
                           onTap: ()=> controller.showDialogPriceSale(),
                           child: TextFormField(
                             style: valueTextStyle,
@@ -424,12 +429,14 @@ class ProductEdit extends StatelessWidget {
                 AnimatedContainer(
                   width:double.infinity, 
                   duration: const Duration(milliseconds: 500),
-                  decoration: BoxDecoration(color: controller.getStock?Colors.grey.withOpacity(0.05):null,border: Border.all(color: controller.getStock?Colors.grey:boderLineColor,width: 0.5,),),
+                  // dibujar borde solo en la parte superior 
+                  decoration: controller.homeController.getIsSubscribedPremium&&controller.getStock?
+                  BoxDecoration(border: Border(top: BorderSide(color: boderLineColor,width: 1.0)))
+                  : BoxDecoration(border: Border(top: BorderSide(color: boderLineColor,width: 1.0),bottom: BorderSide(color: boderLineColor,width: 1.0),left: BorderSide(color: boderLineColor,width: 1.0),right: BorderSide(color: boderLineColor,width: 1.0))),
                   child: Column(
                   children: [
-                    CheckboxListTile(
+                    CheckboxListTile( 
                       contentPadding: const EdgeInsets.symmetric(horizontal:12,vertical: 12),
-                      //enabled: controller.getHomeController.getIsSubscribedPremium?controller.getSaveIndicator ? false : true:false,
                       checkColor: Colors.white,
                       activeColor: Colors.blue,
                       value: controller.homeController.getIsSubscribedPremium?controller.getStock:false,
@@ -465,48 +472,63 @@ class ProductEdit extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 12,),
                           child: Form(
                             key: controller.quantityStockFormKey,
-                            child: TextFormField(
-                              style: valueTextStyle,
-                              enabled: !controller.getLoadingData,
-                              keyboardType: TextInputType.number,
-                              onChanged: (value) => controller.setQuantityStock =int.parse(controller.controllerTextEditQuantityStock .text),
-                              decoration: InputDecoration(
-                                filled: true,fillColor: fillColor,hoverColor: Colors.blue,
-                                disabledBorder: InputBorder.none,
-                                labelText: "Stock", 
-                                border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
-                                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(2),
+                              onTap: ()=> controller.showDialogPricePurchase(), 
+                              child: TextFormField(
+                                style: valueTextStyle,
+                                autofocus: false, 
+                                controller: controller.controllerTextEditQuantityStock,
+                                enabled: false,
+                                autovalidateMode: AutovalidateMode.onUserInteraction, 
+                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                decoration: InputDecoration(
+                                  filled: true,
+                                  fillColor: fillColor,
+                                  labelText: 'Stock (cantidad disponible)',
+                                  border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
+                                ),   
+                                onChanged: (value) { controller.updateAll(); },
+                                // validator: validamos el texto que el usuario ha ingresado.
+                                validator: (value) {
+                                  if ( controller.controllerTextEditPrecioVenta.numberValue == 0.0) { return 'Por favor, escriba un precio de venta'; }
+                                  return null;
+                                },
                               ),
-                              textInputAction: TextInputAction.done, 
-                              controller: controller.controllerTextEditQuantityStock,
-                              // validator: validamos el texto que el usuario ha ingresado.
-                              validator: (value) {
-                                if ( int.parse(controller.controllerTextEditQuantityStock.text )== 0) { return 'Por favor, escriba una cantidad'; }
-                                return null;
-                              },
-                            ),
+                            ), 
                           ),
                         ),
                         space,
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
-                          child: TextField(
-                            style: valueTextStyle,
-                            enabled: !controller.getLoadingData,
-                            keyboardType: TextInputType.number,
-                            onChanged: (value) => controller.setAlertStock = int.parse(controller.controllerTextEditAlertStock.text),
-                            decoration: InputDecoration(
-                              filled: true,fillColor: fillColor,hoverColor: Colors.blue,
-                              disabledBorder: InputBorder.none,
-                              labelText: "Alerta de stock (opcional)", 
-                              border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
-                              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
+                          padding: const EdgeInsets.symmetric(horizontal: 12,),
+                          child: Form( 
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(2),
+                              onTap: ()=> controller.showDialogStockAlert(),
+                              child: TextFormField(
+                                style: valueTextStyle,
+                                autofocus: false, 
+                                controller: controller.controllerTextEditAlertStock,
+                                enabled: false,
+                                autovalidateMode: AutovalidateMode.onUserInteraction, 
+                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                decoration: InputDecoration(
+                                  filled: true,
+                                  fillColor: fillColor,
+                                  labelText: 'Alerta de stock bajo',
+                                  border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor),),
+                                ),    
+                                // validator: validamos el texto que el usuario ha ingresado.
+                                validator: (value) {
+                                  if ( controller.controllerTextEditPrecioVenta.numberValue == 0.0) { return 'Por favor, escriba un precio de venta'; }
+                                  return null;
+                                },
+                              ),
                             ),
-                            textInputAction: TextInputAction.done,
-                            //style: textStyle,
-                            controller: controller.controllerTextEditAlertStock,
                           ),
-                        ) ,
+                        ),
                       ],
                     ):Container(),
                   ],
@@ -1002,11 +1024,24 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Moderador'),
+        title: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [ 
+            Icon(Icons.security),
+            SizedBox(width:5),
+            Text('Moderador'),
+          ],
+        ),
         actions: [
+          
           // iconButton : editar opciones
           controller.getEditModerator?Container():IconButton(
-            onPressed:() => setState(()=>controller.setEditModerator = !controller.getEditModerator), 
+            onPressed: (){
+              setState(() {
+                controller.getProduct.reviewed = true; 
+                controller.setEditModerator = !controller.getEditModerator;
+              });
+            }, 
             icon: const Icon(Icons.edit_outlined),
           ),
           // button : actualizar documento
@@ -1035,7 +1070,7 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
                     const Spacer(),
                     // button : textButton : buscar en google
                     TextButton(
-                        onPressed: () async {
+                        onPressed: !controller.getEditModerator?null: () async {
                           String clave = controller.controllerTextEditDescripcion.text;
                           Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
                           await launchUrl(uri,mode: LaunchMode.externalApplication);
@@ -1043,17 +1078,18 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
                         child: const Text('Descripción' )),
                     // textButton : buscar en google
                     TextButton(
-                        onPressed: () async {
-                          String clave = controller.getProduct.code;
-                          Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
-                          await launchUrl(uri,mode: LaunchMode.externalApplication);
-                        },
-                        child: const Text('Código' )),
+                      onPressed: !controller.getEditModerator?null: () async {
+                        String clave = controller.getProduct.code;
+                        Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
+                        await launchUrl(uri,mode: LaunchMode.externalApplication);
+                      },
+                      child: const Text('Código' ),
+                    ),
                   ],
                 ),
                 // buttom : edicion de imagen
               TextButton( 
-                onPressed: () async{
+                onPressed: !controller.getEditModerator?null: () async{
                   // values
                   Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.camerasideas.instashot&pcampaignid=web_share');
                   //  redireccionara para la tienda de aplicaciones
@@ -1063,53 +1099,9 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
 
               ),
               ],
-            ), 
-            
-            const Divider(), 
-            // view : cantidad de comercios que tienen el producto
-            Row(
-              children: [
-                // text : cantidad de comercios que tienen el producto
-                const Opacity(opacity: 0.4,child: Text('comercios')),
-                const Spacer(),
-                // textButtons
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // button : decrementar seguidores
-                    TextButton(
-                        onPressed: !controller.getEditModerator?null: ()=> setState(()=>controller.descreaseFollowersProductPublic()), 
-                        child:  const Icon(Icons.indeterminate_check_box ),
-                    ),
-                    Opacity(opacity:!controller.getEditModerator?0.3:1,child: Text(Publications.getFormatAmount(value: controller.getProduct.followers))),
-                    // button : incrementar seguidores
-                    TextButton(
-                        onPressed: !controller.getEditModerator? null : ()=> setState( ()=> controller.increaseFollowersProductPublic() ),
-                        child: const Icon(Icons.add_box_rounded),
-                    ),
-                    
-                  ],
-                ),
-              
-              ],
-            ),
+            ),  
             const Divider(),
-            CheckboxListTile(
-              enabled: controller.getEditModerator ? controller.getLoadingData? false: true: false,
-              checkColor: Colors.white,
-              activeColor: Colors.blue,
-              value: controller.getProduct.outstanding,
-              title: const Text('Detacado'),
-              onChanged: (value) {
-                if (!controller.getLoadingData) {
-                  
-                  setState(() {
-                    controller.setOutstanding(value: value ?? false);
-                  });
-                }
-              },
-            ), 
-            const Divider(),
+            // view : verificacion de verificado
             CheckboxListTile(
               enabled: controller.getEditModerator
                   ? controller.getLoadingData
@@ -1120,15 +1112,73 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
               activeColor: Colors.blue,
               value: controller.getProduct.verified,
               title: const Text('Verificado'),
+              subtitle: const Text('Se verifica que el producto es real'),
               onChanged: (value) {
                 if (controller.getEditModerator) {
                   if (!controller.getLoadingData) {
                     setState(() {
                       controller.setCheckVerified(value: value ?? false);
+                      if (value??false) {
+                        controller.getProduct.reviewed = true;
+                      }
                     });
                   }
                 }
               },
+            ), 
+            const Divider(),
+            CheckboxListTile(
+              enabled: controller.getEditModerator ? controller.getLoadingData? false: true: false,
+              checkColor: Colors.white,
+              activeColor: Colors.blue,
+              value: controller.getProduct.outstanding,
+              title: const Text('Detacado'),
+              subtitle: const Text('Se visualiza en productos sugeridos'),
+              onChanged: (value) {
+                if (!controller.getLoadingData) {
+                  
+                  setState(() {
+                    controller.setOutstanding(value: value ?? false);
+                  });
+                }
+              },
+            ),  
+            const Divider(), 
+            // view : cantidad de comercios que tienen el producto
+            Padding(
+              padding: const EdgeInsets.only(left: 12,right: 12),
+              child: Row(
+                children: [
+                  // text : cantidad de comercios que tienen el producto
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Comercios '),
+                      Opacity(opacity: 0.4,child: Text('Cantidad que tienen el producto')),
+                    ],
+                  ),
+                  const Spacer(),
+                  // textButtons
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // button : decrementar seguidores
+                      TextButton(
+                          onPressed: !controller.getEditModerator?null: ()=> setState(()=>controller.descreaseFollowersProductPublic()), 
+                          child:  const Icon(Icons.indeterminate_check_box ),
+                      ),
+                      Opacity(opacity:!controller.getEditModerator?0.3:1,child: Text(Publications.getFormatAmount(value: controller.getProduct.followers))),
+                      // button : incrementar seguidores
+                      TextButton(
+                          onPressed: !controller.getEditModerator? null : ()=> setState( ()=> controller.increaseFollowersProductPublic() ),
+                          child: const Icon(Icons.add_box_rounded),
+                      ),
+                      
+                    ],
+                  ),
+                
+                ],
+              ),
             ),
             const SizedBox(height:20),
             // button : eliminar documento

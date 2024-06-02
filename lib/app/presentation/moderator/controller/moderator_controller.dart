@@ -86,6 +86,8 @@ class ModeratorController extends GetxController {
   int get totalProducts => products.length;
   int get totalVerifiedProducts => products.where((element) => element.verified).length;
   int get totalUnverifiedProducts => products.where((element) => !element.verified).length;
+  int get totalReviewedProducts => products.where((element) => element.reviewed).length;
+  int get totalNotReviewedProducts => products.where((element) => !element.reviewed && !element.verified).length;
   int get totalProductsNoData => products.where((element) => element.code == '' || element.idMark == '' || element.description == '' || element.image == '' ).length;
   Product? getProduct({required String id}) { 
     // description : obtenemos un producto por su id
@@ -169,7 +171,7 @@ class ModeratorController extends GetxController {
   }
   
   // FUNCTION  
-  void filterProducts({bool? verified,String? idUserCreator,bool? noData}) {
+  void filterProducts({bool? verified,bool?reviewed,String? idUserCreator,bool? noData}) {
     // description : filtramos la lista de productos con los parametros dados
     // advertencia : solo se puede filtrar por un parametro a la vez 
     
@@ -181,14 +183,14 @@ class ModeratorController extends GetxController {
     viewProducts =true;
     getProductsFiltered.clear();
     
-    if (verified==null && idUserCreator==null && noData==null) { 
+    if (verified==null && idUserCreator==null && noData==null && reviewed==null) { 
       // add : agregamos todos los productos
       newList.addAll(getProducts);  
     } else { 
       // add : agregamos los productos filtrados
       for (var element in getProducts) {
         // verified
-        if ( verified != null) {
+        if ( verified != null &&  idUserCreator==null && noData==null && reviewed==null) {
           if (element.verified == verified) {
             newList.add(element); 
           } 
@@ -203,6 +205,15 @@ class ModeratorController extends GetxController {
         if (noData != null) {
           if (element.code == '' || element.idMark == '' || element.description == '' || element.image == '' ) {
             newList.add(element); 
+          }
+        }
+        // reviewed
+        if (reviewed != null && verified != null && idUserCreator== null && noData == null  ) {
+          // conditiom : si esta revisado y no verificado
+          if ( element.reviewed == reviewed && element.verified == false) {
+            newList.add(element);
+          }else if(element.reviewed == reviewed && element.verified == false){
+            newList.add(element);
           }
         }
       }

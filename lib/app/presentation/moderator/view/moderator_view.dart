@@ -135,7 +135,25 @@ class ModeratorView extends StatelessWidget {
               controller.setFilterText = 'No verificados';
               controller.filterProducts(verified: false);
             },
-          ),  
+          ), 
+          // chip : total de productos revisados sin verificar
+          chipReport(
+            value: controller.totalReviewedProducts,
+            description: 'Revisados',
+            onTap: (){
+              controller.setFilterText = 'Revisados';
+              controller.filterProducts(reviewed: true,verified: false);
+            },
+          ), 
+          // chip : sin revisar
+          chipReport(
+            value: controller.totalNotReviewedProducts,
+            description: 'Sin revisar',
+            onTap: (){
+              controller.setFilterText = 'Sin revisar';
+              controller.filterProducts(reviewed: false,verified: false);
+            },
+          ),
           // chip : total de productos sin algun dato
           chipReport(
             value: controller.totalProductsNoData,
@@ -339,8 +357,17 @@ class ModeratorView extends StatelessWidget {
                   ),
           ],
         ),
-        //  text : codigo
-        Text(product.code, style: textStyleSecundary.copyWith(fontSize: 12)),
+        //  textrich 
+        RichText(
+          text: TextSpan( 
+            children: <TextSpan>[
+              TextSpan(text:product.code, style: textStyleSecundary.copyWith(fontSize: 12)), 
+              product.verified?const TextSpan(text:''): const TextSpan(text: ' | ', style: TextStyle(color: Colors.black54)),
+              // text : si el producto fue revisado y no esta verificado
+              product.verified?const TextSpan(text:''):product.reviewed ? const TextSpan(text: 'Revisado sin verificar', style: TextStyle(color: Colors.orange)): TextSpan(text:'Sin revisar', style: TextStyle(color: Colors.red[300]))
+            ],
+          ),
+        ), 
         // text : fecha de la ultima actualización
         Text(valueDataUpdate, style: textStyleSecundary.copyWith(fontSize: 12)),
         // Text : id del usuario que creo el producto
