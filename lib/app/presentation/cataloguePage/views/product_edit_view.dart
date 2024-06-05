@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; 
 import 'package:get/get.dart';
+import 'package:search_page/search_page.dart';
 import 'package:sell/app/presentation/cataloguePage/controller/catalogue_controller.dart';
 import 'package:url_launcher/url_launcher.dart';  
 import '../../../domain/entities/catalogo_model.dart'; 
@@ -688,6 +689,9 @@ class _SelectCategoryState extends State<SelectCategory> {
       appBar: AppBar(
         title: const Text('Categorías'),
         actions: [
+          // icon : buscar categoria
+          IconButton(icon: const Icon(Icons.search),onPressed: () {Get.back();showSearchCategory();}),
+          // icon : agregar nueva categoria
           IconButton(icon: const Icon(Icons.add),onPressed: () => showDialogSetCategoria(categoria: Category())),
         ],
       ),
@@ -701,16 +705,7 @@ class _SelectCategoryState extends State<SelectCategory> {
           
           return Column(
                   children: <Widget>[
-                    ListTile(
-                      contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                      dense: true,
-                      title: Text(categoria.name.substring(0, 1).toUpperCase() + categoria.name.substring(1)),
-                      onTap: () {
-                        controllerProductsEdit.setCategory = categoria;
-                        Get.back();
-                      },
-                      trailing: popupMenuItemCategoria(categoria: categoria),
-                    ),
+                    itemCategory(category: categoria),
                     const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
                   ],
                 );
@@ -720,9 +715,24 @@ class _SelectCategoryState extends State<SelectCategory> {
 
   }
 
-  Widget popupMenuItemCategoria({required Category categoria}) {
-    final HomeController controller = Get.find();
+  // WIDGETS COMPONENT
+  Widget itemCategory({required Category category}) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+      dense: true,
+      title: Text(category.name.substring(0, 1).toUpperCase() + category.name.substring(1)),
+      onTap: () {
+        controllerProductsEdit.setCategory = category;
+        Get.back();
+      },
+      trailing: popupMenuItemCategoria(categoria: category),
+    );
+  }
 
+  Widget popupMenuItemCategoria({required Category categoria}) {
+    // controllers 
+    final HomeController controller = Get.find();
+    
     return PopupMenuButton(
       icon: const Icon(Icons.more_vert),
       itemBuilder: (_) => <PopupMenuItem<String>>[
@@ -769,13 +779,40 @@ class _SelectCategoryState extends State<SelectCategory> {
       },
     );
   }
+  // DIALOG
+  showSearchCategory(){
+    // description : muestra la barra de busqueda para buscar la categoria del producto
 
+    // controllers
+    final HomeController welcomeController = Get.find();
+
+    // var
+    Color colorAccent = Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
+
+    showSearch(
+      context: context,
+      delegate: SearchPage<Category>(
+        searchStyle: TextStyle(color: colorAccent),
+        barTheme: Get.theme.copyWith(hintColor: colorAccent, highlightColor: colorAccent,inputDecorationTheme: const InputDecorationTheme(filled: false)),
+        items: welcomeController.getCatalogueCategoryList,
+        searchLabel: 'Buscar cátegoria',
+        suggestion: const Center(child: Text('ej. gaseosa')),
+        failure: const Center(child: Text('No se encontro :(')),
+        filter: (category) => [category.name],
+        builder: (category) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[
+          itemCategory(category: category),
+          ComponentApp().divider(),
+          ]),
+      ),
+    );
+  }
   showDialogSetCategoria({required Category categoria}) async {
+    // controllers
     final HomeController controller = Get.find();
+    // var
     bool loadSave = false;
     bool newProduct = false;
-    TextEditingController textEditingController =
-        TextEditingController(text: categoria.name);
+    TextEditingController textEditingController = TextEditingController(text: categoria.name);
 
     if (categoria.id == '') {
       newProduct = true;
@@ -823,6 +860,7 @@ class _SelectCategoryState extends State<SelectCategory> {
       },
     );
   }
+
 }
 // class : vista para seleccionar el proveedor del producto y eliminar o editar los proveedores
 class SelectProvider extends StatefulWidget {
@@ -868,6 +906,9 @@ class _SelectProviderState extends State<SelectProvider> {
       appBar: AppBar(
         title: const Text('Proveedor'),
         actions: [
+          // icon : buscar proveedor
+          IconButton(icon: const Icon(Icons.search),onPressed: () {Get.back();showSearchProvider();}),
+          // icon : buscar proveedor
           IconButton(icon: const Icon(Icons.add),onPressed: () => showDialogSetProvider(provider: Provider())),
         ],
       ),
@@ -880,24 +921,29 @@ class _SelectProviderState extends State<SelectProvider> {
           Provider provider = welcomeController.getProviderList[index];
           
           return Column(
-                  children: <Widget>[
-                    ListTile(
-                      contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                      dense: true,
-                      title: Text(provider.name.substring(0, 1).toUpperCase() + provider.name.substring(1)),
-                      onTap: () {
-                        controllerProductsEdit.setProvider = provider;
-                        Get.back();
-                      },
-                      trailing: popupMenuItemProvider(provider: provider),
-                    ),
-                    const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
-                  ],
-                );
+            children: <Widget>[
+              itemProvider(provider: provider),
+              const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
+            ],
+          );
         },
       ),
     );
 
+  }
+
+  // WIIDGETS COMPONENT
+  Widget itemProvider({required Provider provider}) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+      dense: true,
+      title: Text(provider.name.substring(0, 1).toUpperCase() + provider.name.substring(1)),
+      onTap: () {
+        controllerProductsEdit.setProvider = provider;
+        Get.back();
+      },
+      trailing: popupMenuItemProvider(provider: provider),
+    );
   }
 
   Widget popupMenuItemProvider({required Provider provider}) {
@@ -949,7 +995,33 @@ class _SelectProviderState extends State<SelectProvider> {
       },
     );
   }
+  // DIALOG
+  showSearchProvider(){
+    // description : muestra la barra de busqueda para buscar la categoria del producto
 
+    // controllers
+    final HomeController welcomeController = Get.find();
+
+    // var
+    Color colorAccent = Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
+
+    showSearch(
+      context: context,
+      delegate: SearchPage<Provider>(
+        searchStyle: TextStyle(color: colorAccent),
+        barTheme: Get.theme.copyWith(hintColor: colorAccent, highlightColor: colorAccent,inputDecorationTheme: const InputDecorationTheme(filled: false)),
+        items: welcomeController.getProviderList,
+        searchLabel: 'Buscar proveedor',
+        suggestion: const Center(child: Text('ej. Mayorista')),
+        failure: const Center(child: Text('No se encontro :(')),
+        filter: (provider) => [provider.name],
+        builder: (provider) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[
+          itemProvider(provider: provider),
+          ComponentApp().divider(),
+          ]),
+      ),
+    );
+  }
   showDialogSetProvider({required Provider provider}) async {
 
     // controllers 

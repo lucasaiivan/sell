@@ -398,8 +398,7 @@ class ControllerProductsEdit extends GetxController {
               }
               // procede agregrar en la base de datos global de productos
               // TODO : delete release (getEditModerator)
-              if ( getEditModerator || getProduct.local == false) {
-
+              if ( getEditModerator || getProduct.local == false) { 
                   setProductPublicFirestore( );
               }
               // condition : verifica si el producto es global publico
@@ -428,14 +427,16 @@ class ControllerProductsEdit extends GetxController {
               }
 
               // Firebase set : se crea los datos del producto del cátalogo de la cuenta
-              Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id)
-                .set(getProduct.toJson()).whenComplete(() async {
-                  // actualiza la lista de productos del cátalogo en la memoria de la app
-                  homeController.sincronizeCatalogueProducts(product: getProduct);
-                  // sleep : espera 3 segundos para que se actualice la vista
-                  await Future.delayed(const Duration(seconds: 3)).then((value) {setLoadingData = false; Get.back(); });
-              }).onError((error, stackTrace) => setLoadingData = false).catchError((_) => setLoadingData = false);
+              Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id).set(getProduct.toJson());
 
+              // actualiza la lista de productos del cátalogo en la memoria de la app
+              homeController.sincronizeCatalogueProducts(product: getProduct);
+              // sleep : espera 3 segundos para que se actualice la vista
+              await Future.delayed(const Duration(milliseconds: 500)).then((value) {
+                setLoadingData = false; Get.back(); 
+              });
+
+              
 
             } else {
               Get.snackbar(
@@ -555,8 +556,9 @@ class ControllerProductsEdit extends GetxController {
     //  function : lee la marca del producto 
     if (getProduct.idMark.isNotEmpty) {
       Database.readMarkFuture(id: getProduct.idMark).then((value) {
-        setMarkSelected = Mark.fromMap(value.data() as Map);
-        getProduct.nameMark = getMarkSelected.name; // guardamos un metadato
+        Mark brand = Mark.fromMap(value.data() as Map);
+        getProduct.nameMark = brand.name; // guardamos un metadato
+        setMarkSelected = brand;
         checkDataUploadStatusProduct(dataUploadStatusMark: true);
       }).onError((error, stackTrace) {
         setMarkSelected = Mark(upgrade: Timestamp.now(), creation: Timestamp.now());
@@ -1151,6 +1153,7 @@ class ControllerProductsEdit extends GetxController {
       Database.readProductPublicFuture(id: id).then((value) {
         //  get 
         Product product = Product.fromMap(value.data() as Map); 
+
         // commprobar que las fechas de actualización sean diferentes
         DateTime date1 = getProduct.documentUpgrade.toDate().copyWith(hour: 0,minute: 0,millisecond: 0,second: 0,microsecond: 0  );
         DateTime date2 = product.upgrade.toDate().copyWith(hour: 0,minute: 0,millisecond: 0,second: 0,microsecond: 0);
@@ -1351,12 +1354,10 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
   // WIDGETS COMPONENT
   showSeachMarks(){
 
-    // buscar cátegoria
+    // description : muestra la barra de busqueda para buscar marcas
 
     // var
     Color colorAccent = Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
-
-
     showSearch(
       context: context,
       delegate: SearchPage<Mark>(
@@ -1364,7 +1365,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         barTheme: Get.theme.copyWith(hintColor: colorAccent, highlightColor: colorAccent,inputDecorationTheme: const InputDecorationTheme(filled: false)),
         items: list,
         searchLabel: 'Buscar marca',
-        suggestion: const Center(child: Text('ej. Miller')),
+        suggestion: const Center(child: Text('ej. agua')),
         failure: const Center(child: Text('No se encontro :(')),
         filter: (product) => [product.name,product.description],
         builder: (mark) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[
@@ -1374,6 +1375,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
       ),
     );
   }
+  
   Widget itemGrid({required Mark marcaSelect}) {
     return InkWell(
       onTap: () {
@@ -1452,11 +1454,12 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
       // insertamos el item seleccionado en la segunda posicion de la lista
       list.insert(1, controllerProductsEdit.getUltimateSelectionMark);
     }
-
+    // obtenemos el item con id 'other'
+    Mark? mark = list.firstWhereOrNull((element) => element.id == 'other'); 
     // eliminamos el item con la id 'other' de la lista
     list.removeWhere((element) => element.id == 'other');
     // insertar en la primera posicion de la lista 
-    list.insert(0, Mark(id: 'other',name: 'Otro',upgrade: Timestamp.now(),creation: Timestamp.now()));
+    if(mark != null) list.insert(0, mark);
   }
   
 }

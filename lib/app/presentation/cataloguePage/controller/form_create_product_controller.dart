@@ -731,7 +731,7 @@ class ControllerCreateProductForm extends GetxController{
     // Dialog view :  muestra el dialogo para agregar el porcentaje de ganancia
 
     //var 
-    final ButtonStyle buttonStyle = ButtonStyle(padding: MaterialStateProperty.all(const EdgeInsets.all(12)));
+    final ButtonStyle buttonStyle = ButtonStyle(padding: WidgetStateProperty.all(const EdgeInsets.all(12)));
     final TextEditingController controller = TextEditingController();
 
     // widgets
@@ -1222,10 +1222,12 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
       list.insert(1, controllerProductNew.getUltimateSelectionMark);
     }
 
+    // obtenemos el item con la id 'other' de la lista
+    Mark mark = list.firstWhere((element) => element.id == 'other');
     // eliminamos el item con la id 'other' de la lista
     list.removeWhere((element) => element.id == 'other');
     // insertar en la primera posicion de la lista 
-    list.insert(0, Mark(id: 'other',name: 'Otro',upgrade: Timestamp.now(),creation: Timestamp.now()));
+    list.insert(0, mark);
   }
 }
 

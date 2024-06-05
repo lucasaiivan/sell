@@ -244,8 +244,8 @@ class HomeController extends GetxController {
     loadMarkCatalogue();
   }
 
-  addToListProductSelecteds({required ProductCatalogue item}) {
-    _productsOutstandingList.add(item);
+  addToListProductSelecteds({required ProductCatalogue item}) { 
+    _productsOutstandingList.insert(0, item);
   }
 
   //  authentication account profile
@@ -393,7 +393,10 @@ class HomeController extends GetxController {
           break;
         }
       }
-      if (!exist) { addToListProductSelecteds(item: product);}
+      // condition : si el producto no existe en la lista lo añadimos
+      if (exist==false) {  
+        getCataloProducts.insert(0, product);
+      }
     }
     // ordenamos por fecha de actualización
     getCataloProducts.sort((a, b) => b.upgrade.compareTo(a.upgrade));

@@ -1,7 +1,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; 
-import 'package:get/get.dart';  
+import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';  
 import '../../../core/utils/dynamicTheme_lb.dart';
 import '../../../core/utils/widgets_utils.dart';
 import '../controller/productsSearch_controller.dart';
@@ -81,6 +82,9 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
             // view : sugerencias de productos
             controller.getWriteCode||controller.getproductDoesNotExist? Container(): WidgetSuggestionProduct(positionDinamic: true,list: controller.getListProductsSuggestions),
             controller.getWriteCode||controller.getproductDoesNotExist? Container(): const SizedBox(height: 20), 
+            
+            // TODO: disable release
+            controller.getWriteCode||controller.getproductDoesNotExist? Container(): popupMenuPagesProveedor,
             // view : image 
             controller.getproductDoesNotExist?Container():
             const Card(
@@ -106,13 +110,13 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                 children: [ 
                   // textfield : código de barra
                   textFieldCodeBar(), 
-                  controller.copyClipboard==''?Container()
-                  :FadeInRight(child: TextButton(
+                  FadeInRight(child: TextButton(
                     onPressed: (){
+                      if(controller.copyClipboard == '') return;
                       controller.textEditingController.text = controller.copyClipboard;
                       controller.searchProductCatalogue(id: controller.copyClipboard);
                     },
-                    child: const Text('Pegar código'))),
+                    child: const Text('Pegar código de portapapeles'))),
                   const SizedBox(height: 12.0),
                   // button : buscar código
                   controller.getWriteCode||controller.getproductDoesNotExist?Container():
@@ -189,8 +193,31 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
       ),
     );
   }
-
+  
   /* WIDGETS COMPONENT */ 
+  Widget get popupMenuPagesProveedor{
+
+    List listPages = [
+      {'name':'preciohoy.ar','url':'https://preciohoy.ar/'},
+      {'name':'supercoco.com.ar','url':'https://supercoco.com.ar/categoria/almacen'}, 
+      {'name':'salemmaonline.com.py','url':'https://www.salemmaonline.com.py/'}, 
+    ]; 
+    return PopupMenuButton<Map<String, String>>(
+      child: const Text('Proveedores web',style: TextStyle(color: Colors.blue)),
+      onSelected: (item) async{
+        String url = item['url'] ?? '';
+        Uri uri = Uri.parse(url);
+        await launchUrl(uri,mode: LaunchMode.externalApplication);
+      },
+      itemBuilder: (context) => List.generate(
+        listPages.length,
+        (index) => PopupMenuItem<Map<String, String>>(
+          value: listPages[index],
+          child: Text(listPages[index]['name']),
+        ),
+      ),
+    ); 
+  }
   Widget button(
       {required Widget icon,
       required String text,

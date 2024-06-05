@@ -355,20 +355,31 @@ class ProductNewFormView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             //TODO: eliminar para desarrrollo
-            TextButton(
-                onPressed: () async {
-                  String clave = controller.controllerTextEditDescripcion.text;
-                  Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
-                  await launchUrl(uri, mode: LaunchMode.externalApplication);
-                },
-                child: const Text('Buscar descripción en Google (moderador)')),
-            TextButton(
-                onPressed: () async {
-                  String clave = controller.getProduct.code;
-                  Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
-                  await launchUrl(uri, mode: LaunchMode.externalApplication);
-                },
-                child: const Text('Buscar en código Google (moderador)')),
+            Container(
+              color: Colors.black.withOpacity(0.01),
+              padding: const EdgeInsets.symmetric(horizontal:20,vertical:1),
+              margin: const EdgeInsets.symmetric(  vertical:20),
+              child: Row(
+                children: [ 
+                  const Text('Buscar en Google: '), 
+                  TextButton(
+                      onPressed: () async {
+                        String clave = controller.getProduct.code;
+                        Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
+                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      },
+                      child: const Text('El Código')),
+                  TextButton(
+                      onPressed: () async {
+                        String clave = controller.controllerTextEditDescripcion.text;
+                        Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
+                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      },
+                      child: const Text('La Descripción')),
+                  
+                ],
+              ),
+            ),
 
             // text : texto infomativo
             Padding(

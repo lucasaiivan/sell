@@ -240,6 +240,7 @@ class ControllerProductsSearch extends GetxController {
       // condition : verificar que sean solo numeros
       if (verifyIsNumber(value: clipboardData.text)) {
         copyClipboard = clipboardData.text??'';  
+        updateAll();
       }
       
     }
