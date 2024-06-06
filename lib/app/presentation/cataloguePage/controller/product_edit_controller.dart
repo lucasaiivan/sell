@@ -207,6 +207,7 @@ class ControllerProductsEdit extends GetxController {
   int _quantityStock = 0;
   set setQuantityStock(int value) {
     _quantityStock = value;
+    controllerTextEditQuantityStock.text = value.toString();
     update(['updateAll']);
   }
   int get getQuantityStock => _quantityStock;
@@ -214,6 +215,7 @@ class ControllerProductsEdit extends GetxController {
   int _alertStock = 5;
   set setAlertStock(int value) {
     _alertStock = value;
+    controllerTextEditAlertStock.text = value.toString();
     update(['updateAll']);
   }
   int get getAlertStock => _alertStock;
@@ -1024,6 +1026,79 @@ class ControllerProductsEdit extends GetxController {
       },
     );
   }
+  void showDialogStock(){
+    // Dialog view :  muestra el dialogo para agregar la cantidad de stock del producto
+
+    // var
+    final Color boderLineColor = Get.isDarkMode?Colors.white.withOpacity(0.3):Colors.black.withOpacity(0.3);
+    final Color fillColor = Get.isDarkMode?Colors.white.withOpacity(0.03):Colors.black.withOpacity(0.03);
+    // style
+    TextStyle valueTextStyle = TextStyle(color: Get.isDarkMode?Colors.white:Colors.black,fontSize: 18,fontWeight: FontWeight.w400);
+    // controllers
+    final TextEditingController controllerTextEdit = TextEditingController(text: getQuantityStock.toString());
+    // widgets
+    Widget content = AlertDialog( 
+      title: const Text('Cantidad en stock'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Column(
+                children: [
+                  // mount textfield
+                  TextFormField(
+                    style: valueTextStyle,
+                    autofocus: true, 
+                    controller:  controllerTextEdit,
+                    enabled: true,
+                    autovalidateMode: AutovalidateMode.onUserInteraction, 
+                    keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                    decoration: InputDecoration( 
+                      filled: true,
+                      fillColor: fillColor,
+                      labelText: 'Cantidad',
+                      border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                      ),   
+                    // validator: validamos el texto que el usuario ha ingresado.
+                    validator: (value) {
+                      // if (value == null || value.isEmpty) { return 'Por favor, escriba un precio de compra'; }
+                      return null; 
+                    },
+                  ),  
+                ],
+              ),
+            ), 
+            // buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                TextButton( onPressed: () { Get.back();}, child: const Text('Cancelar',textAlign: TextAlign.center)),
+                TextButton( onPressed: () {
+                  //  function : guarda el nuevo porcentaje de ganancia
+                  if(controllerTextEdit.text != ''){
+                    int cantidad  = int.parse(controllerTextEdit.text); 
+                    setQuantityStock = cantidad;  
+                  }
+                  //  action : cierra el dialogo
+                  Get.back();
+                }, 
+                child: const Text('ok',textAlign: TextAlign.center)),
+              ],
+            ),
+          ],
+        ),
+    );
+
+    // dialog
+    showDialog(
+      context: Get.context!,
+      builder: (BuildContext context) {
+        return content;
+      },
+    );
+  }
   void showDialogStockAlert(){
     // Dialog view :  muestra el dialogo para introducir la cantidad del control de stock bajos
 
@@ -1033,7 +1108,7 @@ class ControllerProductsEdit extends GetxController {
     // style  
     TextStyle valueTextStyle = TextStyle(color: Get.isDarkMode?Colors.white:Colors.black,fontSize: 18,fontWeight: FontWeight.w400);
     // controllers
-    final TextEditingController controllerTextEdit = TextEditingController(text: getProduct.alertStock.toString());
+    final TextEditingController controllerTextEdit = TextEditingController(text: getAlertStock.toString());
     // widgets
     Widget content = AlertDialog( 
       title: const Text('Alerta de bajo stock'),
@@ -1366,7 +1441,20 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         items: list,
         searchLabel: 'Buscar marca',
         suggestion: const Center(child: Text('ej. agua')),
-        failure: const Center(child: Text('No se encontro :(')),
+        failure: Center(child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('No se encontro :('),
+
+            // TODO : disable moderador ( crear marca )
+            const SizedBox(height: 20),
+            TextButton.icon(
+              onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},
+              icon: const Icon(Icons.add_box_outlined),
+              label: const Text('Crear marca'),
+            )
+          ],
+        )),
         filter: (product) => [product.name,product.description],
         builder: (mark) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[
           itemList(marcaSelect: mark),

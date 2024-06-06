@@ -6,6 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart'; 
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:search_page/search_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart'; 
 import '../../../core/utils/dynamicTheme_lb.dart';
@@ -15,9 +16,21 @@ import '../../../data/datasource/database_cloud.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../controller/moderator_controller.dart';
 
-class ModeratorView extends StatelessWidget {
+class ModeratorView extends StatefulWidget {
   // ignore: prefer_const_constructors_in_immutables
   ModeratorView({Key? key}) : super(key: key);
+
+  @override
+  State<ModeratorView> createState() => _ModeratorViewState();
+  
+}
+
+class _ModeratorViewState extends State<ModeratorView> {
+  
+  // controllers
+  final ScrollController _scrollController = ScrollController();
+
+  bool _showScrollButton = false;
 
   @override
   Widget build(BuildContext context) {
@@ -34,14 +47,23 @@ class ModeratorView extends StatelessWidget {
   }
 
   // WIDGETS VIEWS
+  String stringFormatLimit({required String input}) {
+  int limit = 19;
+  if (input.length > limit) {
+    return '${input.substring(0,limit)}...';
+  } else {
+    return input;
+  }
+}
+
   PreferredSizeWidget appbar({ required BuildContext context,required ModeratorController controller}) {
 
 
     return AppBar(
     title: ComponentApp().buttonAppbar(
         context:  context,
-        onTap: () => controller.viewBrands?controller.showSeachMarks(context:context): controller.showSeachDialog(),
-        text: controller.viewBrands?'Buscar':'Data Base',
+        onTap: () => controller.viewBrands?showSeachMarks(context:context): controller.showSeachDialog(),
+        text: controller.viewBrands?'Buscar':'Database',
         iconLeading: Icons.search,
         colorBackground: Theme.of(context).colorScheme.outline.withOpacity(0.1),
         colorAccent: Theme.of(context).textTheme.bodyLarge!.color?.withOpacity(0.7),
@@ -51,7 +73,7 @@ class ModeratorView extends StatelessWidget {
       PopupMenuButton( 
         icon: ComponentApp().buttonAppbar(
           context: context,
-          text:  controller.getFilterText,
+          text: stringFormatLimit(input: controller.getFilterText),
           iconTrailing: Icons.filter_list,  
         ), 
           onSelected: (selectedValue){
@@ -99,6 +121,7 @@ class ModeratorView extends StatelessWidget {
     ], 
     );
   }
+
   Widget body({required ModeratorController controller}) {
 
     // widget
@@ -106,11 +129,12 @@ class ModeratorView extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       child: Wrap(
         alignment: WrapAlignment.start,
-        spacing: 10,
-        runSpacing: 10,
+        spacing: 6,
+        runSpacing: 6,
         children: [
           // chip : cantidad de articulos del catalogo y filtrados
           chipReport(
+            color: Colors.black,
             value: controller.totalProducts,
             description: 'Productos',
             onTap: (){
@@ -118,8 +142,19 @@ class ModeratorView extends StatelessWidget {
               controller.filterProducts();
             },
           ),
+          // chip : total de productos destacados
+          chipReport(
+            color: Colors.black,
+            value: controller.totalProductsFavorite,
+            description: 'Destacados',
+            onTap: (){
+              controller.setFilterText = 'Destacados';
+              controller.filterProducts(favorite: true);
+            },
+          ),
           // chip : total de productos verificados
           chipReport(
+            color: Colors.black,
             value: controller.totalVerifiedProducts,
             description: 'Verificados',
             onTap: (){
@@ -129,6 +164,7 @@ class ModeratorView extends StatelessWidget {
           ),
           // chip : total de productos no verificados
           chipReport(
+            color: controller.totalUnverifiedProducts > 0 ? Colors.orange : Colors.blue,
             value: controller.totalUnverifiedProducts,
             description: 'No verificados',
             onTap: (){
@@ -138,6 +174,7 @@ class ModeratorView extends StatelessWidget {
           ), 
           // chip : total de productos revisados sin verificar
           chipReport(
+            color: controller.totalReviewedProducts > 0 ? Colors.orange : Colors.blue,
             value: controller.totalReviewedProducts,
             description: 'Revisados',
             onTap: (){
@@ -147,6 +184,7 @@ class ModeratorView extends StatelessWidget {
           ), 
           // chip : sin revisar
           chipReport(
+            color: Colors.red,
             value: controller.totalNotReviewedProducts,
             description: 'Sin revisar',
             onTap: (){
@@ -156,6 +194,7 @@ class ModeratorView extends StatelessWidget {
           ),
           // chip : total de productos sin algun dato
           chipReport(
+            color: controller.totalProductsNoData>0?Colors.orange:Colors.blue,
             value: controller.totalProductsNoData,
             description: 'Datos faltantes',
             onTap: (){
@@ -165,6 +204,7 @@ class ModeratorView extends StatelessWidget {
           ), 
           // chip : total de reportes
           chipReport(
+            color: controller.getReports.isNotEmpty ? Colors.orange : Colors.blue,
             value: controller.getReports.length,
             description: 'Reportes',
             onTap: (){
@@ -176,6 +216,7 @@ class ModeratorView extends StatelessWidget {
           ), 
           // chip : marcas de los productos
           chipReport(
+            color: Colors.black,
             value: controller.getMarks.length,
             description: 'Marcas',
             onTap: (){
@@ -192,41 +233,26 @@ class ModeratorView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // text 
-        const Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Text('Usuarios creadores', style: TextStyle(fontWeight: FontWeight.w400)),
-        ), 
-        // view : filtros de id de usuario
-        SizedBox(
-          height: 40,
-          child: ListView( 
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            scrollDirection: Axis.horizontal,
-            children: controller.getIdUserCreation.keys.map((key) {
-              return Padding(
-                padding: const EdgeInsets.all(2.0),
-                child: ActionChip(
-                  onPressed: (){
-                    controller.setFilterText = key;
-                    controller.filterProducts(idUserCreator: key);
-                  },
-                  side: const BorderSide(color: Colors.transparent),
-                  visualDensity: VisualDensity.compact, 
-                  label: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // text : id del usuario
-                      Text( key,style: const TextStyle(fontWeight: FontWeight.bold)),
-                      // text : cantidad de productos creados por el usuario
-                      Text(' (${ Publications.getFormatAmount(value:controller.getIdUserCreation[key]!).toString()})',style: const TextStyle(fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                  backgroundColor: Get.theme.colorScheme.secondary.withOpacity(0.1),
-                ),
-              );
-            }).toList(),
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
+            children: [
+              // text 
+              const Text('Filtrar usuario por productos', style: TextStyle(fontWeight: FontWeight.w400)),
+              const Spacer(),
+              // textButton : ver usuarios creadores
+              TextButton(
+                onPressed: ()=> showDialogUserSCreator(),
+                child: const Text('Creados'),
+              ),
+              // textButton : ver usuarios actualizadores
+              TextButton(
+                onPressed: ()=> showDialogUsersUpdate(),
+                child: const Text('Actualizados'),
+              ),
+            ],
           ),
-        ),
+        ), 
       ],
     );
     Widget chipsDataView = Column(
@@ -242,17 +268,42 @@ class ModeratorView extends StatelessWidget {
     // condition : muestra las marcas
     if(controller.viewBrands){
       if(controller.getMarks.isNotEmpty){
-        return ListView.builder(
-          itemCount: controller.getMarks.length,
-          itemBuilder: (BuildContext context, int index) { 
-            return Column(
-              children: [
-                index==0?chipsDataView:Container(),
-                listTileBrand(item: controller.getMarks[index]),
-                const Divider(height: 0,thickness:0.4),
-              ],
-            );
-          },
+        return Stack(
+          children: [
+            // listview : items
+            ListView.builder(
+              controller: _scrollController ,
+              itemCount: controller.getMarks.length,
+              itemBuilder: (BuildContext context, int index) { 
+                return Column(
+                  children: [
+                    index==0?chipsDataView:Container(),
+                    listTileBrand(item: controller.getMarks[index]),
+                    const Divider(height: 0,thickness:0.4),
+                  ],
+                );
+              },
+            ),
+            // button : posicionar en la parte superior : _showScrollButton
+            if (_showScrollButton)
+              Positioned( 
+                top: 10, 
+                right: 0,
+                left: 0,
+                child: Center(
+                  child: FloatingActionButton(
+                    onPressed: () {
+                      _scrollController.animateTo(0,duration: const Duration(milliseconds: 500),curve: Curves.easeInOut).whenComplete(
+                        () => setState(() {
+                          _showScrollButton = false;
+                        }),
+                      ); 
+                    },
+                    child: const Icon(Icons.arrow_upward),
+                  ),
+                ),
+              ),
+          ],
         );
       }
     }
@@ -293,7 +344,11 @@ class ModeratorView extends StatelessWidget {
     }
 
     // description : cuerpo de la vista
-    return ListView.builder(
+    return Stack(
+      children: [
+        // listview : items
+        ListView.builder( 
+          controller: _scrollController ,
           itemCount: controller.getProductsFiltered.length  ,
           itemBuilder: (BuildContext context, int index) { 
             return Column(
@@ -315,10 +370,58 @@ class ModeratorView extends StatelessWidget {
               ],
             );
           },
-        );
+        ),
+        // button : posicionar en la parte superior : _showScrollButton
+        if (_showScrollButton)
+          Positioned( 
+            top: 10, 
+            right: 0,
+            left: 0,
+            child: Center(
+              child: FloatingActionButton(
+                onPressed: () {
+                  _scrollController.animateTo(0,duration: const Duration(milliseconds: 500),curve: Curves.easeInOut).whenComplete(
+                    () => setState(() {
+                      _showScrollButton = false;
+                    }),
+                  
+                  ); 
+                },
+                child: const Icon(Icons.arrow_upward),
+              ),
+            ),
+          ),
+      ],
+    );
   }
 
   // WIDGETS COMPONENTS
+  Widget actionChipUser({required String name, required int value ,required bool filterCreator}){
+    // controlles 
+    final ModeratorController controller = Get.find<ModeratorController>(); 
+
+    return ActionChip(
+      onPressed: (){
+        controller.setFilterText = name;
+        if(filterCreator){controller.filterProducts(idUserCreator: name);}
+        else{controller.filterProducts(idUserUpdate: name);}
+        Get.back();
+      },
+      side: const BorderSide(color: Colors.transparent),
+      visualDensity: VisualDensity.compact, 
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // text : id del usuario
+          Flexible(child: Text( name,style: const TextStyle(fontWeight: FontWeight.bold))),
+          // text : cantidad de productos creados por el usuario
+          Text(' (${ Publications.getFormatAmount(value:value).toString()})',style: const TextStyle(fontWeight: FontWeight.bold),overflow: TextOverflow.ellipsis),
+        ],
+      ),
+      backgroundColor: Get.theme.colorScheme.secondary.withOpacity(0.1),
+    );
+  }
+
   Widget listTileProduct({required Product product}) {
     // description : ListTile con detalles del producto
     // controlles 
@@ -430,7 +533,7 @@ class ModeratorView extends StatelessWidget {
                                     Row(
                                       crossAxisAlignment:CrossAxisAlignment.start,
                                       children: [
-                                        !product.outstanding? Container(): const Icon(Icons.star_purple500_sharp,size: 12,color: Colors.orange),!product.outstanding? Container() : const SizedBox(width: 2),
+                                        !product.favorite? Container(): const Icon(Icons.star_purple500_sharp,size: 12,color: Colors.orange),!product.favorite? Container() : const SizedBox(width: 2),
                                         Flexible(child: Text(product.description,maxLines: 1,overflow: TextOverflow.ellipsis,style:textStylePrimery.copyWith(fontSize: titleSize))),
                                       ],
                                     ),
@@ -453,6 +556,7 @@ class ModeratorView extends StatelessWidget {
       ),
     );
   }
+
   Widget listTileReport({required ReportProduct item,required BuildContext context}){
 
     // controlles 
@@ -460,91 +564,98 @@ class ModeratorView extends StatelessWidget {
     // var 
     String description = item.description == '' ? 'sin datos' :item.description;
 
-    return ListTile(
-      title: Text(item.idProduct),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // text : descripcion del reporte
-          RichText(
-            text: TextSpan( 
-              style: DefaultTextStyle.of(context).style,  
-              children: <TextSpan>[
-                TextSpan(text:'Description: ', style: TextStyle(color: DefaultTextStyle.of(context).style.color?.withOpacity(0.5))), 
-                TextSpan(text:description, style: const TextStyle(fontWeight: FontWeight.w300)), 
-              ],
-            ),
-          ),
-          // text : datos reportados
-          Text('Datos reportados:',style: TextStyle(color: DefaultTextStyle.of(context).style.color?.withOpacity(0.5))),
-          // text : reportes items
-          controller.getReports.isEmpty?Container():Row(
-            children: item.reports.map((e) => Padding(
-              padding: const EdgeInsets.only(right: 4),
-              child: Material(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                color: Colors.blue.withOpacity(0.09),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4,vertical:1),
-                  child: Text('$e'),
-                ),
+    return ElasticIn(
+      child: ListTile(
+        title: Text(item.idProduct),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // text : descripcion del reporte
+            RichText(
+              text: TextSpan( 
+                style: DefaultTextStyle.of(context).style,  
+                children: <TextSpan>[
+                  TextSpan(text:'Description: ', style: TextStyle(color: DefaultTextStyle.of(context).style.color?.withOpacity(0.5))), 
+                  TextSpan(text:description, style: const TextStyle(fontWeight: FontWeight.w300)), 
+                ],
               ),
-            )).toList(),
-          ),
-        ],
-      ), 
-      leading: Column(
-        children: [
-          // avatar : product 
-          ImageProductAvatarApp(url: controller.getProduct(id: item.idProduct)!.image,size: 40),
-          // text : descripcion del producto
-          SizedBox(
-            width: 75,
-            child: Text(controller.getProduct(id: item.idProduct)!.description,style: const TextStyle(fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1)),
-        ],
+            ),
+            // text : datos reportados
+            Text('Datos reportados:',style: TextStyle(color: DefaultTextStyle.of(context).style.color?.withOpacity(0.5))),
+            // text : reportes items
+            controller.getReports.isEmpty?Container():Row(
+              children: item.reports.map((e) => Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: Material(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                  color: Colors.blue.withOpacity(0.09),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4,vertical:1),
+                    child: Text('$e'),
+                  ),
+                ),
+              )).toList(),
+            ),
+          ],
+        ), 
+        leading: Column(
+          children: [
+            // avatar : product 
+            ImageProductAvatarApp(url: controller.getProduct(id: item.idProduct)!.image,size: 40),
+            // text : descripcion del producto
+            SizedBox(
+              width: 75,
+              child: Text(controller.getProduct(id: item.idProduct)!.description,style: const TextStyle(fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1)),
+          ],
+        ),
+        // trailing : eliminar reporte
+        trailing: PopupMenuButton<String>(
+          onSelected: (value) {
+            // condition : si se selecciona eliminar reporte
+            if(value=='Eliminar reporte'){
+              controller.deleteReport(id: item.id);
+            }
+            // condition : si se selecciona navegar al producto
+            if(value=='Ver producto'){
+              controller.goToProductEdit(controller.getProduct(id: item.idProduct)!);
+            }
+      
+          },
+          itemBuilder: (BuildContext context) {
+            return ['Ver producto', 'Eliminar reporte', ''].map((String choice) {
+              return PopupMenuItem<String>(
+                value: choice,
+                child: Text(choice),
+              );
+            }).toList();
+          },
+        ),
+        onTap: ()=> controller.goToProductEdit(controller.getProduct(id: item.idProduct)!),
+          
       ),
-      // trailing : eliminar reporte
-      trailing: PopupMenuButton<String>(
-        onSelected: (value) {
-          // condition : si se selecciona eliminar reporte
-          if(value=='Eliminar reporte'){
-            controller.deleteReport(id: item.id);
-          }
-          // condition : si se selecciona navegar al producto
-          if(value=='Ver producto'){
-            controller.goToProductEdit(controller.getProduct(id: item.idProduct)!);
-          }
-
-        },
-        itemBuilder: (BuildContext context) {
-          return ['Ver producto', 'Eliminar reporte', ''].map((String choice) {
-            return PopupMenuItem<String>(
-              value: choice,
-              child: Text(choice),
-            );
-          }).toList();
-        },
-      ),
-      onTap: ()=> controller.goToProductEdit(controller.getProduct(id: item.idProduct)!),
-        
     );
   }
+
   Widget listTileBrand({required Mark item}){
 
     // controlles 
     final ModeratorController controller = Get.find<ModeratorController>();
 
-    return ListTile(
-      title: Text(item.name,maxLines:1),
-      subtitle: item.description.isEmpty?null:Opacity(opacity: 0.7,child: Text(item.description,maxLines:2)),
-      leading: ImageProductAvatarApp(url: item.image,size: 40), 
-      trailing: CircleAvatar(backgroundColor: Colors.blue.withOpacity(0.1), child: Text(controller.totalNumberOfBrandedProducts(idBrand: item.id).toString())),
-      onTap: ()=> controller.showEditBrandDialogFullscreen(mark: item),
+    return ElasticIn(
+      child: ListTile(
+        title: Text(item.name,maxLines:1),
+        subtitle: item.description.isEmpty?null:Opacity(opacity: 0.7,child: Text(item.description,maxLines:2)),
+        leading: ImageProductAvatarApp(url: item.image,size: 40), 
+        trailing: CircleAvatar(backgroundColor: Colors.blue.withOpacity(0.1), child: Text(controller.totalNumberOfBrandedProducts(idBrand: item.id).toString())),
+        onTap: ()=> controller.showEditBrandDialogFullscreen(mark: item),
+      ),
     );
   }
-  Widget chipReport({required int value,required String description,required Function() onTap}) {
+
+  Widget chipReport({required int value,required String description,required Function() onTap,Color color = Colors.blue}) {
     // description : chip con la cantidad de reportes
     return ActionChip(
+      color: WidgetStateProperty.all(color.withOpacity(0.1)),
       onPressed: onTap,
       side: const BorderSide(color: Colors.transparent),
       visualDensity: VisualDensity.compact,
@@ -559,6 +670,7 @@ class ModeratorView extends StatelessWidget {
       backgroundColor: Get.theme.colorScheme.secondary.withOpacity(0.1),
     );
   }
+
   Widget get floatingActionButton{
     // controllers
     final ModeratorController controller = Get.find<ModeratorController>();
@@ -582,6 +694,114 @@ class ModeratorView extends StatelessWidget {
       backgroundColor: Colors.blue, 
       child: const Icon(Icons.add,color: Colors.white,),
     );
+  }
+
+  // DIALOG //  
+  void showDialogUserSCreator(){
+    // controlles 
+    final ModeratorController controller = Get.find<ModeratorController>(); 
+    // dialog
+    showDialog(
+      context: Get.overlayContext!,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Productos creados'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true, 
+              itemCount: controller.getIdUserCreation.keys.length,
+              itemBuilder: (BuildContext context, int index) {
+                String key = controller.getIdUserCreation.keys.elementAt(index);
+                return actionChipUser(filterCreator: true,name: key,value: controller.getIdUserCreation[key]!);
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: const Text('Cerrar'),
+            ),
+          ],
+        );
+      },
+    ); 
+  }
+  void showDialogUsersUpdate(){
+    // controlles 
+    final ModeratorController controller = Get.find<ModeratorController>(); 
+    // dialog
+    showDialog(
+      context: Get.overlayContext!,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Productos actualizados'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true, 
+              itemCount: controller.getIdUserUpdate.keys.length,
+              itemBuilder: (BuildContext context, int index) {
+                String key = controller.getIdUserUpdate.keys.elementAt(index);
+                return actionChipUser(filterCreator: false,name: key,value: controller.getIdUserUpdate[key]!);
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: const Text('Cerrar'),
+            ),
+          ],
+        );
+      },
+    ); 
+  
+  }
+  void showSeachMarks({required BuildContext context}){
+    // description: muestra un dialogo de busqueda de marcas
+
+    // controllers
+    final ModeratorController controller = Get.find<ModeratorController>();
+
+    // var
+    Color colorAccent = Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
+
+
+    showSearch(
+      context: context,
+      delegate: SearchPage<Mark>(
+        searchStyle: TextStyle(color: colorAccent),
+        barTheme: Get.theme.copyWith(hintColor: colorAccent, highlightColor: colorAccent,inputDecorationTheme: const InputDecorationTheme(filled: false)),
+        items: controller.getMarks,
+        searchLabel: 'Buscar marca',
+        suggestion: const Center(child: Text('ej. Miller')),
+        failure: const Center(child: Text('No se encontro :(')),
+        filter: (product) => [product.name,product.description],
+        builder: (mark) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[
+          listTileBrand(item: mark),
+          const Divider(),
+          ]),
+      ),
+    );
+  }
+  // OVERRIDE //
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  } 
+  @override
+  void initState() {
+    _scrollController.addListener(() {
+      if (_scrollController.offset >= 5000) {
+        if(_showScrollButton) return;
+        setState(() {
+          _showScrollButton = true;
+        });
+      } 
+    });
+    super.initState();
   }
 }
 
@@ -824,7 +1044,7 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
                                     Row(
                                       crossAxisAlignment:CrossAxisAlignment.start,
                                       children: [
-                                        !product.outstanding? Container(): const Icon(Icons.star_purple500_sharp,size: 12,color: Colors.orange),!product.outstanding? Container() : const SizedBox(width: 2),
+                                        !product.favorite? Container(): const Icon(Icons.star_purple500_sharp,size: 12,color: Colors.orange),!product.favorite? Container() : const SizedBox(width: 2),
                                         Flexible(child: Text(product.description,maxLines: 1,overflow: TextOverflow.ellipsis,style:textStylePrimery.copyWith(fontSize: titleSize))),
                                       ],
                                     ),

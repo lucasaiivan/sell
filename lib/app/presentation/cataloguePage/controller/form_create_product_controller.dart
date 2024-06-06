@@ -1135,7 +1135,19 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         items: list,
         searchLabel: 'Buscar marca',
         suggestion: const Center(child: Text('ej. Miller')),
-        failure: const Center(child: Text('No se encontro :(')),
+        failure: Center(child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('No se encontro :('),
+            // TODO : disable moderador ( crear marca )
+            const SizedBox(height: 20),
+            TextButton.icon(
+              onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},
+              icon: const Icon(Icons.add_box_outlined),
+              label: const Text('Crear marca'),
+            )
+          ],
+        )),
         filter: (product) => [product.name,product.description],
         builder: (mark) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[
           itemList(marcaSelect: mark),

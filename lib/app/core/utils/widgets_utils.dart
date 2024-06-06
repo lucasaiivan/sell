@@ -840,7 +840,7 @@ class ComponentApp extends StatelessWidget {
                 iconLeading==null?Container():Icon(iconLeading,color: colorAccent,size: 24),
                 iconLeading==null?Container():const SizedBox(width:8),
                 // text
-                Text(text,style: TextStyle(color: colorAccent,fontSize: 16 ),overflow: TextOverflow.ellipsis), 
+                Flexible(child: Text(text,style: TextStyle(color: colorAccent,fontSize: 16 ),overflow: TextOverflow.ellipsis)), 
                 iconTrailing==null?Container():const SizedBox(width:8), 
                 iconTrailing==null?Container():Icon(iconTrailing,color: colorAccent,size: 24),
               ],
@@ -913,7 +913,7 @@ class WidgetSuggestionProduct extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.max,
+      mainAxisSize: MainAxisSize.min,
       children: [
         // button : buscar producto
         !searchButton

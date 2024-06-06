@@ -259,26 +259,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
   void toSeachProduct() {
     Get.toNamed(Routes.searchProduct, arguments: {'id': ''});
   }
-
-  Future<void> categoryDelete({required String idCategory}) async => await Database.refFirestoreCategory(idAccount: homeController.getProfileAccountSelected.id).doc(idCategory).delete();
-  Future<void> categoryUpdate({required Category categoria}) async {
-
-    // refactorizamos el nombre de la cátegoria
-    String name = categoria.name.substring(0, 1).toUpperCase() + categoria.name.substring(1);
-    categoria.name=name;
-    // firestore : reference
-    var documentReferencer = Database.refFirestoreCategory(idAccount: homeController.getProfileAccountSelected.id).doc(categoria.id);
-    // firestore : Actualizamos los datos
-    documentReferencer.set(Map<String, dynamic>.from(categoria.toJson()),SetOptions(merge: true));
-  }
-  Future<void> providerDelete({required String idSupplier}) async => await Database.refFirestoreProvider(idAccount: homeController.getProfileAccountSelected.id).doc(idSupplier).delete();
-  Future<void> providerSave({required Provider provider}) async {
-    // firestore : reference
-    var documentReferencer = Database.refFirestoreProvider(idAccount: homeController.getProfileAccountSelected.id).doc(provider.id);
-    // firestore : Actualizamos los datos
-    documentReferencer.set(Map<String, dynamic>.from(provider.toJson()),SetOptions(merge: true));
-  }
-
+ 
   // ---------------------------- //
   // -------- NAVIGATION -------- //
   // ---------------------------- //

@@ -231,9 +231,7 @@ class ProductEdit extends StatelessWidget {
                         textValue: controller.getMarkSelected.name ,
                         labelText: controller.getMarkSelected.id == ''? 'Seleccionar una marca': 'Marca',
                         onTap: controller.getProduct.verified==false || controller.getEditModerator? controller.showModalSelectMarca : () {},
-                        suffix: controller.getMarkSelected.toString().isNotEmpty
-                            ? ComponentApp().userAvatarCircle(urlImage: controller.getMarkSelected.image,empty: true)
-                            : null,
+                        suffix: controller.getMarkSelected.toString().isNotEmpty? ComponentApp().userAvatarCircle(urlImage: controller.getMarkSelected.image,empty: true): null,
                       ),
                     ),
                   ],
@@ -475,7 +473,7 @@ class ProductEdit extends StatelessWidget {
                             key: controller.quantityStockFormKey,
                             child: InkWell(
                               borderRadius: BorderRadius.circular(2),
-                              onTap: ()=> controller.showDialogPricePurchase(), 
+                              onTap: ()=> controller.showDialogStock(), 
                               child: TextFormField(
                                 style: valueTextStyle,
                                 autofocus: false, 
@@ -689,13 +687,14 @@ class _SelectCategoryState extends State<SelectCategory> {
       appBar: AppBar(
         title: const Text('Categorías'),
         actions: [
+          // icon : agregar nueva categoria
+          IconButton(icon: const Icon(Icons.add),onPressed: (){Get.back();showDialogSetCategoria(categoria: Category());}),
           // icon : buscar categoria
           IconButton(icon: const Icon(Icons.search),onPressed: () {Get.back();showSearchCategory();}),
-          // icon : agregar nueva categoria
-          IconButton(icon: const Icon(Icons.add),onPressed: () => showDialogSetCategoria(categoria: Category())),
+          
         ],
       ),
-      body:welcomeController.getCatalogueCategoryList.isEmpty?const Center(child: Text('Sin cátegorias'),): ListView.builder(
+      body: welcomeController.getCatalogueCategoryList.isEmpty?const Center(child: Text('Sin cátegorias'),): ListView.builder(
         padding: const EdgeInsets.symmetric(vertical: 15.0),
         shrinkWrap: true,
         itemCount: welcomeController.getCatalogueCategoryList.length,
@@ -732,6 +731,7 @@ class _SelectCategoryState extends State<SelectCategory> {
   Widget popupMenuItemCategoria({required Category categoria}) {
     // controllers 
     final HomeController controller = Get.find();
+    final ControllerProductsEdit controllerProductsEdit = Get.find();
     
     return PopupMenuButton(
       icon: const Icon(Icons.more_vert),
@@ -766,6 +766,7 @@ class _SelectCategoryState extends State<SelectCategory> {
                         onPressed: () async {
                           controller.categoryDelete(idCategory: categoria.id).then((value) {
                               setState(() {
+                                controllerProductsEdit.controllerTextEditCategory.text = '';
                                 Get.back();
                               });
                             });
@@ -797,7 +798,22 @@ class _SelectCategoryState extends State<SelectCategory> {
         items: welcomeController.getCatalogueCategoryList,
         searchLabel: 'Buscar cátegoria',
         suggestion: const Center(child: Text('ej. gaseosa')),
-        failure: const Center(child: Text('No se encontro :(')),
+        failure: Center(child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('No se encontro :('), 
+            const SizedBox(height:20),
+            // button : crear nueva categoria
+            ElevatedButton.icon(
+              onPressed: () {
+                Get.back();
+                showDialogSetCategoria(categoria: Category());
+              },
+              icon: const Icon(Icons.add),
+              label: const Text('Crear nueva categoría'),
+            ),
+          ],
+        )),
         filter: (category) => [category.name],
         builder: (category) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[
           itemCategory(category: category),
@@ -808,11 +824,11 @@ class _SelectCategoryState extends State<SelectCategory> {
   }
   showDialogSetCategoria({required Category categoria}) async {
     // controllers
-    final HomeController controller = Get.find();
-    // var
-    bool loadSave = false;
-    bool newProduct = false;
+    final HomeController homeController = Get.find();
+    final ControllerProductsEdit controllerProductsEdit = Get.find();
     TextEditingController textEditingController = TextEditingController(text: categoria.name);
+    // var 
+    bool newProduct = false;
 
     if (categoria.id == '') {
       newProduct = true;
@@ -821,7 +837,7 @@ class _SelectCategoryState extends State<SelectCategory> {
     }
 
     await showDialog<String>(
-      context: context,
+      context: Get.context!,
       builder: (context) {
         return  AlertDialog(
           contentPadding: const EdgeInsets.all(16.0),
@@ -842,17 +858,21 @@ class _SelectCategoryState extends State<SelectCategory> {
                 onPressed: () {
                   Get.back();
                 }),
-            TextButton( child: loadSave == false? Text(newProduct ? 'GUARDAR' : "ACTUALIZAR"): const CircularProgressIndicator(),
+            TextButton( child: Text(newProduct ? 'GUARDAR' : "ACTUALIZAR") ,
                 onPressed: () async {
                   if (textEditingController.text != '') {
+
                     // set
-                    categoria.name = textEditingController.text;
-                    setState(() => loadSave = true);
+                    categoria.name = textEditingController.text; 
+                     
                     // save
-                    await controller.categoryUpdate(categoria: categoria).whenComplete(() {
+                    await homeController.categoryUpdate(categoria: categoria).whenComplete(() {
+                      // set 
+                      controllerProductsEdit.controllerTextEditCategory.text = categoria.name;
+                      // add
                       welcomeController.getCatalogueCategoryList.add(categoria);
-                      setState(() {Get.back();});
-                    }).catchError((error, stackTrace) =>setState(() => loadSave = false));
+                      Get.back();
+                    });
                   }
                 })
           ],
@@ -907,9 +927,10 @@ class _SelectProviderState extends State<SelectProvider> {
         title: const Text('Proveedor'),
         actions: [
           // icon : buscar proveedor
-          IconButton(icon: const Icon(Icons.search),onPressed: () {Get.back();showSearchProvider();}),
+          IconButton(icon: const Icon(Icons.add),onPressed: (){Get.back();showDialogSetProvider(provider: Provider());}),
           // icon : buscar proveedor
-          IconButton(icon: const Icon(Icons.add),onPressed: () => showDialogSetProvider(provider: Provider())),
+          IconButton(icon: const Icon(Icons.search),onPressed: () {Get.back();showSearchProvider();}),
+          
         ],
       ),
       body:welcomeController.getProviderList.isEmpty?const Center(child: Text('Sin proveedores'),): ListView.builder(
@@ -918,12 +939,12 @@ class _SelectProviderState extends State<SelectProvider> {
         itemCount: welcomeController.getProviderList.length,
         itemBuilder: (BuildContext context, int index) {
           //  values
-          Provider provider = welcomeController.getProviderList[index];
+          Provider provider = welcomeController.getProviderList[index] ;
           
           return Column(
             children: <Widget>[
               itemProvider(provider: provider),
-              const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
+              const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.2),
             ],
           );
         },
@@ -937,7 +958,7 @@ class _SelectProviderState extends State<SelectProvider> {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
       dense: true,
-      title: Text(provider.name.substring(0, 1).toUpperCase() + provider.name.substring(1)),
+      title: provider.name==''?null: Text(provider.name.substring(0, 1).toUpperCase() + provider.name.substring(1)),
       onTap: () {
         controllerProductsEdit.setProvider = provider;
         Get.back();
@@ -957,7 +978,7 @@ class _SelectProviderState extends State<SelectProvider> {
       ],
       onSelected: (value) async {
         switch (value) {
-          case "editar":
+          case "editar": 
             showDialogSetProvider(provider: provider);
             break;
           case "eliminar":
@@ -968,7 +989,7 @@ class _SelectProviderState extends State<SelectProvider> {
                   contentPadding: const EdgeInsets.all(16.0),
                   content: const Row(
                     children: <Widget>[
-                      Expanded(child:Text("¿Desea continuar eliminando esta categoría?"))
+                      Expanded(child:Text("¿Desea continuar eliminando este proveedor?"))
                     ],
                   ),
                   actions: <Widget>[
@@ -980,7 +1001,7 @@ class _SelectProviderState extends State<SelectProvider> {
                     TextButton(
                         child: loadSave == false? const Text("ELIMINAR"): const CircularProgressIndicator(),
                         onPressed: () async {
-                          controller.categoryDelete(idCategory: provider.id).then((value) {
+                          controller.providerDelete(idProvider: provider.id).then((value) {
                               setState(() {
                                 Get.back();
                               });
@@ -1013,7 +1034,17 @@ class _SelectProviderState extends State<SelectProvider> {
         items: welcomeController.getProviderList,
         searchLabel: 'Buscar proveedor',
         suggestion: const Center(child: Text('ej. Mayorista')),
-        failure: const Center(child: Text('No se encontro :(')),
+        failure: Center(child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // text 
+            const Text('No se encontro :('),
+            // TODO : delete release ( agregar proveedor )
+            const SizedBox(height: 20),
+            // textButton : agregar proveedor
+            TextButton(onPressed: (){Get.back();showDialogSetProvider(provider: Provider());}, child: const Text('Agregar proveedor')),
+          ],
+        )),
         filter: (provider) => [provider.name],
         builder: (provider) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[
           itemProvider(provider: provider),
@@ -1025,12 +1056,12 @@ class _SelectProviderState extends State<SelectProvider> {
   showDialogSetProvider({required Provider provider}) async {
 
     // controllers 
-    final CataloguePageController cataloguePageController = Get.find(); 
-
-    // var
-    bool loadSave = false;
-    bool newProvider = false;
+    final HomeController homeController = Get.find(); 
+    final ControllerProductsEdit controllerProductsEdit = Get.find();
     TextEditingController textEditingController = TextEditingController(text: provider.name);
+
+    // var  
+    bool newProvider = false;
 
     if (provider.id == '') {
       newProvider = true;
@@ -1039,7 +1070,7 @@ class _SelectProviderState extends State<SelectProvider> {
     }
 
     await showDialog<String>(
-      context: context,
+      context: Get.context!,
       builder: (context) {
         return  AlertDialog(
           contentPadding: const EdgeInsets.all(16.0),
@@ -1060,16 +1091,16 @@ class _SelectProviderState extends State<SelectProvider> {
                 onPressed: () {
                   Get.back();
                 }),
-            TextButton( child: loadSave == false? Text(newProvider ? 'GUARDAR' : "ACTUALIZAR"): const CircularProgressIndicator(),
+            TextButton( child: Text(newProvider ? 'GUARDAR' : "ACTUALIZAR") ,
                 onPressed: () async {
                   if (textEditingController.text != '') {
                     // set
-                    provider.name = textEditingController.text;
-                    setState(() => loadSave = true);
+                    provider.name = textEditingController.text;   
                     // save
-                    await cataloguePageController.providerSave(provider: provider).whenComplete(() {
+                    await homeController.providerSave(provider: provider).whenComplete(() {
                       welcomeController.getProviderList.add(provider);
-                      setState(() {Get.back();});
+                      controllerProductsEdit.controllerTextEditProvider.text = provider.name;
+                      Get.back();
                     }).catchError((error, stackTrace) =>setState(() => loadSave = false));
                   }
                 })
@@ -1099,7 +1130,7 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
         title: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [ 
-            Icon(Icons.security),
+            Icon(Icons.security_sharp),
             SizedBox(width:5),
             Text('Moderador'),
           ],
@@ -1159,32 +1190,38 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
                     ),
                   ],
                 ),
-                // buttom : edicion de imagen
-              TextButton( 
-                onPressed: !controller.getEditModerator?null: () async{
-                  // values
-                  Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.camerasideas.instashot&pcampaignid=web_share');
-                  //  redireccionara para la tienda de aplicaciones
-                  await launchUrl(uri,mode: LaunchMode.externalApplication);
-                },
-                child: const Text('Editar imagen con InstaShot'),
-
+              // view : apps utiles
+              Row(
+                children: [
+                  // text 
+                  const Text('Apps de edición de imagen'),
+                  const Spacer(),
+                  // textButton : direccionamiento a la play store
+                  TextButton.icon( 
+                    onPressed: !controller.getEditModerator?null: () async{
+                      // values
+                      Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.camerasideas.instashot&pcampaignid=web_share');
+                      //  redireccionara para la tienda de aplicaciones
+                      await launchUrl(uri,mode: LaunchMode.externalApplication);
+                    },
+                    icon: const Icon(Icons.photo_size_select_large_sharp),
+                    label: const Text('InstaShot'),
+                  
+                  ),
+                ],
               ),
               ],
             ),  
             const Divider(),
             // view : verificacion de verificado
             CheckboxListTile(
-              enabled: controller.getEditModerator
-                  ? controller.getLoadingData
-                      ? false
-                      : true
-                  : false,
+              enabled: controller.getEditModerator ? controller.getLoadingData ? false : true : false,
               checkColor: Colors.white,
               activeColor: Colors.blue,
               value: controller.getProduct.verified,
               title: const Text('Verificado'),
-              subtitle: const Text('Se verifica que el producto es real'),
+              subtitle: const Text('Se verifica que el producto es real'), 
+              secondary: const Icon(Icons.verified_outlined),
               onChanged: (value) {
                 if (controller.getEditModerator) {
                   if (!controller.getLoadingData) {
@@ -1206,6 +1243,7 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
               value: controller.getProduct.outstanding,
               title: const Text('Detacado'),
               subtitle: const Text('Se visualiza en productos sugeridos'),
+              secondary: const Icon(Icons.star_border_purple500_outlined),
               onChanged: (value) {
                 if (!controller.getLoadingData) {
                   
@@ -1222,14 +1260,15 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
               child: Row(
                 children: [
                   // text : cantidad de comercios que tienen el producto
-                  const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Comercios '),
-                      Opacity(opacity: 0.4,child: Text('Cantidad que tienen el producto')),
-                    ],
-                  ),
-                  const Spacer(),
+                  const Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Comercios '),
+                        Opacity(opacity: 0.4,child: Text('Negocios que siguen este producto',overflow: TextOverflow.ellipsis,)),
+                      ],
+                    ),
+                  ), 
                   // textButtons
                   Row(
                     mainAxisSize: MainAxisSize.min,
@@ -1252,7 +1291,7 @@ class _OptionsModeratorsWidgetState extends State<OptionsModeratorsWidget> {
                 ],
               ),
             ),
-            const SizedBox(height:20),
+            const SizedBox(height:50),
             // button : eliminar documento
             controller.getLoadingData || !controller.getEditModerator
                 ? Container()

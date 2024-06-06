@@ -705,10 +705,7 @@ class HomeController extends GetxController {
   }
 
   void readProductsCatalogue({required String idAccount}) {
-
-    // stream : obtenemos los obj(productos) del catalogo de la cuenta del negocio
-    //Stream<QuerySnapshot<Map<String, dynamic>>> streamSubscription = Database.readProductsCatalogueStream(id: idAccount);
-    
+ 
     // future : obtenemos los productos del catálogo una sola ves
     CollectionReference referenceCollectionCatalogue = Database.refFirestoreCatalogueProduct(idAccount: idAccount); 
     referenceCollectionCatalogue.get().then((value) {
@@ -914,23 +911,22 @@ class HomeController extends GetxController {
     });
   }
 
-  Future<void> categoryDelete({required String idCategory}) async =>
-      await Database.refFirestoreCategory(
-              idAccount: getProfileAccountSelected.id)
-          .doc(idCategory)
-          .delete();
+  Future<void> categoryDelete({required String idCategory}) async => await Database.refFirestoreCategory(idAccount: getProfileAccountSelected.id).doc(idCategory).delete();
   Future<void> categoryUpdate({required Category categoria}) async {
     // refactorizamos el nombre de la cátegoria
-    String name = categoria.name.substring(0, 1).toUpperCase() +
-        categoria.name.substring(1);
+    String name = categoria.name.substring(0, 1).toUpperCase() + categoria.name.substring(1);
     categoria.name = name;
     // ref
-    var documentReferencer =
-        Database.refFirestoreCategory(idAccount: getProfileAccountSelected.id)
-            .doc(categoria.id);
+    var documentReferencer = Database.refFirestoreCategory(idAccount: getProfileAccountSelected.id).doc(categoria.id);
     // Actualizamos los datos
-    documentReferencer.set(
-        Map<String, dynamic>.from(categoria.toJson()), SetOptions(merge: true));
+    documentReferencer.set(Map<String, dynamic>.from(categoria.toJson()), SetOptions(merge: true));
+  }
+  Future<void> providerDelete({required String idProvider}) async => await Database.refFirestoreProvider(idAccount: getProfileAccountSelected.id).doc(idProvider).delete();
+  Future<void> providerSave({required Provider provider}) async {
+    // firestore : reference
+    var documentReferencer = Database.refFirestoreProvider(idAccount: getProfileAccountSelected.id).doc(provider.id);
+    // firestore : Actualizamos los datos
+    documentReferencer.set(Map<String, dynamic>.from(provider.toJson()),SetOptions(merge: true));
   }
 
   void addProductToCatalogue({required ProductCatalogue product,required isProductNew}) async {

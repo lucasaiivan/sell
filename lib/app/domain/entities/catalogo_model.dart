@@ -12,7 +12,7 @@ class Product {
   String code = ""; // codigo del producto
   // valores de comunidad
   int followers = 0; // seguidores
-  bool outstanding = false; // producto destacado
+  bool favorite = false; // producto destacado
   bool verified = false; // estado de verificación  al un moderador
   bool reviewed = false; // estado de revisado por un moderador
   Timestamp creation =Timestamp.now(); // Marca de tiempo ( hora en que se creo el producto )
@@ -28,7 +28,7 @@ class Product {
     this.idUserUpgrade = '',
     this.verified = false,
     this.reviewed = false,
-    this.outstanding = false,
+    this.favorite = false,
     this.idMark = "",
     this.nameMark = '',
     this.imageMark='',
@@ -46,7 +46,7 @@ class Product {
         'idUserUpgrade': idUserUpgrade,
         "verified": verified,
         'reviewed' : reviewed,
-        "outstanding": outstanding,
+        "favorite": favorite,
         "idMark": idMark,
         'nameMark': nameMark,
         'imageMark':imageMark,
@@ -63,7 +63,7 @@ class Product {
         'idUserUpgrade': idUserUpgrade,
         "verified": verified,
         'reviewed' : reviewed,
-        "outstanding": outstanding, 
+        "favorite": favorite, 
         "idMark": idMark,
         'nameMark': nameMark,
         'imageMark':imageMark,
@@ -82,7 +82,7 @@ class Product {
       idUserUpgrade: data.containsKey('idUserUpgrade')? data['idUserUpgrade'] : '',
       verified: data.containsKey('verified')? data['verified']: false,
       reviewed: data.containsKey('reviewed')? data['reviewed']: false,
-      outstanding: data.containsKey('outstanding')? data['outstanding'] : false,
+      favorite: data.containsKey('favorite')? data['favorite'] : false,
       idMark: data.containsKey('idMark') ? data['idMark'] : data.containsKey('id_marca') ?data['id_marca'] :'',
       nameMark: data.containsKey('nameMark') ? data['nameMark'] : '',
       imageMark: data.containsKey('imageMark') ? data['imageMark'] : '',
@@ -104,7 +104,7 @@ class Product {
     idUserUpgrade = data['idUserUpgrade'] ?? '';
     verified = data.containsKey('verified')? data['verified']: data['verificado'] ?? false;
     reviewed = data.containsKey('reviewed')? data['reviewed']: data['revisado'] ?? false;
-    outstanding = data['outstanding'] ?? false;
+    favorite = data['favorite'] ?? false;
     idMark =data.containsKey('idMark') ? data['idMark'] : data['id_marca'] ?? '';
     nameMark = data['nameMark'] ?? '';
     imageMark = data['imageMark'] ?? '';
@@ -123,7 +123,7 @@ class Product {
     productCatalogue.image = image;
     productCatalogue.verified = verified;
     productCatalogue.reviewed = reviewed;
-    productCatalogue.outstanding = outstanding;
+    productCatalogue.outstanding = favorite;
     productCatalogue.idMark = idMark;
     productCatalogue.nameMark = nameMark;
     productCatalogue.imageMark = imageMark;
@@ -477,7 +477,7 @@ class ProductCatalogue {
     productoDefault.image = image;
     productoDefault.verified = verified;
     productoDefault.reviewed = reviewed;
-    productoDefault.outstanding = outstanding;
+    productoDefault.favorite = outstanding;
     productoDefault.idMark =  idMark;
     productoDefault.nameMark =  nameMark;
     productoDefault.imageMark = imageMark;
@@ -495,7 +495,7 @@ class ProductCatalogue {
     image = product.image;
     verified = product.verified;
     reviewed = product.verified;
-    outstanding = product.outstanding;
+    outstanding = product.favorite;
     idMark = product.idMark;
     nameMark = product.nameMark;
     imageMark = product.imageMark;

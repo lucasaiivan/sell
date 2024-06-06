@@ -61,6 +61,16 @@ class ModeratorController extends GetxController {
   final RxString filterText = 'Filtrar'.obs;
   set setFilterText(String value) => filterText.value = value;
   String get getFilterText => filterText.value;
+  // lista de id (correo) de los que actualizaron productos
+  final Map<String, int> idUserUpdate = <String, int>{};
+  Map<String, int> get getIdUserUpdate => idUserUpdate;
+  void addIdUserUpdate({required String correo}) {
+    if (idUserUpdate.containsKey(correo)) {
+      idUserUpdate[correo] = idUserUpdate[correo]! + 1;
+    } else {
+      idUserUpdate[correo] = 1;
+    } 
+  }
   // lista de id (correo) de creadores de productos 
   final Map<String, int> idUserCreation = <String, int>{}; 
   Map<String, int> get getIdUserCreation => idUserCreation;
@@ -89,6 +99,7 @@ class ModeratorController extends GetxController {
   int get totalReviewedProducts => products.where((element) => element.reviewed).length;
   int get totalNotReviewedProducts => products.where((element) => !element.reviewed && !element.verified).length;
   int get totalProductsNoData => products.where((element) => element.code == '' || element.idMark == '' || element.description == '' || element.image == '' ).length;
+  int get totalProductsFavorite => products.where((element) => element.favorite).length;
   Product? getProduct({required String id}) { 
     // description : obtenemos un producto por su id
     for (var element in products) {
@@ -109,6 +120,16 @@ class ModeratorController extends GetxController {
     return count;
     
   }
+  String getNameMark({required String id}) {
+    // description : obtenemos el nombre de la marca por su id
+    for (var element in getMarks) {
+      if (element.id == id) {
+        return element.name;
+      }
+    }
+    return '';
+  }
+  
   // DATA SOURCE
   void loadDB() {
     // default values
@@ -129,8 +150,13 @@ class ModeratorController extends GetxController {
           if(product.idUserCreation!=''){
             addIdUserCreations(correo: product.idUserCreation);
           }
+          // add : agregamos los id de los que actualizaron productos
+          if(product.idUserUpgrade!=''){
+            addIdUserUpdate(correo: product.idUserUpgrade);
+          }
         } catch (e) {}
       } 
+      
       setLoading = false; 
       filterProducts();
     });
@@ -171,7 +197,7 @@ class ModeratorController extends GetxController {
   }
   
   // FUNCTION  
-  void filterProducts({bool? verified,bool?reviewed,String? idUserCreator,bool? noData}) {
+  void filterProducts({bool? verified,bool?reviewed,String? idUserCreator,String? idUserUpdate,bool? noData,bool? favorite}) {
     // description : filtramos la lista de productos con los parametros dados
     // advertencia : solo se puede filtrar por un parametro a la vez 
     
@@ -183,32 +209,44 @@ class ModeratorController extends GetxController {
     viewProducts =true;
     getProductsFiltered.clear();
     
-    if (verified==null && idUserCreator==null && noData==null && reviewed==null) { 
+    if (verified==null && idUserCreator==null && idUserUpdate==null && noData==null && reviewed==null && favorite==null) { 
       // add : agregamos todos los productos
       newList.addAll(getProducts);  
     } else { 
       // add : agregamos los productos filtrados
       for (var element in getProducts) {
         // verified
-        if ( verified != null &&  idUserCreator==null && noData==null && reviewed==null) {
+        if ( verified != null &&  idUserCreator==null && noData==null && reviewed==null && idUserUpdate==null && favorite==null) {
           if (element.verified == verified) {
             newList.add(element); 
           } 
         }
         // idUserCreator
-        if (idUserCreator != null) {
+        if (idUserCreator != null && verified == null && noData == null && reviewed == null && idUserUpdate == null && favorite==null) {
           if (element.idUserCreation == idUserCreator) {
             newList.add(element); 
           }
         }
+        // idUserUpdate
+        if (idUserUpdate != null && verified == null && noData == null && reviewed == null && idUserCreator == null && favorite==null ) {
+          if (element.idUserUpgrade == idUserUpdate) {
+            newList.add(element); 
+          }
+        }
         // noData
-        if (noData != null) {
+        if (noData != null && verified == null && idUserCreator == null && reviewed == null && idUserUpdate == null && favorite==null ) {
           if (element.code == '' || element.idMark == '' || element.description == '' || element.image == '' ) {
             newList.add(element); 
           }
         }
-        // reviewed
-        if (reviewed != null && verified != null && idUserCreator== null && noData == null  ) {
+        // favorite : si es un producto destacado
+        if (favorite != null && verified == null && idUserCreator == null && noData == null && reviewed == null && idUserUpdate == null) {
+          if (element.favorite == favorite) {
+            newList.add(element); 
+          }
+        }
+        // reviewed : si esta revisado
+        if (reviewed != null && verified != null && idUserCreator == null && noData == null && idUserUpdate == null && favorite==null) {
           // conditiom : si esta revisado y no verificado
           if ( element.reviewed == reviewed && element.verified == false) {
             newList.add(element);
@@ -233,6 +271,8 @@ class ModeratorController extends GetxController {
       loadReports();
     });
   }
+  
+  // FUCTION MODERATOR //
   void createDbBackup() {
     // description : creamos una copia de seguridad de un producto
     for (var element in getProducts) {
@@ -245,27 +285,18 @@ class ModeratorController extends GetxController {
       Database.refFirestoreBrandsBackup().doc(element.id).set(element.toJson(), SetOptions(merge: true));
     }
   }
-  /* void refactorDB() {
+  void refactorDB() {
     // description : volvemos a actualizar cada producto en la base de datos con los mismo datos actuales
     for (var element in getProducts) {
       // actualizamos el producto nombre de la marca 
-      if(element.idUserCreation==''){ 
-        element.idUserCreation = 'logica.booleana.2019@gmail.com';
-
+      if(element.idMark==''){ 
+        element.idMark = 'other'; 
+        element.verified = false;
       }
       // firebase : actualizamos el producto
       Database.refFirestoreProductPublic().doc(element.id).set(element.toJson(), SetOptions(merge: true));
     }
   }
-  String getNameMark({required String id}) {
-    // description : obtenemos el nombre de la marca por su id
-    for (var element in getMarks) {
-      if (element.id == id) {
-        return element.name;
-      }
-    }
-    return '';
-  }  */
   
   // DIALOG
   void showSeachDialog() {
@@ -283,31 +314,7 @@ class ModeratorController extends GetxController {
       },
     );
   }
-  void showSeachMarks({required BuildContext context}){
 
-    // buscar cátegoria
-
-    // var
-    Color colorAccent = Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
-
-
-    showSearch(
-      context: context,
-      delegate: SearchPage<Mark>(
-        searchStyle: TextStyle(color: colorAccent),
-        barTheme: Get.theme.copyWith(hintColor: colorAccent, highlightColor: colorAccent,inputDecorationTheme: const InputDecorationTheme(filled: false)),
-        items: getMarks,
-        searchLabel: 'Buscar marca',
-        suggestion: const Center(child: Text('ej. Miller')),
-        failure: const Center(child: Text('No se encontro :(')),
-        filter: (product) => [product.name,product.description],
-        builder: (mark) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[
-          ModeratorView().listTileBrand(item: mark),
-          const Divider(),
-          ]),
-      ),
-    );
-  }
   // NAVIGATION
   void goToProductEdit(Product product) { 
     // item

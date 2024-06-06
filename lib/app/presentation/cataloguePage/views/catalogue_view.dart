@@ -139,8 +139,7 @@ class CataloguePage extends StatelessWidget {
               ],
             ),
             backgroundColor: Get.theme.colorScheme.secondary.withOpacity(0.1),
-          ), 
-          // chip : cantidad de productos con stock incluido
+          ),  
           // conditiom : comprobar subscripcion premium
           !homeController.getIsSubscribedPremium?const SizedBox():
           Chip(  
@@ -608,7 +607,9 @@ class CataloguePage extends StatelessWidget {
   }
   // menu options
   Widget dropdownButtonSupplier({required Provider supplier}) {
-    final CataloguePageController controller = Get.find();
+    
+    // controllers
+    final HomeController homeController = Get.find();
 
     return DropdownButton<String>(
       icon: const Icon(Icons.more_vert),
@@ -637,7 +638,7 @@ class CataloguePage extends StatelessWidget {
               middleText: '¿Desea continuar eliminando este proveedor?',
               confirm: TextButton.icon(
                   onPressed: () async {
-                    controller.providerDelete(idSupplier: supplier.id);
+                    homeController.providerDelete(idProvider: supplier.id);
                     Get.back();
                   },
                   icon: const Icon(Icons.check),
@@ -655,7 +656,9 @@ class CataloguePage extends StatelessWidget {
     );
   }
   Widget dropdownButtonCategory({required Category categoria}) {
-    final CataloguePageController controller = Get.find();
+    
+    // controllers 
+    final HomeController homeController = Get.find();
 
     return DropdownButton<String>(
       icon: const Icon(Icons.more_vert),
@@ -684,7 +687,7 @@ class CataloguePage extends StatelessWidget {
               middleText: '¿Desea continuar eliminando esta categoría?',
               confirm: TextButton.icon(
                   onPressed: () async {
-                    controller.categoryDelete(idCategory: categoria.id);
+                    homeController.categoryDelete(idCategory: categoria.id);
                     Get.back();
                   },
                   icon: const Icon(Icons.clear_rounded),
@@ -702,7 +705,7 @@ class CataloguePage extends StatelessWidget {
   showDialogSetProvider({required Provider supplier}) async {
     
     // controllers
-    final CataloguePageController cataloguePageController = Get.find();
+    final HomeController homeController = Get.find();
     TextEditingController textEditingController = TextEditingController(text: supplier.name);
     // var
     bool loadSave = false; 
@@ -728,12 +731,12 @@ class CataloguePage extends StatelessWidget {
       actions: <Widget>[
         TextButton(child: const Text('CANCEL'),onPressed: () {Get.back();}),
         TextButton(
-            child: loadSave == false?const Text('SAVE'):const CircularProgressIndicator(),
+            child: loadSave == false?const Text('GUARDAR'):const CircularProgressIndicator(),
             onPressed: () async {
               if (loadSave == false) {
                 loadSave = true;
                 supplier.name = textEditingController.text;
-                await cataloguePageController.providerSave(provider: supplier);
+                await homeController.providerSave(provider: supplier);
                 Get.back();
               }
             })
@@ -741,11 +744,13 @@ class CataloguePage extends StatelessWidget {
     ));
   }
   showDialogSetCategoria({required Category categoria}) async {
-    final CataloguePageController controller = Get.find();
+
+    // controllers
+    final HomeController homeController = Get.find();
+    TextEditingController textEditingController = TextEditingController(text: categoria.name);
+    // var
     bool loadSave = false;
     bool newProduct = false;
-    TextEditingController textEditingController =
-        TextEditingController(text: categoria.name);
 
     if (categoria.id == '') {
       newProduct = true;
@@ -775,11 +780,11 @@ class CataloguePage extends StatelessWidget {
                 // set
                 categoria.name = textEditingController.text;
                 loadSave = true;
-                controller.update();
+                homeController.update();
                 // save
-                await controller.categoryUpdate(categoria: categoria).whenComplete(() => Get.back()).catchError((error, stackTrace) {
+                await homeController.categoryUpdate(categoria: categoria).whenComplete(() => Get.back()).catchError((error, stackTrace) {
                   loadSave = false;
-                  controller.update();
+                  homeController.update();
                 });
               }
             })
