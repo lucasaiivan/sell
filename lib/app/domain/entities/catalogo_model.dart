@@ -147,6 +147,8 @@ class ProductCatalogue {
   String code = "";
   Timestamp documentCreation =Timestamp.now(); // Marca de tiempo ( hora en que se creo el producto publico )
   Timestamp documentUpgrade =Timestamp.now();// Marca de tiempo ( hora en que se actualizo el producto publico )
+  String documentIdCreation = ""; // ID del usuaario de creacion
+  String documentIdUpgrade = ""; // ID del usuario de actualizacion
   
   // variables del producto global
   bool verified = false; // estado de verificación por un moderador
@@ -205,6 +207,8 @@ class ProductCatalogue {
     required this.upgrade,
     required this.documentCreation,
     required this.documentUpgrade, 
+    this.documentIdCreation = "",
+    this.documentIdUpgrade = "",
     this.sales = 0,
     this.salePrice = 0.0,
     this.purchasePrice = 0.0,
@@ -239,6 +243,8 @@ class ProductCatalogue {
     Timestamp ? upgrade,
     Timestamp? documentCreation,
     Timestamp? documentUpgrade,
+    String? documentIdCreation,
+    String? documentIdUpgrade,
     int? sales,
     double? salePrice,
     double? purchasePrice,
@@ -273,6 +279,8 @@ class ProductCatalogue {
     upgrade: upgrade ?? this.upgrade,
     documentCreation: documentCreation ?? this.documentCreation,
     documentUpgrade: documentUpgrade ?? this.documentUpgrade,
+    documentIdCreation: documentIdCreation ?? this.documentIdCreation,
+    documentIdUpgrade: documentIdUpgrade ?? this.documentIdUpgrade,
     sales: sales ?? this.sales,
     salePrice: salePrice ?? this.salePrice,
     purchasePrice: purchasePrice ?? this.purchasePrice,
@@ -310,6 +318,8 @@ class ProductCatalogue {
       creation: data.containsKey('creation')? data['creation']: data['timestamp_creation'] ?? Timestamp.now(),
       documentCreation: data.containsKey('documentCreation')? data['documentCreation']: data['documentCreation'] ?? Timestamp.now(),
       documentUpgrade: data.containsKey('documentUpgrade')? data['documentUpgrade']: data['documentUpgrade'] ?? Timestamp.now(),
+      documentIdCreation: data.containsKey('documentIdCreation')? data['documentIdCreation']: data['documentIdCreation'] ?? '',
+      documentIdUpgrade: data.containsKey('documentIdUpgrade')? data['documentIdUpgrade']: data['documentIdUpgrade'] ?? '',
       // valores de la cuenta
       salePrice: data.containsKey('salePrice') ? data['salePrice'].toDouble()??0.0.toDouble() :0.0.toDouble(),
       purchasePrice: data.containsKey('purchasePrice') ? data['purchasePrice'].toDouble()??0.0.toDouble():0.0.toDouble(),
@@ -351,6 +361,8 @@ class ProductCatalogue {
       creation: data.containsKey('creation')? Timestamp.fromMillisecondsSinceEpoch(data['creation']): Timestamp.fromMillisecondsSinceEpoch(data['timestamp_creation']),
       documentCreation: data.containsKey('documentCreation')? Timestamp.fromMillisecondsSinceEpoch(data['documentCreation']): Timestamp.fromMillisecondsSinceEpoch(data['documentCreation']),
       documentUpgrade: data.containsKey('documentUpgrade')? Timestamp.fromMillisecondsSinceEpoch(data['documentUpgrade']): Timestamp.fromMillisecondsSinceEpoch(data['documentUpgrade']),
+      documentIdCreation: data.containsKey('documentIdCreation')? data['documentIdCreation']: data['documentIdCreation'] ?? '',
+      documentIdUpgrade: data.containsKey('documentIdUpgrade')? data['documentIdUpgrade']: data['documentIdUpgrade'] ?? '',
       // valores de la cuenta
       salePrice: data.containsKey('salePrice') ? data['salePrice'].toDouble()??0.0.toDouble() :0.0.toDouble(),
       purchasePrice: data.containsKey('purchasePrice') ? data['purchasePrice'].toDouble()??0.0.toDouble():0.0.toDouble(),
@@ -391,6 +403,8 @@ class ProductCatalogue {
         "upgrade": upgrade.millisecondsSinceEpoch, // convertimos a milisegundos
         "documentCreation": documentCreation.millisecondsSinceEpoch, // convertimos a milisegundos
         "documentUpgrade": documentUpgrade.millisecondsSinceEpoch, // convertimos a milisegundos
+        'documentIdCreation': documentIdCreation,
+        'documentIdUpgrade': documentIdUpgrade,
         "currencySign": currencySign,
         "quantity": quantity,
         "stock": stock,
@@ -425,6 +439,8 @@ class ProductCatalogue {
         "upgrade": upgrade,
         "documentCreation": documentCreation,
         "documentUpgrade": documentUpgrade,
+        'documentIdCreation': documentIdCreation,
+        'documentIdUpgrade': documentIdUpgrade,
         "currencySign": currencySign,
         "quantity": quantity,
         "stock": stock,
@@ -460,6 +476,8 @@ class ProductCatalogue {
       upgrade: Timestamp.fromMillisecondsSinceEpoch(data['upgrade']),
       documentCreation: Timestamp.fromMillisecondsSinceEpoch(data['documentCreation']),
       documentUpgrade: Timestamp.fromMillisecondsSinceEpoch(data['documentUpgrade']),
+      documentIdCreation: data['documentIdCreation'] ?? '',
+      documentIdUpgrade: data['documentIdUpgrade'] ?? '',
       quantityStock: data['quantityStock'] ?? 0,
       stock: data['stock'] ?? false,
       alertStock: data['alertStock'] ?? 5,
@@ -484,6 +502,10 @@ class ProductCatalogue {
     productoDefault.description =  description;
     productoDefault.code = code;  
     productoDefault.upgrade = documentUpgrade;
+    productoDefault.creation = documentCreation;
+    productoDefault.idUserCreation = documentIdCreation;
+    productoDefault.idUserUpgrade = documentIdUpgrade;
+
     return productoDefault;
   }
 
@@ -503,6 +525,9 @@ class ProductCatalogue {
     code = product.code;
     documentCreation = product.creation;
     documentUpgrade = product.upgrade;
+    documentIdCreation = product.idUserCreation;
+    documentIdUpgrade = product.idUserUpgrade;
+    
     return this;
   }
   

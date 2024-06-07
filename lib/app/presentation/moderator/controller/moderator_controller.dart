@@ -23,6 +23,9 @@ class ModeratorController extends GetxController {
   final RxBool loading = true.obs;
   set setLoading(bool value) => loading.value = value;
   bool get getLoading => loading.value;
+  // datos de usuario filtrado
+  Map<String, dynamic> userFilter = {'title':'Usuario actual','id':''};
+
   // lista de productos filtrados
   bool viewProducts = true;
   final RxList<Product> productsFiltered = <Product>[].obs;
@@ -61,26 +64,9 @@ class ModeratorController extends GetxController {
   final RxString filterText = 'Filtrar'.obs;
   set setFilterText(String value) => filterText.value = value;
   String get getFilterText => filterText.value;
-  // lista de id (correo) de los que actualizaron productos
-  final Map<String, int> idUserUpdate = <String, int>{};
-  Map<String, int> get getIdUserUpdate => idUserUpdate;
-  void addIdUserUpdate({required String correo}) {
-    if (idUserUpdate.containsKey(correo)) {
-      idUserUpdate[correo] = idUserUpdate[correo]! + 1;
-    } else {
-      idUserUpdate[correo] = 1;
-    } 
-  }
-  // lista de id (correo) de creadores de productos 
-  final Map<String, int> idUserCreation = <String, int>{}; 
-  Map<String, int> get getIdUserCreation => idUserCreation;
-  void addIdUserCreations({required String correo}) {
-    if (idUserCreation.containsKey(correo)) {
-      idUserCreation[correo] = idUserCreation[correo]! + 1;
-    } else {
-      idUserCreation[correo] = 1;
-    } 
-  }
+  // lista de id (correo) de los crearon y actualizaron productos
+  final Map<String,String> usersMap = {};  
+     
   // lista de marcas de los productos
   bool viewBrands = false;
   final List<Mark> marks = <Mark>[];
@@ -100,6 +86,97 @@ class ModeratorController extends GetxController {
   int get totalNotReviewedProducts => products.where((element) => !element.reviewed && !element.verified).length;
   int get totalProductsNoData => products.where((element) => element.code == '' || element.idMark == '' || element.description == '' || element.image == '' ).length;
   int get totalProductsFavorite => products.where((element) => element.favorite).length;
+  int totalProductsCreatedTodayByUser({required String id}){
+    // description : obtenemos el numero de productos creados en el dia actual por el usuario (admin)
+    // var
+    int count = 0; 
+    // Obtenemos la fecha actual del dispositivo
+    DateTime now = Timestamp.now().toDate();
+    for (var element in products) {
+      if (element.idUserCreation == id) {
+        // var
+        bool isToday = element.creation.toDate().year == now.year && element.creation.toDate().month == now.month && element.creation.toDate().day == now.day;
+        if (isToday) {
+          count++;
+        }
+      }
+    }
+    return count;
+  }
+  int totalProductsUpdateTodayByUser({required String id}){
+    // description : obtenemos el numero de productos actualizados en el dia actual por el usuario (admin)
+    // var
+    int count = 0; 
+    // formateamos la marca de tiempo actual 
+    DateTime now = Timestamp.now().toDate(); 
+
+    for (var element in products) {
+      if (element.idUserUpgrade ==  id) {
+        // var   
+        bool isToday = element.upgrade.toDate().year == now.year && element.upgrade.toDate().month == now.month && element.upgrade.toDate().day == now.day;
+        if ( isToday) {
+          count++;
+        }
+      }
+    }
+    return count;
+  }
+  int totalProductsCreatedCurrentMonthByUser({required String id}){
+    // description : obtenemos el numero de productos creados en el mes actual
+    // var
+    int count = 0; 
+    // Obtenemos la fecha actual del dispositivo
+    DateTime now = Timestamp.now().toDate();
+    for (var element in products) {
+      if (element.idUserCreation == id) {
+        // var
+        bool isCurrentMonth = element.creation.toDate().year == now.year && element.creation.toDate().month == now.month;
+        if (isCurrentMonth) {
+          count++;
+        }
+      }
+    }
+    return count;
+  }
+  int totalProductsUpdateCurrentMonthByUser({required String id}){
+    // description : obtenemos el numero de productos actualizados en el mes actual
+    // var
+    int count = 0; 
+    // Obtenemos la fecha actual del dispositivo
+    DateTime now = Timestamp.now().toDate();
+    for (var element in products) {
+      if (element.idUserUpgrade == id) {
+        // var
+        bool isCurrentMonth = element.upgrade.toDate().year == now.year && element.upgrade.toDate().month == now.month;
+        if (isCurrentMonth) {
+          count++;
+        }
+      }
+    }
+    return count;
+  }
+  int totalProductsCreatedByUser({required String id}){
+    // description : obtenemos el numero de productos creados por el usuario (admin) 
+    // var
+    int count = 0; 
+    for (var element in products) {
+      if (element.idUserCreation == id) {
+        count++;
+      }
+    }
+    return count;
+  }
+  int totalProductsUpdateByUser({required String id}){
+    // description : obtenemos el numero de productos actualizados por el usuario (admin) 
+    // var
+    int count = 0; 
+    for (var element in products) {
+      if (element.idUserUpgrade == id) {
+        count++;
+      }
+    }
+    return count;
+  }
   Product? getProduct({required String id}) { 
     // description : obtenemos un producto por su id
     for (var element in products) {
@@ -146,18 +223,21 @@ class ModeratorController extends GetxController {
           }
           // add : agregamos los productos a la lista total
           products.add(product);  
-          // add : agregamos los id de los creadores de productos
-          if(product.idUserCreation!=''){
-            addIdUserCreations(correo: product.idUserCreation);
+          // obtenemos el id del usuario que creo y actualizo el producto
+          if(product.idUserCreation!='' ){
+            usersMap [product.idUserCreation] = product.idUserCreation;
           }
-          // add : agregamos los id de los que actualizaron productos
-          if(product.idUserUpgrade!=''){
-            addIdUserUpdate(correo: product.idUserUpgrade);
+          if(product.idUserUpgrade!='' ){
+            usersMap [product.idUserUpgrade] = product.idUserUpgrade;
           }
+
         } catch (e) {}
       } 
-      
+
+      // obtenemos los datos del usuario actual por defecto
+      loadFilteredProductsByUser(idUser: userFilter['id']); 
       setLoading = false; 
+      // filtramos los productos
       filterProducts();
     });
   }
@@ -195,7 +275,17 @@ class ModeratorController extends GetxController {
       update();
     });
   }
-  
+  void loadFilteredProductsByUser({ String idUser = ''}) {
+    // description : filtramos los datos del usuario seleccionado o por defecto el usuario actual
+
+    // comprobamos si el usuario es el actual
+    if (idUser == '' || idUser == homeController.getProfileAdminUser.email) {
+      userFilter = {'title':'Usuario actual','id': homeController.getProfileAdminUser.email};
+    }else{
+      userFilter = {'title':'Usuario selecionado','id': idUser};
+    }
+
+  }
   // FUNCTION  
   void filterProducts({bool? verified,bool?reviewed,String? idUserCreator,String? idUserUpdate,bool? noData,bool? favorite}) {
     // description : filtramos la lista de productos con los parametros dados
@@ -208,6 +298,9 @@ class ModeratorController extends GetxController {
     viewBrands = false;
     viewProducts =true;
     getProductsFiltered.clear();
+    if(idUserCreator==null && idUserUpdate==null  ){
+      loadFilteredProductsByUser();
+    }
     
     if (verified==null && idUserCreator==null && idUserUpdate==null && noData==null && reviewed==null && favorite==null) { 
       // add : agregamos todos los productos
@@ -221,15 +314,21 @@ class ModeratorController extends GetxController {
             newList.add(element); 
           } 
         }
-        // idUserCreator
+        // usuarios creadores
         if (idUserCreator != null && verified == null && noData == null && reviewed == null && idUserUpdate == null && favorite==null) {
           if (element.idUserCreation == idUserCreator) {
+            newList.add(element);  
+          }
+        }
+        //  usuarios actualizadores
+        if (idUserUpdate != null && verified == null && noData == null && reviewed == null && idUserCreator == null && favorite==null ) {
+          if (element.idUserUpgrade == idUserUpdate) {
             newList.add(element); 
           }
         }
-        // idUserUpdate
-        if (idUserUpdate != null && verified == null && noData == null && reviewed == null && idUserCreator == null && favorite==null ) {
-          if (element.idUserUpgrade == idUserUpdate) {
+        // usuarios creadores y actualizadores
+        if (idUserCreator != null && idUserUpdate != null && verified == null && noData == null && reviewed == null && favorite==null) {
+          if (element.idUserCreation == idUserCreator || element.idUserUpgrade == idUserUpdate) {
             newList.add(element); 
           }
         }

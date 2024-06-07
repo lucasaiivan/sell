@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:search_page/search_page.dart';
+import 'package:sell/app/presentation/home/controller/home_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart'; 
 import '../../../core/utils/dynamicTheme_lb.dart';
@@ -29,7 +30,7 @@ class _ModeratorViewState extends State<ModeratorView> {
   
   // controllers
   final ScrollController _scrollController = ScrollController();
-
+  // var
   bool _showScrollButton = false;
 
   @override
@@ -68,6 +69,8 @@ class _ModeratorViewState extends State<ModeratorView> {
         colorBackground: Theme.of(context).colorScheme.outline.withOpacity(0.1),
         colorAccent: Theme.of(context).textTheme.bodyLarge!.color?.withOpacity(0.7),
         ),
+    // barra de carga 
+    bottom: controller.getLoading?const PreferredSize(preferredSize: Size.fromHeight(4), child: LinearProgressIndicator()):viewUserDetails,
     actions: [     
       // buttons : filter list
       PopupMenuButton( 
@@ -76,48 +79,48 @@ class _ModeratorViewState extends State<ModeratorView> {
           text: stringFormatLimit(input: controller.getFilterText),
           iconTrailing: Icons.filter_list,  
         ), 
-          onSelected: (selectedValue){
-            // swich
-            switch (selectedValue) {
-              case 'all':
-                controller.setFilterText = 'Todos';
-                controller.filterProducts();
-                break;
-              case 'verified':
-                controller.setFilterText = 'verificados';
-                controller.filterProducts(verified: true);
-                break;
-              case 'noVerified':
-                controller.setFilterText = 'No verificados';
-                controller.filterProducts(verified: false);
-                break;
-              case 'reports':
-                controller.setFilterText = 'Reportes';
-                controller.viewReports = true;
-                controller.update();
-                break;
-              case 'noData':
-                controller.setFilterText = 'Datos faltantes';
-                controller.filterProducts(noData: true);
-                break;
-              default: 
-            }
-            
-          },
-          itemBuilder: (BuildContext ctx) => [
-                const PopupMenuItem(value: 'all', child: Text('Mostrar todos')),
-                const PopupMenuItem(value: 'verified', child: Text('Verificados')),
-                const PopupMenuItem(value: 'noVerified', child: Text('Sin verificar')), 
-                const PopupMenuItem(value: 'noData', child: Text('Datos faltantes')), 
-                const PopupMenuItem(value: '', child: Divider()),
-                const PopupMenuItem(value: 'reports', child: Row(
-                  children: [
-                    Icon(Icons.report_gmailerrorred),
-                    SizedBox(width: 10),
-                    Text('Reportes de usuarios'),
-                  ],
-                )),
-              ]),
+        onSelected: (selectedValue){
+          // swich
+          switch (selectedValue) {
+            case 'all':
+              controller.setFilterText = 'Todos';
+              controller.filterProducts();
+              break;
+            case 'verified':
+              controller.setFilterText = 'verificados';
+              controller.filterProducts(verified: true);
+              break;
+            case 'noVerified':
+              controller.setFilterText = 'No verificados';
+              controller.filterProducts(verified: false);
+              break;
+            case 'reports':
+              controller.setFilterText = 'Reportes';
+              controller.viewReports = true;
+              controller.update();
+              break;
+            case 'noData':
+              controller.setFilterText = 'Datos faltantes';
+              controller.filterProducts(noData: true);
+              break;
+            default: 
+          }
+          
+        },
+        itemBuilder: (BuildContext ctx) => [
+              const PopupMenuItem(value: 'all', child: Text('Mostrar todos')),
+              const PopupMenuItem(value: 'verified', child: Text('Verificados')),
+              const PopupMenuItem(value: 'noVerified', child: Text('Sin verificar')), 
+              const PopupMenuItem(value: 'noData', child: Text('Datos faltantes')), 
+              const PopupMenuItem(value: '', child: Divider()),
+              const PopupMenuItem(value: 'reports', child: Row(
+                children: [
+                  Icon(Icons.report_gmailerrorred),
+                  SizedBox(width: 10),
+                  Text('Reportes de usuarios'),
+                ],
+              )),
+            ]),
     ], 
     );
   }
@@ -164,7 +167,7 @@ class _ModeratorViewState extends State<ModeratorView> {
           ),
           // chip : total de productos no verificados
           chipReport(
-            color: controller.totalUnverifiedProducts > 0 ? Colors.orange : Colors.blue,
+            color: controller.totalUnverifiedProducts > 0 ? Colors.orange : Colors.black,
             value: controller.totalUnverifiedProducts,
             description: 'No verificados',
             onTap: (){
@@ -174,7 +177,7 @@ class _ModeratorViewState extends State<ModeratorView> {
           ), 
           // chip : total de productos revisados sin verificar
           chipReport(
-            color: controller.totalReviewedProducts > 0 ? Colors.orange : Colors.blue,
+            color: controller.totalReviewedProducts > 0 ? Colors.orange : Colors.black,
             value: controller.totalReviewedProducts,
             description: 'Revisados',
             onTap: (){
@@ -194,7 +197,7 @@ class _ModeratorViewState extends State<ModeratorView> {
           ),
           // chip : total de productos sin algun dato
           chipReport(
-            color: controller.totalProductsNoData>0?Colors.orange:Colors.blue,
+            color: controller.totalProductsNoData>0?Colors.orange:Colors.black,
             value: controller.totalProductsNoData,
             description: 'Datos faltantes',
             onTap: (){
@@ -204,7 +207,7 @@ class _ModeratorViewState extends State<ModeratorView> {
           ), 
           // chip : total de reportes
           chipReport(
-            color: controller.getReports.isNotEmpty ? Colors.orange : Colors.blue,
+            color: controller.getReports.isNotEmpty ? Colors.orange : Colors.black,
             value: controller.getReports.length,
             description: 'Reportes',
             onTap: (){
@@ -228,39 +231,8 @@ class _ModeratorViewState extends State<ModeratorView> {
           ),
         ],
       ),
-    ); 
-    Widget wrapChipsFilterIdUserCreations = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // text 
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Row(
-            children: [
-              // text 
-              const Text('Filtrar usuario por productos', style: TextStyle(fontWeight: FontWeight.w400)),
-              const Spacer(),
-              // textButton : ver usuarios creadores
-              TextButton(
-                onPressed: ()=> showDialogUserSCreator(),
-                child: const Text('Creados'),
-              ),
-              // textButton : ver usuarios actualizadores
-              TextButton(
-                onPressed: ()=> showDialogUsersUpdate(),
-                child: const Text('Actualizados'),
-              ),
-            ],
-          ),
-        ), 
-      ],
-    );
-    Widget chipsDataView = Column(
-      children: [
-        wrapChipsInfo,
-        wrapChipsFilterIdUserCreations,
-      ],
-    );
+    );  
+    Widget chipsDataView = wrapChipsInfo;
     // condition : si esta cargando
     if(controller.getLoading){
       return const Center(child: CircularProgressIndicator());
@@ -394,32 +366,170 @@ class _ModeratorViewState extends State<ModeratorView> {
       ],
     );
   }
-
-  // WIDGETS COMPONENTS
-  Widget actionChipUser({required String name, required int value ,required bool filterCreator}){
-    // controlles 
-    final ModeratorController controller = Get.find<ModeratorController>(); 
-
-    return ActionChip(
-      onPressed: (){
-        controller.setFilterText = name;
-        if(filterCreator){controller.filterProducts(idUserCreator: name);}
-        else{controller.filterProducts(idUserUpdate: name);}
-        Get.back();
-      },
-      side: const BorderSide(color: Colors.transparent),
-      visualDensity: VisualDensity.compact, 
-      label: Row(
-        mainAxisSize: MainAxisSize.min,
+  PreferredSize get viewUserDetails{
+    // description : muestra informacion basica del usuario actual de la cuenta
+    // controllers  
+    final ModeratorController moderatorController = Get.find<ModeratorController>(); 
+    // return
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(85),
+      child: Column(
         children: [
-          // text : id del usuario
-          Flexible(child: Text( name,style: const TextStyle(fontWeight: FontWeight.bold))),
-          // text : cantidad de productos creados por el usuario
-          Text(' (${ Publications.getFormatAmount(value:value).toString()})',style: const TextStyle(fontWeight: FontWeight.bold),overflow: TextOverflow.ellipsis),
+          const Divider(height: 0,thickness:0.4),
+          Container(
+            width: double.infinity, 
+            padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 5),
+            child: Row( 
+              children: [
+                // view : datos del usaurio actual
+                Flexible(
+                  flex: 3,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // view : icon y nombre del usuario
+                      Opacity(
+                        opacity: 0.5,
+                        child: Row(
+                          children: [
+                            const Icon(Icons.admin_panel_settings_outlined,size:14),
+                            const SizedBox(width:3),
+                            Flexible(child: Text( moderatorController.userFilter['title'],style: const TextStyle(fontWeight: FontWeight.w400),maxLines: 1,overflow: TextOverflow.ellipsis)),
+                          ],
+                        ),
+                      ),
+                      // textButton : email del usuario
+                      TextButton(
+                        onPressed:  ()=> showDialogUserSCreator(),
+                        style: ButtonStyle(
+                          padding: WidgetStateProperty.all(const EdgeInsets.all(0)), 
+                          visualDensity: VisualDensity.compact,
+                        ),
+                        child: Text(moderatorController.userFilter['id'],style: const TextStyle(fontWeight: FontWeight.w300),maxLines: 1,overflow: TextOverflow.ellipsis),
+                      ), 
+                    ],
+                  ),
+                ),
+                const Spacer(flex:1),
+                // view : cantidad de productos creados y actualizados el dia de hoy y el mes actual 
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.max ,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    // view : datos del dia de hoy
+                    Row( 
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [ 
+                        const Text('Hoy',style: TextStyle(fontWeight: FontWeight.w200)),
+                        const SizedBox(width: 5),
+                        // chip : productos creados el dia de hoy
+                        chipDataPersonality(title: 'create',value: Publications.getFormatAmount(value: moderatorController.totalProductsCreatedTodayByUser(id: moderatorController.userFilter['id'])) ), 
+                        // chip : productos creados el mes actual
+                        chipDataPersonality(title: 'update',value: Publications.getFormatAmount(value: moderatorController.totalProductsUpdateTodayByUser(id: moderatorController.userFilter['id'])) ),
+                    
+                      ],
+                    ),
+                    // view : datos del mes actual
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        const Text('Este Mes',style: TextStyle(fontWeight: FontWeight.w200)),
+                        const SizedBox(width: 5),
+                        // chip : productos creados el dia de hoy
+                        chipDataPersonality(title: 'create',value: Publications.getFormatAmount(value: moderatorController.totalProductsCreatedCurrentMonthByUser(id: moderatorController.userFilter['id']))),
+                        // chip : productos creados el mes actual
+                        chipDataPersonality(title: 'update',value: Publications.getFormatAmount(value: moderatorController.totalProductsUpdateCurrentMonthByUser(id: moderatorController.userFilter['id'])) ),
+                      ],
+                    ),
+                    // view : datos totales
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        const Text('Total',style: TextStyle(fontWeight: FontWeight.w200)),
+                        const SizedBox(width: 5),
+                        // chip : productos creados el dia de hoy
+                        chipDataPersonality(title: 'create',value: Publications.getFormatAmount(value: moderatorController.totalProductsCreatedByUser(id: moderatorController.userFilter['id'])) ),
+                        // chip : productos creados el mes actual
+                        chipDataPersonality(title: 'update',value: Publications.getFormatAmount(value: moderatorController.totalProductsUpdateByUser(id: moderatorController.userFilter['id'])) ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 0,thickness:0.4),
         ],
       ),
-      backgroundColor: Get.theme.colorScheme.secondary.withOpacity(0.1),
     );
+
+     
+  }
+  // WIDGETS COMPONENTS
+  Widget chipDataPersonality({required String title,required String value, Color color = Colors.blueGrey}){
+    // description : chip con informacion personal
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal:4,vertical:0),
+      margin: const EdgeInsets.all(1.2),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Row(
+        children: [ 
+          Text(title,style: TextStyle(color: color,fontWeight: FontWeight.w300)),
+          const SizedBox(width:2),
+          Text(value,style: TextStyle(color: color,fontWeight: FontWeight.w400)),
+        ],
+      ),
+    
+    );
+  }
+  Widget actionChipUser({required String name, required int create ,required int updated ,required bool filterCreator}){
+
+    // controlles
+    final ModeratorController controller = Get.find<ModeratorController>();
+
+    return PopupMenuButton<String>( 
+      child: Container( 
+        padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 5),
+        margin: const EdgeInsets.symmetric(horizontal: 5,vertical: 2), 
+        decoration: BoxDecoration(
+          color: Colors.blue.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: Row( 
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // text : id del usuario
+            Flexible(fit:FlexFit.tight,child: Text( name,style: const TextStyle(fontWeight: FontWeight.bold),overflow: TextOverflow.ellipsis,maxLines: 1)),
+            // text : cantidad de productos creados por el usuario
+            Text(' (${ Publications.getFormatAmount(value:create).toString()}) (${ Publications.getFormatAmount(value:updated).toString()})',style: const TextStyle(fontWeight: FontWeight.bold),overflow: TextOverflow.ellipsis,maxLines: 1),
+          ],
+        ), 
+      ),
+      onSelected: (value) { 
+        if(value=='create'){ 
+          controller.filterProducts(idUserCreator: name);
+        }
+        if(value=='update'){
+          controller.filterProducts(idUserUpdate: name);
+        }
+        if(value=='all'){
+          controller.filterProducts(idUserCreator: name,idUserUpdate: name);
+        }  
+        controller.loadFilteredProductsByUser(idUser: name);
+        Get.back();
+      },
+      itemBuilder: (BuildContext context) {
+        return [
+          const PopupMenuItem(value: 'create', child: Text('Ver creados')), 
+          const PopupMenuItem(value: 'update', child: Text('Ver actualizados')),
+          const PopupMenuItem(value: 'all', child: Text('Ver todos')),
+        ];
+      },
+    ); 
   }
 
   Widget listTileProduct({required Product product}) {
@@ -700,20 +810,38 @@ class _ModeratorViewState extends State<ModeratorView> {
   void showDialogUserSCreator(){
     // controlles 
     final ModeratorController controller = Get.find<ModeratorController>(); 
+    final HomeController homeController = Get.find<HomeController>();
+    // var 
+    List ids = controller.usersMap.keys.toList();
+    // posicionar el usuario actual al inicio de la lista
+    ids.remove(homeController.getProfileAdminUser.email);
+    ids.insert(0,homeController.getProfileAdminUser.email);
     // dialog
     showDialog(
       context: Get.overlayContext!,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Productos creados'),
+          title: const Text('Usuarios'),
           content: SizedBox(
             width: double.maxFinite,
-            child: ListView.builder(
+            child: ListView.builder( 
               shrinkWrap: true, 
-              itemCount: controller.getIdUserCreation.keys.length,
+              itemCount: ids.length,
               itemBuilder: (BuildContext context, int index) {
-                String key = controller.getIdUserCreation.keys.elementAt(index);
-                return actionChipUser(filterCreator: true,name: key,value: controller.getIdUserCreation[key]!);
+                // var
+                String key = ids[index];
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    // text : 'usuario actual'
+                    key == homeController.getProfileAdminUser.email?const Text('Actual',style: TextStyle(fontWeight: FontWeight.w300,fontSize:12),textAlign: TextAlign.start,):Container(),
+                    // view : chip de usuario
+                    actionChipUser(filterCreator: true,name: key,create: controller.totalProductsCreatedByUser(id:key) ,updated: controller.totalProductsUpdateByUser(id:key)),
+                    key == homeController.getProfileAdminUser.email? const Divider():Container(),
+                  ],
+                );
               },
             ),
           ),
@@ -726,38 +854,7 @@ class _ModeratorViewState extends State<ModeratorView> {
         );
       },
     ); 
-  }
-  void showDialogUsersUpdate(){
-    // controlles 
-    final ModeratorController controller = Get.find<ModeratorController>(); 
-    // dialog
-    showDialog(
-      context: Get.overlayContext!,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Productos actualizados'),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: ListView.builder(
-              shrinkWrap: true, 
-              itemCount: controller.getIdUserUpdate.keys.length,
-              itemBuilder: (BuildContext context, int index) {
-                String key = controller.getIdUserUpdate.keys.elementAt(index);
-                return actionChipUser(filterCreator: false,name: key,value: controller.getIdUserUpdate[key]!);
-              },
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Get.back(),
-              child: const Text('Cerrar'),
-            ),
-          ],
-        );
-      },
-    ); 
-  
-  }
+  } 
   void showSeachMarks({required BuildContext context}){
     // description: muestra un dialogo de busqueda de marcas
 

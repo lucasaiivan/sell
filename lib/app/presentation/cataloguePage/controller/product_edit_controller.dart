@@ -401,6 +401,9 @@ class ControllerProductsEdit extends GetxController {
               // procede agregrar en la base de datos global de productos
               // TODO : delete release (getEditModerator)
               if ( getEditModerator || getProduct.local == false) { 
+                // set
+                getProduct.documentUpgrade = time;
+                // se guarda el producto en la base de datos global
                   setProductPublicFirestore( );
               }
               // condition : verifica si el producto es global publico
@@ -465,8 +468,8 @@ class ControllerProductsEdit extends GetxController {
 
     // valores
     Product product = getProduct.convertProductoDefault(); 
-    //  set : id del usuario que actualizo el documento
-    product.idUserUpgrade = homeController.getProfileAdminUser.email;
+    //  set
+    product.idUserUpgrade = homeController.getProfileAdminUser.email; // id del usuario que actualizo el documento
 
     // firebase: actualizar el documento del producto publico
     Database.refFirestoreProductPublic().doc(product.id).update(product.toJsonUpdate());
@@ -1240,7 +1243,8 @@ class ControllerProductsEdit extends GetxController {
 
         //  set
         setProduct = getProduct.updateData(product: product);
-        loadDataFormProduct(); // carga los datos del producto en el formulario
+        // carga los datos del producto en el formulario
+        loadDataFormProduct();
         // actualiza la vista ui
         checkDataUploadStatusProduct(dataUploadStatusProduct: true);
         
