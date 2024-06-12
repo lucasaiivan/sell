@@ -131,7 +131,7 @@ class _StaticsCardsState extends State<StaticsCards> {
           ),
         ),
         valueText: '${transactionsController.getBestSellingProductWithHighestProfit.isNotEmpty?transactionsController.getBestSellingProductWithHighestProfit[0].quantity:''} ventas',
-        description: 'Ganancias ${transactionsController.getBestSellingProductWithHighestProfit.isNotEmpty?Publications.getFormatoPrecio(monto: transactionsController.getBestSellingProductWithHighestProfit[0].revenue ):'Sin datos'}',
+        description: 'Ganancias ${transactionsController.getBestSellingProductWithHighestProfit.isNotEmpty?Publications.getFormatoPrecio(value: transactionsController.getBestSellingProductWithHighestProfit[0].revenue ):'Sin datos'}',
         ), 
     ]; 
     // description : añadimos las tarjetas de las cajas si es que existen
@@ -145,7 +145,7 @@ class _StaticsCardsState extends State<StaticsCards> {
         titleText: 'Caja ${value['name']}',
         subtitle: 'Facturación',
         modalContent: CashRegisterView(cashRegister: value['object']),
-        valueText: Publications.getFormatoPrecio(monto: value['total'] ), 
+        valueText: Publications.getFormatoPrecio(value: value['total'] ), 
         description: 'Transacciones: ${value['sales'].toString()}',
         ));
     }); 
@@ -473,14 +473,14 @@ class ProfitabilityProductsView extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       // text : cantidad y monto total
-                      Text('x${transactionsController.getBestSellingProductWithHighestProfit[i].quantity} ${Publications.getFormatoPrecio(monto: priceTotal)}',style: const TextStyle(fontWeight: FontWeight.bold)),
+                      Text('x${transactionsController.getBestSellingProductWithHighestProfit[i].quantity} ${Publications.getFormatoPrecio(value: priceTotal)}',style: const TextStyle(fontWeight: FontWeight.bold)),
                       // view : en un row el monto total de la ganancia y el porcentaje de ganancia de color verde
                       revenue==0?Container():Row(
                         mainAxisAlignment:  MainAxisAlignment.end,
 
                         children: [
                           // text : monto total de la ganancia
-                          Text(Publications.getFormatoPrecio(monto: revenue),style: const TextStyle(fontWeight: FontWeight.bold,color: Colors.green)),
+                          Text(Publications.getFormatoPrecio(value: revenue),style: const TextStyle(fontWeight: FontWeight.bold,color: Colors.green)),
                           const SizedBox(width: 5),
                           // text : porcentaje de ganancia
                           Container(
@@ -566,7 +566,7 @@ class PaymentMethodView extends StatelessWidget {
       // converit chartData en una nuevo Map
       List<Map> map = [];
       for (var item in chartData) {
-        map.add({'name':transactionsController.getPayMode(idMode: item.key)['name'],'value':item.value,'priceTotal':Publications.getFormatoPrecio(monto: item.value),'color':transactionsController.getPayMode(idMode: item.key)['color'],'iconData':transactionsController.getPayMode(idMode: item.key)['iconData']});
+        map.add({'name':transactionsController.getPayMode(idMode: item.key)['name'],'value':item.value,'priceTotal':Publications.getFormatoPrecio(value: item.value),'color':transactionsController.getPayMode(idMode: item.key)['color'],'iconData':transactionsController.getPayMode(idMode: item.key)['iconData']});
       } 
       
       // var
@@ -736,7 +736,7 @@ class CashRegisterView extends StatelessWidget {
                 const Text('Efectivo inicial:'),
                 const Spacer(),
                 // text : monto de efectivo inicial
-                Text(Publications.getFormatoPrecio(monto: cashRegister.initialCash),style: const TextStyle(fontWeight: FontWeight.w300)),
+                Text(Publications.getFormatoPrecio(value: cashRegister.initialCash),style: const TextStyle(fontWeight: FontWeight.w300)),
 
               ],
             ),    
@@ -748,7 +748,7 @@ class CashRegisterView extends StatelessWidget {
                 const Text('Ingresos:'),
                 const Spacer(),
                 // text : cantidad de Ingresos
-                Text(Publications.getFormatoPrecio(monto: cashRegister.cashInFlow),style: const TextStyle(fontWeight: FontWeight.w300, color: Colors.green)),
+                Text(Publications.getFormatoPrecio(value: cashRegister.cashInFlow),style: const TextStyle(fontWeight: FontWeight.w300, color: Colors.green)),
 
               ],
             ), 
@@ -761,7 +761,7 @@ class CashRegisterView extends StatelessWidget {
                 const Text('Egresos:'),
                 const Spacer(),
                 // text : cantidad de Egresos
-                Text(Publications.getFormatoPrecio(monto: cashRegister.cashOutFlow),style: const TextStyle(fontWeight: FontWeight.w300, color: Colors.red)),
+                Text(Publications.getFormatoPrecio(value: cashRegister.cashOutFlow),style: const TextStyle(fontWeight: FontWeight.w300, color: Colors.red)),
 
               ],
             ), 
@@ -785,7 +785,7 @@ class CashRegisterView extends StatelessWidget {
                 const Text('Facturación:'),
                 const Spacer(),
                 // text : monto de facturación total
-                Text(Publications.getFormatoPrecio(monto: cashRegister.billing),style: const TextStyle(fontWeight: FontWeight.w300)),
+                Text(Publications.getFormatoPrecio(value: cashRegister.billing),style: const TextStyle(fontWeight: FontWeight.w300)),
 
               ],
             ),
@@ -797,7 +797,7 @@ class CashRegisterView extends StatelessWidget {
                 const Text('Descuentos:'),
                 const Spacer(),
                 // text : monto de descuentos
-                Text(Publications.getFormatoPrecio(monto: cashRegister.discount),style: const TextStyle(fontWeight: FontWeight.w300)),
+                Text(Publications.getFormatoPrecio(value: cashRegister.discount),style: const TextStyle(fontWeight: FontWeight.w300)),
 
               ],
             ),
@@ -809,7 +809,7 @@ class CashRegisterView extends StatelessWidget {
                 const Text('Balance esperado en la caja:'),
                 const Spacer(),
                 // text : monto de Balance esperado en la caja
-                Text(Publications.getFormatoPrecio(monto: cashRegister.getExpectedBalance),style: const TextStyle(fontWeight: FontWeight.w500,fontSize: 18)),
+                Text(Publications.getFormatoPrecio(value: cashRegister.getExpectedBalance),style: const TextStyle(fontWeight: FontWeight.w500,fontSize: 18)),
 
               ],
             ),

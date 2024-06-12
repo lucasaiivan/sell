@@ -77,7 +77,8 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
   }
    
   // ----------- FUCTIONS --------------- // 
-  int get getInventoryTotal {
+  String get getTotalItemsCatalogue => Publications.getFormatAmount(value: getCataloProducts.length);
+  String get getInventoryTotal {
     // description : obtiene el inventario total de productos
     int count = 0;
     for (var element in getCataloProducts) {
@@ -88,7 +89,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
       
       }
     }
-    return count;
+    return Publications.getFormatAmount(value: count);
   }
   String get getTotalInventory {
     // description : obtiene el total del inventario formateado en moneda 
@@ -103,7 +104,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
         total += element.salePrice; 
       } 
     }
-    return Publications.getFormatoPrecio(monto: total);
+    return Publications.getFormatoPrecio(value: total,simplified: false);
   }
 
   void catalogueFilter({String filter = ''}) {
@@ -697,10 +698,10 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
               Row(
                 children: [
                   // text : precio de compra
-                  product.purchasePrice==0?Container():Text('compra ${Publications.getFormatoPrecio(monto: product.purchasePrice)}'),
+                  product.purchasePrice==0?Container():Text('compra ${Publications.getFormatoPrecio(value: product.purchasePrice)}'),
                   // text : precio de venta
                   product.salePrice==0?Container():circleDivider,
-                  product.salePrice==0?Container():Text('venta ${Publications.getFormatoPrecio(monto: product.salePrice)}'),
+                  product.salePrice==0?Container():Text('venta ${Publications.getFormatoPrecio(value: product.salePrice)}'),
                 ],
               ),
             ],

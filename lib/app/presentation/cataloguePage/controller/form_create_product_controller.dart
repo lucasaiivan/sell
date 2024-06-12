@@ -415,7 +415,7 @@ class ControllerCreateProductForm extends GetxController{
               getProduct.nameCategory = getCategory.name;
               if(controllerTextEditAlertStock.text!=''){getProduct.alertStock  = int.parse( controllerTextEditAlertStock.text );}
 
-              // TODO : DELETE RELEASE
+              // TODO : DISABLE RELEASE
               getProduct.verified = getProduct.local ? false : true; 
 
               // actualización de la imagen del producto
@@ -449,11 +449,15 @@ class ControllerCreateProductForm extends GetxController{
               }
 
               // Firebase set : se crea los datos del producto del cátalogo de la cuenta
-              Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id)
-                .set(getProduct.toJson())
-                .whenComplete(() async {
-                  await Future.delayed(const Duration(seconds: 3)).then((value) {setDataUploadStatus = false; Get.back();Get.back(); });
-              }).onError((error, stackTrace) => setDataUploadStatus = false).catchError((_) => setDataUploadStatus = false);
+              Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id).set(getProduct.toJson()) ;
+
+              // actualiza la lista de productos del cátalogo en la memoria de la app
+              homeController.sincronizeCatalogueProducts(product: getProduct);
+
+              // sleep : espera 3 segundos para que se actualice la vista
+              await Future.delayed(const Duration(milliseconds: 1)).then((value) {
+                setDataUploadStatus = false; Get.back(); 
+              });
 
             } else {
               Get.snackbar(

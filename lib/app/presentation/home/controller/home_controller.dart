@@ -33,11 +33,7 @@ class HomeController extends GetxController {
   final GlobalKey floatingActionButtonScanCodeBarKey = GlobalKey();
   final GlobalKey floatingActionButtonSelectedCajaKey = GlobalKey();
   final GlobalKey buttonsPaymenyMode = GlobalKey();
- 
-  // estado de la conexión a internet
-  bool _internetConnection = false;
-  set setInternetConnection(bool value) => _internetConnection = value;
-  bool get getInternetConnection => _internetConnection;
+  
 
   // user anonymous
   bool _userAnonymous = false;

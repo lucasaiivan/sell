@@ -252,7 +252,7 @@ class SalesView extends StatelessWidget {
                               Text('Total',style: textDescrpitionStyle.copyWith(fontSize: 16,fontWeight: FontWeight.w900,color: Colors.white)),
                               const Spacer(),
                               const SizedBox(width:12),
-                              Text(Publications.getFormatoPrecio(monto: controller.getTicket.getTotalPrice),style: textValuesStyle.copyWith(fontSize: 24,fontWeight: FontWeight.w900,color: Colors.white)),
+                              Text(Publications.getFormatoPrecio(value: controller.getTicket.getTotalPrice),style: textValuesStyle.copyWith(fontSize: 24,fontWeight: FontWeight.w900,color: Colors.white)),
                             ],
                           ),
                         ),
@@ -518,7 +518,7 @@ class SalesView extends StatelessWidget {
                       style: TextStyle( color: homeController.getDarkMode ? Colors.white : Colors.black),
                       children: <TextSpan>[
                         TextSpan(
-                          text: Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.getExpectedBalance),
+                          text: Publications.getFormatoPrecio(value: homeController.cashRegisterActive.getExpectedBalance),
                           style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
                         ),
                       ],
@@ -543,7 +543,7 @@ class SalesView extends StatelessWidget {
                               ? null
                               : <TextSpan>[
                                   TextSpan(
-                                    text: '\n${Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.cashInFlow)}',
+                                    text: '\n${Publications.getFormatoPrecio(value: homeController.cashRegisterActive.cashInFlow)}',
                                     style: TextStyle(
                                         fontWeight: FontWeight.w600,
                                         fontSize: 12,
@@ -573,7 +573,7 @@ class SalesView extends StatelessWidget {
                               ? null
                               : <TextSpan>[
                                   TextSpan(
-                                    text: '\n${Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.cashOutFlow)}',
+                                    text: '\n${Publications.getFormatoPrecio(value: homeController.cashRegisterActive.cashOutFlow)}',
                                     style: TextStyle(
                                         fontWeight: FontWeight.w600,
                                         fontSize: 12,
@@ -710,7 +710,7 @@ class SalesView extends StatelessWidget {
                     placeholder: (context, url) => CircleAvatar(
                         radius: radius,
                         backgroundColor: backgroundColor,
-                        child: defaultValues ? Container(): Text(Publications.getFormatoPrecio(monto: productCatalogue.salePrice),style: TextStyle(color: Get.textTheme.bodyLarge?.color))),
+                        child: defaultValues ? Container(): Text(Publications.getFormatoPrecio(value: productCatalogue.salePrice),style: TextStyle(color: Get.textTheme.bodyLarge?.color))),
                     imageBuilder: (context, image) => CircleAvatar(
                       radius: radius,
                       backgroundColor: borderCicleColor,
@@ -723,7 +723,7 @@ class SalesView extends StatelessWidget {
                     errorWidget: (context, url, error) => CircleAvatar(
                       radius: radius,
                       backgroundColor: backgroundColor,
-                      child: defaultValues? Container():Text(Publications.getFormatoPrecio(monto: productCatalogue.salePrice),style: TextStyle(color: Get.textTheme.bodyMedium?.color)),
+                      child: defaultValues? Container():Text(Publications.getFormatoPrecio(value: productCatalogue.salePrice),style: TextStyle(color: Get.textTheme.bodyMedium?.color)),
                     ),
                   ),
                   SizedBox(height: spaceImageText),
@@ -809,7 +809,7 @@ class SalesView extends StatelessWidget {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         const Text('Facturado  ',style: TextStyle(color: Colors.black87,fontWeight: FontWeight.w300)),
-                                        Text(Publications.getFormatoPrecio(monto: salesController.getLastTicket.getTotalPrice),style: const TextStyle(color: Colors.black,fontWeight: FontWeight.bold)),
+                                        Text(Publications.getFormatoPrecio(value: salesController.getLastTicket.getTotalPrice),style: const TextStyle(color: Colors.black,fontWeight: FontWeight.bold)),
                                       ],
                                     ),  
                                   ),
@@ -907,7 +907,7 @@ class SalesView extends StatelessWidget {
                   ? Colors.grey
                   : null,
               label: Text(
-                  'Cobrar ${controller.getTicket.listPoduct.isEmpty ? '' : Publications.getFormatoPrecio(monto: controller.getTicket.getTotalPrice)}',
+                  'Cobrar ${controller.getTicket.listPoduct.isEmpty ? '' : Publications.getFormatoPrecio(value: controller.getTicket.getTotalPrice)}',
                   style: const TextStyle(color: Colors.white))),
         ),
       ],
@@ -1209,7 +1209,7 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
               homeController.cashRegisterActive.expectedBalance==0?Container():Row(children: [
                 Text('Efectivo inicial', style: textStyleDescription),
                 const Spacer(),
-                Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.expectedBalance),style: textStyleValue)
+                Text(Publications.getFormatoPrecio(value: homeController.cashRegisterActive.expectedBalance),style: textStyleValue)
               ]),
               // view info : cantidad de ventas
               homeController.cashRegisterActive.sales==0?Container():const SizedBox(height: 12),
@@ -1229,7 +1229,7 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
                 const Spacer(),
                 Text(
                     Publications.getFormatoPrecio(
-                        monto: homeController.cashRegisterActive.billing),
+                        value: homeController.cashRegisterActive.billing),
                     style: textStyleValue)
               ]),
               // view info : descuentos
@@ -1240,7 +1240,7 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
                 child: Row(children: [
                   Text('Descuentos', style: textStyleDescription),
                   const Spacer(),
-                  Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.discount),style: textStyleValue.copyWith(color: Colors.red.shade300))
+                  Text(Publications.getFormatoPrecio(value: homeController.cashRegisterActive.discount),style: textStyleValue.copyWith(color: Colors.red.shade300))
                 ]),
               ),
               // view info : ingresos y egresos
@@ -1260,7 +1260,7 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
               Row(children: [
                 Text('Balance esperado en la caja', style: textStyleDescription),
                 const Spacer(),
-                Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.getExpectedBalance),style: textStyleValue)
+                Text(Publications.getFormatoPrecio(value: homeController.cashRegisterActive.getExpectedBalance),style: textStyleValue)
               ]),
               const SizedBox(height: 20),
               // textfield : Monto en caja
@@ -1293,7 +1293,7 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
                           Text('Diferencia', style: textStyleDescription),
                           const Spacer(),
                           // text : monto de la diferencia
-                          Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.getDifference),style: textStyleValue.copyWith(color: homeController.cashRegisterActive.getDifference<0?Colors.red.shade300: Colors.green.shade300))
+                          Text(Publications.getFormatoPrecio(value: homeController.cashRegisterActive.getDifference),style: textStyleValue.copyWith(color: homeController.cashRegisterActive.getDifference<0?Colors.red.shade300: Colors.green.shade300))
                         ])
                       : Container(),
             ],
@@ -1496,7 +1496,7 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
                   children: [
                     Text(item['description'],style: textStyleValue),
                     const Spacer(),
-                    Text(Publications.getFormatoPrecio(monto: item['amount']),style: textStyleValue),
+                    Text(Publications.getFormatoPrecio(value: item['amount']),style: textStyleValue),
                   ],
                 ),
               ),
@@ -1529,7 +1529,7 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
               children: [
                 Text('Ingresos',style: textStyleDescription,),
                 const Spacer(),
-                Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.cashInFlow),style: textStyleValue.copyWith(color: homeController.cashRegisterActive.cashInFlow == 0? null: Colors.green.shade300)),
+                Text(Publications.getFormatoPrecio(value: homeController.cashRegisterActive.cashInFlow),style: textStyleValue.copyWith(color: homeController.cashRegisterActive.cashInFlow == 0? null: Colors.green.shade300)),
               ],
             );
           },
@@ -1547,7 +1547,7 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
                       child: Text(homeController.cashRegisterActive.cashInFlowList[index]['description'],style: textStyleValue,overflow: TextOverflow.ellipsis,maxLines:2)),
                     const Spacer(),
                     // text : value
-                    Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.cashInFlowList[index]['amount']),style: textStyleValue),
+                    Text(Publications.getFormatoPrecio(value: homeController.cashRegisterActive.cashInFlowList[index]['amount']),style: textStyleValue),
                   ],
                 ),
               );
@@ -1563,7 +1563,7 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
               children: [
                 Text('Egresos',style: textStyleDescription,),
                 const Spacer(),
-                Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.cashOutFlow),style: textStyleValue.copyWith(color:  homeController.cashRegisterActive.cashOutFlow == 0? null: Colors.red.shade300)),
+                Text(Publications.getFormatoPrecio(value: homeController.cashRegisterActive.cashOutFlow),style: textStyleValue.copyWith(color:  homeController.cashRegisterActive.cashOutFlow == 0? null: Colors.red.shade300)),
               ]);
           },
           body: ListView.builder(
@@ -1580,7 +1580,7 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
                       child: Text(homeController.cashRegisterActive.cashOutFlowList[index]['description'],style: textStyleValue,overflow: TextOverflow.ellipsis,maxLines:2)),
                     
                     // text : value
-                    Text(Publications.getFormatoPrecio(monto: homeController.cashRegisterActive.cashOutFlowList[index]['amount']),style: textStyleValue),
+                    Text(Publications.getFormatoPrecio(value: homeController.cashRegisterActive.cashOutFlowList[index]['amount']),style: textStyleValue),
                   ],
                 ),
               );

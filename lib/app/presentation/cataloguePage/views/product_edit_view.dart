@@ -4,8 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; 
 import 'package:get/get.dart';
-import 'package:search_page/search_page.dart';
-import 'package:sell/app/presentation/cataloguePage/controller/catalogue_controller.dart';
+import 'package:search_page/search_page.dart'; 
 import 'package:url_launcher/url_launcher.dart';  
 import '../../../domain/entities/catalogo_model.dart'; 
 import '../../../core/utils/fuctions.dart';
@@ -33,27 +32,7 @@ class ProductEdit extends StatelessWidget {
     // get : obtenemos los valores 
     controller.setContext = context;
     controller.colorLoading = Get.theme.primaryColor;
-    controller.darkMode = Get.isDarkMode; 
-
-    // ignore: unused_local_variable
-    Widget noEdit = Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Flexible(
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.admin_panel_settings,size: 50),
-                SizedBox(height: 16.0),
-                Text('No eres administrador de esta cuenta',style: TextStyle(fontWeight: FontWeight.w300)),
-              ],
-            ),
-          ),
-        ), 
-        TextButton.icon(onPressed: Get.back, icon: const Icon(Icons.close_rounded), label: const Text('Cerrar')),
-      ],
-    ); 
+    controller.darkMode = Get.isDarkMode;  
     
     // GetBuilder - refresh all the views
     return GetBuilder<ControllerProductsEdit>(
@@ -64,25 +43,7 @@ class ProductEdit extends StatelessWidget {
         return Material(
           child: AnimatedSwitcher(
           duration: const  Duration(milliseconds: 100),
-            child: controller.homeController.getInternetConnection ? scaffold(context: context) : Scaffold(
-              appBar: AppBar(
-                elevation: 0.0,
-                backgroundColor: Get.theme.scaffoldBackgroundColor,
-                iconTheme: Theme.of(context).iconTheme.copyWith(color: appBarTextColor),
-                title: Text(controller.getTextAppBar,style: TextStyle(  color: appBarTextColor,fontSize: 18 )),
-              ),
-              body: const Center(
-                  child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.all(12.0),
-                    child: Icon(Icons.wifi_off_rounded),
-                  ),
-                  Text('No hay internet'),
-                ],
-              )),
-            ),
+            child: scaffold(context: context),
           ),
         );
       },

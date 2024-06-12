@@ -595,7 +595,7 @@ class TransactionsController extends GetxController {
     // devolvemos el total de ganancias formateado como una cadena de texto
     return totalEarnings == 0.0
         ? ''
-        : Publications.getFormatoPrecio( monto: totalEarnings, moneda: currencySymbol);
+        : Publications.getFormatoPrecio( value: totalEarnings, moneda: currencySymbol);
   } 
 
   double get getAmountTotalFilter{
@@ -606,7 +606,7 @@ class TransactionsController extends GetxController {
     return total;
   }
   String get getInfoAmountTotalFilter{  
-    return Publications.getFormatoPrecio(monto: getAmountTotalFilter);
+    return Publications.getFormatoPrecio(value: getAmountTotalFilter);
   }
   double get getEarningsFilteredTotal{ 
     // description : obtenemos el total de ganancias de las transacciones filtradas
@@ -622,7 +622,7 @@ class TransactionsController extends GetxController {
     return transactionEarnings;
   }
   String get getEarningsTotalFilteredFormat{ 
-    return Publications.getFormatoPrecio(monto: getEarningsFilteredTotal);
+    return Publications.getFormatoPrecio(value: getEarningsFilteredTotal);
   }
   // devuelve el porcentaje de ganancias
   int getPercentEarningsFilteredTotal() { 
@@ -805,7 +805,7 @@ class TransactionsController extends GetxController {
         map.add({
           'name':getPayMode(idMode: item.key)['name'],
           'value':item.value,
-          'priceTotal':Publications.getFormatoPrecio(monto: item.value),
+          'priceTotal':Publications.getFormatoPrecio(value: item.value),
           'color':getPayMode(idMode: item.key)['color'],
           'iconData':getPayMode(idMode: item.key)['iconData'],
           });

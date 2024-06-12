@@ -24,7 +24,7 @@ class ModeratorController extends GetxController {
   set setLoading(bool value) => loading.value = value;
   bool get getLoading => loading.value;
   // datos de usuario filtrado
-  Map<String, dynamic> userFilter = {'title':'Usuario actual','id':''};
+  Map<String, dynamic> userFilter = {'title':'Moderador','id':''};
 
   // lista de productos filtrados
   bool viewProducts = true;
@@ -82,7 +82,7 @@ class ModeratorController extends GetxController {
   int get totalProducts => products.length;
   int get totalVerifiedProducts => products.where((element) => element.verified).length;
   int get totalUnverifiedProducts => products.where((element) => !element.verified).length;
-  int get totalReviewedProducts => products.where((element) => element.reviewed).length;
+  int get totalReviewedProducts => products.where((element) => element.reviewed && !element.verified).length;
   int get totalNotReviewedProducts => products.where((element) => !element.reviewed && !element.verified).length;
   int get totalProductsNoData => products.where((element) => element.code == '' || element.idMark == '' || element.description == '' || element.image == '' ).length;
   int get totalProductsFavorite => products.where((element) => element.favorite).length;
@@ -280,7 +280,7 @@ class ModeratorController extends GetxController {
 
     // comprobamos si el usuario es el actual
     if (idUser == '' || idUser == homeController.getProfileAdminUser.email) {
-      userFilter = {'title':'Usuario actual','id': homeController.getProfileAdminUser.email};
+      userFilter = {'title':'Moderador','id': homeController.getProfileAdminUser.email};
     }else{
       userFilter = {'title':'Usuario selecionado','id': idUser};
     }
@@ -302,7 +302,7 @@ class ModeratorController extends GetxController {
       loadFilteredProductsByUser();
     }
     
-    if (verified==null && idUserCreator==null && idUserUpdate==null && noData==null && reviewed==null && favorite==null) { 
+    if (verified==null && idUserCreator==null && idUserUpdate==null && noData==null && reviewed==null && favorite==null ) { 
       // add : agregamos todos los productos
       newList.addAll(getProducts);  
     } else { 
@@ -345,12 +345,12 @@ class ModeratorController extends GetxController {
           }
         }
         // reviewed : si esta revisado
-        if (reviewed != null && verified != null && idUserCreator == null && noData == null && idUserUpdate == null && favorite==null) {
-          // conditiom : si esta revisado y no verificado
-          if ( element.reviewed == reviewed && element.verified == false) {
-            newList.add(element);
-          }else if(element.reviewed == reviewed && element.verified == false){
-            newList.add(element);
+        if ( reviewed != null && verified == null && idUserCreator == null && noData == null && idUserUpdate == null && favorite==null ) {
+          // conditiom : si esta revisado
+          if (reviewed == true && element.reviewed == true && element.verified == false) {
+            newList.add(element); 
+          }else if( reviewed == false && element.reviewed == false && element.verified == false){
+            newList.add(element); 
           }
         }
       }

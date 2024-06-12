@@ -561,7 +561,7 @@ class ProductCatalogue {
     if (salePrice != 0.0 && purchasePrice !=0.0) {
       ganancia = salePrice - purchasePrice;
 
-    final String value = Publications.getFormatoPrecio(monto: ganancia);
+    final String value = Publications.getFormatoPrecio(value: ganancia);
     return value;
     }
     return'';

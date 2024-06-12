@@ -140,7 +140,7 @@ class TransactionsView extends StatelessWidget {
     // values
     final Map payMode =transactionsController.getPayMode(idMode: ticketModel.payMode);
     final double  dRevenue = ticketModel.getProfit; 
-    final String sRevenue = dRevenue==0?'': Publications.getFormatoPrecio(monto:dRevenue);  
+    final String sRevenue = dRevenue==0?'': Publications.getFormatoPrecio(value:dRevenue);  
     final int iPorcent = ticketModel.getPercentageProfit;
     // styles
     final Color primaryTextColor  = Get.isDarkMode?Colors.white70:Colors.black87;
@@ -228,7 +228,7 @@ class TransactionsView extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               dividerCircle,
-                              Text('Vuelto: ${Publications.getFormatoPrecio(monto: ticketModel.valueReceived - ticketModel.priceTotal)}',style:textStyleSecundary ),
+                              Text('Vuelto: ${Publications.getFormatoPrecio(value: ticketModel.valueReceived - ticketModel.priceTotal)}',style:textStyleSecundary ),
                             ],
                           ),
                         ],
@@ -255,9 +255,9 @@ class TransactionsView extends StatelessWidget {
               ],
             ),
             //  text : precio totol del ticket
-            Text(Publications.getFormatoPrecio(monto: ticketModel.priceTotal),style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18,color: primaryTextColor)),
+            Text(Publications.getFormatoPrecio(value: ticketModel.priceTotal),style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18,color: primaryTextColor)),
             // text : descuento
-            ticketModel.discount==0?Container():Text('-${Publications.getFormatoPrecio(monto: ticketModel.discount)}',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 10,color: Colors.red.withOpacity(0.9)  )),
+            ticketModel.discount==0?Container():Text('-${Publications.getFormatoPrecio(value: ticketModel.discount)}',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 10,color: Colors.red.withOpacity(0.9)  )),
           ],
         ),
         ],
@@ -448,7 +448,7 @@ class TransactionInfoView extends StatelessWidget {
                 children: <Widget>[
                   const Spacer(),
                   Opacity(opacity:opacity,child: Text("Descuentos:  ",style: textStyleDescription)),
-                  Text(Publications.getFormatoPrecio(monto: ticket.discount,moneda: currencySymbol),overflow:TextOverflow.ellipsis,style: textStyleValue.copyWith(color: Colors.red.shade400)),
+                  Text(Publications.getFormatoPrecio(value: ticket.discount,moneda: currencySymbol),overflow:TextOverflow.ellipsis,style: textStyleValue.copyWith(color: Colors.red.shade400)),
                 ],
               ),
               spacer, 
@@ -459,7 +459,7 @@ class TransactionInfoView extends StatelessWidget {
                   Row(
                     children: <Widget>[ 
                       Opacity(opacity:opacity,child: Text("Total:  ",style: textStyleDescription)),
-                      Text( Publications.getFormatoPrecio(monto: priceTotal,moneda: currencySymbol),overflow:TextOverflow.ellipsis,style: textStyleValue ),
+                      Text( Publications.getFormatoPrecio(value: priceTotal,moneda: currencySymbol),overflow:TextOverflow.ellipsis,style: textStyleValue ),
                     ],
                   ),
                 ],
@@ -471,7 +471,7 @@ class TransactionInfoView extends StatelessWidget {
                 children: <Widget>[
                   const Spacer(),
                   Opacity(opacity:opacity,child: Text("Ganancias:  ",style: textStyleDescription)),
-                  Text( Publications.getFormatoPrecio(monto: ticket.getProfit,moneda: currencySymbol),overflow:TextOverflow.ellipsis,style: textStyleValue.copyWith(color: Colors.green)),
+                  Text( Publications.getFormatoPrecio(value: ticket.getProfit,moneda: currencySymbol),overflow:TextOverflow.ellipsis,style: textStyleValue.copyWith(color: Colors.green)),
                 ],
               ),
               spacer,
@@ -481,7 +481,7 @@ class TransactionInfoView extends StatelessWidget {
                 children: <Widget>[
                   const Spacer(),
                   Opacity(opacity:opacity,child: Text("Valor recibido:  ",style: textStyleDescription)),
-                  Text(Publications.getFormatoPrecio(monto: valueReceived,moneda: currencySymbol),style: textStyleValue),
+                  Text(Publications.getFormatoPrecio(value: valueReceived,moneda: currencySymbol),style: textStyleValue),
                 ],
               ),
               spacer,
@@ -491,7 +491,7 @@ class TransactionInfoView extends StatelessWidget {
                 children: <Widget>[
                   const Spacer(),
                   Opacity(opacity:opacity,child: Text("Vuelto:  ",style: textStyleDescription)),
-                  Text( Publications.getFormatoPrecio(monto: changeAmount,moneda: currencySymbol),style: textStyleValue),
+                  Text( Publications.getFormatoPrecio(value: changeAmount,moneda: currencySymbol),style: textStyleValue),
                 ],
               ),
               const Divider(),
@@ -518,7 +518,7 @@ class TransactionInfoView extends StatelessWidget {
                       ListTile(
                         title: Opacity(opacity: 0.7,child: Text(description,style: style)),
                         leading: Opacity(opacity: 0.5,child: Text('x${productCatalogue.quantity}',style: style)),
-                        trailing: Opacity(opacity: 0.6,child: Text(Publications.getFormatoPrecio(monto: productCatalogue.salePrice*productCatalogue.quantity,moneda: currencySymbol),style: style)),
+                        trailing: Opacity(opacity: 0.6,child: Text(Publications.getFormatoPrecio(value: productCatalogue.salePrice*productCatalogue.quantity,moneda: currencySymbol),style: style)),
                       ),
                       const Divider(height: 0.5,thickness: 0.3),
                     ],
@@ -671,7 +671,7 @@ class TicketView extends StatelessWidget {
                             const SizedBox(width: 10),
                             Flexible(fit: FlexFit.tight,child: Opacity(opacity: 0.7,child: Text(description,style: style,maxLines:1,overflow:TextOverflow.ellipsis,))),
                             const SizedBox(width: 12),
-                            Opacity(opacity: 0.6,child: Text(Publications.getFormatoPrecio(monto: productCatalogue.salePrice*productCatalogue.quantity,moneda: currencySymbol),style: style)),
+                            Opacity(opacity: 0.6,child: Text(Publications.getFormatoPrecio(value: productCatalogue.salePrice*productCatalogue.quantity,moneda: currencySymbol),style: style)),
                           ],
                         ),
                         // condition : si es el ultimo item , no agregar un divider
@@ -694,7 +694,7 @@ class TicketView extends StatelessWidget {
                       children: <Widget>[ 
                         Opacity(opacity:opacity,child: Text("Total:  ",style: textStyleDescription.copyWith(fontSize: 20))),
                         const Spacer(),
-                        Text( Publications.getFormatoPrecio(monto: priceTotal,moneda: currencySymbol),overflow:TextOverflow.ellipsis,style: textStyleValue.copyWith(fontSize: 24) ),
+                        Text( Publications.getFormatoPrecio(value: priceTotal,moneda: currencySymbol),overflow:TextOverflow.ellipsis,style: textStyleValue.copyWith(fontSize: 24) ),
                       ],
                     ),
                   ),
@@ -706,7 +706,7 @@ class TicketView extends StatelessWidget {
                   children: <Widget>[
                     const Spacer(),
                     Opacity(opacity:opacity,child: Text("Descuentos:  ",style: textStyleDescription)),
-                    Text(Publications.getFormatoPrecio(monto: ticket.discount,moneda: currencySymbol),overflow:TextOverflow.ellipsis,style: textStyleValue.copyWith(color: Colors.red.shade400)),
+                    Text(Publications.getFormatoPrecio(value: ticket.discount,moneda: currencySymbol),overflow:TextOverflow.ellipsis,style: textStyleValue.copyWith(color: Colors.red.shade400)),
                   ],
                 ), 
                 spacer,
@@ -716,7 +716,7 @@ class TicketView extends StatelessWidget {
                   children: <Widget>[
                     const Spacer(),
                     Opacity(opacity:opacity,child: Text("Valor recibido:  ",style: textStyleDescription)),
-                    Text(Publications.getFormatoPrecio(monto: valueReceived,moneda: currencySymbol),style: textStyleValue),
+                    Text(Publications.getFormatoPrecio(value: valueReceived,moneda: currencySymbol),style: textStyleValue),
                   ],
                 ),
                 spacer,
@@ -726,7 +726,7 @@ class TicketView extends StatelessWidget {
                   children: <Widget>[
                     const Spacer(),
                     Opacity(opacity:opacity,child: Text("Vuelto:  ",style: textStyleDescription)),
-                    Text( Publications.getFormatoPrecio(monto: changeAmount,moneda: currencySymbol),style: textStyleValue),
+                    Text( Publications.getFormatoPrecio(value: changeAmount,moneda: currencySymbol),style: textStyleValue),
                   ],
                 ), 
                 // view : modo de pago

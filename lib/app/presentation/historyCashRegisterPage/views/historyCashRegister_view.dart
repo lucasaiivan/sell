@@ -178,7 +178,7 @@ class CashRegisterDetailView extends StatelessWidget {
                 const Spacer(),
                 Text(
                     Publications.getFormatoPrecio(
-                        monto: cashRegister.expectedBalance),
+                        value: cashRegister.expectedBalance),
                     style: textStyleValue)
               ]),
               //  view info : cantidad de venta
@@ -195,11 +195,11 @@ class CashRegisterDetailView extends StatelessWidget {
               cashRegister.cashOutFlowList.isEmpty ? Container():const SizedBox(height: 12),
               // view info : egresos
               cashRegister.cashOutFlowList.isEmpty ? Container()
-              :egressAndEntryView(description: 'Egresos',value: Publications.getFormatoPrecio(monto: cashRegister.cashOutFlow),colorValue: Colors.red.shade300,items: cashRegister.cashOutFlowList),
+              :egressAndEntryView(description: 'Egresos',value: Publications.getFormatoPrecio(value: cashRegister.cashOutFlow),colorValue: Colors.red.shade300,items: cashRegister.cashOutFlowList),
               cashRegister.cashInFlowList.isEmpty ? Container():const SizedBox(height: 12),
               // view info : ingresos
               cashRegister.cashInFlowList.isEmpty ? Container()
-              :egressAndEntryView(description: 'Ingresos',value: Publications.getFormatoPrecio(monto: cashRegister.cashInFlow),colorValue: Colors.green.shade300,items: cashRegister.cashInFlowList),
+              :egressAndEntryView(description: 'Ingresos',value: Publications.getFormatoPrecio(value: cashRegister.cashInFlow),colorValue: Colors.green.shade300,items: cashRegister.cashInFlowList),
               const SizedBox(height: 12), 
               Container(
                 // borde 
@@ -213,25 +213,25 @@ class CashRegisterDetailView extends StatelessWidget {
                     Row(children: [
                       const Spacer(),
                       Text('Facturación:   ', style: textStyleDescription), 
-                      Text(Publications.getFormatoPrecio(monto: cashRegister.billing),style: textStyleValue)]),
+                      Text(Publications.getFormatoPrecio(value: cashRegister.billing),style: textStyleValue)]),
                     const SizedBox(height: 12),
                     // view info : monto esperado 
                     Row(children: [
                       const Spacer(),
                       Text('Monto esperado:   ', style: textStyleDescription),
-                      Text(Publications.getFormatoPrecio(monto: cashRegister.expectedBalance),
+                      Text(Publications.getFormatoPrecio(value: cashRegister.expectedBalance),
                           style: textStyleValue)
                     ]),
                     const SizedBox(height: 12),
                     // text : monto de cierre
-                    cashRegister.balance == 0?Container():Row(children: [const Spacer(),Text('Monto de cierre:  ', style: textStyleDescription),Text( Publications.getFormatoPrecio(monto: cashRegister.balance),style: textStyleValue)]),
+                    cashRegister.balance == 0?Container():Row(children: [const Spacer(),Text('Monto de cierre:  ', style: textStyleDescription),Text( Publications.getFormatoPrecio(value: cashRegister.balance),style: textStyleValue)]),
                     cashRegister.balance == 0? Container(): const SizedBox(height: 12),
                     cashRegister.balance == 0
                         ? Container()
                         : Row(children: [
                             const Spacer(),
                             Text('Diferencia:  ', style: textStyleDescription),
-                            Text(Publications.getFormatoPrecio(monto: cashRegister.getDifference),style: textStyleValue.copyWith(color: cashRegister.getDifference == 0? null: cashRegister.getDifference < 0? Colors.red.shade300: Colors.green.shade300)) ]),
+                            Text(Publications.getFormatoPrecio(value: cashRegister.getDifference),style: textStyleValue.copyWith(color: cashRegister.getDifference == 0? null: cashRegister.getDifference < 0? Colors.red.shade300: Colors.green.shade300)) ]),
                   ],
                 ),
               ),
@@ -272,7 +272,7 @@ class CashRegisterDetailView extends StatelessWidget {
                   children: [
                     Text(item['description'],style: textStyleValue),
                     const Spacer(),
-                    Text(Publications.getFormatoPrecio(monto: item['amount']),style: textStyleValue),
+                    Text(Publications.getFormatoPrecio(value: item['amount']),style: textStyleValue),
                   ],
                 ),
               ),
@@ -301,7 +301,7 @@ class CashRegisterDetailView extends StatelessWidget {
               children: [
                 Text('Ingresos',style: textStyleDescription,),
                 const Spacer(),
-                Text(Publications.getFormatoPrecio(monto: cashRegister.cashInFlow),style: textStyleValue.copyWith(color:cashRegister.cashInFlow == 0? null: Colors.green.shade300)),
+                Text(Publications.getFormatoPrecio(value: cashRegister.cashInFlow),style: textStyleValue.copyWith(color:cashRegister.cashInFlow == 0? null: Colors.green.shade300)),
               ],
             );
           },
@@ -317,7 +317,7 @@ class CashRegisterDetailView extends StatelessWidget {
                     Text(cashRegister.cashInFlowList[index]['description'],style: textStyleValue),
                     const Spacer(),
                     // text : value
-                    Text(Publications.getFormatoPrecio(monto:cashRegister.cashInFlowList[index]['amount']),style: textStyleValue),
+                    Text(Publications.getFormatoPrecio(value:cashRegister.cashInFlowList[index]['amount']),style: textStyleValue),
                   ],
                 ),
               );
@@ -333,7 +333,7 @@ class CashRegisterDetailView extends StatelessWidget {
               children: [
                 Text('Egresos',style: textStyleDescription,),
                 const Spacer(),
-                Text(Publications.getFormatoPrecio(monto:cashRegister.cashOutFlow),style: textStyleValue.copyWith(color: cashRegister.cashOutFlow == 0? null: Colors.red.shade300)),
+                Text(Publications.getFormatoPrecio(value:cashRegister.cashOutFlow),style: textStyleValue.copyWith(color: cashRegister.cashOutFlow == 0? null: Colors.red.shade300)),
               ]);
           },
           body: ListView.builder(
@@ -348,7 +348,7 @@ class CashRegisterDetailView extends StatelessWidget {
                     Text(cashRegister.cashOutFlowList[index]['description'],style: textStyleValue),
                     const Spacer(),
                     // text : value
-                    Text(Publications.getFormatoPrecio(monto:cashRegister.cashOutFlowList[index]['amount']),style: textStyleValue),
+                    Text(Publications.getFormatoPrecio(value:cashRegister.cashOutFlowList[index]['amount']),style: textStyleValue),
                   ],
                 ),
               );

@@ -326,7 +326,7 @@ class _ProductoItemState extends State<ProductoItem> {
             ? widget.producto.description.substring(0, 3)
             : widget.producto.description.substring(0, 1)
         : Publications.getFormatoPrecio(
-            monto: widget.producto.salePrice * widget.producto.quantity);
+            value: widget.producto.salePrice * widget.producto.quantity);
     return widget.producto.image != "" && !widget.producto.local
         ? SizedBox(
             width: double.infinity,
@@ -368,7 +368,7 @@ class _ProductoItemState extends State<ProductoItem> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(widget.producto.description,style: const TextStyle(fontWeight: FontWeight.normal,color: Colors.grey ,overflow:TextOverflow.ellipsis),maxLines:1),
-                Text( Publications.getFormatoPrecio(monto: widget.producto.salePrice * widget.producto.quantity),
+                Text( Publications.getFormatoPrecio(value: widget.producto.salePrice * widget.producto.quantity),
                     style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 17.0,color: Colors.black),
                     overflow: TextOverflow.clip,
                     softWrap: false),
@@ -437,22 +437,17 @@ Widget body({required BuildContext context}){
                     :ListTile(
                     leading: Container(padding: const EdgeInsets.all(0.0),child: ComponentApp().userAvatarCircle(urlImage: homeController.getProfileAccountSelected.image,iconData:Icons.storefront_outlined)),
                     title: Text(homeController.getIdAccountSelected == ''? 'Seleccionar una cuenta': homeController.getProfileAccountSelected.name,maxLines: 1,overflow: TextOverflow.ellipsis),
-                    subtitle: homeController.getIdAccountSelected == ''? null: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment:  MainAxisAlignment.start,
-                      children: [
-                        user.name==''?Container():Flexible(child: Opacity(
-                          opacity: 0.7,
-                          child: Row(
-                            children: [
-                              // icon 
-                              const Icon(Icons.person_rounded,size: 14),
-                              const SizedBox(width:2),
-                              // text : nombre del usuario administrador
-                              Flexible(child: Text(user.name,overflow: TextOverflow.ellipsis,maxLines: 1)),
-                            ],
-                          ),
-                        )),
-                      ],
+                    subtitle: user.name==''? null:Opacity(
+                      opacity: 0.7,
+                      child: Row(
+                        children: [
+                          // icon 
+                          const Icon(Icons.person_rounded,size: 14),
+                          const SizedBox(width:2),
+                          // text : nombre del usuario administrador
+                          Flexible(child: Text(user.name,overflow: TextOverflow.ellipsis,maxLines: 1)),
+                        ],
+                      ),
                     ),
                     trailing: homeController.getCashierMode?null: const Icon(Icons.arrow_right),
                     onTap: homeController.getCashierMode?null: () {
@@ -617,9 +612,7 @@ Widget body({required BuildContext context}){
       );
     }
     // loop : crea un maximo de 3 avatares de cuentas existentes superpuestas con un [stack] horizontalmente
-    for ( int i = 0; i < list.length  ; i++) { 
-      // descartar la cuenta seleccionada
-      if (list[i].id == homeController.getIdAccountSelected) { continue; } 
+    for ( int i = 0; i < list.length  ; i++) {  
       // se muestra el avatar de la cuenta 
       listWidget.add(Positioned(
         left: ( space) * i,
@@ -1190,7 +1183,7 @@ class _EditProductSelectedDialogViewState extends State<EditProductSelectedDialo
 
     // widgets
     Widget titleWidget = Text(widget.product.description,style: const TextStyle(fontWeight: FontWeight.w500),maxLines: 5,overflow: TextOverflow.ellipsis);
-    Widget subtitleWidget = Text(Publications.getFormatoPrecio(monto: widget.product.salePrice * widget.product.quantity),style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 20,color: Colors.blue ));
+    Widget subtitleWidget = Text(Publications.getFormatoPrecio(value: widget.product.salePrice * widget.product.quantity),style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 20,color: Colors.blue ));
 
     return AlertDialog(
       title: Row(

@@ -1485,8 +1485,12 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           ImageProductAvatarApp(url: marcaSelect.image,size: 50,description:marcaSelect.name),
-          const SizedBox(height:2),
-          Text(marcaSelect.name,style: const TextStyle(fontWeight: FontWeight.w400 ),textAlign: TextAlign.center,),
+          Flexible(
+            child: Padding(
+              padding: const EdgeInsets.all(3.0),
+              child: Text(marcaSelect.name,style: const TextStyle(fontWeight: FontWeight.w400 ),textAlign: TextAlign.center,maxLines: 2,),
+            ),
+          ),
         ],
       ),
     );
@@ -1496,10 +1500,10 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       trailing:!icon? null  :marcaSelect.image==''?null: ImageProductAvatarApp(url: marcaSelect.image,size: 50,description:marcaSelect.name),
       dense: true,
-      title: Text(marcaSelect.name,overflow: TextOverflow.ellipsis,style: const TextStyle(fontWeight: FontWeight.w400,fontSize: 18),),
+      title: Text(marcaSelect.name,overflow: TextOverflow.ellipsis,style: const TextStyle(fontWeight: FontWeight.w400,fontSize: 18)),
       subtitle: marcaSelect.description == ''
           ? null
-          : Text(marcaSelect.description, overflow: TextOverflow.ellipsis),
+          : Text(marcaSelect.description, overflow: TextOverflow.ellipsis,maxLines: 2,),
       onTap: () {
         controllerProductsEdit.setUltimateSelectionMark = marcaSelect;
         controllerProductsEdit.setMarkSelected = marcaSelect;

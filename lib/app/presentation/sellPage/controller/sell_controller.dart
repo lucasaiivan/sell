@@ -261,7 +261,7 @@ class SellController extends GetxController {
       // var 
       int porcent = ((ticket.discount * 100) / getTicket.getTotalPrice).round().toInt(); 
 
-      return 'Descuento:(${(porcent).toStringAsFixed(0)}%) ${Publications.getFormatoPrecio(monto:ticket.discount)}';
+      return 'Descuento:(${(porcent).toStringAsFixed(0)}%) ${Publications.getFormatoPrecio(value:ticket.discount)}';
     } else {
       return '';
     }
@@ -522,13 +522,13 @@ class SellController extends GetxController {
   String getValueChange() {
 
     // text format : devuelte un texto formateado del monto del cambio que tiene que recibir el cliente
-    if (getValueReceivedTicket == 0.0) {return Publications.getFormatoPrecio(monto: 0);}
+    if (getValueReceivedTicket == 0.0) {return Publications.getFormatoPrecio(value: 0);}
     double result = getValueReceivedTicket - getTicket.getTotalPrice;
-    return Publications.getFormatoPrecio(monto: result);
+    return Publications.getFormatoPrecio(value: result);
   }
   String getValueReceived() {
     // text format : devuelte un texto formateado del monto que el vendedor recibio
-    return Publications.getFormatoPrecio(monto: getValueReceivedTicket);
+    return Publications.getFormatoPrecio(value: getValueReceivedTicket);
   }
 
   void confirmedPurchase() { 
@@ -1392,7 +1392,7 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
                   ),
                 ),
                 // text : precio
-                Text(Publications.getFormatoPrecio(monto: product.salePrice),style: const  TextStyle(fontSize: 18,fontWeight: FontWeight.w300),)
+                Text(Publications.getFormatoPrecio(value: product.salePrice),style: const  TextStyle(fontSize: 18,fontWeight: FontWeight.w300),)
               ],
             ),
           ),

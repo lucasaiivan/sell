@@ -23,7 +23,7 @@ Future<void> main() async {
     await Firebase.initializeApp(options: firebaseConfig);
   } else {
     // disposition android
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(); // 
 
     // RevenueCat : subcripcion 
     await Purchases.setLogLevel(LogLevel.debug); // debug : para ver los errores en la consola

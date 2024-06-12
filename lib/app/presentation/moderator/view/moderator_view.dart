@@ -182,7 +182,7 @@ class _ModeratorViewState extends State<ModeratorView> {
             description: 'Revisados',
             onTap: (){
               controller.setFilterText = 'Revisados';
-              controller.filterProducts(reviewed: true,verified: false);
+              controller.filterProducts(reviewed: true);
             },
           ), 
           // chip : sin revisar
@@ -192,7 +192,7 @@ class _ModeratorViewState extends State<ModeratorView> {
             description: 'Sin revisar',
             onTap: (){
               controller.setFilterText = 'Sin revisar';
-              controller.filterProducts(reviewed: false,verified: false);
+              controller.filterProducts(reviewed: false );
             },
           ),
           // chip : total de productos sin algun dato
@@ -497,7 +497,7 @@ class _ModeratorViewState extends State<ModeratorView> {
         margin: const EdgeInsets.symmetric(horizontal: 5,vertical: 2), 
         decoration: BoxDecoration(
           color: Colors.blue.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(5),
+          borderRadius: BorderRadius.circular(2),
         ),
         child: Row( 
           mainAxisSize: MainAxisSize.min,
@@ -821,7 +821,7 @@ class _ModeratorViewState extends State<ModeratorView> {
       context: Get.overlayContext!,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Usuarios'),
+          title: const Text('Usuarios'), 
           content: SizedBox(
             width: double.maxFinite,
             child: ListView.builder( 
@@ -836,7 +836,7 @@ class _ModeratorViewState extends State<ModeratorView> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     // text : 'usuario actual'
-                    key == homeController.getProfileAdminUser.email?const Text('Actual',style: TextStyle(fontWeight: FontWeight.w300,fontSize:12),textAlign: TextAlign.start,):Container(),
+                    key == homeController.getProfileAdminUser.email?const Text('Moderador',style: TextStyle(fontWeight: FontWeight.w300,fontSize:12),textAlign: TextAlign.start,):Container(),
                     // view : chip de usuario
                     actionChipUser(filterCreator: true,name: key,create: controller.totalProductsCreatedByUser(id:key) ,updated: controller.totalProductsUpdateByUser(id:key)),
                     key == homeController.getProfileAdminUser.email? const Divider():Container(),

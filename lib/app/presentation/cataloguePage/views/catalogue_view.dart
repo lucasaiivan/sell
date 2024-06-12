@@ -111,10 +111,18 @@ class CataloguePage extends StatelessWidget {
   }
 
   Widget viewCatalogue() {
+
     // controllers
     final CataloguePageController controller = Get.find();
     final HomeController homeController = Get.find();
- 
+
+    // var : cantidad de articulos del catalogo
+    String totalItemsCatalogue = controller.getTotalItemsCatalogue;
+    // var : total del inventario
+    String totalInventory = controller.getInventoryTotal;
+    // var : valor total del inventario
+    String totalInventoryValue = controller.getTotalInventory;
+
     // si el cátalogo esta vacio
     if (controller.getCataloProducts.isEmpty) { 
 
@@ -134,7 +142,7 @@ class CataloguePage extends StatelessWidget {
             visualDensity: VisualDensity.compact,
             label: Column(
               children: [
-                Text(controller.getCataloProducts.length.toString(),style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(totalItemsCatalogue,style: const TextStyle(fontWeight: FontWeight.bold)),
                 const Text('Artículos',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w400)),
               ],
             ),
@@ -147,7 +155,7 @@ class CataloguePage extends StatelessWidget {
             visualDensity: VisualDensity.compact,
             label: Column(
               children: [
-                Text(controller.getInventoryTotal.toString(),style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(totalInventory,style: const TextStyle(fontWeight: FontWeight.bold)),
                 const Text('Inventario',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w400)),
               ],
             ),
@@ -159,7 +167,7 @@ class CataloguePage extends StatelessWidget {
             visualDensity: VisualDensity.compact,
             label: Column(
               children: [
-                Text(controller.getTotalInventory,style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(totalInventoryValue,style: const TextStyle(fontWeight: FontWeight.bold)),
                 const Text('Valor del inventario',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w400)),
               ],
             ),
@@ -513,7 +521,7 @@ class CataloguePage extends StatelessWidget {
                             // text : precio de venta
                             Row(
                               children: [
-                                Text(Publications.getFormatoPrecio(monto: item.salePrice),style: TextStyle(fontSize: 20,fontWeight:FontWeight.bold,color: homeController.getDarkMode?Colors.white:Colors.black )),
+                                Text(Publications.getFormatoPrecio(value: item.salePrice),style: TextStyle(fontSize: 20,fontWeight:FontWeight.bold,color: homeController.getDarkMode?Colors.white:Colors.black )),
                                 const Spacer(),
                                 // button : editar producto
                                 OutlinedButton(

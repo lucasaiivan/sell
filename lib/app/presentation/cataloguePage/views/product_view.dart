@@ -163,7 +163,7 @@ class ProductView extends StatelessWidget {
                       children: [
                         // text : precio de venta al publico del producto si es esta en el catalogo
                         Text(
-                            Publications.getFormatoPrecio( monto: controller.getProduct.salePrice ),
+                            Publications.getFormatoPrecio( value: controller.getProduct.salePrice ),
                             style: const TextStyle(color: colorText,fontSize: 30, fontWeight: FontWeight.bold),textAlign: TextAlign.end),
                         // text : fecha de publicacion
                         Padding(
@@ -595,7 +595,7 @@ class ProductView extends StatelessWidget {
                             ),
                       title: Text(
                           Publications.getFormatoPrecio(
-                              monto: controller
+                              value: controller
                                   .getListPricesForProduct[index].price),
                           style: const TextStyle(
                               color: colorText,
@@ -733,7 +733,7 @@ class ProductView extends StatelessWidget {
             // text : descripcion del producto
             Flexible(child: Opacity(opacity: 0.8,child: Text(product.description,style: const TextStyle(fontSize: 12,fontWeight: FontWeight.bold),maxLines: 2,overflow: TextOverflow.ellipsis))),
             // text : precio del producto
-            Text(Publications.getFormatoPrecio(monto: product.salePrice),style: const TextStyle(fontSize: 14,fontWeight: FontWeight.bold)),
+            Text(Publications.getFormatoPrecio(value: product.salePrice),style: const TextStyle(fontSize: 14,fontWeight: FontWeight.bold)),
           ],
         ):Row(
           mainAxisSize: MainAxisSize.min,
@@ -751,7 +751,7 @@ class ProductView extends StatelessWidget {
                     // text : descripcion dxel producto
                     Flexible(child: Opacity(opacity: 0.8,child: Text(product.description,style: const TextStyle(fontSize: 12,fontWeight: FontWeight.bold),maxLines: 2,overflow: TextOverflow.ellipsis))),
                     // text : precio del producto
-                    Text(Publications.getFormatoPrecio(monto: product.salePrice),style: const TextStyle(fontSize: 14,fontWeight: FontWeight.bold)),
+                    Text(Publications.getFormatoPrecio(value: product.salePrice),style: const TextStyle(fontSize: 14,fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),

@@ -12,7 +12,8 @@ import '../../domain/entities/ticket_model.dart';
 import '../../presentation/historyCashRegisterPage/views/historyCashRegister_view.dart';
 import '../../presentation/transactionsPage/views/transactions_view.dart';
 import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
+import 'package:pdf/widgets.dart' as pw; 
+// ignore: depend_on_referenced_packages
 import 'package:path_provider/path_provider.dart';
 
 class Publications {
@@ -20,17 +21,38 @@ class Publications {
 
   static String generateUid() => DateFormat('ddMMyyyyHHmmss').format(Timestamp.now().toDate()).toString();
   // obtiene un double y devuelve un monto formateado
-  static String getFormatoPrecio({String moneda = "\$", required double monto}) {
-    int decimalDigits = (monto % 1) == 0 ? 0 : 2;
-
+  static String getFormatoPrecio({String moneda = "\$", required double value, bool simplified = false }) {
+    // var
+    int decimalDigits = (value % 1) == 0 ? 0 : 2; // cantidad de decimales
+    // formater : formato de moneda
     var formatter = NumberFormat.currency(
       locale: 'es_AR',
       name: moneda,
-      customPattern: monto >= 0 ? '\u00a4###,###,##0.0' : '-\u00a4###,###,##0.0',
+      customPattern: value >= 0 ? '\u00a4###,###,##0.0' : '-\u00a4###,###,##0.0',
       decimalDigits: decimalDigits,
     );
+    if(simplified){
+      /// Formatea un número entero a una cadena de texto con abreviaturas 'K' y 'M'.
+      ///
+      /// Si el número es menor que 10,000, se devuelve como está.
+      /// Si el número es 10,000 o más, pero menos que 1,000,000, se divide por 1,000 y se agrega 'K' al final.
+      /// Si el número es 1,000,000 o más, se divide por 1,000,000 y se agrega 'M' al final.
+      ///
+      /// [value] es el número entero que se va a formatear.
+      /// 
+      if (value < 10000) {
+        // Si el número es menor que 10000, simplemente devuélvelo como una cadena.
+        return formatter.format(value);
+      } else if (value < 1000000) {
+        // Si el número es 10000 o más, pero menos que 1000000, divídelo por 1000 y agrega 'K' al final.
+        return '${formatter.format(value / 1000)}K';
+      } else {
+        // Si el número es 1000000 o más, divídelo por 1000000 y agrega 'M' al final.
+        return '${formatter.format(value / 1000000)}M';
+      }
+    }
 
-    return formatter.format(monto.abs());
+    return formatter.format(value.abs());
   }
 
   

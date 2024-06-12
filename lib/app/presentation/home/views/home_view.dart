@@ -61,12 +61,10 @@ class HomeView extends GetView<HomeController> {
         child: InternetConnectivityBuilder(
           connectivityBuilder: (BuildContext context, bool hasInternetAccess, Widget? child) { 
             if(hasInternetAccess) {
-              // con conexión a internet
-              controller.setInternetConnection = hasInternetAccess;
+              // con conexión a internet 
               return getView(index: controller.getIndexPage);
             } else {
-              // sin conexión a internet
-              controller.setInternetConnection = hasInternetAccess;
+              // sin conexión a internet 
               return Scaffold(
                 appBar: AppBar(
                   // quitar margen

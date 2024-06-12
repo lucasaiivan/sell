@@ -348,7 +348,7 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
                     ),
                   ),
                   // text : precio
-                  Text(Publications.getFormatoPrecio(monto: product.salePrice),style: const  TextStyle(fontSize: 18,fontWeight: FontWeight.w300),)
+                  Text(Publications.getFormatoPrecio(value: product.salePrice),style: const  TextStyle(fontSize: 18,fontWeight: FontWeight.w300),)
                 ],
               ),
             ),

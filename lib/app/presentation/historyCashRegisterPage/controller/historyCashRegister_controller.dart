@@ -293,7 +293,7 @@ class HistoryCashRegisterController extends GetxController {
         amount += element.balance == 0 ? element.getExpectedBalance : element.balance;
       }
     }
-    return Publications.getFormatoPrecio(monto: amount);
+    return Publications.getFormatoPrecio(value: amount);
   }
 
   // WIDGETS COMPONENTS
@@ -303,7 +303,7 @@ class HistoryCashRegisterController extends GetxController {
     int minutes = cashRegister.closure.difference(cashRegister.opening).inMinutes.remainder(60);
     String time = hour==0?'Tiempo: $minutes minutos':'Tiempo: $hour horas y $minutes minutos';
     // var : subtitle
-    String subtitle = 'Balance: ${Publications.getFormatoPrecio(monto: cashRegister.balance == 0 ? cashRegister.getExpectedBalance : cashRegister.balance)}\n$time';
+    String subtitle = 'Balance: ${Publications.getFormatoPrecio(value: cashRegister.balance == 0 ? cashRegister.getExpectedBalance : cashRegister.balance)}\n$time';
 
     return ListTile(
       title: Text(Publications.getFechaPublicacionFormating(
