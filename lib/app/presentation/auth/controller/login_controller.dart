@@ -18,14 +18,14 @@ class LoginController extends GetxController {
   SplashController homeController = Get.find<SplashController>();
 
   // state : style
-  Rx<Color> checkPolicyAlertColor = Colors.orange.shade100.withOpacity(0.4).obs;
+  Rx<Color> checkPolicyAlertColor = Colors.orange.shade100.withOpacity(0.3).obs;
   // state - Check Accept Privacy And Use Policy
   RxBool stateCheckAcceptPrivacyAndUsePolicy = false.obs;
   bool get getStateCheckAcceptPrivacyAndUsePolicy =>
       stateCheckAcceptPrivacyAndUsePolicy.value;
   set setStateCheckAcceptPrivacyAndUsePolicy(bool value) {
     if(value){checkPolicyAlertColor.value = Colors.transparent;}
-    else {checkPolicyAlertColor.value = Colors.orange.shade100.withOpacity(0.4);}
+    else {checkPolicyAlertColor.value = Colors.orange.shade100.withOpacity(0.3);}
     stateCheckAcceptPrivacyAndUsePolicy.value = value;  
   }
 

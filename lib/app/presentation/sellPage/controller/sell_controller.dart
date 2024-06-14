@@ -1,7 +1,5 @@
  
-import 'dart:async';
-import 'dart:io';
-
+import 'dart:async'; 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart'; 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -501,7 +499,6 @@ class SellController extends GetxController {
     update();
     Get.back();
   } 
-
   void addSaleFlash() {
     // generate new ID
     var id = Publications.generateUid();
@@ -518,6 +515,24 @@ class SellController extends GetxController {
       ComponentApp().showMessageAlertApp(title: '😔No se puedo agregar 😔',message: 'Debe ingresar un valor distinto a 0');
     }
   }
+  void confirmedPurchase() { 
+    // el [Usuario] procede a confirmar la venta del ticket  //
+
+    // el usuario confirmo su venta
+    setStateConfirmPurchase = true;  
+
+    // condition : registramos la venta si el usuario esta logueado
+    if(homeController.getUserAnonymous == false){
+      registerTransaction();
+    }else{
+      // set : default values  
+      setStateConfirmPurchaseComplete = true; 
+      setLastTicket = TicketModel.fromMap(getTicket.toJson()); 
+      setTicket = TicketModel(creation: Timestamp.now(), listPoduct: []);
+    }
+    
+  }
+  
   // Getters //
   String getValueChange() {
 
@@ -529,21 +544,6 @@ class SellController extends GetxController {
   String getValueReceived() {
     // text format : devuelte un texto formateado del monto que el vendedor recibio
     return Publications.getFormatoPrecio(value: getValueReceivedTicket);
-  }
-
-  void confirmedPurchase() { 
-    // el [Usuario] procede a confirmar la venta del ticket  //
-
-    // el usuario confirmo su venta
-    setStateConfirmPurchase = true;  
-
-    // condition : registramos la venta si el usuario esta logueado
-    if(homeController.getUserAnonymous == false){
-      registerTransaction();
-    }else{
-      setStateConfirmPurchaseComplete = true;
-    }
-    
   }
   
   // DIALOG // 
@@ -999,7 +999,7 @@ class _NewProductViewState extends State<NewProductView> {
         ),
       ),
     );
-    // TODO : RangeError TextFormField : cuando el usuario mantiene presionado el boton de borrar > 'RangeError : Invalid value: only valid value is 0: -1'
+    // TODO : error :  RangeError TextFormField : cuando el usuario mantiene presionado el boton de borrar > 'RangeError : Invalid value: only valid value is 0: -1'
     Widget widgetTextFieldPrice = Padding(
           padding: const EdgeInsets.symmetric(horizontal:12, vertical: 6),
           child: Form(

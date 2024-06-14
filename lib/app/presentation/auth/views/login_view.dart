@@ -72,11 +72,11 @@ class AuthView extends GetView<LoginController> {
                   child: FadeIn(
                     key:  Key((!controller.getStateCheckAcceptPrivacyAndUsePolicy).toString()),
                     animate:true,
-                    child: ClipRRect( 
+                    child: ClipRRect(  
                       borderRadius: BorderRadius.circular(12.0),
-                      child: Obx(() => AnimatedContainer( 
+                      child: Obx(() => AnimatedContainer(
                         duration: const Duration(milliseconds:500),
-                        color: controller.checkPolicyAlertColor.value ,
+                        color: Colors.transparent,
                         child: widgetCheckAcceptPrivacyAndUsePolicy(),
                         ))),
                   ),
@@ -132,18 +132,19 @@ class AuthView extends GetView<LoginController> {
       ),
     );
 
-    return Obx(() => Padding(
+    return Padding(
           padding: const EdgeInsets.all(8.0),
-          child: CheckboxListTile(  
+          child: CheckboxListTile(   
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
             selectedTileColor: Colors.transparent,
+            tileColor: controller.checkPolicyAlertColor.value ,
             checkColor: Colors.white,
             activeColor: Colors.blue,
             title: text,
             value: controller.getStateCheckAcceptPrivacyAndUsePolicy,
             onChanged: (value) => controller.setStateCheckAcceptPrivacyAndUsePolicy = value!,
           ),
-        ));
+        );
   }
 
   Widget button({required Function() callback,required String text,Color colorText = Colors.white, Color colorButton = Colors.purple,double padding = 12}){

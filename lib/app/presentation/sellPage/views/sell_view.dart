@@ -219,8 +219,17 @@ class SalesView extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             // image : avatar del usuario
-                            ComponentApp().userAvatarCircle(urlImage: homeController.getProfileAccountSelected.image),
-                            const SizedBox(width: 5),
+                            //ComponentApp().userAvatarCircle(urlImage: homeController.getProfileAccountSelected.image),
+                            CachedNetworkImage(
+                              fit: BoxFit.cover,
+                              imageUrl: homeController.getProfileAccountSelected.image == ''
+                                  ? 'default'
+                                  : homeController.getProfileAccountSelected.image,
+                              placeholder: (context, url) => CircleAvatar(backgroundColor: Colors.grey.withOpacity(0.4),radius: 16),
+                              imageBuilder: (context, image) => CircleAvatar(backgroundImage:image,radius: 16),
+                              errorWidget: (context, url, error) => CircleAvatar(backgroundColor: Colors.grey.withOpacity(0.4),radius: 16),
+                            ),
+                            const SizedBox(width:8),
                             // text : name 
                             Text(homeController.getProfileAccountSelected.name,textAlign: TextAlign.center,style: textValuesStyle.copyWith(fontSize: 18,fontWeight: FontWeight.bold)),
                           ],
@@ -385,19 +394,22 @@ class SalesView extends StatelessWidget {
     // opcion premium : esta funcionalidad de arqueo de caja solo esta disponible en la version premium
     bool isPremium = homeController.getIsSubscribedPremium;
     // controllers
-    final controller = Get.find<SellController>();
+    final controller = Get.find<SellController>(); 
  
     // condition : si el esta en modo de prueba, solo muestra el boton de inciar caja
-    if( homeController.getUserAnonymous){
+    if( homeController.getUserAnonymous ){
       return Padding(
         padding: const EdgeInsets.all(8.0),
-        child: ComponentApp().buttonAppbar(
-          context: buildContext,
-          onTap: null,
-          text: 'Iniciar caja',
-          iconTrailing: Icons.keyboard_arrow_down_rounded,
-          colorAccent: homeController.getDarkMode? Colors.white: Colors.black,
-          colorBackground:homeController.getDarkMode ? Colors.white12 : Colors.grey.shade300,
+        child: Opacity(
+          opacity: 0.3,
+          child: ComponentApp().buttonAppbar(
+            context: buildContext,
+            onTap: null,
+            text: 'Iniciar caja',
+            iconTrailing: Icons.keyboard_arrow_down_rounded,
+            colorAccent: homeController.getDarkMode? Colors.white: Colors.black,
+            colorBackground:homeController.getDarkMode ? Colors.white12 : Colors.grey.shade300,
+          ),
         ),
       ); 
     }

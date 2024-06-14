@@ -55,9 +55,11 @@ dependencies:
   # storage 
   get_storage: ^2.1.1
   flutter_secure_storage: ^9.0.0
-
   # app info 
   package_info_plus: ^8.0.0 # Un complemento de Flutter para obtener información sobre el paquete actual, como el nombre, la versión y el número de compilación.
+  #animations
+  lottie: ^3.1.2
+
   # others   
   observe_internet_connectivity: ^1.0.2 # Un paquete de Flutter que proporciona un widget de conexión a Internet que se puede usar para verificar la conectividad a Internet
   fast_cached_network_image: ^1.2.0
@@ -134,7 +136,7 @@ flutter:
       - assets/catalogue.png
       - assets/sell.png
       - assets/transaction.png
-      
+      - assets/premium_anim.json
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

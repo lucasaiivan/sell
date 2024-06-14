@@ -311,9 +311,9 @@ class ControllerProductsEdit extends GetxController {
     super.onClose();
   }
 
-  // TODO : la subcripción por defecto es true
+  // TODO : release : la subcripción por defecto es [homeController.getProfileAccountSelected.subscribed;]
   // get 
-  bool get isSubscribed => true; //homeController.getProfileAccountSelected.subscribed;
+  bool get isSubscribed => homeController.getProfileAccountSelected.subscribed;
 
   //
   // FUNCTIONS
@@ -399,13 +399,13 @@ class ControllerProductsEdit extends GetxController {
                 await ref.getDownloadURL().then((value) => getProduct.image = value); // obtenemos la url de la imagen
               }
               // procede agregrar en la base de datos global de productos
-              // TODO : delete release (getEditModerator)
-              if ( getEditModerator || getProduct.local == false) { 
+              // TODO : release : delete release (getEditModerator)
+              /* if ( getEditModerator || getProduct.local == false) { 
                 // set
                 getProduct.documentUpgrade = time;
                 // se guarda el producto en la base de datos global
                   setProductPublicFirestore( );
-              }
+              } */
               // condition : verifica si el producto es global publico
               if(!getProduct.local){
                 // Registra el precio en una colección publica
@@ -1199,7 +1199,7 @@ class ControllerProductsEdit extends GetxController {
     update(['updateAll']);
   }
 
-  //TODO: eliminar para release
+
   // DEVELOPER OPTIONS
   void showDialogDeleteOPTDeveloper() {
     Get.dialog(AlertDialog(
@@ -1327,8 +1327,9 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
       appBar: AppBar(
         title: const Text('Marcas'),
         actions: [
-          // TODO : delete icon 'add new mark for release'
-          IconButton(onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},icon: const Icon(Icons.add)),
+          // TODO : release : delete icon 'add new mark for release'
+          //IconButton(onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},icon: const Icon(Icons.add)),
+          // icon : cambiar vista
           IconButton(icon: Icon( viewListState? Icons.grid_view_rounded:Icons.table_rows_rounded),onPressed: () { 
             setState(() {
               viewListState = !viewListState;
@@ -1450,13 +1451,13 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
           children: [
             const Text('No se encontro :('),
 
-            // TODO : disable moderador ( crear marca )
-            const SizedBox(height: 20),
+            // TODO : release : disable moderador ( crear marca )
+            /* const SizedBox(height: 20),
             TextButton.icon(
               onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},
               icon: const Icon(Icons.add_box_outlined),
               label: const Text('Crear marca'),
-            )
+            ) */
           ],
         )),
         filter: (product) => [product.name,product.description],
@@ -1476,8 +1477,8 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         Get.back();
       },
       onLongPress: (){
-        // TODO : delete fuction
-        Get.to(() => CreateMark(mark: marcaSelect));
+        // TODO : release : delete fuction
+        //Get.to(() => CreateMark(mark: marcaSelect));
       },
       borderRadius: BorderRadius.circular(5),
       child: Column(
@@ -1510,8 +1511,8 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         Get.back();
       },
       onLongPress: () {
-        // TODO : delete fuction
-        Get.to(() => CreateMark(mark: marcaSelect));
+        // TODO : release : delete fuction
+        //Get.to(() => CreateMark(mark: marcaSelect));
       },
     );
   }
@@ -1560,7 +1561,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
   
 }
 
-// TODO : delete release
+// WIDGETS ( MODERATOR )
 class CreateMark extends StatefulWidget {
   final Mark mark;
   const CreateMark({required this.mark, Key? key}) : super(key: key);

@@ -83,8 +83,8 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
             controller.getWriteCode||controller.getproductDoesNotExist? Container(): WidgetSuggestionProduct(positionDinamic: true,list: controller.getListProductsSuggestions),
             controller.getWriteCode||controller.getproductDoesNotExist? Container(): const SizedBox(height: 20), 
             
-            // TODO: disable release
-            controller.getWriteCode||controller.getproductDoesNotExist? Container(): popupMenuPagesProveedor,
+            // TODO: release : disabled code ( paginas de proveedores web )
+            //controller.getWriteCode||controller.getproductDoesNotExist? Container(): popupMenuPagesProveedor,
             // view : image 
             controller.getproductDoesNotExist?Container():
             const Card(
@@ -109,14 +109,7 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
               child: Column(
                 children: [ 
                   // textfield : código de barra
-                  textFieldCodeBar(), 
-                  FadeInRight(child: TextButton(
-                    onPressed: (){
-                      if(controller.copyClipboard == '') return;
-                      controller.textEditingController.text = controller.copyClipboard;
-                      controller.searchProductCatalogue(id: controller.copyClipboard);
-                    },
-                    child: const Text('Pegar código de portapapeles'))),
+                  textFieldCodeBar(),  
                   const SizedBox(height: 12.0),
                   // button : buscar código
                   controller.getWriteCode||controller.getproductDoesNotExist?Container():

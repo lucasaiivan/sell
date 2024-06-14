@@ -354,8 +354,8 @@ class ProductNewFormView extends StatelessWidget {
         Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            //TODO: eliminar para desarrrollo
-            Container(
+            //TODO: release : disabled code
+            /* Container(
               color: Colors.black.withOpacity(0.01),
               padding: const EdgeInsets.symmetric(horizontal:20,vertical:1),
               margin: const EdgeInsets.symmetric(  vertical:20),
@@ -379,7 +379,7 @@ class ProductNewFormView extends StatelessWidget {
                   
                 ],
               ),
-            ),
+            ), */
 
             // text : texto infomativo
             Padding(
@@ -1424,9 +1424,7 @@ class _SelectCategoryState extends State<SelectCategory> {
         failure: Center(child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('No se encontro :('),
-
-            // TODO : disable moderador ( crear marca )
+            const Text('No se encontro :('), 
             const SizedBox(height: 20),
             TextButton.icon(
               onPressed: () {
@@ -1601,9 +1599,7 @@ class _SelectProviderState extends State<SelectProvider> {
         failure: Center(child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('No se encontro :('),
-
-            // TODO : disable moderador ( crear marca )
+            const Text('No se encontro :('), 
             const SizedBox(height: 20),
             TextButton.icon(
               onPressed: () {

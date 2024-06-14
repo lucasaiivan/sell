@@ -260,8 +260,8 @@ class ControllerProductsSearch extends GetxController {
 
   void toProductNew({required String id}) {
 
-    // TODO : disable for release [local]
-    productSelect.local = false;
+    // TODO : disable for release [local] en (debug) es siempre [true] para poder verificar el codigo
+    //  productSelect.local = false;
 
     //values default
     clean();

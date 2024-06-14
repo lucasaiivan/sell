@@ -454,7 +454,10 @@ Widget body({required BuildContext context}){
                       homeController.showModalBottomSheetConfig();
                     },
                   ),  
-                  homeController.getCashierMode?const Divider(height:0,thickness:.5):Container(),
+                  homeController.getCashierMode || isAnonymous?const Padding(
+                    padding: EdgeInsets.only(bottom: 0,top: 20),
+                    child: Divider(height:0,thickness:.5),
+                  ):Container(),
                   // ----------------- //
                   // funciones premium //
                   // ----------------- //
@@ -507,7 +510,7 @@ Widget body({required BuildContext context}){
                     title: const Text('Catálogo'),
                     onTap: () => homeController.setIndexPage = 3):Container(),
                   // TODO : desabilitar visualizacion para produccion
-                  ListTile(
+                  /* ListTile(
                     enabled: !isAnonymous,
                     selected: homeController.getIndexPage == 5,
                     leading: const Icon(Icons.admin_panel_settings_outlined),
@@ -516,7 +519,7 @@ Widget body({required BuildContext context}){
                     onTap: () {
                       Get.toNamed(Routes.moderator); 
                     },
-                  ),
+                  ), */
                   // multiusuario
                   user.multiuser || isAnonymous?homeController.getCashierMode?Container():ListTile(
                     enabled: !isAnonymous,
@@ -867,7 +870,6 @@ class ComponentApp extends StatelessWidget {
     ));
   }
 
-  // notification
   void showMessageAlertApp({required String title, required String message}) {
     Get.snackbar(title, message,
         margin: const EdgeInsets.all(12),

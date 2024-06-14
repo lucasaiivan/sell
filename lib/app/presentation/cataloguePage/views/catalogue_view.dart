@@ -68,10 +68,10 @@ class CataloguePage extends StatelessWidget {
                   PopupMenuItem(value: '1',enabled: catalogueController.homeController.getIsSubscribedPremium, child: const Text('Mostrar con stock')),
                   PopupMenuItem(value: '3',enabled: catalogueController.homeController.getIsSubscribedPremium, child: const Text('Mostrar con stock bajos')),
                   PopupMenuItem(value: '4',enabled: catalogueController.homeController.getIsSubscribedPremium, child: const Text('Actualizado hace más de 2 meses')),
-                  // TODO : delete release
-                  const PopupMenuItem(value: '6', child: Text('Sin verificación')),
-                  const PopupMenuItem(value: '7', child: Text('Cargar toda la Base de Datos')),
-                  const PopupMenuItem(value: '8', child: Text('DB sin verificar')),
+                  // TODO :release :  disabled options
+                  //const PopupMenuItem(value: '6', child: Text('Sin verificación')),
+                  //const PopupMenuItem(value: '7', child: Text('Cargar toda la Base de Datos')),
+                  //const PopupMenuItem(value: '8', child: Text('DB sin verificar')),
                 ]),
       ],
     );
@@ -185,14 +185,14 @@ class CataloguePage extends StatelessWidget {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // text : cantidad de veces que se consulta la db del catalogo
+                  /* // text : cantidad de veces que se consulta la db del catalogo
                   homeController.dbQueryAmoun==0?Container():Padding(
                     padding: const EdgeInsets.all(12),
                     child: Text('query database: ${homeController.dbQueryAmoun}',style: const TextStyle(fontSize: 12,fontWeight: FontWeight.w300)),
-                  ),
+                  ), */
                   // view : control de inventario
                   homeController.getIsSubscribedPremium?controller.viewStockAlert:Padding(
-                    padding: const EdgeInsets.all(20.0),
+                    padding: const EdgeInsets.all(12.0),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.center,
                       children: [

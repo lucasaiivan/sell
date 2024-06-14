@@ -61,12 +61,11 @@ class ProductEdit extends StatelessWidget {
           ? Text(controller.getTextAppBar,style: TextStyle(fontSize: 18.0, color: appBarTextColor))
           : Text(controller.getItsInTheCatalogue ? 'Editar' :'Nuevo',style: TextStyle(fontSize: 18.0, color: appBarTextColor)),
       actions: <Widget>[
-        // TODO : delete release
-        // 
+        // TODO : release : disabled code
         // start : contenido para desarrollo (debug) 
         // iconButton : opciones de moderador
         //
-        controller.getProduct.local?Container():
+        /* controller.getProduct.local?Container():
         controller.getLoadingData
             ? Container()
             :IconButton(
@@ -76,7 +75,7 @@ class ProductEdit extends StatelessWidget {
                   const OptionsModeratorsWidget(),
                 );
               },
-            ), 
+            ),  */
         //
         // fin contentido para desarrollo (debug)
         //
@@ -530,18 +529,7 @@ class ProductEdit extends StatelessWidget {
     );
   }
 
-  /* WIDGETS COMPONENT */  
-  Widget get widgetForModerator{
-  // TODO : delete release
-  return TextButton(
-    onPressed: (){
-      Get.bottomSheet(
-        const OptionsModeratorsWidget(),
-      );
-    },
-    child: const Text('opciones para moderadores',style: TextStyle(color: Colors.blue),textAlign: TextAlign.center,),
-  );
-}
+  /* WIDGETS COMPONENT */   
   Widget textfielBottomSheetListOptions({required String labelText,String textValue = '',required Function() onTap,bool stateEdit = true,EdgeInsetsGeometry contentPadding = const EdgeInsets.all(12),Widget? suffix}) {
 
     // value
@@ -999,8 +987,7 @@ class _SelectProviderState extends State<SelectProvider> {
           mainAxisSize: MainAxisSize.min,
           children: [
             // text 
-            const Text('No se encontro :('),
-            // TODO : delete release ( agregar proveedor )
+            const Text('No se encontro :('), 
             const SizedBox(height: 20),
             // textButton : agregar proveedor
             TextButton(onPressed: (){Get.back();showDialogSetProvider(provider: Provider());}, child: const Text('Agregar proveedor')),

@@ -253,7 +253,9 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
     divider = ComponentApp().divider();
     // style  
     textDescriptionStyleColor = Get.isDarkMode?Colors.white:Colors.black ;
-    valueTextStyle= TextStyle(height:2,color: textDescriptionStyleColor); 
+    valueTextStyle= TextStyle(height:2,color: textDescriptionStyleColor);  
+    // var
+    bool isSuperUserAdmin = widget.user.superAdmin && widget.user.email == homeController.getProfileAdminUser.email;
 
     return Scaffold(
       appBar: AppBar(
@@ -340,11 +342,11 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
                     // button : crear o actualizar
                     ComponentApp().button( 
                       text: newUser?'Crear usuario':'Actualizar',
-                      colorButton: homeController.getIsSubscribedPremium?null:Colors.amber,
-                      colorAccent:homeController.getIsSubscribedPremium?Colors.blue:Colors.white,
+                      colorButton: homeController.getIsSubscribedPremium && isSuperUserAdmin==false ?null:Colors.amber,
+                      colorAccent:homeController.getIsSubscribedPremium && isSuperUserAdmin==false ?Colors.blue:Colors.white,
                       onPressed: (){ 
-                        // condition : comprueba si la cuenta tiene una suscripción premium
-                        if(homeController.getIsSubscribedPremium==false){
+                        // condition : comprueba si la cuenta tiene una suscripción premium y no es el superusaurio editando su propio perfil
+                        if(homeController.getIsSubscribedPremium==false && isSuperUserAdmin==false){
                           // no es premium
                           Get.back();
                           homeController.showModalBottomSheetSubcription(id: 'multiuser');

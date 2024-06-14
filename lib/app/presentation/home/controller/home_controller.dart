@@ -1,6 +1,5 @@
-import 'dart:io';   
-import 'package:get/get_rx/get_rx.dart';
-import 'package:intl/intl.dart';
+import 'dart:io';    
+import 'package:lottie/lottie.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,8 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:purchases_flutter/object_wrappers.dart';
+import 'package:google_sign_in/google_sign_in.dart'; 
 import 'package:purchases_flutter/purchases_flutter.dart'; 
 import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart'; 
@@ -549,11 +547,12 @@ class HomeController extends GetxController {
           upgrade: Timestamp.now(),
           documentCreation: Timestamp.now(),
           documentUpgrade: Timestamp.now(),
-          id: '078943658457643',
-          code: '078943658457643',
-          description: 'Agua Mineral 1L',
-          salePrice: 170,
-          purchasePrice: 99,
+          image: 'https://ardiaprod.vtexassets.com/arquivos/ids/298980/Gaseosa-CocaCola-Sabor-Original-500-Ml-_1.jpg',
+          id: '7790895000782',
+          code: '7790895000782',
+          description: 'Coca Cola Original 500 Ml',
+          salePrice: 1200,
+          purchasePrice: 600,
           favorite: true,
           sales: 4,
           stock: true,
@@ -564,13 +563,15 @@ class HomeController extends GetxController {
               DateTime.now().subtract(const Duration(days: 1))),
           documentCreation: Timestamp.now(),
           documentUpgrade: Timestamp.now(),
-          id: '69696435423878',
-          code: '69696435423878',
-          description: 'Alfajor De Chocolate Con Dulce De Leche 110 g',
-          salePrice: 60,
-          purchasePrice: 35,
+          image: 'https://img.sistemastock.com/img/7795735000335.jpg',
+          id: '7795735000335',
+          code: '7795735000335',
+          description: 'Don Satur Dulce 200G',
+          salePrice: 866,
+          purchasePrice: 400,
           sales: 1,
           stock: true,
+          favorite: true,
           quantityStock: 47),
       ProductCatalogue(
           creation: Timestamp.now(),
@@ -578,11 +579,74 @@ class HomeController extends GetxController {
               DateTime.now().subtract(const Duration(days: 1))),
           documentCreation: Timestamp.now(),
           documentUpgrade: Timestamp.now(),
-          id: '98679678967969',
-          code: '98679678967969',
-          description: 'Galletitas Dulces 200 g',
-          salePrice: 140,
-          purchasePrice: 80,
+          image: 'https://img.sistemastock.com/img/7790310984192.jpg',
+          id: '7790310984192',
+          code: '7790310984192',
+          description: 'Doritos 85G',
+          salePrice: 2200,
+          purchasePrice: 1500,
+          sales: 7,
+          stock: true,
+          quantityStock: 18,
+          ),
+        ProductCatalogue(
+          creation: Timestamp.now(),
+          upgrade: Timestamp.fromDate(
+              DateTime.now().subtract(const Duration(days: 1))),
+          documentCreation: Timestamp.now(),
+          documentUpgrade: Timestamp.now(),
+          image: 'https://img.sistemastock.com/img/0000077953124.jpg',
+          id: '77953124',
+          code: '77953124',
+          description: 'COFLER BLOCK 38 GR',
+          salePrice: 1000,
+          purchasePrice: 600,
+          sales: 7,
+          stock: true,
+          quantityStock: 18,
+          ),
+        ProductCatalogue(
+          creation: Timestamp.now(),
+          upgrade: Timestamp.fromDate(
+              DateTime.now().subtract(const Duration(days: 1))),
+          documentCreation: Timestamp.now(),
+          documentUpgrade: Timestamp.now(),
+          image: 'https://img.sistemastock.com/img/7790895000836.jpg',
+          id: '7790895000836',
+          code: '7790895000836',
+          description: 'FANTA NARANJA X 500 ML',
+          salePrice: 900,
+          purchasePrice: 490,
+          sales: 7,
+          stock: true,
+          quantityStock: 18,
+          ),
+          ProductCatalogue(
+          creation: Timestamp.now(),
+          upgrade: Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 1))),
+          documentCreation: Timestamp.now(),
+          documentUpgrade: Timestamp.now(),
+          image: 'https://img.sistemastock.com/img/7790387015324.jpg',
+          id: '7790387015324',
+          code: '7790387015324',
+          description: 'Yerba Mate Mañanita 500g',
+          salePrice: 2100,
+          purchasePrice: 1000,
+          sales: 7,
+          stock: true,
+          quantityStock: 18,
+          ),
+          ProductCatalogue(
+          creation: Timestamp.now(),
+          upgrade: Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 1))),
+          documentCreation: Timestamp.now(),
+          documentUpgrade: Timestamp.now(),
+          image: 'https://img.sistemastock.com/img/7791324157022.jpg',
+          id: '7791324157022',
+          code: '7791324157022',
+          description: 'PITUSAS VAINILLA 160G',
+          salePrice: 800,
+          purchasePrice: 450,
           sales: 7,
           stock: true,
           quantityStock: 18,
@@ -706,11 +770,11 @@ class HomeController extends GetxController {
     CollectionReference referenceCollectionCatalogue = Database.refFirestoreCatalogueProduct(idAccount: idAccount); 
     referenceCollectionCatalogue.get().then((value) {
 
-      // TODO : delete for release
+      // TODO : release : disabled code
       // incrementamos el valor de veces que se obtuvo datos de la db o en su defecto creamos la variable en el almacenamiento local
-      String dateId = DateFormat('ddMMyyyy').format(Timestamp.now().toDate()).toString();
+      /* String dateId = DateFormat('ddMMyyyy').format(Timestamp.now().toDate()).toString();
       int count = GetStorage().hasData(dateId) ? GetStorage().read(dateId) : 0;
-      GetStorage().write(dateId, count + value.docs.length );
+      GetStorage().write(dateId, count + value.docs.length ); */
 
       // values
       List<ProductCatalogue> list = [];
@@ -729,38 +793,7 @@ class HomeController extends GetxController {
       // error
       setCatalogueProducts = [];
     }
-    );
-    /* // stream : escuchamos los cambios en los productos de cátalogo
-    streamSubscription.listen((value) {
-
-      // TODO : delete for release
-      // sharedPreference : incrementamos el valor de veces que se obtuvo datos de la db o en su defecto creamos la variable en el almacenamiento local
-      String dateId = DateFormat('ddMMyyyy').format(Timestamp.now().toDate()).toString();
-      int count = GetStorage().hasData(dateId) ? GetStorage().read(dateId) : 0;
-      GetStorage().write(dateId, count + value.docs.length );
-
-      //  values
-      List<ProductCatalogue> list = [];
-      if (value.docs.isNotEmpty) {
-        for (var element in value.docs) {
-          // obj
-          ProductCatalogue product = ProductCatalogue.fromMap(element.data()); 
-          // condition : si el producto no tiene id se le asigna el id del documento
-          if(product.id == ''){
-            product.id = element.id;
-          }
-          // add
-          list.add(product);
-        }
-      }
-      //  obtenemos los productos más vendidos
-      getTheBestSellingProducts(idAccount: idAccount);
-      setCatalogueProducts = list;
-
-    }).onError((error) {
-      // error
-      setCatalogueProducts = [];
-    }); */
+    ); 
   }
 
   void readAdminsUsers({required String idAccount}) {
@@ -988,11 +1021,7 @@ class HomeController extends GetxController {
     Get.offAllNamed(Routes.home,arguments: {'currentUser': getUserAuth, 'idAccount': idAccount} );
   }
   // GETTERS //
-  // TODO : delete for release
-  int  get dbQueryAmoun {
-    String dateId = DateFormat('ddMMyyyy').format(Timestamp.now().toDate()).toString();
-    return GetStorage().hasData(dateId)?GetStorage().read(dateId):0;
-  }
+  // ...
   // DIALOGS //
   void showModalBottomSheetConfig() {  
     
@@ -1382,7 +1411,8 @@ class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcript
                               }catch (e) { 
                                 // ... handle error
                               }
-                            },
+                            },  
+                            leading: homeController.getIsSubscribedPremium?null: SizedBox(width: 40,height: 40,child: Lottie.asset('assets/premium_anim.json')),
                             title: Text(homeController.getIsSubscribedPremium?'Ya estás subcripto':myProductList[index].storeProduct.title,maxLines:1), 
                             trailing:homeController.getIsSubscribedPremium?const Icon(Icons.thumb_up,color: Colors.white,): Text('${myProductList[index].storeProduct.currencyCode} ${myProductList[index].storeProduct.priceString}')),
                         ),

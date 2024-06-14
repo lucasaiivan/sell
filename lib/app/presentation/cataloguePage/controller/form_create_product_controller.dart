@@ -303,9 +303,9 @@ class ControllerCreateProductForm extends GetxController{
     controllerTextEditPrecioVenta.dispose();
     controllerTextEditQuantityStock.dispose();
   } 
-  // TODO : la subcripción por defecto es true
+  // TODO : release : la subcripción por defecto es [homeController.getProfileAccountSelected.subscribed;]
   // get 
-  bool get isSubscribed => true;//homeController.getProfileAccountSelected.subscribed;
+  bool get isSubscribed =>  homeController.getProfileAccountSelected.subscribed;
 
   //
   // FUNCTIONS
@@ -416,7 +416,7 @@ class ControllerCreateProductForm extends GetxController{
               if(controllerTextEditAlertStock.text!=''){getProduct.alertStock  = int.parse( controllerTextEditAlertStock.text );}
 
               // TODO : DISABLE RELEASE
-              getProduct.verified = getProduct.local ? false : true; 
+              //getProduct.verified = getProduct.local ? false : true; 
 
               // actualización de la imagen del producto
               if (getXFileImage.path != '') { 
@@ -902,80 +902,6 @@ class ControllerCreateProductForm extends GetxController{
     update();
   }
 
-  //TODO: eliminar para release
-  // DEVELOPER OPTIONS
-  void showDialogDeleteOPTDeveloper() {
-    Get.dialog(AlertDialog(
-      title: const Text(
-          "¿Seguro que quieres eliminar este documento definitivamente? (Mods)"),
-      content: const Text(
-          "El producto será eliminado de tu catálogo ,de la base de dato global y toda la información acumulada menos el historial de precios registrado"),
-      actions: <Widget>[
-        // usually buttons at the bottom of the dialog
-        TextButton(
-          child: const Text("Cancelar"),
-          onPressed: () => Get.back(),
-        ),
-        TextButton(
-          child: const Text("Borrar"),
-          onPressed: () {
-            Get.back();
-            deleteProducPublic();
-          },
-        ),
-      ],
-    ));
-  }
-  void getDataProduct({required String id}) {
-    // function : obtiene los datos del producto de la base de datos y los carga en el formulario de edición 
-    if (id != '') {
-      Database.readProductPublicFuture(id: id).then((value) {
-        //  get
-        Product product = Product.fromMap(value.data() as Map);
-        //  set
-        setProduct = getProduct.updateData(product: product);
-        setDataUploadStatusProduct = true;
-        loadDataFormProduct(); // carga los datos del producto en el formulario
-        
-      }).catchError((error) {
-        printError(info: error.toString());
-        setDataUploadStatus = false;
-      }).onError((error, stackTrace) {
-        loadDataFormProduct();
-        printError(info: error.toString()); 
-      });
-    }
-  }
-  void increaseFollowersProductPublic() {
-    // function : aumenta el valor de los seguidores del producto publico
-    Database.refFirestoreProductPublic().doc(getProduct.id).update({'followers': FieldValue.increment(1)});
-    // actualizamos el valor de los seguidores del producto
-    getProduct.followers++;
-    update();
-  }
-  void showDialogSaveOPTDeveloper() {
-    Get.dialog(AlertDialog(
-      title:
-          const Text("¿Seguro que quieres actualizar este docuemnto? (Mods)"),
-      content: const Text(
-          "El producto será actualizado de tu catálogo ,de la base de dato global y toda la información acumulada menos el historial de precios registrado"),
-      actions: <Widget>[
-        // usually buttons at the bottom of the dialog
-        TextButton(
-          child: const Text("Cancelar"),
-          onPressed: () => Get.back(),
-        ),
-        TextButton(
-          child: const Text("Si, actualizar"),
-          onPressed: () {
-            Get.back();
-            save(); // save product
-          },
-        ),
-      ],
-    ));
-  }
-
 }
 
 // select mark
@@ -1016,13 +942,16 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
       appBar: AppBar(
         title: const Text('Marcas'),
         actions: [
-          // TODO : delete icon 'add new mark for release'
-          IconButton(onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},icon: const Icon(Icons.add)),
+          // TODO : release : delete icon 'add new mark for release'
+          // icon : agregar nueva marca ( solo para moderadores)
+          //IconButton(onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},icon: const Icon(Icons.add)),
+          // icon : cambiar de vista
           IconButton(icon: Icon( viewListState? Icons.grid_view_rounded:Icons.table_rows_rounded),onPressed: () { 
             setState(() {
               viewListState = !viewListState;
             });
           }),
+          // icon : buscar marca
           IconButton(icon: const Icon(Icons.search),onPressed: () {Get.back();showSeachMarks();})
         ],
       ),
@@ -1143,13 +1072,13 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text('No se encontro :('),
-            // TODO : disable moderador ( crear marca )
-            const SizedBox(height: 20),
+            // TODO : release : disable moderador ( crear marca )
+            /* const SizedBox(height: 20),
             TextButton.icon(
               onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},
               icon: const Icon(Icons.add_box_outlined),
               label: const Text('Crear marca'),
-            )
+            ) */
           ],
         )),
         filter: (product) => [product.name,product.description],
@@ -1168,8 +1097,8 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         Get.back();
       },
       onLongPress: (){
-        // TODO : delete fuction
-        Get.to(() => CreateMark(mark: marcaSelect));
+        // TODO : release : delete fuction
+        //Get.to(() => CreateMark(mark: marcaSelect));
       },
       borderRadius: BorderRadius.circular(5),
       child: Column(
@@ -1198,8 +1127,8 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         Get.back();
       },
       onLongPress: () {
-        // TODO : delete fuction
-        Get.to(() => CreateMark(mark: marcaSelect));
+        // TODO : release : delete fuction
+        //Get.to(() => CreateMark(mark: marcaSelect));
       },
     );
   }
@@ -1246,8 +1175,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
     list.insert(0, mark);
   }
 }
-
-// TODO : delete release
+ // WIDGETS ( MODERATOR )
 class CreateMark extends StatefulWidget {
   final Mark mark;
   const CreateMark({required this.mark, Key? key}) : super(key: key);
