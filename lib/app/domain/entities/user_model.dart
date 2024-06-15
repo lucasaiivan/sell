@@ -2,7 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
 class UserModel {
+  
   UserModel({
+    this.id = "",
     this.inactivate = false,
     this.account = "", 
     this.email = '',  
@@ -24,6 +26,7 @@ class UserModel {
     this.editAccount = false, 
   });
 
+  String id = ""; // id de autenticación del usuario
   bool inactivate = false; // inactivar usuario
   String account = ""; // el ID de la cuenta administrada por defecto es el ID del usuario quien lo creo
   String email = ''; // email del usuario
@@ -48,7 +51,8 @@ class UserModel {
 
   factory UserModel.fromDocument(DocumentSnapshot doc) {
     Map data = doc.data() as Map;
-    return UserModel(
+    return UserModel( 
+      id: doc.id,
       inactivate: data.containsKey("inactivate") ? doc["inactivate"] : false,
       account: doc["account"],
       email: data.containsKey("email") ? doc["email"] : '',
@@ -74,6 +78,7 @@ class UserModel {
   }
 
   Map<String, dynamic> toJson() => {
+    "id": id,
     "inactivate": inactivate,
     "account": account,
     "email": email,
@@ -97,6 +102,7 @@ class UserModel {
 
   factory UserModel.fromMap(Map data) {
     return UserModel(
+      id: data['id'] ?? '',
       inactivate: data['inactivate'] ?? false,
       account: data['account'] ?? '',
       email: data['email'] ?? '',
@@ -125,6 +131,7 @@ class UserModel {
     if (documentSnapshot.data() != null) {data = documentSnapshot.data() as Map; }
 
     //  set
+    id = data.containsKey('id') ? data['id'] : documentSnapshot.id;
     inactivate = data.containsKey('inactivate') ? data['inactivate'] : false;
     account = data.containsKey('account') ? data['account'] : documentSnapshot.id;
     email = data.containsKey('email') ? data['email'] : '';
@@ -146,9 +153,10 @@ class UserModel {
     editAccount = data.containsKey('editAccount') ? data['editAccount'] : false;
   }
 
-  UserModel copyWith({
+  UserModel copyWith({ 
     bool? inactivate,
     String? id,
+    String? account,
     String? email,
     String? name,
     bool? superAdmin,
@@ -170,7 +178,8 @@ class UserModel {
   }) {
     return UserModel(
       inactivate: inactivate ?? this.inactivate,
-      account: id ?? account,
+      id: id ?? this.id,
+      account: account ?? this.account,
       email: email ?? this.email,
       name: name ?? this.name,
       superAdmin: superAdmin ?? this.superAdmin,

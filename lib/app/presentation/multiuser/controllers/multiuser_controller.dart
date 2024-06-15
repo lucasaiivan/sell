@@ -254,8 +254,8 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
     // style  
     textDescriptionStyleColor = Get.isDarkMode?Colors.white:Colors.black ;
     valueTextStyle= TextStyle(height:2,color: textDescriptionStyleColor);  
-    // var
-    bool isSuperUserAdmin = widget.user.superAdmin && widget.user.email == homeController.getProfileAdminUser.email;
+    // var : true si es su perfil y si es super administrador
+    bool editSuperAdmin = widget.user.email == homeController.getProfileAdminUser.email && widget.user.superAdmin;
 
     return Scaffold(
       appBar: AppBar(
@@ -342,11 +342,11 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
                     // button : crear o actualizar
                     ComponentApp().button( 
                       text: newUser?'Crear usuario':'Actualizar',
-                      colorButton: homeController.getIsSubscribedPremium && isSuperUserAdmin==false ?null:Colors.amber,
-                      colorAccent:homeController.getIsSubscribedPremium && isSuperUserAdmin==false ?Colors.blue:Colors.white,
+                      colorButton: homeController.getIsSubscribedPremium || editSuperAdmin ?Colors.blue:Colors.amber,
+                      colorAccent: Colors.white,
                       onPressed: (){ 
                         // condition : comprueba si la cuenta tiene una suscripción premium y no es el superusaurio editando su propio perfil
-                        if(homeController.getIsSubscribedPremium==false && isSuperUserAdmin==false){
+                        if(homeController.getIsSubscribedPremium==false && !editSuperAdmin){
                           // no es premium
                           Get.back();
                           homeController.showModalBottomSheetSubcription(id: 'multiuser');
@@ -535,7 +535,7 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
               Padding(
                 padding: const EdgeInsets.all(2.0),
                 child: ElevatedButton.icon(
-                  style: ButtonStyle(elevation:MaterialStateProperty.all(widget.user.admin? 5: 0)),
+                  style: ButtonStyle(elevation:WidgetStateProperty.all(widget.user.admin? 5: 0)),
                   icon: widget.user.admin? const Icon(Icons.check_circle_rounded) : Container(),
                   onPressed: setAdmin,
                   label: Text(widget.user.superAdmin?'Super administrador':'Administrador'),
@@ -546,7 +546,7 @@ class _UserAdminAlertDialogState extends State<UserAdminAlertDialog> {
                 padding: const EdgeInsets.all(2.0),
                 child: ElevatedButton.icon(
                   
-                  style: ButtonStyle(elevation:MaterialStateProperty.all(widget.user.personalized? 5: 0)),
+                  style: ButtonStyle(elevation:WidgetStateProperty.all(widget.user.personalized? 5: 0)),
                   icon: widget.user.personalized? const Icon(Icons.check_circle_rounded) : Container(),
                   onPressed: widget.user.superAdmin?null: () { 
                     setState(() {

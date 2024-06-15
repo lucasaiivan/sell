@@ -188,7 +188,7 @@ class AccountController extends GetxController {
       homeController.setProfileAccountSelected = profileAccount.copyWith(); 
 
       // si la cuenta no existe, se crea una nueva de lo contrario de actualiza los datos
-      newAccount? createAccount(data: profileAccount ): updateAccount(data: profileAccount.toJson());
+      newAccount? createAccount(profile: profileAccount ): updateAccount(data: profileAccount.toJson());
 
       //  
       homeController.update();
@@ -223,46 +223,47 @@ class AccountController extends GetxController {
     }
   }
 
-  void createAccount({required ProfileAccountModel data}) async {
+  void createAccount({required ProfileAccountModel profile}) async {
     // Esto guarda un documento con los datos de la cuenta por crear
 
     // vales
-    UserModel user = UserModel(
-        account: data.id,
-        email: homeController.getUserAuth.email ?? '', 
-        superAdmin: true,
-        admin: true,
-        daysOfWeek: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
-        startTime: {'hour':0, 'minute': 0},
-        endTime: {'hour':23, 'minute': 59},
-        name: data.name,
-        arqueo: true,
-        catalogue: true, 
-        editAccount: true,
-        historyArqueo: true,
-        multiuser: true,
-        personalized: false, 
-        transactions: true,
-        creation: Timestamp.now(),
-        lastUpdate: Timestamp.now(), 
-        inactivate: false,
-        
-      );
+    UserModel user = UserModel( 
+      id: profile.id,
+      account: profile.id,
+      email: homeController.getUserAuth.email ?? '', 
+      superAdmin: true,
+      admin: true,
+      daysOfWeek: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+      startTime: {'hour':0, 'minute': 0},
+      endTime: {'hour':23, 'minute': 59},
+      name: profile.name,
+      arqueo: true,
+      catalogue: true, 
+      editAccount: true,
+      historyArqueo: true,
+      multiuser: true,
+      personalized: false, 
+      transactions: true,
+      creation: Timestamp.now(),
+      lastUpdate: Timestamp.now(), 
+      inactivate: false,
+      
+    );
     //...
-    if (data.id != '') {
+    if (profile.id != '') {
       // referencias
-      var documentReferencer = Database.refFirestoreAccount().doc(data.id);
-      var refFirestoreUserAccountsList = Database.refFirestoreUserAccountsList(email: user.email).doc(data.id);
-      var refFirestoreAccountsUsersList = Database.refFirestoreAccountsUsersList(idAccount: data.id) .doc(user.email);
+      var documentReferencer = Database.refFirestoreAccount().doc(profile.id);
+      var refFirestoreUserAccountsList = Database.refFirestoreUserAccountsList(email: user.email).doc(profile.id);
+      var refFirestoreAccountsUsersList = Database.refFirestoreAccountsUsersList(idAccount: profile.id) .doc(user.email);
 
       // firestore : crear un documento (cuenta del negocio)
-      documentReferencer.set(data.toJson()).whenComplete(() {
+      documentReferencer.set(profile.toJson()).whenComplete(() {
         // firestore : crea un documento (referencia) con los datos del usuario en el perfil de la cuenta
         refFirestoreAccountsUsersList.set(user.toJson(),SetOptions(merge: true));
         // firestore : crea un documento (referencia) con los datos de la cuenta en el perfil del usuario
         refFirestoreUserAccountsList.set(user.toJson(),SetOptions(merge: true));
         // actualizamos los datos de la cuenta en la memoria en ejecucion de la app
-        homeController.accountChange(idAccount: data.id);
+        homeController.accountChange(idAccount: profile.id);
         Get.back();
       }).catchError((e) {
         setSavingIndicator = false;

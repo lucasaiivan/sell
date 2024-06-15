@@ -400,12 +400,12 @@ class ControllerProductsEdit extends GetxController {
               }
               // procede agregrar en la base de datos global de productos
               // TODO : release : delete release (getEditModerator)
-              /* if ( getEditModerator || getProduct.local == false) { 
+              if ( getProduct.local == false) { 
                 // set
                 getProduct.documentUpgrade = time;
                 // se guarda el producto en la base de datos global
-                  setProductPublicFirestore( );
-              } */
+                setProductPublicFirestore( );
+              } 
               // condition : verifica si el producto es global publico
               if(!getProduct.local){
                 // Registra el precio en una colección publica

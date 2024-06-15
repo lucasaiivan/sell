@@ -291,7 +291,7 @@ class HomeController extends GetxController {
 
   bool get checkAccountExistence {
     // comprobamos si el usuario autenticado ya creo un cuenta
-    String idAccountAthentication = getUserAuth.uid;
+    String idAccountAthentication = getUserAuth.uid; 
     for (ProfileAccountModel element in getManagedAccountsList) {
       if (idAccountAthentication == element.id) {
         return true;
@@ -700,11 +700,16 @@ class HomeController extends GetxController {
   }
 
   void readListCategoryListFuture({required String idAccount}) {
+     
+
     // obtenemos la categorias creadas por el usuario
     Database.readCategoriesQueryStream(idAccount: idAccount).listen((event) {
       List<Category> list = [];
       for (var element in event.docs) {
-        list.add(Category.fromMap(element.data()));
+        // obj
+        Category category = Category.fromMap(element.data()); 
+        // add : añadimos la categoria a la lista
+        list.add(category);
       }
       setCatalogueCategoryList = list;
     });
@@ -913,13 +918,15 @@ class HomeController extends GetxController {
   }
 
   void readUserAccountsList({required String email}) { 
+ 
+
     // firebase : obtenemos la lista de cuentas del usuario
     Database.refFirestoreUserAccountsList(email: email).get().then((value) { 
       //  recorre la lista de cuentas
       for (var element in value.docs){
         
         // get : obtenemos los datos del perfil del usuario
-        UserModel userModel = UserModel.fromDocumentSnapshot(documentSnapshot: element);
+        UserModel userModel = UserModel.fromDocumentSnapshot(documentSnapshot: element); 
         // condition : si el id de la cuenta es diferente de vacio para evitar errores de consulta inexistentes
         if (userModel.account != '') {
           // firebase : obtenemos los datos de la cuenta
@@ -932,6 +939,10 @@ class HomeController extends GetxController {
           });
         }
       } 
+      if(value.docs.isEmpty){
+        setLoadedManagedAccountsList = true;
+      }
+      
     }).onError((error, stackTrace){
       setLoadedManagedAccountsList = true;
     }).catchError((onError) {
@@ -981,6 +992,9 @@ class HomeController extends GetxController {
     
     // Firebase : se actualiza el documento del producto del cátalogo
     Database.refFirestoreCatalogueProduct(idAccount: getProfileAccountSelected.id).doc(product.id).set(product.toJson());
+
+    // actualiza la lista de productos del cátalogo en la memoria de la app
+    sincronizeCatalogueProducts(product: product);
     
     // condition : si el producto no esta verificado o no existe 
     if (product.verified == false || isProductNew ) { 

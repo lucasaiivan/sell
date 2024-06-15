@@ -521,7 +521,8 @@ Widget body({required BuildContext context}){
                     },
                   ), */
                   // multiusuario
-                  user.multiuser || isAnonymous?homeController.getCashierMode?Container():ListTile(
+                  user.multiuser || isAnonymous?homeController.getCashierMode?Container():
+                  ListTile(
                     enabled: !isAnonymous,
                     selected: homeController.getIndexPage == 4,
                     leading: const Icon(Icons.group_add_outlined),
