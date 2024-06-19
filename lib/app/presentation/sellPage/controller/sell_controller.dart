@@ -1303,18 +1303,19 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
     return query.isEmpty
     ? items
     : items.where((item) {
-        // Convertimos la descripción, marca y código del elemento y el query a minúsculas
-        final description = item.description.toLowerCase();
-        final brand = item.nameMark.toLowerCase();
-        final code = item.code.toLowerCase();
-        final category = item.nameCategory.toLowerCase();
-        final lowerCaseQuery = query.toLowerCase();
+        // normalizamos los textos
+        final description = Utils.normalizeText(item.description.toLowerCase());
+        final brand = Utils.normalizeText(item.nameMark.toLowerCase());
+        final code =  Utils.normalizeText(item.code.toLowerCase());
+        final category = Utils.normalizeText(item.nameCategory.toLowerCase());
+        final lowerCaseQuery = Utils.normalizeText(query); 
+        final provider = Utils.normalizeText(item.nameProvider.toLowerCase());
 
         // Dividimos el query en palabras individuales
         final queryWords = lowerCaseQuery.split(' ');
 
         // Verificamos que todas las palabras del query estén presentes en la descripción, marca código
-        return queryWords.every((word) => description.contains(word) || brand.contains(word) || code.contains(word) || category.contains(word));
+        return queryWords.every((word) => description.contains(word) || brand.contains(word) || code.contains(word) || category.contains(word) || provider.contains(word) );
       }).toList();
   }
 

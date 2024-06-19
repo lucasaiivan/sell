@@ -180,7 +180,8 @@ class Utils {
     return listaColor[Random().nextInt(listaColor.length)];
   }
 
-  String capitalize(String input) {
+  String capitalizeString(String input) {
+    // description : capitaliza la primera letra de cada palabra
   if (input.isEmpty) {
     return input;
   }
@@ -194,7 +195,18 @@ class Utils {
   });
   return capitalizedWords.join(' ');
 }
-
+  // normalizar texto : quitar espacios, acentos y convertir a minusculas 
+  static String normalizeText(String text) {
+    // description : normaliza el texto
+    return text
+        .replaceAll(' ', '')
+        .replaceAll('á', 'a')
+        .replaceAll('é', 'e')
+        .replaceAll('í', 'i')
+        .replaceAll('ó', 'o')
+        .replaceAll('ú', 'u')
+        .toLowerCase();
+  }
 
   void getDetailArqueoScreenShot({required BuildContext context,required CashRegister cashRegister}) async {
     // widget : ticket

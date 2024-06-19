@@ -400,7 +400,7 @@ class ControllerCreateProductForm extends GetxController{
               updateAll();
 
               // set : values
-              getProduct.description = Utils().capitalize(controllerTextEditDescripcion.text); // controllerTextEditDescripcion.text;
+              getProduct.description = Utils().capitalizeString(controllerTextEditDescripcion.text); // controllerTextEditDescripcion.text;
               getProduct.upgrade = Timestamp.now();
               getProduct.idMark = getMarkSelected.id;
               getProduct.nameMark = getMarkSelected.name;
@@ -1068,10 +1068,10 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         items: list,
         searchLabel: 'Buscar marca',
         suggestion: const Center(child: Text('ej. Miller')),
-        failure: Center(child: Column(
+        failure: const Center(child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('No se encontro :('),
+            Text('No se encontro :('),
             // TODO : release : disable moderador ( crear marca )
             /* const SizedBox(height: 20),
             TextButton.icon(
@@ -1081,7 +1081,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
             ) */
           ],
         )),
-        filter: (product) => [product.name,product.description],
+        filter: (product) => [Utils.normalizeText(product.name),Utils.normalizeText(product.description)],
         builder: (mark) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[
           itemList(marcaSelect: mark),
           ComponentApp().divider(),

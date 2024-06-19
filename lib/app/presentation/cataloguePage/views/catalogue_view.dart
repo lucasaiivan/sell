@@ -62,11 +62,11 @@ class CataloguePage extends StatelessWidget {
             onSelected: (selectedValue) => catalogueController.popupMenuButtonCatalogueFilter(key: selectedValue),
             itemBuilder: (BuildContext ctx) => [
                   const PopupMenuItem(value: '0', child: Text('Mostrar todos')),
-                  const PopupMenuItem(value: '2', child: Text('Mostrar favoritos')),
+                  const PopupMenuItem(value: '2', child: Text('Favoritos')),
                   const PopupMenuItem(value: '5', child: Text('Actualizado hace más de 5 meses')),
                   homeController.getIsSubscribedPremium?const PopupMenuItem(child: null,height: 0): const PopupMenuItem(value: 'premium',child: Text('Opciones Premium',style: TextStyle(color: Colors.amber,fontWeight: FontWeight.w600),)),
-                  PopupMenuItem(value: '1',enabled: catalogueController.homeController.getIsSubscribedPremium, child: const Text('Mostrar con stock')),
-                  PopupMenuItem(value: '3',enabled: catalogueController.homeController.getIsSubscribedPremium, child: const Text('Mostrar con stock bajos')),
+                  PopupMenuItem(value: '1',enabled: catalogueController.homeController.getIsSubscribedPremium, child: const Text('Con stock')),
+                  PopupMenuItem(value: '3',enabled: catalogueController.homeController.getIsSubscribedPremium, child: const Text('Con stock bajos')),
                   PopupMenuItem(value: '4',enabled: catalogueController.homeController.getIsSubscribedPremium, child: const Text('Actualizado hace más de 2 meses')),
                   // TODO :release :  disabled options
                   //const PopupMenuItem(value: '6', child: Text('Sin verificación')),

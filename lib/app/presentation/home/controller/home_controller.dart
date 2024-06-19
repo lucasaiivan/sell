@@ -139,12 +139,22 @@ class HomeController extends GetxController {
   set setCatalogueCategoryList(List<Category> value) {
     _categoryList.value = value;
   }
+  void categorySelected({required Category category}) {
+    // description : posiciona el item (categoria) seleccionado en el primer lugar de la lista
+    _categoryList.remove(category);
+    _categoryList.insert(0, category);
+  }
   
   // provider list
   final RxList<Provider> _providerList = <Provider>[].obs;
   List<Provider> get getProviderList => _providerList;
   set setProviderList(List<Provider> value) {
     _providerList.value = value;
+  }
+  void providerSelected({required Provider provider}) {
+    // description : posiciona el item (proveedor) seleccionado en el primer lugar de la lista
+    _providerList.remove(provider);
+    _providerList.insert(0, provider);
   }
 
   // cash register  //

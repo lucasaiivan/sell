@@ -118,7 +118,6 @@ class ControllerProductsSearch extends GetxController {
   static List<Product> _listProductsSuggestion = [];
   set setListProductsSuggestions(List<Product> list) => _listProductsSuggestion = list;
   List<Product> get getListProductsSuggestions => _listProductsSuggestion;
-
   get getproductDoesNotExist => _productDoesNotExist;
 
   // FUCTIONS
@@ -222,7 +221,8 @@ class ControllerProductsSearch extends GetxController {
 
   void queryProductSuggestion() {
     if (getListProductsSuggestions.isEmpty) {
-      Database.readProductsFavoritesFuture(limit: 7).then((value) {
+      // firebase : consulta los productos destacados en la base de datos publica
+      Database.readProductsFavoritesFuture().then((value) {
 
         // values 
         List<Product> newList = [];

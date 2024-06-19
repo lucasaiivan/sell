@@ -97,7 +97,7 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                   mainAxisAlignment: MainAxisAlignment.center, 
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text('Escanear código de barra',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold )),  
+                    Text('Escanear el código de barra',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold )),  
                     Text('Encuentra muchos productos disponibles en nuestra base de datos',style: TextStyle(fontSize: 16),textAlign: TextAlign.center),
                   ],
                 ),
@@ -129,21 +129,27 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                   ), 
                   // view : texto informativo que el producto aún no existe si no se encuentra en la base de datos y se escribio manualmente el código por el teclado 
                   !(controller.productSelect.local && controller.getproductDoesNotExist)?Container():
-                  const Card(
-                    color: Colors.black12,
-                    margin: EdgeInsets.all(20.0),
-                    elevation: 0,
-                    child: Padding(
-                      padding: EdgeInsets.all(12.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center, 
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text('El código escrito aún no existe',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white )),  
-                          Text('Crea el producto en tu catálogo y se te notificará cuando sus datos sean verificado',style: TextStyle(fontSize: 16,color: Colors.white70),textAlign: TextAlign.center,),
-                        ],
+                  const Padding(
+                    padding: EdgeInsets.all(12.0),
+                    child: RoundedChatBubble(
+                      isPointingUp: true,
+                      notchMargin: 100.0,
+                      isPointingLeft: false,
+                        bubbleColor: Colors.black12,
+                        widget: Text('El código escrito aún no existe en nuestra base de datos',style: TextStyle(fontSize: 16,color: Colors.white70,fontWeight: FontWeight.w300),textAlign: TextAlign.center,),
                       ),
-                    ),
+                  ),
+                  // view : texto informativo que el producto aún no existe si no se encuentra en la base de datos y se escribio manualmente el código por el teclado 
+                  !(controller.productSelect.local && controller.getproductDoesNotExist)?Container():
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 12),
+                    child: RoundedChatBubble(
+                      isPointingUp: false,
+                      notchMargin: 100.0,
+                      isPointingLeft: true,
+                        bubbleColor: Colors.black12,
+                        widget: Text('Crea el producto en tu catálogo y se te notificará cuando el código sea verificado',style: TextStyle(fontSize: 16,fontWeight: FontWeight.w400,color: Colors.white),textAlign: TextAlign.center),
+                      ),
                   ),
                   // view : texto informativo que el producto aún no existe
                   controller.productSelect.local  ||!controller.getproductDoesNotExist?Container():
@@ -273,10 +279,108 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
       ),
     );
   }
-  
 
-   
-  
+} 
+
+class RoundedBubblePainter extends CustomPainter {
+  // description : Clase que dibuja un globo de conversación redondeado
+  final Color color;
+  final double radius;
+  final bool isPointingUp;
+  final bool isPointingLeft;
+  final double notchMargin; // Margen para la muesca
+
+  RoundedBubblePainter({
+    required this.color,
+    this.radius = 16.0,
+    this.isPointingUp = false, // Por defecto la muesca apunta hacia abajo
+    this.isPointingLeft = true, // Por defecto la muesca apunta hacia la izquierda
+    this.notchMargin = 20.0, // Margen por defecto para la muesca
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    // Calcular la posición de la muesca con margen
+    final double notchXStart = isPointingLeft ? notchMargin : size.width - notchMargin;
+    final double notchYStart = isPointingUp ? notchMargin : size.height - notchMargin;
+    
+    // Rectángulo principal del globo
+    final bubbleRect = RRect.fromRectAndRadius(
+      Rect.fromLTRB(
+        isPointingLeft ? 10 : 0,
+        isPointingUp ? 10 : 0,
+        isPointingLeft ? size.width : size.width - 10,
+        isPointingUp ? size.height : size.height - 10,
+      ),
+      Radius.circular(radius),
+    );
+
+    // Dibujar la forma principal del globo de conversación
+    canvas.drawRRect(bubbleRect, paint);
+
+    // Dibujar la muesca del globo de conversación
+    final path = Path();
+    if (isPointingUp) {
+      // Muesca arriba
+      path.moveTo(notchXStart - 10, 10);
+      path.lineTo(notchXStart, 0);
+      path.lineTo(notchXStart + 10, 10);
+    } else {
+      // Muesca abajo
+      path.moveTo(notchXStart - 10, size.height - 10);
+      path.lineTo(notchXStart, size.height);
+      path.lineTo(notchXStart + 10, size.height - 10);
+    }
+    path.close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
+  }
 }
+class RoundedChatBubble extends StatelessWidget {
+  // description : Widget que dibuja un globo de conversación redondeado
+  final Widget widget;
+  final Color bubbleColor;
+  final bool isPointingUp;
+  final bool isPointingLeft;
+  final double notchMargin;
 
+  const RoundedChatBubble({
+    super.key,
+    required this.widget,
+    this.bubbleColor = Colors.blue,
+    this.isPointingUp = false, // Por defecto la muesca apunta hacia abajo
+    this.isPointingLeft = true, // Por defecto la muesca apunta hacia la izquierda
+    this.notchMargin = 20.0, // Margen por defecto para la muesca
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: RoundedBubblePainter(
+        color: bubbleColor,
+        isPointingUp: isPointingUp,
+        isPointingLeft: isPointingLeft,
+        notchMargin: notchMargin,
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          isPointingLeft ? 20.0 : 12.0,
+          isPointingUp ? 25.0 : 20.0,
+          isPointingLeft ? 12.0 : 20.0,
+          isPointingUp ? 20.0 : 25.0,
+        ),
+        child: widget,
+      ),
+    );
+  }
+}
 

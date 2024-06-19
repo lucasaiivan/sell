@@ -243,8 +243,7 @@ class ProductEdit extends StatelessWidget {
       padding: const EdgeInsets.only(left: 12.0,right: 12.0,top: 12.0,bottom: 50.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[ 
-          
+        children: <Widget>[  
           !controller.getAccountAuth? Container():const Text('Personaliza tu producto',style: TextStyle(fontSize: 18.0)),
           space,
           // textfield : seleccionar proveedor
@@ -652,11 +651,11 @@ class _SelectCategoryState extends State<SelectCategory> {
           Category categoria =welcomeController.getCatalogueCategoryList[index];
           
           return Column(
-                  children: <Widget>[
-                    itemCategory(category: categoria),
-                    const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
-                  ],
-                );
+            children: <Widget>[
+              itemCategory(category: categoria),
+              const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
+            ],
+          );
         },
       ),
     );
@@ -671,6 +670,8 @@ class _SelectCategoryState extends State<SelectCategory> {
       title: Text(category.name.substring(0, 1).toUpperCase() + category.name.substring(1)),
       onTap: () {
         controllerProductsEdit.setCategory = category;
+        welcomeController.categorySelected(category:category);
+
         Get.back();
       },
       trailing: popupMenuItemCategoria(categoria: category),
@@ -763,7 +764,7 @@ class _SelectCategoryState extends State<SelectCategory> {
             ),
           ],
         )),
-        filter: (category) => [category.name],
+        filter: (category) => [Utils.normalizeText(category.name)],
         builder: (category) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[
           itemCategory(category: category),
           ComponentApp().divider(),
@@ -882,7 +883,7 @@ class _SelectProviderState extends State<SelectProvider> {
           
         ],
       ),
-      body:welcomeController.getProviderList.isEmpty?const Center(child: Text('Sin proveedores'),): ListView.builder(
+      body: welcomeController.getProviderList.isEmpty?const Center(child: Text('Sin proveedores'),): ListView.builder(
         padding: const EdgeInsets.symmetric(vertical: 15.0),
         shrinkWrap: true,
         itemCount: welcomeController.getProviderList.length,
@@ -910,6 +911,7 @@ class _SelectProviderState extends State<SelectProvider> {
       title: provider.name==''?null: Text(provider.name.substring(0, 1).toUpperCase() + provider.name.substring(1)),
       onTap: () {
         controllerProductsEdit.setProvider = provider;
+        welcomeController.providerSelected(provider: provider);
         Get.back();
       },
       trailing: popupMenuItemProvider(provider: provider),
@@ -993,7 +995,7 @@ class _SelectProviderState extends State<SelectProvider> {
             TextButton(onPressed: (){Get.back();showDialogSetProvider(provider: Provider());}, child: const Text('Agregar proveedor')),
           ],
         )),
-        filter: (provider) => [provider.name],
+        filter: (provider) => [Utils.normalizeText(provider.name)],
         builder: (provider) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[
           itemProvider(provider: provider),
           ComponentApp().divider(),

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:search_page/search_page.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../core/utils/fuctions.dart';
 import '../../../core/utils/widgets_utils.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../home/controller/home_controller.dart'; 
@@ -1231,7 +1232,7 @@ class _SelectCategoryState extends State<SelectCategory> {
   final Category categoriaSelected = Category();
   bool crearCategoria = false, loadSave = false;
   // controllers
-  final HomeController welcomeController = Get.find();
+  final HomeController homeController = Get.find();
   final ControllerCreateProductForm createProductFormController = Get.find();
 
   @override
@@ -1265,13 +1266,13 @@ class _SelectCategoryState extends State<SelectCategory> {
           }),
         ],
       ),
-      body: welcomeController.getCatalogueCategoryList.isEmpty?const Center(child: Text('Sin cátegorias'),): ListView.builder(
+      body: homeController.getCatalogueCategoryList.isEmpty?const Center(child: Text('Sin cátegorias'),): ListView.builder(
         padding: const EdgeInsets.symmetric(vertical: 15.0),
         shrinkWrap: true,
-        itemCount: welcomeController.getCatalogueCategoryList.length,
+        itemCount: homeController.getCatalogueCategoryList.length,
         itemBuilder: (BuildContext context, int index) {
           //  values
-          Category category =welcomeController.getCatalogueCategoryList[index];
+          Category category =homeController.getCatalogueCategoryList[index];
           
           return Column(
             children: <Widget>[
@@ -1293,6 +1294,7 @@ class _SelectCategoryState extends State<SelectCategory> {
       title: Text(category.name.substring(0, 1).toUpperCase() + category.name.substring(1)),
       onTap: () {
         createProductFormController.setCategory = category;
+        homeController.categorySelected(category: category);
         Get.back();
       },
       trailing: popupMenuItemCategoria(categoria: category),
@@ -1397,7 +1399,7 @@ class _SelectCategoryState extends State<SelectCategory> {
                     categoria.name = textEditingController.text; 
                     // save
                     await controller.categoryUpdate(categoria: categoria).whenComplete(() {
-                      welcomeController.getCatalogueCategoryList.add(categoria);
+                      homeController.getCatalogueCategoryList.add(categoria);
                       controllerCreateProductForm.controllerTextEditCategory.text = categoria.name;
                       Get.back();
                     });
@@ -1418,7 +1420,7 @@ class _SelectCategoryState extends State<SelectCategory> {
       delegate: SearchPage<Category>(
         searchStyle: TextStyle(color: colorAccent),
         barTheme: Get.theme.copyWith(hintColor: colorAccent, highlightColor: colorAccent,inputDecorationTheme: const InputDecorationTheme(filled: false)),
-        items: welcomeController.getCatalogueCategoryList,
+        items: homeController.getCatalogueCategoryList,
         searchLabel: 'Buscar marca',
         suggestion: const Center(child: Text('ej. agua')),
         failure: Center(child: Column(
@@ -1436,7 +1438,7 @@ class _SelectCategoryState extends State<SelectCategory> {
             )
           ],
         )),
-        filter: (category) => [category.name,category.name],
+        filter: (category) => [Utils.normalizeText(category.name),Utils.normalizeText(category.name)],
         builder: (category) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[
           itemCategory(category: category),
           ComponentApp().divider(),
@@ -1473,7 +1475,7 @@ class _SelectProviderState extends State<SelectProvider> {
   // Variables
   final Provider providerSelected = Provider();
   bool createProvider = false, loadSave = false;
-  final HomeController welcomeController = Get.find();
+  final HomeController homeController = Get.find();
   final ControllerCreateProductForm createProductFormController = Get.find();
 
   @override
@@ -1496,13 +1498,13 @@ class _SelectProviderState extends State<SelectProvider> {
           IconButton(icon: const Icon(Icons.search),onPressed: (){Get.back();showSearchProviders();}), 
         ],
       ),
-      body:welcomeController.getProviderList.isEmpty?const Center(child: Text('Sin proveedores'),): ListView.builder(
+      body:homeController.getProviderList.isEmpty?const Center(child: Text('Sin proveedores'),): ListView.builder(
         padding: const EdgeInsets.symmetric(vertical: 15.0),
         shrinkWrap: true,
-        itemCount: welcomeController.getProviderList.length,
+        itemCount: homeController.getProviderList.length,
         itemBuilder: (BuildContext context, int index) {
           //  values
-          Provider provider =welcomeController.getProviderList[index];
+          Provider provider =homeController.getProviderList[index];
           
           return Column(
                   children: <Widget>[
@@ -1523,6 +1525,7 @@ class _SelectProviderState extends State<SelectProvider> {
       title: Text(provider.name.substring(0, 1).toUpperCase() + provider.name.substring(1)),
       onTap: () {
         createProductFormController.setProvider = provider;
+        homeController.providerSelected(provider: provider);
         Get.back();
       },
       trailing: popupMenuItemProvider(provider: provider),
@@ -1593,7 +1596,7 @@ class _SelectProviderState extends State<SelectProvider> {
       delegate: SearchPage<Provider>(
         searchStyle: TextStyle(color: colorAccent),
         barTheme: Get.theme.copyWith(hintColor: colorAccent, highlightColor: colorAccent,inputDecorationTheme: const InputDecorationTheme(filled: false)),
-        items: welcomeController.getProviderList,
+        items: homeController.getProviderList,
         searchLabel: 'Buscar proveedor',
         suggestion: const Center(child: Text('ej. coca cola')),
         failure: Center(child: Column(
@@ -1611,7 +1614,7 @@ class _SelectProviderState extends State<SelectProvider> {
             )
           ],
         )),
-        filter: (provider) => [provider.name,provider.name],
+        filter: (provider) => [Utils.normalizeText(provider.name) ],
         builder: (provider) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[
           itemProvider(provider: provider),
           ComponentApp().divider(),
@@ -1667,7 +1670,7 @@ class _SelectProviderState extends State<SelectProvider> {
                       //set 
                       controllerCreateProductForm.controllerTextEditProvider.text = provider.name;
                       // add
-                      welcomeController.getProviderList.add(provider);
+                      homeController.getProviderList.add(provider);
                       Get.back();
                     }).catchError((error, stackTrace) =>setState(() => loadSave = false));
                   }

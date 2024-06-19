@@ -142,39 +142,51 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
           case '0': // Mostrar todos
             setTextFilter = 'Filtrar';
             list = homeController.getCataloProducts;
+            // set
+            setCatalogueProducts = list;
             break; 
           case '1': //  Mostrar productos con stock
             setTextFilter = 'Con stock';
             List<ProductCatalogue> listSFilter = [];
             for(ProductCatalogue item in homeController.getCataloProducts){if(item.stock)listSFilter.add(item);}
             for(ProductCatalogue item in listSFilter){list.add(item);}
+            // set
+            setCatalogueProducts = list;
             break;
           case '2': //  Mostrar productos favoritos
             setTextFilter = 'Favoritos';
             List<ProductCatalogue> listSFilter = [];
             for(ProductCatalogue item in homeController.getCataloProducts){if(item.favorite)listSFilter.add(item);}
             for(ProductCatalogue item in listSFilter){list.add(item);}
+            // set
+            setCatalogueProducts = list;
             break;
           case '3': // Mostrar productos con stock bajos
             setTextFilter = 'Stock Bajos';
             List<ProductCatalogue> listSFilter = [];
             for(ProductCatalogue item in homeController.getCataloProducts){if(item.stock){if(item.quantityStock<=item.alertStock){listSFilter.add(item);}}}
             for(ProductCatalogue item in listSFilter){list.add(item);}
+            // set
+            setCatalogueProducts = list;
             break;
           case '4': // Mostrar productos actualizados hace más de 2 meses
-            setTextFilter = 'Actualizados hace más de 2 meses';
+            setTextFilter = 'hace más de 2 meses';
             list = homeController.getCataloProducts.where((producto) {
               DateTime fechaActualizacion = producto.upgrade.toDate();
               return fechaActualizacion.isBefore(DateTime.now().subtract( const Duration(days: 2 * 30)));
             }).toList();
+            // set
+            setCatalogueProducts = list;
           
             break;
           case '5': // Mostrar productos actualizados hace más 5 meses
-            setTextFilter = 'Actualizados hace más de 5 meses';
+            setTextFilter = 'hace más de 5 meses';
             list = homeController.getCataloProducts.where((producto) {
               DateTime fechaActualizacion = producto.upgrade.toDate();
               return fechaActualizacion.isBefore( DateTime.now().subtract( const Duration(days: 5 * 30)) );
             }).toList(); 
+            // set
+            setCatalogueProducts = list;
           break; 
 
           case '6': // mostrar los productos que no estan verificados
@@ -182,6 +194,8 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
             list = homeController.getCataloProducts.where((producto) {
               return producto.verified==false;
             }).toList();
+            // set
+            setCatalogueProducts = list;
           break;
           case '7': // obtener los los porductos de la base de datos publica 'Database.readProductsFuture()'
             setTextFilter = 'Base de datos'; 
@@ -205,6 +219,8 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
                   }
                   
                 } 
+                // set
+                setCatalogueProducts = list;
                 update();
               } 
             });
@@ -230,6 +246,8 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
                     } 
                   
                 } 
+                // set
+                setCatalogueProducts = list;
                 update();
               } 
             });
@@ -237,8 +255,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
           
         }
       }
-    // set
-    setCatalogueProducts = list;
+    
   }
   // si el producto esta en el catalogo devuelve el precio de venta
   bool isProductCatalogue({required String id}) { 
@@ -488,13 +505,13 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     return query.isEmpty
     ? getCataloProducts
     : getCataloProducts.where((item) {
-        // Convertimos la descripción, marca y código del elemento y el query a minúsculas
-        final description = item.description.toLowerCase();
-        final brand = item.nameMark.toLowerCase();
-        final code = item.code.toLowerCase();
-        final category = item.nameCategory.toLowerCase();
-        final lowerCaseQuery = query.toLowerCase();
-        final provider = item.nameProvider.toLowerCase();
+        // normalizamos los textos
+        final description = Utils.normalizeText(item.description.toLowerCase());
+        final brand = Utils.normalizeText(item.nameMark.toLowerCase());
+        final code =  Utils.normalizeText(item.code.toLowerCase());
+        final category = Utils.normalizeText(item.nameCategory.toLowerCase());
+        final lowerCaseQuery = Utils.normalizeText(query); 
+        final provider = Utils.normalizeText(item.nameProvider.toLowerCase());
 
         // Dividimos el query en palabras individuales
         final queryWords = lowerCaseQuery.split(' ');
