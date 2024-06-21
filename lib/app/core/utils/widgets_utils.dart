@@ -535,19 +535,22 @@ Widget body({required BuildContext context}){
                   
                 }):Container(),
               const SizedBox(height: 20),
-              homeController.getCashierMode?Container():ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                tileColor: Colors.blue.withOpacity(0.05),
-                leading: const Icon(Icons.messenger_outline_sharp,color: Colors.green),
-                title: const Text('Escribenos tu opinión 😃'),
-                subtitle: const Text('Tu opinión o sugerencia es importante para mejorar esta app'),
-                onTap: () async {
-                  
-                  // values
-                  Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.logicabooleana.sell');
-                  //  redireccionara para la tienda de aplicaciones
-                  await launchUrl(uri,mode: LaunchMode.externalApplication);
-                },
+              homeController.getCashierMode?Container():Container(
+                decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.teal.withOpacity(0.1),Colors.teal.withOpacity(0.01) ],begin: Alignment.centerLeft,end: Alignment.centerRight)),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                  tileColor: Colors.transparent,//Colors.blue.withOpacity(0.05),
+                  leading: const Icon(Icons.messenger_outline_sharp,color: Colors.green),
+                  title: const Text('Escribenos tu opinión 😃'),
+                  subtitle: const Text('Tu opinión o sugerencia es importante para mejorar'),
+                  onTap: () async {
+                    
+                    // values
+                    Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.logicabooleana.sell');
+                    //  redireccionara para la tienda de aplicaciones
+                    await launchUrl(uri,mode: LaunchMode.externalApplication);
+                  },
+                ),
               ),   
               const SizedBox(height: 20)
             ],

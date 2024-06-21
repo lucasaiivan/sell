@@ -207,13 +207,11 @@ class AccountController extends GetxController {
 
       // Actualizamos los datos de la cuenta
       documentReferencer.update(Map<String, dynamic>.from(data)).whenComplete(() {
-        Get.back();
-        print("######################## FIREBASE updateAccount whenComplete");
+        Get.back(); 
       }).catchError((e) {
         setSavingIndicator = false;
         Get.snackbar('No se puedo guardar los datos',
-            'Puede ser un problema de conexión');
-        print("######################## FIREBASE updateAccount catchError: $e");
+            'Puede ser un problema de conexión'); 
       });
     }
   }
@@ -225,12 +223,12 @@ class AccountController extends GetxController {
       id: profile.id,
       account: profile.id,
       email: homeController.getUserAuth.email ?? '', 
+      name: homeController.getUserAuth.displayName ?? '',
       superAdmin: true,
       admin: true,
       daysOfWeek: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
       startTime: {'hour':0, 'minute': 0},
       endTime: {'hour':23, 'minute': 59},
-      name: profile.name,
       arqueo: true,
       catalogue: true, 
       editAccount: true,

@@ -69,8 +69,7 @@ class AccountView extends GetView<AccountController> {
               children: <Widget>[
                 const SizedBox(height: 12.0),
                 // text : informativo
-                controller.newAccount?widgetText(text: 'Dinos un poco de tu negocio\n\n 👇'): Container(),
-               
+                controller.newAccount?widgetText(text: 'Dinos un poco de tu negocio\n 👇'): Container(),
                 // imagen : avatar del negocio
                 widgetsImagen(),
                 // button  : actualizart imagen
@@ -151,6 +150,14 @@ class AccountView extends GetView<AccountController> {
     // values
     Color colorDefault = Colors.grey.withOpacity(0.2);
     double radius = 45.0;
+    // obtener la incial del nombre del negocio si existe el dato
+    String initial = controller.profileAccount.name.isNotEmpty ? controller.profileAccount.name[0].toUpperCase() : '';
+    // widget
+    Widget circleAvatarDefault = CircleAvatar(
+      backgroundColor: colorDefault,
+      radius: radius,
+      child: Opacity(opacity: 0.7,child: Text(initial,style: const TextStyle(fontSize: 30,color: Colors.white))),
+    );
 
     return GetBuilder<AccountController>(
       id: 'image',
@@ -161,27 +168,13 @@ class AccountView extends GetView<AccountController> {
             children: [
               controller.getImageUpdate == false
                   ? controller.profileAccount.image == ''
-                      ? CircleAvatar(
-                          backgroundColor: colorDefault,
-                          radius: radius,
-                        )
+                      ? circleAvatarDefault
                       : CachedNetworkImage(
                           fit: BoxFit.cover,
-                          imageUrl: controller.profileAccount.image == ''
-                              ? 'default'
-                              : controller.profileAccount.image,
-                          placeholder: (context, url) => CircleAvatar(
-                            backgroundColor: colorDefault,
-                            radius: radius,
-                          ),
-                          imageBuilder: (context, image) => CircleAvatar(
-                            backgroundImage: image,
-                            radius: radius,
-                          ),
-                          errorWidget: (context, url, error) => CircleAvatar(
-                            backgroundColor: colorDefault,
-                            radius: radius,
-                          ),
+                          imageUrl: controller.profileAccount.image == '' ? 'default' : controller.profileAccount.image,
+                          placeholder: (context, url) => circleAvatarDefault,
+                          imageBuilder: (context, image) => CircleAvatar(backgroundImage: image,radius: radius),
+                          errorWidget: (context, url, error) => circleAvatarDefault,
                         )
                   : CircleAvatar(
                       radius:radius,
@@ -206,19 +199,20 @@ class AccountView extends GetView<AccountController> {
       key: controller.formKey,
       child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-    
+            children: <Widget>[ 
               // textfiel: nombre del negocio
               TextFormField(
                 enabled: !controller.getSavingIndicator,
                 minLines: 1,
                 maxLines: 5,
-                keyboardType: TextInputType.multiline,
-                onChanged: (value) => controller.profileAccount.name = value,
+                keyboardType: TextInputType.multiline, 
+                onChanged: (value){
+                  controller.profileAccount.name = value;  
+                },
                 decoration: const InputDecoration(filled: true,labelText: "Nombre del Negocio"),
                 controller:TextEditingController(text: controller.profileAccount.name),
                 textInputAction: TextInputAction.next,
-                focusNode: focusTextEdiNombre,
+                focusNode: focusTextEdiNombre, 
                 validator: (value) {
                   if (value!.isEmpty) {
                     return 'Por favor ingrese el nombre del negocio';
@@ -238,7 +232,7 @@ class AccountView extends GetView<AccountController> {
                   decoration: const InputDecoration(
                     labelText: "Simbolo de moneda",
                     filled: true,
-                    prefixIcon: Icon(Icons.monetization_on_outlined),
+                    prefixIcon: Opacity(opacity: 0.7,child: Icon(Icons.monetization_on_outlined)),
                   ),
                   controller: controller.getControllerTextEditSignoMoneda,
                   onChanged: (value) => controller.profileAccount.currencySign = value,
@@ -252,7 +246,7 @@ class AccountView extends GetView<AccountController> {
               ),
               divider,
               // text : texto informativo
-              controller.newAccount?widgetText(text: '¿Donde se encuentra?\n\n 🌍'): const Text("Ubicación", style: TextStyle(fontSize: 24.0)),
+              controller.newAccount?widgetText(text: '¿Donde se encuentra?\n 🌍'): const Text("Ubicación", style: TextStyle(fontSize: 24.0)),
               divider,
               // textfiel: seleccionar un pais
               InkWell(
@@ -262,7 +256,7 @@ class AccountView extends GetView<AccountController> {
                   maxLines: 5,
                   keyboardType: TextInputType.multiline,
                   enabled: false,
-                  decoration: const InputDecoration(labelText: "Pais",filled: true,prefixIcon: Icon(Icons.location_on_outlined)),
+                  decoration: const InputDecoration(labelText: "Pais",filled: true,prefixIcon: Opacity(opacity: 0.7,child: Icon(Icons.location_on_outlined))),
                   controller: controller.getControllerTextEditPais,
                   onChanged: (value) => controller.profileAccount.country = value,
                   validator: (value) {
@@ -287,7 +281,7 @@ class AccountView extends GetView<AccountController> {
                     decoration: const InputDecoration(
                       labelText: "Provincia",
                       filled: true,
-                      prefixIcon: Icon(Icons.business),
+                      prefixIcon: Opacity(opacity: 0.7,child: Icon(Icons.business)),
                     ),
                     controller: controller.getControllerTextEditProvincia,
                     onChanged: (value) {
@@ -309,6 +303,7 @@ class AccountView extends GetView<AccountController> {
                 decoration: const InputDecoration(
                   labelText: "Ciudad (opcional)",
                   filled: true,
+                  prefixIcon: Opacity(opacity: 0.7,child: Icon(Icons.location_searching_rounded)),
                 ),
                 controller: controller.getControllerTextEditTwon,
               ),
