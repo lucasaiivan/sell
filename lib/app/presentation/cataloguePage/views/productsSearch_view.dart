@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; 
 import 'package:get/get.dart';
+import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:url_launcher/url_launcher.dart';  
 import '../../../core/utils/dynamicTheme_lb.dart';
 import '../../../core/utils/widgets_utils.dart';
@@ -281,106 +282,4 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
   }
 
 } 
-
-class RoundedBubblePainter extends CustomPainter {
-  // description : Clase que dibuja un globo de conversación redondeado
-  final Color color;
-  final double radius;
-  final bool isPointingUp;
-  final bool isPointingLeft;
-  final double notchMargin; // Margen para la muesca
-
-  RoundedBubblePainter({
-    required this.color,
-    this.radius = 16.0,
-    this.isPointingUp = false, // Por defecto la muesca apunta hacia abajo
-    this.isPointingLeft = true, // Por defecto la muesca apunta hacia la izquierda
-    this.notchMargin = 20.0, // Margen por defecto para la muesca
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-
-    // Calcular la posición de la muesca con margen
-    final double notchXStart = isPointingLeft ? notchMargin : size.width - notchMargin;
-    final double notchYStart = isPointingUp ? notchMargin : size.height - notchMargin;
-    
-    // Rectángulo principal del globo
-    final bubbleRect = RRect.fromRectAndRadius(
-      Rect.fromLTRB(
-        isPointingLeft ? 10 : 0,
-        isPointingUp ? 10 : 0,
-        isPointingLeft ? size.width : size.width - 10,
-        isPointingUp ? size.height : size.height - 10,
-      ),
-      Radius.circular(radius),
-    );
-
-    // Dibujar la forma principal del globo de conversación
-    canvas.drawRRect(bubbleRect, paint);
-
-    // Dibujar la muesca del globo de conversación
-    final path = Path();
-    if (isPointingUp) {
-      // Muesca arriba
-      path.moveTo(notchXStart - 10, 10);
-      path.lineTo(notchXStart, 0);
-      path.lineTo(notchXStart + 10, 10);
-    } else {
-      // Muesca abajo
-      path.moveTo(notchXStart - 10, size.height - 10);
-      path.lineTo(notchXStart, size.height);
-      path.lineTo(notchXStart + 10, size.height - 10);
-    }
-    path.close();
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
-  }
-}
-class RoundedChatBubble extends StatelessWidget {
-  // description : Widget que dibuja un globo de conversación redondeado
-  final Widget widget;
-  final Color bubbleColor;
-  final bool isPointingUp;
-  final bool isPointingLeft;
-  final double notchMargin;
-
-  const RoundedChatBubble({
-    super.key,
-    required this.widget,
-    this.bubbleColor = Colors.blue,
-    this.isPointingUp = false, // Por defecto la muesca apunta hacia abajo
-    this.isPointingLeft = true, // Por defecto la muesca apunta hacia la izquierda
-    this.notchMargin = 20.0, // Margen por defecto para la muesca
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: RoundedBubblePainter(
-        color: bubbleColor,
-        isPointingUp: isPointingUp,
-        isPointingLeft: isPointingLeft,
-        notchMargin: notchMargin,
-      ),
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          isPointingLeft ? 20.0 : 12.0,
-          isPointingUp ? 25.0 : 20.0,
-          isPointingLeft ? 12.0 : 20.0,
-          isPointingUp ? 20.0 : 25.0,
-        ),
-        child: widget,
-      ),
-    );
-  }
-}
 

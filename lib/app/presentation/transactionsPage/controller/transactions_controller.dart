@@ -549,9 +549,7 @@ class TransactionsController extends GetxController {
     setMostSelledProducts = [];
     for (ProductCatalogue element  in sortedByKeyMap.values) {
       // condition  : evaluamos que sea un producto valido
-      if (element.code != '') {
-        getMostSelledProducts.add(element);
-      }
+      getMostSelledProducts.add(element);
     } 
   }
 

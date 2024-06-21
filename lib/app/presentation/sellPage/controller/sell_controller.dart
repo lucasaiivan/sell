@@ -323,6 +323,7 @@ class SellController extends GetxController {
       for (dynamic data in getTicket.listPoduct) { 
         // obj
         ProductCatalogue product = ProductCatalogue.fromMap(data as Map<String, dynamic>);
+        if(product.code == ''){continue;} // si el producto no tiene código no se registra en el catálogo
         ProductCatalogue productCatalogue = homeController.getProductCatalogue(id: product.id).copyWith(); // obtenemos el producto del catálogo con los datos actualizados
 
         // firestore : hace un incremento de 1 en el valor 'sales' del producto
@@ -504,7 +505,7 @@ class SellController extends GetxController {
     var id = Publications.generateUid();
     // var
     double  valuePrice = textEditingControllerAddFlashPrice.numberValue;
-    String valueDescription = textEditingControllerAddFlashDescription.text;
+    String valueDescription = textEditingControllerAddFlashDescription.text == '' ? 'Sin descripción' : textEditingControllerAddFlashDescription.text;
 
     if (valuePrice != 0) {
       textEditingControllerAddFlashPrice.clear();

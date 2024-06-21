@@ -78,8 +78,7 @@ class AccountController extends GetxController {
   List<String> get getCountries => _listountries;
 
   // account profile
-  final Rx<ProfileAccountModel> _profileAccount =
-      ProfileAccountModel(creation: Timestamp.now()).obs;
+  final Rx<ProfileAccountModel> _profileAccount = ProfileAccountModel(creation: Timestamp.now()).obs;
   ProfileAccountModel get profileAccount => _profileAccount.value;
   set setProfileAccount(ProfileAccountModel user) =>
       _profileAccount.value = user;
@@ -141,25 +140,31 @@ class AccountController extends GetxController {
 
   }
    
-
   // -------------------------------------- //
   // -------------  FUCTIONS -------------- //
   // -------------------------------------- //
 
   void verifyAccount( ) { 
-    // obtenemos los datos de la cuenta
-    setProfileAccount = homeController.getProfileAccountSelected.copyWith();
+    
+    // comprobamos datos por parametros
+    var arguments = Get.arguments; 
+    // obtenemos los datos de la cuenta 
+    if (arguments != null && arguments.containsKey('create')) { 
+      setProfileAccount = ProfileAccountModel(creation: Timestamp.now());
+    } else if( arguments != null && arguments.containsKey('account')){ 
+      setProfileAccount = arguments['account'];
+    }
+    
     // set
-    newAccount = profileAccount.id=='';
-    setControllerTextEditProvincia =TextEditingController(text: profileAccount.province);
-    setControllerTextEditPais =TextEditingController(text: profileAccount.country);
-    setControllerTextEditTwon =TextEditingController(text: profileAccount.town);
-    setControllerTextEditSignoMoneda =TextEditingController(text: profileAccount.currencySign);
+    newAccount = profileAccount.id == '';
+    setControllerTextEditProvincia = TextEditingController(text: profileAccount.province);
+    setControllerTextEditPais = TextEditingController(text: profileAccount.country);
+    setControllerTextEditTwon = TextEditingController(text: profileAccount.town);
+    setControllerTextEditSignoMoneda = TextEditingController(text: profileAccount.currencySign);
     // actuazamos la vista
     stateLoding = false;
     update(['load']);  
   }
-
   void saveAccount() async {
     // fuction :  función para guardar los datos de la cuenta
     if ( formKey.currentState!.validate()) { 
@@ -194,17 +199,7 @@ class AccountController extends GetxController {
       homeController.update();
     }
   }
-  String formatWithInitialsUppercase(String value) {
-    // Esta función divide el String en palabras, convierte la primera letra de cada palabra a mayúsculas
-    return value.split(' ').map((word) {
-      if (word.isNotEmpty) {
-        return word[0].toUpperCase() + word.substring(1);
-      }
-      return '';
-    }).join(' ');
-  }
-
-  updateAccount({required Map<String, dynamic> data}) async {
+  void updateAccount({required Map<String, dynamic> data}) async {
     // Esto actualiza los datos de la cuenta
     if (data['id'] != '') {
       // db ref
@@ -222,7 +217,6 @@ class AccountController extends GetxController {
       });
     }
   }
-
   void createAccount({required ProfileAccountModel profile}) async {
     // Esto guarda un documento con los datos de la cuenta por crear
 
@@ -274,7 +268,6 @@ class AccountController extends GetxController {
       Get.snackbar('No se puedo guardar los datos','Problema con la indentificación de la cuenta');
     }
   }
-  // void : fuction para eliminar la cuenta
   void deleteAccount() {
     // db ref : cuenta
     var documentReferencer = Database.refFirestoreAccount().doc(profileAccount.id);
@@ -368,7 +361,19 @@ class AccountController extends GetxController {
     });
 
   }
-
+  
+  // -------------------------------------- //
+  // ----------------  GET ---------------- //
+  // -------------------------------------- //
+  String formatWithInitialsUppercase(String value) {
+    // Esta función divide el String en palabras, convierte la primera letra de cada palabra a mayúsculas
+    return value.split(' ').map((word) {
+      if (word.isNotEmpty) {
+        return word[0].toUpperCase() + word.substring(1);
+      }
+      return '';
+    }).join(' ');
+  }
   // -------------------------------------- //
   // -------------  OVERRIDE -------------- //
   // -------------------------------------- //

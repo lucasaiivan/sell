@@ -84,7 +84,7 @@ class _StaticsCardsState extends State<StaticsCards> {
               ImageProductAvatarApp(size: 24,url: transactionsController.getMostSelledProducts[0].image),
               const SizedBox(width: 5),
               // text : nombre
-              Flexible(child: Text(transactionsController.getMostSelledProducts[0].description,style: const TextStyle(fontSize: 12,fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines: 1)),
+              Flexible(child: Text(transactionsController.getMostSelledProducts[0].description==''?'Desconocido':transactionsController.getMostSelledProducts[0].description,style: const TextStyle(fontSize: 12,fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines: 1)),
             ],
           ),
         ),
@@ -130,7 +130,7 @@ class _StaticsCardsState extends State<StaticsCards> {
             ],
           ),
         ),
-        valueText: '${transactionsController.getBestSellingProductWithHighestProfit.isNotEmpty?transactionsController.getBestSellingProductWithHighestProfit[0].quantity:''} ventas',
+        valueText: transactionsController.getBestSellingProductWithHighestProfit.isNotEmpty? '${transactionsController.getBestSellingProductWithHighestProfit[0].quantity} Ventas': 'Sin datos',
         description: 'Ganancias ${transactionsController.getBestSellingProductWithHighestProfit.isNotEmpty?Publications.getFormatoPrecio(value: transactionsController.getBestSellingProductWithHighestProfit[0].revenue ):'Sin datos'}',
         ), 
     ]; 
@@ -423,7 +423,8 @@ class ProfitabilityProductsView extends StatelessWidget {
     title: const Text('Rentabilidad'), 
   );
   // body 
-  Widget get body => Padding(
+  
+  Widget get body => transactionsController.getBestSellingProductWithHighestProfit.isEmpty? const Center(child: Text('Sin datos de ganancias')): Padding(
     padding: const EdgeInsets.all(12.0),
     // scrollview : para que se pueda desplazar el contenido 
     child: SingleChildScrollView(
@@ -507,6 +508,7 @@ class ProfitabilityProductsView extends StatelessWidget {
         ),
       );
     }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [   

@@ -135,7 +135,7 @@ class MyConfigView extends StatelessWidget {
                 onTap: () {
                   Get.back();
                   // navigation : navegamos a la pantalla de la cuenta
-                  Get.toNamed(Routes.account);
+                  Get.toNamed(Routes.account,arguments:{'account':homeController.getProfileAccountSelected});
                 },
               ),
               ComponentApp().divider(),

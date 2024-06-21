@@ -1063,12 +1063,9 @@ class HomeController extends GetxController {
     // description : muestra las cuentas en el que el usuario tiene accesos
 
     // widgets
-    Widget widget = !checkAccountExistence
-      ? WidgetButtonListTile().buttonListTileCrearCuenta()
-      : Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // text : titulo  y iconobutton
+    Widget widget = Column(
+      children: [ 
+        // text : titulo  y iconobutton
           Padding(
             padding: const EdgeInsets.all(12.0),
             child: Row(
@@ -1086,6 +1083,7 @@ class HomeController extends GetxController {
               ],
             ),
           ), 
+          // view : lista de cuentas administradas
           ListView.builder(
             padding: const EdgeInsets.symmetric(),
             shrinkWrap: true,
@@ -1099,8 +1097,17 @@ class HomeController extends GetxController {
               );
             },
           ),
-        ],
-      );
+        // button : crear cuenta
+          getLoadedManagedAccountsList && checkAccountExistence? Container():
+          Column(
+            children: [
+              ComponentApp().divider(), 
+              WidgetButtonListTile().buttonListTileCrearCuenta(),
+              ComponentApp().divider(),
+            ],
+          ), 
+      ],
+    );
 
     // muestre la hoja inferior modal de getx
     Get.bottomSheet(

@@ -1,20 +1,15 @@
 
 import 'dart:io';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:cached_network_image/cached_network_image.dart'; 
+import 'package:flutter/material.dart'; 
 import 'package:get/get.dart';
-import 'package:url_launcher/url_launcher.dart';
-
+import 'package:url_launcher/url_launcher.dart'; 
 import 'package:sell/app/core/utils/dynamicTheme_lb.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:sell/app/presentation/home/controller/home_controller.dart';
-import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart';
-
+import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart'; 
 import '../../domain/entities/catalogo_model.dart';
-import '../../domain/entities/user_model.dart';
-import '../../presentation/cataloguePage/controller/catalogue_controller.dart';
+import '../../domain/entities/user_model.dart'; 
 import '../../presentation/sellPage/views/sell_view.dart';
 import '../routes/app_pages.dart';
 
@@ -29,6 +24,7 @@ class ImageBarWidget extends StatelessWidget {
   /// Crea un widget de una imagen de Scan.
   ///
   /// [size] es el tamaño deseado de la imagen en píxeles.
+  // ignore: prefer_const_constructors_in_immutables
   ImageBarWidget({
     Key? key,
     required this.size,
@@ -89,12 +85,12 @@ class WidgetButtonListTile extends StatelessWidget {
   Widget buttonListTileCrearCuenta() {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15.0),
-      trailing: const Icon(Icons.add), 
+      trailing: const Icon(Icons.arrow_forward_ios_rounded), 
       dense: true,
       title: const Text("Crear perfil de mi negocio", style: TextStyle(fontSize: 16.0)),
       onTap: () {
-        Get.back();
-        Get.toNamed(Routes.account);
+        Get.back(); 
+        Get.toNamed(Routes.account, arguments: {'create': true});
       },
     );
   }
@@ -418,143 +414,144 @@ Widget body({required BuildContext context}){
       children: [
         Flexible(
           child: ListView( 
+            children: [
+              // view : header
+              Row(
                 children: [
-                  // view : header
-                  Row(
-                    children: [
-                      const Spacer(),
-                      isAnonymous?Container():homeController.getCashierMode?Container():iconButtonAccount, 
-                      // icon : cambia el tema de la  app
-                      IconButton(
-                        onPressed: () => ThemeService.switchTheme,
-                        icon: Icon(Theme.of(context).brightness == Brightness.dark?Icons.light_mode:Icons.nightlight),
-                      ),
-                      const SizedBox(width: 10),
-                    ],
+                  const Spacer(),
+                  // iconButton : seleccionar cuenta administradas
+                  isAnonymous?Container():homeController.getCashierMode?Container():iconButtonAccount, 
+                  // icon : cambia el tema de la  app
+                  IconButton(
+                    onPressed: () => ThemeService.switchTheme,
+                    icon: Icon(Theme.of(context).brightness == Brightness.dark?Icons.light_mode:Icons.nightlight),
                   ),
-                  // view : avatar y datos la cuenta y del usuario
-                  isAnonymous?textButtonLogin
-                    :ListTile(
-                    leading: Container(padding: const EdgeInsets.all(0.0),child: ComponentApp().userAvatarCircle(urlImage: homeController.getProfileAccountSelected.image,iconData:Icons.storefront_outlined)),
-                    title: Text(homeController.getIdAccountSelected == ''? 'Seleccionar una cuenta': homeController.getProfileAccountSelected.name,maxLines: 1,overflow: TextOverflow.ellipsis),
-                    subtitle: user.name==''? null:Opacity(
-                      opacity: 0.7,
-                      child: Row(
-                        children: [
-                          // icon 
-                          const Icon(Icons.person_rounded,size: 14),
-                          const SizedBox(width:2),
-                          // text : nombre del usuario administrador
-                          Flexible(child: Text(user.name,overflow: TextOverflow.ellipsis,maxLines: 1)),
-                        ],
-                      ),
-                    ),
-                    trailing: homeController.getCashierMode?null: const Icon(Icons.arrow_right),
-                    onTap: homeController.getCashierMode?null: () {
-                      homeController.showModalBottomSheetConfig();
-                    },
-                  ),  
-                  homeController.getCashierMode || isAnonymous?const Padding(
-                    padding: EdgeInsets.only(bottom: 0,top: 20),
-                    child: Divider(height:0,thickness:.5),
-                  ):Container(),
-                  // ----------------- //
-                  // funciones premium //
-                  // ----------------- //
-                  // condition : si el usuario de la cuenta no es administrador no se muestra el boton de suscribirse a premium
-                  user.admin==false?Container():
-                  isAnonymous?Container():
-                  homeController.getCashierMode?Container():
-                    Container(
-                      // color degradado de izquierda a derecha [amber,transparent]
-                      decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.amber.withOpacity(0.1),Colors.amber.withOpacity(0.01) ],begin: Alignment.centerLeft,end: Alignment.centerRight)),
-                      
-                      child: ListTile( 
-                        iconColor:  Colors.amber,  
-                          leading: const Icon(Icons.star_rounded),
-                          title: Text(homeController.getIsSubscribedPremium?'Premium':'Obtener Premium'),
-                          onTap: (){
-                            // action : mostrar modal bottom sheet con  las funciones premium
-                            homeController.showModalBottomSheetSubcription();
-                          }),
-                    ), 
-                  // vender 
-                  ListTile(
-                    selected: homeController.getIndexPage == 0,
-                      leading: const Icon(Icons.attach_money_rounded),
-                      trailing: homeController.getIndexPage != 0 ? null : const Icon(Icons.circle,size: 8),
-                      title: const Text('Vender'),
-                      onTap: () => homeController.setIndexPage = 0),
-                  // historial de caja
-                  user.historyArqueo || isAnonymous ?homeController.getCashierMode?Container():ListTile( 
-                    enabled: !isAnonymous,
-                    selected: homeController.getIndexPage == 1,
-                    leading: const Icon(Icons.manage_search_rounded),
-                    trailing: homeController.getIndexPage != 1 ? null : const Icon(Icons.circle,size: 8),
-                    title: const Text('Historial de caja'),
-                    onTap: () => homeController.setIndexPage = 1):Container(),
-                  // transacciones
-                  user.transactions || isAnonymous?homeController.getCashierMode?Container():ListTile(
-                    enabled: !isAnonymous,
-                    selected: homeController.getIndexPage == 2,
-                    leading: const Icon(Icons.receipt_long_rounded),
-                    trailing: homeController.getIndexPage != 2 ? null : const Icon(Icons.circle,size: 8),
-                    title: const Text('Transacciones'),
-                    onTap: () => homeController.setIndexPage = 2):Container(),
-                  // catalogo
-                  user.catalogue || isAnonymous?homeController.getCashierMode?Container():ListTile(
-                    enabled: !isAnonymous,
-                    selected: homeController.getIndexPage == 3,
-                    leading: const Icon(Icons.apps_rounded),
-                    trailing: homeController.getIndexPage != 3 ? null : const Icon(Icons.circle,size: 8),
-                    title: const Text('Catálogo'),
-                    onTap: () => homeController.setIndexPage = 3):Container(),
-                  // TODO : desabilitar visualizacion para produccion
-                  /* ListTile(
-                    enabled: !isAnonymous,
-                    selected: homeController.getIndexPage == 5,
-                    leading: const Icon(Icons.admin_panel_settings_outlined),
-                    trailing: homeController.getIndexPage != 5 ? null : const Icon(Icons.circle,size: 8),
-                    title: const Text('Moderador'),
-                    onTap: () {
-                      Get.toNamed(Routes.moderator); 
-                    },
-                  ), */
-                  // multiusuario
-                  user.multiuser || isAnonymous?homeController.getCashierMode?Container():
-                  ListTile(
-                    enabled: !isAnonymous,
-                    selected: homeController.getIndexPage == 4,
-                    leading: const Icon(Icons.group_add_outlined),
-                    trailing: homeController.getIndexPage != 4 ? null : const Icon(Icons.circle,size: 8),
-                    title: const Text('Multi Usuario'),
-                    onTap: () {
-                      if( homeController.getProfileAccountSelected.subscribed ){
-                        homeController.setIndexPage = 4;
-                      }else{
-                        Get.back(); // cierra drawer
-                        homeController.showModalBottomSheetSubcription(id: 'multiuser');
-                      }
-                      
-                    }):Container(),
-                  const SizedBox(height: 20),
-                  homeController.getCashierMode?Container():ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                    tileColor: Colors.blue.withOpacity(0.05),
-                    leading: const Icon(Icons.messenger_outline_sharp,color: Colors.green),
-                    title: const Text('Escribenos tu opinión 😃'),
-                    subtitle: const Text('Tu opinión o sugerencia es importante para mejorar esta app'),
-                    onTap: () async {
-                      
-                      // values
-                      Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.logicabooleana.sell');
-                      //  redireccionara para la tienda de aplicaciones
-                      await launchUrl(uri,mode: LaunchMode.externalApplication);
-                    },
-                  ),   
-                  const SizedBox(height: 20)
+                  const SizedBox(width: 10),
                 ],
               ),
+              // view : avatar y datos la cuenta y del usuario
+              isAnonymous?textButtonLogin
+                :ListTile(
+                leading: Container(padding: const EdgeInsets.all(0.0),child: ComponentApp().userAvatarCircle(urlImage: homeController.getProfileAccountSelected.image,text: homeController.getProfileAccountSelected.name)),
+                title: Text(homeController.getIdAccountSelected == ''? 'Seleccionar una cuenta': homeController.getProfileAccountSelected.name,maxLines: 1,overflow: TextOverflow.ellipsis),
+                subtitle: user.name==''? null:Opacity(
+                  opacity: 0.7,
+                  child: Row(
+                    children: [
+                      // icon 
+                      const Icon(Icons.person_rounded,size: 14),
+                      const SizedBox(width:2),
+                      // text : nombre del usuario administrador
+                      Flexible(child: Text(user.name,overflow: TextOverflow.ellipsis,maxLines: 1)),
+                    ],
+                  ),
+                ),
+                trailing: homeController.getCashierMode?null: const Icon(Icons.arrow_right),
+                onTap: homeController.getCashierMode?null: () {
+                  homeController.showModalBottomSheetConfig();
+                },
+              ),  
+              homeController.getCashierMode || isAnonymous?const Padding(
+                padding: EdgeInsets.only(bottom: 0,top: 20),
+                child: Divider(height:0,thickness:.5),
+              ):Container(),
+              // ----------------- //
+              // funciones premium //
+              // ----------------- //
+              // condition : si el usuario de la cuenta no es administrador no se muestra el boton de suscribirse a premium
+              user.admin==false?Container():
+              isAnonymous?Container():
+              homeController.getCashierMode?Container():
+                Container(
+                  // color degradado de izquierda a derecha [amber,transparent]
+                  decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.amber.withOpacity(0.1),Colors.amber.withOpacity(0.01) ],begin: Alignment.centerLeft,end: Alignment.centerRight)),
+                  
+                  child: ListTile( 
+                    iconColor:  Colors.amber,  
+                      leading: const Icon(Icons.star_rounded),
+                      title: Text(homeController.getIsSubscribedPremium?'Premium':'Obtener Premium'),
+                      onTap: (){
+                        // action : mostrar modal bottom sheet con  las funciones premium
+                        homeController.showModalBottomSheetSubcription();
+                      }),
+                ), 
+              // vender 
+              ListTile(
+                selected: homeController.getIndexPage == 0,
+                  leading: const Icon(Icons.attach_money_rounded),
+                  trailing: homeController.getIndexPage != 0 ? null : const Icon(Icons.circle,size: 8),
+                  title: const Text('Vender'),
+                  onTap: () => homeController.setIndexPage = 0),
+              // historial de caja
+              user.historyArqueo || isAnonymous ?homeController.getCashierMode?Container():ListTile( 
+                enabled: !isAnonymous,
+                selected: homeController.getIndexPage == 1,
+                leading: const Icon(Icons.manage_search_rounded),
+                trailing: homeController.getIndexPage != 1 ? null : const Icon(Icons.circle,size: 8),
+                title: const Text('Historial de caja'),
+                onTap: () => homeController.setIndexPage = 1):Container(),
+              // transacciones
+              user.transactions || isAnonymous?homeController.getCashierMode?Container():ListTile(
+                enabled: !isAnonymous,
+                selected: homeController.getIndexPage == 2,
+                leading: const Icon(Icons.receipt_long_rounded),
+                trailing: homeController.getIndexPage != 2 ? null : const Icon(Icons.circle,size: 8),
+                title: const Text('Transacciones'),
+                onTap: () => homeController.setIndexPage = 2):Container(),
+              // catalogo
+              user.catalogue || isAnonymous?homeController.getCashierMode?Container():ListTile(
+                enabled: !isAnonymous,
+                selected: homeController.getIndexPage == 3,
+                leading: const Icon(Icons.apps_rounded),
+                trailing: homeController.getIndexPage != 3 ? null : const Icon(Icons.circle,size: 8),
+                title: const Text('Catálogo'),
+                onTap: () => homeController.setIndexPage = 3):Container(),
+              // TODO : desabilitar visualizacion para produccion
+              /* ListTile(
+                enabled: !isAnonymous,
+                selected: homeController.getIndexPage == 5,
+                leading: const Icon(Icons.admin_panel_settings_outlined),
+                trailing: homeController.getIndexPage != 5 ? null : const Icon(Icons.circle,size: 8),
+                title: const Text('Moderador'),
+                onTap: () {
+                  Get.toNamed(Routes.moderator); 
+                },
+              ), */
+              // multiusuario
+              user.multiuser || isAnonymous?homeController.getCashierMode?Container():
+              ListTile(
+                enabled: !isAnonymous,
+                selected: homeController.getIndexPage == 4,
+                leading: const Icon(Icons.group_add_outlined),
+                trailing: homeController.getIndexPage != 4 ? null : const Icon(Icons.circle,size: 8),
+                title: const Text('Multi Usuario'),
+                onTap: () {
+                  if( homeController.getProfileAccountSelected.subscribed ){
+                    homeController.setIndexPage = 4;
+                  }else{
+                    Get.back(); // cierra drawer
+                    homeController.showModalBottomSheetSubcription(id: 'multiuser');
+                  }
+                  
+                }):Container(),
+              const SizedBox(height: 20),
+              homeController.getCashierMode?Container():ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                tileColor: Colors.blue.withOpacity(0.05),
+                leading: const Icon(Icons.messenger_outline_sharp,color: Colors.green),
+                title: const Text('Escribenos tu opinión 😃'),
+                subtitle: const Text('Tu opinión o sugerencia es importante para mejorar esta app'),
+                onTap: () async {
+                  
+                  // values
+                  Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.logicabooleana.sell');
+                  //  redireccionara para la tienda de aplicaciones
+                  await launchUrl(uri,mode: LaunchMode.externalApplication);
+                },
+              ),   
+              const SizedBox(height: 20)
+            ],
+          ),
         ),
         const Divider(height: 0),
         const SizedBox(height:5),
@@ -697,12 +694,15 @@ Widget viewSelectedAccount() {
                 const SizedBox(height: 20), 
 
                 !homeController.getLoadedManagedAccountsList?Container():homeController.checkAccountExistence?Container():
-                ComponentApp().button(
-                  disable: homeController.getProfileAdminUser.superAdmin,
-                  text: 'Crear perfil de mi negocio',
-                  onPressed: () { 
-                    Get.toNamed(Routes.account);
-                  },
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal:75),
+                  child: ComponentApp().button(
+                    disable: homeController.getProfileAdminUser.superAdmin,
+                    text: 'Crear perfil de mi negocio',
+                    onPressed: () { 
+                      Get.toNamed(Routes.account,arguments: {'create':true});
+                    },
+                  ),
                 ),
 
                 // lista de cuentas administradas o boton para crear una cuenta
@@ -786,7 +786,7 @@ class ComponentApp extends StatelessWidget {
     if(empty){
       iconDefault = Container();
     }else if(urlImage == '' && text == ''){
-      iconDefault = Icon(iconData??Icons.person_outline_rounded,color: Colors.white,size: radius*1.5 );
+      iconDefault = Icon(iconData??Icons.person_outline_rounded,color: Colors.white,size: radius*1.1 );
     }else if(urlImage == '' && text != ''){
       iconDefault = Text( text.substring( 0,1),style: const TextStyle(color: Colors.white));
     }else{
@@ -865,7 +865,7 @@ class ComponentApp extends StatelessWidget {
             textStyle: TextStyle(color: colorAccent,fontWeight: FontWeight.w700),
           ),  
           icon: icon??Container(),
-          label: Text(text, style: TextStyle(color: colorAccent,fontSize: fontSize)),
+          label: Text(text, style: TextStyle(color: colorAccent,fontSize: fontSize),textAlign: TextAlign.center),
         ),
       ),
     ));
@@ -1276,3 +1276,107 @@ class _EditProductSelectedDialogViewState extends State<EditProductSelectedDialo
     return Container();
   }
 }
+// ---------------------------------- //
+// ---------- Paint ----------------- //
+// ---------------------------------- //
+class RoundedBubblePainter extends CustomPainter {
+  // description : Clase que dibuja un globo de conversación redondeado
+  final Color color;
+  final double radius;
+  final bool isPointingUp;
+  final bool isPointingLeft;
+  final double notchMargin; // Margen para la muesca
+
+  RoundedBubblePainter({
+    required this.color,
+    this.radius = 16.0,
+    this.isPointingUp = false, // Por defecto la muesca apunta hacia abajo
+    this.isPointingLeft = true, // Por defecto la muesca apunta hacia la izquierda
+    this.notchMargin = 20.0, // Margen por defecto para la muesca
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    // Calcular la posición de la muesca con margen
+    final double notchXStart = isPointingLeft ? notchMargin : size.width - notchMargin;
+    
+    // Rectángulo principal del globo
+    final bubbleRect = RRect.fromRectAndRadius(
+      Rect.fromLTRB(
+        isPointingLeft ? 10 : 0,
+        isPointingUp ? 10 : 0,
+        isPointingLeft ? size.width : size.width - 10,
+        isPointingUp ? size.height : size.height - 10,
+      ),
+      Radius.circular(radius),
+    );
+
+    // Dibujar la forma principal del globo de conversación
+    canvas.drawRRect(bubbleRect, paint);
+
+    // Dibujar la muesca del globo de conversación
+    final path = Path();
+    if (isPointingUp) {
+      // Muesca arriba
+      path.moveTo(notchXStart - 10, 10);
+      path.lineTo(notchXStart, 0);
+      path.lineTo(notchXStart + 10, 10);
+    } else {
+      // Muesca abajo
+      path.moveTo(notchXStart - 10, size.height - 10);
+      path.lineTo(notchXStart, size.height);
+      path.lineTo(notchXStart + 10, size.height - 10);
+    }
+    path.close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
+  }
+}
+class RoundedChatBubble extends StatelessWidget {
+  // description : Widget que dibuja un globo de conversación redondeado
+  final Widget widget;
+  final Color bubbleColor;
+  final bool isPointingUp;
+  final bool isPointingLeft;
+  final double notchMargin;
+
+  const RoundedChatBubble({
+    super.key,
+    required this.widget,
+    this.bubbleColor = Colors.blue,
+    this.isPointingUp = false, // Por defecto la muesca apunta hacia abajo
+    this.isPointingLeft = true, // Por defecto la muesca apunta hacia la izquierda
+    this.notchMargin = 20.0, // Margen por defecto para la muesca
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: RoundedBubblePainter(
+        color: bubbleColor,
+        isPointingUp: isPointingUp,
+        isPointingLeft: isPointingLeft,
+        notchMargin: notchMargin,
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          isPointingLeft ? 20.0 : 12.0,
+          isPointingUp ? 25.0 : 20.0,
+          isPointingLeft ? 12.0 : 20.0,
+          isPointingUp ? 20.0 : 25.0,
+        ),
+        child: widget,
+      ),
+    );
+  }
+}
+

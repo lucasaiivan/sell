@@ -70,6 +70,7 @@ class AccountView extends GetView<AccountController> {
                 const SizedBox(height: 12.0),
                 // text : informativo
                 controller.newAccount?widgetText(text: 'Dinos un poco de tu negocio\n\n 👇'): Container(),
+               
                 // imagen : avatar del negocio
                 widgetsImagen(),
                 // button  : actualizart imagen
