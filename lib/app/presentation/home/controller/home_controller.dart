@@ -1282,7 +1282,7 @@ class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcript
               Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [ 
+                children: <Widget>[
                   const SizedBox(height: 8),
                   // icon 
                   Padding(padding: const EdgeInsets.only(top:12),child: icon),
