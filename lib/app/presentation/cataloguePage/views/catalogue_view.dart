@@ -185,6 +185,7 @@ class CataloguePage extends StatelessWidget {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  // TODO : disable widget
                   /* // text : cantidad de veces que se consulta la db del catalogo
                   homeController.dbQueryAmoun==0?Container():Padding(
                     padding: const EdgeInsets.all(12),

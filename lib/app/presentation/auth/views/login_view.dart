@@ -115,7 +115,7 @@ class AuthView extends GetView<LoginController> {
               recognizer: TapGestureRecognizer()
                 ..onTap = () async {
                   final Uri url = Uri.parse(
-                      'https://sites.google.com/view/producto-app/t%C3%A9rminos-y-condiciones-de-uso/');
+                      'https://sites.google.com/view/sell-app/t%C3%A9rminos-y-condiciones-de-uso');
                   if (!await launchUrl(url)) throw 'Could not launch $url';
                 }),
           const TextSpan(text: ' así también como la '),
@@ -125,7 +125,7 @@ class AuthView extends GetView<LoginController> {
               recognizer: TapGestureRecognizer()
                 ..onTap = () async {
                   final Uri url = Uri.parse(
-                      'https://sites.google.com/view/producto-app/pol%C3%ADticas-de-privacidad');
+                      'https://sites.google.com/view/sell-app/pol%C3%ADticas-de-privacidad');
                   if (!await launchUrl(url)) throw 'Could not launch $url';
                 }),
         ],

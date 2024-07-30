@@ -1290,14 +1290,14 @@ class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcript
                   Text(title,textAlign: TextAlign.center,style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
                   const SizedBox(height: 5),
                   // TODO : delete button release
-                  TextButton(
+                  /*TextButton(
                     child: const Text('Activar suscripción'),
                     onPressed: () {
                       // activa la suscripción solo en la app en tiempo de ejecución de manera local
                       homeController.setIsSubscribedPremium = true;
                       Get.back();
                     },
-                  ),
+                  ),*/
                   // text : descripción
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),

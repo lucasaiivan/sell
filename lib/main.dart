@@ -46,7 +46,7 @@ Future<void> main() async {
 
   initializeDateFormatting('es', null).then((_){
     runApp(GetMaterialApp(
-      title: "Punto de Venta", // ...
+      title: "Gestiona tus ventas", // ...
       initialRoute: AppPages.INITIAL,
       getPages: AppPages.routes,
       debugShowCheckedModeBanner: false,

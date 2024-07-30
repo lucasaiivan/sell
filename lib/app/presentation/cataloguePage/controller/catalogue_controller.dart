@@ -162,12 +162,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
             setCatalogueProducts = list;
             break;
           case '3': // Mostrar productos con stock bajos
-            setTextFilter = 'Stock Bajos';
-            List<ProductCatalogue> listSFilter = [];
-            for(ProductCatalogue item in homeController.getCataloProducts){if(item.stock){if(item.quantityStock<=item.alertStock){listSFilter.add(item);}}}
-            for(ProductCatalogue item in listSFilter){list.add(item);}
-            // set
-            setCatalogueProducts = list;
+            filterAlertStock();
             break;
           case '4': // Mostrar productos actualizados hace más de 2 meses
             setTextFilter = 'hace más de 2 meses';
@@ -299,35 +294,13 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
     Get.dialog( const ViewSeachProductsCataloguie()); 
   }
   void filterAlertStock() {
-
-    // obtenemos una lista nueva con los productos que tienen un stock
-    List<ProductCatalogue> stockActivateList = [];
-    for (var element in getCataloProducts) {
-      if (element.stock) {
-        stockActivateList.add(element);
-      }
-    }
-    stockActivateList
-        .sort((a, b) => a.quantityStock.compareTo(b.quantityStock));
-
-    // obtenemos una lista nueva con los productos que no tienen el stock activado
-    List<ProductCatalogue> stockDesactivateList = [];
-    for (var element in getCataloProducts) {
-      if (element.stock == false) {
-        stockDesactivateList.add(element);
-      }
-    }
-    stockDesactivateList.sort((a, b) => b.quantityStock.compareTo(a.quantityStock));
-    // creamos una nueva lista con todos los productos ya filtrados
-    List<ProductCatalogue> newFilterList = [];
-    for (var element in stockActivateList) {
-      newFilterList.add(element);
-    }
-    for (var element in stockDesactivateList) {
-      newFilterList.add(element);
-    }
-    // actualizamos la lista para mostrar al usuario
-    setCatalogueProducts = newFilterList;
+    setTextFilter = 'Stock Bajos';
+    List<ProductCatalogue> list = [];
+    List<ProductCatalogue> listSFilter = [];
+    for(ProductCatalogue item in homeController.getCataloProducts){if(item.stock){if(item.quantityStock<=item.alertStock){listSFilter.add(item);}}}
+    for(ProductCatalogue item in listSFilter){list.add(item);}
+    // set
+    setCatalogueProducts = list;
   }
   //
   // FUCTIONS CATALOGUE SEARCH VIEW
@@ -538,7 +511,7 @@ class CataloguePageController extends GetxController with GetSingleTickerProvide
         padding: const EdgeInsets.all(20.0),
         child: TextButton(
             onPressed: filterAlertStock,
-            child: Text('Tienes $countProducts productos con stock bajas',
+            child: Text('Tienes $countProducts productos con stock bajos',
                 style: const TextStyle(
                     fontSize: 16, fontWeight: FontWeight.w200))),
       );
