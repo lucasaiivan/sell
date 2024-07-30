@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
+import 'package:get_storage/get_storage.dart'; 
 import 'package:intl/date_symbol_data_local.dart'; 
 import 'app/core/routes/app_pages.dart';
 import 'app/core/utils/dynamicTheme_lb.dart';
@@ -28,7 +28,7 @@ Future<void> main() async {
     await Purchases.setLogLevel(LogLevel.debug); // debug : para ver los errores en la consola
     PurchasesConfiguration configuration = PurchasesConfiguration(googleApiKey)..observerMode = false;
     await Purchases.configure(configuration); // configuramos la compra
-  } 
+  }  
   // GetStorage : local storage
   await GetStorage.init(); 
   SplashBinding().dependencies(); 

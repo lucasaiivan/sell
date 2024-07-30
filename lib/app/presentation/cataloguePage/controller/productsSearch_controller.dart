@@ -113,12 +113,12 @@ class ControllerProductsSearch extends GetxController {
       _productDoesNotExist = false;
     }
   }
+  get getproductDoesNotExist => _productDoesNotExist;
 
   // list productos sujeridos
   static List<Product> _listProductsSuggestion = [];
   set setListProductsSuggestions(List<Product> list) => _listProductsSuggestion = list;
   List<Product> get getListProductsSuggestions => _listProductsSuggestion;
-  get getproductDoesNotExist => _productDoesNotExist;
 
   // FUCTIONS
   Future<void> scanBarcodeNormal() async {

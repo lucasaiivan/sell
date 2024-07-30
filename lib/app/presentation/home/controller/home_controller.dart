@@ -1,4 +1,4 @@
-import 'dart:io';    
+import 'dart:io';     
 import 'package:lottie/lottie.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -31,7 +31,7 @@ class HomeController extends GetxController {
   final GlobalKey floatingActionButtonScanCodeBarKey = GlobalKey();
   final GlobalKey floatingActionButtonSelectedCajaKey = GlobalKey();
   final GlobalKey buttonsPaymenyMode = GlobalKey();
-  
+ 
 
   // user anonymous
   bool _userAnonymous = false;
@@ -332,7 +332,7 @@ class HomeController extends GetxController {
   }
 
 
-  // FUNCTIONS
+  // FUNCTIONS 
   Future<bool> onBackPressed({required BuildContext context}) async {
     // si el usuario no se encuentra en el index 0, va a devolver la vista al index 0
     if (getIndexPage != 0) {

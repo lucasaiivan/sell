@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; 
 import 'package:get/get.dart';
-import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:url_launcher/url_launcher.dart';  
 import '../../../core/utils/dynamicTheme_lb.dart';
 import '../../../core/utils/widgets_utils.dart';
@@ -140,7 +139,6 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                         widget: Text('El código escrito aún no existe en nuestra base de datos',style: TextStyle(fontSize: 16,color: Colors.white70,fontWeight: FontWeight.w300),textAlign: TextAlign.center,),
                       ),
                   ),
-                  // view : texto informativo que el producto aún no existe si no se encuentra en la base de datos y se escribio manualmente el código por el teclado 
                   !(controller.productSelect.local && controller.getproductDoesNotExist)?Container():
                   const Padding(
                     padding: EdgeInsets.only(bottom: 12),
@@ -154,20 +152,35 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                   ),
                   // view : texto informativo que el producto aún no existe
                   controller.productSelect.local  ||!controller.getproductDoesNotExist?Container():
-                  Card(
-                    elevation: 0,
-                    color: Colors.black12,
-                    margin: const EdgeInsets.symmetric(vertical: 20.0),
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 0.0,bottom: 20.0,left: 12.0,right: 12.0),
-                      child: Column(
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: RoundedChatBubble(
+                      isPointingUp: true,
+                      notchMargin: 100.0, 
+                      bubbleColor: Colors.black12,
+                      widget: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Image.asset('assets/default_image.png',height: 75,width: 75,fit: BoxFit.cover,color: Colors.white38),
-                          const Text( 'El producto escaneado aún no existe',textAlign: TextAlign.center, style: TextStyle(fontSize: 18,color: Colors.white, fontWeight: FontWeight.bold)),
-                          const Text('Ayúdanos a registrar nuevos productos para que esta aplicación sea aún más útil para más personsa 🌍 ',textAlign: TextAlign.center, style: TextStyle(color: Colors.white70)),
+                          Image.asset('assets/default_image.png',height: 50,width: 50,fit: BoxFit.cover,color: Colors.white38),
+                          const Flexible(child: Text( 'El producto escaneado aún no existe',textAlign: TextAlign.center, style: TextStyle( color: Colors.white70 ))),
                         ],
+                                            ),
                       ),
                     ),
+                  ), 
+                  controller.productSelect.local  ||!controller.getproductDoesNotExist?Container():
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 12),
+                    child: RoundedChatBubble(
+                      isPointingUp: false,
+                      notchMargin: 100.0,
+                      isPointingLeft: true,
+                        bubbleColor: Colors.black12,
+                        widget: Text('Ayúdanos a registrar nuevos productos para que esta aplicación sea aún más útil para más personsa 🌍 ',textAlign: TextAlign.center, style: TextStyle(color: Colors.white70 )),
+                      ),
                   ),  
                   //  button : crear producto
                   controller.getproductDoesNotExist

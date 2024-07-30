@@ -1078,7 +1078,7 @@ class _NewProductViewState extends State<NewProductView> {
             //
             if(checkAddCatalogue && homeController.getUserAnonymous == false){
               // add product to catalogue
-              homeController.addProductToCatalogue(product: widget.productCatalogue,isProductNew: isProductNew);
+              homeController.addProductToCatalogue(product: widget.productCatalogue.copyWith(),isProductNew: isProductNew);
               
             }
             // add : agregamos el producto a la lista de productos seleccionados

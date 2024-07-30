@@ -105,7 +105,15 @@ class SalesView extends StatelessWidget {
             duration: const Duration(milliseconds: 300),
             width: double.infinity,
             color: Colors.green,
-            child: const Center(child: Text('ACTUALIZAR',style: TextStyle(color: Colors.white, fontSize: 18))),
+            child: const Center(child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.cloud_upload_outlined,color: Colors.white),
+                SizedBox(width: 8),
+                Text('Actualizar',style: TextStyle(color: Colors.white, fontSize: 18)),
+
+              ],
+            )),
           ),
         )
       : Container();
@@ -612,7 +620,7 @@ class SalesView extends StatelessWidget {
 
     // values
     int numItemDefault = 5;
-    const double height = 120;
+    const double height = 130;
     final bool viewDefault = controller.getProductsOutstandingList.isEmpty;
     final int itemCount = viewDefault?6:controller.getProductsOutstandingList.length + numItemDefault;
     // condition : si no ahi productos destacados ni recientes
@@ -622,7 +630,7 @@ class SalesView extends StatelessWidget {
     // views : load widget mientras se carga la data
     if(homeController.productsBestSellersLoadComplete.value == false ){
       return SizedBox(
-        height: 130,
+        height: height,
         width: double.infinity,
         child: Shimmer.fromColors(
           baseColor: Colors.grey,
@@ -695,7 +703,7 @@ class SalesView extends StatelessWidget {
 
     // values
     bool defaultValues = productCatalogue.id == '';
-    double radius = 40.0;
+    double radius = 45.0;
     double spaceImageText = 1;
     Color backgroundColor = Colors.grey.withOpacity(0.1);
     bool stateAlertStock = productCatalogue.stock && homeController.getIsSubscribedPremium ? productCatalogue.quantityStock < 5 : false;
@@ -703,9 +711,9 @@ class SalesView extends StatelessWidget {
 
     return ElasticIn(
       child: Container(
-        width: 81.0,
-        height: 110.0,
-        padding: const EdgeInsets.all(5.0),
+        width: 95.0,
+        height: 130.0,
+        padding: const EdgeInsets.all(7.0),
         child: Column(
           children: [
             GestureDetector(
