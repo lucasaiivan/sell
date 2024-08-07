@@ -6,12 +6,13 @@ import '../../../core/utils/widgets_utils.dart';
 import '../../../data/datasource/database_cloud.dart';
 import '../../../domain/entities/cashRegister_model.dart';
 import '../../home/controller/home_controller.dart';
+import '../views/historyCashRegister_view.dart';
 
 class HistoryCashRegisterController extends GetxController {
   // others controllers
   final HomeController homeController = Get.find();
   // text filter
-  RxString textFilter = 'Últimos 30 Días'.obs;
+  RxString textFilter = 'Últimos 7 Días'.obs;
   String get getTextFilter => textFilter.value;
   set setTextFilter(value) => textFilter.value = value;
   // estado para saber si se esta cargando datos
@@ -21,33 +22,6 @@ class HistoryCashRegisterController extends GetxController {
   RxList<CashRegister> listCashRegister = <CashRegister>[].obs;
   List<CashRegister> get getListCashRegister => listCashRegister;
   set setListCashRegister(value) => listCashRegister.value = value;
-
-  // load : cargamos los arqueos de caja de los ultimos 30 dias
-  void loadCashRegisterLast30Days() async {
-    setTextFilter = 'Últimos 30 Días';
-    // firebase : obtenemos los documentos de arqueos de caja de los ultimos 30 dias
-    Future<QuerySnapshot<Object?>> query = Database.refFirestoreRecords(
-            idAccount: homeController.getProfileAccountSelected.id)
-        .where('opening',
-            isGreaterThan: DateTime.now().subtract(const Duration(days: 30)))
-        .orderBy('opening', descending: true)
-        .get();
-    query.then((value) {
-      getListCashRegister.clear(); // limpiamos la lista de cajas
-      if (value.docs.isNotEmpty) {
-        // añadimos las cajas disponibles
-        for (var element in value.docs) {
-          // add : seteamos y agregamos los arqueos de caja
-          getListCashRegister.add(
-              CashRegister.fromMap(element.data() as Map<String, dynamic>));
-        }
-      } else {
-        // sin datos
-      }
-      load = false; // terminamos de cargar
-      update(); // actualizamos la vista
-    });
-  }
 
   // load : obtenemos los arqueos de caja del dia de hoy
   void loadCashRegisterToday() async {
@@ -95,6 +69,53 @@ class HistoryCashRegisterController extends GetxController {
               CashRegister.fromMap(element.data() as Map<String, dynamic>));
         }
       }
+      update(); // actualizamos la vista
+    });
+  }
+
+  // load : obtenemos los arqueos de caja de los ultimos 7 dias
+  void loadCashRegisterLast7Days() async {
+    setTextFilter = 'Últimos 7 Días';
+    load = true;  
+    // firebase : obtenemos los documentos de arqueos de caja de los ultimos 7 dias
+    Future<QuerySnapshot<Object?>> query = Database.refFirestoreRecords(
+            idAccount: homeController.getProfileAccountSelected.id)
+        .where('opening',isGreaterThan: DateTime.now().subtract(const Duration(days: 7)))
+        .orderBy('opening', descending: true)
+        .get();
+    query.then((value) {
+      getListCashRegister.clear(); // limpiamos la lista de cajas
+      if (value.docs.isNotEmpty) {
+        // añadimos las cajas disponibles
+        for (var element in value.docs) {
+          // add : seteamos y agregamos los arqueos de caja
+          getListCashRegister.add(CashRegister.fromMap(element.data() as Map<String, dynamic>));
+        }
+      }
+      load = false; // terminamos de cargar
+      update(); // actualizamos la vista
+    });
+  }
+
+  // load : cargamos los arqueos de caja de los ultimos 30 dias
+  void loadCashRegisterLast30Days() async {
+    setTextFilter = 'Últimos 30 Días';
+    // firebase : obtenemos los documentos de arqueos de caja de los ultimos 30 dias
+    Future<QuerySnapshot<Object?>> query = Database.refFirestoreRecords(
+            idAccount: homeController.getProfileAccountSelected.id)
+        .where('opening',isGreaterThan: DateTime.now().subtract(const Duration(days: 30)))
+        .orderBy('opening', descending: true)
+        .get();
+    query.then((value) {
+      getListCashRegister.clear(); // limpiamos la lista de cajas
+      if (value.docs.isNotEmpty) {
+        // añadimos las cajas disponibles
+        for (var element in value.docs) {
+          // add : seteamos y agregamos los arqueos de caja
+          getListCashRegister.add(CashRegister.fromMap(element.data() as Map<String, dynamic>));
+        }
+      } 
+      load = false; // terminamos de cargar
       update(); // actualizamos la vista
     });
   }
@@ -185,6 +206,9 @@ class HistoryCashRegisterController extends GetxController {
       case 'Ayer':
         loadCashRegisterYesterday();
         break;
+      case 'Últimos 7 Días':
+        loadCashRegisterLast7Days();
+        break;
       case 'Este mes':
         loadCashRegisterThisMonth();
         break;
@@ -217,42 +241,59 @@ class HistoryCashRegisterController extends GetxController {
 
   // generate widget
   List<Widget> get getTransactionsWidgetsViews {
-    List<Widget> transactions = []; // lista de widgets de transacciones
+
+    // var
+    List<Widget> transactions = []; // lista de widgets de transacciones 
 
     // define una variable currentDate para realizar el seguimiento de la fecha actual en la que se está construyendo la lista. Inicializa esta variable con la fecha de la primera transacción en la lista
     DateTime currentDate = getListCashRegister[0].opening;
     // add : Itera sobre la lista de transacciones y verifica si la fecha de la transacción actual es diferente a la fecha actual. Si es así, crea un elemento Divider y actualiza la fecha actual
-    for (int i = 0; i < getListCashRegister.length; i++) {
-      // condition : si es la primera transacción
-      if (i == 0) {
-        // add : añade tarjetas de estadísticas
-        //transactions.add(StaticsCards());
-      }
+    for (int i = 0; i < getListCashRegister.length; i++) { 
       // condition : si la fecha actual es diferente a la fecha de la transacción actual
       if (currentDate.day != getListCashRegister[i].opening.day || i == 0) {
         //  set : actualiza la fecha actual de la variable
         currentDate = getListCashRegister[i].opening;
+        // var
+        String amountTotal = getAmountTotalByDate(date: currentDate);
         // add : añade un Container con el texto de la fecha como divisor
         transactions.add(Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-            width: double.infinity,
-            color: Colors.grey.withOpacity(.05),
-            child: Opacity(
-                opacity: 0.8,
-                child: Text(
-                    Publications.getFechaPublicacionSimple(
-                        getListCashRegister[i].opening,
-                        Timestamp.now().toDate()),
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+          width: double.infinity,
+          color: Colors.grey.withOpacity(.05),
+          child: Opacity(
+            opacity: 0.7,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center, 
+              children: [
+                Expanded(
+                  child: Text(
+                    Publications.getFechaPublicacionSimple(getListCashRegister[i].opening,Timestamp.now().toDate()),
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.w300)))));
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w300),
+                  ),
+                ),
+                // text : monto total 
+                Text(amountTotal,style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w400)),
+              ],
+            ),
+          )));
       }
       //  add : añade el elemento de la lista actual a la lista de widgets
       transactions.add(itemTile(cashRegister: getListCashRegister[i]));
       // agregar un divider
-      transactions.add(ComponentApp().divider(thickness: 0.05));
+      transactions.add(ComponentApp().divider(thickness: 0.09));
     }
     return transactions;
+  }
+  String getAmountTotalByDate({required DateTime date}){
+    // description : obtiene el monto total (formateado) de los arqueos de caja de una fecha especifica
+    double amount = 0;
+    for (var element in getListCashRegister) {
+      if (element.opening.day == date.day && element.opening.month == date.month && element.opening.year == date.year) {
+        amount += element.balance == 0 ? element.getExpectedBalance : element.balance;
+      }
+    }
+    return Publications.getFormatoPrecio(value: amount);
   }
 
   // WIDGETS COMPONENTS
@@ -262,7 +303,7 @@ class HistoryCashRegisterController extends GetxController {
     int minutes = cashRegister.closure.difference(cashRegister.opening).inMinutes.remainder(60);
     String time = hour==0?'Tiempo: $minutes minutos':'Tiempo: $hour horas y $minutes minutos';
     // var : subtitle
-    String subtitle = 'Balance: ${Publications.getFormatoPrecio(monto: cashRegister.balance == 0 ? cashRegister.getExpectedBalance : cashRegister.balance)}\n$time';
+    String subtitle = 'Balance: ${Publications.getFormatoPrecio(value: cashRegister.balance == 0 ? cashRegister.getExpectedBalance : cashRegister.balance)}\n$time';
 
     return ListTile(
       title: Text(Publications.getFechaPublicacionFormating(
@@ -274,218 +315,78 @@ class HistoryCashRegisterController extends GetxController {
           Opacity(opacity: 0.5, child: Text(cashRegister.description)),
           const Opacity(
               opacity: 0.5,
-              child: Icon(Icons.arrow_forward_ios_rounded, size: 16))
+              child: Icon(Icons.arrow_right_outlined, size: 16))
         ],
       ),
-      onTap: () {
-        showDialog
-            //  showDialog  : muestra el dialogo de detalles
-            (
-          context: Get.context!,
-          builder: (BuildContext context) =>
-              viewDetails(cashRegister: cashRegister),
-        );
+      onTap: () { 
+        Get.dialog(
+          Theme(
+            data: ThemeData.light(),
+            child: ClipRRect(
+              borderRadius: const  BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12), bottomLeft: Radius.circular(0), bottomRight: Radius.circular(0)),
+              child: Scaffold(
+                backgroundColor: Colors.white,
+                appBar:AppBar(
+                  backgroundColor: Colors.white,
+                  actions: [
+                    // button : eliminar
+                    IconButton(
+                      icon: const Icon(Icons.delete_forever_rounded),
+                      onPressed: () {
+                        registerDeleteConfirmDialog(cashRegister: cashRegister);
+                        
+                      },
+                    ),
+                    
+                  ],
+                ),
+                body: CashRegisterDetailView(cashRegister: cashRegister),
+                floatingActionButton: FloatingActionButton(
+                  heroTag: 'Compartir',
+                  onPressed: () { 
+                    Utils().getDetailArqueoScreenShot(context: Get.context!,cashRegister: cashRegister);
+                  },
+                  backgroundColor: Colors.blue,
+                  child: const Icon(Icons.share,color: Colors.white,),
+                ),
+                ),
+              
+            ),
+          ),
+        ); 
       },
     );
-  }
-
-  Widget viewDetails({required CashRegister cashRegister}) {
-    // others controllers
-    final HistoryCashRegisterController transactionsController = Get.find();
-
-    // var
-    TextStyle textStyleDescription = const TextStyle(fontWeight: FontWeight.w300);
-    TextStyle textStyleValue = const TextStyle(fontSize: 16, fontWeight: FontWeight.w600);
-
-    // var : tiempo de apertura de caja
-    int hour = cashRegister.closure.difference(cashRegister.opening).inHours;
-    int minutes = cashRegister.closure.difference(cashRegister.opening).inMinutes.remainder(60);
-    String time = hour==0?' $minutes minutos':'$hour horas y $minutes minutos';
-
-    return AlertDialog(
-      content: SizedBox(
-        // establece el ancho a toda la pantalla
-        width: Get.width,
-        // SingleChildScrollView : permite hacer scroll en el contenido
-        child: SingleChildScrollView(
-          child: Column(
-            //padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 20),
-            children: [
-              // text : titulo de la alerta
-              const Padding(
-                padding: EdgeInsets.only(bottom: 12),
-                child: Text("Información de arqueo",
-                    textAlign: TextAlign.center,
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.w400)),
-              ),
-              const SizedBox(height: 20),
-              // view info : descripcion
-              Row(children: [
-                Text('Descripción', style: textStyleDescription),
-                const Spacer(),
-                Text(cashRegister.description, style: textStyleValue)
-              ]),
-              // view info : fecha de inicio
-              const SizedBox(height: 12),
-              Row(children: [
-                Text('Inicio', style: textStyleDescription),
-                const Spacer(),
-                Text(
-                    Publications.getFechaPublicacionFormating(
-                        dateTime: cashRegister.opening),
-                    style: textStyleValue)
-              ]),
-              // view info : fecha de cierre
-              const SizedBox(height: 12),
-              Row(children: [
-                Text('Cierre', style: textStyleDescription),
-                const Spacer(),
-                Text(
-                    Publications.getFechaPublicacionFormating(
-                        dateTime: cashRegister.closure),
-                    style: textStyleValue)
-              ]),
-              // view info : tiempo de apertura
-              const SizedBox(height: 12),
-              Row(children: [
-                Text('Tiempo', style: textStyleDescription),
-                const Spacer(),
-                Text(time, style: textStyleValue)
-              ]),
-              // view info : efectivo incial
-              const SizedBox(height: 12),
-              Row(children: [
-                Text('Efectivo inicial', style: textStyleDescription),
-                const Spacer(),
-                Text(
-                    Publications.getFormatoPrecio(
-                        monto: cashRegister.expectedBalance),
-                    style: textStyleValue)
-              ]),
-              //  view info : cantidad de venta
-              const SizedBox(height: 12),
-              Row(children: [
-                Text('Cantidad de ventas', style: textStyleDescription),
-                const Spacer(),
-                Text(cashRegister.sales.toString(), style: textStyleValue)
-              ]),
-              // view info : facturacion
-              const SizedBox(height: 12),
-              Row(children: [
-                Text('Facturación', style: textStyleDescription),
-                const Spacer(),
-                Text(Publications.getFormatoPrecio(monto: cashRegister.billing),
-                    style: textStyleValue)
-              ]),
-              // view info : egresos
-              const SizedBox(height: 12),
-              Row(children: [
-                Text('Egresos', style: textStyleDescription),
-                const Spacer(),
-                Text(
-                    Publications.getFormatoPrecio(
-                        monto: cashRegister.cashOutFlow),
-                    style: textStyleValue.copyWith(color: Colors.red.shade300))
-              ]),
-              // view info : ingresos
-              const SizedBox(height: 12),
-              Row(children: [
-                Text('Ingresos', style: textStyleDescription),
-                const Spacer(),
-                Text(
-                    Publications.getFormatoPrecio(
-                        monto: cashRegister.cashInFlow),
-                    style: textStyleValue.copyWith(
-                        color: cashRegister.cashInFlow == 0
-                            ? null
-                            : Colors.green.shade300))
-              ]),
-              // view info : monto esperado en la caja
-              const SizedBox(height: 12),
-              const Divider(),
-              Row(children: [
-                Text('Monto esperado', style: textStyleDescription),
-                const Spacer(),
-                Text(
-                    Publications.getFormatoPrecio(
-                        monto: cashRegister.getExpectedBalance),
-                    style: textStyleValue)
-              ]),
-              const SizedBox(height: 12),
-              cashRegister.balance == 0
-                  ? Container()
-                  : Row(children: [
-                      Text('Monto de cierre', style: textStyleDescription),
-                      const Spacer(),
-                      Text(
-                          Publications.getFormatoPrecio(
-                              monto: cashRegister.balance),
-                          style: textStyleValue)
-                    ]),
-              cashRegister.balance == 0
-                  ? Container()
-                  : const SizedBox(height: 12),
-              cashRegister.balance == 0
-                  ? Container()
-                  : Row(children: [
-                      Text('Diferencia', style: textStyleDescription),
-                      const Spacer(),
-                      Text(
-                          Publications.getFormatoPrecio(
-                              monto: cashRegister.getDifference),
-                          style: textStyleValue.copyWith(
-                              color: cashRegister.getDifference == 0
-                                  ? null
-                                  : cashRegister.getDifference < 0
-                                      ? Colors.red.shade300
-                                      : Colors.green.shade300))
-                    ]),
-            ],
-          ),
-        ),
-      ),
+    
+  }  
+  void registerDeleteConfirmDialog({required CashRegister cashRegister}){
+    // dialog : confirmar eliminacion
+    Get.dialog(AlertDialog(
+      title: const Text('Eliminar informe de caja'),
+      content: const Text('¿Está seguro de eliminarlo?'),
       actions: [
-        // textButton : cancelar
         TextButton(
             onPressed: () {
               Get.back();
             },
             child: const Text('Cancelar')),
-        // textButton : eliminar
         TextButton(
-          onPressed: () {
-            Get.dialog(AlertDialog(
-              title: const Text('Eliminar informe de caja'),
-              content: const Text('¿Está seguro de eliminarlo?'),
-              actions: [
-                TextButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    child: const Text('Cancelar')),
-                TextButton(
-                    onPressed: () {
-                      // delete : eliminar caja
-                      transactionsController.deleteCashRegister(
-                          cashRegister: cashRegister);
-                      Get.back();
-                      Get.back();
-                    },
-                    child: const Text('Si, eliminar')),
-              ],
-            ));
-          },
-          child: Text('Eliminar', style: TextStyle(color: Colors.red.shade300)),
-        ),
+            onPressed: () {
+              // delete : eliminar caja
+              deleteCashRegister( cashRegister: cashRegister);
+              Get.back();
+              Get.back();
+            },
+            child: const Text('Si, eliminar')),
       ],
-    );
+    ));
   }
+
 
   @override
   void onInit() async {
     super.onInit();
-    loadCashRegisterLast30Days(); // cargar las cajas de los ultimos 30 dias por defecto
+    // load : obtenemos los arqueos de caja de los ultimos 7 dias
+    loadCashRegisterLast7Days();
   }
 
   @override

@@ -3,13 +3,14 @@ import 'package:sell/app/domain/entities/catalogo_model.dart';
 
 class TicketModel {
   String id = '';
-  String seller = ''; // nombre del vendedor
+  String sellerName = ''; // nombre del vendedor
+  String sellerId = ''; // id del vendedor
   String cashRegisterName = '1'; // nombre o numero de caja que se efectuo la venta
   String cashRegisterId = ''; // id de la caja que se efectuo la venta
   String payMode = ''; // efective (Efectivo) - mercadopago (Mercado Pago) - card (Tarjeta De Crédito/Débito)
   double priceTotal = 0.0; // precio total de la venta
-  double valueReceived = 0.0;
-  double discount = 0.0;
+  double valueReceived = 0.0; // valor recibido por la venta
+  double discount = 0.0; // descuento aplicado a la venta
   String currencySymbol = '\$';
   List<dynamic> listPoduct= [];
   late Timestamp creation; // Marca de tiempo ( hora en que se reporto el producto )
@@ -18,7 +19,8 @@ class TicketModel {
     this.id = "",
     this.payMode = "",
     this.currencySymbol = "\$",
-    this.seller = "",
+    this.sellerName = "",
+    this.sellerId = "",
     this.cashRegisterName = "",
     this.cashRegisterId = "",
     this.priceTotal = 0.0,
@@ -27,7 +29,7 @@ class TicketModel {
     required this.listPoduct,
     required this.creation,
   });
-  int getLengh() {
+  int getProductsQuantity() {
     int count = 0;
     for (var element in listPoduct) {
       count += element['quantity'] as int;
@@ -54,7 +56,8 @@ class TicketModel {
         "id": id,
         "payMode": payMode,
         "currencySymbol": currencySymbol,
-        "seller": seller,
+        "sellerName": sellerName,
+        'sellerId' : sellerId,
         "cashRegisterName": cashRegisterName,
         'cashRegisterId' : cashRegisterId,
         "priceTotal": priceTotal,
@@ -69,7 +72,8 @@ class TicketModel {
         "id": id,
         "payMode": payMode,
         "currencySymbol": currencySymbol,
-        "seller": seller,
+        "sellerName": sellerName,
+        'sellerId' : sellerId,
         "cashRegisterName": cashRegisterName,
         'cashRegisterId' : cashRegisterId,
         "priceTotal": priceTotal,
@@ -82,7 +86,8 @@ class TicketModel {
     return TicketModel(
       id: data.containsKey('id') ? data['id'] : '',
       payMode: data.containsKey('payMode') ? data['payMode'] : '',
-      seller: data.containsKey('seller') ? data['seller'] : '',
+      sellerName: data.containsKey('sellerName') ? data['sellerName'] : '',
+      sellerId: data.containsKey('sellerId') ? data['sellerId'] : '',
       currencySymbol: data.containsKey('currencySymbol') ? data['currencySymbol'] : '\$',
       cashRegisterName: data.containsKey('cashRegisterName') ? data['cashRegisterName'] : '',
       cashRegisterId: data.containsKey('cashRegisterId') ? data['cashRegisterId'] : '',
@@ -99,7 +104,8 @@ class TicketModel {
     return TicketModel(
       id: data.containsKey('id') ? data['id'] : '',
       payMode: data.containsKey('payMode') ? data['payMode'] : '',
-      seller: data.containsKey('seller') ? data['seller'] : '',
+      sellerName: data.containsKey('sellerName') ? data['sellerName'] : '',
+      sellerId: data.containsKey('sellerId') ? data['sellerId'] : '',
       currencySymbol: data.containsKey('currencySymbol') ? data['currencySymbol'] : '\$',
       cashRegisterName: data.containsKey('cashRegisterName') ? data['cashRegisterName'] : '',
       cashRegisterId: data.containsKey('cashRegisterId') ? data['cashRegisterId'] : '',
@@ -115,7 +121,8 @@ class TicketModel {
 
     id = data['id'] ?? '';
     payMode = data['payMode'] ?? '';
-    seller = data['seller'] ?? '';
+    sellerName = data['sellerName'] ?? '';
+    sellerId = data['sellerId'] ?? '';
     currencySymbol = data['currencySymbol'] ?? '\$';
     cashRegisterName = data['cashRegister'] ?? '';
     cashRegisterId = data['cashRegisterId'] ?? '';
@@ -213,6 +220,7 @@ class TicketModel {
         return;
       }
     }
+    
   }
   // void : decrementa el producto seleccionado del ticket
   void decrementProduct({required ProductCatalogue product}) {

@@ -1,46 +1,81 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
+import 'package:screenshot/screenshot.dart';
+import 'package:share_plus/share_plus.dart';
+import '../../domain/entities/cashRegister_model.dart';
+import '../../domain/entities/ticket_model.dart';
+import '../../presentation/historyCashRegisterPage/views/historyCashRegister_view.dart';
+import '../../presentation/transactionsPage/views/transactions_view.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw; 
+// ignore: depend_on_referenced_packages
+import 'package:path_provider/path_provider.dart';
 
 class Publications {
 
 
   static String generateUid() => DateFormat('ddMMyyyyHHmmss').format(Timestamp.now().toDate()).toString();
   // obtiene un double y devuelve un monto formateado
-  static String getFormatoPrecio({String moneda = "\$", required double monto}) {
-    int decimalDigits = (monto % 1) == 0 ? 0 : 2;
-
+  static String getFormatoPrecio({String moneda = "\$", required double value, bool simplified = false }) {
+    // var
+    int decimalDigits = (value % 1) == 0 ? 0 : 2; // cantidad de decimales
+    // formater : formato de moneda
     var formatter = NumberFormat.currency(
       locale: 'es_AR',
       name: moneda,
-      customPattern: monto >= 0 ? '\u00a4###,###,##0.0' : '-\u00a4###,###,##0.0',
+      customPattern: value >= 0 ? '\u00a4###,###,##0.0' : '-\u00a4###,###,##0.0',
       decimalDigits: decimalDigits,
     );
+    if(simplified){
+      /// Formatea un número entero a una cadena de texto con abreviaturas 'K' y 'M'.
+      ///
+      /// Si el número es menor que 10,000, se devuelve como está.
+      /// Si el número es 10,000 o más, pero menos que 1,000,000, se divide por 1,000 y se agrega 'K' al final.
+      /// Si el número es 1,000,000 o más, se divide por 1,000,000 y se agrega 'M' al final.
+      ///
+      /// [value] es el número entero que se va a formatear.
+      /// 
+      if (value < 10000) {
+        // Si el número es menor que 10000, simplemente devuélvelo como una cadena.
+        return formatter.format(value);
+      } else if (value < 1000000) {
+        // Si el número es 10000 o más, pero menos que 1000000, divídelo por 1000 y agrega 'K' al final.
+        return '${formatter.format(value / 1000)}K';
+      } else {
+        // Si el número es 1000000 o más, divídelo por 1000000 y agrega 'M' al final.
+        return '${formatter.format(value / 1000000)}M';
+      }
+    }
 
-    return formatter.format(monto.abs());
+    return formatter.format(value.abs());
   }
 
-
+  
   static String getFormatAmount({required int value}){
-    String price = value.toString();
-    String priceInText ='';
-    int counter = 0;
-    for(int i = (price.length - 1);  i >= 0; i--){
-        counter++;
-        String str = price[i];
-        if((counter % 3) != 0 && i !=0){
-          priceInText = "$str$priceInText";
-        }else if(i == 0 ){
-          priceInText = "$str$priceInText";
-        
-        }else{
-          priceInText = ".$str$priceInText";
-        }
+    final formatCurrency = NumberFormat('#,##0', 'es_ES');
+    /// Formatea un número entero a una cadena de texto con abreviaturas 'K' y 'M'.
+    ///
+    /// Si el número es menor que 10,000, se devuelve como está.
+    /// Si el número es 10,000 o más, pero menos que 1,000,000, se divide por 1,000 y se agrega 'K' al final.
+    /// Si el número es 1,000,000 o más, se divide por 1,000,000 y se agrega 'M' al final.
+    ///
+    /// [value] es el número entero que se va a formatear.
+    /// 
+    if (value < 10000) {
+      // Si el número es menor que 10000, simplemente devuélvelo como una cadena.
+      return formatCurrency.format(value);
+    } else if (value < 1000000) {
+      // Si el número es 10000 o más, pero menos que 1000000, divídelo por 1000 y agrega 'K' al final.
+      return '${formatCurrency.format(value / 1000)}K';
+    } else {
+      // Si el número es 1000000 o más, divídelo por 1000000 y agrega 'M' al final.
+      return '${formatCurrency.format(value / 1000000)}M';
     }
-    return priceInText.trim();
   }
 
   // Recibe la fecha y la decha actual para devolver hace cuanto tiempo se publico
@@ -71,7 +106,7 @@ class Publications {
     return 'Hoy';
   }
 } 
-static String getFechaPublicacion({required DateTime fechaPublicacion, required DateTime fechaActual}) {
+  static String getFechaPublicacion({required DateTime fechaPublicacion, required DateTime fechaActual}) {
   /** 
     Obtiene la fecha de publicación en formato legible para el usuario.
     @param fechaPublicacion La fecha de publicación del contenido.
@@ -145,7 +180,8 @@ class Utils {
     return listaColor[Random().nextInt(listaColor.length)];
   }
 
-  String capitalize(String input) {
+  String capitalizeString(String input) {
+    // description : capitaliza la primera letra de cada palabra
   if (input.isEmpty) {
     return input;
   }
@@ -159,7 +195,73 @@ class Utils {
   });
   return capitalizedWords.join(' ');
 }
+  // normalizar texto : quitar espacios, acentos y convertir a minusculas 
+  static String normalizeText(String text) {
+    // description : normaliza el texto
+    return text
+        .replaceAll(' ', '')
+        .replaceAll('á', 'a')
+        .replaceAll('é', 'e')
+        .replaceAll('í', 'i')
+        .replaceAll('ó', 'o')
+        .replaceAll('ú', 'u')
+        .toLowerCase();
+  }
 
+  void getDetailArqueoScreenShot({required BuildContext context,required CashRegister cashRegister}) async {
+    // widget : ticket
+    var myLongWidget = Builder(builder: (context) {return CashRegisterDetailView(cashRegister:cashRegister).body;});
+    // controller
+    final ScreenshotController screenshotController = ScreenshotController(); 
+    // captura de pantalla
+    screenshotController.captureFromLongWidget(
+          Material(child: SizedBox(width: 400,child: myLongWidget)),
+          delay: const Duration(milliseconds: 100),
+          pixelRatio: 2, 
+          context:context,  
+      ).then((capturedImage) async {
+        // crear un pdf y compartirlo
+        createPdfAndShare(data: capturedImage, id: cashRegister.id); 
+      
+  }); 
+  } 
+  void getTicketScreenShot({required TicketModel ticketModel,required BuildContext context }) async {
 
+    // widget : ticket
+    var myLongWidget = Builder(builder: (context) {return TicketView(ticket: ticketModel).body(context: context);});
+    // controller
+    final ScreenshotController screenshotController = ScreenshotController(); 
+    
+    screenshotController.captureFromLongWidget(
+          Material(child: SizedBox(width: 400,child: myLongWidget)),
+          delay: const Duration(milliseconds: 100),
+          pixelRatio: 2, 
+          context:context,  
+      ).then((capturedImage) async {
+        // crear un pdf y compartirlo
+        createPdfAndShare(data: capturedImage, id: ticketModel.id);
+        /* 
+        final directory =  await getTemporaryDirectory(); // directorio temporal
+        final imagePath = await File('${directory.path}/ticketTemporaryPrint.png').create(); // archivo variable
+        await imagePath.writeAsBytes(capturedImage); // escribimos la captura de pantalla en el archivo
 
+        /// Share Plugin : compartir la captura de pantalla
+        await Share.shareXFiles([XFile(imagePath.path)], text: 'Compartir Ticket'); 
+       */
+  }); 
+  }    
+
+  Future<void> createPdfAndShare({required Uint8List data,required String id}) async {
+    // description : crea un pdf y lo comparte
+    final pdf = pw.Document();
+    pdf.addPage(pw.Page(build: (pw.Context context) => pw.Center(child: pw.Image(pw.MemoryImage(data))),
+    pageFormat: PdfPageFormat.a4, 
+    ));
+
+    final output = await getTemporaryDirectory();
+    final file = File("${output.path}/${id}Ticket.pdf");
+    await file.writeAsBytes(await pdf.save());
+
+    Share.shareXFiles([XFile(file.path)], text: 'Compartir Ticket',subject: 'hello',sharePositionOrigin: Rect.zero );
+  }
 }

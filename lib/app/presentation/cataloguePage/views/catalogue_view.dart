@@ -1,6 +1,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; 
 import 'package:get/get.dart';
 import 'package:sell/app/presentation/cataloguePage/controller/catalogue_controller.dart';
 import 'package:sell/app/presentation/home/controller/home_controller.dart';
@@ -42,33 +42,36 @@ class CataloguePage extends StatelessWidget {
     return AppBar(
       elevation: 0,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      title: Text(catalogueController.getTextTitleAppBar),
-      // bottom : vista de productos seleccionados
-      bottom: catalogueController.buttonAppBar,
-      actions: [
-        // iconButton : buscar un producto del cátalogo
-        IconButton(icon: const Icon(Icons.search),onPressed: (() => catalogueController.showSeach(context: context))),
+      //title: Text(catalogueController.getTextTitleAppBar),
+      title: ComponentApp().buttonAppbar(
+        context:  context,
+        onTap: () => catalogueController.showSeach(context: context), 
+        text: 'Catálogo',
+        iconLeading: Icons.search,
+        colorBackground: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+        colorAccent: Theme.of(context).textTheme.bodyLarge!.color?.withOpacity(0.7),
+        ), 
+      actions: [ 
         // buttons : filter list
-        catalogueController.filterState?IconButton(onPressed: catalogueController.catalogueFilter, icon: const Icon(Icons.close),padding: const EdgeInsets.all(0))
-        : PopupMenuButton( 
+        PopupMenuButton( 
           icon: ComponentApp().buttonAppbar(
             context: context,
-            text: 'Filtrar',
+            text:  catalogueController.getTextFilter,
             iconTrailing: Icons.filter_list,  
           ), 
             onSelected: (selectedValue) => catalogueController.popupMenuButtonCatalogueFilter(key: selectedValue),
             itemBuilder: (BuildContext ctx) => [
                   const PopupMenuItem(value: '0', child: Text('Mostrar todos')),
-                  const PopupMenuItem(value: '2', child: Text('Mostrar favoritos')),
-                  const PopupMenuItem(value: '5', child: Text('Hace más de 5 meses')),
+                  const PopupMenuItem(value: '2', child: Text('Favoritos')),
                   homeController.getIsSubscribedPremium?const PopupMenuItem(child: null,height: 0): const PopupMenuItem(value: 'premium',child: Text('Opciones Premium',style: TextStyle(color: Colors.amber,fontWeight: FontWeight.w600),)),
-                  PopupMenuItem(value: '1',enabled: catalogueController.homeController.getIsSubscribedPremium, child: const Text('Mostrar con stock')),
-                  PopupMenuItem(value: '3',enabled: catalogueController.homeController.getIsSubscribedPremium, child: const Text('Mostrar con stock bajos')),
+                  PopupMenuItem(value: '1',enabled: catalogueController.homeController.getIsSubscribedPremium, child: const Text('Con stock')),
+                  PopupMenuItem(value: '3',enabled: catalogueController.homeController.getIsSubscribedPremium, child: const Text('Con stock bajos')),
                   PopupMenuItem(value: '4',enabled: catalogueController.homeController.getIsSubscribedPremium, child: const Text('Actualizado hace más de 2 meses')),
-                  // TODO : delete release
-                  const PopupMenuItem(value: '6', child: Text('Sin verificación')),
-                  const PopupMenuItem(value: '7', child: Text('Cargar toda la Base de Datos')),
-                  const PopupMenuItem(value: '8', child: Text('DB sin verificar')),
+                  const PopupMenuItem(value: '5', child: Text('Actualizado hace más de 5 meses')),
+                  // TODO :release :  disabled options
+                  //const PopupMenuItem(value: '6', child: Text('Sin verificación')),
+                  //const PopupMenuItem(value: '7', child: Text('Cargar toda la Base de Datos')),
+                  //const PopupMenuItem(value: '8', child: Text('DB sin verificar')),
                 ]),
       ],
     );
@@ -87,19 +90,13 @@ class CataloguePage extends StatelessWidget {
           child: TabBar(
               controller: controller.tabController,
               labelColor: Get.theme.textTheme.bodyMedium?.color,
-              tabs: [
+              tabs: const [
                 // tab : productos
-                Tab(child: Row(children: [
-                  const Flexible(child: Text("Productos",overflow: TextOverflow.ellipsis)),
-                  controller.getCataloProducts.isEmpty?Container():Padding(
-                    padding: const EdgeInsets.only(left: 5                                                                                                                                                                                                                ),
-                    child: Container(padding: const EdgeInsets.symmetric(horizontal:3,vertical: 1),decoration: BoxDecoration(borderRadius: BorderRadius.circular(5), color: Colors.blue.withOpacity(0.1)), child: Text(controller.getCataloProducts.length.toString(), style: const TextStyle(color: Colors.blue, fontSize: 12),)),
-                  ),
-                ],)),
+                Tab(text: 'Productos'),
                 // tab : categorias
-                const Tab(text: "Cátegorias"),
+                Tab(text: "Cátegorias"),
                 // tab : proveedores
-                const Tab(text: "Proveedores"),
+                Tab(text: "Proveedores"),
               ]),
         ),
         Flexible(
@@ -114,10 +111,18 @@ class CataloguePage extends StatelessWidget {
   }
 
   Widget viewCatalogue() {
+
     // controllers
     final CataloguePageController controller = Get.find();
     final HomeController homeController = Get.find();
- 
+
+    // var : cantidad de articulos del catalogo
+    String totalItemsCatalogue = controller.getTotalItemsCatalogue;
+    // var : total del inventario
+    String totalInventory = controller.getInventoryTotal;
+    // var : valor total del inventario
+    String totalInventoryValue = controller.getTotalInventory;
+
     // si el cátalogo esta vacio
     if (controller.getCataloProducts.isEmpty) { 
 
@@ -125,6 +130,53 @@ class CataloguePage extends StatelessWidget {
         child: Text('Sin productos'),
       );
     }
+    // widget 
+    Widget infoChips =  Padding(
+      padding: const EdgeInsets.all(12),
+      child: Wrap( 
+        spacing: 10,
+        children: [
+          // chip : cantidad de articulos del catalogo y filtrados
+          Chip(  
+            side: const BorderSide(color: Colors.transparent), 
+            visualDensity: VisualDensity.compact,
+            label: Column(
+              children: [
+                Text(totalItemsCatalogue,style: const TextStyle(fontWeight: FontWeight.bold)),
+                const Text('Artículos',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w400)),
+              ],
+            ),
+            backgroundColor: Get.theme.colorScheme.secondary.withOpacity(0.1),
+          ),  
+          // conditiom : comprobar subscripcion premium
+          !homeController.getIsSubscribedPremium?const SizedBox():
+          Chip(  
+            side: BorderSide(color: Get.theme.colorScheme.secondary.withOpacity(0.0)),   
+            visualDensity: VisualDensity.compact,
+            label: Column(
+              children: [
+                Text(totalInventory,style: const TextStyle(fontWeight: FontWeight.bold)),
+                const Text('Inventario',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w400)),
+              ],
+            ),
+            backgroundColor: Get.theme.colorScheme.secondary.withOpacity(0.1),
+          ),
+          // chip : monto total del inventario
+          Chip(  
+            side: BorderSide(color: Get.theme.colorScheme.secondary.withOpacity(0.0)),   
+            visualDensity: VisualDensity.compact,
+            label: Column(
+              children: [
+                Text(totalInventoryValue,style: const TextStyle(fontWeight: FontWeight.bold)),
+                const Text('Valor del inventario',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w400)),
+              ],
+            ),
+            backgroundColor: Get.theme.colorScheme.secondary.withOpacity(0.1),
+          ),
+      
+        ],
+      ),
+    );
 
     return Obx(() => ListView.builder(
           itemCount: controller.getCataloProducts.length,
@@ -133,16 +185,26 @@ class CataloguePage extends StatelessWidget {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  // TODO : disable widget
+                  /* // text : cantidad de veces que se consulta la db del catalogo
+                  homeController.dbQueryAmoun==0?Container():Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Text('query database: ${homeController.dbQueryAmoun}',style: const TextStyle(fontSize: 12,fontWeight: FontWeight.w300)),
+                  ), */
+                  // view : control de inventario
                   homeController.getIsSubscribedPremium?controller.viewStockAlert:Padding(
-                    padding: const EdgeInsets.all(20.0),
+                    padding: const EdgeInsets.all(12.0),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         TextButton(onPressed:()=>homeController.showModalBottomSheetSubcription(id: 'stock'), child: const  Text('Controla tu inventario')),
-                        LogoPremium(id: 'stock',personalize: true,accentColor: Colors.amber),
+                        LogoPremium(id: 'stock'),
                       ],
                     ),
                   ),
+                  // view : informacion del inventario
+                  controller.getCataloProducts.isNotEmpty?infoChips:Container(), 
+                  // view : lista de productos
                   listTileProduct(item: controller.getCataloProducts[index]),
                 ],
               );
@@ -265,24 +327,53 @@ class CataloguePage extends StatelessWidget {
   }
   // WIDGETS COMPONENTS
   Widget floatingActionButton({required CataloguePageController controller}) {
-    return FloatingActionButton( 
-        backgroundColor: controller.homeController.getUserAnonymous?Colors.grey:Colors.blue,
-        onPressed: (){ 
 
-          switch (controller.tabController.index) {
-            case 0:
-              controller.toSeachProduct();
-              break;
-            case 1:
-              showDialogSetCategoria(categoria: Category());
-              break;
-            case 2:
-              showDialogSetProvider(supplier: Provider());
-              break;
-            default:
-          }
-        },
-        child: const Icon(Icons.add,color: Colors.white));
+    // var
+    Widget icon = controller.getProductsSelectedList.isNotEmpty?Text(controller.getProductsSelectedList.length.toString(),style: const TextStyle(fontSize: 24,fontWeight: FontWeight.bold,color: Colors.white),): const Icon(Icons.add,color: Colors.white);
+    return Row(
+      mainAxisAlignment:  MainAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min, 
+      children: [
+        // button : limpia la lista de productos seleccionados
+        controller.getProductsSelectedList.isEmpty?const Spacer():
+        FloatingActionButton( 
+            backgroundColor:Colors.grey,
+            onPressed: (){    
+              controller.getProductsSelectedList.clear();
+            },
+            child: const Icon(Icons.clear,color: Colors.white),
+          ),
+        controller.getProductsSelectedList.isEmpty?const Spacer():const SizedBox(width: 10),
+        // button : multifuncion (agregar producto, categoria o proveedor y vista de productos seleccionados)
+        FloatingActionButton( 
+            backgroundColor: controller.homeController.getUserAnonymous?Colors.grey:Colors.blue,
+            onPressed: (){  
+              // condition : si hay productos seleccionados
+              if(controller.getProductsSelectedList.isNotEmpty){
+                // dialog : vista de productos seleccionados
+                Get.dialog( const ViewProductsSelected()); 
+                return;
+              } 
+              switch (controller.tabController.index) {
+                case 0:
+                // navigation : agregar producto
+                  controller.toSeachProduct();
+                  break;
+                case 1:
+                // dialog : agregar categoria
+                  showDialogSetCategoria(categoria: Category());
+                  break;
+                case 2:
+                // dialog : agregar proveedor
+                  showDialogSetProvider(supplier: Provider());
+                  break;
+                default:
+              }
+            },
+            child: icon,
+          ),
+      ],
+    );
   }
 
   Widget listTileProduct({required ProductCatalogue item}) {
@@ -303,8 +394,7 @@ class CataloguePage extends StatelessWidget {
     final TextStyle textStylePrimery = TextStyle(color: primaryTextColor,fontWeight: FontWeight.w400);
     final TextStyle textStyleSecundary = TextStyle(color: secundayTextColor,fontWeight: FontWeight.w400);
     // widgets
-    final Widget dividerCircle = ComponentApp().dividerDot(color: secundayTextColor);
-    Widget divider = ComponentApp().divider();
+    final Widget dividerCircle = ComponentApp().dividerDot(color: secundayTextColor); 
 
     // widgets 
     Widget description = Column(
@@ -314,13 +404,15 @@ class CataloguePage extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            item.verified?const Icon(Icons.verified,size: 11,color: Colors.blue):Container(),
+            item.verified ? const SizedBox(width:1):Container(),
             //text : nombre de la marca
             item.nameMark==''?Container():Text(
                 item.nameMark,
                 maxLines: 2,
                 overflow: TextOverflow.clip,
                 style: TextStyle(color: item.verified?Colors.blue:null),
-              ),
+              ), 
             //text : nombre del proveedor
             item.nameProvider==''?Container(): dividerCircle,
             item.nameProvider==''?Container():Flexible(
@@ -332,16 +424,10 @@ class CataloguePage extends StatelessWidget {
                 ),
             ),
           ],
-        ), 
-        // view : texts
-        homeController.getIsSubscribedPremium==false?Container():
-        item.stock?Row(
-          children: [
-            Text(item.quantityStock.toString(),style: textStylePrimery.copyWith(color: catalogueController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
-            Text(' Disponible ',style: textStylePrimery.copyWith(color: catalogueController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
-          ],
-        ):Container(),
-        // text : favorito
+        ),  
+        //  text : codigo
+        Text(item.code,style: textStyleSecundary.copyWith(fontSize: 12)),
+        // text : stock
         alertStockText == '' ? Container() : Text(alertStockText),
         // text : fecha de la ultima actualización
         Text( valueDataUpdate ,style: textStyleSecundary.copyWith(fontSize: 12)),
@@ -352,19 +438,17 @@ class CataloguePage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         // text : monto de la ganancia
-        item.getBenefits==''?Container():Text(item.getBenefits,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w300)),
+        item.getBenefits==''?Container():Text(item.getBenefits,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.bold)),
         // text : porcentaje de ganancia
-        item.getPorcentage==''?Container():Opacity(opacity:0.7,
+        item.getPorcentageFormat==''?Container():Opacity(opacity:0.7,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               const Icon(Icons.arrow_upward_rounded,size: 14,color: Colors.green),
-              Text(item.getPorcentage,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w300)),
+              Text(item.getPorcentageFormat,style:const TextStyle(color: Colors.green,fontWeight: FontWeight.w300)),
             ],
           )),
-        // text : precio de venta
-        Text(Publications.getFormatoPrecio(monto: item.salePrice),style: TextStyle(fontSize: 18,color: homeController.getDarkMode?Colors.white:Colors.black )),
-        const SizedBox(width: 5),
+        
         
       ],
     );
@@ -375,7 +459,7 @@ class CataloguePage extends StatelessWidget {
           // condition : si no hay productos seleccionados
           if(catalogueController.getProductsSelectedList.isEmpty){
             // navigation : editar producto
-            catalogueController.toNavigationProductEdit(productCatalogue: item); 
+            catalogueController.toNavigationProduct(productCatalogue: item);
           }else{ 
             // selecciona el producto
             catalogueController.selectedProduct(product: item); 
@@ -396,34 +480,73 @@ class CataloguePage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    ImageProductAvatarApp(url:item.local?'': item.image,size: 80,favorite: item.favorite),
-                    Flexible( 
+                    // image : avatar del producto
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal:item.image==''?27:0),
+                      child: ImageProductAvatarApp(url:item.local?'': item.image,size:item.image==''?25: 80 ),
+                    ),
+                    // view : contenido
+                    Flexible(
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start, 
                           children: [
                             Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                !item.favorite?Container():const Icon(Icons.star_purple500_sharp,size: 12,color: Colors.orange),
-                                !item.favorite?Container():const SizedBox(width: 2),
-                                Flexible(child: Text(item.description, maxLines: 1,overflow:TextOverflow.ellipsis,style: textStylePrimery.copyWith( fontSize: titleSize))),
+                                // view : description y icon favorite
+                                Flexible( 
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start, 
+                                    children: [
+                                      // text and icon of favorite
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          !item.favorite?Container():const Icon(Icons.star_purple500_sharp,size: 12,color: Colors.orange),
+                                          !item.favorite?Container():const SizedBox(width: 2),
+                                          Flexible(child: Text(item.description, maxLines: 1,overflow:TextOverflow.ellipsis,style: textStylePrimery.copyWith( fontSize: titleSize))),
+                                        ],
+                                      ),
+                                      description,
+                                    ],
+                                  ),
+                                ),
+                                // view : datos de precios y ganancia
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 10),
+                                  child: priceWidget,
+                                ),
                               ],
                             ),
-                            description,
+                            // 
+                            // text : precio de venta
+                            Row(
+                              children: [
+                                Text(Publications.getFormatoPrecio(value: item.salePrice),style: TextStyle(fontSize: 20,fontWeight:FontWeight.bold,color: homeController.getDarkMode?Colors.white:Colors.black )),
+                                const Spacer(),
+                                // button : editar producto
+                                OutlinedButton(
+                                  onPressed: ()=>catalogueController.toNavigationProductEdit(productCatalogue: item), 
+                                  child: Text('Editar',style: TextStyle(color: Get.isDarkMode?Colors.white:Colors.black))
+                                ),
+                              ],
+                            ),
+                            // text : stock
+                            homeController.getIsSubscribedPremium==false?Container():
+                            item.stock?Row(
+                              children: [
+                                Text(item.quantityStock.toString(),style: textStylePrimery.copyWith(color: catalogueController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
+                                Text(' Disponible ',style: textStylePrimery.copyWith(color: catalogueController.getStockColor(productCatalogue: item,color: textStyleSecundary.color as Color))),
+                              ],
+                            ):Container(),
                           ],
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10),
-                      child: priceWidget,
-                    ),
                   ],
                 ),
               ),
-              divider,
+              const Opacity(opacity: 0.3,child: Divider(height: 0)),
             ],
           ),
         ),
@@ -493,7 +616,9 @@ class CataloguePage extends StatelessWidget {
   }
   // menu options
   Widget dropdownButtonSupplier({required Provider supplier}) {
-    final CataloguePageController controller = Get.find();
+    
+    // controllers
+    final HomeController homeController = Get.find();
 
     return DropdownButton<String>(
       icon: const Icon(Icons.more_vert),
@@ -522,7 +647,7 @@ class CataloguePage extends StatelessWidget {
               middleText: '¿Desea continuar eliminando este proveedor?',
               confirm: TextButton.icon(
                   onPressed: () async {
-                    controller.providerDelete(idSupplier: supplier.id);
+                    homeController.providerDelete(idProvider: supplier.id);
                     Get.back();
                   },
                   icon: const Icon(Icons.check),
@@ -540,7 +665,9 @@ class CataloguePage extends StatelessWidget {
     );
   }
   Widget dropdownButtonCategory({required Category categoria}) {
-    final CataloguePageController controller = Get.find();
+    
+    // controllers 
+    final HomeController homeController = Get.find();
 
     return DropdownButton<String>(
       icon: const Icon(Icons.more_vert),
@@ -569,7 +696,7 @@ class CataloguePage extends StatelessWidget {
               middleText: '¿Desea continuar eliminando esta categoría?',
               confirm: TextButton.icon(
                   onPressed: () async {
-                    controller.categoryDelete(idCategory: categoria.id);
+                    homeController.categoryDelete(idCategory: categoria.id);
                     Get.back();
                   },
                   icon: const Icon(Icons.clear_rounded),
@@ -587,7 +714,7 @@ class CataloguePage extends StatelessWidget {
   showDialogSetProvider({required Provider supplier}) async {
     
     // controllers
-    final CataloguePageController cataloguePageController = Get.find();
+    final HomeController homeController = Get.find();
     TextEditingController textEditingController = TextEditingController(text: supplier.name);
     // var
     bool loadSave = false; 
@@ -613,12 +740,12 @@ class CataloguePage extends StatelessWidget {
       actions: <Widget>[
         TextButton(child: const Text('CANCEL'),onPressed: () {Get.back();}),
         TextButton(
-            child: loadSave == false?const Text('SAVE'):const CircularProgressIndicator(),
+            child: loadSave == false?const Text('GUARDAR'):const CircularProgressIndicator(),
             onPressed: () async {
               if (loadSave == false) {
                 loadSave = true;
                 supplier.name = textEditingController.text;
-                await cataloguePageController.providerSave(provider: supplier);
+                await homeController.providerSave(provider: supplier);
                 Get.back();
               }
             })
@@ -626,11 +753,13 @@ class CataloguePage extends StatelessWidget {
     ));
   }
   showDialogSetCategoria({required Category categoria}) async {
-    final CataloguePageController controller = Get.find();
+
+    // controllers
+    final HomeController homeController = Get.find();
+    TextEditingController textEditingController = TextEditingController(text: categoria.name);
+    // var
     bool loadSave = false;
     bool newProduct = false;
-    TextEditingController textEditingController =
-        TextEditingController(text: categoria.name);
 
     if (categoria.id == '') {
       newProduct = true;
@@ -660,11 +789,11 @@ class CataloguePage extends StatelessWidget {
                 // set
                 categoria.name = textEditingController.text;
                 loadSave = true;
-                controller.update();
+                homeController.update();
                 // save
-                await controller.categoryUpdate(categoria: categoria).whenComplete(() => Get.back()).catchError((error, stackTrace) {
+                await homeController.categoryUpdate(categoria: categoria).whenComplete(() => Get.back()).catchError((error, stackTrace) {
                   loadSave = false;
-                  controller.update();
+                  homeController.update();
                 });
               }
             })

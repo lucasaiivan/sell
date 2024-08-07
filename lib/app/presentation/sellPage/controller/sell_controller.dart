@@ -1,4 +1,5 @@
  
+import 'dart:async'; 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart'; 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -16,13 +17,12 @@ import 'package:sell/app/core/utils/widgets_utils.dart';
 import 'package:uuid/uuid.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../domain/entities/ticket_model.dart';
-import '../views/sell_view.dart';  
-import 'package:mobile_scanner/mobile_scanner.dart';
+import '../views/sell_view.dart';   
 
 
 
 
-class SalesController extends GetxController {
+class SellController extends GetxController {
 
   // controllers views //
   final HomeController homeController = Get.find(); 
@@ -30,14 +30,18 @@ class SalesController extends GetxController {
   // titulo del Appbar //
   String titleText = 'Vender'; 
 
+  //  state load data admin user // 
+  final RxBool _stateLoadDataAdminUserComplete = false.obs; 
+  set setStateLoadDataAdminUserComplete(bool value) => _stateLoadDataAdminUserComplete.value = value;
+  bool get getStateLoadDataAdminUserComplete => _stateLoadDataAdminUserComplete.value;
+
   // state view barcodescan //
   final RxBool _stateViewBarCodeScan = false.obs;
   bool get getStateViewBarCodeScan => _stateViewBarCodeScan.value;
   set setStateViewBarCodeScan(bool value) {
     _stateViewBarCodeScan.value = value;
     update();
-  }
-  late MobileScannerController cameraScanBarCodeController;
+  } 
 
   // state flash camera scan bar code //
   final RxBool _stateFlashCameraScanBarCode = false.obs;
@@ -255,7 +259,7 @@ class SalesController extends GetxController {
       // var 
       int porcent = ((ticket.discount * 100) / getTicket.getTotalPrice).round().toInt(); 
 
-      return 'Descuento:(${(porcent).toStringAsFixed(0)}%) ${Publications.getFormatoPrecio(monto:ticket.discount)}';
+      return 'Descuento:(${(porcent).toStringAsFixed(0)}%) ${Publications.getFormatoPrecio(value:ticket.discount)}';
     } else {
       return '';
     }
@@ -273,6 +277,10 @@ class SalesController extends GetxController {
   final RxBool _stateConfirmPurchase = false.obs;
   bool get getStateConfirmPurchase => _stateConfirmPurchase.value;
   set setStateConfirmPurchase(bool value) => _stateConfirmPurchase.value = value;
+  // stete ticket confirm purchase ticket complete
+  final RxBool _stateConfirmPurchaseComplete = false.obs;
+  bool get getStateConfirmPurchaseComplete => _stateConfirmPurchaseComplete.value;
+  set setStateConfirmPurchaseComplete(bool value) => _stateConfirmPurchaseComplete.value = value;
 
   // state ticket view
   final RxBool _ticketView = false.obs;
@@ -284,34 +292,25 @@ class SalesController extends GetxController {
   double get getValueReceivedTicket => _valueReceivedTicket.value;
   set setValueReceivedTicket(double value) {_valueReceivedTicket.value = value; }
 
- 
-  @override
-  void onClose() {
-    textEditingControllerAddFlashDescription.dispose();
-    textEditingControllerAddFlashPrice.dispose();
-    textEditingControllerTicketMount.dispose();
-    super.dispose();
-  }
 
 
-  // FIREBASE
-  
+  // FIREBASE 
   void registerTransaction() {
 
     // Procederemos a guardar un documento con la transacción
-
-    // get values    
-
-    // set  : asignamos el ticket a la variable que recibe el ticket
-    setLastTicket = TicketModel.fromMap(getTicket.toJson()); 
+ 
     //  set values
     getTicket.id = Publications.generateUid(); // generate id  
     getTicket.cashRegisterName = homeController.cashRegisterActive.description.toString(); // nombre de la caja registradora
     getTicket.cashRegisterId = homeController.cashRegisterActive.id; // id de la caja registradora
-    getTicket.seller = homeController.getUserAuth.email!; 
+    getTicket.sellerName = homeController.getProfileAdminUser.name; 
+    getTicket.sellerId = homeController.getProfileAdminUser.email;
     getTicket.priceTotal = getTicket.getTotalPrice;
     getTicket.valueReceived = getValueReceivedTicket; 
     getTicket.creation = Timestamp.now();
+
+    // set  : replicamos el ticket actual temporalmente  
+    setLastTicket = TicketModel.fromMap(getTicket.toJson()); 
 
     // registramos el monto en caja
     if( homeController.getIsSubscribedPremium ){
@@ -319,24 +318,34 @@ class SalesController extends GetxController {
     }
     
     // set firestore : guarda la transacción
-    Database.refFirestoretransactions(idAccount: homeController.getIdAccountSelected).doc(getTicket.id).set(getTicket.toJson());
-    
-    for (dynamic data in getTicket.listPoduct) { 
-      // obj
-      ProductCatalogue product = ProductCatalogue.fromMap(data as Map<String, dynamic>);
+    Database.refFirestoretransactions(idAccount: homeController.getIdAccountSelected).doc(getTicket.id).set(getTicket.toJson()).whenComplete((){
+      // incrementamos la cantidad de venta y descrementamos el stock de los productos del catálogo
+      for (dynamic data in getTicket.listPoduct) { 
+        // obj
+        ProductCatalogue product = ProductCatalogue.fromMap(data as Map<String, dynamic>);
+        if(product.code == ''){continue;} // si el producto no tiene código no se registra en el catálogo
+        ProductCatalogue productCatalogue = homeController.getProductCatalogue(id: product.id).copyWith(); // obtenemos el producto del catálogo con los datos actualizados
 
-      // set firestore : hace un incremento de las ventas del producto
-      Database.dbProductStockSalesIncrement(idAccount: homeController.getIdAccountSelected,idProduct: product.id,quantity: product.quantity );
-      // set firestore : hace un descremento en el valor 'stock' del producto si es que tiene stock habilitado
-      if (product.stock && homeController.getIsSubscribedPremium ) {
-        // set firestore : hace un descremento en el valor 'stock'
-        Database.dbProductStockDecrement(idAccount: homeController.getIdAccountSelected,idProduct: product.id,quantity: product.quantity);
+        // firestore : hace un incremento de 1 en el valor 'sales' del producto
+        productCatalogue.sales ++;
+        Database.dbProductStockSalesIncrement(idAccount: homeController.getIdAccountSelected,idProduct: product.id,quantity: 1 );
+        // condition :  hace un descremento en el valor 'stock' del producto si es que tiene stock habilitado
+        if (product.stock && homeController.getIsSubscribedPremium ) {
+          //  firestore : hace un descremento en el valor 'stock'
+          productCatalogue.quantityStock -= product.quantity;
+          Database.dbProductStockDecrement(idAccount: homeController.getIdAccountSelected,idProduct: product.id,quantity: product.quantity);
+        }
+        // actualizamos la lista de producto de  catálogo  en memoria de la app
+        homeController.sincronizeCatalogueProducts(product: productCatalogue);
       }
-    }
+      setStateConfirmPurchaseComplete = true;
+      // set : default values  
+      setTicket = TicketModel(creation: Timestamp.now(), listPoduct: []);
+    });
+    
   }
-
-  // FUCTIONS 
   
+  // FUCTIONS  
   void showSeach({required BuildContext context}) {
     // Busca entre los productos de mi catálogo 
     showSearch(
@@ -345,25 +354,26 @@ class SalesController extends GetxController {
     );
 
   }
-
-  
-  
   Future<void>  scanBarcodeNormal() async {   
  
     // Escanner Code - Abre en pantalla completa la camara para escanear el código
     try {
+      //  var
       late String barcodeScanRes;
-      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-        "#ff6666",
-        "Cancel",
-        true,
-        ScanMode.BARCODE,
-      );
-      if(barcodeScanRes == '-1'){ return;}
+      // scan
+      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode('#ff6666','Cancel',true,ScanMode.BARCODE);
+      // condition : si el usuario cancela el escaneo
+      if(barcodeScanRes == '-1'){ 
+        setStateViewBarCodeScan = false;
+        return;
+      }else{
+        setStateViewBarCodeScan = true;
+      }
       // sound
       playSoundScan();
       // verifica el código de barra
       verifyExistenceInSelectedScanResult(id:barcodeScanRes);
+    
     } on PlatformException {
       Get.snackbar('scanBarcode', 'Failed to get platform version');
     } 
@@ -405,12 +415,19 @@ class SalesController extends GetxController {
         coincidence = true;
         update();
         animateAdd();
+        
       }
     }
     
     if (coincidence == false) {
       // el producto no esta en la lista de productos seleccionados del ticket
       verifyExistenceInCatalogue(id: id);
+    }else{ 
+      if( getStateViewBarCodeScan){ 
+        Future.delayed(const Duration(milliseconds:500),(){
+          scanBarcodeNormal();
+        });
+      }
     }
   }
 
@@ -418,6 +435,7 @@ class SalesController extends GetxController {
     // verificamos si el producto esta en el catálogo de productos de la cuenta
     bool coincidence = false;
     final listCatalogue =  homeController.getCataloProducts..toList();
+    // recorremos la lista de productos del catálogo para verificar si el producto se encuentra
     for (final ProductCatalogue product in listCatalogue) {
       // si el producto se encuentra en el cátalgo de la cuenta se agrega a la lista de productos seleccionados
       if (product.id == id) {
@@ -429,6 +447,12 @@ class SalesController extends GetxController {
     // si el producto no se encuentra en el cátalogo de la cuenta se va consultar en la base de datos de productos publicos
     if (coincidence == false) {
       queryProductDbPublic(id: id);
+    }else{
+      if( getStateViewBarCodeScan){ 
+        Future.delayed(const Duration(milliseconds:500),(){
+          scanBarcodeNormal();
+        });
+      }
     }
   }
 
@@ -476,13 +500,12 @@ class SalesController extends GetxController {
     update();
     Get.back();
   } 
-
   void addSaleFlash() {
     // generate new ID
     var id = Publications.generateUid();
     // var
     double  valuePrice = textEditingControllerAddFlashPrice.numberValue;
-    String valueDescription = textEditingControllerAddFlashDescription.text;
+    String valueDescription = textEditingControllerAddFlashDescription.text == '' ? 'Sin descripción' : textEditingControllerAddFlashDescription.text;
 
     if (valuePrice != 0) {
       textEditingControllerAddFlashPrice.clear();
@@ -493,32 +516,38 @@ class SalesController extends GetxController {
       ComponentApp().showMessageAlertApp(title: '😔No se puedo agregar 😔',message: 'Debe ingresar un valor distinto a 0');
     }
   }
+  void confirmedPurchase() { 
+    // el [Usuario] procede a confirmar la venta del ticket  //
 
-  String getValueChange() {
-
-    // text format : devuelte un texto formateado del monto del cambio que tiene que recibir el cliente
-    if (getValueReceivedTicket == 0.0) {return Publications.getFormatoPrecio(monto: 0);}
-    double result = getValueReceivedTicket - getTicket.getTotalPrice;
-    return Publications.getFormatoPrecio(monto: result);
-  }
-  String getValueReceived() {
-    // text format : devuelte un texto formateado del monto que el vendedor recibio
-    return Publications.getFormatoPrecio(monto: getValueReceivedTicket);
-  }
-
-  void confirmedPurchase() {
-    //
-    // el [Usuario] procede a confirmar la venta del ticket 
-    //
+    // el usuario confirmo su venta
+    setStateConfirmPurchase = true;  
 
     // condition : registramos la venta si el usuario esta logueado
     if(homeController.getUserAnonymous == false){
       registerTransaction();
-    }  
-    // el usuario confirmo su venta
-    setStateConfirmPurchase = true;  
+    }else{
+      // set : default values  
+      setStateConfirmPurchaseComplete = true; 
+      setLastTicket = TicketModel.fromMap(getTicket.toJson()); 
+      setTicket = TicketModel(creation: Timestamp.now(), listPoduct: []);
+    }
+    
   }
+  
+  // Getters //
+  String getValueChange() {
 
+    // text format : devuelte un texto formateado del monto del cambio que tiene que recibir el cliente
+    if (getValueReceivedTicket == 0.0) {return Publications.getFormatoPrecio(value: 0);}
+    double result = getValueReceivedTicket - getTicket.getTotalPrice;
+    return Publications.getFormatoPrecio(value: result);
+  }
+  String getValueReceived() {
+    // text format : devuelte un texto formateado del monto que el vendedor recibio
+    return Publications.getFormatoPrecio(value: getValueReceivedTicket);
+  }
+  
+  // DIALOG // 
   void showDialogAddProductNew({ required ProductCatalogue productCatalogue}) {
     // dialog : muestra este dialog cuando el producto no se encuentra en el cáatalogo de la cuenta
 
@@ -529,9 +558,7 @@ class SalesController extends GetxController {
         child: NewProductView(productCatalogue: productCatalogue),
       ),
     ); 
-  }
-
-  
+  }  
   void showDialogAddDiscount() {
 
     // dialog : añadir descuento al ticket 
@@ -624,6 +651,7 @@ class SalesController extends GetxController {
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: ComponentApp().button( 
+                  colorButton: Colors.blue,
                   text: 'Agregar',
                   onPressed: () {
                     addSaleFlash();
@@ -646,7 +674,6 @@ class SalesController extends GetxController {
       ),
     );  
   }
-
   void dialogSelectedIncomeCash() {
 
     // Dialog view : Cantidad del total del ingreso abonado
@@ -666,15 +693,14 @@ class SalesController extends GetxController {
                 //var
                 double valueReceived = textEditingControllerTicketMount.text == '' ? 0.0 : double.parse(textEditingControllerTicketMount.text);
                 // condition : verificar si el usaurio ingreso un monto valido y que sea mayor al monto total del ticket
-                if (valueReceived >= getTicket.getTotalPrice &&
-                    textEditingControllerTicketMount.text != '') {
-                      setValueReceivedTicket = valueReceived;
-                      textEditingControllerTicketMount.text = '';
-                      setPayModeTicket = 'effective';
-                      Get.back();
-                } else {
-                  ComponentApp().showMessageAlertApp( title: '😔', message: 'Tiene que ingresar un monto valido');
+                if (valueReceived >= getTicket.getTotalPrice && textEditingControllerTicketMount.text != '') {
+                  setValueReceivedTicket = valueReceived;
+                  textEditingControllerTicketMount.text = '';
+                  setPayModeTicket = 'effective';
+                  
                 }
+              Get.back();
+
               },
               child: const Text('aceptar')),
         ),
@@ -717,7 +743,7 @@ class SalesController extends GetxController {
                   ), 
                   // chip : efectivo '1000'
                   getTicket.getTotalPrice > 1000 ? Container() :ChoiceChip(
-                    label: const Text('1000'),
+                    label: const Text('1.000'),
                     selected: false,
                     onSelected: (bool value) {
                       setPayModeTicket = 'effective';
@@ -727,7 +753,7 @@ class SalesController extends GetxController {
                   ), 
                   // chip : efectivo '1500'
                   getTicket.getTotalPrice > 1500 ? Container() :ChoiceChip(
-                    label: const Text('1500'),
+                    label: const Text('1.500'),
                     selected: false,
                     onSelected: (bool value) {
                       setPayModeTicket = 'effective';
@@ -737,7 +763,7 @@ class SalesController extends GetxController {
                   ),
                   // chip : efectivo '2000'
                   getTicket.getTotalPrice > 2000 ? Container() :ChoiceChip(
-                    label: const Text('2000'),
+                    label: const Text('2.000'),
                     selected: false,
                     onSelected: (bool value) {
                       setPayModeTicket = 'effective';
@@ -745,6 +771,36 @@ class SalesController extends GetxController {
                       Get.back();
                     },
                   ), 
+                  // chip : efectivo '5000'
+                  getTicket.getTotalPrice > 5000 ? Container() :ChoiceChip(
+                    label: const Text('5.000'),
+                    selected: false,
+                    onSelected: (bool value) {
+                      setPayModeTicket = 'effective';
+                      setValueReceivedTicket = 5000;
+                      Get.back();
+                    },
+                  ),
+                  // chip : efectivo '10000'
+                  getTicket.getTotalPrice > 10000 ? Container() :ChoiceChip(
+                    label: const Text('10.000'),
+                    selected: false,
+                    onSelected: (bool value) {
+                      setPayModeTicket = 'effective';
+                      setValueReceivedTicket = 10000;
+                      Get.back();
+                    },
+                  ),
+                  // chip : efectivo '20000'
+                  getTicket.getTotalPrice > 20000 ? Container() :ChoiceChip(
+                    label: const Text('20.000'),
+                    selected: false,
+                    onSelected: (bool value) {
+                      setPayModeTicket = 'effective';
+                      setValueReceivedTicket = 20000;
+                      Get.back();
+                    },
+                  ),
                 ],
               ),
             ),
@@ -775,22 +831,43 @@ class SalesController extends GetxController {
                     textEditingControllerTicketMount.text = '';
                     setPayModeTicket = 'effective';
                     Get.back();
-                  } else {
-                    ComponentApp().showMessageAlertApp( title: '😔', message: 'Tiene que ingresar un monto valido');
-                  }
+                  }  
+                  Get.back();
                 },
               ),
             ),
           ],
         ));
   }
+
+  void checkDataAdminUser() {
+  Timer.periodic(const Duration(seconds: 1), (timer) {
+    if ( homeController.getProfileAdminUser.email != '') {
+      setStateLoadDataAdminUserComplete = true; 
+      timer.cancel(); // Detiene el temporizador cuando _stateConfirmPurchaseComplete es true
+    }
+  });
 }
 
-//
+  // OVERRIDE //
+  @override
+  void onInit() { 
+    // chequeamos cada segundo si se cargo los datos del usuario admin hasta que se cargue
+    checkDataAdminUser();
+    super.onInit();
+  }
+  @override
+  void onClose() {
+    textEditingControllerAddFlashDescription.dispose();
+    textEditingControllerAddFlashPrice.dispose();
+    textEditingControllerTicketMount.dispose();
+    super.dispose();
+  }
+}
+ 
 //
 // WIDGETS CLASS
-//
-//
+// 
 class NewProductView extends StatefulWidget {
   
   // parametro obligatorio
@@ -809,7 +886,7 @@ class _NewProductViewState extends State<NewProductView> {
   
   // controllers 
   final HomeController homeController = Get.find<HomeController>();
-  final SalesController salesController = Get.find<SalesController>();
+  final SellController salesController = Get.find<SellController>();
   late TextEditingController controllerTextEditDescripcion = TextEditingController(text: widget.productCatalogue.description);
   late MoneyMaskedTextController controllerTextEditPrecioVenta = MoneyMaskedTextController(initialValue: widget.productCatalogue.salePrice);
   // keys form
@@ -867,6 +944,14 @@ class _NewProductViewState extends State<NewProductView> {
         const SizedBox(width: 5),
         // text :  crear un rich text para poder darle estilo al texto
         Text(widget.productCatalogue.code,style: textStyle.copyWith(fontWeight: FontWeight.bold,fontSize: 16)),
+        const Spacer(),
+        TextButton(
+          child: const Text('Volver a escanear'),
+          onPressed: () {
+            Get.back();
+            salesController.scanBarcodeNormal();
+          }, 
+        ),
       ],
     ), 
     ); 
@@ -915,7 +1000,7 @@ class _NewProductViewState extends State<NewProductView> {
         ),
       ),
     );
-    // TODO : RangeError TextFormField : cuando el usuario mantiene presionado el boton de borrar > 'RangeError : Invalid value: only valid value is 0: -1'
+    // TODO : error :  RangeError TextFormField : cuando el usuario mantiene presionado el boton de borrar > 'RangeError : Invalid value: only valid value is 0: -1'
     Widget widgetTextFieldPrice = Padding(
           padding: const EdgeInsets.symmetric(horizontal:12, vertical: 6),
           child: Form(
@@ -974,31 +1059,40 @@ class _NewProductViewState extends State<NewProductView> {
     // button 
     final Widget buttonConfirm = Padding(
       padding: const EdgeInsets.all(12.0),
-      child:ComponentApp().button(
+      child:  ComponentApp().button(
+        text: 'Confirmar',
+        colorAccent: Colors.white,
+        colorButton: Colors.blue,
         onPressed: () {
-            // variables de condiciones
-            bool conditionDescription = widget.productCatalogue.verified?true:descriptionFormKey.currentState!.validate();
-            bool conditionPrice = priceFormKey.currentState!.validate();
-            // condition : validamos los campos del formulario
-            if (  conditionPrice && conditionDescription) {
-              // set 
-              widget.productCatalogue.description = controllerTextEditDescripcion.text;
-              widget.productCatalogue.salePrice = controllerTextEditPrecioVenta.numberValue;
-              //
-              // condition : si el usuario quiere agregar el producto a la lista de productos del catálogo
-              // entonces lo agregamos a la lista de productos del catálogo y a la colección de productos publica de la DB
-              //
-              if(checkAddCatalogue && homeController.getUserAnonymous == false){
-                // add product to catalogue
-                homeController.addProductToCatalogue(product: widget.productCatalogue,isProductNew: isProductNew);
-              }
-              // add : agregamos el producto a la lista de productos seleccionados
-              salesController.addProductsSelected(product: widget.productCatalogue);
-              // close dialog
-              Get.back();
+          // variables de condiciones
+          bool conditionDescription = widget.productCatalogue.verified?true:descriptionFormKey.currentState!.validate();
+          bool conditionPrice = priceFormKey.currentState!.validate();
+          // condition : validamos los campos del formulario
+          if (  conditionPrice && conditionDescription) {
+            // set 
+            widget.productCatalogue.description = controllerTextEditDescripcion.text;
+            widget.productCatalogue.salePrice = controllerTextEditPrecioVenta.numberValue;
+            //
+            // condition : si el usuario quiere agregar el producto a la lista de productos del catálogo
+            // entonces lo agregamos a la lista de productos del catálogo y a la colección de productos publica de la DB
+            //
+            if(checkAddCatalogue && homeController.getUserAnonymous == false){
+              // add product to catalogue
+              homeController.addProductToCatalogue(product: widget.productCatalogue.copyWith(),isProductNew: isProductNew);
+              
             }
-          },
-          text: 'Confirmar',
+            // add : agregamos el producto a la lista de productos seleccionados
+            salesController.addProductsSelected(product: widget.productCatalogue);
+            // close dialog
+            Get.back();
+            // condition  : si el usuario no cancelo el escaneo consecutivo 
+            if(salesController.getStateViewBarCodeScan){ 
+              Future.delayed(const Duration(milliseconds:500),(){
+                salesController.scanBarcodeNormal();
+              });
+            }
+          }
+        }, 
       ), 
     );
     
@@ -1031,6 +1125,7 @@ class _NewProductViewState extends State<NewProductView> {
             widgetTextFieldPrice,
             // widget :  permiso para guardar el producto nuevo en mi cátalogo (app catalogo)
             Padding(padding: const EdgeInsets.all(12.0),child: checkboxAddProductToCatalogue),
+            // button 
             SizedBox(width: double.infinity,child: buttonConfirm),
           ],
         ),
@@ -1052,7 +1147,7 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
 
   // controllers
   HomeController homeController = Get.find<HomeController>();
-  SalesController salesController = Get.find<SalesController>();
+  SellController salesController = Get.find<SellController>();
 
   @override
   List<Widget> buildActions(BuildContext context) {
@@ -1076,8 +1171,7 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
   } 
   // texto de ayuda del textfield de busqueda
   @override
-  String get searchFieldLabel => 'Buscar';
-
+  String get searchFieldLabel => 'Buscar'; 
 
   @override
   Widget buildLeading(BuildContext context) {
@@ -1093,9 +1187,7 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
   Widget buildResults(BuildContext context) {
     return ListView.builder(
       itemCount: _filteredItems.length, 
-      itemBuilder: (context, index) { 
-        // Aquí puedes construir el diseño de cada resultado.
-        // Por ejemplo: ListTile, Container, Card, etc.
+      itemBuilder: (context, index) {  
         return item(product:_filteredItems[index]);
       },
     );
@@ -1120,14 +1212,14 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
             for (Mark element in homeController.getMarkList)
               // chip
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal:3),
+                padding: const EdgeInsets.symmetric(horizontal:2,vertical:1),
                 child: GestureDetector(
                   onTap: (){
                     // set query
                     query = element.name;
                   },
                   child: Chip(  
-                    avatar: element.image==''?null:CircleAvatar(backgroundImage: NetworkImage(element.image),),
+                    avatar: element.image==''?null:CircleAvatar(backgroundImage: NetworkImage(element.image),backgroundColor:primaryTextColor.withOpacity(0.1) ),
                     label: Text(element.name,style: textStyleSecundary), 
                     shape: RoundedRectangleBorder(side: BorderSide(color: primaryTextColor.withOpacity(0.5)),borderRadius: BorderRadius.circular(5)),
                     backgroundColor: Colors.transparent,   
@@ -1176,6 +1268,11 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
       // control de vista
       SystemChannels.textInput.invokeMethod('TextInput.hide'); // quita el foco
 
+      // condition : si no hay ningun producto en el catalogo
+      if(filteredSuggestions.isEmpty){
+        return const Center(child: Opacity(opacity: 0.5,child: Text('aun no hay productos en el catálogo',)));
+      }
+
       return Padding(
         padding: const EdgeInsets.only(top: 20,left: 12,right: 12),
         child: ListView(
@@ -1189,9 +1286,7 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
     // condition : si se consulto pero no se obtuvieron resultados
     if(filteredSuggestions.isEmpty && query.isNotEmpty){
       return const Center(child: Text('No se encontraron resultados'));
-    }
-
-
+    } 
     return ListView.builder(
       itemCount: filteredSuggestions.length,
       itemBuilder: (context, index) { 
@@ -1209,18 +1304,19 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
     return query.isEmpty
     ? items
     : items.where((item) {
-        // Convertimos la descripción, marca y código del elemento y el query a minúsculas
-        final description = item.description.toLowerCase();
-        final brand = item.nameMark.toLowerCase();
-        final code = item.code.toLowerCase();
-        final category = item.nameCategory.toLowerCase();
-        final lowerCaseQuery = query.toLowerCase();
+        // normalizamos los textos
+        final description = Utils.normalizeText(item.description.toLowerCase());
+        final brand = Utils.normalizeText(item.nameMark.toLowerCase());
+        final code =  Utils.normalizeText(item.code.toLowerCase());
+        final category = Utils.normalizeText(item.nameCategory.toLowerCase());
+        final lowerCaseQuery = Utils.normalizeText(query); 
+        final provider = Utils.normalizeText(item.nameProvider.toLowerCase());
 
         // Dividimos el query en palabras individuales
         final queryWords = lowerCaseQuery.split(' ');
 
         // Verificamos que todas las palabras del query estén presentes en la descripción, marca código
-        return queryWords.every((word) => description.contains(word) || brand.contains(word) || code.contains(word) || category.contains(word));
+        return queryWords.every((word) => description.contains(word) || brand.contains(word) || code.contains(word) || category.contains(word) || provider.contains(word) );
       }).toList();
   }
 
@@ -1242,8 +1338,7 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
         InkWell(
           // color del cliqueable
           splashColor: Colors.blue, 
-          highlightColor: highlightColor.withOpacity(0.1),
-
+          highlightColor: highlightColor.withOpacity(0.1), 
           onTap: () {
             salesController.selectedProduct(item: product);
             Get.back();
@@ -1254,7 +1349,7 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
               crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 // image
-                ImageProductAvatarApp(url: product.local?'':product.image,size: 75,favorite:product.favorite),
+                ImageProductAvatarApp(url: product.local?'':product.image,size: 75),
                 // text : datos del producto
                 Flexible(
                   child: Padding(
@@ -1263,7 +1358,15 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(product.description,maxLines: 1,overflow: TextOverflow.clip,style: const TextStyle(fontWeight: FontWeight.w500)),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // icon : favorito 
+                          product.favorite?const Icon(Icons.star_rate_rounded,color: Colors.amber,size:14,):Container(),
+                          // text : nombre del producto
+                          Flexible(child: Text(product.description,maxLines:2,overflow: TextOverflow.ellipsis,style: const TextStyle(fontWeight: FontWeight.w500))),
+                        ],
+                      ),
                       product.nameMark==''?Container():Text(product.nameMark,maxLines: 1,overflow: TextOverflow.clip,style: TextStyle(color: product.verified?Colors.blue:null)),
                       Wrap(
                         crossAxisAlignment: WrapCrossAlignment.start,
@@ -1276,15 +1379,7 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
                                 dividerCircle,
                                 Text(product.code,style: textStyleSecundary),
                               ],
-                            ),
-                            // favorite
-                            product.favorite?Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                dividerCircle,
-                                Text('Favorito',style: textStyleSecundary),
-                              ],
-                            ):Container(),
+                            ), 
                           //  text : alert stockv
                             alertStockText != ''?Row(
                               mainAxisSize: MainAxisSize.min,
@@ -1294,14 +1389,13 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
                               ],
                             ):Container(),
                         ],
-                      ),
-                              
+                      ), 
                     ],
-                                  ),
+                    ),
                   ),
                 ),
                 // text : precio
-                Text(Publications.getFormatoPrecio(monto: product.salePrice),style: const  TextStyle(fontSize: 18,fontWeight: FontWeight.w300),)
+                Text(Publications.getFormatoPrecio(value: product.salePrice),style: const  TextStyle(fontSize: 18,fontWeight: FontWeight.w300),)
               ],
             ),
           ),
@@ -1311,5 +1405,6 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
     );
   }
 }
+ 
 
 

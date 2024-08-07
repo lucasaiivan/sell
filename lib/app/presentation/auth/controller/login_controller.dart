@@ -18,14 +18,14 @@ class LoginController extends GetxController {
   SplashController homeController = Get.find<SplashController>();
 
   // state : style
-  Rx<Color> checkPolicyAlertColor = Colors.orange.shade100.withOpacity(0.4).obs;
+  Rx<Color> checkPolicyAlertColor = Colors.orange.shade100.withOpacity(0.3).obs;
   // state - Check Accept Privacy And Use Policy
   RxBool stateCheckAcceptPrivacyAndUsePolicy = false.obs;
   bool get getStateCheckAcceptPrivacyAndUsePolicy =>
       stateCheckAcceptPrivacyAndUsePolicy.value;
   set setStateCheckAcceptPrivacyAndUsePolicy(bool value) {
     if(value){checkPolicyAlertColor.value = Colors.transparent;}
-    else {checkPolicyAlertColor.value = Colors.orange.shade100.withOpacity(0.4);}
+    else {checkPolicyAlertColor.value = Colors.orange.shade100.withOpacity(0.3);}
     stateCheckAcceptPrivacyAndUsePolicy.value = value;  
   }
 
@@ -94,14 +94,13 @@ class LoginController extends GetxController {
 class CustomFullScreenDialog {
   static void showDialog() {
     Get.dialog(
-      WillPopScope(
-        child: const Center(
+      const PopScope(
+        canPop: false,
+        child: Center(
           child: CircularProgressIndicator(
             valueColor: AlwaysStoppedAnimation(Colors.yellowAccent),
           ),
-        ),
-        // onWillPop - Se llama cada ves que el usuario intenta descartar el ModalRoute adjunta
-        onWillPop: () => Future.value(false),
+        ), // deshabilitar el botón de retroceso del dispositivo
       ),
       barrierDismissible: false,
       barrierColor: const Color(0xff141A31).withOpacity(.3),

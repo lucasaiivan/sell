@@ -12,12 +12,14 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:search_page/search_page.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart'; 
 import '../../../core/utils/fuctions.dart';
 import '../../../core/utils/widgets_utils.dart';
 import '../../../data/datasource/database_cloud.dart';
 import '../../../domain/entities/catalogo_model.dart';
-import '../../home/controller/home_controller.dart'; 
+import '../../home/controller/home_controller.dart';
+import '../../moderator/controller/moderator_controller.dart'; 
 
 class ControllerCreateProductForm extends GetxController{
 
@@ -301,9 +303,9 @@ class ControllerCreateProductForm extends GetxController{
     controllerTextEditPrecioVenta.dispose();
     controllerTextEditQuantityStock.dispose();
   } 
-  // TODO : la subcripción por defecto es true
+  // TODO : release : la subcripción por defecto es [homeController.getProfileAccountSelected.subscribed;]
   // get 
-  bool get isSubscribed => true;//homeController.getProfileAccountSelected.subscribed;
+  bool get isSubscribed =>  homeController.getProfileAccountSelected.subscribed;
 
   //
   // FUNCTIONS
@@ -348,14 +350,14 @@ class ControllerCreateProductForm extends GetxController{
       _onBackPressed = !_onBackPressed;
       return false;
     }
-
-    if(getCurrentSlide!=0 && !getProduct.local){
+    // condition : si el slide actual es distinto de 0
+    if( getCurrentSlide !=0 && getProduct.local == false || getCurrentSlide !=1 && getProduct.local == true){
       previousPage();
       return false;
-    }
+    } 
 
     //  si _onBackPressed es true se puede salir 
-    if(getCurrentSlide==0 || (getProduct.local && getCurrentSlide==1)){
+    if( getCurrentSlide==0 && getProduct.local==false || (getProduct.local && getCurrentSlide==1)){
       final  shouldPop = await showDialog<bool>(
           context: context,
           builder: (context) {
@@ -379,7 +381,7 @@ class ControllerCreateProductForm extends GetxController{
           },
         );
         return shouldPop!;
-        }
+    }
     return true;
         
   } 
@@ -398,7 +400,7 @@ class ControllerCreateProductForm extends GetxController{
               updateAll();
 
               // set : values
-              getProduct.description = Utils().capitalize(controllerTextEditDescripcion.text); // controllerTextEditDescripcion.text;
+              getProduct.description = Utils().capitalizeString(controllerTextEditDescripcion.text); // controllerTextEditDescripcion.text;
               getProduct.upgrade = Timestamp.now();
               getProduct.idMark = getMarkSelected.id;
               getProduct.nameMark = getMarkSelected.name;
@@ -413,8 +415,8 @@ class ControllerCreateProductForm extends GetxController{
               getProduct.nameCategory = getCategory.name;
               if(controllerTextEditAlertStock.text!=''){getProduct.alertStock  = int.parse( controllerTextEditAlertStock.text );}
 
-              // TODO : DELETE RELEASE
-              getProduct.verified = getProduct.local ? false : true; 
+              // TODO : DISABLE RELEASE
+              //getProduct.verified = getProduct.local ? false : true; 
 
               // actualización de la imagen del producto
               if (getXFileImage.path != '') { 
@@ -447,11 +449,15 @@ class ControllerCreateProductForm extends GetxController{
               }
 
               // Firebase set : se crea los datos del producto del cátalogo de la cuenta
-              Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id)
-                .set(getProduct.toJson())
-                .whenComplete(() async {
-                  await Future.delayed(const Duration(seconds: 3)).then((value) {setDataUploadStatus = false; Get.back();Get.back(); });
-              }).onError((error, stackTrace) => setDataUploadStatus = false).catchError((_) => setDataUploadStatus = false);
+              Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id).set(getProduct.toJson()) ;
+
+              // actualiza la lista de productos del cátalogo en la memoria de la app
+              homeController.sincronizeCatalogueProducts(product: getProduct);
+
+              // sleep : espera 3 segundos para que se actualice la vista
+              await Future.delayed(const Duration(milliseconds: 1)).then((value) {
+                setDataUploadStatus = false; Get.back(); 
+              });
 
             } else {
               Get.snackbar(
@@ -480,8 +486,7 @@ class ControllerCreateProductForm extends GetxController{
     // valores
     Product product = getProduct.convertProductoDefault();
     
-    // asignamos los valores de creación
-    product.idAccount = homeController.getProfileAccountSelected.id;
+    // asignamos los valores de creación 
     product.idUserCreation = homeController.getProfileAdminUser.email;
     product.creation = Timestamp.fromDate(DateTime.now());
     //  set : marca de tiempo que se actualizo el documento
@@ -493,6 +498,16 @@ class ControllerCreateProductForm extends GetxController{
     product.followers++;  
     // crear el documento del producto publico
     await Database.refFirestoreProductPublic().doc(product.id).set(product.toJson());
+
+    // condition : verifica si existe el controlador
+    if (Get.isRegistered<ModeratorController>()) {
+      // si accedemos desde la vista de moderador
+      // controllers
+      final ModeratorController controller = Get.find<ModeratorController>(); 
+      // actualizamos el producto modificado
+      controller.updateProducts(product: product);
+    }
+    
   }
   void deleteProductInCatalogue() async{
     // activate indicator load
@@ -720,7 +735,7 @@ class ControllerCreateProductForm extends GetxController{
     // Dialog view :  muestra el dialogo para agregar el porcentaje de ganancia
 
     //var 
-    final ButtonStyle buttonStyle = ButtonStyle(padding: MaterialStateProperty.all(const EdgeInsets.all(12)));
+    final ButtonStyle buttonStyle = ButtonStyle(padding: WidgetStateProperty.all(const EdgeInsets.all(12)));
     final TextEditingController controller = TextEditingController();
 
     // widgets
@@ -887,80 +902,6 @@ class ControllerCreateProductForm extends GetxController{
     update();
   }
 
-  //TODO: eliminar para release
-  // DEVELOPER OPTIONS
-  void showDialogDeleteOPTDeveloper() {
-    Get.dialog(AlertDialog(
-      title: const Text(
-          "¿Seguro que quieres eliminar este documento definitivamente? (Mods)"),
-      content: const Text(
-          "El producto será eliminado de tu catálogo ,de la base de dato global y toda la información acumulada menos el historial de precios registrado"),
-      actions: <Widget>[
-        // usually buttons at the bottom of the dialog
-        TextButton(
-          child: const Text("Cancelar"),
-          onPressed: () => Get.back(),
-        ),
-        TextButton(
-          child: const Text("Borrar"),
-          onPressed: () {
-            Get.back();
-            deleteProducPublic();
-          },
-        ),
-      ],
-    ));
-  }
-  void getDataProduct({required String id}) {
-    // function : obtiene los datos del producto de la base de datos y los carga en el formulario de edición 
-    if (id != '') {
-      Database.readProductPublicFuture(id: id).then((value) {
-        //  get
-        Product product = Product.fromMap(value.data() as Map);
-        //  set
-        setProduct = getProduct.updateData(product: product);
-        setDataUploadStatusProduct = true;
-        loadDataFormProduct(); // carga los datos del producto en el formulario
-        
-      }).catchError((error) {
-        printError(info: error.toString());
-        setDataUploadStatus = false;
-      }).onError((error, stackTrace) {
-        loadDataFormProduct();
-        printError(info: error.toString()); 
-      });
-    }
-  }
-  void increaseFollowersProductPublic() {
-    // function : aumenta el valor de los seguidores del producto publico
-    Database.refFirestoreProductPublic().doc(getProduct.id).update({'followers': FieldValue.increment(1)});
-    // actualizamos el valor de los seguidores del producto
-    getProduct.followers++;
-    update();
-  }
-  void showDialogSaveOPTDeveloper() {
-    Get.dialog(AlertDialog(
-      title:
-          const Text("¿Seguro que quieres actualizar este docuemnto? (Mods)"),
-      content: const Text(
-          "El producto será actualizado de tu catálogo ,de la base de dato global y toda la información acumulada menos el historial de precios registrado"),
-      actions: <Widget>[
-        // usually buttons at the bottom of the dialog
-        TextButton(
-          child: const Text("Cancelar"),
-          onPressed: () => Get.back(),
-        ),
-        TextButton(
-          child: const Text("Si, actualizar"),
-          onPressed: () {
-            Get.back();
-            save(); // save product
-          },
-        ),
-      ],
-    ));
-  }
-
 }
 
 // select mark
@@ -1001,13 +942,16 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
       appBar: AppBar(
         title: const Text('Marcas'),
         actions: [
-          // TODO : delete icon 'add new mark for release'
-          IconButton(onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},icon: const Icon(Icons.add)),
+          // TODO : release : delete icon 'add new mark for release'
+          // icon : agregar nueva marca ( solo para moderadores)
+          //IconButton(onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},icon: const Icon(Icons.add)),
+          // icon : cambiar de vista
           IconButton(icon: Icon( viewListState? Icons.grid_view_rounded:Icons.table_rows_rounded),onPressed: () { 
             setState(() {
               viewListState = !viewListState;
             });
           }),
+          // icon : buscar marca
           IconButton(icon: const Icon(Icons.search),onPressed: () {Get.back();showSeachMarks();})
         ],
       ),
@@ -1124,8 +1068,20 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         items: list,
         searchLabel: 'Buscar marca',
         suggestion: const Center(child: Text('ej. Miller')),
-        failure: const Center(child: Text('No se encontro :(')),
-        filter: (product) => [product.name,product.description],
+        failure: const Center(child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('No se encontro :('),
+            // TODO : release : disable moderador ( crear marca )
+            /* const SizedBox(height: 20),
+            TextButton.icon(
+              onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},
+              icon: const Icon(Icons.add_box_outlined),
+              label: const Text('Crear marca'),
+            ) */
+          ],
+        )),
+        filter: (product) => [Utils.normalizeText(product.name),Utils.normalizeText(product.description)],
         builder: (mark) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[
           itemList(marcaSelect: mark),
           ComponentApp().divider(),
@@ -1141,8 +1097,8 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         Get.back();
       },
       onLongPress: (){
-        // TODO : delete fuction
-        Get.to(() => CreateMark(mark: marcaSelect));
+        // TODO : release : delete fuction
+        //Get.to(() => CreateMark(mark: marcaSelect));
       },
       borderRadius: BorderRadius.circular(5),
       child: Column(
@@ -1171,8 +1127,8 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         Get.back();
       },
       onLongPress: () {
-        // TODO : delete fuction
-        Get.to(() => CreateMark(mark: marcaSelect));
+        // TODO : release : delete fuction
+        //Get.to(() => CreateMark(mark: marcaSelect));
       },
     );
   }
@@ -1211,14 +1167,15 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
       list.insert(1, controllerProductNew.getUltimateSelectionMark);
     }
 
+    // obtenemos el item con la id 'other' de la lista
+    Mark mark = list.firstWhere((element) => element.id == 'other');
     // eliminamos el item con la id 'other' de la lista
     list.removeWhere((element) => element.id == 'other');
     // insertar en la primera posicion de la lista 
-    list.insert(0, Mark(id: 'other',name: 'Otro',upgrade: Timestamp.now(),creation: Timestamp.now()));
+    list.insert(0, mark);
   }
 }
-
-// TODO : delete release
+ // WIDGETS ( MODERATOR )
 class CreateMark extends StatefulWidget {
   final Mark mark;
   const CreateMark({required this.mark, Key? key}) : super(key: key);
@@ -1332,6 +1289,49 @@ class _CreateMarkState extends State<CreateMark> {
             style: textStyle,
           ),
         ),
+        // view : botones de edicionales
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              // view : buscar en google
+              Row(
+                children: [
+                  // text 
+                  const Text('Buscar en google:'),
+                  const Spacer(),
+                  // button : textButton : buscar en google
+                  TextButton(
+                      onPressed: () async {
+                        String clave = 'logo ${widget.mark.name}';
+                        Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
+                        await launchUrl(uri,mode: LaunchMode.externalApplication);
+                      },
+                      child: const Text('Imagen del logo' )),
+                  // textButton : buscar en google
+                  TextButton(
+                      onPressed: () async {
+                        String clave = 'que industria es la marca ${widget.mark.name}?';
+                        Uri uri = Uri.parse("https://www.google.com/search?q=$clave");
+                        await launchUrl(uri,mode: LaunchMode.externalApplication);
+                      },
+                      child: const Text('Información')),
+                ],
+              ),
+              // buttom : edicion de imagen
+              TextButton(
+                onPressed: () async{
+                  // values
+                  Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.camerasideas.instashot&pcampaignid=web_share');
+                  //  redireccionara para la tienda de aplicaciones
+                  await launchUrl(uri,mode: LaunchMode.externalApplication);
+                },
+                child: const Text('Editar imagen con InstaShot'),
+              ),
+            ],
+          ),
+        ), 
       ],
     );
   }

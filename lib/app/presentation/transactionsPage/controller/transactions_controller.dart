@@ -1,36 +1,36 @@
-import 'dart:async';
-
-import 'package:cloud_firestore/cloud_firestore.dart'; 
+import 'dart:async'; 
+import 'package:cloud_firestore/cloud_firestore.dart';  
+import 'package:screenshot/screenshot.dart'; 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:sell/app/core/utils/widgets_utils.dart';
+import 'package:get/get.dart'; 
 import 'package:sell/app/data/datasource/database_cloud.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:sell/app/domain/entities/catalogo_model.dart'; 
 import '../../../domain/entities/cashRegister_model.dart';
 import '../../../domain/entities/ticket_model.dart';
-import '../../home/controller/home_controller.dart';
-import 'package:fl_chart/fl_chart.dart';
+import '../../home/controller/home_controller.dart'; 
+
+
 
 
 class TransactionsController extends GetxController {
 
-  // others controllers
-  final HomeController homeController = Get.find();
+  // Create an instance controllers
+  final HomeController homeController = Get.find(); 
+  final ScreenshotController screenshotController = ScreenshotController(); 
 
   // stream  
   StreamSubscription?  streamSubscription;
 
+  // estado de carga de datos
+  final RxBool _loading = true.obs;
+  bool get getLoading => _loading.value;
+  set setLoading(bool value) => _loading.value = value;
+
   // style : estilo de la vista
   final double cardBoderRadius = 20.0;
   double get getCardBoderRadius => cardBoderRadius;
-
-  // lista de montos de las transacciones por fecha
-  int positionIndex = 0;
-  List<double> _billingByDateList = [];
-  List<double> get getBillingByDateList => _billingByDateList;
-  set setBillingByDateList(List<double> value) => _billingByDateList = value;
-
+ 
   // obtenemos los medios de pagos y sus respectivas ganancias
   // description : efective (Efectivo) - mercadopago (Mercado Pago) - card (Tarjeta De Crédito/Débito)
   Map<String, double> _analyticsMeansOfPaymentMap = {};
@@ -108,6 +108,7 @@ class TransactionsController extends GetxController {
     readAnalyticsMeansOfPayment(); // actualizamos los medios de pago
     readCashAnalysis(); // actualizamos los montos de cada caja
     readBestSellingProduct(); // actualizamos los productos más vendidos por cantidad
+    setLoading = false;
     update();
   }
 
@@ -117,22 +118,11 @@ class TransactionsController extends GetxController {
   set setTicketView(bool value) => _ticketView.value = value;
 
 
-
-  @override
-  void onInit() async {
-    super.onInit();
-    filterList(key: 'hoy');
-  }
-
-  @override
-  void onClose() {}
-
   // set/get
   void filterList({required String key}) {
- 
 
-    // values default 
-    setBillingByDateList = [];
+    setLoading = true;
+
     
     switch (key) {
       case 'premium': 
@@ -172,10 +162,9 @@ class TransactionsController extends GetxController {
     //  obtenemos los documentos creados el año pasado
     //
 
-    // a la marca de tiempo actual le descontamos el tiempo hasta la primera fecha del año pasado
+    // var : marcas de tiempo
     Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch( DateTime( Timestamp.now().toDate().year-1 ).millisecondsSinceEpoch);
-    // marca de tiempo actual
-    Timestamp timeEnd = Timestamp.fromMillisecondsSinceEpoch(Timestamp.now().toDate().subtract( Duration(hours:Timestamp.now().toDate().hour )).millisecondsSinceEpoch);
+    Timestamp timeEnd = Timestamp.fromMillisecondsSinceEpoch( DateTime( Timestamp.now().toDate().year ).millisecondsSinceEpoch);
 
     // stream : obtenemos los documentos creados  el año pasado
     Stream<QuerySnapshot<Map<String, dynamic>>> stream = Database.readTransactionsFilterTimeStream(
@@ -222,13 +211,14 @@ class TransactionsController extends GetxController {
       // get : agregamos los tickets a la lista
       transactionsAlllist = value.docs.map((e) => TicketModel.fromMap(e.data())).toList(); 
       //  set
-      setVisivilityTransactionsList = transactionsAlllist;  
+      setVisivilityTransactionsList = transactionsAlllist;   
     }); 
   }
-  // obtenenemos las transacciones del día actual y los ultimos 5 dias
+  // obtenenemos las transacciones del día actual 
   void readTransactionsOfTheDay(){ 
-    // a la marca de tiempo actual le descontamos las los ultimos 5 dias
-    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch(Timestamp.now().toDate() .subtract(const Duration(days: 5)).millisecondsSinceEpoch);
+    // formateamos la marca de tiempo actual 
+    DateTime now = Timestamp.now().toDate();
+    Timestamp timeStart = Timestamp.fromDate(DateTime(now.year, now.month, now.day));
 
     // stream : obtenemos los documentos creados en el día
     Stream<QuerySnapshot<Map<String, dynamic>>> stream = Database.readTransactionsFilterIsGreaterThanTimeStream(
@@ -240,38 +230,17 @@ class TransactionsController extends GetxController {
     // stream : obtenemos los documentos creados en el día
     streamSubscription= stream.listen((value) { 
       
-      // var
-      List<double> listAmountTotal = [];  
-      List<TicketModel> transactionsTodayList = [];
-      // lista de las transacciones de los ultimos 5 dias
-      List<TicketModel> transactionsAlllist = []; 
+      // var 
+      List<TicketModel> transactionsTodayList = []; 
 
       // obtenemos las transacciones del dia de hoy
       for (var element in value.docs) {
         TicketModel ticket = TicketModel.fromMap(element.data());
-        if( ticket.creation.toDate().day == Timestamp.now().toDate().day){
-          transactionsTodayList.add(ticket); 
-        }
-      }
-      // obtenemos todas las transacciones de los ultimos 5 dias 
-      for (var element in value.docs) {
-        transactionsAlllist.add(TicketModel.fromMap(element.data()));
-      }
-      // obtenemos y clasificamos por fecha y obtenemos el monto total de cada día  
-      for (var i = 0; i < 5; i++) {
-        double amountTotal = 0; 
-        for (TicketModel element in transactionsAlllist) {
-          if (element.creation.toDate().day == Timestamp.now().toDate().subtract(Duration(days: i)).day) {
-            amountTotal += element.priceTotal;
-          }
-        }
-        listAmountTotal.add(amountTotal);
-      }
-      //  set
-      positionIndex = 4; 
-      setBillingByDateList = listAmountTotal;
+        transactionsTodayList.add(ticket); 
+      } 
+      //  set 
       setTransactionsTodayList = transactionsTodayList;
-      setVisivilityTransactionsList = transactionsTodayList; 
+      setVisivilityTransactionsList = transactionsTodayList;  
     });
 
   }
@@ -328,18 +297,19 @@ class TransactionsController extends GetxController {
     }  
   }
  
-  // obtenemos las transacciones de los ultimos 5 dias y del dia de ayer
+  // obtenemos las transacciones del dia de ayer
   void readTransactionsYesterday() {
-    // var :  marca de tiempo actual
-    DateTime timeEnd = Timestamp.now().toDate();
-    // var :  a la marca de tiempo actual dubtraemos 5 dias
-    Timestamp timeStart = Timestamp.fromDate(timeEnd.subtract(const Duration(days:5)));
+
+    // formateamos la marca de tiempo actual 
+    // var : marcas de tiempo
+    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch( DateTime( Timestamp.now().toDate().year,Timestamp.now().toDate().month, Timestamp.now().toDate().day-1).millisecondsSinceEpoch);
+    Timestamp timeEnd = Timestamp.fromMillisecondsSinceEpoch( DateTime( Timestamp.now().toDate().year,Timestamp.now().toDate().month,Timestamp.now().toDate().day).millisecondsSinceEpoch);
 
     // stream : obtenemos los documentos creados en el día
     Stream<QuerySnapshot<Map<String, dynamic>>> stream = Database.readTransactionsFilterTimeStream(
       idAccount: homeController.getProfileAccountSelected.id,
       timeStart: timeStart,
-      timeEnd: Timestamp.fromDate(timeEnd),
+      timeEnd: timeEnd,
     );
     // si ahi una suscripcion activa la cancelamos
     streamSubscription?.cancel();
@@ -352,37 +322,19 @@ class TransactionsController extends GetxController {
       transactionsAlllist = value.docs.map((e) => TicketModel.fromMap(e.data())).toList(); 
       // obtenemos todas las transacciones del día e ayer
       for (TicketModel ticket in transactionsAlllist ) { 
-        if( ticket.creation.toDate().day == timeEnd.subtract(const Duration(days: 1)).day ){
-          transactionsTodayList.add(ticket);
-        } 
-      } 
-      // obtenemos y clasificamos por fecha y obtenemos el monto total de cada día  de los ultimos 5 días 
-      List<TicketModel> ticketsList = transactionsAlllist.where((element) => element.creation.toDate().isAfter( Timestamp.now().toDate().subtract(const Duration(days:5)) ) ).toList();
-      
-      // var : montos totales de los ultimos 5 dias
-      List<double> listAmountTotal = [];  
-      for (var i = 0; i < 5; i++) {
-        double amountTotal = 0; 
-        for (TicketModel element in ticketsList) { 
-          if (element.creation.toDate().day == (timeEnd.day - i)) {
-            amountTotal += element.priceTotal;
-          }
-        }
-        listAmountTotal.add(amountTotal);
-      }
-      //  set
-      positionIndex = 3; 
-      setBillingByDateList = listAmountTotal; 
-      setVisivilityTransactionsList = transactionsTodayList; 
+        transactionsTodayList.add(ticket);
+      }  
+      //  set 
+      setVisivilityTransactionsList = transactionsTodayList;  
     });
   }
-  // obtenemos las transacciones de los ultimos 5 meses y del mes actual
+  // obtenemos las transacciones del mes actual
   void readTransactionsThisMonth() async{ 
 
     // marca de tiempo actual
     DateTime timeEnd = Timestamp.now().toDate();
-    //  a la marca de tiempo actual le descontamos 5 meses
-    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch( DateTime(timeEnd.year, timeEnd.month-4, 1, 0).millisecondsSinceEpoch);
+    //  a la marca de tiempo al inicio del mes actual
+    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch( DateTime(timeEnd.year, timeEnd.month,0,0,0).millisecondsSinceEpoch);
 
     // stream : obtenemos los documentos creados en los ultimos 5 meses
     Stream<QuerySnapshot<Map<String, dynamic>>> stream = Database.readTransactionsFilterIsGreaterThanTimeStream(
@@ -403,81 +355,36 @@ class TransactionsController extends GetxController {
         if (ticket.creation.toDate().month == Timestamp.now().toDate().month) {
           transactionsTodayList.add(ticket);
         }
-      }
-      // obtenemos todas las transacciones de los ultimos 5 meses 
-      List<TicketModel> ticketsList = transactionsAlllist.where((element) => element.creation.toDate().isAfter( timeStart.toDate() ) ).toList();
-      
-
-      // obtenemos y clasificamos por fecha y obtenemos el monto total de cada día
-      List<double> listAmountTotal = [];      
-      Map data = {};
-      for (var element in ticketsList) {
-        // obtenemos el año y el mes de la fecha
-        String timeData = '${element.creation.toDate().year}-${element.creation.toDate().month}';
-        // add data
-        data.containsKey(timeData)
-            ? data[timeData] = data[timeData] + element.priceTotal
-            : data[timeData] = element.priceTotal;
-        
-      } 
-      // obtenemos el monto total de cada mes 
-      for (var element in data.entries) {
-        listAmountTotal.add(element.value);
-      }
+      }   
       //  set
-      positionIndex = 4; 
-      setBillingByDateList = listAmountTotal;
-      setVisivilityTransactionsList = transactionsTodayList;
-
-
+      setVisivilityTransactionsList = transactionsTodayList;  
     });  
 
   } 
 
-  // obtenemos las transacciones de los ultimos 5 meses y del mes pasado
+  // obtenemos las transacciones del mes pasado
   void readTransactionsLastMonth() {
-    // var :  marca de tiempo actual
-    DateTime timeNow = Timestamp.now().toDate();  
-    // var :  obtenemos todas las transacciones de los ultimos 5 meses
-    Timestamp timeStart = Timestamp.fromMillisecondsSinceEpoch( DateTime(timeNow.year, timeNow.month-4, 1, 0).millisecondsSinceEpoch) ; 
-    // stream : obtenemos los documentos creados  hace 5 meses
+    // var :  marcas de tiempos 
+    DateTime now =  Timestamp.now().toDate(); 
+    Timestamp timeEnd = Timestamp.fromDate(DateTime(now.year, now.month,1,0));
+    Timestamp timeStart = Timestamp.fromDate(DateTime(now.year, now.month-1,1,0));
+
+    // stream : obtenemos los documentos creados  el mes pasado
     Stream<QuerySnapshot<Map<String, dynamic>>> stream = Database.readTransactionsFilterTimeStream(
       idAccount: homeController.getProfileAccountSelected.id,
       timeStart: timeStart,
-      timeEnd: Timestamp.fromDate(timeNow),
+      timeEnd: timeEnd,
     );
     // si ahi una suscripcion activa la cancelamos
     streamSubscription?.cancel();
-    // stream : obtenemos los documentos creados en el día
+    // stream : obtenemos los documentos  
     streamSubscription=stream.listen((value) {
       
       // var
       List<TicketModel> transactionsAlllist = value.docs.map((e) => TicketModel.fromMap(e.data())).toList();
-      // obtenemos todas las transacciones del mes pasado
-      List<TicketModel> lastMonthsTicketList = transactionsAlllist.where((element) => element.creation.toDate().isAfter( Timestamp.fromMillisecondsSinceEpoch( DateTime(timeNow.year, timeNow.month-1).millisecondsSinceEpoch).toDate() )).toList();
-
-      lastMonthsTicketList = lastMonthsTicketList.where((element) => element.creation.toDate().isBefore( Timestamp.fromMillisecondsSinceEpoch( DateTime(timeNow.year, timeNow.month ).millisecondsSinceEpoch).toDate() )).toList(); 
-      // obtenemos y clasificamos por fecha y obtenemos el monto total de cada día
-      List<double> listAmountTotal = [];      
-      Map data = {};
-      for (var element in transactionsAlllist) {
-        // obtenemos el año y el mes de la fecha
-        String timeData = '${element.creation.toDate().year}-${element.creation.toDate().month}';
-        // add data
-        data.containsKey(timeData)
-            ? data[timeData] = data[timeData] + element.priceTotal
-            : data[timeData] = element.getTotalPrice;
-        
-      } 
-      // obtenemos el monto total de cada mes 
-      for (var element in data.entries) {
-        listAmountTotal.add(element.value);
-      }
-  
+      
       //  set
-      positionIndex = 3; 
-      setBillingByDateList = listAmountTotal;
-      setVisivilityTransactionsList = lastMonthsTicketList;
+      setVisivilityTransactionsList = transactionsAlllist; 
 
     });
 
@@ -609,7 +516,8 @@ class TransactionsController extends GetxController {
     setCashiersList = Map.fromEntries( getCashiersList.entries.toList() ..sort((e1, e2) => e1.key.compareTo(e2.key)));
   }
 
-  // FUCTIONS
+  // FUCTIONS  
+
   void readBestSellingProduct(){
     // description : obtenemos los productos más vendidos  por cantidad  
 
@@ -639,9 +547,7 @@ class TransactionsController extends GetxController {
     setMostSelledProducts = [];
     for (ProductCatalogue element  in sortedByKeyMap.values) {
       // condition  : evaluamos que sea un producto valido
-      if (element.code != '') {
-        getMostSelledProducts.add(element);
-      }
+      getMostSelledProducts.add(element);
     } 
   }
 
@@ -685,7 +591,7 @@ class TransactionsController extends GetxController {
     // devolvemos el total de ganancias formateado como una cadena de texto
     return totalEarnings == 0.0
         ? ''
-        : Publications.getFormatoPrecio( monto: totalEarnings, moneda: currencySymbol);
+        : Publications.getFormatoPrecio( value: totalEarnings, moneda: currencySymbol);
   } 
 
   double get getAmountTotalFilter{
@@ -696,7 +602,7 @@ class TransactionsController extends GetxController {
     return total;
   }
   String get getInfoAmountTotalFilter{  
-    return Publications.getFormatoPrecio(monto: getAmountTotalFilter);
+    return Publications.getFormatoPrecio(value: getAmountTotalFilter);
   }
   double get getEarningsFilteredTotal{ 
     // description : obtenemos el total de ganancias de las transacciones filtradas
@@ -712,7 +618,7 @@ class TransactionsController extends GetxController {
     return transactionEarnings;
   }
   String get getEarningsTotalFilteredFormat{ 
-    return Publications.getFormatoPrecio(monto: getEarningsFilteredTotal);
+    return Publications.getFormatoPrecio(value: getEarningsFilteredTotal);
   }
   // devuelve el porcentaje de ganancias
   int getPercentEarningsFilteredTotal() { 
@@ -753,7 +659,7 @@ class TransactionsController extends GetxController {
 
   void deleteSale({required TicketModel ticketModel}) {
     Widget widget = AlertDialog(
-      title: const Text('¿Seguro que quieres eliminar esta venta?',
+      title: const Text('¿Seguro que quieres eliminar esta transacción?',
           textAlign: TextAlign.center),
       content: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
         TextButton(
@@ -765,7 +671,7 @@ class TransactionsController extends GetxController {
             onPressed: () {
               // firebase : elimina la transacción
               Database.refFirestoretransactions(idAccount: homeController.getIdAccountSelected).doc(ticketModel.id).delete();
-              Get.back();
+              Get.back();Get.back();
             },
             child: const Text('si, eliminar')),
       ]),
@@ -774,7 +680,7 @@ class TransactionsController extends GetxController {
   }
 
   // WIDGETS COMPONENTS
-  Widget getPieChartView({required List chartData  , double size = 100 }){
+  /* Widget getPieChartView({required List chartData  , double size = 100 }){
 
     // var
     Map data = {};
@@ -863,7 +769,7 @@ class TransactionsController extends GetxController {
       );
 
 
-  }
+  } */
  
   // void : devolver una lista de [double] con el porcentaje en el rango de [0.0 al 9.9] de cada monto [double] de la lista[double] que se obtiene por parametro
   List<double> getPorcentList({required List<double> list}){
@@ -895,8 +801,9 @@ class TransactionsController extends GetxController {
         map.add({
           'name':getPayMode(idMode: item.key)['name'],
           'value':item.value,
-          'priceTotal':Publications.getFormatoPrecio(monto: item.value),
+          'priceTotal':Publications.getFormatoPrecio(value: item.value),
           'color':getPayMode(idMode: item.key)['color'],
+          'iconData':getPayMode(idMode: item.key)['iconData'],
           });
       } 
       
@@ -916,11 +823,23 @@ class TransactionsController extends GetxController {
       for (var i = 0; i < chartData.length; i++) {
         map[i]['porcent'] = listPorcent[i];
       }
+
+      // determinar el index que mayor valor tiene
+      int indexMax = 0;
+      for (var i = 0; i < map.length; i++) {
+        if(map[i]['porcent'] > map[indexMax]['porcent']) indexMax = i;
+      }
   
 
       return ListView(
         shrinkWrap: true,
-        children: List.generate(chartData.length, (index) {
+        children: List.generate(chartData.length, (index) { 
+          // var 
+          height = indexMax == index ? height+6 : height;
+          Widget icon = indexMax == index ?map[index]['iconData'] == null ? Container() : Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 5),
+            child: Icon(map[index]['iconData'],color: Colors.white ,size: 20),
+          ):Container();
 
           // obtener el porcentaje formateado  redondeado sin reciduo
           String porcent = map[index]['porcent'] % 1 == 0 ? '${map[index]['porcent'].round()}%' : '${map[index]['porcent']}%';
@@ -933,10 +852,10 @@ class TransactionsController extends GetxController {
           );
           // crear un [Material] con el color del 'chartData[index]['color']'  y pintado segun el porcentaje 
           Widget percentageBar = Material( 
-            borderRadius: BorderRadius.circular(3),
+            borderRadius: BorderRadius.circular(3), 
             color: map[index]['color'],
             child: FractionallySizedBox(
-              widthFactor: map[index]['porcent'] / 100,  
+              widthFactor: map[index]['porcent'] /  100,  
               child:  Container(height:height),
             ),
           );
@@ -950,7 +869,14 @@ class TransactionsController extends GetxController {
                 percentageBar,
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                  child: Text(map[index]['name']+' '+porcent+' '+priceTotal,style: textStyle,overflow: TextOverflow.ellipsis),
+                  child: Row(
+                    children: [
+                      // icon : muestra el icono solo del medio de pago que tiene el mayor porcentaje
+                      icon,
+                      // text : medio de pago, porcentaje y monto total
+                      Flexible(child: Text(map[index]['name']+' '+porcent+' '+priceTotal,style: textStyle,overflow: TextOverflow.ellipsis)),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -960,7 +886,7 @@ class TransactionsController extends GetxController {
         ),
       );
   }
-  Widget viewBarChartData({required List<Map> chartData, double size = 100 }){
+  /* Widget viewBarChartData({required List<Map> chartData, double size = 100 }){
     
     // var
     bool isDarkMode = Theme.of(Get.context!).brightness == Brightness.dark;
@@ -1104,7 +1030,19 @@ class TransactionsController extends GetxController {
       ); 
 
 
+  } */
+
+  // ----------------------- //
+  // ------ OVERRIDE-------- //
+  // ----------------------- //
+  @override
+  void onInit() async {
+    super.onInit();
+    filterList(key: 'hoy');
   }
+
+  @override
+  void onClose() {}
  
 
 }

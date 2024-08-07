@@ -2,6 +2,7 @@
 import 'package:get/get.dart'; 
 import '../controller/catalogue_controller.dart'; 
 import '../controller/form_create_product_controller.dart';
+import '../controller/product_controller.dart';
 import '../controller/product_edit_controller.dart';
 import '../controller/productsSearch_controller.dart'; 
 
@@ -31,5 +32,11 @@ class ProductsFormCreateBinding extends Bindings {
   @override
   void dependencies() {
     Get.put<ControllerCreateProductForm>( ControllerCreateProductForm());
+  }
+} 
+class ProductControllerBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.put<ProductController>(ProductController());
   }
 }

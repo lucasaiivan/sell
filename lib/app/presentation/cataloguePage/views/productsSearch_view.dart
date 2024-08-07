@@ -1,7 +1,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; 
-import 'package:get/get.dart';  
+import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';  
 import '../../../core/utils/dynamicTheme_lb.dart';
 import '../../../core/utils/widgets_utils.dart';
 import '../controller/productsSearch_controller.dart';
@@ -77,9 +78,13 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.max, 
           children: [
-            const SizedBox(height:50),
+            const SizedBox(height:50), 
             // view : sugerencias de productos
-            controller.getWriteCode||controller.getproductDoesNotExist? Container(): WidgetSuggestionProduct(list: controller.getListProductsSuggestions),
+            controller.getWriteCode||controller.getproductDoesNotExist? Container(): WidgetSuggestionProduct(positionDinamic: true,list: controller.getListProductsSuggestions),
+            controller.getWriteCode||controller.getproductDoesNotExist? Container(): const SizedBox(height: 20), 
+            
+            // TODO: release : disabled code ( paginas de proveedores web )
+            //controller.getWriteCode||controller.getproductDoesNotExist? Container(): popupMenuPagesProveedor,
             // view : image 
             controller.getproductDoesNotExist?Container():
             const Card(
@@ -92,8 +97,8 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                   mainAxisAlignment: MainAxisAlignment.center, 
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text('Escanear código de barra',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold )),  
-                    Text('Encuentra muchos productos precargados en la base de datos',style: TextStyle(fontSize: 16),textAlign: TextAlign.center),
+                    Text('Escanear el código de barra',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold )),  
+                    Text('Encuentra muchos productos disponibles en nuestra base de datos',style: TextStyle(fontSize: 16),textAlign: TextAlign.center),
                   ],
                 ),
               ),
@@ -104,7 +109,7 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
               child: Column(
                 children: [ 
                   // textfield : código de barra
-                  textFieldCodeBar(), 
+                  textFieldCodeBar(),  
                   const SizedBox(height: 12.0),
                   // button : buscar código
                   controller.getWriteCode||controller.getproductDoesNotExist?Container():
@@ -124,38 +129,58 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                   ), 
                   // view : texto informativo que el producto aún no existe si no se encuentra en la base de datos y se escribio manualmente el código por el teclado 
                   !(controller.productSelect.local && controller.getproductDoesNotExist)?Container():
-                  const Card(
-                    color: Colors.black12,
-                    margin: EdgeInsets.all(20.0),
-                    elevation: 0,
-                    child: Padding(
-                      padding: EdgeInsets.all(12.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center, 
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text('El código escrito aún no existe',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white )),  
-                          Text('Crea el producto en tu catálogo y se te notificará cuando haya un producto verificado',style: TextStyle(fontSize: 16,color: Colors.white70),textAlign: TextAlign.center,),
-                        ],
+                  const Padding(
+                    padding: EdgeInsets.all(12.0),
+                    child: RoundedChatBubble(
+                      isPointingUp: true,
+                      notchMargin: 100.0,
+                      isPointingLeft: false,
+                        bubbleColor: Colors.black12,
+                        widget: Text('El código escrito aún no existe en nuestra base de datos',style: TextStyle(fontSize: 16,color: Colors.white70,fontWeight: FontWeight.w300),textAlign: TextAlign.center,),
                       ),
-                    ),
+                  ),
+                  !(controller.productSelect.local && controller.getproductDoesNotExist)?Container():
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 12),
+                    child: RoundedChatBubble(
+                      isPointingUp: false,
+                      notchMargin: 100.0,
+                      isPointingLeft: true,
+                        bubbleColor: Colors.black12,
+                        widget: Text('Crea el producto en tu catálogo y se te notificará cuando el código sea verificado',style: TextStyle(fontSize: 16,fontWeight: FontWeight.w400,color: Colors.white),textAlign: TextAlign.center),
+                      ),
                   ),
                   // view : texto informativo que el producto aún no existe
                   controller.productSelect.local  ||!controller.getproductDoesNotExist?Container():
-                  Card(
-                    elevation: 0,
-                    color: Colors.black12,
-                    margin: const EdgeInsets.symmetric(vertical: 20.0),
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 0.0,bottom: 20.0,left: 12.0,right: 12.0),
-                      child: Column(
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: RoundedChatBubble(
+                      isPointingUp: true,
+                      notchMargin: 100.0, 
+                      bubbleColor: Colors.black12,
+                      widget: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Image.asset('assets/default_image.png',height: 75,width: 75,fit: BoxFit.cover,color: Colors.white38),
-                          const Text( 'El producto escaneado aún no existe',textAlign: TextAlign.center, style: TextStyle(fontSize: 18,color: Colors.white, fontWeight: FontWeight.bold)),
-                          const Text('Ayúdanos a registrar nuevos productos para que esta aplicación sea aún más útil para más personsa 🌍 ',textAlign: TextAlign.center, style: TextStyle(color: Colors.white70)),
+                          Image.asset('assets/default_image.png',height: 50,width: 50,fit: BoxFit.cover,color: Colors.white38),
+                          const Flexible(child: Text( 'El producto escaneado aún no existe',textAlign: TextAlign.center, style: TextStyle( color: Colors.white70 ))),
                         ],
+                                            ),
                       ),
                     ),
+                  ), 
+                  controller.productSelect.local  ||!controller.getproductDoesNotExist?Container():
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 12),
+                    child: RoundedChatBubble(
+                      isPointingUp: false,
+                      notchMargin: 100.0,
+                      isPointingLeft: true,
+                        bubbleColor: Colors.black12,
+                        widget: Text('Ayúdanos a registrar nuevos productos para que esta aplicación sea aún más útil para más personsa 🌍 ',textAlign: TextAlign.center, style: TextStyle(color: Colors.white70 )),
+                      ),
                   ),  
                   //  button : crear producto
                   controller.getproductDoesNotExist
@@ -181,8 +206,31 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
       ),
     );
   }
-
+  
   /* WIDGETS COMPONENT */ 
+  Widget get popupMenuPagesProveedor{
+
+    List listPages = [
+      {'name':'preciohoy.ar','url':'https://preciohoy.ar/'},
+      {'name':'supercoco.com.ar','url':'https://supercoco.com.ar/categoria/almacen'}, 
+      {'name':'salemmaonline.com.py','url':'https://www.salemmaonline.com.py/'}, 
+    ]; 
+    return PopupMenuButton<Map<String, String>>(
+      child: const Text('Proveedores web',style: TextStyle(color: Colors.blue)),
+      onSelected: (item) async{
+        String url = item['url'] ?? '';
+        Uri uri = Uri.parse(url);
+        await launchUrl(uri,mode: LaunchMode.externalApplication);
+      },
+      itemBuilder: (context) => List.generate(
+        listPages.length,
+        (index) => PopupMenuItem<Map<String, String>>(
+          value: listPages[index],
+          child: Text(listPages[index]['name']),
+        ),
+      ),
+    ); 
+  }
   Widget button(
       {required Widget icon,
       required String text,
@@ -216,15 +264,16 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
     return ElasticIn(
       curve: Curves.fastLinearToSlowEaseIn,
       child: TextField( 
+        readOnly: !controller.productSelect.local &&  controller.getproductDoesNotExist?true:false,
         focusNode: controller.textFieldCodeFocusNode,
         controller: controller.textEditingController,
-        keyboardType: const TextInputType.numberWithOptions(decimal: false),
+        keyboardType: const TextInputType.numberWithOptions(decimal: false), 
         inputFormatters: [FilteringTextInputFormatter.allow(RegExp('[1234567890]'))],
         decoration: InputDecoration(
           fillColor: controller.getColorFondo,
             suffixIcon: controller.textEditingController.value.text == ""?null:IconButton(onPressed: ()=>controller.clean(),icon: Icon(Icons.clear, color: controller.getColorTextField)),
             filled: true,
-            hintText: 'ej. 77565440001743',
+            hintText: 'ej. 775654001743',
             hintStyle: TextStyle(color: Get.theme.hintColor.withOpacity(0.3)),
             enabledBorder: OutlineInputBorder(borderRadius: const BorderRadius.all(Radius.circular(16.0)),borderSide: BorderSide(color: controller.getColorTextField)),
             border: OutlineInputBorder(borderRadius: const BorderRadius.all(Radius.circular(16.0)),borderSide: BorderSide(color: controller.getColorTextField)),
@@ -244,9 +293,6 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
       ),
     );
   }
-  
 
-   
-  
-}
+} 
 

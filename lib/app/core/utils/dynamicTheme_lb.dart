@@ -93,14 +93,14 @@ class ThemesDataApp {
     popupMenuTheme:
         const PopupMenuThemeData(color: Color.fromRGBO(249, 242, 237, 1)),
     visualDensity: VisualDensity.adaptivePlatformDensity,
-    //brightness: Brightness.light,
+    //brightness: Brightness.light, 
     useMaterial3: true,
     scaffoldBackgroundColor: colorLight,
     appBarTheme: AppBarTheme(backgroundColor: colorLight),
     drawerTheme: DrawerThemeData(backgroundColor: colorLight),
     canvasColor: colorLight,
     cardColor: colorLight,
-    dialogBackgroundColor: colorLight,
+    dialogBackgroundColor: colorLight, 
     inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: Colors.black.withOpacity(0.03),
@@ -118,8 +118,9 @@ class ThemesDataApp {
     visualDensity: VisualDensity.adaptivePlatformDensity,
     //brightness: Brightness.dark,
     useMaterial3: true,
-    primarySwatch: Colors.blue,
+    primarySwatch: Colors.blue, 
     scaffoldBackgroundColor: colorDark,
+    
     appBarTheme: AppBarTheme(backgroundColor: colorDark),
     drawerTheme: DrawerThemeData(backgroundColor: colorDark),
     canvasColor: colorDark,

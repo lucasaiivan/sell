@@ -13,13 +13,14 @@ class Database {
   //  Podemos leer datos de Firestore de dos formas: como Futuro como Stream. Puede usar Future si desea leer los datos una sola vez.
   //  de lo contrario usaremos Stream, ya que sincronizará automáticamente los datos cada vez que se modifiquen en la base de datos.
   // future - QuerySnapshot
-  static Future<QuerySnapshot<Map<String, dynamic>>> readProductsFavoritesFuture({int limit = 0}) =>limit != 0? FirebaseFirestore.instance.collection('APP/ARG/PRODUCTOS').where('outstanding',isEqualTo:true).limit(limit).get(): FirebaseFirestore.instance.collection('APP/ARG/PRODUCTOS').where('outstanding',isEqualTo:true).get();
-  static Future<QuerySnapshot<Map<String, dynamic>>> readProductsFuture({int limit = 0}) =>limit != 0? FirebaseFirestore.instance.collection('APP/ARG/PRODUCTOS').limit(limit).get(): FirebaseFirestore.instance.collection('APP/ARG/PRODUCTOS').get();
+  static Future<QuerySnapshot<Map<String, dynamic>>> readProductsFavoritesFuture({int limit = 0}) =>limit != 0? FirebaseFirestore.instance.collection('APP/ARG/PRODUCTOS').where('favorite',isEqualTo:true).limit(limit).get(): FirebaseFirestore.instance.collection('APP/ARG/PRODUCTOS').where('favorite',isEqualTo:true).get();
+  static Future<QuerySnapshot<Map<String, dynamic>>> readProductsFuture({int limit = 0}) =>limit != 0? FirebaseFirestore.instance.collection('APP/ARG/PRODUCTOS').limit(limit).get(): FirebaseFirestore.instance.collection('APP/ARG/PRODUCTOS').orderBy("upgrade", descending: true).get();
   static Future<QuerySnapshot<Map<String, dynamic>>> readProductsFutureNoVerified() =>FirebaseFirestore.instance.collection('APP/ARG/PRODUCTOS').where("verified", isEqualTo: false).get();
   static Future<QuerySnapshot<Map<String, dynamic>>> readProductsForMakFuture({required String idMark, int limit = 0}) =>limit != 0? FirebaseFirestore.instance.collection('APP/ARG/PRODUCTOS').where("idMark", isEqualTo: idMark).limit(limit).get() : FirebaseFirestore.instance.collection('APP/ARG/PRODUCTOS').where("idMark", isEqualTo: idMark).get();
   static Future<QuerySnapshot<Map<String, dynamic>>>readListPricesProductFuture({required String id, String isoPAis = 'ARG', int limit = 50}) =>FirebaseFirestore.instance.collection('APP/$isoPAis/PRODUCTOS/$id/PRICES').limit(limit).orderBy("time", descending: true).get();
   static Future<QuerySnapshot<Map<String, dynamic>>> readCategoryListFuture({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/CATEGORY').get();
-  static Future<QuerySnapshot<Map<String, dynamic>>> readListMarksFuture() =>FirebaseFirestore.instance.collection('/APP/ARG/MARCAS').get();
+  static Future<QuerySnapshot<Map<String, dynamic>>> readListMarksFuture() =>FirebaseFirestore.instance.collection('/APP/ARG/MARCAS').orderBy('upgrade',descending:true).get();
+  static Future<QuerySnapshot<Map<String, dynamic>>> readReportsProductFuture() =>FirebaseFirestore.instance.collection('/APP/ARG/REPORTS').orderBy('time',descending:true).get();
   // transactions
   static Future<QuerySnapshot<Map<String, dynamic>>> readTransactionsFuture({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/TRANSACTIONS').orderBy("creation", descending: true).get();
   static Future<QuerySnapshot<Map<String, dynamic>>> readProductsVerifiedFuture() => FirebaseFirestore.instance.collection('APP/ARG/PRODUCTOS').where("verified", isEqualTo: false).get();
@@ -37,15 +38,18 @@ class Database {
   // stream - DocumentSnapshot
   static Stream<DocumentSnapshot<Map<String, dynamic>>> readAccountModelStream(String id) =>FirebaseFirestore.instance.collection('ACCOUNTS').doc(id).snapshots();
   // stream - QuerySnapshot
-  static Stream<QuerySnapshot<Map<String, dynamic>>>readTransactionsStream({required String idAccount}) =>FirebaseFirestore.instance.collection('ACCOUNTS/$idAccount/TRANSACTIONS').orderBy("creation", descending: true).snapshots();
-  static Stream<QuerySnapshot<Map<String, dynamic>>>readProductsCatalogueStream({required String id}) =>FirebaseFirestore.instance.collection('ACCOUNTS/$id/CATALOGUE').orderBy('upgrade', descending: true).snapshots();
+  static Stream<QuerySnapshot<Map<String, dynamic>>> readTransactionsStream({required String idAccount}) =>FirebaseFirestore.instance.collection('ACCOUNTS/$idAccount/TRANSACTIONS').orderBy("creation", descending: true).snapshots();
+  static Stream<QuerySnapshot<Map<String, dynamic>>> readProductsCatalogueStream({required String id}) =>FirebaseFirestore.instance.collection('ACCOUNTS/$id/CATALOGUE').orderBy('upgrade', descending: true).snapshots();
   static Stream<QuerySnapshot<Map<String, dynamic>>> readCategoriesQueryStream({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/CATEGORY') .snapshots();
   static Stream<QuerySnapshot<Map<String, dynamic>>> readProvidersQueryStream({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/PROVIDER') .snapshots();
   static Stream<QuerySnapshot<Map<String, dynamic>>> readQueryStreamAdminsUsers({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/USERS') .snapshots();
-  static Stream<QuerySnapshot<Map<String, dynamic>>>readCashRegistersStream({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/CASHREGISTERS/').snapshots();
+  static Stream<QuerySnapshot<Map<String, dynamic>>> readCashRegistersStream({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/CASHREGISTERS/').snapshots();
+ 
   // STORAGE reference
   static Reference referenceStorageAccountImageProfile({required String id}) => FirebaseStorage.instance.ref().child("ACCOUNTS").child(id).child("PROFILE").child("imageProfile");
   static Reference referenceStorageProductPublic({required String id}) => FirebaseStorage.instance.ref().child("APP").child("ARG").child("PRODUCTOS").child(id);
+  // FIRESTORE reference
+  static Reference referenceFirestoreAccountProfile({required String id}) => FirebaseStorage.instance.ref().child("ACCOUNTS").child(id).child("PROFILE").child("imageProfile");
   
   // Firestore - CollectionReference
   static CollectionReference refFirestoreAccountsUsersList({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/USERS');
@@ -59,9 +63,11 @@ class Database {
   static CollectionReference refFirestoreCashRegisters({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/CASHREGISTERS/'); // cajas registradoras activas
   static CollectionReference refFirestoreFixedDescriptions({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/FIXERDESCRIPTIONS/');  // fixed descriptions
   static CollectionReference refFirestoreProductPublic() =>FirebaseFirestore.instance.collection('/APP/ARG/PRODUCTOS');
+  static CollectionReference refFirestoreProductPublicBackup() =>FirebaseFirestore.instance.collection('/APP/ARG/PRODUCTOS_BACKUP');
   static CollectionReference refFirestoreRegisterPrice({required String idProducto, String isoPAis = 'ARG'}) =>FirebaseFirestore.instance.collection('/APP/$isoPAis/PRODUCTOS/$idProducto/PRICES/');
   static CollectionReference refFirestoreMark() =>FirebaseFirestore.instance.collection('/APP/ARG/MARCAS/');
-  static CollectionReference refFirestoreReportProduct() =>FirebaseFirestore.instance.collection('/APP/ARG/REPORTS/');
+  static CollectionReference refFirestoreBrandsBackup() =>FirebaseFirestore.instance.collection('/APP/ARG/BRANDS_BACKUP');
+  static CollectionReference refFirestoreReportProduct() =>FirebaseFirestore.instance.collection('/APP/ARG/REPORTS');
 
   // set - Firestore
   static Future dbProductStockSalesIncrement({required String idAccount, required String idProduct,int quantity=1}) =>FirebaseFirestore.instance.collection('ACCOUNTS/$idAccount/CATALOGUE/').doc(idProduct).update({"sales": FieldValue.increment(quantity)}); 

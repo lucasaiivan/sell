@@ -2,6 +2,7 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart'; 
 import 'package:get/get.dart'; 
 import 'package:sell/app/data/datasource/database_cloud.dart';
@@ -21,39 +22,6 @@ class ControllerProductsSearch extends GetxController {
   // controllers 
   late HomeController homeController;
 
-  @override
-  void onInit() {
-
-    // obtenemos los datos del controlador principal
-    homeController = Get.find();
-    // llamado inmediatamente después de que se asigna memoria al widget - ej. fetchApi();
-    _codeBarParameter = Get.arguments['id'] ?? '';
-    // condition : si el parametro no esta vacio
-    if (_codeBarParameter != '') {
-      getTextEditingController.text = _codeBarParameter;
-      searchProductCatalogue(id: _codeBarParameter);
-    }
-    queryProductSuggestion();
-
-    super.onInit();
-  }
-
-  @override
-  void onReady() {
-    // llamado después de que el widget se representa en la pantalla - ej. showIntroDialog();
-    super.onReady();
-    productSelect.local = true;
-    textFieldCodeFocusNode = FocusNode();
-  }
-
-  @override
-  void onClose() {
-    ThemeService.switchThemeDefault();
-    textFieldCodeFocusNode.dispose();
-    super.onClose();
-    
-  }
-
   // product
   ProductCatalogue productSelect = ProductCatalogue(upgrade: Timestamp.now(), creation: Timestamp.now(),documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now());
 
@@ -62,6 +30,8 @@ class ControllerProductsSearch extends GetxController {
     final player = AudioPlayer(); // "soundBip.mp3"
     await player.play(AssetSource("soundBip.mp3")); 
   }
+  // copy to clipboard  
+  String copyClipboard = ""; 
 
   // list excel to json
    List<ProductCatalogue> productsToExelList = [];
@@ -143,13 +113,12 @@ class ControllerProductsSearch extends GetxController {
       _productDoesNotExist = false;
     }
   }
+  get getproductDoesNotExist => _productDoesNotExist;
 
   // list productos sujeridos
   static List<Product> _listProductsSuggestion = [];
   set setListProductsSuggestions(List<Product> list) => _listProductsSuggestion = list;
   List<Product> get getListProductsSuggestions => _listProductsSuggestion;
-
-  get getproductDoesNotExist => _productDoesNotExist;
 
   // FUCTIONS
   Future<void> scanBarcodeNormal() async {
@@ -160,12 +129,13 @@ class ControllerProductsSearch extends GetxController {
       // FlutterBarcodeScanner : escanea el codigo de barras
       barcodeScanRes = await FlutterBarcodeScanner.scanBarcode( "#ff6666", "Cancel", true, ScanMode.BARCODE);
       // condition : comprobamos 'back'
-      if (barcodeScanRes == '-1') {
+      if (barcodeScanRes == '-31') {
         return;
       }
       // sound : play 
       playSoundScan();
       //  set 
+      barcodeScanRes = barcodeScanRes;
       productSelect.local = false;
       textEditingController.text = barcodeScanRes;
       searchProductCatalogue(id: barcodeScanRes);
@@ -185,11 +155,12 @@ class ControllerProductsSearch extends GetxController {
       bool thereIsACoincidence = false;
       for (var element in homeController.getCataloProducts) {
         if (element.id == id) {
-          toProductView(porduct: element);
+          toNavigationProduct(porduct: element);
           thereIsACoincidence = true;
         }
       }
       if(!thereIsACoincidence){
+        // buscamos en la base de datos publica
         searchProductDBPublic(id: id);
       }
     }else{
@@ -210,8 +181,8 @@ class ControllerProductsSearch extends GetxController {
 
         // obtenemos el obj
         Product product = Product.fromMap(value.data() as Map);
-        // convertimos el obj a product catalogue
-        toProductView(porduct: product.convertProductCatalogue());
+        // convertimos el obj a product catalogue 
+        toNavigationProduct(porduct: product.convertProductCatalogue());
 
       }).onError((error, stackTrace) {
         setproductDoesNotExist = true;
@@ -250,7 +221,8 @@ class ControllerProductsSearch extends GetxController {
 
   void queryProductSuggestion() {
     if (getListProductsSuggestions.isEmpty) {
-      Database.readProductsFavoritesFuture(limit: 7).then((value) {
+      // firebase : consulta los productos destacados en la base de datos publica
+      Database.readProductsFavoritesFuture().then((value) {
 
         // values 
         List<Product> newList = [];
@@ -262,15 +234,35 @@ class ControllerProductsSearch extends GetxController {
       });
     }
   }
-
-  void toProductView({required ProductCatalogue porduct}) {
-    Get.back();
-     // TODO :  comrpobar si el producto esta en el cátalogo
-     // ...
-    Get.toNamed(Routes.EDITPRODUCT, arguments: {'product': porduct.copyWith()});
+  void getClipboardData() async {
+    ClipboardData? clipboardData = await Clipboard.getData('text/plain');
+    if (clipboardData != null) {
+      // condition : verificar que sean solo numeros
+      if (verifyIsNumber(value: clipboardData.text)) {
+        copyClipboard = clipboardData.text??'';  
+        updateAll();
+      }
+      
+    }
+  }
+  // NAVIGATION //
+  void toNavigationProduct({required ProductCatalogue porduct}) {
+    //values default
+    clean();
+    // condition : verifica si es un producto local
+    if(porduct.local){ 
+      // navega hacia la vista de producto
+      Get.toNamed(Routes.editProduct, arguments: {'product': porduct.copyWith()});
+    }else{
+      Get.toNamed(Routes.product, arguments: {'product': porduct.copyWith()});
+    }
   }
 
   void toProductNew({required String id}) {
+
+    // TODO : disable for release [local] en (debug) es siempre [true] para poder verificar el codigo
+    //  productSelect.local = false;
+
     //values default
     clean();
     //set
@@ -278,6 +270,40 @@ class ControllerProductsSearch extends GetxController {
     productSelect.code = id; 
     // navega hacia una nueva vista para crear un nuevo producto
     Get.toNamed(Routes.createProductForm,arguments: { 'product': productSelect});
+  }
+
+  // OVERRIDE // 
+  @override
+  void onInit() {
+    getClipboardData();
+    // obtenemos los datos del controlador principal
+    homeController = Get.find();
+    // llamado inmediatamente después de que se asigna memoria al widget - ej. fetchApi();
+    _codeBarParameter = Get.arguments['id'] ?? '';
+    // condition : si el parametro no esta vacio
+    if (_codeBarParameter != '') {
+      getTextEditingController.text = _codeBarParameter;
+      searchProductCatalogue(id: _codeBarParameter);
+    }
+    queryProductSuggestion();
+
+    super.onInit();
+  }
+
+  @override
+  void onReady() {
+    // llamado después de que el widget se representa en la pantalla - ej. showIntroDialog();
+    super.onReady();
+    productSelect.local = true;
+    textFieldCodeFocusNode = FocusNode();
+  }
+
+  @override
+  void onClose() {
+    ThemeService.switchThemeDefault();
+    textFieldCodeFocusNode.dispose();
+    super.onClose();
+    
   }
 }
 

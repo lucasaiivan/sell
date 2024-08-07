@@ -10,11 +10,13 @@ import 'package:image_picker/image_picker.dart';
 import 'package:search_page/search_page.dart';
 import 'package:sell/app/core/utils/fuctions.dart'; 
 import 'package:shimmer/shimmer.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../data/datasource/database_cloud.dart';
 import '../../../core/utils/widgets_utils.dart';
-import '../../home/controller/home_controller.dart'; 
+import '../../home/controller/home_controller.dart';
+import '../../moderator/controller/moderator_controller.dart'; 
 
 class ControllerProductsEdit extends GetxController {
 
@@ -29,6 +31,11 @@ class ControllerProductsEdit extends GetxController {
 
   // var : obtenemos el precio de venta al publico original para determinar si se actualizo
   double priceSaleOriginal = 0.0;
+
+  // datos del producto estan actualizados
+  bool _dataProductUpdate = false;
+  set setDataProductUpdate(bool value) => _dataProductUpdate = value;
+  bool get getDataProductUpdate => _dataProductUpdate;
 
   // var : message notification
   String _messageNotification = '';
@@ -46,11 +53,7 @@ class ControllerProductsEdit extends GetxController {
   GlobalKey<FormState> purchasePriceFormKey = GlobalKey<FormState>();
   GlobalKey<FormState> salePriceFormKey = GlobalKey<FormState>(); 
   GlobalKey<FormState> quantityStockFormKey = GlobalKey<FormState>(); 
-
-  // var : TextFormField focus
-  final descriptionTextFormFieldfocus = FocusNode(); 
-  final purchasePriceTextFormFieldfocus = FocusNode(); 
-  final salePriceTextFormFieldfocus = FocusNode(); 
+ 
 
   // state internet
   bool connected = false;
@@ -129,6 +132,7 @@ class ControllerProductsEdit extends GetxController {
   set setDescription(String value) {
     _description = value;
     getProduct.description = value;
+    controllerTextEditDescripcion.text = value;
     update(['updateAll']);
   }
   get getDescription => _description;
@@ -171,6 +175,7 @@ class ControllerProductsEdit extends GetxController {
   double _purchasePrice = 0.0;
   set setPurchasePrice(double value) {
     _purchasePrice = value;
+    controllerTextEditPrecioCosto.updateValue(value);
     update(['updateAll']);
   }
   get getPurchasePrice => _purchasePrice;
@@ -178,7 +183,7 @@ class ControllerProductsEdit extends GetxController {
   double _salePrice = 0.0;
   set setSalePrice(double value) {
     _salePrice = value;
-    controllerTextEditPrecioVenta.updateValue(value);
+    controllerTextEditPrecioVenta.updateValue(value); 
     update(['updateAll']);
   }
   get getSalePrice => _salePrice;
@@ -202,6 +207,7 @@ class ControllerProductsEdit extends GetxController {
   int _quantityStock = 0;
   set setQuantityStock(int value) {
     _quantityStock = value;
+    controllerTextEditQuantityStock.text = value.toString();
     update(['updateAll']);
   }
   int get getQuantityStock => _quantityStock;
@@ -209,6 +215,7 @@ class ControllerProductsEdit extends GetxController {
   int _alertStock = 5;
   set setAlertStock(int value) {
     _alertStock = value;
+    controllerTextEditAlertStock.text = value.toString();
     update(['updateAll']);
   }
   int get getAlertStock => _alertStock;
@@ -263,7 +270,7 @@ class ControllerProductsEdit extends GetxController {
     setAccountAuth = homeController.getIdAccountSelected != ''; 
     // obtenemos el producto por parametro
     ProductCatalogue productFinal = Get.arguments['product'] ?? ProductCatalogue(documentCreation: Timestamp.now(),documentUpgrade: Timestamp.now(),upgrade: Timestamp.now(), creation: Timestamp.now());
-    //  finalmente  asigna el producto
+    //  set : copiamos el producto para evitar problemas de referencia en memoria con el producto original
     setProduct = productFinal.copyWith();
     // load data product
     setTextAppBar = 'Editar';
@@ -304,9 +311,9 @@ class ControllerProductsEdit extends GetxController {
     super.onClose();
   }
 
-  // TODO : la subcripción por defecto es true
+  // TODO : release : la subcripción por defecto es [homeController.getProfileAccountSelected.subscribed;]
   // get 
-  bool get isSubscribed => true; //homeController.getProfileAccountSelected.subscribed;
+  bool get isSubscribed => homeController.getProfileAccountSelected.subscribed;
 
   //
   // FUNCTIONS
@@ -327,7 +334,7 @@ class ControllerProductsEdit extends GetxController {
 
     
     if (ganancia % 1 != 0) {
-      return '${porcentajeGanancia.toStringAsFixed(2)}%';
+      return '${porcentajeGanancia.toInt()}%';
     } else {
       return '${porcentajeGanancia.toInt()}%';
     }
@@ -349,7 +356,7 @@ class ControllerProductsEdit extends GetxController {
   Future<void> save() async {
     if (getProduct.id != '') {
       if ( controllerTextEditDescripcion.text != '') {
-        if (getMarkSelected.id != '' && getMarkSelected.name != '') {
+        if (getMarkSelected.id != '' && getMarkSelected.name != '' || getProduct.local == true ) {
           if (controllerTextEditPrecioVenta.numberValue > 0 ) {
             if ( getStock ? (getQuantityStock >= 1) : true) { 
               
@@ -358,8 +365,11 @@ class ControllerProductsEdit extends GetxController {
               setTextAppBar = 'Espere por favor...';
               updateAll();
 
+              // marca de tiempo 
+              Timestamp time = Timestamp.now();  
+
               // set : values 
-              getProduct.description = Utils().capitalize(controllerTextEditDescripcion.text); // format : actualiza a mayuscula la primera letra de cada palabra
+              getProduct.description = Utils().capitalizeString(controllerTextEditDescripcion.text); // format : actualiza a mayuscula la primera letra de cada palabra
               getProduct.code = getProduct.code == '' ? getProduct.id : getProduct.code;
               getProduct.idMark = getMarkSelected.id;
               getProduct.nameMark = getMarkSelected.name;
@@ -372,11 +382,11 @@ class ControllerProductsEdit extends GetxController {
               getProduct.provider = getProvider.id;
               getProduct.nameProvider = getProvider.name;
               getProduct.category = getCategory.id; 
-              getProduct.nameCategory = getCategory.name;
+              getProduct.nameCategory = getCategory.name; 
               if(controllerTextEditAlertStock.text!=''){getProduct.alertStock  = int.parse( controllerTextEditAlertStock.text );}
               // se actualiza la marca de tiempo si se actualiza el precio de venta al publico
-              if (priceSaleOriginal != getProduct.salePrice) {
-                getProduct.upgrade = Timestamp.now();
+              if (priceSaleOriginal != getProduct.salePrice || getDataProductUpdate ) {
+                getProduct.upgrade = time;
               } 
 
               // actualización de la imagen del producto
@@ -389,10 +399,13 @@ class ControllerProductsEdit extends GetxController {
                 await ref.getDownloadURL().then((value) => getProduct.image = value); // obtenemos la url de la imagen
               }
               // procede agregrar en la base de datos global de productos
-              // TODO : delete release
-              if ( getEditModerator && getProduct.local == false) {
-                  setProductPublicFirestore( );
-              }
+              // TODO : release : delete release (getEditModerator)
+              if ( getProduct.local == false) { 
+                // set
+                getProduct.documentUpgrade = time;
+                // se guarda el producto en la base de datos global
+                setProductPublicFirestore( );
+              } 
               // condition : verifica si el producto es global publico
               if(!getProduct.local){
                 // Registra el precio en una colección publica
@@ -419,12 +432,16 @@ class ControllerProductsEdit extends GetxController {
               }
 
               // Firebase set : se crea los datos del producto del cátalogo de la cuenta
-              Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id)
-                .set(getProduct.toJson())
-                .whenComplete(() async {
-                  await Future.delayed(const Duration(seconds: 3)).then((value) {setLoadingData = false; Get.back(); });
-              }).onError((error, stackTrace) => setLoadingData = false).catchError((_) => setLoadingData = false);
+              Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id).set(getProduct.toJson());
 
+              // actualiza la lista de productos del cátalogo en la memoria de la app
+              homeController.sincronizeCatalogueProducts(product: getProduct);
+              // sleep : espera 3 segundos para que se actualice la vista
+              await Future.delayed(const Duration(milliseconds: 500)).then((value) {
+                setLoadingData = false; Get.back(); 
+              });
+
+              
 
             } else {
               Get.snackbar(
@@ -450,33 +467,22 @@ class ControllerProductsEdit extends GetxController {
     // esta función procede a guardar el documento de una colleción publica
 
     // valores
-    Product product = getProduct.convertProductoDefault();
-     
-    //  set : marca de tiempo que se actualizo el documento
-    product.upgrade = Timestamp.fromDate(DateTime.now()); 
-    //  set : id del usuario que actualizo el documento
-    product.idUserUpgrade = homeController.getProfileAdminUser.email;
+    Product product = getProduct.convertProductoDefault(); 
+    //  set
+    product.idUserUpgrade = homeController.getProfileAdminUser.email; // id del usuario que actualizo el documento
 
     // firebase: actualizar el documento del producto publico
-    Database.refFirestoreProductPublic().doc(product.id).update(product.toJson());
-  }
-  void setProductPublicFirestoreAndBack() { 
-    // esta función procede a guardar el documento de una colleción publica
+    Database.refFirestoreProductPublic().doc(product.id).update(product.toJsonUpdate());
 
-    // valores
-    Product product = getProduct.convertProductoDefault();
-    
-    //  set : marca de tiempo que se actualizo el documento
-    product.upgrade = Timestamp.fromDate(DateTime.now()); 
-    //  set : id del usuario que actualizo el documento
-    product.idUserUpgrade = homeController.getProfileAdminUser.email;
-
-    // firebase: actualizar el documento del producto publico
-    Database.refFirestoreProductPublic().doc(product.id).update(product.toJson());
-    // actualizar vista
-    updateAll();
-    Get.back();
-  }
+    // condition : verifica si existe el controlador
+    if (Get.isRegistered<ModeratorController>()) {
+      // si accedemos desde la vista de moderador
+      // controllers
+      final ModeratorController controller = Get.find<ModeratorController>(); 
+      // actualizamos el producto modificado
+      controller.updateProducts(product: product);
+    } 
+  } 
   void deleteProductInCatalogue() async{
     // activate indicator load
     setLoadingData = true;
@@ -490,6 +496,8 @@ class ControllerProductsEdit extends GetxController {
       .doc(getProduct.id)
       .delete()
       .whenComplete(() {
+        // actualiza la lista de productos del cátalogo en la memoria de la app
+        homeController.sincronizeCatalogueProducts(product: getProduct, delete: true);
         // Firebase : descontamos el valor de los seguidores del producto
         if (getProduct.followers > 0){
           Database.refFirestoreProductPublic().doc(getProduct.id).update({'followers': FieldValue.increment(-1)});
@@ -553,8 +561,9 @@ class ControllerProductsEdit extends GetxController {
     //  function : lee la marca del producto 
     if (getProduct.idMark.isNotEmpty) {
       Database.readMarkFuture(id: getProduct.idMark).then((value) {
-        setMarkSelected = Mark.fromMap(value.data() as Map);
-        getProduct.nameMark = getMarkSelected.name; // guardamos un metadato
+        Mark brand = Mark.fromMap(value.data() as Map);
+        getProduct.nameMark = brand.name; // guardamos un metadato
+        setMarkSelected = brand;
         checkDataUploadStatusProduct(dataUploadStatusMark: true);
       }).onError((error, stackTrace) {
         setMarkSelected = Mark(upgrade: Timestamp.now(), creation: Timestamp.now());
@@ -650,14 +659,22 @@ class ControllerProductsEdit extends GetxController {
     // Dialog view :  muestra el dialogo para agregar el porcentaje de ganancia
 
     //var 
-    final ButtonStyle buttonStyle = ButtonStyle(padding: MaterialStateProperty.all(const EdgeInsets.all(12)));
-    final TextEditingController controller = TextEditingController();
+    final ButtonStyle buttonStyle = ButtonStyle(padding: WidgetStateProperty.all(const EdgeInsets.all(12)));
+    TextEditingController controller = TextEditingController(text: getProduct.getPorcentageValue.toString());
 
     // widgets
     Widget content = Scaffold(
       appBar: AppBar(
         title: const Text('Porcentaje de beneficio'), 
         automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () {
+              Get.back();
+            },
+          ),
+        ],
         ),
         body: Column(
           children: [
@@ -669,15 +686,19 @@ class ControllerProductsEdit extends GetxController {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: TextField(
-                      controller: controller,
+                      
+                      controller: controller, 
                       autofocus: true, 
                       keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                      // icoono de porcentaje
+
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp('[1234567890]'))
                       ],
                       decoration: const InputDecoration( 
                         hintText: '%',
                         labelText: "Porcentaje",
+                        prefixIcon: Icon(Icons.percent),
                       ),
                       style: const TextStyle(fontSize: 20.0),
                       textInputAction: TextInputAction.next,
@@ -697,8 +718,8 @@ class ControllerProductsEdit extends GetxController {
                   if(controller.text != ''){
                     double porcentajeDeGanancia  = double.parse(controller.text); 
                     double ganancia = controllerTextEditPrecioCosto.numberValue * (porcentajeDeGanancia / 100);
-                    setSalePrice = controllerTextEditPrecioCosto.numberValue + ganancia; 
-                    update(['updateAll']);
+                    setSalePrice = controllerTextEditPrecioCosto.numberValue + ganancia;  
+                    
                   }
                   //  action : cierra el dialogo
                   Get.back();
@@ -775,31 +796,386 @@ class ControllerProductsEdit extends GetxController {
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
     );
   }
-  // dialog : muestra el dialogo para eliminar el producto
+  // DIALOG // 
   void showDialogDelete() {
     Widget widget = AlertDialog(
-      title: const Text(
-          "¿Seguro que quieres eliminar este producto de tu catálogo?"),
-      content: const Text(
-          "El producto será eliminado de tu catálogo y toda la información acumulada"),
+      title: const Text("¿Seguro que quieres eliminar este producto de tu catálogo?"),
+      content: const Text("El producto será eliminado de tu catálogo y toda la información acumulada"),
       actions: <Widget>[
         // usually buttons at the bottom of the dialog
-        TextButton(
-          child: const Text('Cancelar'),
-          onPressed: () {
-            Get.back();
-          },
-        ),
-        TextButton(
-          onPressed: ()=> deleteProductInCatalogue(),
-          child: const Text('Si, eliminar'),
-        ),
+        TextButton(child: const Text('Cancelar'),onPressed: () {Get.back(); }),
+        TextButton(onPressed: ()=> deleteProductInCatalogue(),child: const Text('Si, eliminar')),
       ],
     );
-
+    // muestre el dialogo
     Get.dialog(widget);
   }
-  // bottomSheet : muestra el modal para seleccionar la categoria
+  void showDialogDescription(){
+    // Dialog view :  muestra el dialogo para agregar la descripción del producto
+
+    // var
+    final Color boderLineColor = Get.isDarkMode?Colors.white.withOpacity(0.3):Colors.black.withOpacity(0.3);
+    final Color fillColor = Get.isDarkMode?Colors.white.withOpacity(0.03):Colors.black.withOpacity(0.03);
+    // style  
+    TextStyle valueTextStyle = TextStyle(color: Get.isDarkMode?Colors.white:Colors.black,fontSize: 18,fontWeight: FontWeight.w400);
+    // controllers
+    final TextEditingController controllerTextEditDescripcion = TextEditingController(text: getProduct.description);
+    // widgets
+    Widget content = AlertDialog( 
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Column(
+                children: [
+                  // mount textfield
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal:0),
+                    child: TextFormField(
+                      style: valueTextStyle,
+                      autofocus: true, 
+                      controller:  controllerTextEditDescripcion,
+                      enabled: true, 
+                      maxLines: null, 
+                      autovalidateMode: AutovalidateMode.onUserInteraction, 
+                      keyboardType: TextInputType.text,
+                      decoration: InputDecoration( 
+                        filled: true,
+                        fillColor: fillColor,
+                        labelText: 'Descripción',
+                        border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                        ),        
+                      // validator: validamos el texto que el usuario ha ingresado.
+                      validator: (value) {
+                        // if (value == null || value.isEmpty) { return 'Por favor, escriba un precio de compra'; }
+                        return null; 
+                      },
+                    ),
+                  ),  
+                ],
+              ),
+            ), 
+            // buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                TextButton( onPressed: () { Get.back();}, child: const Text('Cancelar',textAlign: TextAlign.center)),
+                TextButton( onPressed: () {
+                  //  function : guarda el nuevo porcentaje de ganancia
+                  setDescription = controllerTextEditDescripcion.text;
+                  //  action : cierra el dialogo
+                  Get.back();
+                },
+                child: const Text('ok',textAlign: TextAlign.center)),
+              ],
+            ),
+          ],
+        ),
+    );
+
+    // dialog
+    showDialog(
+      context: Get.context!,
+      builder: (BuildContext context) {
+        return content;
+      },
+    );
+  }
+  void showDialogPriceSale(){
+    // Dialog view :  muestra el dialogo para agregar el porcentaje de ganancia
+
+    // var
+    final Color boderLineColor = Get.isDarkMode?Colors.white.withOpacity(0.3):Colors.black.withOpacity(0.3);
+    final Color fillColor = Get.isDarkMode?Colors.white.withOpacity(0.03):Colors.black.withOpacity(0.03);
+    // style  
+    TextStyle valueTextStyle = TextStyle(color: Get.isDarkMode?Colors.white:Colors.black,fontSize: 18,fontWeight: FontWeight.w400);
+    // controllers
+    final MoneyMaskedTextController controllerTextEditPrecioVenta = MoneyMaskedTextController(initialValue: getProduct.salePrice,leftSymbol: '${homeController.getProfileAccountSelected.currencySign} ');
+    // widgets
+    Widget content = AlertDialog( 
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Column(
+                children: [
+                  // mount textfield
+                  TextFormField(
+                    style: valueTextStyle,
+                    autofocus: true, 
+                    controller:  controllerTextEditPrecioVenta,
+                    enabled: true,
+                    autovalidateMode: AutovalidateMode.onUserInteraction, 
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration( 
+                      filled: true,
+                      fillColor: fillColor,
+                      labelText: 'Precio de venta',
+                      border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                      ),        
+                    // validator: validamos el texto que el usuario ha ingresado.
+                    validator: (value) {
+                      // if (value == null || value.isEmpty) { return 'Por favor, escriba un precio de compra'; }
+                      return null; 
+                    },
+                  ),  
+                ],
+              ),
+            ), 
+            // buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                TextButton( onPressed: () { Get.back();}, child: const Text('Cancelar',textAlign: TextAlign.center)),
+                TextButton( onPressed: () {
+                  //  function : guarda el nuevo porcentaje de ganancia
+                  if(controllerTextEditPrecioVenta.numberValue != 0
+                  ){
+                    double precioVenta  = controllerTextEditPrecioVenta.numberValue; 
+                    setSalePrice = precioVenta;  
+                  }
+                  //  action : cierra el dialogo
+                  Get.back();
+                },
+                child: const Text('ok',textAlign: TextAlign.center)),
+              ],
+            ),
+          ],
+        ),
+    );
+
+    // dialog
+    showDialog(
+      context: Get.context!,
+      builder: (BuildContext context) {
+        return content;
+      },
+    );
+  }
+  void showDialogPricePurchase(){
+    // Dialog view :  muestra el dialogo para agregar el porcentaje de ganancia
+
+    // var
+    final Color boderLineColor = Get.isDarkMode?Colors.white.withOpacity(0.3):Colors.black.withOpacity(0.3);
+    final Color fillColor = Get.isDarkMode?Colors.white.withOpacity(0.03):Colors.black.withOpacity(0.03);
+    // style  
+    TextStyle valueTextStyle = TextStyle(color: Get.isDarkMode?Colors.white:Colors.black,fontSize: 18,fontWeight: FontWeight.w400);
+    // controllers
+    final MoneyMaskedTextController controllerTextEdit = MoneyMaskedTextController(initialValue: getProduct.purchasePrice,leftSymbol: '${homeController.getProfileAccountSelected.currencySign} ');
+    // widgets
+    Widget content = AlertDialog( 
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Column(
+                children: [
+                  // mount textfield
+                  TextFormField(
+                    style: valueTextStyle,
+                    autofocus: true, 
+                    controller:  controllerTextEdit,
+                    enabled: true,
+                    autovalidateMode: AutovalidateMode.onUserInteraction, 
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration( 
+                      filled: true,
+                      fillColor: fillColor,
+                      labelText: 'Precio de Costo',
+                      border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                      ),        
+                    // validator: validamos el texto que el usuario ha ingresado.
+                    validator: (value) {
+                      // if (value == null || value.isEmpty) { return 'Por favor, escriba un precio de compra'; }
+                      return null; 
+                    },
+                  ),  
+                ],
+              ),
+            ), 
+            // buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                TextButton( onPressed: () { Get.back();}, child: const Text('Cancelar',textAlign: TextAlign.center)),
+                TextButton( onPressed: () {
+                  //  function : guarda el nuevo porcentaje de ganancia
+                  if(controllerTextEdit.numberValue != 0
+                  ){
+                    double price  = controllerTextEdit.numberValue; 
+                    setPurchasePrice = price;  
+                  }
+                  //  action : cierra el dialogo
+                  Get.back();
+                },
+                child: const Text('ok',textAlign: TextAlign.center)),
+              ],
+            ),
+          ],
+        ),
+    );
+
+    // dialog
+    showDialog(
+      context: Get.context!,
+      builder: (BuildContext context) {
+        return content;
+      },
+    );
+  }
+  void showDialogStock(){
+    // Dialog view :  muestra el dialogo para agregar la cantidad de stock del producto
+
+    // var
+    final Color boderLineColor = Get.isDarkMode?Colors.white.withOpacity(0.3):Colors.black.withOpacity(0.3);
+    final Color fillColor = Get.isDarkMode?Colors.white.withOpacity(0.03):Colors.black.withOpacity(0.03);
+    // style
+    TextStyle valueTextStyle = TextStyle(color: Get.isDarkMode?Colors.white:Colors.black,fontSize: 18,fontWeight: FontWeight.w400);
+    // controllers
+    final TextEditingController controllerTextEdit = TextEditingController(text: getQuantityStock.toString());
+    // widgets
+    Widget content = AlertDialog( 
+      title: const Text('Cantidad en stock'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Column(
+                children: [
+                  // mount textfield
+                  TextFormField(
+                    style: valueTextStyle,
+                    autofocus: true, 
+                    controller:  controllerTextEdit,
+                    enabled: true,
+                    autovalidateMode: AutovalidateMode.onUserInteraction, 
+                    keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                    decoration: InputDecoration( 
+                      filled: true,
+                      fillColor: fillColor,
+                      labelText: 'Cantidad',
+                      border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                      ),   
+                    // validator: validamos el texto que el usuario ha ingresado.
+                    validator: (value) {
+                      // if (value == null || value.isEmpty) { return 'Por favor, escriba un precio de compra'; }
+                      return null; 
+                    },
+                  ),  
+                ],
+              ),
+            ), 
+            // buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                TextButton( onPressed: () { Get.back();}, child: const Text('Cancelar',textAlign: TextAlign.center)),
+                TextButton( onPressed: () {
+                  //  function : guarda el nuevo porcentaje de ganancia
+                  if(controllerTextEdit.text != ''){
+                    int cantidad  = int.parse(controllerTextEdit.text); 
+                    setQuantityStock = cantidad;  
+                  }
+                  //  action : cierra el dialogo
+                  Get.back();
+                }, 
+                child: const Text('ok',textAlign: TextAlign.center)),
+              ],
+            ),
+          ],
+        ),
+    );
+
+    // dialog
+    showDialog(
+      context: Get.context!,
+      builder: (BuildContext context) {
+        return content;
+      },
+    );
+  }
+  void showDialogStockAlert(){
+    // Dialog view :  muestra el dialogo para introducir la cantidad del control de stock bajos
+
+    // var
+    final Color boderLineColor = Get.isDarkMode?Colors.white.withOpacity(0.3):Colors.black.withOpacity(0.3);
+    final Color fillColor = Get.isDarkMode?Colors.white.withOpacity(0.03):Colors.black.withOpacity(0.03);
+    // style  
+    TextStyle valueTextStyle = TextStyle(color: Get.isDarkMode?Colors.white:Colors.black,fontSize: 18,fontWeight: FontWeight.w400);
+    // controllers
+    final TextEditingController controllerTextEdit = TextEditingController(text: getAlertStock.toString());
+    // widgets
+    Widget content = AlertDialog( 
+      title: const Text('Alerta de bajo stock'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Column(
+                children: [
+                  // mount textfield
+                  TextFormField(
+                    style: valueTextStyle,
+                    autofocus: true, 
+                    controller:  controllerTextEdit,
+                    enabled: true,
+                    autovalidateMode: AutovalidateMode.onUserInteraction, 
+                    keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                    decoration: InputDecoration( 
+                      filled: true,
+                      fillColor: fillColor,
+                      labelText: 'Cantidad',
+                      border: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: boderLineColor)),
+                      ),   
+                    // validator: validamos el texto que el usuario ha ingresado.
+                    validator: (value) {
+                      // if (value == null || value.isEmpty) { return 'Por favor, escriba un precio de compra'; }
+                      return null; 
+                    },
+                  ),  
+                ],
+              ),
+            ), 
+            // buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                TextButton( onPressed: () { Get.back();}, child: const Text('Cancelar',textAlign: TextAlign.center)),
+                TextButton( onPressed: () {
+                  //  function : guarda el nuevo porcentaje de ganancia
+                  if(controllerTextEdit.text != ''){
+                    int cantidad  = int.parse(controllerTextEdit.text); 
+                    setAlertStock = cantidad;  
+                  }
+                  //  action : cierra el dialogo
+                  Get.back();
+                }, 
+                child: const Text('ok',textAlign: TextAlign.center)),
+              ],
+            ),
+          ],
+        ),
+    );
+
+    // dialog
+    showDialog(
+      context: Get.context!,
+      builder: (BuildContext context) {
+        return content;
+      },
+    );
+  }
+  // BOTTONSHET //
   void showModalSelectMarca() {
     // widget
     Widget widget = const WidgetSelectMark();
@@ -823,7 +1199,7 @@ class ControllerProductsEdit extends GetxController {
     update(['updateAll']);
   }
 
-  //TODO: eliminar para release
+
   // DEVELOPER OPTIONS
   void showDialogDeleteOPTDeveloper() {
     Get.dialog(AlertDialog(
@@ -850,21 +1226,25 @@ class ControllerProductsEdit extends GetxController {
   void getDataProduct({required String id}) {
     // function : obtiene los datos del producto de la base de datos y los carga en el formulario de edición 
     if (id != '') {
-      // firebase : obtiene los datos del producto
+      print('------------------------- Firebase db public -----------------------------------');
+      // firebase : obtiene los datos del producto 
       Database.readProductPublicFuture(id: id).then((value) {
-        //  get
+        //  get 
         Product product = Product.fromMap(value.data() as Map); 
+
         // commprobar que las fechas de actualización sean diferentes
         DateTime date1 = getProduct.documentUpgrade.toDate().copyWith(hour: 0,minute: 0,millisecond: 0,second: 0,microsecond: 0  );
         DateTime date2 = product.upgrade.toDate().copyWith(hour: 0,minute: 0,millisecond: 0,second: 0,microsecond: 0);
         if (date1.isBefore(date2)  ) {
           // se notifica que existen datos actualizados del producto
-          setMessageNotification = 'Producto actualizado \n ${Publications.getFechaPublicacionFormating(dateTime: date1)} \n ${Publications.getFechaPublicacionFormating(dateTime: date2)}';
+          setMessageNotification = 'Producto actualizado';
+          setDataProductUpdate = true;
         } 
 
         //  set
         setProduct = getProduct.updateData(product: product);
-        loadDataFormProduct(); // carga los datos del producto en el formulario
+        // carga los datos del producto en el formulario
+        loadDataFormProduct();
         // actualiza la vista ui
         checkDataUploadStatusProduct(dataUploadStatusProduct: true);
         
@@ -875,7 +1255,7 @@ class ControllerProductsEdit extends GetxController {
       });
     }
   }
-  void increaseFollowersProductPublic() {
+  void increaseFollowersProductPublic() { 
     // function : aumenta el valor de los seguidores del producto publico
     Database.refFirestoreProductPublic().doc(getProduct.id).update({'followers': FieldValue.increment(1)});
     // actualizamos el valor de los seguidores del producto
@@ -891,16 +1271,11 @@ class ControllerProductsEdit extends GetxController {
   }
   void showDialogSaveOPTDeveloper() {
     Get.dialog(AlertDialog(
-      title:
-          const Text("¿Seguro que quieres actualizar este docuemnto? (Mods)"),
-      content: const Text(
-          "El producto será actualizado de tu catálogo ,de la base de dato global y toda la información acumulada menos el historial de precios registrado"),
+      title: const Text("¿Seguro que quieres actualizar este docuemnto? (Mods)"),
+      content: const Text( "El producto será actualizado de tu catálogo ,de la base de dato global y toda la información acumulada menos el historial de precios registrado"),
       actions: <Widget>[
         // usually buttons at the bottom of the dialog
-        TextButton(
-          child: const Text("Cancelar"),
-          onPressed: () => Get.back(),
-        ),
+        TextButton(child: const Text("Cancelar"),onPressed: () => Get.back()),
         TextButton(
           child: const Text("Si, actualizar"),
           onPressed: () {
@@ -910,7 +1285,7 @@ class ControllerProductsEdit extends GetxController {
         ),
       ],
     ));
-  }
+  } 
 
 }
 
@@ -952,8 +1327,9 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
       appBar: AppBar(
         title: const Text('Marcas'),
         actions: [
-          // TODO : delete icon 'add new mark for release'
-          IconButton(onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},icon: const Icon(Icons.add)),
+          // TODO : release : delete icon 'add new mark for release'
+          //IconButton(onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},icon: const Icon(Icons.add)),
+          // icon : cambiar vista
           IconButton(icon: Icon( viewListState? Icons.grid_view_rounded:Icons.table_rows_rounded),onPressed: () { 
             setState(() {
               viewListState = !viewListState;
@@ -1058,12 +1434,10 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
   // WIDGETS COMPONENT
   showSeachMarks(){
 
-    // buscar cátegoria
+    // description : muestra la barra de busqueda para buscar marcas
 
     // var
     Color colorAccent = Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
-
-
     showSearch(
       context: context,
       delegate: SearchPage<Mark>(
@@ -1071,9 +1445,22 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         barTheme: Get.theme.copyWith(hintColor: colorAccent, highlightColor: colorAccent,inputDecorationTheme: const InputDecorationTheme(filled: false)),
         items: list,
         searchLabel: 'Buscar marca',
-        suggestion: const Center(child: Text('ej. Miller')),
-        failure: const Center(child: Text('No se encontro :(')),
-        filter: (product) => [product.name,product.description],
+        suggestion: const Center(child: Text('ej. agua')),
+        failure: const Center(child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('No se encontro :('),
+
+            // TODO : release : disable moderador ( crear marca )
+            /* const SizedBox(height: 20),
+            TextButton.icon(
+              onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},
+              icon: const Icon(Icons.add_box_outlined),
+              label: const Text('Crear marca'),
+            ) */
+          ],
+        )),
+        filter: (product) => [Utils.normalizeText(product.name),Utils.normalizeText(product.description)],
         builder: (mark) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[
           itemList(marcaSelect: mark),
           ComponentApp().divider(),
@@ -1081,6 +1468,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
       ),
     );
   }
+  
   Widget itemGrid({required Mark marcaSelect}) {
     return InkWell(
       onTap: () {
@@ -1089,8 +1477,8 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         Get.back();
       },
       onLongPress: (){
-        // TODO : delete fuction
-        Get.to(() => CreateMark(mark: marcaSelect));
+        // TODO : release : delete fuction
+        //Get.to(() => CreateMark(mark: marcaSelect));
       },
       borderRadius: BorderRadius.circular(5),
       child: Column(
@@ -1098,8 +1486,12 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           ImageProductAvatarApp(url: marcaSelect.image,size: 50,description:marcaSelect.name),
-          const SizedBox(height:2),
-          Text(marcaSelect.name,style: const TextStyle(fontWeight: FontWeight.w400 ),textAlign: TextAlign.center,),
+          Flexible(
+            child: Padding(
+              padding: const EdgeInsets.all(3.0),
+              child: Text(marcaSelect.name,style: const TextStyle(fontWeight: FontWeight.w400 ),textAlign: TextAlign.center,maxLines: 2,),
+            ),
+          ),
         ],
       ),
     );
@@ -1109,18 +1501,18 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       trailing:!icon? null  :marcaSelect.image==''?null: ImageProductAvatarApp(url: marcaSelect.image,size: 50,description:marcaSelect.name),
       dense: true,
-      title: Text(marcaSelect.name,overflow: TextOverflow.ellipsis,style: const TextStyle(fontWeight: FontWeight.w400,fontSize: 18),),
+      title: Text(marcaSelect.name,overflow: TextOverflow.ellipsis,style: const TextStyle(fontWeight: FontWeight.w400,fontSize: 18)),
       subtitle: marcaSelect.description == ''
           ? null
-          : Text(marcaSelect.description, overflow: TextOverflow.ellipsis),
+          : Text(marcaSelect.description, overflow: TextOverflow.ellipsis,maxLines: 2,),
       onTap: () {
         controllerProductsEdit.setUltimateSelectionMark = marcaSelect;
         controllerProductsEdit.setMarkSelected = marcaSelect;
         Get.back();
       },
       onLongPress: () {
-        // TODO : delete fuction
-        Get.to(() => CreateMark(mark: marcaSelect));
+        // TODO : release : delete fuction
+        //Get.to(() => CreateMark(mark: marcaSelect));
       },
     );
   }
@@ -1128,6 +1520,8 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
   // functions
   loadMarks() async {
     if (controllerProductsEdit.getMarks.isEmpty) {
+      print('------------------------- Firebase db public product brands -----------------------------------');
+      // firebase : obtiene las marcas de la base de datos
       await Database.readListMarksFuture().then((value) {
         setState(() {
           for (var element in value.docs) {
@@ -1157,16 +1551,17 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
       // insertamos el item seleccionado en la segunda posicion de la lista
       list.insert(1, controllerProductsEdit.getUltimateSelectionMark);
     }
-
+    // obtenemos el item con id 'other'
+    Mark? mark = list.firstWhereOrNull((element) => element.id == 'other'); 
     // eliminamos el item con la id 'other' de la lista
     list.removeWhere((element) => element.id == 'other');
     // insertar en la primera posicion de la lista 
-    list.insert(0, Mark(id: 'other',name: 'Otro',upgrade: Timestamp.now(),creation: Timestamp.now()));
+    if(mark != null) list.insert(0, mark);
   }
   
 }
 
-// TODO : delete release
+// WIDGETS ( MODERATOR )
 class CreateMark extends StatefulWidget {
   final Mark mark;
   const CreateMark({required this.mark, Key? key}) : super(key: key);
@@ -1251,6 +1646,7 @@ class _CreateMarkState extends State<CreateMark> {
             ],
           ),
         ),
+        // view : nombre de la marca
         Padding(
           padding: const EdgeInsets.all(20.0),
           child: TextField(
@@ -1264,12 +1660,16 @@ class _CreateMarkState extends State<CreateMark> {
             style: textStyle,
           ),
         ),
+        // view : descripcion de la marca
         Padding(
           padding: const EdgeInsets.all(20.0),
           child: TextField(
             enabled: !load,
             controller: TextEditingController(text: widget.mark.description),
-            onChanged: (value) => widget.mark.description = value,
+            onChanged: (value) => widget.mark.description = value, 
+            minLines: 1, // Definir el mínimo de líneas
+            maxLines: null, // Permitir cualquier cantidad de líneas
+            maxLength: 160,
             decoration: InputDecoration(
                 filled: true, 
                 fillColor: fillColor,
@@ -1277,6 +1677,49 @@ class _CreateMarkState extends State<CreateMark> {
             style: textStyle,
           ),
         ),
+        // view : botones de edicionales
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              // view : buscar en google
+              Row(
+                children: [
+                  // text 
+                  const Text('Buscar en google:'),
+                  const Spacer(),
+                  // button : textButton : buscar en google
+                  TextButton(
+                      onPressed: () async {
+                        String clave = 'logo ${widget.mark.name}';
+                        Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
+                        await launchUrl(uri,mode: LaunchMode.externalApplication);
+                      },
+                      child: const Text('Imagen del logo' )),
+                  // textButton : buscar en google
+                  TextButton(
+                      onPressed: () async {
+                        String clave = 'que industria es la marca ${widget.mark.name}?';
+                        Uri uri = Uri.parse("https://www.google.com/search?q=$clave");
+                        await launchUrl(uri,mode: LaunchMode.externalApplication);
+                      },
+                      child: const Text('Información')),
+                ],
+              ),
+              // buttom : edicion de imagen
+              TextButton(
+                onPressed: () async{
+                  // values
+                  Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.camerasideas.instashot&pcampaignid=web_share');
+                  //  redireccionara para la tienda de aplicaciones
+                  await launchUrl(uri,mode: LaunchMode.externalApplication);
+                },
+                child: const Text('Editar imagen con InstaShot'),
+              ),
+            ],
+          ),
+        ), 
       ],
     );
   }
@@ -1341,10 +1784,13 @@ class _CreateMarkState extends State<CreateMark> {
       
       // mark save
       if( newMark ){
+        // set
+        widget.mark.creation = Timestamp.now();
+        widget.mark.upgrade = Timestamp.now();
         // creamos un docuemnto nuevo
         await Database.refFirestoreMark().doc(widget.mark.id).set(widget.mark.toJson()).whenComplete(() {
 
-          // set values 
+          // set values  
           controllerProductsEdit.setUltimateSelectionMark = widget.mark;
           controllerProductsEdit.setMarkSelected = widget.mark;
           // agregar el obj manualmente para evitar consulta a la db  innecesaria
@@ -1352,6 +1798,9 @@ class _CreateMarkState extends State<CreateMark> {
           Get.back();
         });
       }else{
+        //set 
+        widget.mark.upgrade = Timestamp.now();
+
         // actualizamos un documento existente
         await Database.refFirestoreMark().doc(widget.mark.id).update(widget.mark.toJson()).whenComplete(() {
 

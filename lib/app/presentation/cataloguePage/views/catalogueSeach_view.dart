@@ -18,9 +18,6 @@ class ViewSeachProductsCataloguie extends StatefulWidget {
 
 class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCataloguie> {
 
-
-  
-
   // controllers
   final HomeController homeController = Get.find<HomeController>();
   final CataloguePageController catalogueController = Get.find<CataloguePageController>();
@@ -111,7 +108,7 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
                     setQuery = element.name;
                   },
                   child: Chip( 
-                    avatar: element.image==''?null:CircleAvatar(backgroundImage: NetworkImage(element.image),),
+                    avatar: element.image==''?null:CircleAvatar(backgroundImage: NetworkImage(element.image),backgroundColor:Colors.black.withOpacity(0.06)),
                     label: Text(element.name,style: textStyleSecundary), 
                     shape: RoundedRectangleBorder(side: BorderSide(color: primaryTextColor.withOpacity(0.5)),borderRadius: BorderRadius.circular(5)),
                     backgroundColor: Colors.transparent,   
@@ -253,7 +250,7 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
             if(catalogueController.getProductsSelectedList.isEmpty){ 
               Get.back(); // cierra el dialogo
               // navigation : editar producto
-              homeController.getUserAnonymous?null:catalogueController.toNavigationProductEdit(productCatalogue: product);
+              homeController.getUserAnonymous?null:catalogueController.toNavigationProduct(productCatalogue: product);
             }else{ 
               // selecciona el producto
               catalogueController.selectedProduct(product: product); 
@@ -268,7 +265,7 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
                 crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   // image
-                  ImageProductAvatarApp(url:product.local?'':product.image,size: 75,favorite:product.favorite),
+                  ImageProductAvatarApp(url:product.local?'':product.image,size: 75 ),
                   // text : datos del producto
                   Flexible(
                     child: Padding(
@@ -277,7 +274,15 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(product.description,maxLines: 1,overflow: TextOverflow.ellipsis,style: const TextStyle(fontWeight: FontWeight.w500)),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // icon : favorito
+                            product.favorite?const Icon(Icons.star_rounded,color: Colors.amber,size: 14,):Container(),
+                            // text : nombre del producto
+                            Flexible(child: Text(product.description,maxLines:2,overflow: TextOverflow.ellipsis,style: const TextStyle(fontWeight: FontWeight.w500))),
+                          ],
+                        ),
                         // view : marca del producto y proveedor
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -343,7 +348,7 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
                     ),
                   ),
                   // text : precio
-                  Text(Publications.getFormatoPrecio(monto: product.salePrice),style: const  TextStyle(fontSize: 18,fontWeight: FontWeight.w300),)
+                  Text(Publications.getFormatoPrecio(value: product.salePrice),style: const  TextStyle(fontSize: 18,fontWeight: FontWeight.w300),)
                 ],
               ),
             ),
