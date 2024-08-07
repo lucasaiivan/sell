@@ -266,7 +266,7 @@ class HomeController extends GetxController {
   }
 
   // profile account selected
-  ProfileAccountModel _accountProfileSelected = ProfileAccountModel(creation: Timestamp.now());
+  ProfileAccountModel _accountProfileSelected = ProfileAccountModel(creation: Timestamp.now(),trialEnd: Timestamp.now(),trialStart: Timestamp.now());
   ProfileAccountModel get getProfileAccountSelected => _accountProfileSelected;
   set setProfileAccountSelected(ProfileAccountModel value) => _accountProfileSelected = value;
   String get getIdAccountSelected => _accountProfileSelected.id;
@@ -663,7 +663,7 @@ class HomeController extends GetxController {
           ),
     ]; // lista de productos del catálogo
     setProductsOutstandingList = getCataloProducts.toList(); // lista de productos destacados
-    setProfileAccountSelected = ProfileAccountModel(creation: Timestamp.now(),name: 'Mi negocio'); // datos de la cuenta
+    setProfileAccountSelected = ProfileAccountModel(creation: Timestamp.now(),name: 'Mi negocio',trialEnd: Timestamp.now(),trialStart: Timestamp.now()); // datos de la cuenta
     setManagedAccountsList = []; // lista de cuentas gestionadas
     setProfileAdminUser = UserModel(
         superAdmin: true,
@@ -682,7 +682,7 @@ class HomeController extends GetxController {
     setCatalogueCategoryList = [];
     setCatalogueProducts = [];
     setProductsOutstandingList = [];
-    setProfileAccountSelected = ProfileAccountModel(creation: Timestamp.now());
+    setProfileAccountSelected = ProfileAccountModel(creation: Timestamp.now(),trialEnd: Timestamp.now(),trialStart: Timestamp.now());
     getProfileAccountSelected.id = idAccount; // asignamos el id de la cuenta
 
     // obtenemos las cuentas asociada a este email

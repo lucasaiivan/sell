@@ -78,7 +78,7 @@ class AccountController extends GetxController {
   List<String> get getCountries => _listountries;
 
   // account profile
-  final Rx<ProfileAccountModel> _profileAccount = ProfileAccountModel(creation: Timestamp.now()).obs;
+  final Rx<ProfileAccountModel> _profileAccount = ProfileAccountModel(creation: Timestamp.now(),trialEnd:Timestamp.now(),trialStart: Timestamp.now() ).obs;
   ProfileAccountModel get profileAccount => _profileAccount.value;
   set setProfileAccount(ProfileAccountModel user) =>
       _profileAccount.value = user;
@@ -150,7 +150,7 @@ class AccountController extends GetxController {
     var arguments = Get.arguments; 
     // obtenemos los datos de la cuenta 
     if (arguments != null && arguments.containsKey('create')) { 
-      setProfileAccount = ProfileAccountModel(creation: Timestamp.now());
+      setProfileAccount = ProfileAccountModel(creation: Timestamp.now(),trialEnd: Timestamp.now(),trialStart: Timestamp.now());
     } else if( arguments != null && arguments.containsKey('account')){ 
       setProfileAccount = arguments['account'];
     }

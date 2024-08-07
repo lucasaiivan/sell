@@ -2,15 +2,13 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';  
 import 'package:screenshot/screenshot.dart'; 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:sell/app/core/utils/widgets_utils.dart';
+import 'package:get/get.dart'; 
 import 'package:sell/app/data/datasource/database_cloud.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:sell/app/domain/entities/catalogo_model.dart'; 
 import '../../../domain/entities/cashRegister_model.dart';
 import '../../../domain/entities/ticket_model.dart';
-import '../../home/controller/home_controller.dart';
-import 'package:fl_chart/fl_chart.dart';  
+import '../../home/controller/home_controller.dart'; 
 
 
 
@@ -682,7 +680,7 @@ class TransactionsController extends GetxController {
   }
 
   // WIDGETS COMPONENTS
-  Widget getPieChartView({required List chartData  , double size = 100 }){
+  /* Widget getPieChartView({required List chartData  , double size = 100 }){
 
     // var
     Map data = {};
@@ -771,7 +769,7 @@ class TransactionsController extends GetxController {
       );
 
 
-  }
+  } */
  
   // void : devolver una lista de [double] con el porcentaje en el rango de [0.0 al 9.9] de cada monto [double] de la lista[double] que se obtiene por parametro
   List<double> getPorcentList({required List<double> list}){
@@ -888,7 +886,7 @@ class TransactionsController extends GetxController {
         ),
       );
   }
-  Widget viewBarChartData({required List<Map> chartData, double size = 100 }){
+  /* Widget viewBarChartData({required List<Map> chartData, double size = 100 }){
     
     // var
     bool isDarkMode = Theme.of(Get.context!).brightness == Brightness.dark;
@@ -1032,7 +1030,7 @@ class TransactionsController extends GetxController {
       ); 
 
 
-  }
+  } */
 
   // ----------------------- //
   // ------ OVERRIDE-------- //

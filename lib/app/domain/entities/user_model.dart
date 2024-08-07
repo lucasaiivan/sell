@@ -276,7 +276,10 @@ class ProfileAccountModel {
   bool blockingAccount = false;
   String blockingMessage = "";
   bool verifiedAccount = false; // Cuenta verificada
-  String pin = ''; // pin de seguridad
+  String pin = ''; // pin de seguridad  
+  bool trial = false; // estado de prueba gratuita
+  Timestamp trialStart = Timestamp.now(); // fecha de inicio de la prueba
+  Timestamp trialEnd = Timestamp.now(); // fecha de fin de la prueba
 
   // location
   String countrycode = "";
@@ -304,6 +307,9 @@ class ProfileAccountModel {
     this.province = "",
     this.town = "", 
     required this.creation,
+    this.trial = false,
+    required this.trialStart,
+    required this.trialEnd,
   });
   ProfileAccountModel copyWith({
     // account info
@@ -346,6 +352,9 @@ class ProfileAccountModel {
       province: province ?? this.province,
       town: town ?? this.town, 
       creation: creation ?? this.creation,
+      trial: trial,
+      trialStart: trialStart,
+      trialEnd: trialEnd,
     );
   }
 
@@ -376,6 +385,9 @@ class ProfileAccountModel {
     province =
         data.containsKey('province') ? data['province'] : data['provincia'];
     country = data.containsKey('country') ? data['country'] : data['pais'];
+    trial = data.containsKey('trial') ? data['trial'] : false;
+    trialStart = data.containsKey('trialStart') ? data['trialStart'] : Timestamp.now();
+    trialEnd = data.containsKey('trialEnd') ? data['trialEnd'] : Timestamp.now();
   }
   Map<String, dynamic> toJson() => {
         "id": id,
@@ -393,6 +405,9 @@ class ProfileAccountModel {
         "country": country,
         "province": province,
         "town": town, 
+        "trial": trial,
+        "trialStart": trialStart,
+        "trialEnd": trialEnd,
       };
 
   ProfileAccountModel.fromDocumentSnapshot( {required DocumentSnapshot documentSnapshot}) {
@@ -432,5 +447,8 @@ class ProfileAccountModel {
         ? data['province']
         : data["provincia"] ?? '';
     town = data.containsKey('town') ? data['town'] : data["ciudad"] ?? ''; 
+    trial = data.containsKey('trial') ? data['trial'] : false;
+    trialStart = data.containsKey('trialStart') ? data['trialStart'] : Timestamp.now();
+    trialEnd = data.containsKey('trialEnd') ? data['trialEnd'] : Timestamp.now();
   }
 }
