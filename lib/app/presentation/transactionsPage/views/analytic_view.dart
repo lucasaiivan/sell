@@ -1,6 +1,5 @@
 import 'dart:ui';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/utils/fuctions.dart';
@@ -30,22 +29,24 @@ class _StaticsCardsState extends State<StaticsCards> {
   @override
   Widget build(BuildContext context) {
 
+    // var
+    Color cardColor = Colors.blueGrey.withOpacity(0.2);
+
     // widgets
     List<Widget> cards =   [ 
       // card : facturación
       CardAnalityc(
         isPremium:true, // siempre es visible su contenido
-        backgroundColor: Colors.blueGrey.shade100.withOpacity(0.7),
+        backgroundColor: cardColor,
         icon:  const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.attach_money_rounded,color: Colors.white,size:14)))),
         titleText: 'Facturación', 
         valueText: transactionsController.getInfoAmountTotalFilter,
-        description: 'Balance total',
-        content: MiniLineChart(prices: transactionsController.getBillingByDateList.reversed.toList(),positionIndex: transactionsController.positionIndex),
+        description: 'Balance total',  
         ), 
       // card : transacciones
       CardAnalityc( 
         isPremium: true, // siempre es visible su contenido
-        backgroundColor: Colors.teal.shade100.withOpacity(0.7),
+        backgroundColor: cardColor,
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.receipt,color: Colors.white,size:14)))),
         titleText: 'Transacciones',
         subtitle: '',
@@ -56,9 +57,8 @@ class _StaticsCardsState extends State<StaticsCards> {
       // card : ganancia 
       CardAnalityc( 
         isPremium: homeController.getIsSubscribedPremium,
-        backgroundColor: Colors.green.shade100.withOpacity(0.7),
-        icon:  const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.show_chart_rounded,color: Colors.white,size:14)))),
-        //content: transactionsController.viewPercentageBarValue(text:'%${transactionsController.getPercentEarningsTotal()}',value: transactionsController.getEarningsTotal,total: transactionsController.getAmountTotalFilter),
+        backgroundColor: cardColor,
+        icon:  const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Color.fromARGB(31, 94, 43, 43),shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.show_chart_rounded,color: Colors.white,size:14)))),
         titleText: 'Ganancia',
         subtitle: '%${transactionsController.getPercentEarningsFilteredTotal()}',
         valueText:  transactionsController.getEarningsTotalFilteredFormat,
@@ -68,9 +68,9 @@ class _StaticsCardsState extends State<StaticsCards> {
       !transactionsController.getMostSelledProducts.isNotEmpty ?Container():
       CardAnalityc( 
         isPremium: homeController.getIsSubscribedPremium,
-        backgroundColor: Colors.blue.shade100.withOpacity(0.7),
+        backgroundColor: cardColor,
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.category_rounded,color: Colors.white,size:14)))),
-        titleText: 'Productos vendidos', 
+        titleText: 'Productos', 
         subtitle: 'Total',
         valueText: Publications.getFormatAmount(value:transactionsController.readTotalProducts ),
         description: 'Mejor vendido con ${Publications.getFormatAmount(value:  transactionsController.getMostSelledProducts[0].quantity )} ventas', 
@@ -84,7 +84,7 @@ class _StaticsCardsState extends State<StaticsCards> {
               ImageProductAvatarApp(size: 24,url: transactionsController.getMostSelledProducts[0].image),
               const SizedBox(width: 5),
               // text : nombre
-              Flexible(child: Text(transactionsController.getMostSelledProducts[0].description,style: const TextStyle(fontSize: 12,fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines: 1)),
+              Flexible(child: Text(transactionsController.getMostSelledProducts[0].description==''?'Desconocido':transactionsController.getMostSelledProducts[0].description,style: const TextStyle(fontSize: 12,fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines: 1)),
             ],
           ),
         ),
@@ -92,17 +92,16 @@ class _StaticsCardsState extends State<StaticsCards> {
       // card : clientes
       CardAnalityc( 
         isPremium: homeController.getIsSubscribedPremium,
-        backgroundColor: Colors.orangeAccent.shade100.withOpacity(0.7),
+        backgroundColor: cardColor,
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.payment_rounded,color: Colors.white,size:14)))),
         content: transactionsController.viewPercentageBarCharTextDataHorizontal(chartData:  transactionsController.getAnalyticsMeansOfPayment.entries.toList()),
-        titleText: 'Medio de pago', 
-        //description:'${transactionsController.getPreferredPaymentMethod()['name']} más usado',
+        titleText: 'Medio de pago',  
         modalContent: PaymentMethodView(),
         ),
       // card : rentabilidad
       CardAnalityc( 
         isPremium: homeController.getIsSubscribedPremium,
-        backgroundColor: Colors.cyan.shade100.withOpacity(0.7),
+        backgroundColor: cardColor,
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.query_stats_rounded,color: Colors.white,size:14)))),
         titleText: 'Rentabilidad',
         modalContent: ProfitabilityProductsView(),
@@ -131,8 +130,8 @@ class _StaticsCardsState extends State<StaticsCards> {
             ],
           ),
         ),
-        valueText: '${transactionsController.getBestSellingProductWithHighestProfit.isNotEmpty?transactionsController.getBestSellingProductWithHighestProfit[0].quantity:''} ventas',
-        description: 'Ganancias ${transactionsController.getBestSellingProductWithHighestProfit.isNotEmpty?Publications.getFormatoPrecio(monto: transactionsController.getBestSellingProductWithHighestProfit[0].revenue ):'Sin datos'}',
+        valueText: transactionsController.getBestSellingProductWithHighestProfit.isNotEmpty? '${transactionsController.getBestSellingProductWithHighestProfit[0].quantity} Ventas': 'Sin datos',
+        description: 'Ganancias ${transactionsController.getBestSellingProductWithHighestProfit.isNotEmpty?Publications.getFormatoPrecio(value: transactionsController.getBestSellingProductWithHighestProfit[0].revenue ):'Sin datos'}',
         ), 
     ]; 
     // description : añadimos las tarjetas de las cajas si es que existen
@@ -141,12 +140,12 @@ class _StaticsCardsState extends State<StaticsCards> {
       // add : agregamos las tarjetas de las cajas en una posicion especifica
       cards.insert(2,CardAnalityc( 
         isPremium: homeController.getIsSubscribedPremium,
-        backgroundColor: Colors.grey.shade400.withOpacity(0.7),
+        backgroundColor: cardColor,
         icon: const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Colors.black12,shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.point_of_sale_sharp,color: Colors.white,size:14)))),
         titleText: 'Caja ${value['name']}',
         subtitle: 'Facturación',
         modalContent: CashRegisterView(cashRegister: value['object']),
-        valueText: Publications.getFormatoPrecio(monto: value['total'] ), 
+        valueText: Publications.getFormatoPrecio(value: value['total'] ), 
         description: 'Transacciones: ${value['sales'].toString()}',
         ));
     }); 
@@ -226,10 +225,7 @@ class CardAnalityc extends StatelessWidget {
               );
               
             },
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: viewContent,
-            ),
+            child: viewContent,
           ),
         ),
       ),
@@ -240,61 +236,65 @@ class CardAnalityc extends StatelessWidget {
 
 
 
-    // style  
+    // style   
     TextStyle subtitleStyle = const TextStyle(fontSize: 18,fontWeight: FontWeight.w300);
     TextStyle valueTextStyle = TextStyle(fontSize: description=='' && subtitle==''? 30: 24, fontWeight: FontWeight.w500,overflow: TextOverflow.ellipsis);
     TextStyle descriptionStyle = const TextStyle(fontSize: 12);  
+    Color? buttonColor = Get.isDarkMode?Colors.white70:Colors.grey.shade700;
 
     return Stack(
+      fit: StackFit.expand,
       children: [
         // view : contenedor de informacion estadisticos 
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [  
-            const Spacer(), 
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [ 
-                content,
-                subtitle==''?Container(): Flexible(child: Opacity(opacity: 0.7, child: Text(subtitle,style: subtitleStyle))),
-                valueText==''?Container():Flexible(child: Text(valueText,maxLines:2, textAlign: TextAlign.start, style: valueTextStyle)),
-                description==''?Container():Flexible(child: Opacity(opacity: 0.7, child: Text(description, style: descriptionStyle))),
-                Row(   
-                  children: [
-                    Flexible(
-                      fit: FlexFit.tight,
-                      child: widgetDescription),
-                      // condition : si ruta esta vacio no muesta el icono de ver mas informacion
-                    modalContent is SizedBox ?Container():const Padding(
-                      padding: EdgeInsets.only(left: 8),
-                      child: Opacity(opacity: 0.2,child: Icon(Icons.expand_circle_down_sharp,size: 24)),
-                    ),
-                  ],
+        ImageFiltered(
+          enabled: !isPremium,
+            imageFilter: ImageFilter.blur(sigmaX:4,sigmaY:4,tileMode: TileMode.decal),
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [  
+                      const Spacer(), 
+                      Column(
+                        mainAxisSize: MainAxisSize.min, 
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [ 
+                          content,
+                          subtitle==''?Container(): Flexible(child: Opacity(opacity: 0.7, child: Text(subtitle,style: subtitleStyle))),
+                          valueText==''?Container():Flexible(child: Text(valueText,maxLines:2, textAlign: TextAlign.start, style: valueTextStyle)),
+                          description==''?Container():Flexible(child: Opacity(opacity: 0.7, child: Text(description, style: descriptionStyle))),
+                          widgetDescription,
+                        ],
+                      ),
+                    ],
+                    
+                  ),
+                ),
+                // position : posiciona en la parte inferior izquiedo
+                Positioned(
+                  bottom: 8,
+                  right: 8,
+                  child: modalContent is SizedBox ?Container(): Padding(padding: const EdgeInsets.only(left: 8),child: CircleAvatar(backgroundColor: Colors.black26,maxRadius: 14,child: Icon(Icons.expand_circle_down_sharp,size: 24,color:buttonColor),) ),
                 ),
               ],
             ),
-          ],
-        ), 
-        // condition : si es premium desenfoca el contenido
-        isPremium?Container(): 
-          BackdropFilter(
-          filter: ImageFilter.blur(sigmaX:5, sigmaY:5),
-          // view :  texto y icon version premium  
-          child: Center(child: LogoPremium(personalize: true,id: 'analytic')),
+          ), 
+          // view : logo de premium
+          isPremium?Container():Center(child: LogoPremium(personalize: true,id: 'analytic')),
+          // position : posicionar en la parte superior  al inicio  de lado izquierdo
+          Positioned(
+            top:12,
+            left:12,
+            child: Row( 
+            children: [
+              icon,
+              Text(titleText,style: const TextStyle(fontWeight: FontWeight.w400),overflow:  TextOverflow.ellipsis)
+            ],
           ),
-        // position : posicionar en la parte superior  al inicio  de lado izquierdo
-        Positioned(
-          top: 0,
-          left: 0,
-          child: Row( 
-          children: [
-            icon,
-            Text(titleText,style: const TextStyle(fontWeight: FontWeight.w400),overflow:  TextOverflow.ellipsis)
-          ],
-        ),
-        ),  
-      ],
+          ),   
+        ],
     );
   }
 }
@@ -344,55 +344,59 @@ class SoldProductsView extends StatelessWidget {
   );
   // widget : obtener un maximo de productos vendidos`
   Widget get bestSellingProduct { 
-    // obtener un maximo de 3 producto de transactionsController.getBestSellingProductList
+    // var
     List<Widget> list = [];
+    // obtenemos la informacion de los productos
     for (var i = 0; i < transactionsController.getMostSelledProducts.length; i++) {
-      if(i<5){
-        list.add(
-          Padding(
-            padding: const EdgeInsets.only(top: 5,bottom: 5),
-            child: Column(
-              children: [
-                // view : item del producto
-                Row(
-                  children: [ 
-                    // imagen del producto
-                    ImageProductAvatarApp(size: 35,url:transactionsController.getMostSelledProducts[i].image),
-                    const SizedBox(width:8),
-                    // text : nombre
-                    Flexible(
-                      fit: FlexFit.tight,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(transactionsController.getMostSelledProducts[i].description,textAlign: TextAlign.center,style: const TextStyle(fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1),
-                          // text : codigo
-                          const SizedBox(width:2),
-                          Text(transactionsController.getMostSelledProducts[i].code,textAlign: TextAlign.center,style: const TextStyle(fontSize: 10,fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1),
-                        ],
-                      ),
+      list.add(
+        Padding(
+          padding: const EdgeInsets.only(top: 5,bottom: 5),
+          child: Column(
+            children: [
+              // view : item del producto
+              Row(
+                children: [ 
+                  // imagen del producto
+                  ImageProductAvatarApp(size: 35,url:transactionsController.getMostSelledProducts[i].image),
+                  const SizedBox(width:8),
+                  // text : nombre
+                  Flexible(
+                    fit: FlexFit.tight,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(transactionsController.getMostSelledProducts[i].description,textAlign: TextAlign.center,style: const TextStyle(fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1),
+                        // text : codigo
+                        const SizedBox(width:2),
+                        Text(transactionsController.getMostSelledProducts[i].code,textAlign: TextAlign.center,style: const TextStyle(fontSize: 10,fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1),
+                      ],
                     ),
-                    const Spacer(),
-                    // text : cantidad
-                    Text('x${transactionsController.getMostSelledProducts[i].quantity.toString()}',style: const TextStyle(fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: ComponentApp().divider(),
-                ),
-              ],
-            ),
+                  ), 
+                  const SizedBox(width:50),
+                  // text : cantidad
+                  Container( 
+                    // circular
+                    decoration: BoxDecoration(
+                      color: Colors.black12,
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    padding:  const EdgeInsets.symmetric(horizontal: 5,vertical: 2),
+                    child: Text(transactionsController.getMostSelledProducts[i].quantity.toString(),style: const TextStyle(fontWeight: FontWeight.bold))),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: ComponentApp().divider(),
+              ),
+            ],
           ),
-        );
-      }
+        ),
+      );
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [ 
-        Text( list.length==1?'El más vendido':'Los ${list.length} más vendidos por cantidad',style: const TextStyle( fontWeight: FontWeight.w300)),
-        const SizedBox(height: 12),
+      children: [  
         ...list,
       ],
     );
@@ -419,7 +423,8 @@ class ProfitabilityProductsView extends StatelessWidget {
     title: const Text('Rentabilidad'), 
   );
   // body 
-  Widget get body => Padding(
+  
+  Widget get body => transactionsController.getBestSellingProductWithHighestProfit.isEmpty? const Center(child: Text('Sin datos de ganancias')): Padding(
     padding: const EdgeInsets.all(12.0),
     // scrollview : para que se pueda desplazar el contenido 
     child: SingleChildScrollView(
@@ -437,78 +442,76 @@ class ProfitabilityProductsView extends StatelessWidget {
       double revenue = transactionsController.getBestSellingProductWithHighestProfit[i].revenue;
       double priceTotal = transactionsController.getBestSellingProductWithHighestProfit[i].salePrice*transactionsController.getBestSellingProductWithHighestProfit[i].quantity;
       int percentage = ((revenue/priceTotal)*100).round();
-      // condition  : mostramos 4 productos
-      if(i<5){
-        list.add(
-          Padding(
-            padding: const EdgeInsets.only(top: 5,bottom: 5),
-            child: Column(
-              children: [
-                Row(
-                  children: [ 
-                    // imagen del producto
-                    ImageProductAvatarApp(size: 35,url:transactionsController.getBestSellingProductWithHighestProfit[i].image),
-                    const SizedBox(width:8),
-                    // text : nombre
-                    Flexible(
-                      fit: FlexFit.tight,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(transactionsController.getBestSellingProductWithHighestProfit[i].description,textAlign: TextAlign.center,style: const TextStyle(fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1),
-                          // text : codigo
-                          const SizedBox(width:2),
-                          Text(transactionsController.getBestSellingProductWithHighestProfit[i].code,textAlign: TextAlign.center,style: const TextStyle(fontSize: 10,fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1),
-                        ],
-                      ),
-                    ),
-                    const Spacer(),
-                    // view : monto total y ganancia
-                    Column(
-                      mainAxisAlignment:  MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.end,
+      // agregamos el item a la lista
+      list.add(
+        Padding(
+          padding: const EdgeInsets.only(top: 5,bottom: 5),
+          child: Column(
+            children: [
+              Row(
+                children: [ 
+                  // imagen del producto
+                  ImageProductAvatarApp(size: 35,url:transactionsController.getBestSellingProductWithHighestProfit[i].image),
+                  const SizedBox(width:8),
+                  // text : nombre
+                  Flexible(
+                    fit: FlexFit.tight,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // text : cantidad y monto total
-                        Text('x${transactionsController.getBestSellingProductWithHighestProfit[i].quantity} ${Publications.getFormatoPrecio(monto: priceTotal)}',style: const TextStyle(fontWeight: FontWeight.bold)),
-                        // view : en un row el monto total de la ganancia y el porcentaje de ganancia de color verde
-                        revenue==0?Container():Row(
-                          mainAxisAlignment:  MainAxisAlignment.end,
-
-                          children: [
-                            // text : monto total de la ganancia
-                            Text(Publications.getFormatoPrecio(monto: revenue),style: const TextStyle(fontWeight: FontWeight.bold,color: Colors.green)),
-                            const SizedBox(width: 5),
-                            // text : porcentaje de ganancia
-                            Row(
-                              children: [
-                                const Icon(Icons.arrow_outward_rounded,size: 14,color: Colors.green),
-                                const SizedBox(width: 2),
-                                Text('%$percentage',style: const TextStyle(fontWeight: FontWeight.bold,color: Colors.green)),
-                              ],
-                            ),
-                            
-                          ],
-                        ),
+                        Text(transactionsController.getBestSellingProductWithHighestProfit[i].description,textAlign: TextAlign.center,style: const TextStyle(fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1),
+                        // text : codigo
+                        const SizedBox(width:2),
+                        Text(transactionsController.getBestSellingProductWithHighestProfit[i].code,textAlign: TextAlign.center,style: const TextStyle(fontSize: 10,fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1),
                       ],
                     ),
-                    
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: ComponentApp().divider(),
-                ),
-              ],
-            ),
+                  ),
+                  const Spacer(),
+                  // view : monto total y ganancia
+                  Column(
+                    mainAxisAlignment:  MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      // text : cantidad y monto total
+                      Text('x${transactionsController.getBestSellingProductWithHighestProfit[i].quantity} ${Publications.getFormatoPrecio(value: priceTotal)}',style: const TextStyle(fontWeight: FontWeight.bold)),
+                      // view : en un row el monto total de la ganancia y el porcentaje de ganancia de color verde
+                      revenue==0?Container():Row(
+                        mainAxisAlignment:  MainAxisAlignment.end,
+
+                        children: [
+                          // text : monto total de la ganancia
+                          Text(Publications.getFormatoPrecio(value: revenue),style: const TextStyle(fontWeight: FontWeight.bold,color: Colors.green)),
+                          const SizedBox(width: 5),
+                          // text : porcentaje de ganancia
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.green.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal:3,vertical:1),
+                            child: Text('%$percentage',style: const TextStyle(fontWeight: FontWeight.bold,color: Colors.green))),
+                          
+                        ],
+                      ),
+                    ],
+                  ),
+                  
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: ComponentApp().divider(),
+              ),
+            ],
           ),
-        );
-      }
+        ),
+      );
     }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [  
-        Text(list.length==1?'Con mayor beneficio':'Los ${list.length} productos con mayor ganancia',style: const TextStyle( fontWeight: FontWeight.w300)),
+      children: [   
         const SizedBox(height: 12),
         ...list,
       ],
@@ -565,7 +568,7 @@ class PaymentMethodView extends StatelessWidget {
       // converit chartData en una nuevo Map
       List<Map> map = [];
       for (var item in chartData) {
-        map.add({'name':transactionsController.getPayMode(idMode: item.key)['name'],'value':item.value,'priceTotal':Publications.getFormatoPrecio(monto: item.value),'color':transactionsController.getPayMode(idMode: item.key)['color']});
+        map.add({'name':transactionsController.getPayMode(idMode: item.key)['name'],'value':item.value,'priceTotal':Publications.getFormatoPrecio(value: item.value),'color':transactionsController.getPayMode(idMode: item.key)['color'],'iconData':transactionsController.getPayMode(idMode: item.key)['iconData']});
       } 
       
       // var
@@ -584,12 +587,25 @@ class PaymentMethodView extends StatelessWidget {
       for (var i = 0; i < chartData.length; i++) {
         map[i]['porcent'] = listPorcent[i];
       }
+
+      // determinar el index que mayor valor tiene
+      int indexMax = 0;
+      for (var i = 0; i < map.length; i++) {
+        if(map[i]['porcent'] > map[indexMax]['porcent']) indexMax = i;
+      }
   
 
       return ListView( 
         physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
         children: List.generate(chartData.length, (index) {
+
+          // var 
+          height = indexMax == index ? height+6 : height;
+          Widget icon = map[index]['iconData']!=null?Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 5),
+            child: Icon(map[index]['iconData'],color: Colors.white),
+          ):Container();
 
           // obtener el porcentaje formateado  redondeado sin reciduo
           String porcent = map[index]['porcent'] % 1 == 0 ? '${map[index]['porcent'].round()}%' : '${map[index]['porcent']}%';
@@ -615,10 +631,12 @@ class PaymentMethodView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // text : nombre del medio de pago
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 5.0,vertical:5),
                   child: Text(map[index]['name'] ,style: textStyle,overflow: TextOverflow.ellipsis),
                 ),
+                // view :  datos de porcentaje y monto total
                 Stack(  
                   alignment: Alignment.centerLeft, // centrar contenido
                   children: [
@@ -626,7 +644,14 @@ class PaymentMethodView extends StatelessWidget {
                     percentageBar,
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                      child: Text( '$porcent $priceTotal',style: textStyle.copyWith(color: Colors.white),overflow: TextOverflow.ellipsis),
+                      child: Row(
+                        children: [
+                          // icon : icono de medio de pago si es que existe
+                          icon,
+                          // text : porcentaje y monto total
+                          Text( '$porcent $priceTotal',style: textStyle.copyWith(color: Colors.white),overflow: TextOverflow.ellipsis),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -713,7 +738,7 @@ class CashRegisterView extends StatelessWidget {
                 const Text('Efectivo inicial:'),
                 const Spacer(),
                 // text : monto de efectivo inicial
-                Text(Publications.getFormatoPrecio(monto: cashRegister.initialCash),style: const TextStyle(fontWeight: FontWeight.w300)),
+                Text(Publications.getFormatoPrecio(value: cashRegister.initialCash),style: const TextStyle(fontWeight: FontWeight.w300)),
 
               ],
             ),    
@@ -725,7 +750,7 @@ class CashRegisterView extends StatelessWidget {
                 const Text('Ingresos:'),
                 const Spacer(),
                 // text : cantidad de Ingresos
-                Text(Publications.getFormatoPrecio(monto: cashRegister.cashInFlow),style: const TextStyle(fontWeight: FontWeight.w300, color: Colors.green)),
+                Text(Publications.getFormatoPrecio(value: cashRegister.cashInFlow),style: const TextStyle(fontWeight: FontWeight.w300, color: Colors.green)),
 
               ],
             ), 
@@ -738,7 +763,7 @@ class CashRegisterView extends StatelessWidget {
                 const Text('Egresos:'),
                 const Spacer(),
                 // text : cantidad de Egresos
-                Text(Publications.getFormatoPrecio(monto: cashRegister.cashOutFlow),style: const TextStyle(fontWeight: FontWeight.w300, color: Colors.red)),
+                Text(Publications.getFormatoPrecio(value: cashRegister.cashOutFlow),style: const TextStyle(fontWeight: FontWeight.w300, color: Colors.red)),
 
               ],
             ), 
@@ -762,7 +787,7 @@ class CashRegisterView extends StatelessWidget {
                 const Text('Facturación:'),
                 const Spacer(),
                 // text : monto de facturación total
-                Text(Publications.getFormatoPrecio(monto: cashRegister.billing),style: const TextStyle(fontWeight: FontWeight.w300)),
+                Text(Publications.getFormatoPrecio(value: cashRegister.billing),style: const TextStyle(fontWeight: FontWeight.w300)),
 
               ],
             ),
@@ -774,7 +799,7 @@ class CashRegisterView extends StatelessWidget {
                 const Text('Descuentos:'),
                 const Spacer(),
                 // text : monto de descuentos
-                Text(Publications.getFormatoPrecio(monto: cashRegister.discount),style: const TextStyle(fontWeight: FontWeight.w300)),
+                Text(Publications.getFormatoPrecio(value: cashRegister.discount),style: const TextStyle(fontWeight: FontWeight.w300)),
 
               ],
             ),
@@ -786,7 +811,7 @@ class CashRegisterView extends StatelessWidget {
                 const Text('Balance esperado en la caja:'),
                 const Spacer(),
                 // text : monto de Balance esperado en la caja
-                Text(Publications.getFormatoPrecio(monto: cashRegister.getExpectedBalance),style: const TextStyle(fontWeight: FontWeight.w500,fontSize: 18)),
+                Text(Publications.getFormatoPrecio(value: cashRegister.getExpectedBalance),style: const TextStyle(fontWeight: FontWeight.w500,fontSize: 18)),
 
               ],
             ),
@@ -801,97 +826,3 @@ class CashRegisterView extends StatelessWidget {
   }
 }
 
-
-
-
-
-
-
-
-
-
-// ignore: must_be_immutable
-class MiniLineChart extends StatelessWidget {
-
-  List<double> prices=[];
-  int positionIndex=0;
-  
-  MiniLineChart({Key? key,required this.prices,this.positionIndex=0}) : super(key: key);
- 
-
-  @override
-  Widget build(BuildContext context) {
-
-    if(prices.isEmpty) return Container();
- 
-    return SizedBox(
-      height: 30,
-      width: double.infinity,
-      child: LineChart(
-        LineChartData(
-          
-
-          lineTouchData: LineTouchData(  
-            handleBuiltInTouches: true,
-            touchTooltipData: LineTouchTooltipData(  
-              getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
-                return touchedBarSpots.map((barSpot) {
-                  final flSpot = barSpot; 
-                  return LineTooltipItem(
-                    formatValue(flSpot.y),
-                    const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                  );
-                }).toList();
-              },
-
-            ),
-          ),
-          lineBarsData: [
-            LineChartBarData(  
-              spots: [
-                for (int i = 0; i < prices.length; i++)
-                  FlSpot(i.toDouble(), prices[i]),
-              ], 
-              isCurved: true,
-              color:Colors.blue,
-              barWidth: 2,
-              dotData: FlDotData(
-                show: true,
-                getDotPainter: (spot, percent, barData, index) {
-                  return FlDotCirclePainter(
-                    radius: index==0?4: index == positionIndex ? 6 : 4,
-                    color:Colors.blue,
-                    strokeColor: Colors.white ,
-                    strokeWidth: index==0?0: index == positionIndex ? 1 : 0,
-                  );
-                },
-        ),  
-            ),
-            
-            
-          ],
-          gridData: const FlGridData(
-            show: false,
-          ),
-          borderData: FlBorderData(
-            show: false,
-          ),
-          titlesData: const FlTitlesData(
-            show: false,
-          ),
-        ),
-        
-      ),
-    );
-  }
-
-  String formatValue(double value) {
-  if (value >= 1000) {
-    return '${value /1000}';
-  } else {
-    return value.toStringAsFixed(0);
-  }
-} 
-
-
-}

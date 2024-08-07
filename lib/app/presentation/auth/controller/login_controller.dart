@@ -25,7 +25,7 @@ class LoginController extends GetxController {
       stateCheckAcceptPrivacyAndUsePolicy.value;
   set setStateCheckAcceptPrivacyAndUsePolicy(bool value) {
     if(value){checkPolicyAlertColor.value = Colors.transparent;}
-    else {checkPolicyAlertColor.value = Colors.orange.shade100.withOpacity(0.5);}
+    else {checkPolicyAlertColor.value = Colors.orange.shade100.withOpacity(0.3);}
     stateCheckAcceptPrivacyAndUsePolicy.value = value;  
   }
 
@@ -64,7 +64,7 @@ class LoginController extends GetxController {
       Get.snackbar(
           'Primero tienes que leer nuestras políticas y términos de uso 🙂',
           'Tienes que aceptar nuestros términos de uso y política de privacidad para usar esta aplicación');
-      checkPolicyAlertColor.value = Colors.red.shade100.withOpacity(0.5); 
+      checkPolicyAlertColor.value = Colors.red.shade100.withOpacity(0.7); 
     }
   } 
   void signInAnonymously() async { 
@@ -94,14 +94,13 @@ class LoginController extends GetxController {
 class CustomFullScreenDialog {
   static void showDialog() {
     Get.dialog(
-      WillPopScope(
-        child: const Center(
+      const PopScope(
+        canPop: false,
+        child: Center(
           child: CircularProgressIndicator(
             valueColor: AlwaysStoppedAnimation(Colors.yellowAccent),
           ),
-        ),
-        // onWillPop - Se llama cada ves que el usuario intenta descartar el ModalRoute adjunta
-        onWillPop: () => Future.value(false),
+        ), // deshabilitar el botón de retroceso del dispositivo
       ),
       barrierDismissible: false,
       barrierColor: const Color(0xff141A31).withOpacity(.3),

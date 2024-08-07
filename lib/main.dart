@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
+import 'package:get_storage/get_storage.dart'; 
 import 'package:intl/date_symbol_data_local.dart'; 
 import 'app/core/routes/app_pages.dart';
 import 'app/core/utils/dynamicTheme_lb.dart';
@@ -22,13 +22,12 @@ Future<void> main() async {
     await Firebase.initializeApp(options: firebaseConfig);
   } else {
     // disposition android
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(); // 
 
     // RevenueCat : subcripcion 
-    await Purchases.setLogLevel(LogLevel.debug); // debug : para ver los errores en la consola
-    PurchasesConfiguration configuration = PurchasesConfiguration(googleApiKey)..observerMode = false;
-    await Purchases.configure(configuration); // configuramos la compra
-  }
+    //await Purchases.setLogLevel(LogLevel.debug); // debug : para ver los errores en la consola 
+    await Purchases.configure(PurchasesConfiguration(googleApiKey)); // configuramos la compra
+  }  
   // GetStorage : local storage
   await GetStorage.init(); 
   SplashBinding().dependencies(); 
@@ -46,13 +45,14 @@ Future<void> main() async {
 
   initializeDateFormatting('es', null).then((_){
     runApp(GetMaterialApp(
-      title: "Punto de Venta",
+      title: "Gestiona tus ventas", // ...
       initialRoute: AppPages.INITIAL,
       getPages: AppPages.routes,
       debugShowCheckedModeBanner: false,
       themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
       theme: ThemesDataApp().themeData,
       darkTheme: ThemesDataApp().themeDataDark,
+
       )
     );
   });

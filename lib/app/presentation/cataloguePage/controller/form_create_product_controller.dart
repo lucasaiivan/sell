@@ -12,12 +12,14 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:search_page/search_page.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart'; 
 import '../../../core/utils/fuctions.dart';
 import '../../../core/utils/widgets_utils.dart';
 import '../../../data/datasource/database_cloud.dart';
 import '../../../domain/entities/catalogo_model.dart';
-import '../../home/controller/home_controller.dart'; 
+import '../../home/controller/home_controller.dart';
+import '../../moderator/controller/moderator_controller.dart'; 
 
 class ControllerCreateProductForm extends GetxController{
 
@@ -281,6 +283,13 @@ class ControllerCreateProductForm extends GetxController{
     setProduct = Get.arguments['product']?? ProductCatalogue(creation: Timestamp.now(), upgrade: Timestamp.now(), documentCreation: Timestamp.now(), documentUpgrade: Timestamp.now());
   } 
   @override
+  void onReady() {
+    super.onReady();
+    if(getProduct.local){
+      carouselController.animateToPage(1);
+    }
+  }
+  @override
   void onClose() {
     super.onClose();
 
@@ -294,9 +303,9 @@ class ControllerCreateProductForm extends GetxController{
     controllerTextEditPrecioVenta.dispose();
     controllerTextEditQuantityStock.dispose();
   } 
-  // TODO : la subcripción por defecto es true
+  // TODO : release : la subcripción por defecto es [homeController.getProfileAccountSelected.subscribed;]
   // get 
-  bool get isSubscribed => true;//homeController.getProfileAccountSelected.subscribed;
+  bool get isSubscribed =>  homeController.getProfileAccountSelected.subscribed;
 
   //
   // FUNCTIONS
@@ -341,14 +350,14 @@ class ControllerCreateProductForm extends GetxController{
       _onBackPressed = !_onBackPressed;
       return false;
     }
-
-    if(getCurrentSlide!=0){
+    // condition : si el slide actual es distinto de 0
+    if( getCurrentSlide !=0 && getProduct.local == false || getCurrentSlide !=1 && getProduct.local == true){
       previousPage();
       return false;
-    }
+    } 
 
-    //  si _onBackPressed es true se puede salir de la app
-    if(getCurrentSlide==0){
+    //  si _onBackPressed es true se puede salir 
+    if( getCurrentSlide==0 && getProduct.local==false || (getProduct.local && getCurrentSlide==1)){
       final  shouldPop = await showDialog<bool>(
           context: context,
           builder: (context) {
@@ -372,7 +381,7 @@ class ControllerCreateProductForm extends GetxController{
           },
         );
         return shouldPop!;
-        }
+    }
     return true;
         
   } 
@@ -391,7 +400,7 @@ class ControllerCreateProductForm extends GetxController{
               updateAll();
 
               // set : values
-              getProduct.description = Utils().capitalize(controllerTextEditDescripcion.text); // controllerTextEditDescripcion.text;
+              getProduct.description = Utils().capitalizeString(controllerTextEditDescripcion.text); // controllerTextEditDescripcion.text;
               getProduct.upgrade = Timestamp.now();
               getProduct.idMark = getMarkSelected.id;
               getProduct.nameMark = getMarkSelected.name;
@@ -406,11 +415,11 @@ class ControllerCreateProductForm extends GetxController{
               getProduct.nameCategory = getCategory.name;
               if(controllerTextEditAlertStock.text!=''){getProduct.alertStock  = int.parse( controllerTextEditAlertStock.text );}
 
-              // TODO : DELETE RELEASE
-              getProduct.verified = true; 
+              // TODO : DISABLE RELEASE
+              //getProduct.verified = getProduct.local ? false : true; 
 
               // actualización de la imagen del producto
-              if (getXFileImage.path != '') {
+              if (getXFileImage.path != '') { 
                 // image - Si el "path" es distinto '' quiere decir que ahi una nueva imagen para actualizar
                 // si es asi procede a guardar la imagen en la base de la app
                 Reference ref = Database.referenceStorageProductPublic(id: getProduct.id); // obtenemos la referencia en el storage
@@ -418,31 +427,37 @@ class ControllerCreateProductForm extends GetxController{
                 await uploadTask; // esperamos a que se suba la imagen 
                 await ref.getDownloadURL().then((value) => getProduct.image = value); // obtenemos la url de la imagen
               }
-              // procede agregrar el producto en una colección publica
-              setProductPublicFirestore();
-              
-              // Registra el precio en una colección publica
-              ProductPrice precio = ProductPrice(
-                id: homeController.getProfileAccountSelected.id,
-                idAccount: homeController.getProfileAccountSelected.id,
-                imageAccount: homeController.getProfileAccountSelected.image,
-                nameAccount: homeController.getProfileAccountSelected.name,
-                price: getProduct.salePrice,
-                currencySign: getProduct.currencySign,
-                province: homeController.getProfileAccountSelected.province,
-                town: homeController.getProfileAccountSelected.town,
-                time: Timestamp.fromDate(DateTime.now()),
-              ); 
+              if(getProduct.local == false){
+                // procede agregrar el producto en una colección publica
+                setProductPublicFirestore();
+                
+                // Registra el precio en una colección publica
+                ProductPrice precio = ProductPrice(
+                  id: homeController.getProfileAccountSelected.id,
+                  idAccount: homeController.getProfileAccountSelected.id,
+                  imageAccount: homeController.getProfileAccountSelected.image,
+                  nameAccount: homeController.getProfileAccountSelected.name,
+                  price: getProduct.salePrice,
+                  currencySign: getProduct.currencySign,
+                  province: homeController.getProfileAccountSelected.province,
+                  town: homeController.getProfileAccountSelected.town,
+                  time: Timestamp.fromDate(DateTime.now()),
+                ); 
 
-              // Firebase set : se crea un documento con la referencia del precio del producto
-              Database.refFirestoreRegisterPrice(idProducto: getProduct.id, isoPAis: 'ARG').doc(precio.id).set(precio.toJson());
+                // Firebase set : se crea un documento con la referencia del precio del producto
+                Database.refFirestoreRegisterPrice(idProducto: getProduct.id, isoPAis: 'ARG').doc(precio.id).set(precio.toJson());
+              }
 
               // Firebase set : se crea los datos del producto del cátalogo de la cuenta
-              Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id)
-                .set(getProduct.toJson())
-                .whenComplete(() async {
-                  await Future.delayed(const Duration(seconds: 3)).then((value) {setDataUploadStatus = false; Get.back();Get.back(); });
-              }).onError((error, stackTrace) => setDataUploadStatus = false).catchError((_) => setDataUploadStatus = false);
+              Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(getProduct.id).set(getProduct.toJson()) ;
+
+              // actualiza la lista de productos del cátalogo en la memoria de la app
+              homeController.sincronizeCatalogueProducts(product: getProduct);
+
+              // sleep : espera 3 segundos para que se actualice la vista
+              await Future.delayed(const Duration(milliseconds: 1)).then((value) {
+                setDataUploadStatus = false; Get.back(); 
+              });
 
             } else {
               Get.snackbar(
@@ -471,8 +486,7 @@ class ControllerCreateProductForm extends GetxController{
     // valores
     Product product = getProduct.convertProductoDefault();
     
-    // asignamos los valores de creación
-    product.idAccount = homeController.getProfileAccountSelected.id;
+    // asignamos los valores de creación 
     product.idUserCreation = homeController.getProfileAdminUser.email;
     product.creation = Timestamp.fromDate(DateTime.now());
     //  set : marca de tiempo que se actualizo el documento
@@ -484,6 +498,16 @@ class ControllerCreateProductForm extends GetxController{
     product.followers++;  
     // crear el documento del producto publico
     await Database.refFirestoreProductPublic().doc(product.id).set(product.toJson());
+
+    // condition : verifica si existe el controlador
+    if (Get.isRegistered<ModeratorController>()) {
+      // si accedemos desde la vista de moderador
+      // controllers
+      final ModeratorController controller = Get.find<ModeratorController>(); 
+      // actualizamos el producto modificado
+      controller.updateProducts(product: product);
+    }
+    
   }
   void deleteProductInCatalogue() async{
     // activate indicator load
@@ -711,7 +735,7 @@ class ControllerCreateProductForm extends GetxController{
     // Dialog view :  muestra el dialogo para agregar el porcentaje de ganancia
 
     //var 
-    final ButtonStyle buttonStyle = ButtonStyle(padding: MaterialStateProperty.all(const EdgeInsets.all(12)));
+    final ButtonStyle buttonStyle = ButtonStyle(padding: WidgetStateProperty.all(const EdgeInsets.all(12)));
     final TextEditingController controller = TextEditingController();
 
     // widgets
@@ -878,80 +902,6 @@ class ControllerCreateProductForm extends GetxController{
     update();
   }
 
-  //TODO: eliminar para release
-  // DEVELOPER OPTIONS
-  void showDialogDeleteOPTDeveloper() {
-    Get.dialog(AlertDialog(
-      title: const Text(
-          "¿Seguro que quieres eliminar este documento definitivamente? (Mods)"),
-      content: const Text(
-          "El producto será eliminado de tu catálogo ,de la base de dato global y toda la información acumulada menos el historial de precios registrado"),
-      actions: <Widget>[
-        // usually buttons at the bottom of the dialog
-        TextButton(
-          child: const Text("Cancelar"),
-          onPressed: () => Get.back(),
-        ),
-        TextButton(
-          child: const Text("Borrar"),
-          onPressed: () {
-            Get.back();
-            deleteProducPublic();
-          },
-        ),
-      ],
-    ));
-  }
-  void getDataProduct({required String id}) {
-    // function : obtiene los datos del producto de la base de datos y los carga en el formulario de edición 
-    if (id != '') {
-      Database.readProductPublicFuture(id: id).then((value) {
-        //  get
-        Product product = Product.fromMap(value.data() as Map);
-        //  set
-        setProduct = getProduct.updateData(product: product);
-        setDataUploadStatusProduct = true;
-        loadDataFormProduct(); // carga los datos del producto en el formulario
-        
-      }).catchError((error) {
-        printError(info: error.toString());
-        setDataUploadStatus = false;
-      }).onError((error, stackTrace) {
-        loadDataFormProduct();
-        printError(info: error.toString()); 
-      });
-    }
-  }
-  void increaseFollowersProductPublic() {
-    // function : aumenta el valor de los seguidores del producto publico
-    Database.refFirestoreProductPublic().doc(getProduct.id).update({'followers': FieldValue.increment(1)});
-    // actualizamos el valor de los seguidores del producto
-    getProduct.followers++;
-    update();
-  }
-  void showDialogSaveOPTDeveloper() {
-    Get.dialog(AlertDialog(
-      title:
-          const Text("¿Seguro que quieres actualizar este docuemnto? (Mods)"),
-      content: const Text(
-          "El producto será actualizado de tu catálogo ,de la base de dato global y toda la información acumulada menos el historial de precios registrado"),
-      actions: <Widget>[
-        // usually buttons at the bottom of the dialog
-        TextButton(
-          child: const Text("Cancelar"),
-          onPressed: () => Get.back(),
-        ),
-        TextButton(
-          child: const Text("Si, actualizar"),
-          onPressed: () {
-            Get.back();
-            save(); // save product
-          },
-        ),
-      ],
-    ));
-  }
-
 }
 
 // select mark
@@ -968,6 +918,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
   ControllerCreateProductForm controllerProductNew = Get.find();
   //  var
   List<Mark> list = [];
+  bool viewListState = false;
 
   @override
   void initState() {
@@ -991,47 +942,59 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
       appBar: AppBar(
         title: const Text('Marcas'),
         actions: [
-          // TODO : delete icon 'add new mark for release'
-          IconButton(onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},icon: const Icon(Icons.add)),
+          // TODO : release : delete icon 'add new mark for release'
+          // icon : agregar nueva marca ( solo para moderadores)
+          //IconButton(onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},icon: const Icon(Icons.add)),
+          // icon : cambiar de vista
+          IconButton(icon: Icon( viewListState? Icons.grid_view_rounded:Icons.table_rows_rounded),onPressed: () { 
+            setState(() {
+              viewListState = !viewListState;
+            });
+          }),
+          // icon : buscar marca
           IconButton(icon: const Icon(Icons.search),onPressed: () {Get.back();showSeachMarks();})
         ],
       ),
-      body: list.isEmpty
-          ? widgetAnimLoad()
-          : ListView.builder(
-              padding: const EdgeInsets.only(bottom: 12),
-              shrinkWrap: true,
-              itemCount: list.length,
-              itemBuilder: (BuildContext context, int index) {
-
-                //  values
-                Mark marcaSelect = list[index];
-
-                if (index == 0) {
-                  return Column(
-                    children: [
-                      getWidgetOptionOther(),
-                      ComponentApp().divider(),
-                      controllerProductNew.getUltimateSelectionMark.id == '' || controllerProductNew.getUltimateSelectionMark.id == 'other'? Container() : listTile( marcaSelect: controllerProductNew.getUltimateSelectionMark),
-                      ComponentApp().divider(),
-                      listTile(marcaSelect: marcaSelect),
-                      ComponentApp().divider(),
-                    ],
-                  );
-                }
-                return Column(
-                  children: <Widget>[
-                    listTile(marcaSelect: marcaSelect),
-                    ComponentApp().divider(),
-                  ],
-                );
-              },
-            ),
+      body: list.isEmpty ? widgetAnimLoad : viewListState ? bodyList : bodyGrid,
     );
   }
+  // WIDGETS VIEW 
+  Widget get bodyList {
 
+
+    return ListView.builder(
+      padding: const EdgeInsets.only(bottom: 12),
+      shrinkWrap: true,
+      itemCount: list.length,
+      itemBuilder: (BuildContext context, int index) {
+
+        //  values
+        Mark marcaSelect = list[index]; 
+        return Column(
+          children: <Widget>[
+            itemList(marcaSelect: marcaSelect),
+            ComponentApp().divider(),
+          ],
+        );
+      },
+    );
+  } 
+  Widget get bodyGrid {
+    
+    return GridView.builder(
+      padding: const EdgeInsets.only(bottom: 12),
+      shrinkWrap: true, 
+      itemCount: list.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:4,childAspectRatio: 1),
+      itemBuilder: (BuildContext context, int index) {
+        //  values
+        Mark marcaSelect = list[index]; 
+        return itemGrid(marcaSelect: marcaSelect);
+      },
+    );
+  }
   // WIDGETS
-  Widget widgetAnimLoad() {
+  Widget get widgetAnimLoad {
     return Center(
         child: ListView(
       children: [
@@ -1086,22 +1049,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
       ],
     ));
   }
-
-  Widget getWidgetOptionOther() {
-    //values
-    late Widget widget;
-    // recorre la la de marcas para buscar la informaciób de opción 'other'
-    if (controllerProductNew.getMarks.isEmpty) {
-      widget = Container();
-    } else {
-      for (var element in controllerProductNew.getMarks) {
-        if (element.id == 'other') {
-          widget = listTile(marcaSelect: element);
-        }
-      }
-    }
-    return widget;
-  }
+ 
 
   // WIDGETS COMPONENT
   showSeachMarks(){
@@ -1111,7 +1059,6 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
     // var
     Color colorAccent = Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
 
-     getWidgetOptionOther();
 
     showSearch(
       context: context,
@@ -1121,17 +1068,51 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         items: list,
         searchLabel: 'Buscar marca',
         suggestion: const Center(child: Text('ej. Miller')),
-        failure: const Center(child: Text('No se encontro :(')),
-        filter: (product) => [product.name,product.description],
+        failure: const Center(child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('No se encontro :('),
+            // TODO : release : disable moderador ( crear marca )
+            /* const SizedBox(height: 20),
+            TextButton.icon(
+              onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},
+              icon: const Icon(Icons.add_box_outlined),
+              label: const Text('Crear marca'),
+            ) */
+          ],
+        )),
+        filter: (product) => [Utils.normalizeText(product.name),Utils.normalizeText(product.description)],
         builder: (mark) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[
-          listTile(marcaSelect: mark),
+          itemList(marcaSelect: mark),
           ComponentApp().divider(),
           ]),
       ),
     );
   }
-
-  Widget listTile({required Mark marcaSelect, bool icon = true}) {
+  Widget itemGrid({required Mark marcaSelect}) {
+    return InkWell(
+      onTap: () {
+        controllerProductNew.setUltimateSelectionMark = marcaSelect;
+        controllerProductNew.setMarkSelected = marcaSelect;
+        Get.back();
+      },
+      onLongPress: (){
+        // TODO : release : delete fuction
+        //Get.to(() => CreateMark(mark: marcaSelect));
+      },
+      borderRadius: BorderRadius.circular(5),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ImageProductAvatarApp(url: marcaSelect.image,size: 50,description:marcaSelect.name),
+          const SizedBox(height:2),
+          Text(marcaSelect.name,style: const TextStyle(fontWeight: FontWeight.w400 ),textAlign: TextAlign.center,),
+        ],
+      ),
+    );
+  }
+  Widget itemList({required Mark marcaSelect, bool icon = true}) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       trailing:!icon? null  :marcaSelect.image==''?null: ImageProductAvatarApp(url: marcaSelect.image,size: 50,description:marcaSelect.name),
@@ -1146,8 +1127,8 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         Get.back();
       },
       onLongPress: () {
-        // TODO : delete fuction
-        Get.to(() => CreateMark(mark: marcaSelect));
+        // TODO : release : delete fuction
+        //Get.to(() => CreateMark(mark: marcaSelect));
       },
     );
   }
@@ -1162,19 +1143,39 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
             mark.id = element.id;
             list.add(mark);
           }
+          updateListMarkSelected();
           controllerProductNew.setMarks = list;
         });
       });
     } else {
       // datos ya descargados
       list = controllerProductNew.getMarks;
+      updateListMarkSelected();
       setState(() => list = controllerProductNew.getMarks);
     }
-  }
-  
-}
 
-// TODO : delete release
+  }
+  updateListMarkSelected() {
+    //  description : posicionamos el ultimo item seleccionado por el usuario en el segundo lugar 
+    //                para que el usuario pueda encontrarlo facilmente
+
+    // comprobamos que ahi un item seleccionado
+    if (controllerProductNew.getUltimateSelectionMark.id != '') {
+      // eliminamos el item seleccionado de la lista
+      list.removeWhere((element) => element.id == controllerProductNew.getUltimateSelectionMark.id);
+      // insertamos el item seleccionado en la segunda posicion de la lista
+      list.insert(1, controllerProductNew.getUltimateSelectionMark);
+    }
+
+    // obtenemos el item con la id 'other' de la lista
+    Mark mark = list.firstWhere((element) => element.id == 'other');
+    // eliminamos el item con la id 'other' de la lista
+    list.removeWhere((element) => element.id == 'other');
+    // insertar en la primera posicion de la lista 
+    list.insert(0, mark);
+  }
+}
+ // WIDGETS ( MODERATOR )
 class CreateMark extends StatefulWidget {
   final Mark mark;
   const CreateMark({required this.mark, Key? key}) : super(key: key);
@@ -1288,6 +1289,49 @@ class _CreateMarkState extends State<CreateMark> {
             style: textStyle,
           ),
         ),
+        // view : botones de edicionales
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              // view : buscar en google
+              Row(
+                children: [
+                  // text 
+                  const Text('Buscar en google:'),
+                  const Spacer(),
+                  // button : textButton : buscar en google
+                  TextButton(
+                      onPressed: () async {
+                        String clave = 'logo ${widget.mark.name}';
+                        Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
+                        await launchUrl(uri,mode: LaunchMode.externalApplication);
+                      },
+                      child: const Text('Imagen del logo' )),
+                  // textButton : buscar en google
+                  TextButton(
+                      onPressed: () async {
+                        String clave = 'que industria es la marca ${widget.mark.name}?';
+                        Uri uri = Uri.parse("https://www.google.com/search?q=$clave");
+                        await launchUrl(uri,mode: LaunchMode.externalApplication);
+                      },
+                      child: const Text('Información')),
+                ],
+              ),
+              // buttom : edicion de imagen
+              TextButton(
+                onPressed: () async{
+                  // values
+                  Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.camerasideas.instashot&pcampaignid=web_share');
+                  //  redireccionara para la tienda de aplicaciones
+                  await launchUrl(uri,mode: LaunchMode.externalApplication);
+                },
+                child: const Text('Editar imagen con InstaShot'),
+              ),
+            ],
+          ),
+        ), 
       ],
     );
   }

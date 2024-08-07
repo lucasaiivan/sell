@@ -1,18 +1,16 @@
 
 import 'dart:io';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart'; 
+import 'package:flutter/material.dart'; 
 import 'package:get/get.dart';
-import 'package:url_launcher/url_launcher.dart';
-
+import 'package:url_launcher/url_launcher.dart'; 
 import 'package:sell/app/core/utils/dynamicTheme_lb.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:sell/app/presentation/home/controller/home_controller.dart';
-import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart';
-
+import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart'; 
 import '../../domain/entities/catalogo_model.dart';
-import '../../domain/entities/user_model.dart';
-import '../../presentation/cataloguePage/controller/catalogue_controller.dart';
+import '../../domain/entities/user_model.dart'; 
+import '../../presentation/sellPage/views/sell_view.dart';
 import '../routes/app_pages.dart';
 
 /// Un widget que muestra una imagen
@@ -26,6 +24,7 @@ class ImageBarWidget extends StatelessWidget {
   /// Crea un widget de una imagen de Scan.
   ///
   /// [size] es el tamaño deseado de la imagen en píxeles.
+  // ignore: prefer_const_constructors_in_immutables
   ImageBarWidget({
     Key? key,
     required this.size,
@@ -51,21 +50,22 @@ class ImageBarWidget extends StatelessWidget {
 class ImageIconScanWidget extends StatelessWidget {
   /// Tamaño deseado del icono.
   final double size;
+  final Color? color;
 
   /// Crea un widget de icono de escaneo de código de barras.
   ///
   /// [size] es el tamaño deseado del icono en píxeles.
   const ImageIconScanWidget({
-    Key? key,
-    required this.size,
+    Key? key, 
+    required this.size, this.color,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) { 
     return SizedBox(
       width: size,
       height: size,
-      child: Image.asset('assets/scanbarcode.png',color: Colors.white),
+      child: Image.asset('assets/scanbarcode.png',color: color),
     );
   }
 }
@@ -85,12 +85,12 @@ class WidgetButtonListTile extends StatelessWidget {
   Widget buttonListTileCrearCuenta() {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15.0),
-      trailing: const Icon(Icons.add), 
+      trailing: const Icon(Icons.arrow_forward_ios_rounded), 
       dense: true,
-      title: const Text("Crear mi perfil de mi negocio", style: TextStyle(fontSize: 16.0)),
+      title: const Text("Crear perfil de mi negocio", style: TextStyle(fontSize: 16.0)),
       onTap: () {
-        Get.back();
-        Get.toNamed(Routes.ACCOUNT);
+        Get.back(); 
+        Get.toNamed(Routes.account, arguments: {'create': true});
       },
     );
   }
@@ -101,7 +101,9 @@ class WidgetButtonListTile extends StatelessWidget {
     final HomeController homeController = Get.find();
 
     // var 
-    bool editAccount =  homeController.getProfileAdminUser.editAccount && homeController.getProfileAccountSelected.id == perfilNegocio.id;
+    final bool isSelected =  homeController.getProfileAccountSelected.id == perfilNegocio.id; 
+    final bool isAdmin = homeController.getProfileAdminUser.admin;
+    final bool isSuperAdmin = homeController.getProfileAdminUser.superAdmin;
 
     // condition : si el perfil de negocio no tiene id no se muestra
     if (perfilNegocio.id == '') { return Container(); }
@@ -109,7 +111,7 @@ class WidgetButtonListTile extends StatelessWidget {
     // row : si la vista es en forma de lista horizontal , se muesta una vista reducida de el avatar y el nombre debajo
     if(row){
       return InkWell(
-        onTap: () {
+        onTap: () { 
           controller.accountChange(idAccount: perfilNegocio.id);
         },
         // touch round
@@ -129,7 +131,7 @@ class WidgetButtonListTile extends StatelessWidget {
                   // condition : si el usuario es superAdmin y el perfil seleccionado es el mismo que el perfil que se esta mostrando
                   if(homeController.getProfileAdminUser.superAdmin && homeController.getProfileAccountSelected.id == perfilNegocio.id){
                     Get.back();
-                    Get.toNamed(Routes.ACCOUNT);
+                    Get.toNamed(Routes.account);
                   }else{
                     // action : ir a la cuenta seleccionada 
                     controller.accountChange(idAccount: perfilNegocio.id);
@@ -162,7 +164,7 @@ class WidgetButtonListTile extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 5.0),
-              Text(perfilNegocio.name, style: const TextStyle(overflow: TextOverflow.ellipsis )),
+              Text(perfilNegocio.name, style: const TextStyle( overflow: TextOverflow.ellipsis )),
             ],
           ),
         ),
@@ -200,29 +202,15 @@ class WidgetButtonListTile extends StatelessWidget {
                   ),
           ),
           dense: true,
-          title: Text(perfilNegocio.name),
-          subtitle: homeController.getProfileAccountSelected.id != perfilNegocio.id ? null  : Text( editAccount ?'Administrador':'Tienes que ser administrador para editar esta cuenta'  ),
-          trailing:  editAccount ? TextButton(onPressed: (){
-              Get.back();
-              Get.toNamed(Routes.ACCOUNT);
-          }, child: const Text('Editar')): Radio(
-            activeColor: Colors.blue,
-            value: controller.isSelected(id: perfilNegocio.id) ? 0 : 1,
-            groupValue: 0,
-            onChanged: (val) {
-              if(homeController.getProfileAdminUser.superAdmin && homeController.getProfileAccountSelected.id == perfilNegocio.id){
-                Get.back();
-                Get.toNamed(Routes.ACCOUNT);
-              }else{
-                controller.accountChange(idAccount: perfilNegocio.id);
-              }
-              
-            },
-          ),
+          title: Text(perfilNegocio.name,style: const TextStyle( fontSize: 18,overflow: TextOverflow.ellipsis)),
+          subtitle: homeController.getProfileAccountSelected.id != perfilNegocio.id ? null  : Text( isSuperAdmin ? 'Super Administrador' : isAdmin ? 'Administrador' : 'Usuario estandar'),
+          trailing:  isSelected ? const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Icon(Icons.check_circle_outline_rounded,color: Colors.blue),
+          ):null,
           onTap: () {
-            if(homeController.getProfileAdminUser.superAdmin && homeController.getProfileAccountSelected.id == perfilNegocio.id){
-                Get.back();
-                Get.toNamed(Routes.ACCOUNT);
+            if(homeController.getProfileAccountSelected.id == perfilNegocio.id){
+                 // no hace ninguna acción
               }else{
                 controller.accountChange(idAccount: perfilNegocio.id);
               }
@@ -252,14 +240,13 @@ class ProductoItem extends StatefulWidget {
 }
 class _ProductoItemState extends State<ProductoItem> {
   // controllers
-  SalesController salesController = Get.find<SalesController>();
+  SellController salesController = Get.find<SellController>();
 
   @override
   Widget build(BuildContext context) {
 
-    //  values
-    bool isSelect = salesController.getIdProductSelected == widget.producto.id;
-    final String alertStockText = widget.producto.stock ? (widget.producto.quantityStock >=0 ? widget.producto.quantityStock<=widget.producto.alertStock?'Stock bajo':'' : 'Sin stock'): '';
+    //  values 
+    final String alertStockText = widget.producto.stock && salesController.homeController.getIsSubscribedPremium ? (widget.producto.quantityStock >=0 ? widget.producto.quantityStock<=widget.producto.alertStock?'Stock bajo':'' : 'Sin stock'): '';
 
     // aparición animada
     return Card(
@@ -269,7 +256,7 @@ class _ProductoItemState extends State<ProductoItem> {
       clipBehavior: Clip.antiAlias,
       child: Stack(  
         children: [
-          // image and description  to product
+          // view : alert stock, image and info
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -288,104 +275,39 @@ class _ProductoItemState extends State<ProductoItem> {
               contentInfo(),
             ],
           ),
-          // selected
+          // view : selected
           Positioned.fill(
             child: Material(
               color: Colors.transparent,
               child: InkWell(
                 mouseCursor: MouseCursor.uncontrolled,
-                onTap: (){
-                  // action : selecciona producto de la lista de productos del ticket
-                  salesController.setIdProductSelected = widget.producto.id; 
-                }, 
+                onTap: (){ 
+                  // action : abre el dialogo para mostrar la informacion completa basica (imagen,codigo y descripcion) del producto
+                  Get.dialog( EditProductSelectedDialogView(product: widget.producto) ); 
+                },
+                onLongPress: (){
+                  // action : abre el dialogo para mostrar la informacion completa basica (imagen,codigo y descripcion) del producto
+                  Get.dialog( EditProductSelectedDialogView(product: widget.producto) ); 
+                },
               ),
             ),
           ),
-          // color selected
-          isSelect ?Positioned.fill(child: Container(color: Colors.black26,)):Container(),
-          // button delete
-          isSelect
-              ? Align(
-                  alignment: Alignment.topRight,
-                  child: IconButton(
-                      onPressed: () {
-                        salesController.getTicket.removeProduct(product: widget.producto);
-                        salesController.update();
-                      },
-                      icon: const CircleAvatar(
-                          backgroundColor: Colors.red,
-                          child: Icon(
-                            Icons.close,
-                            color: Colors.white,
-                          ))))
-              : Container(),
-          // value quantity
-          widget.producto.quantity > 1 || isSelect
-              ? Align(
-                  alignment: Alignment.topLeft,
-                  child: IconButton(
-                    onPressed: (){
-                     salesController.setIdProductSelected = widget.producto.id;
-                    },
-                    icon: CircleAvatar(
-                      backgroundColor: Colors.black,
-                      child: Padding(
-                        padding: const EdgeInsets.all(2.0),
-                        child: CircleAvatar(
-                            backgroundColor: Colors.white,
-                            child: Center(
-                              child:
-                                  Text(widget.producto.quantity.toString(),style: const TextStyle(color: Colors.black),),
-                            )),
-                      ),
-                    ),
-                  ))
-              : Container(),
-          // button  subtract quantity
-          isSelect
-              ? Align(
-                  alignment: Alignment.bottomLeft,
-                  child: IconButton(
-                      onPressed: () {
-                        salesController.getTicket.decrementProduct(product: widget.producto);
-                        salesController.update();
-                      },
-                      icon: const CircleAvatar(
-                          backgroundColor: Colors.blue,
-                          child: Icon(
-                            Icons.horizontal_rule,
-                            color: Colors.white,
-                          ))))
-              : Container(),
-          // button  increase quantity
-          isSelect
-              ? Align(
-                  alignment: Alignment.bottomRight,
-                  child: IconButton(
-                      onPressed: () {
-                        salesController.getTicket.incrementProduct(product: widget.producto);
-                        salesController.update();
-                      },
-                      icon: const CircleAvatar(
-                          backgroundColor: Colors.blue,
-                          child: Icon(
-                            Icons.add,
-                            color: Colors.white,
-                          ))))
-              : Container(),
-          // button  deselect
-          isSelect
-              ? Align(
-                  alignment: Alignment.center,
-                  child: IconButton(
-                      onPressed: () {
-                        salesController.setIdProductSelected = '';
-                      },
-                      icon: const Icon(
-                        Icons.close,
-                        color: Colors.white,
-                      )))
-              : Container(),
+          // view : cantidad de productos seleccionados
+          widget.producto.quantity==1 ?  Container()
+          :Positioned(
+            top:5,
+            right:5,
+            child: CircleAvatar(
+              backgroundColor: Colors.black87,
+              child: Padding(
+                padding: const EdgeInsets.all(1.0),
+                child: CircleAvatar(  
+                  backgroundColor: Colors.white,
+                  child: Text(widget.producto.quantity.toString(),style: const TextStyle(color: Colors.black,fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -400,8 +322,8 @@ class _ProductoItemState extends State<ProductoItem> {
             ? widget.producto.description.substring(0, 3)
             : widget.producto.description.substring(0, 1)
         : Publications.getFormatoPrecio(
-            monto: widget.producto.salePrice * widget.producto.quantity);
-    return widget.producto.image != ""
+            value: widget.producto.salePrice * widget.producto.quantity);
+    return widget.producto.image != "" && !widget.producto.local
         ? SizedBox(
             width: double.infinity,
             child: CachedNetworkImage(
@@ -411,17 +333,14 @@ class _ProductoItemState extends State<ProductoItem> {
               placeholder: (context, url) => Container(
                 color: Colors.grey[100],
                 child: Center(
-                  child: Text(description,
-                      style:
-                          const TextStyle(fontSize: 24.0, color: Colors.grey)),
+                  child: Text(description, style: const TextStyle(fontSize: 24.0, color: Colors.grey,overflow: TextOverflow.clip )),
                 ),
               ),
               errorWidget: (context, url, error) => Container(
                 color: Colors.grey[100],
                 child: Center(
                   child: Text(description,
-                      style:
-                          const TextStyle(fontSize: 24.0, color: Colors.grey)),
+                      style:  const TextStyle(fontSize: 24.0, color: Colors.grey,overflow: TextOverflow.clip)),
                 ),
               ),
             ),
@@ -430,7 +349,7 @@ class _ProductoItemState extends State<ProductoItem> {
             color: Colors.grey[100],
             child: Center(
               child: Text(description,
-                  style: const TextStyle(fontSize: 24.0, color: Colors.grey)),
+                  style: const TextStyle(fontSize: 24.0, color: Colors.grey,overflow: TextOverflow.clip)),
             ),
           );
   }
@@ -441,23 +360,12 @@ class _ProductoItemState extends State<ProductoItem> {
         : Padding(
             padding: const EdgeInsets.all(5.0),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(widget.producto.description,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.normal,
-                        fontSize: 14.0,
-                        color: Colors.grey),
-                    overflow: TextOverflow.clip,
-                    softWrap: false),
-                Text(
-                    Publications.getFormatoPrecio(
-                        monto: widget.producto.salePrice *
-                            widget.producto.quantity),
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.0,
-                        color: Colors.black),
+                Text(widget.producto.description,style: const TextStyle(fontWeight: FontWeight.normal,color: Colors.grey ,overflow:TextOverflow.ellipsis),maxLines:1),
+                Text( Publications.getFormatoPrecio(value: widget.producto.salePrice * widget.producto.quantity),
+                    style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 17.0,color: Colors.black),
                     overflow: TextOverflow.clip,
                     softWrap: false),
               ],
@@ -482,12 +390,7 @@ class WidgetDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     
-    return GetBuilder<HomeController>( 
-      initState: (_) {},
-      builder: (_) {
-        return  body(context: context); 
-      },
-    );
+    return body(context: context); 
 }
 
 // WIDGETS VIEWS
@@ -495,6 +398,7 @@ Widget body({required BuildContext context}){
 
   // controllers
     final HomeController homeController = Get.find<HomeController>();
+    final SellController sellController = Get.find<SellController>();
 
     // variables
     UserModel user = homeController.getProfileAdminUser.copyWith(); 
@@ -506,123 +410,270 @@ Widget body({required BuildContext context}){
       child: SizedBox(width: double.infinity,child: FloatingActionButton(onPressed: homeController.signOutFirebase,elevation: 0,child: const Text('Iniciar sesión',style: TextStyle(color: Colors.white),))),
     );  
     
-    return ListView( 
+    return Obx(() => Column(
       children: [
-        const SizedBox(height: 50),
-        isAnonymous?textButtonLogin
-          :ListTile(
-          leading: Container(padding: const EdgeInsets.all(0.0),child: ComponentApp().userAvatarCircle(urlImage: homeController.getProfileAccountSelected.image)),
-          title: Text(homeController.getIdAccountSelected == ''? 'Seleccionar una cuenta': homeController.getProfileAccountSelected.name,maxLines: 1,overflow: TextOverflow.ellipsis),
-          subtitle: homeController.getIdAccountSelected == ''? null: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment:  MainAxisAlignment.start,
+        Flexible(
+          child: ListView( 
             children: [
-              user.name==''?Container():const Flexible(child: Text( 'ivan de turno manana',overflow: TextOverflow.ellipsis,maxLines: 1)),
-              // view : punto de seracion
-              user.name==''?Container():const Icon(Icons.arrow_right_rounded), 
-              Text( user.admin? 'Administrador': 'Usuario estandar',overflow: TextOverflow.ellipsis,maxLines: 1),
+              // view : header
+              Row(
+                children: [
+                  const Spacer(),
+                  // iconButton : seleccionar cuenta administradas
+                  isAnonymous?Container():homeController.getCashierMode?Container():iconButtonAccount, 
+                  // icon : cambia el tema de la  app
+                  IconButton(
+                    onPressed: () => ThemeService.switchTheme,
+                    icon: Icon(Theme.of(context).brightness == Brightness.dark?Icons.light_mode:Icons.nightlight),
+                  ),
+                  const SizedBox(width: 10),
+                ],
+              ),
+              // view : avatar y datos la cuenta y del usuario
+              isAnonymous?textButtonLogin
+                :ListTile(
+                leading: Container(padding: const EdgeInsets.all(0.0),child: ComponentApp().userAvatarCircle(urlImage: homeController.getProfileAccountSelected.image,text: homeController.getProfileAccountSelected.name)),
+                title: Text(homeController.getIdAccountSelected == ''? 'Seleccionar una cuenta': homeController.getProfileAccountSelected.name,maxLines: 1,overflow: TextOverflow.ellipsis),
+                subtitle: user.name==''? null:Opacity(
+                  opacity: 0.7,
+                  child: Row(
+                    children: [
+                      // icon 
+                      const Icon(Icons.person_rounded,size: 14),
+                      const SizedBox(width:2),
+                      // text : nombre del usuario administrador
+                      Flexible(child: Text(user.name,overflow: TextOverflow.ellipsis,maxLines: 1)),
+                    ],
+                  ),
+                ),
+                trailing: homeController.getCashierMode?null: const Icon(Icons.arrow_right),
+                onTap: homeController.getCashierMode?null: () {
+                  homeController.showModalBottomSheetConfig();
+                },
+              ),  
+              homeController.getCashierMode || isAnonymous?const Padding(
+                padding: EdgeInsets.only(bottom: 0,top: 20),
+                child: Divider(height:0,thickness:.5),
+              ):Container(),
+              // ----------------- //
+              // funciones premium //
+              // ----------------- //
+              // condition : si el usuario de la cuenta no es administrador no se muestra el boton de suscribirse a premium
+              user.admin==false?Container():
+              isAnonymous?Container():
+              homeController.getCashierMode?Container():
+                Container(
+                  // color degradado de izquierda a derecha [amber,transparent]
+                  decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.amber.withOpacity(0.1),Colors.amber.withOpacity(0.01) ],begin: Alignment.centerLeft,end: Alignment.centerRight)),
+                  
+                  child: ListTile( 
+                    iconColor:  Colors.amber,  
+                      leading: const Icon(Icons.star_rounded),
+                      title: Text(homeController.getIsSubscribedPremium?'Premium':'Obtener Premium'),
+                      onTap: (){
+                        // action : mostrar modal bottom sheet con  las funciones premium
+                        homeController.showModalBottomSheetSubcription();
+                      }),
+                ), 
+              // vender 
+              ListTile(
+                selected: homeController.getIndexPage == 0,
+                  leading: const Icon(Icons.attach_money_rounded),
+                  trailing: homeController.getIndexPage != 0 ? null : const Icon(Icons.circle,size: 8),
+                  title: const Text('Vender'),
+                  onTap: () => homeController.setIndexPage = 0),
+              // historial de caja
+              user.historyArqueo || isAnonymous ?homeController.getCashierMode?Container():ListTile( 
+                enabled: !isAnonymous,
+                selected: homeController.getIndexPage == 1,
+                leading: const Icon(Icons.manage_search_rounded),
+                trailing: homeController.getIndexPage != 1 ? null : const Icon(Icons.circle,size: 8),
+                title: const Text('Historial de caja'),
+                onTap: () => homeController.setIndexPage = 1):Container(),
+              // transacciones
+              user.transactions || isAnonymous?homeController.getCashierMode?Container():ListTile(
+                enabled: !isAnonymous,
+                selected: homeController.getIndexPage == 2,
+                leading: const Icon(Icons.receipt_long_rounded),
+                trailing: homeController.getIndexPage != 2 ? null : const Icon(Icons.circle,size: 8),
+                title: const Text('Transacciones'),
+                onTap: () => homeController.setIndexPage = 2):Container(),
+              // catalogo
+              user.catalogue || isAnonymous?homeController.getCashierMode?Container():ListTile(
+                enabled: !isAnonymous,
+                selected: homeController.getIndexPage == 3,
+                leading: const Icon(Icons.apps_rounded),
+                trailing: homeController.getIndexPage != 3 ? null : const Icon(Icons.circle,size: 8),
+                title: const Text('Catálogo'),
+                onTap: () => homeController.setIndexPage = 3):Container(),
+              // TODO : desabilitar visualizacion para produccion
+              /* ListTile(
+                enabled: !isAnonymous,
+                selected: homeController.getIndexPage == 5,
+                leading: const Icon(Icons.admin_panel_settings_outlined),
+                trailing: homeController.getIndexPage != 5 ? null : const Icon(Icons.circle,size: 8),
+                title: const Text('Moderador'),
+                onTap: () {
+                  Get.toNamed(Routes.moderator); 
+                },
+              ), */
+              // multiusuario
+              user.multiuser || isAnonymous?homeController.getCashierMode?Container():
+              ListTile(
+                enabled: !isAnonymous,
+                selected: homeController.getIndexPage == 4,
+                leading: const Icon(Icons.group_add_outlined),
+                trailing: homeController.getIndexPage != 4 ? null : const Icon(Icons.circle,size: 8),
+                title: const Text('Multi Usuario'),
+                onTap: () {
+                  if( homeController.getProfileAccountSelected.subscribed ){
+                    homeController.setIndexPage = 4;
+                  }else{
+                    Get.back(); // cierra drawer
+                    homeController.showModalBottomSheetSubcription(id: 'multiuser');
+                  }
+                  
+                }):Container(),
+              const SizedBox(height: 20),
+              homeController.getCashierMode?Container():Container(
+                decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.teal.withOpacity(0.1),Colors.teal.withOpacity(0.01) ],begin: Alignment.centerLeft,end: Alignment.centerRight)),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                  tileColor: Colors.transparent,//Colors.blue.withOpacity(0.05),
+                  leading: const Icon(Icons.messenger_outline_sharp,color: Colors.green),
+                  title: const Text('Escribenos tu opinión 😃'),
+                  subtitle: const Text('Tu opinión o sugerencia es importante para mejorar'),
+                  onTap: () async {
+                    
+                    // values
+                    Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.logicabooleana.sell');
+                    //  redireccionara para la tienda de aplicaciones
+                    await launchUrl(uri,mode: LaunchMode.externalApplication);
+                  },
+                ),
+              ),   
+              const SizedBox(height: 20)
             ],
           ),
-          trailing: const Icon(Icons.arrow_forward_ios_rounded),
-          onTap: () {
-            homeController.showModalBottomSheetSelectAccount();
-          },
-        ),  
-        // funciones premium //
-        // condition : si el usuario de la cuenta no es administrador no se muestra el boton de suscribirse a premium
-        user.admin==false?Container():
-        isAnonymous?Container():
-          ListTile(
-            tileColor: homeController.getIsSubscribedPremium?null:Colors.amber.withOpacity(0.05),
-            iconColor:  Colors.amber, 
-            //titleTextStyle: const TextStyle(fontWeight: FontWeight.bold),
-              leading: const Icon(Icons.star_rounded),
-              title: Text(homeController.getIsSubscribedPremium?'Premium':'Funciones Premium'),
-              onTap: (){
-                // action : mostrar modal bottom sheet con 
-                Get.back(); // cierra drawer
-                homeController.showModalBottomSheetSubcription();
-              }),
-        isAnonymous?Container():const Opacity(opacity: 0.3,child: Divider(height:0)),
-        const SizedBox(height: 20),
-        // vender 
-        ListTile(
-          selected: homeController.getIndexPage == 0,
-            leading: const Icon(Icons.attach_money_rounded),
-            trailing: homeController.getIndexPage != 0 ? null : const Icon(Icons.circle,size: 8),
-            title: const Text('Vender'),
-            onTap: () => homeController.setIndexPage = 0),
-        // historial de caja
-        user.historyArqueo || isAnonymous ?ListTile( 
-          enabled: !isAnonymous,
-          selected: homeController.getIndexPage == 1,
-          leading: const Icon(Icons.manage_search_rounded),
-          trailing: homeController.getIndexPage != 1 ? null : const Icon(Icons.circle,size: 8),
-          title: const Text('Historial de caja'),
-          onTap: () => homeController.setIndexPage = 1):Container(),
-        // transacciones
-        user.transactions || isAnonymous?ListTile(
-          enabled: !isAnonymous,
-          selected: homeController.getIndexPage == 2,
-          leading: const Icon(Icons.receipt_long_rounded),
-          trailing: homeController.getIndexPage != 2 ? null : const Icon(Icons.circle,size: 8),
-          title: const Text('Transacciones'),
-          onTap: () => homeController.setIndexPage = 2):Container(),
-        user.catalogue || isAnonymous?ListTile(
-          enabled: !isAnonymous,
-          selected: homeController.getIndexPage == 3,
-          leading: const Icon(Icons.apps_rounded),
-          trailing: homeController.getIndexPage != 3 ? null : const Icon(Icons.circle,size: 8),
-          title: const Text('Catálogo'),
-          onTap: () => homeController.setIndexPage = 3):Container(),
-        user.multiuser || isAnonymous?ListTile(
-          enabled: !isAnonymous,
-          selected: homeController.getIndexPage == 4,
-          leading: const Icon(Icons.add_moderator_outlined),
-          trailing: homeController.getIndexPage != 4 ? null : const Icon(Icons.circle,size: 8),
-          title: const Text('Multi Usuario'),
-          onTap: () {
-            if( homeController.getProfileAccountSelected.subscribed ){
-              homeController.setIndexPage = 4;
-            }else{
-              Get.back(); // cierra drawer
-              homeController.showModalBottomSheetSubcription(id: 'multiuser');
-            }
-            
-          }):Container(),
-        const SizedBox(height: 20),
-        ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-          tileColor: Colors.blue.withOpacity(0.05),
-          leading: const Icon(Icons.messenger_outline_sharp,color: Colors.green),
-          title: const Text('Escribenos tu opinión 😃'),
-          subtitle: const Text('Tu opinión o sugerencia es importante'),
-          onTap: () async {
-            
-            // values
-            Uri uri = Uri.parse('https://play.google.com/store/apps/details?id=com.logicabooleana.sell');
-            //  redireccionara para la tienda de aplicaciones
-            await launchUrl(uri,mode: LaunchMode.externalApplication);
-          },
-        ), 
-        //  option :  cambiar el brillo del tema de la app
-        ListTile(
-          leading: Icon(Theme.of(context).brightness==Brightness.dark?Icons.light_mode_outlined:Icons.mode_night_outlined),
-          title: Text(Theme.of(context).brightness==Brightness.dark?'Tema claro':'Tema oscuro'),
-          onTap: ()=> ThemeService.switchTheme,
         ),
-      const SizedBox(height: 20)
+        const Divider(height: 0),
+        const SizedBox(height:5),
+        // switch : modo cajero
+        ListTile(
+          leading: const Icon(Icons.security_rounded),
+          title: const Text('Modo cajero'),
+          trailing: Switch(
+            value: homeController.getCashierMode,
+            activeColor: Colors.blue,
+            onChanged: (value) {  
+              // condition : si esta en modo de app de prueba 
+              if(isAnonymous){
+                // action : activar el modo cajero
+                  homeController.setCashierMode = value;
+                  sellController.update();
+                  return;
+              }
+              // condition : para desactivar el modo cajero introducir la pin
+              if(value == false ){
+                // show dialog : introducir pin para desactivar el modo cajero
+                Get.dialog( PinCheckAlertDialog(entry: true),barrierDismissible: false);
+              }else{
+                // condition : primero verificar que existe un pin 
+                if(homeController.getProfileAccountSelected.pin == ''){
+                  // show dialog : introducir pin para desactivar el modo cajero
+                  Get.dialog(  PinCheckAlertDialog(create: true),barrierDismissible: false);
+                }else{
+                  // action : activar el modo cajero
+                  homeController.setCashierMode = value;
+                  sellController.update();
+                } 
+              }
+            },
+          ),
+        ),
+        const SizedBox(height: 12),
       ],
+    ));
+  }
+  // VIEW COMPONENTS //
+  Widget get iconButtonAccount{ 
+    // description : crea un maximo de 3 avatares de cuentas existentes superpuestas con un [stack] horizontalmente
+    
+    // controllers
+    final HomeController homeController = Get.find();
+    
+    // var
+    List<ProfileAccountModel> list = homeController.getManagedAccountsList;   
+    double space = 9.0;
+    List<Widget> listWidget = [];
+    // condition : si no hay cuentas administradas se muestra un iconobutton por defecto
+    if (list.isEmpty) {
+      return IconButton(
+        onPressed: () {
+          homeController.showModalBottomSheetSelectAccount();
+        },
+        icon: const Icon(Icons.change_circle_outlined),
+      );
+    }
+    // loop : crea un maximo de 3 avatares de cuentas existentes superpuestas con un [stack] horizontalmente
+    for ( int i = 0; i < list.length  ; i++) {  
+      // se muestra el avatar de la cuenta 
+      listWidget.add(Positioned(
+        left: ( space) * i,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(100.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(1.0),
+            child: ComponentApp().userAvatarCircle(urlImage: list[i].image,radius:10,iconData: Icons.storefront_sharp)),
+        ),
+      ));
+    } 
+    // add : posisionar el icono a lo ultimo 
+    listWidget.add(Positioned(
+      left: (  space) * listWidget.length,
+      child: Container(
+        decoration: BoxDecoration( color: Colors.white,borderRadius: BorderRadius.circular(100.0)),
+        child: Container( 
+          decoration: BoxDecoration( borderRadius: BorderRadius.circular(100.0)),
+          child: Icon(Icons.change_circle,color: Colors.grey.shade800,size: 26.0),
+        ),
+      ),
+    ));
+
+    return SizedBox(
+      width: 55,
+      height: 50,
+      child: ClipOval(
+        clipBehavior: Clip.antiAlias,
+        child: Material(
+          child: InkWell(
+            onTap: () => homeController.showModalBottomSheetSelectAccount(),
+            radius: 100.0,// radio de la esquina
+            child: Stack(
+              clipBehavior: Clip.antiAlias,
+              fit: StackFit.loose, // loose :
+              alignment: Alignment.center,
+              children: listWidget,
+            ),
+          ),
+        ),
+      ),
     );
+
   }
 
 }
 
-Widget viewDefault() {
+Widget viewSelectedAccount() {
 
   // description  : vista por defecto que se le muestra al usuario para que seleccione un cuenta
 
   // controllers
   final HomeController homeController = Get.find();
+  // style
   const TextStyle textStyle = TextStyle(
     fontFamily: 'Roboto', // o 'Open Sans'
     fontSize: 20,
@@ -641,11 +692,24 @@ Widget viewDefault() {
                 // text : bienvenida
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20),
-                  child: Text('Hola 🖐️\n\nIngresa a tu cuenta para gestionar tu tienda\n',textAlign: TextAlign.center,style: textStyle,),
+                  child: Text('Hola 🖐️\n\nIngresa a una cuenta para gestionar la tienda\n',textAlign: TextAlign.center,style: textStyle,),
                 ),
                 const SizedBox(height: 20), 
+
+                !homeController.getLoadedManagedAccountsList?Container():homeController.checkAccountExistence?Container():
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal:75),
+                  child: ComponentApp().button(
+                    disable: homeController.getProfileAdminUser.superAdmin,
+                    text: 'Crear perfil de mi negocio',
+                    onPressed: () { 
+                      Get.toNamed(Routes.account,arguments: {'create':true});
+                    },
+                  ),
+                ),
+
                 // lista de cuentas administradas o boton para crear una cuenta
-                !homeController.getLoadedManagedAccountsList?const CircularProgressIndicator(): !homeController.checkAccountExistence? WidgetButtonListTile().buttonListTileCrearCuenta()
+                !homeController.getLoadedManagedAccountsList?const CircularProgressIndicator(): homeController.getManagedAccountsList.isEmpty? Container()
                 :Flexible(  
                   fit: FlexFit.loose,
                   child: SizedBox( 
@@ -662,11 +726,18 @@ Widget viewDefault() {
               ],
             ),
           ),
-        ),
+        ), 
         // textButton : cerrar sesion
         Padding(
           padding: const EdgeInsets.all(20.0),
-          child: TextButton(onPressed: homeController.showDialogCerrarSesion, child: const Text('Cerrar sesión')),
+          child: Column(
+            children: [
+              // text : email del usuario
+              Opacity(opacity:0.5,child: Text(homeController.getFirebaseAuth.currentUser!.email??'')),
+              // button : cerrar sesion
+              TextButton(onPressed: homeController.showDialogCerrarSesion, child: const Text('Cerrar sesión')),
+            ],
+          ),
         ),
       ],
     )),
@@ -689,7 +760,7 @@ class ComponentApp extends StatelessWidget {
     return Container();
   }
   // view : grafico de barra para mostrar el progreso de carga de la app
-  PreferredSize linearProgressBarApp({Color color = Colors.purple}) {
+  PreferredSize linearProgressBarApp({Color color = Colors.blue}) {
     return PreferredSize(
         preferredSize: const Size.fromHeight(0.0),
         child: LinearProgressIndicator(
@@ -698,10 +769,9 @@ class ComponentApp extends StatelessWidget {
             valueColor: AlwaysStoppedAnimation<Color>(color)));
   }
   // view : grafico divisor estandar de la app 
-  Divider divider({double thickness = 0.1}) {
+  Divider divider({double thickness = 0.3}) {
     return Divider(
-      thickness: thickness,height: 0,
-      color: Get.isDarkMode?Colors.white30:Colors.black38,
+      thickness: thickness,height: 0, 
     );
   }
   // view : grafico punto divisor estandar de la app
@@ -709,32 +779,36 @@ class ComponentApp extends StatelessWidget {
     return Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child:Icon(Icons.circle,size:size, color: color.withOpacity(0.4)));
   }
   // view : imagen avatar del usuario
-  Widget userAvatarCircle({String urlImage='',String text = '', double radius = 20.0}) {
+  Widget userAvatarCircle({ Color? background,IconData? iconData,bool empty=false,String urlImage='',String text = '', double radius = 20.0}) {
     
     // style
-    Color backgroundColor = Get.theme.dividerColor.withOpacity(0.5);
+    Color backgroundColor =background??Get.theme.dividerColor ;
     // widgets
     late Widget avatar;
-    Widget iconDedault = Icon(Icons.person_outline_rounded,color: Colors.white,size: radius*1.5,);
-
-    if(urlImage == '' && text == ''){
-      iconDedault = Icon(Icons.person_outline_rounded,color: Colors.white,size: radius*1 );
+    late Widget iconDefault;
+    if(empty){
+      iconDefault = Container();
+    }else if(urlImage == '' && text == ''){
+      iconDefault = Icon(iconData??Icons.person_outline_rounded,color: Colors.white,size: radius*1.1 );
     }else if(urlImage == '' && text != ''){
-      iconDedault = Text( text.substring( 0,1),style: const TextStyle(color: Colors.white));
+      iconDefault = Text( text.substring( 0,1),style: const TextStyle(color: Colors.white));
+    }else{
+      iconDefault = Container();
     }
     
     // crear avatar
     avatar = urlImage == ''
-      ? CircleAvatar(backgroundColor:backgroundColor,child: Center(child: iconDedault))
+      ? CircleAvatar(backgroundColor:backgroundColor,radius:radius, child: Center(child: iconDefault))
         : CachedNetworkImage(
           imageUrl: urlImage,
-          placeholder: (context, url) => CircleAvatar(backgroundColor:backgroundColor,child:iconDedault),
-          imageBuilder: (context, image) => Padding(padding: const EdgeInsets.all(2.0),child: CircleAvatar(backgroundImage: image)),
+          placeholder: (context, url) => CircleAvatar(backgroundColor:backgroundColor,radius:radius, child:iconDefault),
+          imageBuilder: (context, image) => CircleAvatar(backgroundImage: image,radius:radius),
           errorWidget: (context, url, error) {
             // return : un circleView con la inicial de nombre como icon 
             return CircleAvatar(
               backgroundColor: backgroundColor,
-              child: Center(child: iconDedault),
+              radius:radius,
+              child: Center(child: iconDefault),
               );
           },
     );
@@ -766,9 +840,8 @@ class ComponentApp extends StatelessWidget {
                 iconLeading==null?Container():Icon(iconLeading,color: colorAccent,size: 24),
                 iconLeading==null?Container():const SizedBox(width:8),
                 // text
-                Text(text,style: TextStyle(color: colorAccent,fontSize: 16 )), 
-                iconTrailing==null?Container():const SizedBox(width:8),
-                // icon trailing
+                Flexible(child: Text(text,style: TextStyle(color: colorAccent,fontSize: 16 ),overflow: TextOverflow.ellipsis)), 
+                iconTrailing==null?Container():const SizedBox(width:8), 
                 iconTrailing==null?Container():Icon(iconTrailing,color: colorAccent,size: 24),
               ],
             ),
@@ -776,31 +849,31 @@ class ComponentApp extends StatelessWidget {
         ),
       ),
     );
-  }
-  Widget button( {bool defaultStyle = false,double elevation=0,double width = double.infinity,bool disable = false, Widget? icon, String text = '',required dynamic onPressed,EdgeInsets padding =const EdgeInsets.symmetric(horizontal: 12, vertical: 12),Color colorButton = Colors.blue,Color colorAccent = Colors.white}) {
+  } 
+  Widget button( {bool defaultStyle = false,double elevation=0,double fontSize = 14,double width = double.infinity,bool disable = false, Widget? icon, String text = '',required dynamic onPressed,EdgeInsets padding =const EdgeInsets.symmetric(horizontal: 12, vertical: 12),Color? colorButton= Colors.blue,Color colorAccent = Colors.white , EdgeInsets margin =const EdgeInsets.symmetric(horizontal: 12, vertical: 12)}) {
+     
     // button : personalizado
     return FadeIn(
         child: Padding(
-      padding: padding,
+      padding: margin,
       child: SizedBox(
         width: width,
         child: ElevatedButton.icon(
           onPressed: disable?null:onPressed,
-          style: ElevatedButton.styleFrom(
+          style: ElevatedButton.styleFrom(  
             elevation:defaultStyle?0: elevation,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-            padding: const EdgeInsets.all(20.0),
-            backgroundColor:defaultStyle?null: colorButton,
+            padding: padding,
+            backgroundColor: colorButton ,
             textStyle: TextStyle(color: colorAccent,fontWeight: FontWeight.w700),
           ),  
           icon: icon??Container(),
-          label: Text(text, style: TextStyle(color: colorAccent)),
+          label: Text(text, style: TextStyle(color: colorAccent,fontSize: fontSize),textAlign: TextAlign.center),
         ),
       ),
     ));
   }
 
-  // notification
   void showMessageAlertApp({required String title, required String message}) {
     Get.snackbar(title, message,
         margin: const EdgeInsets.all(12),
@@ -817,98 +890,152 @@ class ComponentApp extends StatelessWidget {
 class WidgetSuggestionProduct extends StatelessWidget {
 
   // ignore: prefer_const_constructors_in_immutables
-  WidgetSuggestionProduct({Key? key, required this.list, this.searchButton = false}): super(key: key);
+  WidgetSuggestionProduct({Key? key, required this.list, this.searchButton = false,this.positionDinamic=false}): super(key: key);
 
   //values
+  final bool positionDinamic;
   final bool searchButton ;
-  final List<Product> list ;
-  
-
+  final List<Product> list ; 
+   
   @override
   Widget build(BuildContext context) {
 
     // controllers
-    CataloguePageController homeController = Get.find<CataloguePageController>();
+    HomeController controller = Get.find();
 
     if (list.isEmpty) return Container();
 
     // values
-    Color? colorAccent = Get.theme.textTheme.titleMedium?.color;
+    Color? colorAccent = Get.theme.textTheme.titleMedium!.color?.withOpacity(0.1);
     double radius = 32.0;
 
-    return Column(
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.max,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text("Sugerencias para vos",style: Get.theme.textTheme.titleMedium),
-        ),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            !searchButton
-                ? Container()
-                : InkWell(
-                    onTap: () => Get.toNamed(Routes.SEACH_PRODUCT,arguments: {'id': ''}),
-                    borderRadius: BorderRadius.circular(50),
-                    child: Padding(
-                      padding: const EdgeInsets.all(5.0),
-                      child: FadeInLeft(
-                        child: CircleAvatar(
-                            radius: radius,
-                            backgroundColor: colorAccent,
-                            child: CircleAvatar(radius: radius-2,backgroundColor:Get.theme.scaffoldBackgroundColor,child: Icon(Icons.search, color: colorAccent))),
-                      ),
+        // button : buscar producto
+        !searchButton
+            ? Container()
+            : InkWell(
+                onTap: () => Get.toNamed(Routes.searchProduct,arguments: {'id': ''}),
+                borderRadius: BorderRadius.circular(50),
+                child: Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: FadeInLeft(
+                    child: CircleAvatar(
+                        radius: radius,
+                        backgroundColor: colorAccent,
+                        child: CircleAvatar(radius: radius-2,backgroundColor:Get.theme.scaffoldBackgroundColor,child: Icon(Icons.search, color: colorAccent))),
+                  ),
+                ),
+              ),
+        // condition : si la posicion es dinamica
+        positionDinamic?
+        CustomAvatarRow(
+          width: Get.size.width,
+          height: 100,
+          avatars: list.map((e) => CircleAvatar(
+            backgroundColor: colorAccent,
+            foregroundColor: colorAccent,
+            radius: radius,
+            child: CircleAvatar(
+                backgroundColor: Colors.grey[100],
+                foregroundColor: Colors.grey[100],
+                radius: radius-2,
+                child: ClipRRect(
+                  borderRadius:BorderRadius.circular(50),
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(50),  
+                   onTap: () => controller.navigationToPage(productCatalogue: e.convertProductCatalogue()),
+                    child: CachedNetworkImage(
+                      fadeInDuration: const Duration( milliseconds: 200),
+                      fit: BoxFit.cover,
+                      imageUrl: e.image,
+                      placeholder: (context, url) =>CircleAvatar(backgroundColor:Colors.grey[100],foregroundColor:Colors.grey[100]),
+                      errorWidget:(context, url, error) =>CircleAvatar(backgroundColor:Colors.grey[100],foregroundColor:Colors.grey[100]),
                     ),
                   ),
-            SizedBox(
-                width: Get.size.width,
-                height: 100,
-                child: Center(
-                  child: ListView.builder(
-                      shrinkWrap: true,
-                      scrollDirection: Axis.horizontal,
-                      itemCount: list.length,
-                      itemBuilder: (context, index) {
-                        return Align(
-                          widthFactor: 0.5,
-                          child: InkWell(
-                            onTap: () => homeController.toNavigationProductEdit(productCatalogue: list[index].convertProductCatalogue()),
-                            borderRadius: BorderRadius.circular(50),
-                            child: Padding(
-                              padding: const EdgeInsets.all(5.0),
-                              child: FadeInRight(
-                                child: CircleAvatar(
-                                    backgroundColor: colorAccent,
-                                    foregroundColor: colorAccent,
-                                    radius: radius,
-                                    child: CircleAvatar(
-                                        backgroundColor: Colors.grey[100],
-                                        foregroundColor: Colors.grey[100],
-                                        radius: radius-2,
-                                        child: ClipRRect(
-                                          borderRadius:BorderRadius.circular(50),
-                                          child: CachedNetworkImage(
-                                            fadeInDuration: const Duration( milliseconds: 200),
-                                            fit: BoxFit.cover,
-                                            imageUrl: list[index].image,
-                                            placeholder: (context, url) =>CircleAvatar(backgroundColor:Colors.grey[100],foregroundColor:Colors.grey[100]),
-                                            errorWidget:(context, url, error) =>CircleAvatar(backgroundColor:Colors.grey[100],foregroundColor:Colors.grey[100]),
-                                          ),
-                                        ))),
-                              ),
-                            ),
-                          ),
-                        );
-                      }),
                 )),
-          ],
-        ),
+          )).toList(),
+        )
+        // si la posicion no es dinamica
+        :SizedBox(
+            width: Get.size.width,
+            height: 100,
+            child: Center(
+              child: ListView.builder(
+                  shrinkWrap: true,
+                  scrollDirection: Axis.horizontal,
+                  itemCount: list.length,
+                  itemBuilder: (context, index) {
+                    return Align(
+                      widthFactor: 0.5,
+                      child: InkWell(
+                        onTap: () => controller.navigationToPage(productCatalogue: list[index].convertProductCatalogue()),
+                        borderRadius: BorderRadius.circular(50),
+                        child: Padding(
+                          padding: const EdgeInsets.all(5.0),
+                          child: FadeInRight(
+                            child: CircleAvatar(
+                                backgroundColor: colorAccent,
+                                foregroundColor: colorAccent,
+                                radius: radius,
+                                child: CircleAvatar(
+                                    backgroundColor: Colors.grey[100],
+                                    foregroundColor: Colors.grey[100],
+                                    radius: radius-2,
+                                    child: ClipRRect(
+                                      borderRadius:BorderRadius.circular(50),
+                                      child: CachedNetworkImage(
+                                        fadeInDuration: const Duration( milliseconds: 200),
+                                        fit: BoxFit.cover,
+                                        imageUrl: list[index].image,
+                                        placeholder: (context, url) =>CircleAvatar(backgroundColor:Colors.grey[100],foregroundColor:Colors.grey[100]),
+                                        errorWidget:(context, url, error) =>CircleAvatar(backgroundColor:Colors.grey[100],foregroundColor:Colors.grey[100]),
+                                      ),
+                                    ))),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+            )),
       ],
+    );
+  }
+}
+class CustomAvatarRow extends StatelessWidget {
+  final double width;
+  final double height;
+  final List<CircleAvatar> avatars;
+
+  const CustomAvatarRow({super.key, 
+    required this.width,
+    required this.height,
+    required this.avatars,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: width,
+      height: height,
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal:20.0),
+        scrollDirection: Axis.horizontal,
+        itemCount: avatars.length,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.all(2.0),
+            child: Align(
+              alignment: index % 2 == 0 ? Alignment.topCenter : Alignment.bottomCenter,
+              child: avatars[index],
+            ),
+          );
+        },
+      ),
     );
   }
 }
@@ -920,29 +1047,29 @@ class LogoPremium extends StatelessWidget {
   late bool visible;
   late double size;
   late Color accentColor;
+  late Color backgroundColor;
   late final bool personalize;
   late String id;
 
-  LogoPremium({Key? key,this.personalize=false,this.accentColor=Colors.amber,this.size=14,this.visible=false,this.id='premium'}) : super(key: key);
+  LogoPremium({Key? key,this.personalize=false,this.backgroundColor=Colors.amber,this.accentColor=Colors.white,this.size=14,this.visible=false,this.id='premium'}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
 
     // others controllers
-    final HomeController homeController = Get.find();
-    
-    // value
-    if( personalize  == false ){ 
-      // valores por defecto
-      accentColor = Theme.of(context).brightness==Brightness.dark?Colors.white70:Colors.black87; 
-    }
+    final HomeController homeController = Get.find(); 
+    bool isDarkMode = Get.theme.brightness == Brightness.dark;
+
+    backgroundColor = isDarkMode?Colors.black26:backgroundColor;
+    accentColor = isDarkMode?Colors.amber:accentColor;
 
 
     return Padding(
       padding: const EdgeInsets.all(2.0),
       child: Material( 
         clipBehavior: Clip.antiAlias,
-        color: Theme.of(context).brightness==Brightness.dark?Colors.black26:Colors.amber.shade50,
+        // background color
+        color:backgroundColor,
         borderRadius: const BorderRadius.all(Radius.circular(6.0)),
         child: InkWell(
           onTap: () => homeController.showModalBottomSheetSubcription(id:id ),
@@ -966,8 +1093,8 @@ class LogoPremium extends StatelessWidget {
 }
 
 class ImageProductAvatarApp extends StatelessWidget { 
-  late final bool iconAdd;
-  late final bool favorite;
+  late final  Widget? icon;
+  late final bool iconAdd; 
   late final String url;
   late final double size;
   late final double radius;
@@ -976,7 +1103,7 @@ class ImageProductAvatarApp extends StatelessWidget {
   final VoidCallback?  onTap;
   late final Color canvasColor;
   // ignore: prefer_const_constructors_in_immutables
-  ImageProductAvatarApp({Key? key,this.iconAdd=false,this.canvasColor=Colors.black12,this.favorite=false,this.url='',this.size=50,this.radius=12,this.description='',this.path='', this.onTap }) : super(key: key);
+  ImageProductAvatarApp({Key? key,this.url='', this.size = 75, this.radius = 6.0, this.description = '', this.path = '', this.onTap, this.iconAdd = false, this.canvasColor = Colors.grey,this.icon }) : super(key: key);
 
   // avatar que se va usar en toda la app, especialemnte en los 'ListTile'
 
@@ -984,11 +1111,11 @@ class ImageProductAvatarApp extends StatelessWidget {
   Widget build(BuildContext context) { 
 
 
-     // var
-     final bool darkMode = Theme.of(context).brightness==Brightness.dark;
-     // style 
-     Color backgroundColor = Colors.grey.withOpacity(0.2);
-     Color iconColor = darkMode?Colors.white38 :Colors.white70;
+    // var
+    final bool darkMode = Theme.of(context).brightness==Brightness.dark;
+    // style 
+    Color backgroundColor = Colors.grey.withOpacity(0.2);
+    Color iconColor = darkMode?Colors.white38 :Colors.white70;
 
 
     /// widgets
@@ -997,28 +1124,23 @@ class ImageProductAvatarApp extends StatelessWidget {
       imageDefault = AnimatedContainer(
       duration: const Duration(milliseconds: 500),
       color: backgroundColor,
-      child: Icon( Icons.add_a_photo,color: iconColor,));
+      child: Icon( Icons.add_a_photo,color: iconColor));
     }else {
       imageDefault = AnimatedContainer(
       duration: const Duration(milliseconds: 500),
       color: backgroundColor,
-      child: Image.asset('assets/default_image.png',fit: BoxFit.cover,color: iconColor,));
+      child:icon??Image.asset('assets/default_image.png',fit: BoxFit.cover,color: iconColor));
     }
     return SizedBox(
       width: size,height: size,
       child: path =='' ?InkWell(
-        child: Container(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 500),
           width: 75,
           height: 75,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8.0),
-            border: Border.all(
-              color: favorite?Colors.yellow.shade700:Colors.transparent,
-              width: favorite?2:0,
-            ),
-          ),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(8.0),border: Border.all(color: Colors.transparent,width: 0)),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(6.0),
+            borderRadius: BorderRadius.circular(radius),  
             child: InkWell(
               onTap: onTap,
               child: CachedNetworkImage(
@@ -1044,3 +1166,220 @@ class ImageProductAvatarApp extends StatelessWidget {
     );
   }
 }
+
+// view : dialog para editar item del producto seleccionado
+class EditProductSelectedDialogView extends StatefulWidget {
+  
+  final ProductCatalogue product;
+  const EditProductSelectedDialogView({Key? key,required this.product}) : super(key: key);
+
+  @override
+  State<EditProductSelectedDialogView> createState() => _EditProductSelectedDialogViewState();
+}
+
+class _EditProductSelectedDialogViewState extends State<EditProductSelectedDialogView> {
+  
+  // controllers
+  final SellController controller = Get.find<SellController>();
+
+  
+  
+  @override
+  Widget build(BuildContext context) { 
+
+    // widgets
+    Widget titleWidget = Text(widget.product.description,style: const TextStyle(fontWeight: FontWeight.w500),maxLines: 5,overflow: TextOverflow.ellipsis);
+    Widget subtitleWidget = Text(Publications.getFormatoPrecio(value: widget.product.salePrice * widget.product.quantity),style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 20,color: Colors.blue ));
+
+    return AlertDialog(
+      title: Row(
+        children: [
+          Flexible(
+            fit: FlexFit.tight,
+            child: Text(widget.product.code==''?'Item':widget.product.code,style: const TextStyle(fontWeight: FontWeight.w400))),
+          IconButton(
+            onPressed: Get.back,
+            icon: const Icon(Icons.close),
+          ),
+        ],
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: ImageProductAvatarApp(url: widget.product.image),
+            title:widget.product.description==''?subtitleWidget:titleWidget,
+            // subtitle : codigo del producto si es q existe 
+            subtitle: widget.product.description==''? null:subtitleWidget,
+          ), 
+          const SizedBox(height: 12),
+          const Divider(thickness:0.6,),
+          // text : cantidad
+          const Text('Cantidad'),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // button : disminuir cantidad
+              FloatingActionButton(
+                elevation: 3,
+                onPressed: () {
+                  controller.getTicket.decrementProduct(product: widget.product); 
+                  controller.update();
+                  if(widget.product.quantity>1){
+                    setState(() {widget.product.quantity--;});
+                  }
+                },
+                child: const Icon(Icons.horizontal_rule,color: Colors.white),
+              
+              ),
+              Padding(
+                padding: const EdgeInsets.all(18.0),
+                child: Text(widget.product.quantity.toString(),style: const TextStyle(fontSize: 20)),
+              ),
+              // button : aumentar cantidad
+              FloatingActionButton(
+                elevation: 3,
+                onPressed: () {
+                  controller.getTicket.incrementProduct(product: widget.product); 
+                  controller.update();
+                  setState(() {widget.product.quantity++;});
+                },
+                child: const Icon(Icons.add,color: Colors.white),
+              ),  
+            ],
+          ),
+        ],
+      ),
+      actions: [
+        // butoom : eliminar
+        TextButton(
+          onPressed: () {
+            controller.getTicket.removeProduct(product: widget.product); 
+            controller.update();
+            Get.back();
+          },
+          child: Text('Eliminar',style: TextStyle(color: Colors.red.shade400)),
+        ),
+        // button : cancelar
+        TextButton(
+          onPressed: () {
+            Get.back();
+          },
+          child: const Text('Ok'),
+        ),
+        
+      ],
+    );
+
+  }
+
+  // views
+  Widget body({required BuildContext context}) {
+    return Container();
+  }
+}
+// ---------------------------------- //
+// ---------- Paint ----------------- //
+// ---------------------------------- //
+class RoundedBubblePainter extends CustomPainter {
+  // description : Clase que dibuja un globo de conversación redondeado
+  final Color color;
+  final double radius;
+  final bool isPointingUp;
+  final bool isPointingLeft;
+  final double notchMargin; // Margen para la muesca
+
+  RoundedBubblePainter({
+    required this.color,
+    this.radius = 16.0,
+    this.isPointingUp = false, // Por defecto la muesca apunta hacia abajo
+    this.isPointingLeft = true, // Por defecto la muesca apunta hacia la izquierda
+    this.notchMargin = 20.0, // Margen por defecto para la muesca
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    // Calcular la posición de la muesca con margen
+    final double notchXStart = isPointingLeft ? notchMargin : size.width - notchMargin;
+    
+    // Rectángulo principal del globo
+    final bubbleRect = RRect.fromRectAndRadius(
+      Rect.fromLTRB(
+        isPointingLeft ? 10 : 0,
+        isPointingUp ? 10 : 0,
+        isPointingLeft ? size.width : size.width - 10,
+        isPointingUp ? size.height : size.height - 10,
+      ),
+      Radius.circular(radius),
+    );
+
+    // Dibujar la forma principal del globo de conversación
+    canvas.drawRRect(bubbleRect, paint);
+
+    // Dibujar la muesca del globo de conversación
+    final path = Path();
+    if (isPointingUp) {
+      // Muesca arriba
+      path.moveTo(notchXStart - 10, 10);
+      path.lineTo(notchXStart, 0);
+      path.lineTo(notchXStart + 10, 10);
+    } else {
+      // Muesca abajo
+      path.moveTo(notchXStart - 10, size.height - 10);
+      path.lineTo(notchXStart, size.height);
+      path.lineTo(notchXStart + 10, size.height - 10);
+    }
+    path.close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
+  }
+}
+class RoundedChatBubble extends StatelessWidget {
+  // description : Widget que dibuja un globo de conversación redondeado
+  final Widget widget;
+  final Color bubbleColor;
+  final bool isPointingUp;
+  final bool isPointingLeft;
+  final double notchMargin;
+
+  const RoundedChatBubble({
+    super.key,
+    required this.widget,
+    this.bubbleColor = Colors.blue,
+    this.isPointingUp = false, // Por defecto la muesca apunta hacia abajo
+    this.isPointingLeft = true, // Por defecto la muesca apunta hacia la izquierda
+    this.notchMargin = 20.0, // Margen por defecto para la muesca
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: RoundedBubblePainter(
+        color: bubbleColor,
+        isPointingUp: isPointingUp,
+        isPointingLeft: isPointingLeft,
+        notchMargin: notchMargin,
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          isPointingLeft ? 20.0 : 12.0,
+          isPointingUp ? 25.0 : 20.0,
+          isPointingLeft ? 12.0 : 20.0,
+          isPointingUp ? 20.0 : 25.0,
+        ),
+        child: widget,
+      ),
+    );
+  }
+}
+

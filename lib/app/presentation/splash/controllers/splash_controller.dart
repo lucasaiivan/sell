@@ -20,9 +20,7 @@ class SplashController extends GetxController {
 
 
   @override
-  void onReady() async {
-    // Verificamos si tenemos una referencia de una cuenta guardada en GetStorage ( API del controlador de almacenamiento )
-    idAccount = GetStorage().read('idAccount') ?? '';
+  void onReady() async { 
 
     /// Workers
     // Los trabajadores lo ayudarán y activarán devoluciones de llamadas específicas cuando ocurra un evento.
@@ -44,14 +42,16 @@ class SplashController extends GetxController {
   void handleAuthStateChanged(bool isLoggedIn) async { 
     // aquí, según el estado de autentificación redirigir al usuario a la vista correspondiente
     if (isLoggedIn) {
+      // Verificamos si tenemos una referencia de una cuenta guardada en GetStorage ( API del controlador de almacenamiento )
+      idAccount = GetStorage().read('idAccount') ?? '';
       // si esta autentificado
-      Get.offAllNamed(Routes.HOME, arguments: {'currentUser': firebaseAuth.currentUser,'idAccount': idAccount} );
+      Get.offAllNamed(Routes.home, arguments: {'currentUser': firebaseAuth.currentUser,'idAccount': idAccount} );
     } else {
       // default values 
       await GetStorage().write('idAccount', '');
       //await googleSign.signOut();
       // si no esta autentificado
-      Get.offAllNamed(Routes.LOGIN);
+      Get.offAllNamed(Routes.login);
     }
   }
 }

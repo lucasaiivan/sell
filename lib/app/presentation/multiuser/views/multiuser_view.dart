@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:path/path.dart'; 
+import 'package:get/get.dart'; 
 import 'package:sell/app/presentation/home/controller/home_controller.dart';
 import 'package:sell/app/presentation/splash/controllers/splash_controller.dart';
 import '../../../core/utils/fuctions.dart';
@@ -59,6 +58,8 @@ class LoadingInitView extends StatelessWidget {
           padding:  const EdgeInsets.symmetric(horizontal: 10,vertical: 8),
           text: 'Crear',
           iconTrailing: Icons.add, 
+          colorAccent: homeController.getIsSubscribedPremium?null:Colors.white,
+          colorBackground: homeController.getIsSubscribedPremium?null:Colors.amber,
           onTap: (){
             // condition :  si la cuenta tiene un subcripcion premium
             if(homeController.getIsSubscribedPremium){
@@ -90,20 +91,21 @@ class LoadingInitView extends StatelessWidget {
 
     // controllers 
     final MultiUserController controller = Get.find();  
+    
 
     return Column(
       children: [
         ListTile( 
           contentPadding:  const EdgeInsets.symmetric(horizontal: 20,vertical: 12),
-          leading:  ComponentApp().userAvatarCircle(),
-          title: Text(user.name==''?user.email:user.name,style: const TextStyle(fontSize: 14,fontWeight: FontWeight.w500)),
+          leading:  ComponentApp().userAvatarCircle(iconData: user.superAdmin?Icons.security_rounded:user.admin?Icons.admin_panel_settings_outlined:null),
+          title: Text(user.name==''?user.email:user.name,maxLines:1,overflow:TextOverflow.clip,style: const TextStyle(fontSize: 14,fontWeight: FontWeight.w500)),
           subtitle: Opacity(opacity: 0.5,child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // text : email
               user.name==''?Container():Text(user.email),Text( user.superAdmin ? 'Super administrador' : user.admin ? 'Administrador':'Permisos personalizado' ),
               // text : fecha de fecha de actualización 
-              Text('Actualizado ${Publications.getFechaPublicacion(fechaActual: user.creation.toDate(),fechaPublicacion: Timestamp.now().toDate()) }'),
+              Text('Actualizado ${Publications.getFechaPublicacion(fechaActual: user.lastUpdate.toDate(),fechaPublicacion: Timestamp.now().toDate()) }'),
             ],
           )),
           onLongPress: () => controller.deleteItem(user: user),

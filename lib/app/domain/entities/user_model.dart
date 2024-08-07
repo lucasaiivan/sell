@@ -1,7 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; 
+import 'package:intl/intl.dart';
 
 class UserModel {
+  
   UserModel({
+    this.id = "",
     this.inactivate = false,
     this.account = "", 
     this.email = '',  
@@ -11,6 +14,9 @@ class UserModel {
     this.personalized = false,  
     required this.creation,
     required this.lastUpdate,
+    this.startTime = const {},
+    this.endTime = const {},
+    this.daysOfWeek = const [],
     // ... 
     this.arqueo = false,  
     this.historyArqueo = false, 
@@ -20,6 +26,7 @@ class UserModel {
     this.editAccount = false, 
   });
 
+  String id = ""; // id de autenticación del usuario
   bool inactivate = false; // inactivar usuario
   String account = ""; // el ID de la cuenta administrada por defecto es el ID del usuario quien lo creo
   String email = ''; // email del usuario
@@ -28,6 +35,9 @@ class UserModel {
   bool admin = false; // permiso de administrador 
   Timestamp creation = Timestamp.now(); // Fecha en la que se creo la cuenta
   Timestamp lastUpdate = Timestamp.now(); // Fecha en la que se actualizo la cuenta
+  Map<String,dynamic> startTime = {}; // hora de acceso habilitada para el usuario
+  Map<String,dynamic> endTime = {}; // hora de cierre de acceso para el usuario
+  List daysOfWeek = []; // dias de la semana habilitados al acceso
   // permisos personalizados
   bool personalized = false;
   // ...  
@@ -41,7 +51,8 @@ class UserModel {
 
   factory UserModel.fromDocument(DocumentSnapshot doc) {
     Map data = doc.data() as Map;
-    return UserModel(
+    return UserModel( 
+      id: doc.id,
       inactivate: data.containsKey("inactivate") ? doc["inactivate"] : false,
       account: doc["account"],
       email: data.containsKey("email") ? doc["email"] : '',
@@ -51,6 +62,9 @@ class UserModel {
       personalized: data.containsKey("personalized") ? doc["personalized"] : false,
       creation: data.containsKey("creation") ? doc["creation"] : Timestamp.now(),
       lastUpdate: data.containsKey("lastUpdate") ? doc["lastUpdate"] : Timestamp.now(),
+      startTime: data.containsKey("startTime") ? doc["startTime"] : {},
+      endTime: data.containsKey("endTime") ? doc["endTime"] : {},
+      daysOfWeek: data.containsKey("daysOfWeek") ? doc["daysOfWeek"] : [],
       // ... 
       arqueo: data.containsKey("arqueo") ? doc["arqueo"] : false,
       historyArqueo: data.containsKey("historyArqueo") ? doc["historyArqueo"] : false,
@@ -64,6 +78,7 @@ class UserModel {
   }
 
   Map<String, dynamic> toJson() => {
+    "id": id,
     "inactivate": inactivate,
     "account": account,
     "email": email,
@@ -72,6 +87,9 @@ class UserModel {
     "admin": admin,
     'creation': creation,
     'lastUpdate': lastUpdate,
+    'startTime': startTime,
+    'endTime': endTime,
+    'daysOfWeek': daysOfWeek,
     // permisos personalizados
     "personalized": personalized, 
     "arqueo": arqueo,
@@ -84,6 +102,7 @@ class UserModel {
 
   factory UserModel.fromMap(Map data) {
     return UserModel(
+      id: data['id'] ?? '',
       inactivate: data['inactivate'] ?? false,
       account: data['account'] ?? '',
       email: data['email'] ?? '',
@@ -93,6 +112,9 @@ class UserModel {
       personalized: data['personalized'] ?? false,
       creation: data['creation'] ?? Timestamp.now(),
       lastUpdate: data['lastUpdate'] ?? Timestamp.now(),
+      startTime: data['startTime'] ?? {},
+      endTime: data['endTime'] ?? {},
+      daysOfWeek: data['daysOfWeek'] ?? [],
       // ... 
       arqueo: data['arqueo'] ?? false,
       historyArqueo: data['historyArqueo'] ?? false,
@@ -109,6 +131,7 @@ class UserModel {
     if (documentSnapshot.data() != null) {data = documentSnapshot.data() as Map; }
 
     //  set
+    id = data.containsKey('id') ? data['id'] : documentSnapshot.id;
     inactivate = data.containsKey('inactivate') ? data['inactivate'] : false;
     account = data.containsKey('account') ? data['account'] : documentSnapshot.id;
     email = data.containsKey('email') ? data['email'] : '';
@@ -118,6 +141,9 @@ class UserModel {
     personalized = data.containsKey('personalized') ? data['personalized'] : false;
     creation = data.containsKey('creation') ? data['creation'] : Timestamp.now();
     lastUpdate = data.containsKey('lastUpdate') ? data['lastUpdate'] : Timestamp.now();
+    startTime = data.containsKey('startTime') ? data['startTime'] : {};
+    endTime = data.containsKey('endTime') ? data['endTime'] : {};
+    daysOfWeek = data.containsKey('daysOfWeek') ? data['daysOfWeek'] : [];
     // ... 
     arqueo = data.containsKey('arqueo') ? data['arqueo'] : false;
     historyArqueo = data.containsKey('historyArqueo') ? data['historyArqueo'] : false;
@@ -127,9 +153,10 @@ class UserModel {
     editAccount = data.containsKey('editAccount') ? data['editAccount'] : false;
   }
 
-  UserModel copyWith({
+  UserModel copyWith({ 
     bool? inactivate,
     String? id,
+    String? account,
     String? email,
     String? name,
     bool? superAdmin,
@@ -137,6 +164,9 @@ class UserModel {
     bool? personalized,
     Timestamp? creation,
     Timestamp? lastUpdate,
+    Map<String,dynamic>? startTime,
+    Map<String,dynamic>? endTime,
+    List<String>? daysOfWeek,
     // ...
     bool? sell,
     bool? arqueo,
@@ -148,7 +178,8 @@ class UserModel {
   }) {
     return UserModel(
       inactivate: inactivate ?? this.inactivate,
-      account: id ?? account,
+      id: id ?? this.id,
+      account: account ?? this.account,
       email: email ?? this.email,
       name: name ?? this.name,
       superAdmin: superAdmin ?? this.superAdmin,
@@ -156,6 +187,9 @@ class UserModel {
       personalized: personalized ?? this.personalized,
       creation: creation ?? this.creation,
       lastUpdate: lastUpdate ?? this.lastUpdate,
+      startTime: startTime ?? this.startTime,
+      endTime: endTime ?? this.endTime,
+      daysOfWeek: daysOfWeek ?? this.daysOfWeek,
       // ... 
       arqueo: arqueo ?? this.arqueo,
       historyArqueo: historyArqueo ?? this.historyArqueo,
@@ -165,9 +199,70 @@ class UserModel {
       editAccount: editAccount ?? this.editAccount,
     );
   }
+
+
+  String get getAccessTimeFormat {
+    // devuelve la hora de acceso del usuario con formato de 24 horas [hh:mm] 
+    if (startTime.isEmpty && endTime.isEmpty) return "";
+    
+    return "${startTime['hour'].toString().padLeft(2, '0')}:${startTime['minute'].toString().padLeft(2, '0')} - ${endTime['hour'].toString().padLeft(2, '0')}:${endTime['minute'].toString().padLeft(2, '0')}";
+  }
+  bool get hasAccessHour{
+    // var
+    DateTime now = DateTime.now(); 
+    // devuelve verdadero si el usuario tiene acceso a la cuenta dentro del horario establecido
+    if (startTime.isEmpty || endTime.isEmpty) return false; 
+    DateTime start = DateTime(now.year, now.month, now.day, startTime['hour'], startTime['minute']);
+    DateTime end = DateTime(now.year, now.month, now.day, endTime['hour'], endTime['minute']);
+    return now.isAfter(start) && now.isBefore(end); 
+  } 
+  bool get hasAccessDay{
+    // var
+    DateTime now = DateTime.now(); 
+    bool dayAccess = false;  
+    // devuelve verdadero si el usuario tiene acceso a la cuenta en el día de la semana establecido 
+    String dayName = DateFormat('EEEE', 'en_US').format(now).toString().toLowerCase().replaceAll(' ', '');  
+    for (var day in daysOfWeek) {  
+      if (day.toString().toLowerCase().replaceAll(' ', '') == dayName.toString().toLowerCase().replaceAll(' ', '') ) {
+        dayAccess = true; 
+      }
+    }
+
+    return dayAccess;
+  } 
+  List get getDaysOfWeek{
+    // devuelve los días de la semana en español
+    List<String> days = [];
+    for (var day in daysOfWeek) {
+      days.add(translateDay(day: day));
+    }
+    return days;
+  }
+  String translateDay({required String day}){
+    // devuelve el dia de la semana en español
+    switch (day) {
+      case 'monday':
+        return 'Lunes';
+      case 'tuesday':
+        return 'Martes';
+      case 'wednesday':
+        return 'Miércoles';
+      case 'thursday':
+        return 'Jueves';
+      case 'friday':
+        return 'Viernes';
+      case 'saturday':
+        return 'Sábado';
+      case 'sunday':
+        return 'Domingo';
+      default:
+        return '';
+    }
+  }
 }
 
 class ProfileAccountModel {
+
   // Informacion de la cuenta
   Timestamp creation = Timestamp.now(); // Fecha en la que se creo la cuenta
   String id = ""; // el ID de la cuenta por defecto es el ID del usuario quien lo creo
@@ -181,10 +276,14 @@ class ProfileAccountModel {
   bool blockingAccount = false;
   String blockingMessage = "";
   bool verifiedAccount = false; // Cuenta verificada
+  String pin = ''; // pin de seguridad  
+  bool trial = false; // estado de prueba gratuita
+  Timestamp trialStart = Timestamp.now(); // fecha de inicio de la prueba
+  Timestamp trialEnd = Timestamp.now(); // fecha de fin de la prueba
 
   // location
   String countrycode = "";
-  String country = "";
+  String country = ""; // pais
   String province = ""; // provincia o estado
   String town = ""; // ciudad o pueblo 
 
@@ -203,10 +302,14 @@ class ProfileAccountModel {
     this.blockingAccount = false,
     this.blockingMessage = "",
     this.verifiedAccount = false, // Cuenta verificada 
+    this.pin = '',
     this.country = "",
     this.province = "",
     this.town = "", 
     required this.creation,
+    this.trial = false,
+    required this.trialStart,
+    required this.trialEnd,
   });
   ProfileAccountModel copyWith({
     // account info
@@ -222,7 +325,8 @@ class ProfileAccountModel {
     String? currencySign,
     bool? blockingAccount,
     String? blockingMessage,
-    bool? verifiedAccount, // Cuenta verificada 
+    bool? verifiedAccount, 
+    String? pin,
     String? country,
     String? province,
     String? town, 
@@ -242,11 +346,15 @@ class ProfileAccountModel {
       currencySign: currencySign ?? this.currencySign,
       blockingAccount: blockingAccount ?? this.blockingAccount,
       blockingMessage: blockingMessage ?? this.blockingMessage,
-      verifiedAccount: verifiedAccount ?? this.verifiedAccount, // Cuenta verificada 
+      verifiedAccount: verifiedAccount ?? this.verifiedAccount, 
+      pin: pin ?? this.pin,
       country: country ?? this.country,
       province: province ?? this.province,
       town: town ?? this.town, 
       creation: creation ?? this.creation,
+      trial: trial,
+      trialStart: trialStart,
+      trialEnd: trialEnd,
     );
   }
 
@@ -269,6 +377,7 @@ class ProfileAccountModel {
     verifiedAccount = data.containsKey('verifiedAccount')
         ? data['verifiedAccount']
         : data['cuenta_verificada'];
+    pin =  data.containsKey('pin') ? data['pin'] : '';
     countrycode = data.containsKey('countrycode')
         ? data['countrycode']
         : data['codigo_pais']; 
@@ -276,6 +385,9 @@ class ProfileAccountModel {
     province =
         data.containsKey('province') ? data['province'] : data['provincia'];
     country = data.containsKey('country') ? data['country'] : data['pais'];
+    trial = data.containsKey('trial') ? data['trial'] : false;
+    trialStart = data.containsKey('trialStart') ? data['trialStart'] : Timestamp.now();
+    trialEnd = data.containsKey('trialEnd') ? data['trialEnd'] : Timestamp.now();
   }
   Map<String, dynamic> toJson() => {
         "id": id,
@@ -288,10 +400,14 @@ class ProfileAccountModel {
         "blockingAccount": blockingAccount,
         "blockingMessage": blockingMessage,
         "verifiedAccount": verifiedAccount,
+        "pin": pin,
         "countrycode": countrycode,
         "country": country,
         "province": province,
         "town": town, 
+        "trial": trial,
+        "trialStart": trialStart,
+        "trialEnd": trialEnd,
       };
 
   ProfileAccountModel.fromDocumentSnapshot( {required DocumentSnapshot documentSnapshot}) {
@@ -321,6 +437,7 @@ class ProfileAccountModel {
     verifiedAccount = data.containsKey('verifiedAccount')
         ? data['verifiedAccount']
         : data["cuenta_verificada"] ?? false;
+    pin = data.containsKey('pin') ? data['pin'] : '';
     countrycode = data.containsKey('countrycode')
         ? data['countrycode']
         : data["codigo_pais"] ?? '';
@@ -330,5 +447,8 @@ class ProfileAccountModel {
         ? data['province']
         : data["provincia"] ?? '';
     town = data.containsKey('town') ? data['town'] : data["ciudad"] ?? ''; 
+    trial = data.containsKey('trial') ? data['trial'] : false;
+    trialStart = data.containsKey('trialStart') ? data['trialStart'] : Timestamp.now();
+    trialEnd = data.containsKey('trialEnd') ? data['trialEnd'] : Timestamp.now();
   }
 }

@@ -3,11 +3,12 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:search_page/search_page.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../core/utils/fuctions.dart';
 import '../../../core/utils/widgets_utils.dart';
 import '../../../domain/entities/catalogo_model.dart';
-import '../../home/controller/home_controller.dart';
-import '../controller/catalogue_controller.dart';
+import '../../home/controller/home_controller.dart'; 
 import '../controller/form_create_product_controller.dart';
 
 class ProductNewFormView extends StatelessWidget {
@@ -44,8 +45,9 @@ class ProductNewFormView extends StatelessWidget {
                 titleTextStyle: TextStyle(
                     color: controller.darkMode ? Colors.white : Colors.white))),
         // WillPopScope : nos permite controlar el botón de retroceso del dispositivo
-        child: WillPopScope(
-          onWillPop: () => controller.onBackPressed(context: context),
+        child: PopScope(
+          canPop: false, // si se puede retroceder
+          onPopInvoked: (_) => controller.onBackPressed(context: context),
           //  Scaffold : proporciona una estructura visual básica para la aplicación
           child: GetBuilder<ControllerCreateProductForm>(
             init: ControllerCreateProductForm(),
@@ -91,7 +93,7 @@ class ProductNewFormView extends StatelessWidget {
         // text : codigo
         controller.getProduct.code != ''
             ? Opacity(opacity: 0.5,
-              child: Text(controller.getProduct.code,
+              child: Text('${controller.getProduct.code}${controller.getProduct.local?' (Catálogo)':''}',
                   style: TextStyle(color: colorAccent, fontSize: 12)),
             )
             : Container(),
@@ -164,7 +166,7 @@ class ProductNewFormView extends StatelessWidget {
             TextButton(
               onPressed: controller.getDataUploadStatus
                   ? null
-                  : controller.getCurrentSlide == 0
+                  : controller.getCurrentSlide == 0 || (controller.getProduct.local && controller.getCurrentSlide == 1) 
                       ? null
                       : () {
                           controller.previousPage();
@@ -353,21 +355,32 @@ class ProductNewFormView extends StatelessWidget {
         Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            //TODO: eliminar para desarrrollo
-            TextButton(
-                onPressed: () async {
-                  String clave = controller.controllerTextEditDescripcion.text;
-                  Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
-                  await launchUrl(uri, mode: LaunchMode.externalApplication);
-                },
-                child: const Text('Buscar descripción en Google (moderador)')),
-            TextButton(
-                onPressed: () async {
-                  String clave = controller.getProduct.code;
-                  Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
-                  await launchUrl(uri, mode: LaunchMode.externalApplication);
-                },
-                child: const Text('Buscar en código Google (moderador)')),
+            //TODO: release : disabled code
+            /* Container(
+              color: Colors.black.withOpacity(0.01),
+              padding: const EdgeInsets.symmetric(horizontal:20,vertical:1),
+              margin: const EdgeInsets.symmetric(  vertical:20),
+              child: Row(
+                children: [ 
+                  const Text('Buscar en Google: '), 
+                  TextButton(
+                      onPressed: () async {
+                        String clave = controller.getProduct.code;
+                        Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
+                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      },
+                      child: const Text('El Código')),
+                  TextButton(
+                      onPressed: () async {
+                        String clave = controller.controllerTextEditDescripcion.text;
+                        Uri uri = Uri.parse("https://www.google.com/search?q=$clave&source=lnms&tbm=isch&sa");
+                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      },
+                      child: const Text('La Descripción')),
+                  
+                ],
+              ),
+            ), */
 
             // text : texto infomativo
             Padding(
@@ -396,10 +409,10 @@ class ProductNewFormView extends StatelessWidget {
                     FilteringTextInputFormatter.allow(
                         RegExp(r'[a-zA-ZÀ-ÿ0-9\- .³%]'))
                   ],
-                  decoration: const InputDecoration(
-                      border: UnderlineInputBorder(),
+                  decoration: InputDecoration(
+                      border: const UnderlineInputBorder(),
                       labelText: 'Descripción',
-                      helperText: 'Visibilidad pública'),
+                      helperText: controller.getProduct.local?'':'Visibilidad pública'),
                   onChanged: (value) {
                     controller.formEditing =
                         true; // validamos que el usuario ha modificado el formulario
@@ -429,6 +442,11 @@ class ProductNewFormView extends StatelessWidget {
 
     // style 
     TextStyle textStyle = TextStyle( color: Get.theme.textTheme.bodyMedium!.color ?? Colors.black );
+    // widget 
+    Widget? circleAvatarBrand = controller.getMarkSelected.toString().isNotEmpty? Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: ComponentApp().userAvatarCircle(urlImage: controller.getMarkSelected.image,empty: true),
+    ): null;
 
     // TextFormField : creamos una entrada de texto
     return Column(
@@ -454,8 +472,7 @@ class ProductNewFormView extends StatelessWidget {
               ],
             ),
           ),
-        ),
-        
+        ), 
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           child: GestureDetector(
@@ -468,15 +485,16 @@ class ProductNewFormView extends StatelessWidget {
                 focusNode: null,
                 controller: controller.controllerTextEditMark,
                 enabled: false,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
+                autovalidateMode: AutovalidateMode.onUserInteraction, 
                 keyboardType: TextInputType.name,
-                decoration: InputDecoration(
+                decoration: InputDecoration( 
+                  suffixIcon: circleAvatarBrand,
                   border: const UnderlineInputBorder(),  
                   labelText: controller.controllerTextEditMark.text == '' ? 'Seleccionar' : 'Marca',
-                  helperText: 'Visibilidad pública',
-                ),
-                onChanged: (value) => controller.formEditing =
-                    true, // validamos que el usuario ha modificado el formulario
+                  helperText: controller.getProduct.local?'':'Visibilidad pública', 
+                  
+                ),  
+                onChanged: (value) => controller.formEditing = true, // validamos que el usuario ha modificado el formulario
                 // validator: validamos el texto que el usuario ha ingresado.
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -767,7 +785,7 @@ class ProductNewFormView extends StatelessWidget {
                   decoration: const InputDecoration(
                       border: UnderlineInputBorder(),
                       labelText: 'Precio de venta',
-                      helperText: 'Visibilidad pública (cualquier usuario puede verlo)'),
+                      helperText: 'Visibilidad pública (cualquier puede verlo)'),
                   onChanged: (value) {
                     if (controller.controllerTextEditPrecioVenta.numberValue != 0) {
                       controller.setSalePrice =
@@ -1213,7 +1231,8 @@ class _SelectCategoryState extends State<SelectCategory> {
   // Variables
   final Category categoriaSelected = Category();
   bool crearCategoria = false, loadSave = false;
-  final HomeController welcomeController = Get.find();
+  // controllers
+  final HomeController homeController = Get.find();
   final ControllerCreateProductForm createProductFormController = Get.find();
 
   @override
@@ -1235,39 +1254,56 @@ class _SelectCategoryState extends State<SelectCategory> {
       appBar: AppBar(
         title: const Text('Categorías'),
         actions: [
-          IconButton(icon: const Icon(Icons.add),onPressed: () => showDialogSetCategoria(categoria: Category())),
+          // icon : agregar nueva categoria
+          IconButton(icon: const Icon(Icons.add),onPressed: (){  
+            Get.back();
+            showDialogSetCategoria(categoria: Category());
+          }),
+          // icon : buscar categoria
+          IconButton(icon: const Icon(Icons.search),onPressed: (){
+            Get.back();
+            showSearchCategories();
+          }),
         ],
       ),
-      body:welcomeController.getCatalogueCategoryList.isEmpty?const Center(child: Text('Sin cátegorias'),): ListView.builder(
+      body: homeController.getCatalogueCategoryList.isEmpty?const Center(child: Text('Sin cátegorias'),): ListView.builder(
         padding: const EdgeInsets.symmetric(vertical: 15.0),
         shrinkWrap: true,
-        itemCount: welcomeController.getCatalogueCategoryList.length,
+        itemCount: homeController.getCatalogueCategoryList.length,
         itemBuilder: (BuildContext context, int index) {
           //  values
-          Category categoria =welcomeController.getCatalogueCategoryList[index];
+          Category category =homeController.getCatalogueCategoryList[index];
           
           return Column(
-                  children: <Widget>[
-                    ListTile(
-                      contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                      dense: true,
-                      title: Text(categoria.name.substring(0, 1).toUpperCase() + categoria.name.substring(1)),
-                      onTap: () {
-                        createProductFormController.setCategory = categoria;
-                        Get.back();
-                      },
-                      trailing: popupMenuItemCategoria(categoria: categoria),
-                    ),
-                    const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
-                  ],
-                );
+            children: <Widget>[
+              itemCategory(category: category),
+              const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
+            ],
+          );
         },
       ),
     );
 
   }
 
+  // WIDGETS COMPONENTS //
+  Widget itemCategory({required Category category}){
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+      dense: true,
+      title: Text(category.name.substring(0, 1).toUpperCase() + category.name.substring(1)),
+      onTap: () {
+        createProductFormController.setCategory = category;
+        homeController.categorySelected(category: category);
+        Get.back();
+      },
+      trailing: popupMenuItemCategoria(categoria: category),
+    );
+  }
   Widget popupMenuItemCategoria({required Category categoria}) {
+
+    // controllers
+    final ControllerCreateProductForm controllerCreateProductForm = Get.find();
     final HomeController controller = Get.find();
 
     return PopupMenuButton(
@@ -1303,6 +1339,7 @@ class _SelectCategoryState extends State<SelectCategory> {
                         onPressed: () async {
                           controller.categoryDelete(idCategory: categoria.id).then((value) {
                               setState(() {
+                                controllerCreateProductForm.controllerTextEditCategory.text = '';
                                 Get.back();
                               });
                             });
@@ -1316,13 +1353,15 @@ class _SelectCategoryState extends State<SelectCategory> {
       },
     );
   }
-
+  // DIALOG // 
   showDialogSetCategoria({required Category categoria}) async {
-    final HomeController controller = Get.find();
-    bool loadSave = false;
+
+    // controllers 
+    final ControllerCreateProductForm controllerCreateProductForm = Get.find();
+    final HomeController controller = Get.find(); 
+    TextEditingController textEditingController = TextEditingController(text: categoria.name);
+    // var
     bool newProduct = false;
-    TextEditingController textEditingController =
-        TextEditingController(text: categoria.name);
 
     if (categoria.id == '') {
       newProduct = true;
@@ -1331,10 +1370,11 @@ class _SelectCategoryState extends State<SelectCategory> {
     }
 
     await showDialog<String>(
-      context: context,
+    context: Get.context!,
       builder: (context) {
         return  AlertDialog(
           contentPadding: const EdgeInsets.all(16.0),
+          title: Text(newProduct ? 'Crear' : "Editar"),
           content:  Row(
             children: <Widget>[
               Expanded(
@@ -1356,18 +1396,54 @@ class _SelectCategoryState extends State<SelectCategory> {
                 onPressed: () async {
                   if (textEditingController.text != '') {
                     // set
-                    categoria.name = textEditingController.text;
-                    setState(() => loadSave = true);
+                    categoria.name = textEditingController.text; 
                     // save
                     await controller.categoryUpdate(categoria: categoria).whenComplete(() {
-                      welcomeController.getCatalogueCategoryList.add(categoria);
-                      setState(() {Get.back();});
-                    }).catchError((error, stackTrace) =>setState(() => loadSave = false));
+                      homeController.getCatalogueCategoryList.add(categoria);
+                      controllerCreateProductForm.controllerTextEditCategory.text = categoria.name;
+                      Get.back();
+                    });
                   }
                 })
           ],
         );
       },
+    );
+  }
+  showSearchCategories(){
+    // description : muestra la barra de busqueda para buscar las categorias
+
+    // var
+    Color colorAccent = Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
+    showSearch(
+      context: context,
+      delegate: SearchPage<Category>(
+        searchStyle: TextStyle(color: colorAccent),
+        barTheme: Get.theme.copyWith(hintColor: colorAccent, highlightColor: colorAccent,inputDecorationTheme: const InputDecorationTheme(filled: false)),
+        items: homeController.getCatalogueCategoryList,
+        searchLabel: 'Buscar marca',
+        suggestion: const Center(child: Text('ej. agua')),
+        failure: Center(child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('No se encontro :('), 
+            const SizedBox(height: 20),
+            TextButton.icon(
+              onPressed: () {
+                Get.back();
+                showDialogSetCategoria(categoria: Category());
+              },
+              icon: const Icon(Icons.add_box_outlined),
+              label: const Text('Crear categoria'),
+            )
+          ],
+        )),
+        filter: (category) => [Utils.normalizeText(category.name),Utils.normalizeText(category.name)],
+        builder: (category) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[
+          itemCategory(category: category),
+          ComponentApp().divider(),
+          ]),
+      ),
     );
   }
 }
@@ -1399,7 +1475,7 @@ class _SelectProviderState extends State<SelectProvider> {
   // Variables
   final Provider providerSelected = Provider();
   bool createProvider = false, loadSave = false;
-  final HomeController welcomeController = Get.find();
+  final HomeController homeController = Get.find();
   final ControllerCreateProductForm createProductFormController = Get.find();
 
   @override
@@ -1416,29 +1492,23 @@ class _SelectProviderState extends State<SelectProvider> {
       appBar: AppBar(
         title: const Text('Proveedor'),
         actions: [
-          IconButton(icon: const Icon(Icons.add),onPressed: () => showDialogSetProvider(provider: Provider())),
+          // iconButton : agregar nuevo proveedor
+          IconButton(icon: const Icon(Icons.add),onPressed: (){Get.back();showDialogSetProvider(provider: Provider());}),
+          // iconButton : buscar proveedor
+          IconButton(icon: const Icon(Icons.search),onPressed: (){Get.back();showSearchProviders();}), 
         ],
       ),
-      body:welcomeController.getProviderList.isEmpty?const Center(child: Text('Sin proveedores'),): ListView.builder(
+      body:homeController.getProviderList.isEmpty?const Center(child: Text('Sin proveedores'),): ListView.builder(
         padding: const EdgeInsets.symmetric(vertical: 15.0),
         shrinkWrap: true,
-        itemCount: welcomeController.getProviderList.length,
+        itemCount: homeController.getProviderList.length,
         itemBuilder: (BuildContext context, int index) {
           //  values
-          Provider provider =welcomeController.getProviderList[index];
+          Provider provider =homeController.getProviderList[index];
           
           return Column(
                   children: <Widget>[
-                    ListTile(
-                      contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                      dense: true,
-                      title: Text(provider.name.substring(0, 1).toUpperCase() + provider.name.substring(1)),
-                      onTap: () {
-                        createProductFormController.setProvider = provider;
-                        Get.back();
-                      },
-                      trailing: popupMenuItemProvider(provider: provider),
-                    ),
+                    itemProvider(provider: provider),
                     const Divider(endIndent: 0.0, indent: 0.0, height: 0.0,thickness: 0.1),
                   ],
                 );
@@ -1447,8 +1517,24 @@ class _SelectProviderState extends State<SelectProvider> {
     );
 
   }
-
+  // WIDGETS COMPONENTS //
+  Widget itemProvider({required Provider provider}){
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+      dense: true,
+      title: Text(provider.name.substring(0, 1).toUpperCase() + provider.name.substring(1)),
+      onTap: () {
+        createProductFormController.setProvider = provider;
+        homeController.providerSelected(provider: provider);
+        Get.back();
+      },
+      trailing: popupMenuItemProvider(provider: provider),
+    );
+  }
   Widget popupMenuItemProvider({required Provider provider}) {
+
+    // controllers
+    final ControllerCreateProductForm controllerCreateProductForm = Get.find(); 
     final HomeController controller = Get.find();
 
     return PopupMenuButton(
@@ -1470,7 +1556,7 @@ class _SelectProviderState extends State<SelectProvider> {
                   contentPadding: const EdgeInsets.all(16.0),
                   content: const Row(
                     children: <Widget>[
-                      Expanded(child:Text("¿Desea continuar eliminando esta categoría?"))
+                      Expanded(child:Text("¿Desea continuar eliminando esta proveedor?"))
                     ],
                   ),
                   actions: <Widget>[
@@ -1482,8 +1568,10 @@ class _SelectProviderState extends State<SelectProvider> {
                     TextButton(
                         child: loadSave == false? const Text("ELIMINAR"): const CircularProgressIndicator(),
                         onPressed: () async {
-                          controller.categoryDelete(idCategory: provider.id).then((value) {
+                          controller.providerDelete(idProvider: provider.id).then((value) {
                               setState(() {
+                                provider.name = ''; 
+                                controllerCreateProductForm.controllerTextEditProvider.text = '';
                                 Get.back();
                               });
                             });
@@ -1497,14 +1585,50 @@ class _SelectProviderState extends State<SelectProvider> {
       },
     );
   }
+  // DIALOG //
+  showSearchProviders(){
+    // description : muestra la barra de busqueda para buscar los proveedores
 
+    // var
+    Color colorAccent = Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
+    showSearch(
+      context: context,
+      delegate: SearchPage<Provider>(
+        searchStyle: TextStyle(color: colorAccent),
+        barTheme: Get.theme.copyWith(hintColor: colorAccent, highlightColor: colorAccent,inputDecorationTheme: const InputDecorationTheme(filled: false)),
+        items: homeController.getProviderList,
+        searchLabel: 'Buscar proveedor',
+        suggestion: const Center(child: Text('ej. coca cola')),
+        failure: Center(child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('No se encontro :('), 
+            const SizedBox(height: 20),
+            TextButton.icon(
+              onPressed: () {
+                Get.back();
+                showDialogSetProvider(provider: Provider());
+              },
+              icon: const Icon(Icons.add_box_outlined),
+              label: const Text('Crear proveedor'),
+            )
+          ],
+        )),
+        filter: (provider) => [Utils.normalizeText(provider.name) ],
+        builder: (provider) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[
+          itemProvider(provider: provider),
+          ComponentApp().divider(),
+          ]),
+      ),
+    );
+  }
   showDialogSetProvider({required Provider provider}) async {
 
     // controllers 
-    final CataloguePageController cataloguePageController = Get.find(); 
+    final HomeController homeController = Get.find();
+    final ControllerCreateProductForm controllerCreateProductForm = Get.find(); 
 
-    // var
-    bool loadSave = false;
+    // var 
     bool newProvider = false;
     TextEditingController textEditingController = TextEditingController(text: provider.name);
 
@@ -1512,10 +1636,10 @@ class _SelectProviderState extends State<SelectProvider> {
       newProvider = true;
       provider =  Provider();
       provider.id =  DateTime.now().millisecondsSinceEpoch.toString();
-    }
+    } 
 
     await showDialog<String>(
-      context: context,
+      context: Get.context!,
       builder: (context) {
         return  AlertDialog(
           contentPadding: const EdgeInsets.all(16.0),
@@ -1538,14 +1662,16 @@ class _SelectProviderState extends State<SelectProvider> {
                 }),
             TextButton( child: loadSave == false? Text(newProvider ? 'GUARDAR' : "ACTUALIZAR"): const CircularProgressIndicator(),
                 onPressed: () async {
-                  if (textEditingController.text != '') {
-                    // set
-                    provider.name = textEditingController.text;
-                    setState(() => loadSave = true);
+                  if (textEditingController.text != '') { 
+                    //  set
+                    provider.name = textEditingController.text; 
                     // save
-                    await cataloguePageController.providerSave(provider: provider).whenComplete(() {
-                      welcomeController.getProviderList.add(provider);
-                      setState(() {Get.back();});
+                    await homeController.providerSave(provider: provider).whenComplete(() {
+                      //set 
+                      controllerCreateProductForm.controllerTextEditProvider.text = provider.name;
+                      // add
+                      homeController.getProviderList.add(provider);
+                      Get.back();
                     }).catchError((error, stackTrace) =>setState(() => loadSave = false));
                   }
                 })

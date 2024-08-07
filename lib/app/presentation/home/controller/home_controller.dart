@@ -1,4 +1,5 @@
-import 'dart:io'; 
+import 'dart:io';     
+import 'package:lottie/lottie.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:google_sign_in/google_sign_in.dart'; 
 import 'package:purchases_flutter/purchases_flutter.dart'; 
 import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart'; 
@@ -17,7 +18,8 @@ import '../../../domain/entities/cashRegister_model.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../domain/entities/user_model.dart';
 import '../../../core/utils/widgets_utils.dart';
-import '../../auth/controller/login_controller.dart';
+import '../../auth/controller/login_controller.dart'; 
+import '../views/home_view.dart';
 
 class HomeController extends GetxController {
 
@@ -29,11 +31,7 @@ class HomeController extends GetxController {
   final GlobalKey floatingActionButtonScanCodeBarKey = GlobalKey();
   final GlobalKey floatingActionButtonSelectedCajaKey = GlobalKey();
   final GlobalKey buttonsPaymenyMode = GlobalKey();
-  
-  // estado de la conexión a internet
-  bool _internetConnection = false;
-  set setInternetConnection(bool value) => _internetConnection = value;
-  bool get getInternetConnection => _internetConnection;
+ 
 
   // user anonymous
   bool _userAnonymous = false;
@@ -50,7 +48,19 @@ class HomeController extends GetxController {
   set setUrlPlayStore(String value) => _urlPlayStore = value;
   get getUrlPlayStore {
     return _urlPlayStore == '' ? '' : _urlPlayStore;
+  } 
+
+  // modo cajero 
+  set setCashierMode(bool value) { 
+    // guardar dato en el almacenamiento local [SharedPreferences]
+    GetStorage().write('cashierMode', value);
   }
+  bool get getCashierMode{
+    // obtener dato en el almacenamiento local [SharedPreferences]  
+    return GetStorage().hasData('cashierMode') ? GetStorage().read('cashierMode') : false;
+  
+  }
+  
  // estado de actualización de la app
   bool _updateApp = false;
   set setUpdateApp(bool value) {
@@ -73,7 +83,11 @@ class HomeController extends GetxController {
  
   // inicia la identificación de id de usario para revenuecat 
   void initIdentityRevenueCat() async {
-    //  configure el SDK de RevvenueCat con una ID de usuario de la aplicación personalizada  
+    //  ------------------------------------------------------------------------------------  //
+    //  configure el SDK de RevvenueCat con una ID de usuario de la aplicación personalizada  //
+    //  ------------------------------------------------------------------------------------  //
+
+    // var
     clientRevenueCatID= getProfileAccountSelected.id;  
     if(clientRevenueCatID == ''){
       // si no hay una cuenta seleccionada
@@ -95,13 +109,17 @@ class HomeController extends GetxController {
       // get : obtenemos los productos de compra
       result.customerInfo.entitlements.all.forEach((key, value) { 
         // conditionm : si la subcripcion es premium esta activa
-        if(key == entitlementID){ setIsSubscribedPremium = value.isActive; }  
+        if(key == entitlementID){ 
+          setIsSubscribedPremium = value.isActive;
+          //Get.snackbar('RevenueCat', value.isActive?'Suscripción premium activa':'Suscripción premium inactiva');  
+        }  
       }); 
     }catch(e){
       // ignore: avoid_print
       print('Error en initIdentityRevenueCat: $e');
+      //Get.snackbar('Error RevenueCat', 'Error en initIdentityRevenueCat: $e');
     }
-  }
+  } 
 
   // brillo de la pantalla
   bool _darkMode = false;
@@ -121,6 +139,11 @@ class HomeController extends GetxController {
   set setCatalogueCategoryList(List<Category> value) {
     _categoryList.value = value;
   }
+  void categorySelected({required Category category}) {
+    // description : posiciona el item (categoria) seleccionado en el primer lugar de la lista
+    _categoryList.remove(category);
+    _categoryList.insert(0, category);
+  }
   
   // provider list
   final RxList<Provider> _providerList = <Provider>[].obs;
@@ -128,8 +151,16 @@ class HomeController extends GetxController {
   set setProviderList(List<Provider> value) {
     _providerList.value = value;
   }
+  void providerSelected({required Provider provider}) {
+    // description : posiciona el item (proveedor) seleccionado en el primer lugar de la lista
+    _providerList.remove(provider);
+    _providerList.insert(0, provider);
+  }
 
   // cash register  //
+  late CashRegister cashRegisterActiveTemp; 
+  set setCashRegisterActiveTemp(CashRegister value) => cashRegisterActiveTemp = value; 
+  CashRegister get getCashRegisterActiveTemp => cashRegisterActiveTemp;
   CashRegister cashRegisterActive = CashRegister(
       id: '',
       sales: 0,
@@ -196,7 +227,7 @@ class HomeController extends GetxController {
     _markList.clear();
     for (ProductCatalogue item in _catalogueBusiness) {
       // object : obtenemos los datos de la marca
-      Mark mark = Mark(id: item.idMark, name: item.nameMark,creation: Timestamp.now(),upgrade: Timestamp.now());
+      Mark mark = Mark(id: item.idMark, name: item.nameMark,image: item.imageMark,creation: Timestamp.now(),upgrade: Timestamp.now());
       // condition : validamos la marca del producto
       if(mark.id !='' && mark.name != ''){
         // condition : si la marca no esta en la lista la añadimos
@@ -217,8 +248,8 @@ class HomeController extends GetxController {
     loadMarkCatalogue();
   }
 
-  addToListProductSelecteds({required ProductCatalogue item}) {
-    _productsOutstandingList.add(item);
+  addToListProductSelecteds({required ProductCatalogue item}) { 
+    _productsOutstandingList.insert(0, item);
   }
 
   //  authentication account profile
@@ -235,7 +266,7 @@ class HomeController extends GetxController {
   }
 
   // profile account selected
-  ProfileAccountModel _accountProfileSelected = ProfileAccountModel(creation: Timestamp.now());
+  ProfileAccountModel _accountProfileSelected = ProfileAccountModel(creation: Timestamp.now(),trialEnd: Timestamp.now(),trialStart: Timestamp.now());
   ProfileAccountModel get getProfileAccountSelected => _accountProfileSelected;
   set setProfileAccountSelected(ProfileAccountModel value) => _accountProfileSelected = value;
   String get getIdAccountSelected => _accountProfileSelected.id;
@@ -270,7 +301,7 @@ class HomeController extends GetxController {
 
   bool get checkAccountExistence {
     // comprobamos si el usuario autenticado ya creo un cuenta
-    String idAccountAthentication = getUserAuth.uid;
+    String idAccountAthentication = getUserAuth.uid; 
     for (ProfileAccountModel element in getManagedAccountsList) {
       if (idAccountAthentication == element.id) {
         return true;
@@ -284,36 +315,24 @@ class HomeController extends GetxController {
   int get getIndexPage => _indexPage.value;
   set setIndexPage(int value) => _indexPage.value = value;
 
-  @override
-  void onInit() async {
-    super.onInit(); 
-  
-    // inicialización de la variable
-    setFirebaseAuth = FirebaseAuth.instance; // inicializamos la autenticación de firebase
-    isAppUpdated(); // verificamos si la app esta actualizada 
-    
-    // condition : comprobamos si el usuario esta autenticado o es un usuario anonimo
-    if (getFirebaseAuth.currentUser.isAnonymous) {
-      // obtenemos datos de prueba para que el usaurio pueda probar la app sin autenticarse
-      readAccountsInviteData();
-    } else {
-      // GetX : obtenemos por parametro los datos de la cuenta de atentificación
-      Map arguments = Get.arguments;
-      // verificamos y obtenemos los datos pasados por parametro
-      setUserAuth = arguments['currentUser'];
-      // obtenemos el id de la cuenta seleccionada si es que existe 
-      readAccountsData(idAccount: arguments['idAccount']);
+  // GETTERS //
+  bool pinSegurityCheck({required String pin}) {
+    // verifica si el pin ingresado es correcto
+    return getProfileAccountSelected.pin == pin;
+  }
+  bool isCatalogue({required String id}) {
+    bool iscatalogue = false;
+    List list = getCataloProducts;
+    for (var element in list) {
+      if (element.id == id) {
+        iscatalogue = true;
+      }
     }
-  }
-
-  @override
-  void onClose() { 
-    // ...
-    super.onClose(); 
+    return iscatalogue;
   }
 
 
-  // FUNCTIONS
+  // FUNCTIONS 
   Future<bool> onBackPressed({required BuildContext context}) async {
     // si el usuario no se encuentra en el index 0, va a devolver la vista al index 0
     if (getIndexPage != 0) {
@@ -351,18 +370,6 @@ class HomeController extends GetxController {
     );
     return shouldPop!;
   }
-
-  bool isCatalogue({required String id}) {
-    bool iscatalogue = false;
-    List list = getCataloProducts;
-    for (var element in list) {
-      if (element.id == id) {
-        iscatalogue = true;
-      }
-    }
-    return iscatalogue;
-  }
-
   ProductCatalogue getProductCatalogue({required String id}) {
     ProductCatalogue product = ProductCatalogue(
         creation: Timestamp.now(),
@@ -376,7 +383,28 @@ class HomeController extends GetxController {
     }
     return product;
   }
-
+  void sincronizeCatalogueProducts({required ProductCatalogue product,bool delete = false}) {
+    // sincronizamos los productos del catálogo
+    bool exist = false;
+    if(delete){
+      // eliminamos el producto del catálogo
+      getCataloProducts.removeWhere((element) => element.id == product.id);
+    }else{
+      for (int i = 0; i < getCataloProducts.length; i++) {
+        if (getCataloProducts[i].id == product.id) {
+          getCataloProducts[i] = product;
+          exist = true;
+          break;
+        }
+      }
+      // condition : si el producto no existe en la lista lo añadimos
+      if (exist==false) {  
+        getCataloProducts.insert(0, product);
+      }
+    }
+    // ordenamos por fecha de actualización
+    getCataloProducts.sort((a, b) => b.upgrade.compareTo(a.upgrade));
+  }
   // login
   void login() async {
     // Inicio de sesión con Google
@@ -405,7 +433,7 @@ class HomeController extends GetxController {
       // Una vez que haya iniciado sesión, devuelva el UserCredential
       await firebaseAuth.signInWithCredential(oAuthCredential);
       // navigation : navegamos a la pantalla principal
-      Get.offAllNamed(Routes.HOME, arguments: {
+      Get.offAllNamed(Routes.home, arguments: {
         'currentUser': firebaseAuth.currentUser,
         'idAccount': ''
       });
@@ -423,7 +451,7 @@ class HomeController extends GetxController {
     // signOut : Cierra la sesión del usuario actual.
     await firebaseAuth.signOut();
     // navigation : navegamos a la pantalla principal
-    Get.offAllNamed(Routes.LOGIN);
+    Get.offAllNamed(Routes.login);
     // finalizamos el diálogo alerta
     CustomFullScreenDialog.cancelDialog();
   }
@@ -472,6 +500,14 @@ class HomeController extends GetxController {
     final GoogleSignIn googleSignIn = GoogleSignIn();
     // cerramos sesión
     try {
+      // Eliminar los datos de la memoria del dispositivo
+      await const FlutterSecureStorage().deleteAll();
+      // elimina los datos de shared preferences
+      await GetStorage().erase();
+      // set : id de la cuenta seleccionada nulo por defecto
+      await GetStorage().write('idAccount','');
+      
+
       // 1. Cerrar sesión de Google
       await googleSignIn.signOut();
 
@@ -481,17 +517,22 @@ class HomeController extends GetxController {
       // 3. Revocar el token de acceso actual
       await googleSignIn.disconnect();
 
-      // Eliminar los datos de la memoria del dispositivo
-      await const FlutterSecureStorage().deleteAll();
     } catch (error) {
       print('#### error : signOutGoogle');
     }
   }
 
-  //
-  // QUERIES FIRESTORE
-  //
+  // FIRESTORE //
+  void createPin({required String pin}) { 
+    // ref
+     CollectionReference referenceCollection = Database.refFirestoreAccount();
+    // set
+    getProfileAccountSelected.pin = pin;
 
+    // firebase : guarda el pin en la cuenta
+    referenceCollection.doc(getProfileAccountSelected.id).update({'pin': pin});
+    
+  }
   Future<void> isAppUpdated() async {
     try {
       final packageInfo = await PackageInfo.fromPlatform();
@@ -516,11 +557,12 @@ class HomeController extends GetxController {
           upgrade: Timestamp.now(),
           documentCreation: Timestamp.now(),
           documentUpgrade: Timestamp.now(),
-          id: '078943658457643',
-          code: '078943658457643',
-          description: 'Agua Mineral 1L',
-          salePrice: 170,
-          purchasePrice: 99,
+          image: 'https://ardiaprod.vtexassets.com/arquivos/ids/298980/Gaseosa-CocaCola-Sabor-Original-500-Ml-_1.jpg',
+          id: '7790895000782',
+          code: '7790895000782',
+          description: 'Coca Cola Original 500 Ml',
+          salePrice: 1200,
+          purchasePrice: 600,
           favorite: true,
           sales: 4,
           stock: true,
@@ -531,13 +573,15 @@ class HomeController extends GetxController {
               DateTime.now().subtract(const Duration(days: 1))),
           documentCreation: Timestamp.now(),
           documentUpgrade: Timestamp.now(),
-          id: '69696435423878',
-          code: '69696435423878',
-          description: 'Alfajor De Chocolate Con Dulce De Leche 110 g',
-          salePrice: 60,
-          purchasePrice: 35,
+          image: 'https://img.sistemastock.com/img/7795735000335.jpg',
+          id: '7795735000335',
+          code: '7795735000335',
+          description: 'Don Satur Dulce 200G',
+          salePrice: 866,
+          purchasePrice: 400,
           sales: 1,
           stock: true,
+          favorite: true,
           quantityStock: 47),
       ProductCatalogue(
           creation: Timestamp.now(),
@@ -545,18 +589,81 @@ class HomeController extends GetxController {
               DateTime.now().subtract(const Duration(days: 1))),
           documentCreation: Timestamp.now(),
           documentUpgrade: Timestamp.now(),
-          id: '98679678967969',
-          code: '98679678967969',
-          description: 'Galletitas Dulces 200 g',
-          salePrice: 140,
-          purchasePrice: 80,
+          image: 'https://img.sistemastock.com/img/7790310984192.jpg',
+          id: '7790310984192',
+          code: '7790310984192',
+          description: 'Doritos 85G',
+          salePrice: 2200,
+          purchasePrice: 1500,
+          sales: 7,
+          stock: true,
+          quantityStock: 18,
+          ),
+        ProductCatalogue(
+          creation: Timestamp.now(),
+          upgrade: Timestamp.fromDate(
+              DateTime.now().subtract(const Duration(days: 1))),
+          documentCreation: Timestamp.now(),
+          documentUpgrade: Timestamp.now(),
+          image: 'https://img.sistemastock.com/img/0000077953124.jpg',
+          id: '77953124',
+          code: '77953124',
+          description: 'COFLER BLOCK 38 GR',
+          salePrice: 1000,
+          purchasePrice: 600,
+          sales: 7,
+          stock: true,
+          quantityStock: 18,
+          ),
+        ProductCatalogue(
+          creation: Timestamp.now(),
+          upgrade: Timestamp.fromDate(
+              DateTime.now().subtract(const Duration(days: 1))),
+          documentCreation: Timestamp.now(),
+          documentUpgrade: Timestamp.now(),
+          image: 'https://img.sistemastock.com/img/7790895000836.jpg',
+          id: '7790895000836',
+          code: '7790895000836',
+          description: 'FANTA NARANJA X 500 ML',
+          salePrice: 900,
+          purchasePrice: 490,
+          sales: 7,
+          stock: true,
+          quantityStock: 18,
+          ),
+          ProductCatalogue(
+          creation: Timestamp.now(),
+          upgrade: Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 1))),
+          documentCreation: Timestamp.now(),
+          documentUpgrade: Timestamp.now(),
+          image: 'https://img.sistemastock.com/img/7790387015324.jpg',
+          id: '7790387015324',
+          code: '7790387015324',
+          description: 'Yerba Mate Mañanita 500g',
+          salePrice: 2100,
+          purchasePrice: 1000,
+          sales: 7,
+          stock: true,
+          quantityStock: 18,
+          ),
+          ProductCatalogue(
+          creation: Timestamp.now(),
+          upgrade: Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 1))),
+          documentCreation: Timestamp.now(),
+          documentUpgrade: Timestamp.now(),
+          image: 'https://img.sistemastock.com/img/7791324157022.jpg',
+          id: '7791324157022',
+          code: '7791324157022',
+          description: 'PITUSAS VAINILLA 160G',
+          salePrice: 800,
+          purchasePrice: 450,
           sales: 7,
           stock: true,
           quantityStock: 18,
           ),
     ]; // lista de productos del catálogo
     setProductsOutstandingList = getCataloProducts.toList(); // lista de productos destacados
-    setProfileAccountSelected = ProfileAccountModel(creation: Timestamp.now(),name: 'Mi negocio'); // datos de la cuenta
+    setProfileAccountSelected = ProfileAccountModel(creation: Timestamp.now(),name: 'Mi negocio',trialEnd: Timestamp.now(),trialStart: Timestamp.now()); // datos de la cuenta
     setManagedAccountsList = []; // lista de cuentas gestionadas
     setProfileAdminUser = UserModel(
         superAdmin: true,
@@ -575,7 +682,7 @@ class HomeController extends GetxController {
     setCatalogueCategoryList = [];
     setCatalogueProducts = [];
     setProductsOutstandingList = [];
-    setProfileAccountSelected = ProfileAccountModel(creation: Timestamp.now());
+    setProfileAccountSelected = ProfileAccountModel(creation: Timestamp.now(),trialEnd: Timestamp.now(),trialStart: Timestamp.now());
     getProfileAccountSelected.id = idAccount; // asignamos el id de la cuenta
 
     // obtenemos las cuentas asociada a este email
@@ -603,11 +710,16 @@ class HomeController extends GetxController {
   }
 
   void readListCategoryListFuture({required String idAccount}) {
+     
+
     // obtenemos la categorias creadas por el usuario
     Database.readCategoriesQueryStream(idAccount: idAccount).listen((event) {
       List<Category> list = [];
       for (var element in event.docs) {
-        list.add(Category.fromMap(element.data()));
+        // obj
+        Category category = Category.fromMap(element.data()); 
+        // add : añadimos la categoria a la lista
+        list.add(category);
       }
       setCatalogueCategoryList = list;
     });
@@ -661,32 +773,42 @@ class HomeController extends GetxController {
       setProductsOutstandingList = finalList;
       try {
         // actualizamos la vista de ventas
-        SalesController salesController = Get.find();
+        SellController salesController = Get.find();
         salesController.update();
       } catch (_) {}
     });
   }
 
   void readProductsCatalogue({required String idAccount}) {
-    // obtenemos los obj(productos) del catalogo de la cuenta del negocio
-    Stream<QuerySnapshot<Map<String, dynamic>>> streamSubscription = Database.readProductsCatalogueStream(id: idAccount);
-    streamSubscription.listen((value) {
-      //  values
-      List<ProductCatalogue> list = [];
+ 
+    // future : obtenemos los productos del catálogo una sola ves
+    CollectionReference referenceCollectionCatalogue = Database.refFirestoreCatalogueProduct(idAccount: idAccount); 
+    referenceCollectionCatalogue.get().then((value) {
 
+      // TODO : release : disabled code
+      // incrementamos el valor de veces que se obtuvo datos de la db o en su defecto creamos la variable en el almacenamiento local
+      /* String dateId = DateFormat('ddMMyyyy').format(Timestamp.now().toDate()).toString();
+      int count = GetStorage().hasData(dateId) ? GetStorage().read(dateId) : 0;
+      GetStorage().write(dateId, count + value.docs.length ); */
+
+      // values
+      List<ProductCatalogue> list = [];
       if (value.docs.isNotEmpty) {
         for (var element in value.docs) {
-          list.add(ProductCatalogue.fromMap(element.data()));
+          // obj
+          ProductCatalogue product = ProductCatalogue.fromMap(element.data() as Map<String, dynamic>);
+          // add
+          list.add(product);
         }
       }
       //  obtenemos los productos más vendidos
       getTheBestSellingProducts(idAccount: idAccount);
       setCatalogueProducts = list;
-
-    }).onError((error) {
+    }).onError((error, stackTrace) {
       // error
       setCatalogueProducts = [];
-    });
+    }
+    ); 
   }
 
   void readAdminsUsers({required String idAccount}) {
@@ -705,35 +827,132 @@ class HomeController extends GetxController {
       // error
     });
   }
-
+  
   void readDataAdminUser({required String idAccount, required String email}) {
     // obtenemos los datos de los permisos del usuario en la cuenta
     Database.readFutureAdminUser(idAccount: idAccount, email: email).then((value) {
-      if (value.exists) {
+      if (value.exists) { 
         // set : datos de los permisos del usuario en la cuenta
-        setProfileAdminUser = UserModel.fromDocumentSnapshot(documentSnapshot: value); 
+        setProfileAdminUser = UserModel.fromDocumentSnapshot(documentSnapshot: value);   
+        // condition : comprobar que el usuario no este inactivo
+        if(getProfileAdminUser.inactivate == true){
+          //  ------------------------------------  //
+          //  acceso inactivo por el administrador  //
+          //  ------------------------------------  //
+          Get.dialog(
+            PopScope( 
+              canPop: false, // Evita que el diálogo se cierre cuando se presiona el botón de retroceso
+              child: Center(
+                child: AlertDialog(
+                  icon: const Icon(Icons.lock),
+                  title: const Text('Usuario inactivo'),
+                  content: const Text('Tu acceso a la cuenta ha sido restringido ponte en contacto con el administrador'),
+                  actions: [
+                    // button : cambiar de cuenta
+                    TextButton(
+                      onPressed: () {
+                        // navigation : navegamos a la pantalla de inicio de sesión
+                        Get.offAllNamed(Routes.home, arguments: {
+                          'currentUser': getUserAuth,
+                          'idAccount': ''
+                        });
+                      },
+                      child: const Text('ok'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            barrierDismissible: false,
+            barrierColor: const Color(0xff141A31).withOpacity(.3),
+            useSafeArea: true, navigatorKey: Get.key,
+          );
+
+        // condition : denegar el acceso si esta fuera de horario o dia [hasAccessDay, hasAccessHour] a menos que sea [superAdmin, admin]
+        }else if( getProfileAdminUser.hasAccessDay == false && getProfileAdminUser.superAdmin == false  || getProfileAdminUser.hasAccessHour == false && getProfileAdminUser.superAdmin == false){ 
+          
+          //  --------------------------------------  //
+          // acceso restringido por horario de acceso //
+          //  --------------------------------------  //
+          Get.dialog(
+            PopScope( 
+              canPop: false, // Evita que el diálogo se cierre cuando se presiona el botón de retroceso
+              child: Center(
+                child: AlertDialog(
+                  icon: const Icon(Icons.lock_clock),
+                  title: const Text('No tienes acceso'),
+                  content: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [ 
+                      // text : dias con acceso
+                      const Text('Días de acceso:'),
+                      const SizedBox(height: 10),
+                      // text : dias con acceso 
+                      Wrap(
+                        spacing: 4,
+                        children: getProfileAdminUser.getDaysOfWeek.map((e) => Chip(label: Text(e),backgroundColor: Colors.transparent)).toList(),
+                      ),
+                      // text : horario de acceso
+                      Text('Horario: ${getProfileAdminUser.getAccessTimeFormat}'),
+                    ],
+                  ),
+                  actions: [
+                    // button : cambiar de cuenta
+                    TextButton(
+                      onPressed: () {
+                        // navigation : navegamos a la pantalla de inicio de sesión
+                        Get.offAllNamed(Routes.home, arguments: {
+                          'currentUser': getUserAuth,
+                          'idAccount': ''
+                        });
+                      },
+                      child: const Text('ok'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            barrierDismissible: false,
+            barrierColor: const Color(0xff141A31).withOpacity(.3),
+            useSafeArea: true, navigatorKey: Get.key,
+          );
+        }
+        
       }
+    }).onError((error, stackTrace) {
+      // message : verificamos si hay conexión a internet
+      Get.snackbar('Error', 'Error al obtener los datos, verifica tu conexión a internet');
+
     });
   }
 
-  void readUserAccountsList({required String email}) {
+  void readUserAccountsList({required String email}) { 
+ 
+
     // firebase : obtenemos la lista de cuentas del usuario
-    Database.refFirestoreUserAccountsList(email: email).get().then((value) {
+    Database.refFirestoreUserAccountsList(email: email).get().then((value) { 
       //  recorre la lista de cuentas
-      for (var element in value.docs) {
+      for (var element in value.docs){
+        
+        // get : obtenemos los datos del perfil del usuario
+        UserModel userModel = UserModel.fromDocumentSnapshot(documentSnapshot: element); 
         // condition : si el id de la cuenta es diferente de vacio para evitar errores de consulta inexistentes
-        if (element.get('id') != '') {
+        if (userModel.account != '') {
           // firebase : obtenemos los datos de la cuenta
-          Database.readProfileAccountModelFuture(element.get('id')).then((value) {
-            // obtenemos los perfiles de las cuentas administradas
+          Database.readProfileAccountModelFuture(userModel.account).then((value) { 
+            // get : obtenemos los perfiles de las cuentas administradas
             ProfileAccountModel profileAccountModel = ProfileAccountModel.fromDocumentSnapshot(documentSnapshot:value);
             // set
-            addManagedAccountsList = profileAccountModel; 
+            addManagedAccountsList = profileAccountModel;  
+            setLoadedManagedAccountsList = true;
           });
         }
+      } 
+      if(value.docs.isEmpty){
+        setLoadedManagedAccountsList = true;
       }
-      // actualizamos el estado de la lista de cuentas administradas
-      setLoadedManagedAccountsList = true;
+      
     }).onError((error, stackTrace){
       setLoadedManagedAccountsList = true;
     }).catchError((onError) {
@@ -742,23 +961,22 @@ class HomeController extends GetxController {
     });
   }
 
-  Future<void> categoryDelete({required String idCategory}) async =>
-      await Database.refFirestoreCategory(
-              idAccount: getProfileAccountSelected.id)
-          .doc(idCategory)
-          .delete();
+  Future<void> categoryDelete({required String idCategory}) async => await Database.refFirestoreCategory(idAccount: getProfileAccountSelected.id).doc(idCategory).delete();
   Future<void> categoryUpdate({required Category categoria}) async {
     // refactorizamos el nombre de la cátegoria
-    String name = categoria.name.substring(0, 1).toUpperCase() +
-        categoria.name.substring(1);
+    String name = categoria.name.substring(0, 1).toUpperCase() + categoria.name.substring(1);
     categoria.name = name;
     // ref
-    var documentReferencer =
-        Database.refFirestoreCategory(idAccount: getProfileAccountSelected.id)
-            .doc(categoria.id);
+    var documentReferencer = Database.refFirestoreCategory(idAccount: getProfileAccountSelected.id).doc(categoria.id);
     // Actualizamos los datos
-    documentReferencer.set(
-        Map<String, dynamic>.from(categoria.toJson()), SetOptions(merge: true));
+    documentReferencer.set(Map<String, dynamic>.from(categoria.toJson()), SetOptions(merge: true));
+  }
+  Future<void> providerDelete({required String idProvider}) async => await Database.refFirestoreProvider(idAccount: getProfileAccountSelected.id).doc(idProvider).delete();
+  Future<void> providerSave({required Provider provider}) async {
+    // firestore : reference
+    var documentReferencer = Database.refFirestoreProvider(idAccount: getProfileAccountSelected.id).doc(provider.id);
+    // firestore : Actualizamos los datos
+    documentReferencer.set(Map<String, dynamic>.from(provider.toJson()),SetOptions(merge: true));
   }
 
   void addProductToCatalogue({required ProductCatalogue product,required isProductNew}) async {
@@ -767,8 +985,9 @@ class HomeController extends GetxController {
     // condition : si el producto es nuevo se le asigna los valores de creación
     if(isProductNew){
       // el producto no existe 
-      product.creation = Timestamp.fromDate(DateTime.now()); // fecha de creación del producto
+      product.creation = Timestamp.fromDate(DateTime.now()); // fecha de creación del producto 
       product.followers++; // incrementamos el contador de los seguidores del producto publico 
+   
     }else{
       // el producto ya existe
       //
@@ -783,9 +1002,13 @@ class HomeController extends GetxController {
     
     // Firebase : se actualiza el documento del producto del cátalogo
     Database.refFirestoreCatalogueProduct(idAccount: getProfileAccountSelected.id).doc(product.id).set(product.toJson());
+
+    // actualiza la lista de productos del cátalogo en la memoria de la app
+    sincronizeCatalogueProducts(product: product);
     
-    // condition : si el producto no esta verificado se procede a crear un documento en la colección publica
-    if (product.verified == false) {
+    // condition : si el producto no esta verificado o no existe 
+    if (product.verified == false || isProductNew ) { 
+      // fuction : se crea un documento en la colección publica
       addProductToCollectionPublic(isNew: isProductNew, product: product.convertProductoDefault());
     }
   }
@@ -796,8 +1019,7 @@ class HomeController extends GetxController {
 
     // condition : si el producto es nuevo se le asigna los valores de creación
     if (isNew && product.verified == false) {
-      // datos de creación por primera vez
-      product.idAccount = getProfileAccountSelected.id;
+      // datos de creación por primera vez 
       product.idUserCreation = getProfileAdminUser.email;
       product.creation = Timestamp.fromDate(DateTime.now());
     }
@@ -812,32 +1034,56 @@ class HomeController extends GetxController {
       Database.refFirestoreProductPublic().doc(product.id).set(product.toJson());
     } else {
       // firebase : se actualiza un documento en la colección publica
-      Database.refFirestoreProductPublic().doc(product.id).update(product.toJson());
+      Database.refFirestoreProductPublic().doc(product.id).update(product.toJsonUpdate());
     }
   }
 
-  // void : funcion para cambiar de cuenta en la app
   void accountChange({required String idAccount}) async {
     // save key/values Storage
     await GetStorage().write('idAccount', idAccount);
     // navegar hacia otra pantalla
-    Get.offAllNamed(Routes.HOME,arguments: {'currentUser': getUserAuth, 'idAccount': idAccount} );
+    Get.offAllNamed(Routes.home,arguments: {'currentUser': getUserAuth, 'idAccount': idAccount} );
   }
-
-  // BottomSheet - Getx
+  // GETTERS //
+  // ...
+  // DIALOGS //
+  void showModalBottomSheetConfig() {  
+    
+    // muestre la hoja inferior modal de getx
+    Get.bottomSheet(
+      MyConfigView(),
+      clipBehavior: Clip.antiAlias,
+      backgroundColor: Get.theme.scaffoldBackgroundColor,
+      enableDrag: true,
+      isDismissible: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
+    );
+  }
   void showModalBottomSheetSelectAccount() {
-    // muestra las cuentas en el que el usuario tiene accesos
+    // description : muestra las cuentas en el que el usuario tiene accesos
 
     // widgets
-    Widget widget = !checkAccountExistence
-      ? WidgetButtonListTile().buttonListTileCrearCuenta()
-      : Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-            padding: EdgeInsets.only(bottom: 12, left: 12, right: 12, top: 20),
-            child: Text('Tienes acceso a estas cuentas'),
-          ),
+    Widget widget = Column(
+      children: [ 
+        // text : titulo  y iconobutton
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              children: [
+                // text : titulo
+                const Text('Cuentas',style: TextStyle(fontSize: 20,fontWeight: FontWeight.w600)),
+                const Spacer(),
+                // icon : close
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () {
+                    Get.back();
+                  },
+                ),
+              ],
+            ),
+          ), 
+          // view : lista de cuentas administradas
           ListView.builder(
             padding: const EdgeInsets.symmetric(),
             shrinkWrap: true,
@@ -851,8 +1097,17 @@ class HomeController extends GetxController {
               );
             },
           ),
-        ],
-      );
+        // button : crear cuenta
+          getLoadedManagedAccountsList && checkAccountExistence? Container():
+          Column(
+            children: [
+              ComponentApp().divider(), 
+              WidgetButtonListTile().buttonListTileCrearCuenta(),
+              ComponentApp().divider(),
+            ],
+          ), 
+      ],
+    );
 
     // muestre la hoja inferior modal de getx
     Get.bottomSheet(
@@ -862,53 +1117,84 @@ class HomeController extends GetxController {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              // button : cerrar sesion
-              ListTile(
-                title: const Text('Cerrar sesión'),
-                subtitle: Text(getUserAuth.email.toString(),
-                    maxLines: 1, overflow: TextOverflow.ellipsis),
-                trailing: const Icon(Icons.arrow_forward_ios_rounded),
-                onTap: showDialogCerrarSesion,
-              ),
+            children: [ 
               ComponentApp().divider(),
               widget,
             ],
           ),
         ],
       ),
+      clipBehavior: Clip.antiAlias,
       backgroundColor: Get.theme.scaffoldBackgroundColor,
       enableDrag: true,
       isDismissible: true,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
     );
   }
-
   void showModalBottomSheetSubcription({String id = 'premium'}) {
     // bottomSheet : muestre la hoja inferior modal de getx
     Get.bottomSheet(
-      SizedBox(height: 600, child: WidgetBottomSheet(id: id)),
-      backgroundColor: Get.theme.scaffoldBackgroundColor,
-      isScrollControlled: true,
-      enableDrag: true,
-      isDismissible: true,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20), topRight: Radius.circular(20))),
+      SizedBox(
+        height: 600, 
+        child: WidgetBottomSheetSubcription(id: id)),
+        backgroundColor: Get.theme.scaffoldBackgroundColor,
+        isScrollControlled: true,
+        enableDrag: true,
+        isDismissible: true,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
     );
   }
-}
+  // NAVIGATION //
+  void navigationToPage({required ProductCatalogue productCatalogue}) {
+    // condition : verifica si es un producto local
+    if(productCatalogue.local){
+      // navega hacia la vista de producto
+      Get.toNamed(Routes.editProduct, arguments: {'product': productCatalogue.copyWith()});
+    }else{
+      Get.toNamed(Routes.product, arguments: {'product': productCatalogue.copyWith()});
+    }
+  }
 
-class WidgetBottomSheet extends StatefulWidget {
-  late final String id;
-  // ignore: prefer_const_constructors_in_immutables
-  WidgetBottomSheet({Key? key, required this.id}) : super(key: key);
+  // OVERRIDE //
+  @override
+  void onInit() async {
+    super.onInit(); 
+  
+    // inicialización de la variable
+    setFirebaseAuth = FirebaseAuth.instance; // inicializamos la autenticación de firebase
+    isAppUpdated(); // verificamos si la app esta actualizada 
+    
+    // condition : comprobamos si el usuario esta autenticado o es un usuario anonimo
+    if (getFirebaseAuth.currentUser.isAnonymous) {
+      // obtenemos datos de prueba para que el usaurio pueda probar la app sin autenticarse
+      readAccountsInviteData();
+    } else {
+      // GetX : obtenemos por parametro los datos de la cuenta de atentificación
+      final Map arguments = Get.arguments;
+      // verificamos y obtenemos los datos pasados por parametro
+      setUserAuth = arguments['currentUser'];
+      // obtenemos el id de la cuenta seleccionada si es que existe 
+      readAccountsData(idAccount: arguments['idAccount']);
+    }
+  }
 
   @override
-  State<WidgetBottomSheet> createState() => _WidgetBottomSheetState();
+  void onClose() { 
+    // ...
+    super.onClose(); 
+  }
+
 }
 
-class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
+class WidgetBottomSheetSubcription extends StatefulWidget {
+  late final String id;
+  // ignore: prefer_const_constructors_in_immutables
+  WidgetBottomSheetSubcription({Key? key, required this.id}) : super(key: key);
+
+  @override
+  State<WidgetBottomSheetSubcription> createState() => _WidgetBottomSheetSubcriptionState();
+}
+class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcription> {
   // others controllers
   final HomeController homeController = Get.find();
 
@@ -978,9 +1264,7 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
 
     // values
     Color colorCard = Get.isDarkMode?Get.theme.scaffoldBackgroundColor:const Color.fromARGB(255, 243, 238, 228); 
-    setData(id: widget.id);
- 
- 
+    setData(id: widget.id); 
 
     return Card(
       margin: const EdgeInsets.all(0),
@@ -998,13 +1282,22 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [ 
+                children: <Widget>[
                   const SizedBox(height: 8),
                   // icon 
                   Padding(padding: const EdgeInsets.only(top:12),child: icon),
                   // text : titulo
                   Text(title,textAlign: TextAlign.center,style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
                   const SizedBox(height: 5),
+                  // TODO : delete button release
+                  /*TextButton(
+                    child: const Text('Activar suscripción'),
+                    onPressed: () {
+                      // activa la suscripción solo en la app en tiempo de ejecución de manera local
+                      homeController.setIsSubscribedPremium = true;
+                      Get.back();
+                    },
+                  ),*/
                   // text : descripción
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -1093,6 +1386,17 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
               const SizedBox(height:200),
             ],
           ),
+          // icon : cerrar dialog
+          Positioned(
+            top: 0,
+            right: 0,
+            child: IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () {
+                Get.back();
+              },
+            ),
+          ),
           // view : buton para subcribirse a Premium en la app 
           //
           // Positioned : para posicionar el boton en la parte inferior de la pantalla
@@ -1100,14 +1404,9 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
             bottom: 0,left: 0,right: 0,
             child: Container(   
               // color : gradient de un color y transparent 
-              decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.transparent,Theme.of(context).scaffoldBackgroundColor.withOpacity(0.9),Theme.of(context).scaffoldBackgroundColor], begin: Alignment.topCenter,end: Alignment.bottomCenter),),
+              decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.transparent,Theme.of(context).scaffoldBackgroundColor ], begin: Alignment.topCenter,end: Alignment.bottomCenter,stops: const [0.0,0.6])),
               // condition : comprobar que 'offerings' esta inicializado
-              child:  true ?// homeController.offerings==null? 
-              TextButton(onPressed:(){
-                homeController.setIsSubscribedPremium = true;
-                }, 
-                child: const Text('Subcribirce a Premium'))
-                :Column(
+              child: Column(
                 children: [
                   ListView.builder(
                     physics: const BouncingScrollPhysics(),
@@ -1143,7 +1442,8 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
                               }catch (e) { 
                                 // ... handle error
                               }
-                            },
+                            },  
+                            leading: homeController.getIsSubscribedPremium?null: SizedBox(width: 40,height: 40,child: Lottie.asset('assets/premium_anim.json')),
                             title: Text(homeController.getIsSubscribedPremium?'Ya estás subcripto':myProductList[index].storeProduct.title,maxLines:1), 
                             trailing:homeController.getIsSubscribedPremium?const Icon(Icons.thumb_up,color: Colors.white,): Text('${myProductList[index].storeProduct.currencyCode} ${myProductList[index].storeProduct.priceString}')),
                         ),
@@ -1179,8 +1479,4 @@ class _WidgetBottomSheetState extends State<WidgetBottomSheet> {
     );
   }
 }
-
-
-
-
 
