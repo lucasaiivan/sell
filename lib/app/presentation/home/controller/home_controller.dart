@@ -657,12 +657,14 @@ class HomeController extends GetxController {
         if (value.exists) {
           //get profile account
           setProfileAccountSelected = ProfileAccountModel.fromDocumentSnapshot(documentSnapshot: value);
-          // subcription premium  : inicializamos la identidad de revenue cat
-          initIdentityRevenueCat(); // inicializamos la identidad de revenue cat
+          
           // prueba gratuita : comprobamos si la cuenta tiene una prueba gratuita activada
           if(getProfileAccountSelected.trialEnd.toDate().isAfter(DateTime.now())){
             // si la prueba gratuita esta activa
             setIsSubscribedPremium = true;
+          }else{
+            // subcription premium  : inicializamos la identidad de revenue cat
+            initIdentityRevenueCat(); // inicializamos la identidad de revenue cat
           }
           // load
           loadCashRegisters(); // obtenemos las cajas registradoras activas
@@ -752,7 +754,6 @@ class HomeController extends GetxController {
     CollectionReference referenceCollectionCatalogue = Database.refFirestoreCatalogueProduct(idAccount: idAccount); 
     referenceCollectionCatalogue.get().then((value) {
 
-      // TODO : release : disabled code
       // incrementamos el valor de veces que se obtuvo datos de la db o en su defecto creamos la variable en el almacenamiento local
       /* String dateId = DateFormat('ddMMyyyy').format(Timestamp.now().toDate()).toString();
       int count = GetStorage().hasData(dateId) ? GetStorage().read(dateId) : 0;
@@ -931,7 +932,7 @@ class HomeController extends GetxController {
     // registramos la fecha de inicio y fin de la prueba gratuita
     // var 
     Timestamp trialStart = Timestamp.fromDate(DateTime.now());
-    Timestamp trialEnd = Timestamp.fromDate(DateTime.now().add(const Duration(days:30))); 
+    Timestamp trialEnd = Timestamp.fromDate(DateTime.now().add(const Duration(days:2))); 
     // ref
     var documentReferencer = Database.refFirestoreAccount().doc(getProfileAccountSelected.id);
     // set

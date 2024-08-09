@@ -1776,6 +1776,7 @@ class _ViewAddDiscountState extends State<ViewAddDiscount> {
 }
 
 // DIALOG 
+// ignore: must_be_immutable
 class PinCheckAlertDialog extends StatefulWidget {
 
   late bool create;
