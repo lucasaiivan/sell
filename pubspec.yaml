@@ -15,7 +15,7 @@ publish_to: 'none' # Quite esta línea si desea publicar en pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.7.2+8
+version: 1.7.4+9
 
 environment:
   sdk: '^3.0.0' 
@@ -49,7 +49,7 @@ dependencies:
   in_app_review: ^2.0.9
 
   # RevanueCat  
-  purchases_flutter: ^7.0.0 # Un complemento de Flutter para la API de compras de RevenueCat.
+  purchases_flutter: ^7.0.1 # Un complemento de Flutter para la API de compras de RevenueCat.
 
   # state controller
   get: ^4.6.6 # GetX es una solución potente y extraligera para Flutter. Combina la gestión del estado de alto rendimiento, la inyección inteligente de dependencias y la gestión de rutas de forma rápida y práctica.

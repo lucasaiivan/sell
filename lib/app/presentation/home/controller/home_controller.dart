@@ -88,7 +88,7 @@ class HomeController extends GetxController {
     //  ------------------------------------------------------------------------------------  //
 
     // var
-    clientRevenueCatID= getProfileAccountSelected.id;  
+    clientRevenueCatID = getProfileAccountSelected.id;  
     if(clientRevenueCatID == ''){
       // si no hay una cuenta seleccionada
       setIsSubscribedPremium = false;
@@ -114,6 +114,13 @@ class HomeController extends GetxController {
           //Get.snackbar('RevenueCat', value.isActive?'Suscripción premium activa':'Suscripción premium inactiva');  
         }  
       }); 
+      // prueba gratuita : comprobamos si la cuenta tiene una prueba gratuita activada
+      if(getIsSubscribedPremium == false ){
+        if(getProfileAccountSelected.trialEnd.toDate().isAfter(DateTime.now())){
+          // si la prueba gratuita esta activa
+          setIsSubscribedPremium = true;
+        }
+      }
     }catch(e){
       // ignore: avoid_print
       print('Error en initIdentityRevenueCat: $e');
@@ -658,14 +665,10 @@ class HomeController extends GetxController {
           //get profile account
           setProfileAccountSelected = ProfileAccountModel.fromDocumentSnapshot(documentSnapshot: value);
           
-          // prueba gratuita : comprobamos si la cuenta tiene una prueba gratuita activada
-          if(getProfileAccountSelected.trialEnd.toDate().isAfter(DateTime.now())){
-            // si la prueba gratuita esta activa
-            setIsSubscribedPremium = true;
-          }else{
-            // subcription premium  : inicializamos la identidad de revenue cat
-            initIdentityRevenueCat(); // inicializamos la identidad de revenue cat
-          }
+          
+          // subcription premium  : inicializamos la identidad de revenue cat
+          initIdentityRevenueCat();  
+          
           // load
           loadCashRegisters(); // obtenemos las cajas registradoras activas
           readProductsCatalogue(idAccount: idAccount); // obtenemos los productos del catálogo
