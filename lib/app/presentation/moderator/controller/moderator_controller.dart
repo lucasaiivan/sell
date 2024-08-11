@@ -1,8 +1,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:search_page/search_page.dart'; 
+import 'package:get/get.dart'; 
 import '../../../core/routes/app_pages.dart';
 import '../../../data/datasource/database_cloud.dart';
 import '../../../domain/entities/catalogo_model.dart';

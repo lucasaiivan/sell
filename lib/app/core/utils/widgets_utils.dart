@@ -469,7 +469,7 @@ Widget body({required BuildContext context}){
                     iconColor:  Colors.amber,  
                       leading: const Icon(Icons.star_rounded),
                       title: Text(homeController.getIsSubscribedPremium?'Premium':'Obtener Premium'),
-                      subtitle: homeController.getTrialActive && homeController.getDaysLeftTrial !=0 ? Text('¡Te quedan ${homeController.getDaysLeftTrial} días de prueba!'):Container(),
+                      subtitle: homeController.getTrialActive && homeController.getDaysLeftTrial !=0 ? Text('¡Te quedan ${homeController.getDaysLeftTrial} días de prueba!'):null,
                       onTap: (){
                         // action : mostrar modal bottom sheet con  las funciones premium
                         homeController.showModalBottomSheetSubcription();

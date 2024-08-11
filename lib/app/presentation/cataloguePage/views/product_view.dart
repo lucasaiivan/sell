@@ -564,39 +564,11 @@ class ProductView extends StatelessWidget {
                 return Column(
                   children: <Widget>[
                     ListTile(
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 0.0),
-                      leading: controller.getListPricesForProduct[index]
-                                      .idAccount ==
-                                  "" ||
-                              controller.getListPricesForProduct[index]
-                                      .imageAccount ==
-                                  ""
-                          ? const CircleAvatar(
-                              backgroundColor: Colors.grey,
-                              radius: 24.0,
-                            )
-                          : CachedNetworkImage(
-                              imageUrl: controller
-                                  .getListPricesForProduct[index].imageAccount,
-                              placeholder: (context, url) => const CircleAvatar(
-                                backgroundColor: Colors.grey,
-                                radius: 24.0,
-                              ),
-                              imageBuilder: (context, image) => CircleAvatar(
-                                backgroundImage: image,
-                                radius: 24.0,
-                              ),
-                              errorWidget: (context, url, error) =>
-                                  const CircleAvatar(
-                                backgroundColor: Colors.grey,
-                                radius: 24.0,
-                              ),
-                            ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 0.0),
+                      leading: ComponentApp().userAvatarCircle(urlImage: controller.getListPricesForProduct[index].imageAccount,text: controller.getListPricesForProduct[index].nameAccount),
                       title: Text(
                           Publications.getFormatoPrecio(
-                              value: controller
-                                  .getListPricesForProduct[index].price),
+                              value: controller.getListPricesForProduct[index].price),
                           style: const TextStyle(
                               color: colorText,
                               fontSize: 24.0,
