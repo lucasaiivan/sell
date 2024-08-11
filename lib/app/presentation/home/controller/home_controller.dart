@@ -88,7 +88,7 @@ class HomeController extends GetxController {
     //  ------------------------------------------------------------------------------------  //
 
     // var
-    clientRevenueCatID= getProfileAccountSelected.id;  
+    clientRevenueCatID = getProfileAccountSelected.id;  
     if(clientRevenueCatID == ''){
       // si no hay una cuenta seleccionada
       setIsSubscribedPremium = false;
@@ -114,6 +114,13 @@ class HomeController extends GetxController {
           //Get.snackbar('RevenueCat', value.isActive?'Suscripción premium activa':'Suscripción premium inactiva');  
         }  
       }); 
+      // prueba gratuita : comprobamos si la cuenta tiene una prueba gratuita activada
+      if(getIsSubscribedPremium == false ){
+        if(getProfileAccountSelected.trialEnd.toDate().isAfter(DateTime.now())){
+          // si la prueba gratuita esta activa
+          setIsSubscribedPremium = true;
+        }
+      }
     }catch(e){
       // ignore: avoid_print
       print('Error en initIdentityRevenueCat: $e');
@@ -332,7 +339,7 @@ class HomeController extends GetxController {
   }
 
 
-  // FUNCTIONS 
+  // FUNCTIONS //
   Future<bool> onBackPressed({required BuildContext context}) async {
     // si el usuario no se encuentra en el index 0, va a devolver la vista al index 0
     if (getIndexPage != 0) {
@@ -441,8 +448,7 @@ class HomeController extends GetxController {
       CustomFullScreenDialog.cancelDialog();
     }
   }
-
-// cerrar sesion de firebase
+  // cerrar sesion de firebase
   Future<void> signOutFirebase() async {
     // visualizamos un diálogo alerta
     CustomFullScreenDialog.showDialog();
@@ -455,44 +461,6 @@ class HomeController extends GetxController {
     // finalizamos el diálogo alerta
     CustomFullScreenDialog.cancelDialog();
   }
-
-// cerrar sesión
-  void showDialogCerrarSesion() {
-    Widget widget = AlertDialog(
-      title: const Text("Cerrar sesión"),
-      content: const Text("¿Estás seguro de que quieres cerrar la sesión?"),
-      actions: <Widget>[
-        // usually buttons at the bottom of the dialog
-        TextButton(
-            onPressed: () {
-              Get.back();
-            },
-            child: const Text('cancelar')),
-        TextButton(
-            child: const Text('si'),
-            onPressed: () async {
-              // visualizamos un diálogo alerta
-              Get.dialog(
-                const Center(
-                  child: CircularProgressIndicator(),
-                ),
-                barrierDismissible: false,
-                barrierColor: const Color(0xff141A31).withOpacity(.3),
-                useSafeArea: true,
-              );
-              //
-              // instancias de FirebaseAuth para proceder a cerrar sesión
-              //
-              await signOutGoogleAndFirebase();
-            }),
-      ],
-    );
-
-    Get.dialog(
-      widget,
-    );
-  }
-
   // FUCTION : cerrar sesión de google y firebase
   Future<void> signOutGoogleAndFirebase() async {
     // intancias de FirebaseAuth para proceder a cerrar sesión
@@ -534,6 +502,7 @@ class HomeController extends GetxController {
     
   }
   Future<void> isAppUpdated() async {
+    // comprobamos si la app esta actualizada
     try {
       final packageInfo = await PackageInfo.fromPlatform();
       final currentVersion = int.parse(packageInfo.buildNumber);
@@ -695,8 +664,11 @@ class HomeController extends GetxController {
         if (value.exists) {
           //get profile account
           setProfileAccountSelected = ProfileAccountModel.fromDocumentSnapshot(documentSnapshot: value);
+          
+          
           // subcription premium  : inicializamos la identidad de revenue cat
-          initIdentityRevenueCat(); // inicializamos la identidad de revenue cat
+          initIdentityRevenueCat();  
+          
           // load
           loadCashRegisters(); // obtenemos las cajas registradoras activas
           readProductsCatalogue(idAccount: idAccount); // obtenemos los productos del catálogo
@@ -785,7 +757,6 @@ class HomeController extends GetxController {
     CollectionReference referenceCollectionCatalogue = Database.refFirestoreCatalogueProduct(idAccount: idAccount); 
     referenceCollectionCatalogue.get().then((value) {
 
-      // TODO : release : disabled code
       // incrementamos el valor de veces que se obtuvo datos de la db o en su defecto creamos la variable en el almacenamiento local
       /* String dateId = DateFormat('ddMMyyyy').format(Timestamp.now().toDate()).toString();
       int count = GetStorage().hasData(dateId) ? GetStorage().read(dateId) : 0;
@@ -960,7 +931,21 @@ class HomeController extends GetxController {
       setLoadedManagedAccountsList = true;
     });
   }
-
+  Future<void> activateTrial() async {
+    // registramos la fecha de inicio y fin de la prueba gratuita
+    // var 
+    Timestamp trialStart = Timestamp.fromDate(DateTime.now());
+    Timestamp trialEnd = Timestamp.fromDate(DateTime.now().add(const Duration(days:2))); 
+    // ref
+    var documentReferencer = Database.refFirestoreAccount().doc(getProfileAccountSelected.id);
+    // set
+    documentReferencer.update({'trialEnd': trialEnd,'trialStart': trialStart,'trial': true});
+    // set
+    getProfileAccountSelected.trialEnd = trialEnd;
+    getProfileAccountSelected.trialStart = trialStart;
+    // set
+    setIsSubscribedPremium = true;
+  }
   Future<void> categoryDelete({required String idCategory}) async => await Database.refFirestoreCategory(idAccount: getProfileAccountSelected.id).doc(idCategory).delete();
   Future<void> categoryUpdate({required Category categoria}) async {
     // refactorizamos el nombre de la cátegoria
@@ -1045,8 +1030,50 @@ class HomeController extends GetxController {
     Get.offAllNamed(Routes.home,arguments: {'currentUser': getUserAuth, 'idAccount': idAccount} );
   }
   // GETTERS //
-  // ...
+  int get getDaysLeftTrial{
+    // description : obtiene los dias restantes de la prueba gratuita
+    return getProfileAccountSelected.trialEnd.toDate().difference(DateTime.now()).inDays;
+  }
+  bool get getTrialActive {
+    // description : verifica si la prueba gratuita esta activa
+    return getProfileAccountSelected.trialEnd.toDate().isAfter(DateTime.now());
+  }
   // DIALOGS //
+  void showDialogCerrarSesion() {
+    Widget widget = AlertDialog(
+      title: const Text("Cerrar sesión"),
+      content: const Text("¿Estás seguro de que quieres cerrar la sesión?"),
+      actions: <Widget>[
+        // usually buttons at the bottom of the dialog
+        TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: const Text('cancelar')),
+        TextButton(
+            child: const Text('si'),
+            onPressed: () async {
+              // visualizamos un diálogo alerta
+              Get.dialog(
+                const Center(
+                  child: CircularProgressIndicator(),
+                ),
+                barrierDismissible: false,
+                barrierColor: const Color(0xff141A31).withOpacity(.3),
+                useSafeArea: true,
+              );
+              //
+              // instancias de FirebaseAuth para proceder a cerrar sesión
+              //
+              await signOutGoogleAndFirebase();
+            }),
+      ],
+    );
+
+    Get.dialog(
+      widget,
+    );
+  }
   void showModalBottomSheetConfig() {  
     
     // muestre la hoja inferior modal de getx
@@ -1290,14 +1317,29 @@ class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcript
                   Text(title,textAlign: TextAlign.center,style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
                   const SizedBox(height: 5),
                   // TODO : delete button release
-                  /*TextButton(
-                    child: const Text('Activar suscripción'),
+                  homeController.getTrialActive && homeController.getDaysLeftTrial == 0 ?Container():
+                  TextButton(
+                    style: TextButton.styleFrom( 
+                      side: const BorderSide(color: Colors.blue,width: 1),
+                      minimumSize: const Size(200, 40),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    ),
                     onPressed: () {
                       // activa la suscripción solo en la app en tiempo de ejecución de manera local
-                      homeController.setIsSubscribedPremium = true;
+                      //homeController.setIsSubscribedPremium = true;
+
+                      if(homeController.getTrialActive){
+                        // si la prueba gratuita esta activa
+                        return;
+                      }
+                      
+                      // activar prueba gratuita
+                      homeController.activateTrial();
                       Get.back();
                     },
-                  ),*/
+                    child: homeController.getTrialActive ? Text('Quedan ${homeController.getDaysLeftTrial} días de prueba') : const Text('ACTIVAR PRUEBA POR 30 DÍAS'),
+                  ),
+                  const SizedBox(height: 5),
                   // text : descripción
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),

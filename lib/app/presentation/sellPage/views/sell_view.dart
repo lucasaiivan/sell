@@ -227,17 +227,8 @@ class SalesView extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             // image : avatar del usuario
-                            //ComponentApp().userAvatarCircle(urlImage: homeController.getProfileAccountSelected.image),
-                            CachedNetworkImage(
-                              fit: BoxFit.cover,
-                              imageUrl: homeController.getProfileAccountSelected.image == ''
-                                  ? 'default'
-                                  : homeController.getProfileAccountSelected.image,
-                              placeholder: (context, url) => CircleAvatar(backgroundColor: Colors.grey.withOpacity(0.4),radius: 16),
-                              imageBuilder: (context, image) => CircleAvatar(backgroundImage:image,radius: 16),
-                              errorWidget: (context, url, error) => CircleAvatar(backgroundColor: Colors.grey.withOpacity(0.4),radius: 16),
-                            ),
-                            const SizedBox(width:8),
+                            ComponentApp().userAvatarCircle(urlImage: homeController.getProfileAccountSelected.image,text: homeController.getProfileAccountSelected.name),
+                            const SizedBox(width:4),
                             // text : name 
                             Text(homeController.getProfileAccountSelected.name,textAlign: TextAlign.center,style: textValuesStyle.copyWith(fontSize: 18,fontWeight: FontWeight.bold)),
                           ],
@@ -1776,6 +1767,7 @@ class _ViewAddDiscountState extends State<ViewAddDiscount> {
 }
 
 // DIALOG 
+// ignore: must_be_immutable
 class PinCheckAlertDialog extends StatefulWidget {
 
   late bool create;

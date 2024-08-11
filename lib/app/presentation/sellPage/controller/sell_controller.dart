@@ -8,7 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:image_picker/image_picker.dart';  
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';  
 import 'package:sell/app/domain/entities/cashRegister_model.dart';
 import 'package:sell/app/presentation/home/controller/home_controller.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart';
@@ -606,8 +607,7 @@ class SellController extends GetxController {
                     child: TextField(
                       autofocus: true,
                       controller: textEditingControllerAddFlashPrice,
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: false),
+                      keyboardType: const TextInputType.numberWithOptions(decimal: false),
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp('[1234567890]'))
                       ],
@@ -1407,4 +1407,27 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
 }
  
 
+class CurrencyTextEditingController extends TextEditingController {
+  final NumberFormat _formatter = NumberFormat.currency(
+    locale: 'es_ES',
+    symbol: '',
+    decimalDigits: 2,
+  );
 
+  CurrencyTextEditingController() {
+    addListener(_formatText);
+  }
+
+  void _formatText() {
+    final String text = this.text;
+    if (text.isEmpty) return;
+
+    final String newText = _formatter.format(double.tryParse(text.replaceAll(',', '')) ?? 0);
+    final int selectionIndex = this.selection.end + (newText.length - text.length);
+
+    this.value = this.value.copyWith(
+      text: newText,
+      selection: TextSelection.collapsed(offset: selectionIndex),
+    );
+  }
+}
