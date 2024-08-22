@@ -958,7 +958,7 @@ class ProductNewFormView extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               // view :  logo premium : solo los usuarios premium pueden crear productos
-              LogoPremium(personalize: true, id: 'stock'),
+              controller.getHomeController.getIsSubscribedPremium?Container():LogoPremium(personalize: true, id: 'stock'),
               controller.getStock ? space : Container(),
               AnimatedContainer(
                 width: controller.getStock ? null : 0,

@@ -93,8 +93,12 @@ class TransactionsView extends StatelessWidget {
 
     // vista para mostrar en el caso que no alla ninguna transacción
     if (transactionsController.getVisibilityTransactionsList.isEmpty) {
-      return Center( child: Text( 'Sin transacciones ${transactionsController.getFilterText.toLowerCase()}'));
+      return Center( child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Text( 'Sin transacciones ${transactionsController.getFilterText.toLowerCase()}',style: const TextStyle(fontSize: 30,fontWeight: FontWeight.w300),textAlign: TextAlign.center),
+      ));
     }
+ 
 
     // define una variable currentDate para realizar el seguimiento de la fecha actual en la que se está construyendo la lista. Inicializa esta variable con la fecha de la primera transacción en la lista
     DateTime currentDate = transactionsController.getVisibilityTransactionsList[0].creation.toDate();

@@ -81,7 +81,10 @@ class HistoryCashRegisterView extends StatelessWidget {
     if (!transactionsController.load &&
         transactionsController.getListCashRegister.isEmpty) {
       return const Center(
-        child: Text('sin datos'),
+        child: Padding(
+          padding: EdgeInsets.all(20.0),
+          child: Text('sin datos',style: TextStyle(fontSize: 30,fontWeight: FontWeight.w300),textAlign: TextAlign.center),
+        )
       );
     }
 

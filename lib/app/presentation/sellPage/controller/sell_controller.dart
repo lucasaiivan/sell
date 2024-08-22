@@ -613,7 +613,8 @@ class SellController extends GetxController {
                       ],
                       decoration: InputDecoration(  
                         labelText: "Precio",
-                        prefixIcon: const Icon(Icons.attach_money_rounded), 
+                        hintText: '\$0',
+                        //prefixIcon: const Icon(Icons.attach_money_rounded), 
                         border: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent)),
                         enabledBorder: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent), )
                       ),
@@ -1270,7 +1271,10 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
 
       // condition : si no hay ningun producto en el catalogo
       if(filteredSuggestions.isEmpty){
-        return const Center(child: Opacity(opacity: 0.5,child: Text('aun no hay productos en el catálogo',)));
+        return const Center(child: Padding(
+          padding: EdgeInsets.all(20.0),
+          child: Text('aun no hay productos en el catálogo',textAlign: TextAlign.center,style: TextStyle(fontSize: 30)),
+        ));
       }
 
       return Padding(
@@ -1285,7 +1289,10 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
     }
     // condition : si se consulto pero no se obtuvieron resultados
     if(filteredSuggestions.isEmpty && query.isNotEmpty){
-      return const Center(child: Text('No se encontraron resultados'));
+      return const Center(child: Padding(
+        padding: EdgeInsets.all(20.0),
+        child: Text('No se encontraron resultados',style: TextStyle(fontSize: 30),textAlign: TextAlign.center),
+      ));
     } 
     return ListView.builder(
       itemCount: filteredSuggestions.length,

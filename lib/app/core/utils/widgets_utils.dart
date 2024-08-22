@@ -1188,15 +1188,22 @@ class _EditProductSelectedDialogViewState extends State<EditProductSelectedDialo
   Widget build(BuildContext context) { 
 
     // widgets
-    Widget titleWidget = Text(widget.product.description,style: const TextStyle(fontWeight: FontWeight.w500),maxLines: 5,overflow: TextOverflow.ellipsis);
-    Widget subtitleWidget = Text(Publications.getFormatoPrecio(value: widget.product.salePrice * widget.product.quantity),style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 20,color: Colors.blue ));
+    Widget titleWidget = Text(widget.product.description,style: const TextStyle(fontWeight: FontWeight.w400),maxLines: 5,overflow: TextOverflow.ellipsis);
+    Widget subtitleWidget = Text(Publications.getFormatoPrecio(value: widget.product.salePrice * widget.product.quantity),style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 24,color: Colors.blue ));
 
     return AlertDialog(
       title: Row(
         children: [
+          // text : titulo barrar superior
           Flexible(
             fit: FlexFit.tight,
-            child: Text(widget.product.code==''?'Item':widget.product.code,style: const TextStyle(fontWeight: FontWeight.w400))),
+            child: Row(
+              children: [
+                ImageProductAvatarApp(url: widget.product.image,size: 35),
+                const SizedBox(width: 10),
+                Text(widget.product.code==''?'Item':widget.product.code,style: const TextStyle(fontWeight: FontWeight.w300)),
+              ],
+            )),
           IconButton(
             onPressed: Get.back,
             icon: const Icon(Icons.close),
@@ -1206,13 +1213,11 @@ class _EditProductSelectedDialogViewState extends State<EditProductSelectedDialo
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ListTile(
-            leading: ImageProductAvatarApp(url: widget.product.image),
-            title:widget.product.description==''?subtitleWidget:titleWidget,
+          ListTile( 
+            title:widget.product.description==''?subtitleWidget:titleWidget, 
             // subtitle : codigo del producto si es q existe 
             subtitle: widget.product.description==''? null:subtitleWidget,
-          ), 
-          const SizedBox(height: 12),
+          ),  
           const Divider(thickness:0.6,),
           // text : cantidad
           const Text('Cantidad'),
@@ -1259,7 +1264,7 @@ class _EditProductSelectedDialogViewState extends State<EditProductSelectedDialo
             controller.update();
             Get.back();
           },
-          child: Text('Eliminar',style: TextStyle(color: Colors.red.shade400)),
+          child: Text('Quitar',style: TextStyle(color: Colors.red.shade400)),
         ),
         // button : cancelar
         TextButton(

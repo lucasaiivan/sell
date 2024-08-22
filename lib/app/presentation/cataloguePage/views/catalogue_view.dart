@@ -127,7 +127,7 @@ class CataloguePage extends StatelessWidget {
     if (controller.getCataloProducts.isEmpty) { 
 
       return const Center(
-        child: Text('Sin productos'),
+        child: Text('Sin productos',style: TextStyle(fontSize: 30,fontWeight: FontWeight.w300)),
       );
     }
     // widget 
@@ -226,7 +226,7 @@ class CataloguePage extends StatelessWidget {
 
     if (controller.getCatalogueCategoryList.isEmpty) {
       return const Center(
-        child: Text('Sin cátegorias'),
+        child: Text('Sin cátegorias',style: TextStyle(fontSize: 30,fontWeight: FontWeight.w300)),
       );
     }
     return Obx(
@@ -281,7 +281,7 @@ class CataloguePage extends StatelessWidget {
 
     if (controller.getProviderList.isEmpty) {
       return const Center(
-        child: Text('Sin proveedores'),
+        child: Text('Sin proveedores',style: TextStyle(fontSize: 30,fontWeight: FontWeight.w300)),
       );
     }
     return Obx(
