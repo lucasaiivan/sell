@@ -692,14 +692,15 @@ class ProductNewFormView extends StatelessWidget {
               autovalidateMode: AutovalidateMode.onUserInteraction,
               maxLength: 15,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [AppMoneyInputFormatter()],
               decoration: const InputDecoration(
                   border: UnderlineInputBorder(),
                   labelText: 'Precio de compra (opcional)',
                   helperText: 'Visibilidad privada (solo tu puedes verlo)'),
 
               onChanged: (value) {
-                if (controller.controllerTextEditPrecioCosto.numberValue != 0) {
-                  controller.setPurchasePrice = controller.controllerTextEditPrecioCosto.numberValue;
+                if (controller.controllerTextEditPrecioCosto.doubleValue != 0) {
+                  controller.setPurchasePrice = controller.controllerTextEditPrecioCosto.doubleValue;
                   controller.formEditing = true;
                 }
               },
@@ -779,23 +780,23 @@ class ProductNewFormView extends StatelessWidget {
                   enabled: true,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   maxLength: 15,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [AppMoneyInputFormatter()],
                   decoration: const InputDecoration(
                       border: UnderlineInputBorder(),
                       labelText: 'Precio de venta',
                       helperText: 'Visibilidad pública (cualquier puede verlo)'),
                   onChanged: (value) {
-                    if (controller.controllerTextEditPrecioVenta.numberValue != 0) {
+                    if (controller.controllerTextEditPrecioVenta.doubleValue != 0) {
                       controller.setSalePrice =
-                          controller.controllerTextEditPrecioVenta.numberValue;
+                          controller.controllerTextEditPrecioVenta.doubleValue;
                       controller.formEditing = true;
                       controller.update();
                     }
                   },
                   // validator: validamos el texto que el usuario ha ingresado.
                   validator: (value) {
-                    if (controller.controllerTextEditPrecioVenta.numberValue ==
+                    if (controller.controllerTextEditPrecioVenta.doubleValue ==
                         0.0) {
                       return 'Por favor, escriba un precio de venta';
                     }

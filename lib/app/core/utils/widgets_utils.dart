@@ -1,7 +1,8 @@
 
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart'; 
-import 'package:flutter/material.dart'; 
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; 
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart'; 
 import 'package:sell/app/core/utils/dynamicTheme_lb.dart';
@@ -507,7 +508,7 @@ Widget body({required BuildContext context}){
                 title: const Text('Catálogo'),
                 onTap: () => homeController.setIndexPage = 3):Container(),
               // TODO : desabilitar visualizacion para produccion
-              /* ListTile(
+              ListTile(
                 enabled: !isAnonymous,
                 selected: homeController.getIndexPage == 5,
                 leading: const Icon(Icons.admin_panel_settings_outlined),
@@ -516,7 +517,7 @@ Widget body({required BuildContext context}){
                 onTap: () {
                   Get.toNamed(Routes.moderator); 
                 },
-              ), */
+              ),
               // multiusuario
               user.multiuser || isAnonymous?homeController.getCashierMode?Container():
               ListTile(
@@ -1388,3 +1389,72 @@ class RoundedChatBubble extends StatelessWidget {
   }
 }
 
+
+// AppMoneyInputFormatter : Formateador de texto para campos de dinero
+// Este formateador se encarga de formatear el texto de un campo de texto para que se vea como un monto de dinero
+class AppMoneyInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    // Eliminar cualquier cosa que no sea un número o una coma
+    var newText = newValue.text.replaceAll(RegExp(r'[^0-9,]'), '');
+
+    // Separar la parte entera y la parte decimal
+    var parts = newText.split(',');
+    var integerPart = parts[0];
+    var decimalPart = parts.length > 1 ? parts[1] : '';
+
+    // Limitar a 2 decimales
+    if (decimalPart.length > 2) {
+      decimalPart = decimalPart.substring(0, 2);
+    }
+
+    // Formatear la parte entera con puntos de miles
+    var buffer = StringBuffer();
+    for (var i = 0; i < integerPart.length; i++) {
+      if (i > 0 && (integerPart.length - i) % 3 == 0) {
+        buffer.write('.');
+      }
+      buffer.write(integerPart[i]);
+    }
+
+    // Construir el texto formateado
+    var formattedText = buffer.toString();
+    if (newText.contains(',')) {
+      formattedText += ',$decimalPart';
+    }
+
+    // Añadir el signo de dólar al principio
+    formattedText = '\$$formattedText';
+
+    // Mantener la posición del cursor
+    var selectionIndex = formattedText.length;
+    return TextEditingValue(
+      text: formattedText,
+      selection: TextSelection.collapsed(offset: selectionIndex),
+    );
+  }
+}
+//  AppMoneyTextEditingController : Controlador de texto para campos de dinero
+// Este controlador se encarga de manejar el valor de un campo de texto para que se vea como un monto de dinero
+class AppMoneyTextEditingController extends TextEditingController {
+  AppMoneyTextEditingController({String? value}) : super(text: value);
+
+  // Método para obtener el valor como double
+  double get doubleValue {
+    String textWithoutCommas = text.replaceAll('.', '').replaceAll(',', '.').replaceAll('\$','');
+    return double.tryParse(textWithoutCommas) ?? 0.0;
+  }
+
+  // Método para obtener el valor formateado como string
+  String get formattedValue {
+    return text;
+  }
+  // actualizar el valor del controlador
+  void updateValue(double value) {
+    // actualiza el nuevo valor teniendo en cuenta si tiene o no decimales
+    text = Publications.getFormatoPrecio(value: value);
+  }
+}

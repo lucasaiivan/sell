@@ -4,8 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; 
-import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_masked_text2/flutter_masked_text2.dart';
+import 'package:flutter_animate/flutter_animate.dart'; 
 import 'package:get/get.dart'; 
 import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:sell/app/core/utils/widgets_utils.dart';
@@ -1005,12 +1004,7 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
   final SellController salesController = Get.find<SellController>();
 
   // others controllers
-  final MoneyMaskedTextController moneyMaskedTextController =
-      MoneyMaskedTextController(
-          leftSymbol: '\$',
-          decimalSeparator: ',',
-          thousandSeparator: '.',
-          precision: 2);
+  final AppMoneyTextEditingController moneyMaskedTextController =AppMoneyTextEditingController();
   final TextEditingController textEditingController = TextEditingController();
   final FocusNode _amountCashRegisterFocusNode = FocusNode();
   // var 
@@ -1125,7 +1119,7 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
               TextField(
                 controller: moneyMaskedTextController,
                 keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly], // Permite solo dígitos
+                inputFormatters: [AppMoneyInputFormatter()], // Permite solo dígitos
                 decoration: const InputDecoration(
                   border: UnderlineInputBorder(),
                   enabledBorder: UnderlineInputBorder(),
@@ -1158,14 +1152,14 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
                 if(textEditingController.text==''){
                   textEditingController.text = 'Sin especificar';
                 }
-                if (moneyMaskedTextController.numberValue > 0) {
+                if (moneyMaskedTextController.doubleValue > 0) {
                   if (isEgreso) {
                     salesController.cashRegisterOutFlow(
-                        amount: -moneyMaskedTextController.numberValue,
+                        amount: -moneyMaskedTextController.doubleValue,
                         description: textEditingController.text);
                   } else {
                     salesController.cashRegisterInFlow(
-                        amount: moneyMaskedTextController.numberValue,
+                        amount: moneyMaskedTextController.doubleValue,
                         description: textEditingController.text);
                   }
     
@@ -1279,8 +1273,8 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
                   ? TextField(
                       focusNode: _amountCashRegisterFocusNode,
                       controller: moneyMaskedTextController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                          decimal: false, signed: false),
+                      keyboardType: const TextInputType.numberWithOptions(decimal: false, signed: false),
+                      inputFormatters: [AppMoneyInputFormatter()],
                       decoration: const InputDecoration(
                         border: UnderlineInputBorder(),
                         enabledBorder: UnderlineInputBorder(),
@@ -1290,7 +1284,7 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
                         setState(() {
                           // get diference
                           homeController.cashRegisterActive.balance =
-                              moneyMaskedTextController.numberValue;
+                              moneyMaskedTextController.doubleValue;
                         });
                       },
                     )
@@ -1337,8 +1331,8 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
                     // comprobamos si el usuario ya confirmo el cierre de caja
                     if (confirmCloseState) {
                       // comprobamos si el usuario ingreso un monto en caja
-                      if (moneyMaskedTextController.numberValue != 0) {
-                        homeController.cashRegisterActive.balance = moneyMaskedTextController.numberValue;
+                      if (moneyMaskedTextController.doubleValue != 0) {
+                        homeController.cashRegisterActive.balance = moneyMaskedTextController.doubleValue;
                       }
                       homeController.setCashRegisterActiveTemp = homeController.cashRegisterActive;
                       // cerramos la caja
@@ -1383,6 +1377,7 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
                 keyboardType: const TextInputType.numberWithOptions(decimal: false, signed: false),
                 controller: moneyMaskedTextController,
                 style: const TextStyle(fontSize: 24),
+                inputFormatters: [AppMoneyInputFormatter()],
                 decoration: const InputDecoration(
                   border: UnderlineInputBorder(),
                   enabledBorder: UnderlineInputBorder(),
@@ -1462,8 +1457,8 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
                 // iniciamos la caja
                 salesController.startCashRegister(
                     description: textEditingController.text,
-                    initialCash: moneyMaskedTextController.numberValue,
-                    expectedBalance: moneyMaskedTextController.numberValue);
+                    initialCash: moneyMaskedTextController.doubleValue,
+                    expectedBalance: moneyMaskedTextController.doubleValue);
                 Get.back();
               },),
           ),
@@ -1473,52 +1468,6 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
   }
 
   // WIDGETS COMPONENTS
-  Widget egressAndEntryView({required String description,required String value,Color ?colorValue ,required List<dynamic> items}){
-    // description : visualiza los egresos o ingresos de la caja con su respectiva descripción, monto y lista de items
-    
-    // style 
-    TextStyle textStyleValue = const TextStyle(fontSize: 14);
-    TextStyle textStyleDescription = const TextStyle(fontWeight: FontWeight.w300);
-    
-    if(items.isEmpty){return Container();}
-    return Column(
-      children: [
-        Row(
-          children: [ 
-            // text : description
-            Text(description,style: textStyleDescription),
-            const Spacer(),
-            // text : cantidad de items
-            Text('(${items.length}) ',style: textStyleValue),
-            // text : value
-            Text(value,style: textStyleValue.copyWith(color: colorValue)),
-          ],
-        ),  
-        const Divider(), 
-        // list : items
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: items.map((item) {
-            return Opacity(
-              opacity: 0.8,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical:2,horizontal:12),
-                child: Row(
-                  children: [
-                    Text(item['description'],style: textStyleValue),
-                    const Spacer(),
-                    Text(Publications.getFormatoPrecio(value: item['amount']),style: textStyleValue),
-                  ],
-                ),
-              ),
-            );
-          }).toList(),
-        )
-        
-      ],
-    );
-
-  }
   Widget get egressAndEntryExpansionPanelListView{
 
     // style 
@@ -1615,7 +1564,7 @@ class _ViewAddDiscountState extends State<ViewAddDiscount> {
 
   // controllers
   final SellController salesController = Get.find<SellController>();
-  final MoneyMaskedTextController textEditingDiscountController = MoneyMaskedTextController(leftSymbol: '\$',decimalSeparator: ',',thousandSeparator: '.',precision:2);
+  final AppMoneyTextEditingController textEditingDiscountController = AppMoneyTextEditingController();
   final TextEditingController textEditingPorcentController = TextEditingController();
   FocusNode focusNodeDiscount = FocusNode();
   FocusNode focusNodePorcent = FocusNode();
@@ -1631,7 +1580,7 @@ class _ViewAddDiscountState extends State<ViewAddDiscount> {
       }
       // var 
       double priceTotal = salesController.getTicket.getTotalPrice;
-      double discount = textEditingDiscountController.numberValue;
+      double discount = textEditingDiscountController.doubleValue;
       // evita que el descuento sea mayor al precio total
       if(discount > priceTotal){
         textEditingDiscountController.updateValue(priceTotal);
@@ -1704,11 +1653,8 @@ class _ViewAddDiscountState extends State<ViewAddDiscount> {
             focusNode: focusNodeDiscount,
             autofocus: true,
             controller: textEditingDiscountController,
-            keyboardType:
-                const TextInputType.numberWithOptions(decimal: false),
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp('[1234567890]'))
-            ],
+            keyboardType: const TextInputType.numberWithOptions(decimal: false),
+            inputFormatters: [AppMoneyInputFormatter()],
             decoration: const InputDecoration( 
               hintText: '\$',
               labelText: "Monto",
@@ -1742,9 +1688,9 @@ class _ViewAddDiscountState extends State<ViewAddDiscount> {
           child: SizedBox(
             width: double.infinity,
             child: ElevatedButton( 
-              onPressed: textEditingDiscountController.numberValue==0?null: () {
+              onPressed: textEditingDiscountController.doubleValue==0?null: () {
                 // var
-                double discount = textEditingDiscountController.numberValue;
+                double discount = textEditingDiscountController.doubleValue;
                 // comprobamos si el descuento es mayor a 0
                 if(discount > 0){
                   // agregamos el descuento

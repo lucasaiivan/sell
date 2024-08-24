@@ -1,7 +1,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_masked_text2/flutter_masked_text2.dart';
+import 'package:flutter/material.dart'; 
 import 'package:get/get.dart';
 import 'package:sell/app/core/utils/widgets_utils.dart'; 
 import 'package:sell/app/presentation/home/controller/home_controller.dart';
@@ -775,8 +774,8 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
   }
   void updatePricePurchaseAndSalesDialog(){
     // controllers
-    MoneyMaskedTextController pricePurchaseController = MoneyMaskedTextController();
-    MoneyMaskedTextController priceSaleController = MoneyMaskedTextController();
+    AppMoneyTextEditingController pricePurchaseController = AppMoneyTextEditingController();
+    AppMoneyTextEditingController priceSaleController = AppMoneyTextEditingController();
 
     Get.dialog(
       AlertDialog(
@@ -817,7 +816,7 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
           TextButton(
             onPressed: () {
               // fuction : actualizar precios de los productos seleccionados
-              catalogueController.updatePricePurchaseAndSales(list:catalogueController.getProductsSelectedList,pricePurchase: pricePurchaseController.numberValue,priceSales: priceSaleController.numberValue);
+              catalogueController.updatePricePurchaseAndSales(list:catalogueController.getProductsSelectedList,pricePurchase: pricePurchaseController.doubleValue,priceSales: priceSaleController.doubleValue);
               Get.back();
             },
             child: const Text('Actualizar'),
@@ -828,7 +827,7 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
   }
   void updateSalesPriceDialog(){
     // controllers
-    MoneyMaskedTextController priceSaleController = MoneyMaskedTextController();
+    AppMoneyTextEditingController priceSaleController = AppMoneyTextEditingController();
 
     Get.dialog(
       AlertDialog(
@@ -859,12 +858,12 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
           ),
           TextButton(
             onPressed: () {
-              if(priceSaleController.numberValue==0){
+              if(priceSaleController.doubleValue==0){
                 Get.snackbar('Error', 'El precio de venta no puede ser 0');
                 return;
               }
               // function : actualizar precio de venta de los productos seleccionados 
-              catalogueController.updateSalesPriceProducts( list: catalogueController.getProductsSelectedList,price: priceSaleController.numberValue); 
+              catalogueController.updateSalesPriceProducts( list: catalogueController.getProductsSelectedList,price: priceSaleController.doubleValue); 
               Get.back();
             },
             child: const Text('Actualizar'),
@@ -876,7 +875,7 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
   void updatePricePurchaseDialog(){
 
     // controllers
-    MoneyMaskedTextController controllerTextEditPrecioCosto = MoneyMaskedTextController(leftSymbol: '\$');
+    AppMoneyTextEditingController controllerTextEditPrecioCosto = AppMoneyTextEditingController( );
 
     Get.dialog(
       AlertDialog(
@@ -908,12 +907,12 @@ class _ViewProductsSelectedState extends State<ViewProductsSelected> {
           TextButton(
             onPressed: () {
               // condition : precio de compra no puede ser 0
-              if(controllerTextEditPrecioCosto.numberValue==0){
+              if(controllerTextEditPrecioCosto.doubleValue==0){
                 Get.snackbar('Error', 'El precio de compra no puede ser 0');
                 return;
               }
               // function : actualizar precio de compra de los productos seleccionados
-              catalogueController.updatePurchasePriceProducts(list: catalogueController.getProductsSelectedList,price: controllerTextEditPrecioCosto.numberValue);
+              catalogueController.updatePurchasePriceProducts(list: catalogueController.getProductsSelectedList,price: controllerTextEditPrecioCosto.doubleValue);
             
               Get.back();
             },

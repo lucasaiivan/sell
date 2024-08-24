@@ -3,8 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_masked_text2/flutter_masked_text2.dart';
+import 'package:flutter/services.dart'; 
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart'; 
 import 'package:search_page/search_page.dart';
@@ -124,8 +123,8 @@ class ControllerProductsEdit extends GetxController {
   TextEditingController controllerTextEditCategory = TextEditingController();
   TextEditingController controllerTextEditQuantityStock = TextEditingController();
   TextEditingController controllerTextEditAlertStock = TextEditingController();
-  MoneyMaskedTextController controllerTextEditPrecioVenta = MoneyMaskedTextController(leftSymbol: '\$');
-  MoneyMaskedTextController controllerTextEditPrecioCosto = MoneyMaskedTextController(leftSymbol: '\$');
+  AppMoneyTextEditingController controllerTextEditPrecioVenta = AppMoneyTextEditingController();
+  AppMoneyTextEditingController controllerTextEditPrecioCosto = AppMoneyTextEditingController();
 
   // description
   String _description = '';
@@ -322,14 +321,14 @@ class ControllerProductsEdit extends GetxController {
 
   String get getPorcentage{
     // description : obtenemos el porcentaje de las ganancias
-    if ( controllerTextEditPrecioCosto.numberValue == 0 ) {
+    if ( controllerTextEditPrecioCosto.doubleValue == 0 ) {
       return '';
     }
-    if ( controllerTextEditPrecioVenta.numberValue == 0 ) {
+    if ( controllerTextEditPrecioVenta.doubleValue == 0 ) {
       return '0%';
     }
-    double dCosto = controllerTextEditPrecioCosto.numberValue;
-    double ganancia = controllerTextEditPrecioVenta.numberValue - controllerTextEditPrecioCosto.numberValue; 
+    double dCosto = controllerTextEditPrecioCosto.doubleValue;
+    double ganancia = controllerTextEditPrecioVenta.doubleValue - controllerTextEditPrecioCosto.doubleValue; 
     double porcentajeGanancia = (ganancia / dCosto) * 100;
 
     
@@ -357,7 +356,7 @@ class ControllerProductsEdit extends GetxController {
     if (getProduct.id != '') {
       if ( controllerTextEditDescripcion.text != '') {
         if (getMarkSelected.id != '' && getMarkSelected.name != '' || getProduct.local == true ) {
-          if (controllerTextEditPrecioVenta.numberValue > 0 ) {
+          if (controllerTextEditPrecioVenta.doubleValue > 0 ) {
             if ( getStock ? (getQuantityStock >= 1) : true) { 
               
               // update view
@@ -374,8 +373,8 @@ class ControllerProductsEdit extends GetxController {
               getProduct.idMark = getMarkSelected.id;
               getProduct.nameMark = getMarkSelected.name;
               getProduct.imageMark = getMarkSelected.image;
-              getProduct.purchasePrice = controllerTextEditPrecioCosto.numberValue;
-              getProduct.salePrice = controllerTextEditPrecioVenta.numberValue;
+              getProduct.purchasePrice = controllerTextEditPrecioCosto.doubleValue;
+              getProduct.salePrice = controllerTextEditPrecioVenta.doubleValue;
               getProduct.favorite = getFavorite;
               getProduct.stock = getStock;
               if(controllerTextEditQuantityStock.text!=''){getProduct.quantityStock = int.parse( controllerTextEditQuantityStock.text );}
@@ -545,8 +544,8 @@ class ControllerProductsEdit extends GetxController {
     
     // set : controles de las entradas de texto
     controllerTextEditDescripcion = TextEditingController(text: getDescription);
-    controllerTextEditPrecioVenta = MoneyMaskedTextController(initialValue: getSalePrice,leftSymbol: '\$');
-    controllerTextEditPrecioCosto = MoneyMaskedTextController(initialValue: getPurchasePrice,leftSymbol: '\$');
+    controllerTextEditPrecioVenta = AppMoneyTextEditingController(value: Publications.getFormatoPrecio(value: getSalePrice) );
+    controllerTextEditPrecioCosto = AppMoneyTextEditingController(value: Publications.getFormatoPrecio(value: getPurchasePrice));
     controllerTextEditQuantityStock = TextEditingController(text: getQuantityStock.toString());
     controllerTextEditAlertStock = TextEditingController(text: getAlertStock.toString());
     controllerTextEditCategory = TextEditingController(text: getCategory.name);
@@ -717,8 +716,8 @@ class ControllerProductsEdit extends GetxController {
                   //  function : guarda el nuevo porcentaje de ganancia
                   if(controller.text != ''){
                     double porcentajeDeGanancia  = double.parse(controller.text); 
-                    double ganancia = controllerTextEditPrecioCosto.numberValue * (porcentajeDeGanancia / 100);
-                    setSalePrice = controllerTextEditPrecioCosto.numberValue + ganancia;  
+                    double ganancia = controllerTextEditPrecioCosto.doubleValue * (porcentajeDeGanancia / 100);
+                    setSalePrice = controllerTextEditPrecioCosto.doubleValue + ganancia;  
                     
                   }
                   //  action : cierra el dialogo
@@ -884,7 +883,7 @@ class ControllerProductsEdit extends GetxController {
     );
   }
   void showDialogPriceSale(){
-    // Dialog view :  muestra el dialogo para agregar el porcentaje de ganancia
+    // Dialog view :  muestra el dialogo para agregar el precio de venta del producto
 
     // var
     final Color boderLineColor = Get.isDarkMode?Colors.white.withOpacity(0.3):Colors.black.withOpacity(0.3);
@@ -892,7 +891,7 @@ class ControllerProductsEdit extends GetxController {
     // style  
     TextStyle valueTextStyle = TextStyle(color: Get.isDarkMode?Colors.white:Colors.black,fontSize: 18,fontWeight: FontWeight.w400);
     // controllers
-    final MoneyMaskedTextController controllerTextEditPrecioVenta = MoneyMaskedTextController(initialValue: getProduct.salePrice,leftSymbol: '${homeController.getProfileAccountSelected.currencySign} ');
+    final AppMoneyTextEditingController controllerTextEditPrecioVenta = AppMoneyTextEditingController(value: Publications.getFormatoPrecio(value: getSalePrice));
     // widgets
     Widget content = AlertDialog( 
         content: Column(
@@ -910,6 +909,7 @@ class ControllerProductsEdit extends GetxController {
                     enabled: true,
                     autovalidateMode: AutovalidateMode.onUserInteraction, 
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [AppMoneyInputFormatter()],
                     decoration: InputDecoration( 
                       filled: true,
                       fillColor: fillColor,
@@ -933,9 +933,8 @@ class ControllerProductsEdit extends GetxController {
                 TextButton( onPressed: () { Get.back();}, child: const Text('Cancelar',textAlign: TextAlign.center)),
                 TextButton( onPressed: () {
                   //  function : guarda el nuevo porcentaje de ganancia
-                  if(controllerTextEditPrecioVenta.numberValue != 0
-                  ){
-                    double precioVenta  = controllerTextEditPrecioVenta.numberValue; 
+                  if(controllerTextEditPrecioVenta.doubleValue != 0 ){
+                    double precioVenta  = controllerTextEditPrecioVenta.doubleValue; 
                     setSalePrice = precioVenta;  
                   }
                   //  action : cierra el dialogo
@@ -957,7 +956,7 @@ class ControllerProductsEdit extends GetxController {
     );
   }
   void showDialogPricePurchase(){
-    // Dialog view :  muestra el dialogo para agregar el porcentaje de ganancia
+    // Dialog view : muestra el dialogo para agregar el precio de costo del producto
 
     // var
     final Color boderLineColor = Get.isDarkMode?Colors.white.withOpacity(0.3):Colors.black.withOpacity(0.3);
@@ -965,7 +964,7 @@ class ControllerProductsEdit extends GetxController {
     // style  
     TextStyle valueTextStyle = TextStyle(color: Get.isDarkMode?Colors.white:Colors.black,fontSize: 18,fontWeight: FontWeight.w400);
     // controllers
-    final MoneyMaskedTextController controllerTextEdit = MoneyMaskedTextController(initialValue: getProduct.purchasePrice,leftSymbol: '${homeController.getProfileAccountSelected.currencySign} ');
+    final AppMoneyTextEditingController controllerTextEdit = AppMoneyTextEditingController(value: Publications.getFormatoPrecio(value: getPurchasePrice));
     // widgets
     Widget content = AlertDialog( 
         content: Column(
@@ -983,6 +982,7 @@ class ControllerProductsEdit extends GetxController {
                     enabled: true,
                     autovalidateMode: AutovalidateMode.onUserInteraction, 
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [AppMoneyInputFormatter()],
                     decoration: InputDecoration( 
                       filled: true,
                       fillColor: fillColor,
@@ -1006,9 +1006,9 @@ class ControllerProductsEdit extends GetxController {
                 TextButton( onPressed: () { Get.back();}, child: const Text('Cancelar',textAlign: TextAlign.center)),
                 TextButton( onPressed: () {
                   //  function : guarda el nuevo porcentaje de ganancia
-                  if(controllerTextEdit.numberValue != 0
+                  if(controllerTextEdit.doubleValue != 0
                   ){
-                    double price  = controllerTextEdit.numberValue; 
+                    double price  = controllerTextEdit.doubleValue; 
                     setPurchasePrice = price;  
                   }
                   //  action : cierra el dialogo
@@ -1328,7 +1328,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         title: const Text('Marcas'),
         actions: [
           // TODO : release : delete icon 'add new mark for release'
-          //IconButton(onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},icon: const Icon(Icons.add)),
+          IconButton(onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},icon: const Icon(Icons.add)),
           // icon : cambiar vista
           IconButton(icon: Icon( viewListState? Icons.grid_view_rounded:Icons.table_rows_rounded),onPressed: () { 
             setState(() {
@@ -1478,7 +1478,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
       },
       onLongPress: (){
         // TODO : release : delete fuction
-        //Get.to(() => CreateMark(mark: marcaSelect));
+        Get.to(() => CreateMark(mark: marcaSelect));
       },
       borderRadius: BorderRadius.circular(5),
       child: Column(

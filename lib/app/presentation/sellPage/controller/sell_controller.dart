@@ -1,7 +1,6 @@
  
 import 'dart:async'; 
-import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter_masked_text2/flutter_masked_text2.dart'; 
+import 'package:audioplayers/audioplayers.dart'; 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -59,7 +58,9 @@ class SellController extends GetxController {
   }
   void registerFixerDescription({required String description}){
     // firebase : registra una descripción fija
-    Database.refFirestoreFixedDescriptions(idAccount:homeController.getProfileAccountSelected.id).doc(description).set({'description':description});
+    if(description!=''){
+      Database.refFirestoreFixedDescriptions(idAccount:homeController.getProfileAccountSelected.id).doc(description).set({'description':description});
+    }
   }
   Future<List<String>> loadFixerDescriotions(){
     // firebase : obtenemos las descripciones fijadas por el usuario
@@ -203,9 +204,9 @@ class SellController extends GetxController {
   }
 
   // text field controllers 
-  final MoneyMaskedTextController textEditingControllerAddFlashPrice = MoneyMaskedTextController(leftSymbol: '\$',decimalSeparator: ',',thousandSeparator: '.',precision:2);
+  final AppMoneyTextEditingController textEditingControllerAddFlashPrice = AppMoneyTextEditingController();
   final TextEditingController textEditingControllerAddFlashDescription =TextEditingController();
-  final TextEditingController textEditingControllerTicketMount =TextEditingController();
+  final AppMoneyTextEditingController textEditingControllerTicketMount =AppMoneyTextEditingController();
 
   // xfiel : imagen temporal del producto
   XFile _xFileImageCaptureBarCode = XFile('');
@@ -502,10 +503,9 @@ class SellController extends GetxController {
     Get.back();
   } 
   void addSaleFlash() {
-    // generate new ID
     var id = Publications.generateUid();
     // var
-    double  valuePrice = textEditingControllerAddFlashPrice.numberValue;
+    double  valuePrice = textEditingControllerAddFlashPrice.doubleValue;
     String valueDescription = textEditingControllerAddFlashDescription.text == '' ? 'Sin descripción' : textEditingControllerAddFlashDescription.text;
 
     if (valuePrice != 0) {
@@ -575,9 +575,9 @@ class SellController extends GetxController {
   void showDialogQuickSale( ) {
     // Dialog view : Hacer una venta rapida 
 
-    //var
-    final FocusNode myFocusNode = FocusNode(); 
-
+    //var 
+    final FocusNode myFocusNode = FocusNode();  
+    
     // style
     final Color colorAccent = Get.isDarkMode?Colors.white:Colors.black; 
     // widgets
@@ -609,7 +609,7 @@ class SellController extends GetxController {
                       controller: textEditingControllerAddFlashPrice,
                       keyboardType: const TextInputType.numberWithOptions(decimal: false),
                       inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp('[1234567890]'))
+                        AppMoneyInputFormatter()
                       ],
                       decoration: InputDecoration(  
                         labelText: "Precio",
@@ -618,7 +618,7 @@ class SellController extends GetxController {
                         border: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent)),
                         enabledBorder: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent), )
                       ),
-                      style: const TextStyle(fontSize: 20.0),
+                      style: const TextStyle(fontSize: 24.0),
                       textInputAction: TextInputAction.next,
                     ),
                   ),
@@ -692,7 +692,7 @@ class SellController extends GetxController {
           child: TextButton(
               onPressed: () {
                 //var
-                double valueReceived = textEditingControllerTicketMount.text == '' ? 0.0 : double.parse(textEditingControllerTicketMount.text);
+                double valueReceived = textEditingControllerTicketMount.doubleValue;
                 // condition : verificar si el usaurio ingreso un monto valido y que sea mayor al monto total del ticket
                 if (valueReceived >= getTicket.getTotalPrice && textEditingControllerTicketMount.text != '') {
                   setValueReceivedTicket = valueReceived;
@@ -812,9 +812,7 @@ class SellController extends GetxController {
                 autofocus: true,
                 controller: textEditingControllerTicketMount,
                 keyboardType: const TextInputType.numberWithOptions(decimal: false),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp('[1234567890]'))
-                ],
+                inputFormatters: [AppMoneyInputFormatter()],
                 decoration: const InputDecoration(
                   hintText: '\$',
                   labelText: "Escribe el monto",
@@ -823,12 +821,10 @@ class SellController extends GetxController {
                 textInputAction: TextInputAction.done,
                 onSubmitted: (value) {
                   //var
-                  double valueReceived = textEditingControllerTicketMount.text ==''
-                      ? 0.0
-                      : double.parse(textEditingControllerTicketMount.text);
+                  double valueReceived = textEditingControllerTicketMount.doubleValue;
                   // condition : verificar si el usaurio ingreso un monto valido y que sea mayor al monto total del ticket
                   if (valueReceived >= getTicket.getTotalPrice && textEditingControllerTicketMount.text != '') {
-                    setValueReceivedTicket = double.parse(textEditingControllerTicketMount.text);
+                    setValueReceivedTicket = textEditingControllerTicketMount.doubleValue;
                     textEditingControllerTicketMount.text = '';
                     setPayModeTicket = 'effective';
                     Get.back();
@@ -889,7 +885,7 @@ class _NewProductViewState extends State<NewProductView> {
   final HomeController homeController = Get.find<HomeController>();
   final SellController salesController = Get.find<SellController>();
   late TextEditingController controllerTextEditDescripcion = TextEditingController(text: widget.productCatalogue.description);
-  late MoneyMaskedTextController controllerTextEditPrecioVenta = MoneyMaskedTextController(initialValue: widget.productCatalogue.salePrice);
+  late AppMoneyTextEditingController controllerTextEditPrecioVenta = AppMoneyTextEditingController(value: widget.productCatalogue.salePrice.toString());
   // keys form
   GlobalKey<FormState> descriptionFormKey = GlobalKey<FormState>();
   GlobalKey<FormState> priceFormKey = GlobalKey<FormState>();
@@ -1014,6 +1010,7 @@ class _NewProductViewState extends State<NewProductView> {
               enabled: true,
               autovalidateMode: AutovalidateMode.onUserInteraction,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),  
+              inputFormatters: [AppMoneyInputFormatter()],
               decoration: InputDecoration(
                 labelText: 'Precio de venta al públuco',
                 hintText: 'ej. agua saborisada 500 ml',  
@@ -1027,13 +1024,13 @@ class _NewProductViewState extends State<NewProductView> {
                 ), 
               onChanged: (value) {
                 // condition : comprobar si es un monto valido 
-                if (controllerTextEditPrecioVenta.numberValue > 0.0) {
-                  widget.productCatalogue.salePrice = controllerTextEditPrecioVenta.numberValue;
+                if (controllerTextEditPrecioVenta.doubleValue > 0.0) {
+                  widget.productCatalogue.salePrice = controllerTextEditPrecioVenta.doubleValue;
                 }
               },
               // validator: validamos el texto que el usuario ha ingresado.
               validator: (value) {
-                if ( controllerTextEditPrecioVenta.numberValue == 0.0) { return 'Por favor, introduzca el precio del producto'; }
+                if ( controllerTextEditPrecioVenta.doubleValue == 0.0) { return 'Por favor, introduzca el precio del producto'; }
                 return null;
               },
             ),
@@ -1072,7 +1069,7 @@ class _NewProductViewState extends State<NewProductView> {
           if (  conditionPrice && conditionDescription) {
             // set 
             widget.productCatalogue.description = controllerTextEditDescripcion.text;
-            widget.productCatalogue.salePrice = controllerTextEditPrecioVenta.numberValue;
+            widget.productCatalogue.salePrice = controllerTextEditPrecioVenta.doubleValue;
             //
             // condition : si el usuario quiere agregar el producto a la lista de productos del catálogo
             // entonces lo agregamos a la lista de productos del catálogo y a la colección de productos publica de la DB
@@ -1438,3 +1435,4 @@ class CurrencyTextEditingController extends TextEditingController {
     );
   }
 }
+

@@ -79,8 +79,7 @@ dependencies:
   search_page: ^2.3.0
   flutter_launcher_icons: ^0.13.1 #  Una herramienta de línea de comandos que simplifica la tarea de actualizar el icono de inicio de la aplicación Flutter
   flutter_barcode_scanner: ^2.0.0 # Un complemento para las aplicaciones Flutter que agrega compatibilidad con el escaneo de códigos de barras tanto en Android como en iOS.
-  audioplayers: ^6.0.0
-  flutter_masked_text2: ^0.9.1
+  audioplayers: ^6.0.0 
   shimmer: ^3.0.0 # Un paquete de Flutter que proporciona un widget de efecto de brillo.
   uuid: ^4.4.2  # Un paquete de Flutter que genera identificadores únicos universales (UUID). 
   file_picker: ^8.0.7 # Un complemento de Flutter para seleccionar archivos desde el almacenamiento local del dispositivo.

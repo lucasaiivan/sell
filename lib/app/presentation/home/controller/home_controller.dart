@@ -1326,7 +1326,7 @@ class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcript
                     ),
                     onPressed: () {
                       // activa la suscripción solo en la app en tiempo de ejecución de manera local
-                      //homeController.setIsSubscribedPremium = true;
+                      homeController.setIsSubscribedPremium = true;
 
                       if(homeController.getTrialActive){
                         // si la prueba gratuita esta activa
