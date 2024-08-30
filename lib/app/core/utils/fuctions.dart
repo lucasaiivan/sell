@@ -54,7 +54,6 @@ class Publications {
 
     return formatter.format(value.abs());
   }
-
   
   static String getFormatAmount({required int value}){
     final formatCurrency = NumberFormat('#,##0', 'es_ES');

@@ -301,11 +301,7 @@ class ControllerCreateProductForm extends GetxController{
     controllerTextEditPrecioCosto.dispose();
     controllerTextEditPrecioVenta.dispose();
     controllerTextEditQuantityStock.dispose();
-  } 
-  // TODO : release : la subcripción por defecto es [homeController.getProfileAccountSelected.subscribed;]
-  // get 
-  bool get isSubscribed =>  homeController.getProfileAccountSelected.subscribed;
-
+  }  
   //
   // FUNCTIONS
   //

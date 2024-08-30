@@ -819,7 +819,7 @@ class SalesView extends StatelessWidget {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         const Text('Facturado  ',style: TextStyle(color: Colors.black87,fontWeight: FontWeight.w300)),
-                                        Text(Publications.getFormatoPrecio(value: salesController.getLastTicket.getTotalPrice),style: const TextStyle(color: Colors.black,fontWeight: FontWeight.bold)),
+                                        Text(Publications.getFormatoPrecio(value: salesController.getLastTicket.getTotalPrice),style: const TextStyle(color: Colors.black,fontWeight: FontWeight.w800)),
                                       ],
                                     ),  
                                   ),
@@ -827,7 +827,7 @@ class SalesView extends StatelessWidget {
                                   ComponentApp().button( 
                                     defaultStyle: false,
                                     elevation: 0, 
-                                    padding: const EdgeInsets.symmetric(horizontal: 12,vertical:10),
+                                    margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                                     icon: const Row(
                                       children: [
                                         Icon(Icons.share_outlined,color: Colors.white),
@@ -1699,8 +1699,8 @@ class _ViewAddDiscountState extends State<ViewAddDiscount> {
                 Get.back();
               },
               style: ButtonStyle(
-                  padding: MaterialStateProperty.all(const EdgeInsets.all(20)),
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                  padding: WidgetStateProperty.all(const EdgeInsets.all(20)),
+                  shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                       RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(2)))),
               child: const Text('Confirmar'),

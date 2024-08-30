@@ -504,12 +504,13 @@ class ProductEdit extends StatelessWidget {
                 // button : guardar
                 const SizedBox(height:30),  
                 //  button : guardar el producto
-                ComponentApp().button( 
+                ComponentApp().button(  
                   disable:controller.getLoadingData == true   ,
                   onPressed: controller.save,
                   icon: Container(),
                   colorButton: Colors.blue,
-                  padding:const EdgeInsets.all(0),
+                  margin: const EdgeInsets.symmetric(vertical: 0,horizontal: 0),
+                  padding:const EdgeInsets.symmetric(vertical: 20),
                   colorAccent: Colors.white,
                   text: controller.getItsInTheCatalogue?'Actualizar':'Agregar a mi cátalogo',
                 ), 

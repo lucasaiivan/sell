@@ -9,7 +9,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart'; 
-import 'package:purchases_flutter/purchases_flutter.dart'; 
+import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:sell/app/core/utils/fuctions.dart'; 
 import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart'; 
 import '../../../core/routes/app_pages.dart';
@@ -109,14 +110,15 @@ class HomeController extends GetxController {
       // get : obtenemos los productos de compra
       result.customerInfo.entitlements.all.forEach((key, value) { 
         // conditionm : si la subcripcion es premium esta activa
-        if(key == entitlementID){ 
+        if(key == entitlementID){  
           setIsSubscribedPremium = value.isActive;
           //Get.snackbar('RevenueCat', value.isActive?'Suscripción premium activa':'Suscripción premium inactiva');  
         }  
       }); 
       // prueba gratuita : comprobamos si la cuenta tiene una prueba gratuita activada
       if(getIsSubscribedPremium == false ){
-        if(getProfileAccountSelected.trialEnd.toDate().isAfter(DateTime.now())){
+        // imprimir las marcas de tiempo 
+        if(getProfileAccountSelected.trialEnd.toDate().isAfter(DateTime.now())){ 
           // si la prueba gratuita esta activa
           setIsSubscribedPremium = true;
         }
@@ -1029,10 +1031,33 @@ class HomeController extends GetxController {
     // navegar hacia otra pantalla
     Get.offAllNamed(Routes.home,arguments: {'currentUser': getUserAuth, 'idAccount': idAccount} );
   }
-  // GETTERS //
-  int get getDaysLeftTrial{
-    // description : obtiene los dias restantes de la prueba gratuita
-    return getProfileAccountSelected.trialEnd.toDate().difference(DateTime.now()).inDays;
+  // GETTERS // 
+  String calcularDiferenciaFechas(DateTime fechaInicio, DateTime fechaFin) {
+     // Asegurar que la fecha final es posterior a la fecha inicial
+    if (fechaFin.isBefore(fechaInicio)) {
+      throw ArgumentError('La fecha final debe ser posterior a la fecha inicial.');
+    }
+
+    // Calcular la diferencia entre las fechas en milisegundos
+    final diferencia = fechaFin.difference(fechaInicio);
+
+    // Extraer días y horas
+    final dias = diferencia.inDays;
+    final horas = diferencia.inHours % 24;
+
+    // Formatear la salida según si quedan días o solo horas
+    if (dias > 0) {
+      return '$dias días y $horas horas';
+    } else {
+      return '$horas horas';
+    }
+  }
+  String get getDaysLeftTrialFormat{
+    // devuelva en un string formateado los dias y hora restantes de la prueba gratuita y sino queda mas tiempo devuelve un string vacio
+    if(getTrialActive){
+      return calcularDiferenciaFechas(DateTime.now(),getProfileAccountSelected.trialEnd.toDate());
+    }
+    return '';
   }
   bool get getTrialActive {
     // description : verifica si la prueba gratuita esta activa
@@ -1291,6 +1316,7 @@ class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcript
 
     // values
     Color colorCard = Get.isDarkMode?Get.theme.scaffoldBackgroundColor:const Color.fromARGB(255, 243, 238, 228); 
+    Color colorAccent = Get.isDarkMode?Colors.white:Colors.black;
     setData(id: widget.id); 
 
     return Card(
@@ -1317,7 +1343,7 @@ class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcript
                   Text(title,textAlign: TextAlign.center,style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
                   const SizedBox(height: 5),
                   // TODO : delete button release
-                  homeController.getTrialActive && homeController.getDaysLeftTrial == 0 ?Container():
+                  !homeController.getTrialActive  ?Container():
                   TextButton(
                     style: TextButton.styleFrom( 
                       side: const BorderSide(color: Colors.blue,width: 1),
@@ -1337,7 +1363,7 @@ class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcript
                       homeController.activateTrial();
                       Get.back();
                     },
-                    child: homeController.getTrialActive ? Text('Quedan ${homeController.getDaysLeftTrial} días de prueba') : const Text('ACTIVAR PRUEBA POR 30 DÍAS'),
+                    child: homeController.getTrialActive ? Text('Quedan ${homeController.getDaysLeftTrialFormat} de prueba') : const Text('ACTIVAR PRUEBA POR 30 DÍAS'),
                   ),
                   const SizedBox(height: 5),
                   // text : descripción
@@ -1350,79 +1376,87 @@ class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcript
               ),  
               // view : caracteristicas de la suscripción
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: Column( 
-                  children: [
-                    const SizedBox(height:12),
-                    // view :   texto de caracteristicas de la suscripción
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 5),
-                      decoration: BoxDecoration(  
-                        gradient: LinearGradient( 
-                          colors: [
-                            colorCard,
-                            Colors.amber.shade200.withOpacity(0.3),
-                            colorCard,
-                          ],
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
+                padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical:12),
+                child: Container(
+                  // contorno delineado
+                  decoration: BoxDecoration(
+                    border: Border.all(color: colorAccent.withOpacity(0.1),width: 0.5),
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.amber.shade200.withOpacity(0.05),
+                  ),
+                  child: Column( 
+                    children: [
+                      const SizedBox(height:20),
+                      // view :   texto de caracteristicas de la suscripción
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 5),
+                        decoration: BoxDecoration(  
+                          gradient: LinearGradient( 
+                            colors: [
+                              Colors.amber.shade200.withOpacity(0.01),
+                              Colors.amber.shade200.withOpacity(0.3),
+                              Colors.amber.shade200.withOpacity(0.01),
+                            ],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ),
+                        ),
+                        // text : caracteristicas de la suscripción
+                        child: const Text('CARACTERÍSTICAS PREMIUM',textAlign: TextAlign.center,style: TextStyle(fontWeight: FontWeight.w200)),
+                      ),   
+                      const SizedBox(height:5),
+                      // LisTile : caracteristicas de la suscripción 'Arqueo de caja'
+                      const Opacity(
+                        opacity: 0.9,
+                        child: ListTile(
+                          leading: Icon(Icons.point_of_sale_sharp),
+                          title: Text('Arqueo de caja'),
+                          subtitle: Opacity(opacity: 0.5,child: Text('Realiza arqueo de caja, controla el saldo de tu caja al final de cada día')), 
                         ),
                       ),
-                      // text : caracteristicas de la suscripción
-                      child: const Text('CARACTERÍSTICAS PREMIUM',textAlign: TextAlign.center,style: TextStyle(fontWeight: FontWeight.w200)),
-                    ),   
-                    const SizedBox(height:5),
-                    // LisTile : caracteristicas de la suscripción 'Arqueo de caja'
-                    const Opacity(
-                      opacity: 0.9,
-                      child: ListTile(
-                        leading: Icon(Icons.point_of_sale_sharp),
-                        title: Text('Arqueo de caja'),
-                        subtitle: Opacity(opacity: 0.5,child: Text('Realiza arqueo de caja, controla el saldo de tu caja al final de cada día')), 
+                      const Opacity(opacity: 0.5,child: Divider(indent: 50,endIndent:50,thickness:0.5)),
+                      // ListTile : caracteristicas de la suscripción 'Control de inventario' 
+                      const Opacity(
+                        opacity: 0.9,
+                        child: ListTile(
+                          leading: Icon(Icons.inventory_outlined ),
+                          title: Text('Control de inventario'),
+                          subtitle: Opacity(opacity: 0.5,child: Text('Maneje el stock de sus productos')), 
+                        ),
                       ),
-                    ),
-                    const Opacity(opacity: 0.5,child: Divider(indent: 50,endIndent:50,thickness:0.5)),
-                    // ListTile : caracteristicas de la suscripción 'Control de inventario' 
-                    const Opacity(
-                      opacity: 0.9,
-                      child: ListTile(
-                        leading: Icon(Icons.inventory_outlined ),
-                        title: Text('Control de inventario'),
-                        subtitle: Opacity(opacity: 0.5,child: Text('Maneje el stock de sus productos')), 
+                      const Opacity(opacity: 0.5,child: Divider(indent: 50,endIndent:50,thickness:0.5)),
+                      // ListTile : caracteristicas de la suscripción 'Multi Usuarios'
+                      const Opacity(
+                        opacity: 0.9,
+                        child: ListTile(
+                          leading: Icon(Icons.people_outline),
+                          title: Text('Multi Usuarios'),
+                          subtitle: Opacity(opacity: 0.5,child: Text('Permita que más personas gestionen esta cuenta y con permisos personalizados')), 
+                        ),
                       ),
-                    ),
-                    const Opacity(opacity: 0.5,child: Divider(indent: 50,endIndent:50,thickness:0.5)),
-                    // ListTile : caracteristicas de la suscripción 'Multi Usuarios'
-                    const Opacity(
-                      opacity: 0.9,
-                      child: ListTile(
-                        leading: Icon(Icons.people_outline),
-                        title: Text('Multi Usuarios'),
-                        subtitle: Opacity(opacity: 0.5,child: Text('Permita que más personas gestionen esta cuenta y con permisos personalizados')), 
+                      const Opacity(opacity: 0.5,child: Divider(indent: 50,endIndent:50,thickness:0.5)),
+                      // ListTile : caracteristicas de la suscripción 'Informes y estadísticas'
+                      const Opacity(
+                        opacity: 0.9,
+                        child: ListTile(
+                          leading: Icon(Icons.analytics_outlined),
+                          title: Text('Informes y estadísticas'),
+                          subtitle: Opacity(opacity: 0.5,child: Text('Obtenga datos, informes y estadísticas de sus transacciones y productos')), 
+                        ),
                       ),
-                    ),
-                    const Opacity(opacity: 0.5,child: Divider(indent: 50,endIndent:50,thickness:0.5)),
-                    // ListTile : caracteristicas de la suscripción 'Informes y estadísticas'
-                    const Opacity(
-                      opacity: 0.9,
-                      child: ListTile(
-                        leading: Icon(Icons.analytics_outlined),
-                        title: Text('Informes y estadísticas'),
-                        subtitle: Opacity(opacity: 0.5,child: Text('Obtenga datos, informes y estadísticas de sus transacciones y productos')), 
+                      const Opacity(opacity: 0.5,child: Divider(indent: 50,endIndent:50,thickness:0.5)),
+                      // ListTile : Version web y para windows proximamente
+                      const Opacity(
+                        opacity: 0.9,
+                        child: ListTile(
+                          leading: Icon(Icons.web),
+                          title: Text('Versión Web y para Windows (proximamente)'),
+                          subtitle: Opacity(opacity: 0.5,child: Text('Accede cualquier navegador web o desde tu computadora')), 
+                        ),
                       ),
-                    ),
-                    const Opacity(opacity: 0.5,child: Divider(indent: 50,endIndent:50,thickness:0.5)),
-                    // ListTile : Version web y para windows proximamente
-                    const Opacity(
-                      opacity: 0.9,
-                      child: ListTile(
-                        leading: Icon(Icons.web),
-                        title: Text('Versión Web y para Windows (proximamente)'),
-                        subtitle: Opacity(opacity: 0.5,child: Text('Accede cualquier navegador web o desde tu computadora')), 
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ), 
               const SizedBox(height:200),

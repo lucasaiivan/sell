@@ -612,13 +612,12 @@ class SellController extends GetxController {
                         AppMoneyInputFormatter()
                       ],
                       decoration: InputDecoration(  
-                        labelText: "Precio",
-                        hintText: '\$0',
-                        //prefixIcon: const Icon(Icons.attach_money_rounded), 
+                        labelText: "Ingrese el monto",
+                        hintText: '\$0', 
                         border: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent)),
                         enabledBorder: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent), )
                       ),
-                      style: const TextStyle(fontSize: 24.0),
+                      style: const TextStyle(fontSize: 40.0),
                       textInputAction: TextInputAction.next,
                     ),
                   ),
@@ -650,8 +649,9 @@ class SellController extends GetxController {
             SizedBox(
               width: double.infinity,
               child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: ComponentApp().button( 
+                padding: const EdgeInsets.all(0.0),
+                child: ComponentApp().button(  
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                   colorButton: Colors.blue,
                   text: 'Agregar',
                   onPressed: () {
@@ -885,7 +885,7 @@ class _NewProductViewState extends State<NewProductView> {
   final HomeController homeController = Get.find<HomeController>();
   final SellController salesController = Get.find<SellController>();
   late TextEditingController controllerTextEditDescripcion = TextEditingController(text: widget.productCatalogue.description);
-  late AppMoneyTextEditingController controllerTextEditPrecioVenta = AppMoneyTextEditingController(value: widget.productCatalogue.salePrice.toString());
+  late AppMoneyTextEditingController controllerTextEditPrecioVenta = AppMoneyTextEditingController();
   // keys form
   GlobalKey<FormState> descriptionFormKey = GlobalKey<FormState>();
   GlobalKey<FormState> priceFormKey = GlobalKey<FormState>();
@@ -1041,8 +1041,7 @@ class _NewProductViewState extends State<NewProductView> {
       width:double.infinity, 
       duration: const Duration(milliseconds: 500),
       decoration: BoxDecoration(border: Border.all(color: checkAddCatalogue?checkActiveColor:colorAccent,width: 0.5),color: checkAddCatalogue?checkActiveColor.withOpacity(0.2):Colors.transparent,borderRadius: BorderRadius.circular(5)), 
-      child: CheckboxListTile(
-        contentPadding: const EdgeInsets.symmetric(vertical: 5,horizontal: 12),
+      child: CheckboxListTile( 
         title: Text('Agregar a mi cátalogo', style: TextStyle(fontSize: 14,color: colorAccent)),
         value: checkAddCatalogue, 
         checkColor: Colors.white,

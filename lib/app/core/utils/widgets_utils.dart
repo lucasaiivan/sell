@@ -470,7 +470,7 @@ Widget body({required BuildContext context}){
                     iconColor:  Colors.amber,  
                       leading: const Icon(Icons.star_rounded),
                       title: Text(homeController.getIsSubscribedPremium?'Premium':'Obtener Premium'),
-                      subtitle: homeController.getTrialActive && homeController.getDaysLeftTrial !=0 ? Text('¡Te quedan ${homeController.getDaysLeftTrial} días de prueba!'):null,
+                      subtitle: homeController.getTrialActive? Text('¡Te quedan ${homeController.getDaysLeftTrialFormat} de prueba!'):null,
                       onTap: (){
                         // action : mostrar modal bottom sheet con  las funciones premium
                         homeController.showModalBottomSheetSubcription();
@@ -527,7 +527,7 @@ Widget body({required BuildContext context}){
                 trailing: homeController.getIndexPage != 4 ? null : const Icon(Icons.circle,size: 8),
                 title: const Text('Multi Usuario'),
                 onTap: () {
-                  if( homeController.getProfileAccountSelected.subscribed ){
+                  if( homeController.getIsSubscribedPremium ){
                     homeController.setIndexPage = 4;
                   }else{
                     Get.back(); // cierra drawer
@@ -851,7 +851,7 @@ class ComponentApp extends StatelessWidget {
       ),
     );
   } 
-  Widget button( {bool defaultStyle = false,double elevation=0,double fontSize = 14,double width = double.infinity,bool disable = false, Widget? icon, String text = '',required dynamic onPressed,EdgeInsets padding =const EdgeInsets.symmetric(horizontal: 12, vertical: 12),Color? colorButton= Colors.blue,Color colorAccent = Colors.white , EdgeInsets margin =const EdgeInsets.symmetric(horizontal: 12, vertical: 12)}) {
+  Widget button( {bool defaultStyle = false,double elevation=0,double fontSize = 14,double width = double.infinity,bool disable = false, Widget? icon, String text = '',required dynamic onPressed,EdgeInsets padding =const EdgeInsets.symmetric(horizontal:0, vertical:16),Color? colorButton= Colors.blue,Color colorAccent = Colors.white , EdgeInsets margin =const EdgeInsets.symmetric(horizontal: 0, vertical: 0)}) {
      
     // button : personalizado
     return FadeIn(
@@ -1393,13 +1393,19 @@ class RoundedChatBubble extends StatelessWidget {
 // AppMoneyInputFormatter : Formateador de texto para campos de dinero
 // Este formateador se encarga de formatear el texto de un campo de texto para que se vea como un monto de dinero
 class AppMoneyInputFormatter extends TextInputFormatter {
+
+  final String symbol; 
+  AppMoneyInputFormatter({this.symbol = '\$'});
+
   @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue,TextEditingValue newValue) { 
+    
     // Eliminar cualquier cosa que no sea un número o una coma
     var newText = newValue.text.replaceAll(RegExp(r'[^0-9,]'), '');
+    // elimina el 0 si es que esta al principioque existe de la primera posición
+    if (newText.length > 1 && newText[0] == '0') {
+      newText = newText.substring(1);
+    }
 
     // Separar la parte entera y la parte decimal
     var parts = newText.split(',');
@@ -1427,7 +1433,7 @@ class AppMoneyInputFormatter extends TextInputFormatter {
     }
 
     // Añadir el signo de dólar al principio
-    formattedText = '\$$formattedText';
+    formattedText = '$symbol$formattedText';
 
     // Mantener la posición del cursor
     var selectionIndex = formattedText.length;

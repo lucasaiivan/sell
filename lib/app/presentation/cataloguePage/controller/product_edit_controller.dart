@@ -309,11 +309,7 @@ class ControllerProductsEdit extends GetxController {
 
     super.onClose();
   }
-
-  // TODO : release : la subcripción por defecto es [homeController.getProfileAccountSelected.subscribed;]
-  // get 
-  bool get isSubscribed => homeController.getProfileAccountSelected.subscribed;
-
+ 
   //
   // FUNCTIONS
   //
@@ -1446,18 +1442,18 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         items: list,
         searchLabel: 'Buscar marca',
         suggestion: const Center(child: Text('ej. agua')),
-        failure: const Center(child: Column(
+        failure: Center(child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('No se encontro :('),
+            const Text('No se encontro :('),
 
             // TODO : release : disable moderador ( crear marca )
-            /* const SizedBox(height: 20),
+            const SizedBox(height: 20),
             TextButton.icon(
               onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},
               icon: const Icon(Icons.add_box_outlined),
               label: const Text('Crear marca'),
-            ) */
+            )
           ],
         )),
         filter: (product) => [Utils.normalizeText(product.name),Utils.normalizeText(product.description)],
@@ -1512,7 +1508,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
       },
       onLongPress: () {
         // TODO : release : delete fuction
-        //Get.to(() => CreateMark(mark: marcaSelect));
+        Get.to(() => CreateMark(mark: marcaSelect));
       },
     );
   }
