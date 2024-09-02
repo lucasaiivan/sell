@@ -621,27 +621,13 @@ Widget body({required BuildContext context}){
       // se muestra el avatar de la cuenta 
       listWidget.add(Positioned(
         left: ( space) * i,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(100.0),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(1.0),
-            child: ComponentApp().userAvatarCircle(urlImage: list[i].image,radius:10,iconData: Icons.storefront_sharp)),
-        ),
+        child: ComponentApp().userAvatarCircle(urlImage: list[i].image,radius:12,iconData: Icons.storefront_sharp,lineBorder: true),
       ));
     } 
     // add : posisionar el icono a lo ultimo 
     listWidget.add(Positioned(
       left: (  space) * listWidget.length,
-      child: Container(
-        decoration: BoxDecoration( color: Colors.white,borderRadius: BorderRadius.circular(100.0)),
-        child: Container( 
-          decoration: BoxDecoration( borderRadius: BorderRadius.circular(100.0)),
-          child: Icon(Icons.change_circle,color: Colors.grey.shade800,size: 26.0),
-        ),
-      ),
+      child: ComponentApp().userAvatarCircle(urlImage: '',radius: 12,iconData: Icons.change_circle_outlined,lineBorder: true),
     ));
 
     return SizedBox(
@@ -780,9 +766,10 @@ class ComponentApp extends StatelessWidget {
     return Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child:Icon(Icons.circle,size:size, color: color.withOpacity(0.4)));
   }
   // view : imagen avatar del usuario
-  Widget userAvatarCircle({ Color? background,IconData? iconData,bool empty=false,String urlImage='',String text = '', double radius = 20.0}) {
+  Widget userAvatarCircle({ Color? background,IconData? iconData,bool empty=false,String urlImage='',String text = '', double radius = 20.0,bool lineBorder = false,Color? lineBorderColor }) {
     
     // style
+    lineBorderColor ??= Get.isDarkMode ? Colors.white : Colors.black;
     Color backgroundColor =background??Get.theme.dividerColor ;
     // widgets
     late Widget avatar;
@@ -792,25 +779,38 @@ class ComponentApp extends StatelessWidget {
     }else if(urlImage == '' && text == ''){
       iconDefault = Icon(iconData??Icons.person_outline_rounded,color: Colors.white,size: radius*1.1 );
     }else if(urlImage == '' && text != ''){
-      iconDefault = Text( text.substring( 0,1),style: const TextStyle(color: Colors.white));
+      iconDefault = Text( text.substring( 0,1),style: TextStyle(color: Colors.white,fontSize: radius*0.8));
     }else{
-      iconDefault = Container();
+      iconDefault = text == '' ?Container(): Text(text.substring(0,1),style: TextStyle(color: Colors.white,fontSize: radius*0.8));
     }
     
     // crear avatar
     avatar = urlImage == ''
-      ? CircleAvatar(backgroundColor:backgroundColor,radius:radius, child: Center(child: iconDefault))
+      ? CircleAvatar(
+        backgroundColor:lineBorderColor,
+        radius:radius,
+        child: CircleAvatar(backgroundColor:backgroundColor,radius:lineBorder==false?radius:radius-0.5, child: Center(child: iconDefault)))
         : CachedNetworkImage(
           imageUrl: urlImage,
-          placeholder: (context, url) => CircleAvatar(backgroundColor:backgroundColor,radius:radius, child:iconDefault),
-          imageBuilder: (context, image) => CircleAvatar(backgroundImage: image,radius:radius),
+          placeholder: (context, url) => CircleAvatar(
+            backgroundColor:lineBorderColor,
+            radius:radius,
+            child: CircleAvatar(backgroundColor:backgroundColor,radius:lineBorder==false?radius:radius-0.5, child:iconDefault)),
+          imageBuilder: (context, image) => CircleAvatar(
+            backgroundColor:lineBorderColor,
+            radius:radius,
+            child: CircleAvatar(backgroundImage: image,radius:lineBorder==false?radius:radius-0.5, child: iconDefault)),
           errorWidget: (context, url, error) {
             // return : un circleView con la inicial de nombre como icon 
             return CircleAvatar(
-              backgroundColor: backgroundColor,
+              backgroundColor:lineBorderColor,
               radius:radius,
-              child: Center(child: iconDefault),
-              );
+              child: CircleAvatar(
+                backgroundColor: backgroundColor,
+                radius:lineBorder==false?radius:radius-0.5,
+                child: Center(child: iconDefault),
+                ),
+            );
           },
     );
 

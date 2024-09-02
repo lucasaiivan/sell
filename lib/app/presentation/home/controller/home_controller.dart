@@ -1,4 +1,5 @@
-import 'dart:io';     
+import 'dart:io';
+import 'dart:ui';     
 import 'package:lottie/lottie.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -1255,6 +1256,7 @@ class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcript
   Widget icon = Container();
   String title = 'Premium';
   String description = ''; 
+  String assetImage = '';
 
   // functions 
   void setData({required String id}) {
@@ -1263,6 +1265,7 @@ class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcript
         title = 'Premium';
         description = 'Funcionalidades especiales para profesionalizar tu negocio';
         icon =  Icon(Icons.star_rounded,size: sizePremiumLogo,color: Colors.amber); 
+        assetImage = 'assets/stock01.jpg';
         break;
       case 'arching':
         title = 'Arqueo de caja';
@@ -1271,11 +1274,13 @@ class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcript
             padding: const EdgeInsets.only(right: 5),
             // icon : icono de caja registradora 
             child: Icon(Icons.point_of_sale_rounded,size: sizePremiumLogo,color: Colors.amber));
+        assetImage = 'assets/sell.png';
         break;
       case 'stock':
         title = 'Control de Inventario';
         description ='Maneje el stock de sus productos, disfruta además de otras características especiales';
         icon = Padding(padding:const EdgeInsets.only(right: 5),child: Icon(Icons.inventory_rounded,size: sizePremiumLogo,color: Colors.amber)); 
+        assetImage = 'assets/stock.jpg';
         break;
       case 'analytic':
         title = 'Informes y Estadísticas';
@@ -1283,6 +1288,7 @@ class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcript
         icon = Padding(
             padding: const EdgeInsets.only(right: 5),
             child: Icon(Icons.analytics_outlined,size: sizePremiumLogo,color: Colors.amber)); 
+        assetImage = 'assets/analytics.jpg';
         break;
       case 'multiuser':
         title = 'Multiusuario';
@@ -1290,12 +1296,14 @@ class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcript
         icon = Padding(
             padding: const EdgeInsets.only(right: 5),
             child: Icon(Icons.people_outline,size: sizePremiumLogo,color: Colors.amber));
+        assetImage = 'assets/transaction.png';
         break;
       default:
         title = '';
         description =
             'Funcionalidades especiales para profesionalizar tu negocio';
         icon = Container(); 
+        assetImage = 'assets/sell.png';
         break;
     }
   }
@@ -1317,7 +1325,7 @@ class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcript
     // values
     Color colorCard = Get.isDarkMode?Get.theme.scaffoldBackgroundColor:const Color.fromARGB(255, 243, 238, 228); 
     Color colorAccent = Get.isDarkMode?Colors.white:Colors.black;
-    setData(id: widget.id); 
+   
 
     return Card(
       margin: const EdgeInsets.all(0),
@@ -1325,53 +1333,77 @@ class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcript
       color: colorCard,
       clipBehavior: Clip.antiAlias,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
-      child: Stack(  
-        children: [
+      child: Stack(   
+        children: [ 
           // view : contenido de la suscripción desplazable
-          ListView( 
-            // efecto rebote
-            physics: const BouncingScrollPhysics(),
+          ListView(  
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  const SizedBox(height: 8),
-                  // icon 
-                  Padding(padding: const EdgeInsets.only(top:12),child: icon),
-                  // text : titulo
-                  Text(title,textAlign: TextAlign.center,style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
-                  const SizedBox(height: 5),
-                  // TODO : delete button release
-                  !homeController.getTrialActive  ?Container():
-                  TextButton(
-                    style: TextButton.styleFrom( 
-                      side: const BorderSide(color: Colors.blue,width: 1),
-                      minimumSize: const Size(200, 40),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                    ),
-                    onPressed: () {
-                      // activa la suscripción solo en la app en tiempo de ejecución de manera local
-                      homeController.setIsSubscribedPremium = true;
-
-                      if(homeController.getTrialActive){
-                        // si la prueba gratuita esta activa
-                        return;
-                      }
-                      
-                      // activar prueba gratuita
-                      homeController.activateTrial();
-                      Get.back();
-                    },
-                    child: homeController.getTrialActive ? Text('Quedan ${homeController.getDaysLeftTrialFormat} de prueba') : const Text('ACTIVAR PRUEBA POR 30 DÍAS'),
-                  ),
-                  const SizedBox(height: 5),
-                  // text : descripción
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Opacity(opacity: 0.7,child: Text(description, textAlign: TextAlign.center,style: const TextStyle(fontWeight: FontWeight.w300))),
+              Stack(
+                children: [
+                  // Imagen de fondo
+                  Image.asset(
+                    assetImage,
+                    fit: BoxFit.cover, // Ajusta la imagen al contenedor
+                    //color: Colors.black, // Aplica el color negro como overlay 
+                    height: 210,
+                    width: double.infinity, 
                   ), 
+                  // Degradado superpuesto
+                  Container(
+                    height: 211.5, 
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.transparent,
+                          colorCard,
+                        ], 
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      const SizedBox(height: 8),
+                      // icon 
+                      Padding(padding: const EdgeInsets.only(top:12),child: icon),
+                      // text : titulo
+                      Text(title,textAlign: TextAlign.center,style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800,color: Colors.white)),
+                      const SizedBox(height: 5),
+                      // TODO : delete button release
+                      !homeController.getTrialActive  ?Container():
+                      TextButton(
+                        style: TextButton.styleFrom( 
+                          side: const BorderSide(color: Colors.blue,width: 1),
+                          minimumSize: const Size(200, 40),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        ),
+                        onPressed: () {
+                          // activa la suscripción solo en la app en tiempo de ejecución de manera local
+                          homeController.setIsSubscribedPremium = true;
                   
+                          if(homeController.getTrialActive){
+                            // si la prueba gratuita esta activa
+                            return;
+                          }
+                          
+                          // activar prueba gratuita
+                          homeController.activateTrial();
+                          Get.back();
+                        },
+                        child: homeController.getTrialActive ? Text('Quedan ${homeController.getDaysLeftTrialFormat} de prueba') : const Text('ACTIVAR PRUEBA POR 30 DÍAS'),
+                      ),
+                      const SizedBox(height: 5),
+                      // text : descripción
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Opacity(opacity: 0.7,child: Text(description, textAlign: TextAlign.center,style: const TextStyle(fontWeight: FontWeight.w300,color: Colors.white))),
+                      ), 
+                      
+                    ],
+                  ),
                 ],
               ),  
               // view : caracteristicas de la suscripción
@@ -1467,7 +1499,7 @@ class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcript
             top: 0,
             right: 0,
             child: IconButton(
-              icon: const Icon(Icons.close),
+              icon: const Icon(Icons.close,color: Colors.white),
               onPressed: () {
                 Get.back();
               },

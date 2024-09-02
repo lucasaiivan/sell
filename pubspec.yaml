@@ -136,7 +136,10 @@ flutter:
       - assets/catalogue.png
       - assets/sell.png
       - assets/transaction.png
-      - assets/premium_anim.json
+      - assets/premium_anim.json 
+      - assets/analytics.jpg
+      - assets/stock.jpg
+      - assets/stock01.jpg
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
