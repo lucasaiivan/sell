@@ -1,5 +1,4 @@
-import 'package:animate_do/animate_do.dart';
-import 'package:carousel_slider/carousel_slider.dart';
+import 'package:animate_do/animate_do.dart'; 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -65,6 +64,7 @@ class ProductNewFormView extends StatelessWidget {
 
   // MAIN WIDGETS
   PreferredSizeWidget get appbar {
+
     // values
     Color colorAccent = controller.darkMode ? Colors.white : Colors.black;
     bool imageProductExist = controller.getProduct.image != '' ||
@@ -72,6 +72,28 @@ class ProductNewFormView extends StatelessWidget {
     String title = controller.getProduct.description != ''
         ? controller.getProduct.description
         : controller.getTextAppBar;
+    // widgets
+    final Widget dividerCircle = ComponentApp().dividerDot(color: colorAccent); 
+    Widget brandText = controller.getProduct.nameMark != '' ? Opacity(
+      opacity: 0.5,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          dividerCircle,
+          Flexible(child: Text(controller.getProduct.nameMark,overflow:TextOverflow.ellipsis,style: const TextStyle(fontSize:12),)),
+        ],
+      ),
+    ):Container();
+    Widget proceSaleText = controller.getSalePrice != 0 ? Opacity(
+      opacity: 0.5,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          dividerCircle,
+          Flexible(child: Text(Publications.getFormatoPrecio(value: controller.getSalePrice),overflow:TextOverflow.ellipsis,style: const TextStyle(fontSize:12),)),
+        ],
+      ),
+    ):Container();
 
     // widgets
     Widget titleWidget = Column(
@@ -84,18 +106,22 @@ class ProductNewFormView extends StatelessWidget {
             imageProductExist ? controller.loadImage(size: 40) : Container(),
             imageProductExist ? const SizedBox(width: 12) : Container(),
             // text : nombre del producto
-            SizedBox(
-              width: 200,
-              child: Text(title, style: TextStyle(color: colorAccent, fontSize: 18),overflow: TextOverflow.ellipsis)),
+            SizedBox(width: 200,child: Text(title, style: TextStyle(color: colorAccent,fontSize:18),overflow: TextOverflow.ellipsis)),
+          ],
+        ), 
+        // text : codigo
+        Row(
+          children: [
+            controller.getProduct.code != ''
+                ? Opacity(opacity: 0.5,
+                  child: Text('${controller.getProduct.code}${controller.getProduct.local?' (Catálogo)':''}',
+                      style: TextStyle(color: colorAccent, fontSize: 12)),
+                )
+                : Container(),
+          brandText,
+          proceSaleText,
           ],
         ),
-        // text : codigo
-        controller.getProduct.code != ''
-            ? Opacity(opacity: 0.5,
-              child: Text('${controller.getProduct.code}${controller.getProduct.local?' (Catálogo)':''}',
-                  style: TextStyle(color: colorAccent, fontSize: 12)),
-            )
-            : Container(),
       ],
     );
     // si se esta guardando los datos del producto
@@ -250,15 +276,15 @@ class ProductNewFormView extends StatelessWidget {
       consentProductCardCheckbox,
     ];
 
-    return CarouselSlider.builder(
-      carouselController: controller.carouselController,
-      options: CarouselOptions( 
-        height: 600,
-        scrollPhysics: const NeverScrollableScrollPhysics(),
-        onPageChanged: (index, reason) {
-    
+    return SizedBox(
+      height: 600,
+      child: PageView.builder(
+        controller: controller.carouselController,
+        physics: const NeverScrollableScrollPhysics(), // Desactiva el desplazamiento táctil
+        onPageChanged: (index) {
+      
           controller.setCurrentSlide = index;
-    
+      
           switch (index) {
             case 0: // seleccion de una imagen para el producto
               SystemChannels.textInput.invokeMethod('TextInput.hide'); // quita el foco
@@ -285,29 +311,25 @@ class ProductNewFormView extends StatelessWidget {
               SystemChannels.textInput.invokeMethod('TextInput.hide'); // quita el foco
               break;
           }
+          
         },
-        viewportFraction: 0.95,
-        enableInfiniteScroll: false, 
-        aspectRatio: 2.0,
-        enlargeCenterPage: true,
-        enlargeStrategy: CenterPageEnlargeStrategy.height,
+        itemBuilder: (context, index) {
+          // values
+          bool focusWidget = controller.getCurrentSlide == index
+              ? true
+              : false; // si el foco esta en el widget actual
+          // AnimatedOpacity : anima el cambio de opacidad del widget segun el foco actual
+          return AnimatedOpacity(
+            duration: const Duration(milliseconds: 800),
+            opacity: focusWidget ? 1.0 : 0.3,
+            // widget
+            child: listWidgetss[index],
+          );
+        },
+      
       ),
-      //options: CarouselOptions(enableInfiniteScroll: lista.length == 1 ? false : true,autoPlay: lista.length == 1 ? false : true,aspectRatio: 2.0,enlargeCenterPage: true,enlargeStrategy: CenterPageEnlargeStrategy.scale),
-      itemCount: listWidgetss.length,
-      itemBuilder: (context, index, realIndex) {
-        // values
-        bool focusWidget = controller.getCurrentSlide == index
-            ? true
-            : false; // si el foco esta en el widget actual
-        // AnimatedOpacity : anima el cambio de opacidad del widget segun el foco actual
-        return AnimatedOpacity(
-          duration: const Duration(milliseconds: 800),
-          opacity: focusWidget ? 1.0 : 0.3,
-          // widget
-          child: listWidgetss[index],
-        );
-      },
     );
+
   }
 
   // WIDGET : un boton para cargar una imagen
@@ -788,8 +810,7 @@ class ProductNewFormView extends StatelessWidget {
                       helperText: 'Visibilidad pública (cualquier puede verlo)'),
                   onChanged: (value) {
                     if (controller.controllerTextEditPrecioVenta.doubleValue != 0) {
-                      controller.setSalePrice =
-                          controller.controllerTextEditPrecioVenta.doubleValue;
+                      controller.setSalePrice = controller.controllerTextEditPrecioVenta.doubleValue;
                       controller.formEditing = true;
                       controller.update();
                     }

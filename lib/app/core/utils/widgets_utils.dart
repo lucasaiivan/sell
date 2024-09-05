@@ -774,14 +774,15 @@ class ComponentApp extends StatelessWidget {
     // widgets
     late Widget avatar;
     late Widget iconDefault;
+    Widget iconText = text == ''?Container(): Text( text.substring( 0,1),style: TextStyle(color: Colors.white,fontSize: radius*0.8));
     if(empty){
       iconDefault = Container();
     }else if(urlImage == '' && text == ''){
-      iconDefault = Icon(iconData??Icons.person_outline_rounded,color: Colors.white,size: radius*1.1 );
+      iconDefault =  iconText;
     }else if(urlImage == '' && text != ''){
-      iconDefault = Text( text.substring( 0,1),style: TextStyle(color: Colors.white,fontSize: radius*0.8));
+      iconDefault = iconText;
     }else{
-      iconDefault = text == '' ?Container(): Text(text.substring(0,1),style: TextStyle(color: Colors.white,fontSize: radius*0.8));
+      iconDefault = Container();
     }
     
     // crear avatar
@@ -808,7 +809,7 @@ class ComponentApp extends StatelessWidget {
               child: CircleAvatar(
                 backgroundColor: backgroundColor,
                 radius:lineBorder==false?radius:radius-0.5,
-                child: Center(child: iconDefault),
+                child: Center(child: iconText),
                 ),
             );
           },

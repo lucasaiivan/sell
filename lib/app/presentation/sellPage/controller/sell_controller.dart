@@ -996,8 +996,8 @@ class _NewProductViewState extends State<NewProductView> {
           },
         ),
       ),
-    );
-    // TODO : error :  RangeError TextFormField : cuando el usuario mantiene presionado el boton de borrar > 'RangeError : Invalid value: only valid value is 0: -1'
+    ); 
+    // widget : entrada de monto del precio de venta al publico 
     Widget widgetTextFieldPrice = Padding(
           padding: const EdgeInsets.symmetric(horizontal:12, vertical: 6),
           child: Form(
@@ -1013,7 +1013,7 @@ class _NewProductViewState extends State<NewProductView> {
               inputFormatters: [AppMoneyInputFormatter()],
               decoration: InputDecoration(
                 labelText: 'Precio de venta al públuco',
-                hintText: 'ej. agua saborisada 500 ml',  
+                hintText: '0.0',  
                 hintStyle: hintStyle,
                 labelStyle: labelStyle,
                 prefixIcon: const Icon(Icons.attach_money_rounded), 

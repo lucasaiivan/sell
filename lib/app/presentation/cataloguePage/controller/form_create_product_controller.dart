@@ -1,8 +1,6 @@
 
 import 'dart:io';
-
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cached_network_image/cached_network_image.dart'; 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -36,7 +34,8 @@ class ControllerCreateProductForm extends GetxController{
 
 
   // controller : carousel de componentes para que el usuario complete los campos necesarios para crear un nuevo producto nuevo
-  CarouselController carouselController = CarouselController();
+  PageController carouselController = PageController(); 
+  
   // var : logic  para que el usuario complete los campos necesarios para crear un nuevo producto nuevo
   bool formEditing = false;
   bool theFormIsComplete = false;
@@ -285,7 +284,7 @@ class ControllerCreateProductForm extends GetxController{
   void onReady() {
     super.onReady();
     if(getProduct.local){
-      carouselController.animateToPage(1);
+      carouselController.jumpToPage(1);
     }
   }
   @override
@@ -674,7 +673,7 @@ class ControllerCreateProductForm extends GetxController{
   }
   
   void previousPage(){
-    carouselController.animateToPage(getCurrentSlide-1); 
+    carouselController.previousPage( duration: const Duration(milliseconds: 500), curve: Curves.easeIn ); 
   }
   void next(){
     // function : verificamos que el campo actual este completo para pasar al siguiente campo y complertar el formulario
@@ -714,7 +713,7 @@ class ControllerCreateProductForm extends GetxController{
     }
 
     // action : pasa a la siquiente vista si es posible
-    if(next){carouselController.nextPage();} 
+    if(next){carouselController.nextPage( duration: const Duration(milliseconds: 500), curve: Curves.easeIn );} 
 
     update();
  

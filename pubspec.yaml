@@ -86,7 +86,7 @@ dependencies:
   #excel: ^4.0.3
   clipboard: ^0.1.3 # Un paquete de Flutter que proporciona acceso al portapapeles del sistema.
   external_app_launcher: ^4.0.0 #Un complemento de Flutter que te ayuda a abrir otra aplicación desde tu aplicación. El paquete le solicita cuatro parámetros, de los cuales dos son obligatorios.
-  carousel_slider: ^4.2.1 # Un widget deslizante de carrusel
+  #carousel_slider: ^5.0.0 # Un widget deslizante de carrusel
   email_validator: ^3.0.0
   blur: ^4.0.0  # Un paquete de Flutter que proporciona un widget de enfoque de desenfoque.
   #fl_chart: ^0.68.0 # Un paquete de Flutter que proporciona un widget de gráfico de datos.
