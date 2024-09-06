@@ -527,12 +527,7 @@ Widget body({required BuildContext context}){
                 trailing: homeController.getIndexPage != 4 ? null : const Icon(Icons.circle,size: 8),
                 title: const Text('Multi Usuario'),
                 onTap: () {
-                  if( homeController.getIsSubscribedPremium ){
-                    homeController.setIndexPage = 4;
-                  }else{
-                    Get.back(); // cierra drawer
-                    homeController.showModalBottomSheetSubcription(id: 'multiuser');
-                  }
+                  homeController.setIndexPage = 4;
                   
                 }):Container(),
               const SizedBox(height: 20),
@@ -621,13 +616,13 @@ Widget body({required BuildContext context}){
       // se muestra el avatar de la cuenta 
       listWidget.add(Positioned(
         left: ( space) * i,
-        child: ComponentApp().userAvatarCircle(urlImage: list[i].image,radius:12,iconData: Icons.storefront_sharp,lineBorder: true),
+        child: ComponentApp().userAvatarCircle(urlImage: list[i].image,radius:12,lineBorder: true),
       ));
     } 
     // add : posisionar el icono a lo ultimo 
     listWidget.add(Positioned(
       left: (  space) * listWidget.length,
-      child: ComponentApp().userAvatarCircle(urlImage: '',radius: 12,iconData: Icons.change_circle_outlined,lineBorder: true),
+      child: ComponentApp().userAvatarCircle(urlImage: '',radius: 14,iconData: Icons.change_circle_outlined,lineBorder: true),
     ));
 
     return SizedBox(
@@ -769,7 +764,7 @@ class ComponentApp extends StatelessWidget {
   Widget userAvatarCircle({ Color? background,IconData? iconData,bool empty=false,String urlImage='',String text = '', double radius = 20.0,bool lineBorder = false,Color? lineBorderColor }) {
     
     // style
-    lineBorderColor ??= Get.isDarkMode ? Colors.white : Colors.black;
+    lineBorderColor ??= Colors.white;
     Color backgroundColor =background??Get.theme.dividerColor ;
     // widgets
     late Widget avatar;
@@ -783,6 +778,9 @@ class ComponentApp extends StatelessWidget {
       iconDefault = iconText;
     }else{
       iconDefault = Container();
+    }
+    if(iconData!=null){
+      iconDefault = Icon(iconData,color:lineBorderColor);
     }
     
     // crear avatar

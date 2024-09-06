@@ -555,8 +555,7 @@ class ProductEdit extends StatelessWidget {
           fillColor:stateEdit?fillColor:Colors.transparent , 
           labelText: labelText,
           suffix:suffix,
-          ),
-        
+          ), 
       ),
     );
   }

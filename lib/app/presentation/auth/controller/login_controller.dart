@@ -7,9 +7,9 @@ import '../../splash/controllers/splash_controller.dart';
 class LoginController extends GetxController {
 
   // source
-  String sellImagen = "assets/sell.png";
-  String transactionImage = "assets/transaction.png";
-  String catalogueImage = "assets/catalogue.png";
+  String sellImagen = "assets/sell02.jpeg";
+  String transactionImage = "assets/sell05.jpeg";
+  String catalogueImage = "assets/catalogue03.jpeg";
 
   // firebase
   final FirebaseAuth auth = FirebaseAuth.instance;

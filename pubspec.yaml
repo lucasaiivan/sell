@@ -133,13 +133,23 @@ flutter:
       - assets/scanbarcode.png
       - assets/productoLogo.png
       - assets/default_image.png
-      - assets/catalogue.png
-      - assets/sell.png
+      - assets/catalogue.jpeg
+      - assets/catalogue01.jpeg
+      - assets/catalogue02.png
+      - assets/catalogue03.jpeg
+      - assets/sell.jpeg
+      - assets/sell01.jpeg
+      - assets/sell02.jpeg
+      - assets/sell03.jpeg
+      - assets/sell04.jpeg
+      - assets/sell05.jpeg
+      - assets/sell06.jpeg
+      - assets/sell07.jpeg
       - assets/transaction.png
       - assets/premium_anim.json 
-      - assets/analytics.jpg
-      - assets/stock.jpg
-      - assets/stock01.jpg
+      - assets/analytics.png
+      - assets/stock.jpeg 
+      - assets/premium.jpeg 
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

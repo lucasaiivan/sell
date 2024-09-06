@@ -1194,6 +1194,7 @@ class HomeController extends GetxController {
         isScrollControlled: true,
         enableDrag: true,
         isDismissible: true,
+        clipBehavior: Clip.antiAlias,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
     );
   }
@@ -1265,7 +1266,7 @@ class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcript
         title = 'Premium';
         description = 'Funcionalidades especiales para profesionalizar tu negocio';
         icon =  Icon(Icons.star_rounded,size: sizePremiumLogo,color: Colors.amber); 
-        assetImage = 'assets/stock01.jpg';
+        assetImage = 'assets/premium.jpeg';
         break;
       case 'arching':
         title = 'Arqueo de caja';
@@ -1274,13 +1275,13 @@ class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcript
             padding: const EdgeInsets.only(right: 5),
             // icon : icono de caja registradora 
             child: Icon(Icons.point_of_sale_rounded,size: sizePremiumLogo,color: Colors.amber));
-        assetImage = 'assets/sell.png';
+        assetImage = 'assets/sell05.jpeg';
         break;
       case 'stock':
         title = 'Control de Inventario';
         description ='Maneje el stock de sus productos, disfruta además de otras características especiales';
         icon = Padding(padding:const EdgeInsets.only(right: 5),child: Icon(Icons.inventory_rounded,size: sizePremiumLogo,color: Colors.amber)); 
-        assetImage = 'assets/stock.jpg';
+        assetImage = 'assets/stock.jpeg';
         break;
       case 'analytic':
         title = 'Informes y Estadísticas';
@@ -1288,7 +1289,7 @@ class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcript
         icon = Padding(
             padding: const EdgeInsets.only(right: 5),
             child: Icon(Icons.analytics_outlined,size: sizePremiumLogo,color: Colors.amber)); 
-        assetImage = 'assets/analytics.jpg';
+        assetImage = 'assets/sell04.jpeg';
         break;
       case 'multiuser':
         title = 'Multiusuario';
@@ -1296,14 +1297,14 @@ class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcript
         icon = Padding(
             padding: const EdgeInsets.only(right: 5),
             child: Icon(Icons.people_outline,size: sizePremiumLogo,color: Colors.amber));
-        assetImage = 'assets/transaction.png';
+        assetImage = 'assets/analytics.jpg';
         break;
       default:
         title = '';
         description =
             'Funcionalidades especiales para profesionalizar tu negocio';
         icon = Container(); 
-        assetImage = 'assets/sell.png';
+        assetImage = 'assets/premium.jpeg';
         break;
     }
   }
@@ -1332,7 +1333,6 @@ class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcript
       elevation: 0,
       color: colorCard,
       clipBehavior: Clip.antiAlias,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
       child: Stack(   
         children: [ 
           // view : contenido de la suscripción desplazable
@@ -1528,7 +1528,7 @@ class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcript
                       // card : con un color gradient de tres colores y bordes redondeados
                       return Card(  
                         elevation: 0,
-                        margin: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
+                        margin: const EdgeInsets.symmetric(horizontal: 12,vertical: 8),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8),side: BorderSide.none),
                         clipBehavior: Clip.antiAlias,
                         // container : aplicamos un gradiente de tres colores
@@ -1560,7 +1560,7 @@ class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcript
                   ),
                   // view : texto de información de la suscripción y textbuton de condiciones de uso y política de privacidad
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0,top: 0.0,left: 20.0,right: 20.0),
+                    padding: const EdgeInsets.only(bottom: 0.0,top: 0.0,left: 20.0,right: 20.0),
                     child: Column(  
                       children: [
                         // text : cancelar de la suscripción
