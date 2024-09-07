@@ -1434,6 +1434,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
 
     // var
     Color colorAccent = Get.theme.brightness == Brightness.dark ? Colors.white : Colors.black;
+    
     showSearch(
       context: context,
       delegate: SearchPage<Mark>(
@@ -1456,7 +1457,9 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
             )
           ],
         )),
-        filter: (product) => [Utils.normalizeText(product.name),Utils.normalizeText(product.description)],
+        filter: (brand){ 
+          return [brand.name,brand.description];
+        },
         builder: (mark) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[
           itemList(marcaSelect: mark),
           ComponentApp().divider(),

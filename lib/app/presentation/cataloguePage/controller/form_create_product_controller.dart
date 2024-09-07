@@ -64,14 +64,7 @@ class ControllerCreateProductForm extends GetxController{
     _currentSlide = value;
     update();
   }
-
-  // concentimiento del usuario
-  bool _userConsent = false;
-  set setUserConsent(bool value) {
-    _userConsent = value;
-    update();
-  }
-  bool get getUserConsent => _userConsent; 
+ 
 
   // state internet
   bool connected = false;
@@ -410,7 +403,7 @@ class ControllerCreateProductForm extends GetxController{
               if(controllerTextEditAlertStock.text!=''){getProduct.alertStock  = int.parse( controllerTextEditAlertStock.text );}
 
               // TODO : DISABLE RELEASE
-              //getProduct.verified = getProduct.local ? false : true; 
+              getProduct.verified = true; getProduct.local = false;
 
               // actualización de la imagen del producto
               if (getXFileImage.path != '') { 
@@ -450,7 +443,8 @@ class ControllerCreateProductForm extends GetxController{
 
               // sleep : espera 3 segundos para que se actualice la vista
               await Future.delayed(const Duration(milliseconds: 1)).then((value) {
-                setDataUploadStatus = false; Get.back(); 
+                setDataUploadStatus = false; 
+                Get.back(); 
               });
 
             } else {
@@ -705,12 +699,7 @@ class ControllerCreateProductForm extends GetxController{
       Get.snackbar(' Stock no valido 😐', 'debe proporcionar un cantidad');
       next=false;
     }
-
-    // concentimientos del usuario : este campo es obligatorio para crear un producto nuevo
-    if(getCurrentSlide == 9 && getUserConsent == false){
-      Get.snackbar('Debes aceptar los terminos y condiciones', 'Este campo no puede dejarse vacio',snackPosition: SnackPosition.TOP,snackStyle: SnackStyle.FLOATING,);
-      next=false;
-    }
+ 
 
     // action : pasa a la siquiente vista si es posible
     if(next){carouselController.nextPage( duration: const Duration(milliseconds: 500), curve: Curves.easeIn );} 

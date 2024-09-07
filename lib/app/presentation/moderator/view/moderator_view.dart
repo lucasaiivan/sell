@@ -674,6 +674,9 @@ class _ModeratorViewState extends State<ModeratorView> {
     // var 
     String description = item.description == '' ? 'sin datos' :item.description;
 
+     
+    
+
     return ElasticIn(
       child: ListTile(
         title: Text(item.idProduct),
@@ -708,14 +711,14 @@ class _ModeratorViewState extends State<ModeratorView> {
             ),
           ],
         ), 
-        leading: Column(
+        leading:  Column(
           children: [
             // avatar : product 
-            ImageProductAvatarApp(url: controller.getProduct(id: item.idProduct)!.image,size: 40),
+            ImageProductAvatarApp(url:controller.getProduct(id: item.idProduct) == null?'': controller.getProduct(id: item.idProduct)!.image,size: 40),
             // text : descripcion del producto
             SizedBox(
               width: 75,
-              child: Text(controller.getProduct(id: item.idProduct)!.description,style: const TextStyle(fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1)),
+              child: Text(controller.getProduct(id: item.idProduct) == null?'null':controller.getProduct(id: item.idProduct)!.description,style: const TextStyle(fontWeight: FontWeight.w300),overflow: TextOverflow.ellipsis,maxLines:1)),
           ],
         ),
         // trailing : eliminar reporte
@@ -727,7 +730,9 @@ class _ModeratorViewState extends State<ModeratorView> {
             }
             // condition : si se selecciona navegar al producto
             if(value=='Ver producto'){
-              controller.goToProductEdit(controller.getProduct(id: item.idProduct)!);
+              if(controller.getProduct(id: item.idProduct) != null){
+                controller.goToProductEdit(controller.getProduct(id: item.idProduct)!);
+              }
             }
       
           },

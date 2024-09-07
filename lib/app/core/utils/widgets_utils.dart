@@ -1197,23 +1197,24 @@ class _EditProductSelectedDialogViewState extends State<EditProductSelectedDialo
           // text : titulo barrar superior
           Flexible(
             fit: FlexFit.tight,
-            child: Row(
-              children: [
-                ImageProductAvatarApp(url: widget.product.image,size: 35),
-                const SizedBox(width: 10),
-                Text(widget.product.code==''?'Item':widget.product.code,style: const TextStyle(fontWeight: FontWeight.w300)),
-              ],
-            )),
+            child: Text(widget.product.code==''?'Item':widget.product.code,style: const TextStyle(fontWeight: FontWeight.w300,fontSize: 18),overflow: TextOverflow.ellipsis,)),
+          IconButton(
+            onPressed: (){},
+            icon: Icon(widget.product.favorite?Icons.star: Icons.star_border,color:widget.product.favorite?Colors.amber:null,)),
+          !controller.homeController.getProfileAdminUser.catalogue?Container()
+          :IconButton(
+            onPressed: (){},
+            icon: const Icon(Icons.edit_outlined)),
           IconButton(
             onPressed: Get.back,
-            icon: const Icon(Icons.close),
-          ),
+            icon: const Icon(Icons.close)),
         ],
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           ListTile( 
+            leading: ImageProductAvatarApp(url: widget.product.image,size: 35),
             title:widget.product.description==''?subtitleWidget:titleWidget, 
             // subtitle : codigo del producto si es q existe 
             subtitle: widget.product.description==''? null:subtitleWidget,

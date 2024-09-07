@@ -2,7 +2,8 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:search_page/search_page.dart'; 
+import 'package:search_page/search_page.dart';
+import 'package:url_launcher/url_launcher.dart'; 
 import '../../../core/utils/fuctions.dart';
 import '../../../core/utils/widgets_utils.dart';
 import '../../../domain/entities/catalogo_model.dart';
@@ -72,30 +73,36 @@ class ProductNewFormView extends StatelessWidget {
     String title = controller.getProduct.description != ''
         ? controller.getProduct.description
         : controller.getTextAppBar;
-    // widgets
+    // widget : separador
     final Widget dividerCircle = ComponentApp().dividerDot(color: colorAccent); 
+    // widget : codigo
+    Widget code = controller.getProduct.code != ''? Opacity(opacity: 0.5,child: Text('${controller.getProduct.code}${controller.getProduct.local?' (Catálogo)':''}',style: TextStyle(color: colorAccent, fontSize: 12)),): Container();
+    // widget : marca
     Widget brandText = controller.getProduct.nameMark != '' ? Opacity(
       opacity: 0.5,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           dividerCircle,
-          Flexible(child: Text(controller.getProduct.nameMark,overflow:TextOverflow.ellipsis,style: const TextStyle(fontSize:12),)),
+          Flexible(child: Text(controller.getProduct.nameMark,overflow:TextOverflow.ellipsis,style: TextStyle(fontSize:12,color: colorAccent))),
         ],
       ),
     ):Container();
+    // widget : precio de venta
     Widget proceSaleText = controller.getSalePrice != 0 ? Opacity(
       opacity: 0.5,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           dividerCircle,
-          Flexible(child: Text(Publications.getFormatoPrecio(value: controller.getSalePrice),overflow:TextOverflow.ellipsis,style: const TextStyle(fontSize:12),)),
+          Flexible(child: Text(Publications.getFormatoPrecio(value: controller.getSalePrice),overflow:TextOverflow.ellipsis,style: TextStyle(fontSize:12,color: colorAccent))),
         ],
       ),
     ):Container();
+    // widget : icon de favorito
+    Widget favoriteIcon = controller.getFavorite?const Icon(Icons.star,size:12,color: Colors.amber):Container();
 
-    // widgets
+    // widget : tituto
     Widget titleWidget = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -105,19 +112,15 @@ class ProductNewFormView extends StatelessWidget {
             // image : imagen del producto
             imageProductExist ? controller.loadImage(size: 40) : Container(),
             imageProductExist ? const SizedBox(width: 12) : Container(),
+            favoriteIcon,
             // text : nombre del producto
             SizedBox(width: 200,child: Text(title, style: TextStyle(color: colorAccent,fontSize:18),overflow: TextOverflow.ellipsis)),
           ],
         ), 
-        // text : codigo
+        // text : codigo, marca, precio de venta
         Row(
           children: [
-            controller.getProduct.code != ''
-                ? Opacity(opacity: 0.5,
-                  child: Text('${controller.getProduct.code}${controller.getProduct.local?' (Catálogo)':''}',
-                      style: TextStyle(color: colorAccent, fontSize: 12)),
-                )
-                : Container(),
+          code,
           brandText,
           proceSaleText,
           ],
@@ -126,8 +129,7 @@ class ProductNewFormView extends StatelessWidget {
     );
     // si se esta guardando los datos del producto
     if (controller.getDataUploadStatus) {
-      titleWidget = Text(controller.getTextAppBar,
-          style: TextStyle(color: colorAccent, fontSize: 18));
+      titleWidget = Text(controller.getTextAppBar,style: TextStyle(color: colorAccent, fontSize: 18));
     }
 
     return AppBar(
@@ -207,7 +209,7 @@ class ProductNewFormView extends StatelessWidget {
               child: TextButton(
                   onPressed: controller.getDataUploadStatus
                       ? null
-                      : controller.getCurrentSlide == 9 ? controller.getUserConsent? controller.save : null: () => controller.next(),
+                      : controller.getCurrentSlide == 9 ? controller.save : () => controller.next(),
                   child: Text(
                       controller.getCurrentSlide == 9 ? 'Publicar' : 'Siguiente')),
             ),
@@ -377,7 +379,7 @@ class ProductNewFormView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             //TODO: release : disabled code
-            /* Container(
+            Container(
               color: Colors.black.withOpacity(0.01),
               padding: const EdgeInsets.symmetric(horizontal:20,vertical:1),
               margin: const EdgeInsets.symmetric(  vertical:20),
@@ -401,7 +403,7 @@ class ProductNewFormView extends StatelessWidget {
                   
                 ],
               ),
-            ), */
+            ), 
 
             // text : texto infomativo
             Padding(
@@ -1061,82 +1063,34 @@ class ProductNewFormView extends StatelessWidget {
 
     // style 
     Color cardColor = Get.isDarkMode?Colors.black12:Colors.amber[50]!;
+    Color textColor = Get.isDarkMode?Colors.white:Colors.black;
 
-    return Column(
-      children: [
-        const Spacer(),
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // text : texto infomativo
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              child: Text.rich(
-                textAlign: TextAlign.center,
-                TextSpan(
-                  text: '¿Aceptas los ',
-                  style: TextStyle(
-                      color: Get.theme.textTheme.bodyMedium!.color ?? Colors.black,
-                      fontSize: 18),
-                  children: const <InlineSpan>[
-                    TextSpan(
-                      text: 'términos y condiciones?',
-                      style: TextStyle(
-                          color: Colors.blue,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold),
-                    ), 
-                  ],
-                ),
-              ),
-            ),
-            // CheckboxListTile : consentimiento de usuario para crear un producto
-            Container(
-              margin: const EdgeInsets.only(bottom: 20, top: 12), 
-              child: CheckboxListTile(
-                tileColor: cardColor, 
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                controlAffinity: ListTileControlAffinity.leading,
-                title: const Text('Importante!\nAl crear un producto, entiendo y acepto lo siguiente: los datos básicos (descripción, imagen, marca) serán visibles para todos y podrían ser modificados por otros usuarios hasta que un moderador los verifique. Una vez verificados, no podré cambiar estos datos. El (precio de venta al público) también será visible para todos.',
-                  style: TextStyle(fontWeight: FontWeight.w400),
-                ),
-                value: controller.getUserConsent,
-                onChanged: (value) {
-                  controller.setUserConsent = value!;
-                },
-              ),
-            ),  
-            // text : texto infomativo ' si acepto los terminos y condiciones'
-            !controller.getUserConsent?Container():Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              child: Text.rich(
-                textAlign: TextAlign.center,
-                TextSpan(
-                  text: 'Si acepto los ',
-                  style: TextStyle(
-                      color: Get.theme.textTheme.bodyMedium!.color ?? Colors.black,
-                      fontSize: 18),
-                  children: const <InlineSpan>[
-                    TextSpan(
-                      text: 'términos y condiciones',
-                      style: TextStyle(
-                          color: Colors.blue,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    TextSpan(
-                      text: ', para crear el producto',
-                      style: TextStyle( 
-                          fontSize: 18),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-        const Spacer(),
-      ],
+    // widget : mesaje
+    Widget messageText = RichText(
+      text: TextSpan(
+        text: 'Aviso!\n\n', 
+        style: TextStyle(fontWeight: FontWeight.w300,color: textColor),
+        children: const <TextSpan>[
+          TextSpan(text: 'El '),
+          TextSpan(text: 'precio de venta ', style: TextStyle(fontWeight: FontWeight.w500)),
+          TextSpan(text: 'será de carácter público, y los datos básicos del producto '),
+          TextSpan(text: '(nombre, descripción, marca e imagen) ', style: TextStyle(fontWeight: FontWeight.w500)),
+          TextSpan(text: 'estarán sujetos a cambios hasta que sean verificados por un revisor humano. Una vez verificados, estos datos quedarán fijos y no podrán ser modificados'),
+        ],
+      ),
+    );
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(30.0),
+        child: Card(
+          color: cardColor,
+          elevation: 0,
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: messageText,
+          )),
+      ),
     );
   }
 
