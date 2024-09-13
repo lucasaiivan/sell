@@ -1,5 +1,4 @@
-import 'dart:io';
-import 'dart:ui';     
+import 'dart:io';    
 import 'package:lottie/lottie.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -10,8 +9,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart'; 
-import 'package:purchases_flutter/purchases_flutter.dart';
-import 'package:sell/app/core/utils/fuctions.dart'; 
+import 'package:purchases_flutter/purchases_flutter.dart'; 
 import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart'; 
 import '../../../core/routes/app_pages.dart';
@@ -86,7 +84,7 @@ class HomeController extends GetxController {
   // inicia la identificación de id de usario para revenuecat 
   void initIdentityRevenueCat() async {
     //  ------------------------------------------------------------------------------------  //
-    //  configure el SDK de RevvenueCat con una ID de usuario de la aplicación personalizada  //
+    //  configure el SDK de RevenueCat con una ID de usuario de la aplicación personalizada  //
     //  ------------------------------------------------------------------------------------  //
 
     // var
@@ -186,6 +184,8 @@ class HomeController extends GetxController {
       cashInFlowList: [],
       cashOutFlowList: [],
       initialCash: 0.0,
+      cashiers: [],
+      openingCashiers: '',
     );
   List<CashRegister> listCashRegister = [];
   void loadCashRegisters() {
@@ -415,7 +415,7 @@ class HomeController extends GetxController {
     // ordenamos por fecha de actualización
     getCataloProducts.sort((a, b) => b.upgrade.compareTo(a.upgrade));
   }
-  // login
+  // fuction :login
   void login() async {
     // Inicio de sesión con Google
     // Primero comprobamos que el usuario acepto los términos de uso de servicios y que a leído las politicas de privacidad
@@ -451,7 +451,7 @@ class HomeController extends GetxController {
       CustomFullScreenDialog.cancelDialog();
     }
   }
-  // cerrar sesion de firebase
+  // fuction : cerrar sesion de firebase
   Future<void> signOutFirebase() async {
     // visualizamos un diálogo alerta
     CustomFullScreenDialog.showDialog();
@@ -464,7 +464,7 @@ class HomeController extends GetxController {
     // finalizamos el diálogo alerta
     CustomFullScreenDialog.cancelDialog();
   }
-  // FUCTION : cerrar sesión de google y firebase
+  // fuction : cerrar sesión de google y firebase
   Future<void> signOutGoogleAndFirebase() async {
     // intancias de FirebaseAuth para proceder a cerrar sesión
     final FirebaseAuth auth = FirebaseAuth.instance;
@@ -938,7 +938,7 @@ class HomeController extends GetxController {
     // registramos la fecha de inicio y fin de la prueba gratuita
     // var 
     Timestamp trialStart = Timestamp.fromDate(DateTime.now());
-    Timestamp trialEnd = Timestamp.fromDate(DateTime.now().add(const Duration(days:2))); 
+    Timestamp trialEnd = Timestamp.fromDate(DateTime.now().add(const Duration(days:30))); 
     // ref
     var documentReferencer = Database.refFirestoreAccount().doc(getProfileAccountSelected.id);
     // set
@@ -966,7 +966,7 @@ class HomeController extends GetxController {
     // firestore : Actualizamos los datos
     documentReferencer.set(Map<String, dynamic>.from(provider.toJson()),SetOptions(merge: true));
   }
-
+  
   void addProductToCatalogue({required ProductCatalogue product,required isProductNew}) async {
     // obj : se obtiene los datos para registrar del precio al publico del producto en una colección publica de la db
     ProductPrice precio = ProductPrice(id: getProfileAccountSelected.id,idAccount: getProfileAccountSelected.id,imageAccount: getProfileAccountSelected.image,nameAccount: getProfileAccountSelected.name,price: product.salePrice,currencySign: product.currencySign,province: getProfileAccountSelected.province,town: getProfileAccountSelected.town,time: Timestamp.fromDate(DateTime.now()));
@@ -1060,9 +1060,12 @@ class HomeController extends GetxController {
     }
     return '';
   }
-  bool get getTrialActive {
+  bool get getTrialActive { 
     // description : verifica si la prueba gratuita esta activa
     return getProfileAccountSelected.trialEnd.toDate().isAfter(DateTime.now());
+  }
+  bool get getButtonTrialActive{ 
+    return getProfileAccountSelected.trialEnd.toDate().year == getProfileAccountSelected.trialStart.toDate().year && getProfileAccountSelected.trialEnd.toDate().month == getProfileAccountSelected.trialStart.toDate().month && getProfileAccountSelected.trialEnd.toDate().day == getProfileAccountSelected.trialStart.toDate().day;
   }
   // DIALOGS //
   void showDialogCerrarSesion() {
@@ -1198,6 +1201,7 @@ class HomeController extends GetxController {
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))),
     );
   }
+  
   // NAVIGATION //
   void navigationToPage({required ProductCatalogue productCatalogue}) {
     // condition : verifica si es un producto local
@@ -1326,7 +1330,23 @@ class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcript
     // values
     Color colorCard = Get.isDarkMode?Get.theme.scaffoldBackgroundColor:const Color.fromARGB(255, 243, 238, 228); 
     Color colorAccent = Get.isDarkMode?Colors.white:Colors.black;
-   
+    // widgets
+    TextButton trialActivateTextButton = TextButton(
+      style: TextButton.styleFrom( side: const BorderSide(color: Colors.blue,width: 1),minimumSize: const Size(200, 40),shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
+      onPressed: () { 
+        // activar prueba gratuita
+        homeController.activateTrial();
+        Get.back();
+      },
+      child:const Text('ACTIVAR PRUEBA POR 30 DÍAS'),
+    );
+    TextButton trialResumenTextButton = TextButton(
+      style: TextButton.styleFrom( side: const BorderSide(color: Colors.blue,width: 1),minimumSize: const Size(200, 40),shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
+      onPressed: () { 
+        return;
+      },
+      child: Text('Quedan ${homeController.getDaysLeftTrialFormat} de prueba'),
+    );
 
     return Card(
       margin: const EdgeInsets.all(0),
@@ -1345,12 +1365,12 @@ class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcript
                     assetImage,
                     fit: BoxFit.cover, // Ajusta la imagen al contenedor
                     //color: Colors.black, // Aplica el color negro como overlay 
-                    height: 210,
+                    height: 240,
                     width: double.infinity, 
                   ), 
                   // Degradado superpuesto
                   Container(
-                    height: 211.5, 
+                    height: 241.5, 
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
@@ -1372,29 +1392,7 @@ class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcript
                       // text : titulo
                       Text(title,textAlign: TextAlign.center,style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800,color: Colors.white)),
                       const SizedBox(height: 5),
-                      // TODO : delete button release
-                      !homeController.getTrialActive  ?Container():
-                      TextButton(
-                        style: TextButton.styleFrom( 
-                          side: const BorderSide(color: Colors.blue,width: 1),
-                          minimumSize: const Size(200, 40),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                        ),
-                        onPressed: () {
-                          // activa la suscripción solo en la app en tiempo de ejecución de manera local
-                          homeController.setIsSubscribedPremium = true;
-                  
-                          if(homeController.getTrialActive){
-                            // si la prueba gratuita esta activa
-                            return;
-                          }
-                          
-                          // activar prueba gratuita
-                          homeController.activateTrial();
-                          Get.back();
-                        },
-                        child: homeController.getTrialActive ? Text('Quedan ${homeController.getDaysLeftTrialFormat} de prueba') : const Text('ACTIVAR PRUEBA POR 30 DÍAS'),
-                      ),
+                      homeController.getButtonTrialActive?trialActivateTextButton:homeController.getTrialActive == false ?Container():trialResumenTextButton,
                       const SizedBox(height: 5),
                       // text : descripción
                       Padding(

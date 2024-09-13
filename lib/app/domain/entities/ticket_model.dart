@@ -235,6 +235,15 @@ class TicketModel {
       }
     }
   }
+  // void : actualiza los datos del producto
+  void updateData({required ProductCatalogue product}){
+    for (var i = 0; i < listPoduct.length; i++) { 
+      if (listPoduct[i]['id'] == product.id) {
+        listPoduct[i] = product.toJson();
+        return;
+      }
+    }
+  }
   // void : elimina el producto seleccionado del ticket
   void removeProduct({required ProductCatalogue product}) {
     // se verifica la coincidencia del producto en la lista de productos del ticket

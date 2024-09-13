@@ -1181,15 +1181,20 @@ class _EditProductSelectedDialogViewState extends State<EditProductSelectedDialo
   
   // controllers
   final SellController controller = Get.find<SellController>();
-
+  // var 
+  bool favorite = false;  
   
   
   @override
-  Widget build(BuildContext context) { 
-
+  Widget build(BuildContext context) {
+  
+    // set values
+    favorite = widget.product.favorite;
     // widgets
     Widget titleWidget = Text(widget.product.description,style: const TextStyle(fontWeight: FontWeight.w400),maxLines: 5,overflow: TextOverflow.ellipsis);
-    Widget subtitleWidget = Text(Publications.getFormatoPrecio(value: widget.product.salePrice * widget.product.quantity),style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 24,color: Colors.blue ));
+    Widget subtitleWidget = Text(Publications.getFormatoPrecio(value: widget.product.salePrice),style: const TextStyle(fontWeight: FontWeight.bold));
+    Widget priceTotalText = Text(Publications.getFormatoPrecio(value: widget.product.salePrice * widget.product.quantity),style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 18,color: Colors.blue ));
+
 
     return AlertDialog(
       title: Row(
@@ -1197,14 +1202,28 @@ class _EditProductSelectedDialogViewState extends State<EditProductSelectedDialo
           // text : titulo barrar superior
           Flexible(
             fit: FlexFit.tight,
-            child: Text(widget.product.code==''?'Item':widget.product.code,style: const TextStyle(fontWeight: FontWeight.w300,fontSize: 18),overflow: TextOverflow.ellipsis,)),
-          IconButton(
-            onPressed: (){},
-            icon: Icon(widget.product.favorite?Icons.star: Icons.star_border,color:widget.product.favorite?Colors.amber:null,)),
-          !controller.homeController.getProfileAdminUser.catalogue?Container()
+            child: Text(widget.product.code==''?'Item':widget.product.code,style: const TextStyle(fontWeight: FontWeight.w300,fontSize: 18),overflow: TextOverflow.ellipsis,)
+           ),
+           // button : agregar a favorito
+          widget.product.code==''?Container():!controller.homeController.getProfileAdminUser.catalogue?Container()
           :IconButton(
-            onPressed: (){},
-            icon: const Icon(Icons.edit_outlined)),
+            onPressed: (){
+              setState(() {
+                favorite=!favorite;
+                controller.setProductFavorite(product: widget.product, favorite: favorite);
+              });
+            },
+            icon: Icon(favorite?Icons.star: Icons.star_border,color: favorite?Colors.amber:null,)),
+          // button : editar product
+          widget.product.code==''?Container():!controller.homeController.getProfileAdminUser.catalogue?Container()
+          :IconButton(
+            onPressed: (){
+              Get.back();
+              controller.showUpdatePricePurchaseAndSalesDialog(product: widget.product);
+            },
+            icon: const Icon(Icons.edit_outlined),
+          ),
+          // button : cerrar dialog
           IconButton(
             onPressed: Get.back,
             icon: const Icon(Icons.close)),
@@ -1212,6 +1231,7 @@ class _EditProductSelectedDialogViewState extends State<EditProductSelectedDialo
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           ListTile( 
             leading: ImageProductAvatarApp(url: widget.product.image,size: 35),
@@ -1219,10 +1239,13 @@ class _EditProductSelectedDialogViewState extends State<EditProductSelectedDialo
             // subtitle : codigo del producto si es q existe 
             subtitle: widget.product.description==''? null:subtitleWidget,
           ),  
+          priceTotalText,
           const Divider(thickness:0.6,),
           // text : cantidad
-          const Text('Cantidad'),
-          const SizedBox(height: 12),
+          const SizedBox(
+            width: double.infinity,
+            child: Text('Cantidad',textAlign: TextAlign.center)),
+          const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -1241,7 +1264,7 @@ class _EditProductSelectedDialogViewState extends State<EditProductSelectedDialo
               ),
               Padding(
                 padding: const EdgeInsets.all(18.0),
-                child: Text(widget.product.quantity.toString(),style: const TextStyle(fontSize: 20)),
+                child: Text(widget.product.quantity.toString(),style: const TextStyle(fontSize: 20,fontWeight: FontWeight.bold)),
               ),
               // button : aumentar cantidad
               FloatingActionButton(

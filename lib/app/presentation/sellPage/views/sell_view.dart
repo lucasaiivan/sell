@@ -1452,13 +1452,13 @@ class _ViewCashRegisterState extends State<ViewCashRegister> {
               text: 'Inciar caja',
               onPressed: () {
                 // recordamos la descripcion ingresada por el usuario
-                salesController.registerFixerDescription(
-                    description: textEditingController.text);
+                salesController.registerFixerDescription(description: textEditingController.text);
                 // iniciamos la caja
-                salesController.startCashRegister(
-                    description: textEditingController.text,
-                    initialCash: moneyMaskedTextController.doubleValue,
-                    expectedBalance: moneyMaskedTextController.doubleValue);
+                salesController.startCashRegister( 
+                  description: textEditingController.text,
+                  initialCash: moneyMaskedTextController.doubleValue,
+                  expectedBalance: moneyMaskedTextController.doubleValue,
+                );
                 Get.back();
               },),
           ),

@@ -403,7 +403,7 @@ class ControllerCreateProductForm extends GetxController{
               if(controllerTextEditAlertStock.text!=''){getProduct.alertStock  = int.parse( controllerTextEditAlertStock.text );}
 
               // TODO : DISABLE RELEASE
-              getProduct.verified = true; getProduct.local = false;
+              getProduct.verified = true;
 
               // actualización de la imagen del producto
               if (getXFileImage.path != '') { 

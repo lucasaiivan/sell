@@ -80,6 +80,7 @@ class SellController extends GetxController {
     // set
     String uniqueId = Publications.generateUid(); // genera un id unico
     homeController.cashRegisterActive.id=uniqueId; // asigna el id unico a la caja
+    homeController.cashRegisterActive.openingCashiers = homeController.getProfileAdminUser.email; // asigna el id del usuario que hace la apertura de la caja
     homeController.cashRegisterActive.description=description; // asigna la descripcion a la caja 
     homeController.cashRegisterActive.initialCash = initialCash; // asigna el dinero inicial a la caja
     homeController.cashRegisterActive.expectedBalance += expectedBalance;  // asigna el dinero esperado a la caja al iniciar
@@ -146,7 +147,7 @@ class SellController extends GetxController {
       }
     }); 
   } 
-  void cashRegisterSetTransaction({required double amount,double discount = 0.0 }){
+  void cashRegisterSetTransaction({required double amount,double discount = 0.0 ,required String idUser}){
     // incrementar monto de transaccion de caja
     //
     // firebase
@@ -161,6 +162,10 @@ class SellController extends GetxController {
         if (snapshot.exists) {
           // Crea una instancia de la clase CashRegister a partir de los datos del documento
           CashRegister cashRegister = CashRegister.fromMap(snapshot.data() as Map<String, dynamic>);
+          // agrega el id del usuario que registra la venta si esq no existe en la lista
+          if(!cashRegister.cashiers.contains(idUser)){
+            cashRegister.cashiers.add(idUser);
+          }
           // incrementa el valor total de la facturacion de la caja
           cashRegister.billing += amount; 
           // incrementa el valor si es que existe un descuento
@@ -299,7 +304,7 @@ class SellController extends GetxController {
   // FIREBASE 
   void registerTransaction() {
 
-    // Procederemos a guardar un documento con la transacción
+    // Procederemos a guardar la transacción
  
     //  set values
     getTicket.id = Publications.generateUid(); // generate id  
@@ -316,7 +321,7 @@ class SellController extends GetxController {
 
     // registramos el monto en caja
     if( homeController.getIsSubscribedPremium ){
-      cashRegisterSetTransaction(amount: getTicket.priceTotal,discount: getTicket.discount);
+      cashRegisterSetTransaction(amount: getTicket.priceTotal,discount: getTicket.discount,idUser: homeController.getProfileAdminUser.email);
     }
     
     // set firestore : guarda la transacción
@@ -346,7 +351,54 @@ class SellController extends GetxController {
     });
     
   }
-  
+  Future<void> pricesProductCatalogueUpdate({required ProductCatalogue product,double salePrice=0.0,double purchasePrice = 0.0})async {
+
+    // obj : se obtiene los datos para registrar del precio al publico del producto en una colección publica de la db
+    ProductPrice precio = ProductPrice(id: homeController.getProfileAccountSelected.id,idAccount: homeController.getProfileAccountSelected.id,imageAccount: homeController.getProfileAccountSelected.image,nameAccount: homeController.getProfileAccountSelected.name,price: product.salePrice,currencySign: product.currencySign,province: homeController.getProfileAccountSelected.province,town: homeController.getProfileAccountSelected.town,time: Timestamp.fromDate(DateTime.now()));
+    // var
+    Timestamp upgrade =  Timestamp.now();
+    Map data = {'upgrade':upgrade};
+    if(salePrice!=0){ 
+      data['salePrice']=salePrice; 
+      product.salePrice = salePrice;
+      }
+    if(purchasePrice!=0){ 
+      data['purchasePrice']=purchasePrice; 
+      product.purchasePrice = purchasePrice;
+      }
+    // set : fecha de actualización del producto
+    product.upgrade = upgrade; 
+
+    // ref : referencias de firebase
+    var docRefProductCatalogue = Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(product.id);
+    var docRefRegisterPrice = Database.refFirestoreRegisterPrice(idProducto: product.id, isoPAis: 'ARG').doc(precio.id);
+    // firebase : se crea un registro de precio al publico del producto en una colección publica de la db
+    docRefRegisterPrice.set(precio.toJson());
+    // firebase : Actualizamos los datos
+    docRefProductCatalogue.set(Map<String, dynamic>.from(data), SetOptions(merge: true));
+
+    // actualiza la lista de productos seleccionados
+    getTicket.updateData(product: product);
+    // actualiza la lista de productos del cátalogo en la memoria de la app
+    homeController.sincronizeCatalogueProducts(product: product);
+    // vuelve a abrir el dialog para editar la cantidad del producto seleccionado
+    Get.dialog( EditProductSelectedDialogView(product: product) ); 
+  }
+  Future<void> setProductFavorite({required ProductCatalogue product,required bool favorite})async {
+    
+    // var
+    Map data = {'favorite':favorite};
+    product.favorite = favorite;
+    // ref : referencias de firebase
+    var docRefProductCatalogue = Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(product.id);
+    // firebase : Actualizamos los datos
+    docRefProductCatalogue.set(Map<String, dynamic>.from(data), SetOptions(merge: true));
+    // actualiza la lista de productos seleccionados
+    getTicket.updateData(product: product);
+    // actualiza la lista de productos del cátalogo en la memoria de la app
+    homeController.sincronizeCatalogueProducts(product: product);
+  }
+
   // FUCTIONS  
   void showSeach({required BuildContext context}) {
     // Busca entre los productos de mi catálogo 
@@ -534,7 +586,7 @@ class SellController extends GetxController {
     }
     
   }
-  
+
   // Getters //
   String getValueChange() {
 
@@ -547,7 +599,7 @@ class SellController extends GetxController {
     // text format : devuelte un texto formateado del monto que el vendedor recibio
     return Publications.getFormatoPrecio(value: getValueReceivedTicket);
   }
-  
+
   // DIALOG // 
   void showDialogAddProductNew({ required ProductCatalogue productCatalogue}) {
     // dialog : muestra este dialog cuando el producto no se encuentra en el cáatalogo de la cuenta
@@ -836,7 +888,6 @@ class SellController extends GetxController {
           ],
         ));
   }
-
   void checkDataAdminUser() {
   Timer.periodic(const Duration(seconds: 1), (timer) {
     if ( homeController.getProfileAdminUser.email != '') {
@@ -845,7 +896,67 @@ class SellController extends GetxController {
     }
   });
 }
+  void showUpdatePricePurchaseAndSalesDialog({required ProductCatalogue product}){
+    // controllers
+    AppMoneyTextEditingController pricePurchaseController = AppMoneyTextEditingController();
+    AppMoneyTextEditingController priceSaleController = AppMoneyTextEditingController();
 
+    // set values 
+    pricePurchaseController.updateValue(product.purchasePrice);
+    priceSaleController.updateValue(product.salePrice);
+
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Actualizar precios'),  
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // textfield : precio de compra
+            TextField( 
+              autofocus: false,
+              controller: pricePurchaseController,
+              enabled: true, 
+              inputFormatters: [AppMoneyInputFormatter()],
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(filled: true,labelText: 'Precio de costo',prefixIcon: Icon(Icons.monetization_on_rounded)),
+            ),
+            const SizedBox(height: 10),
+            // textfield : precio de venta
+            TextField( 
+              autofocus: false,
+              controller: priceSaleController,
+              enabled: true, 
+              inputFormatters: [AppMoneyInputFormatter()],
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(filled: true,labelText: 'Precio de venta al público',prefixIcon: Icon(Icons.monetization_on_rounded)),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+              // fuction : actualizar precios de los productos seleccionado
+              pricesProductCatalogueUpdate(
+                product: product,
+                purchasePrice: pricePurchaseController.doubleValue,  
+                salePrice: priceSaleController.doubleValue,
+              );
+              
+            },
+            child: const Text('Actualizar'),
+          ),
+        ],
+      )
+    );
+  }
   // OVERRIDE //
   @override
   void onInit() { 

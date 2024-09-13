@@ -127,6 +127,18 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                         )
                         : Container(),
                   ), 
+                  SizedBox(
+                    width: 200,
+                    child: CheckboxListTile(
+                      visualDensity: VisualDensity.compact,
+                      value: controller.moderator,
+                      title: const Text('Moderador'),
+                     onChanged: (active){
+                      controller.moderator = active!;
+                      controller.updateAll();
+                     },
+                    ),
+                  ),
                   // view : texto informativo que el producto aún no existe si no se encuentra en la base de datos y se escribio manualmente el código por el teclado 
                   !(controller.productSelect.local && controller.getproductDoesNotExist)?Container():
                   const Padding(
