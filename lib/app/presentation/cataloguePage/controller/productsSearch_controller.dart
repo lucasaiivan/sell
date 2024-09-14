@@ -272,7 +272,7 @@ class ControllerProductsSearch extends GetxController {
     productSelect.id = id;
     productSelect.code = id; 
     // navega hacia una nueva vista para crear un nuevo producto
-    Get.toNamed(Routes.createProductForm,arguments: { 'product': productSelect});
+    Get.toNamed(Routes.createProductForm,arguments: { 'product': productSelect.copyWith()});
   }
 
   // OVERRIDE // 

@@ -383,6 +383,7 @@ class SellController extends GetxController {
     homeController.sincronizeCatalogueProducts(product: product);
     // vuelve a abrir el dialog para editar la cantidad del producto seleccionado
     Get.dialog( EditProductSelectedDialogView(product: product) ); 
+    update();
   }
   Future<void> setProductFavorite({required ProductCatalogue product,required bool favorite})async {
     
@@ -701,7 +702,7 @@ class SellController extends GetxController {
             SizedBox(
               width: double.infinity,
               child: Padding(
-                padding: const EdgeInsets.all(0.0),
+                padding: const EdgeInsets.all(12.0),
                 child: ComponentApp().button(  
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   colorButton: Colors.blue,
@@ -919,7 +920,7 @@ class SellController extends GetxController {
               enabled: true, 
               inputFormatters: [AppMoneyInputFormatter()],
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(filled: true,labelText: 'Precio de costo',prefixIcon: Icon(Icons.monetization_on_rounded)),
+              decoration: const InputDecoration(filled: true,labelText: 'Costo',prefixIcon: Icon(Icons.monetization_on_rounded)),
             ),
             const SizedBox(height: 10),
             // textfield : precio de venta
@@ -929,7 +930,7 @@ class SellController extends GetxController {
               enabled: true, 
               inputFormatters: [AppMoneyInputFormatter()],
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(filled: true,labelText: 'Precio de venta al público',prefixIcon: Icon(Icons.monetization_on_rounded)),
+              decoration: const InputDecoration(filled: true,labelText: 'Venta al público',prefixIcon: Icon(Icons.monetization_on_rounded)),
             ),
           ],
         ),

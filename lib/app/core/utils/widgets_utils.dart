@@ -1239,12 +1239,18 @@ class _EditProductSelectedDialogViewState extends State<EditProductSelectedDialo
             // subtitle : codigo del producto si es q existe 
             subtitle: widget.product.description==''? null:subtitleWidget,
           ),  
-          priceTotalText,
-          const Divider(thickness:0.6,),
-          // text : cantidad
-          const SizedBox(
-            width: double.infinity,
-            child: Text('Cantidad',textAlign: TextAlign.center)),
+          //priceTotalText,
+          // divider : seleccionar cantidad 
+          Row(  
+            children: [
+              const Flexible(child: Divider(thickness:0.6 )), 
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: widget.product.quantity==1?const Text('Cantidad'): priceTotalText,
+              ),
+              const Flexible(child: Divider(thickness:0.6)),
+            ],
+          ),
           const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,

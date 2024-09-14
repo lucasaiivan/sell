@@ -1458,7 +1458,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
           ],
         )),
         filter: (brand){ 
-          return [brand.name,brand.description];
+          return [ Utils.normalizeText(brand.name.toLowerCase()),Utils.normalizeText(brand.description.toLowerCase()) ];
         },
         builder: (mark) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[
           itemList(marcaSelect: mark),
