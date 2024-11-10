@@ -393,16 +393,15 @@ class ControllerProductsEdit extends GetxController {
                 await uploadTask; // esperamos a que se suba la imagen 
                 await ref.getDownloadURL().then((value) => getProduct.image = value); // obtenemos la url de la imagen
               }
-              // procede agregrar en la base de datos global de productos
-              // TODO : release : delete release (getEditModerator)
-              if ( getProduct.local == false) { 
+              // actualiza los datos del documento publico de producto
+              if ( getProduct.local == false && getProduct.verified == false) { 
                 // set
                 getProduct.documentUpgrade = time;
                 // se guarda el producto en la base de datos global
                 setProductPublicFirestore( );
               } 
               // condition : verifica si el producto es global publico
-              if(!getProduct.local){
+              if(getProduct.local == false){
                 // Registra el precio en una colección publica
                 ProductPrice precio = ProductPrice(
                   id: homeController.getProfileAccountSelected.id,
@@ -1324,7 +1323,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         title: const Text('Marcas'),
         actions: [
           // TODO : release : delete icon 'add new mark for release'
-          IconButton(onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},icon: const Icon(Icons.add)),
+          //IconButton(onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},icon: const Icon(Icons.add)),
           // icon : cambiar vista
           IconButton(icon: Icon( viewListState? Icons.grid_view_rounded:Icons.table_rows_rounded),onPressed: () { 
             setState(() {
@@ -1449,12 +1448,12 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
             const Text('No se encontro :('),
 
             // TODO : release : disable moderador ( crear marca )
-            const SizedBox(height: 20),
+            /* const SizedBox(height: 20),
             TextButton.icon(
               onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},
               icon: const Icon(Icons.add_box_outlined),
               label: const Text('Crear marca'),
-            )
+            ) */
           ],
         )),
         filter: (brand){ 
@@ -1477,7 +1476,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
       },
       onLongPress: (){
         // TODO : release : delete fuction
-        Get.to(() => CreateMark(mark: marcaSelect));
+        //Get.to(() => CreateMark(mark: marcaSelect));
       },
       borderRadius: BorderRadius.circular(5),
       child: Column(
@@ -1511,7 +1510,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
       },
       onLongPress: () {
         // TODO : release : delete fuction
-        Get.to(() => CreateMark(mark: marcaSelect));
+        //Get.to(() => CreateMark(mark: marcaSelect));
       },
     );
   }

@@ -20,7 +20,7 @@ class ButtonData {
 class ControllerProductsSearch extends GetxController {
 
   // TODO : delete release 
-  bool moderator = false;
+  //bool moderator = false;
 
   // controllers 
   late HomeController homeController;
@@ -264,7 +264,7 @@ class ControllerProductsSearch extends GetxController {
   void toProductNew({required String id}) {
 
     // TODO : disable for release [local] en (debug) es siempre [true] para poder verificar el codigo
-    productSelect.local = !moderator;
+    //productSelect.local = !moderator;
 
     //values default
     clean();

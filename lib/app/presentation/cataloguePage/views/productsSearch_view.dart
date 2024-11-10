@@ -83,8 +83,6 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
             controller.getWriteCode||controller.getproductDoesNotExist? Container(): WidgetSuggestionProduct(positionDinamic: true,list: controller.getListProductsSuggestions),
             controller.getWriteCode||controller.getproductDoesNotExist? Container(): const SizedBox(height: 20), 
             
-            // TODO: release : disabled code ( paginas de proveedores web )
-            //controller.getWriteCode||controller.getproductDoesNotExist? Container(): popupMenuPagesProveedor,
             // view : image 
             controller.getproductDoesNotExist?Container():
             const Card(
@@ -127,7 +125,8 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                         )
                         : Container(),
                   ), 
-                  SizedBox(
+                  // TODO : disable for release
+                  /* SizedBox(
                     width: 200,
                     child: CheckboxListTile(
                       visualDensity: VisualDensity.compact,
@@ -138,7 +137,7 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
                       controller.updateAll();
                      },
                     ),
-                  ),
+                  ), */
                   // view : texto informativo que el producto aún no existe si no se encuentra en la base de datos y se escribio manualmente el código por el teclado 
                   !(controller.productSelect.local && controller.getproductDoesNotExist)?Container():
                   const Padding(
@@ -219,30 +218,7 @@ class ProductsSearch extends GetView<ControllerProductsSearch> {
     );
   }
   
-  /* WIDGETS COMPONENT */ 
-  Widget get popupMenuPagesProveedor{
-
-    List listPages = [
-      {'name':'preciohoy.ar','url':'https://preciohoy.ar/'},
-      {'name':'supercoco.com.ar','url':'https://supercoco.com.ar/categoria/almacen'}, 
-      {'name':'salemmaonline.com.py','url':'https://www.salemmaonline.com.py/'}, 
-    ]; 
-    return PopupMenuButton<Map<String, String>>(
-      child: const Text('Proveedores web',style: TextStyle(color: Colors.blue)),
-      onSelected: (item) async{
-        String url = item['url'] ?? '';
-        Uri uri = Uri.parse(url);
-        await launchUrl(uri,mode: LaunchMode.externalApplication);
-      },
-      itemBuilder: (context) => List.generate(
-        listPages.length,
-        (index) => PopupMenuItem<Map<String, String>>(
-          value: listPages[index],
-          child: Text(listPages[index]['name']),
-        ),
-      ),
-    ); 
-  }
+  /* WIDGETS COMPONENT */  
   Widget button(
       {required Widget icon,
       required String text,

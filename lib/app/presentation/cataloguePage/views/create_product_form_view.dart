@@ -379,7 +379,7 @@ class ProductNewFormView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             //TODO: release : disabled code
-            Container(
+            /* Container(
               color: Colors.black.withOpacity(0.01),
               padding: const EdgeInsets.symmetric(horizontal:20,vertical:1),
               margin: const EdgeInsets.symmetric(  vertical:20),
@@ -403,7 +403,7 @@ class ProductNewFormView extends StatelessWidget {
                   
                 ],
               ),
-            ), 
+            ),  */
 
             // text : texto infomativo
             Padding(

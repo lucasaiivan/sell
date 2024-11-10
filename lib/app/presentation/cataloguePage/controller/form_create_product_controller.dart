@@ -403,7 +403,7 @@ class ControllerCreateProductForm extends GetxController{
               if(controllerTextEditAlertStock.text!=''){getProduct.alertStock  = int.parse( controllerTextEditAlertStock.text );}
 
               // TODO : DISABLE RELEASE
-              getProduct.verified = true;
+              //getProduct.verified = true;
 
               // actualización de la imagen del producto
               if (getXFileImage.path != '') { 
@@ -927,7 +927,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         actions: [
           // TODO : release : delete icon 'add new mark for release'
           // icon : agregar nueva marca ( solo para moderadores)
-          IconButton(onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},icon: const Icon(Icons.add)),
+          //IconButton(onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},icon: const Icon(Icons.add)),
           // icon : cambiar de vista
           IconButton(icon: Icon( viewListState? Icons.grid_view_rounded:Icons.table_rows_rounded),onPressed: () { 
             setState(() {
@@ -1056,12 +1056,12 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
           children: [
             const Text('No se encontro :('),
             // TODO : release : disable moderador ( crear marca )
-            const SizedBox(height: 20),
+            /* const SizedBox(height: 20),
             TextButton.icon(
               onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},
               icon: const Icon(Icons.add_box_outlined),
               label: const Text('Crear marca'),
-            ) 
+            )  */
           ],
         )),
         filter: (product) => [Utils.normalizeText(product.name.toLowerCase()),Utils.normalizeText(product.description.toLowerCase())],
@@ -1081,7 +1081,7 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
       },
       onLongPress: (){
         // TODO : release : delete fuction
-        Get.to(() => CreateMark(mark: marcaSelect));
+        //Get.to(() => CreateMark(mark: marcaSelect));
       },
       borderRadius: BorderRadius.circular(5),
       child: Column(

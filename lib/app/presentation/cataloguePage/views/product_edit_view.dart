@@ -65,7 +65,7 @@ class ProductEdit extends StatelessWidget {
         // start : contenido para desarrollo (debug) 
         // iconButton : opciones de moderador
         //
-        controller.getProduct.local?Container():
+        /* controller.getProduct.local?Container():
         controller.getLoadingData
             ? Container()
             :IconButton(
@@ -75,7 +75,7 @@ class ProductEdit extends StatelessWidget {
                   const OptionsModeratorsWidget(),
                 );
               },
-            ),
+            ), */
         //
         // fin contentido para desarrollo (debug)
         //

@@ -508,7 +508,7 @@ Widget body({required BuildContext context}){
                 title: const Text('Catálogo'),
                 onTap: () => homeController.setIndexPage = 3):Container(),
               // TODO : desabilitar visualizacion para produccion
-              ListTile(
+              /* ListTile(
                 enabled: !isAnonymous,
                 selected: homeController.getIndexPage == 5,
                 leading: const Icon(Icons.admin_panel_settings_outlined),
@@ -517,7 +517,7 @@ Widget body({required BuildContext context}){
                 onTap: () {
                   Get.toNamed(Routes.moderator); 
                 },
-              ),
+              ), */
               // multiusuario
               user.multiuser || isAnonymous?homeController.getCashierMode?Container():
               ListTile(
