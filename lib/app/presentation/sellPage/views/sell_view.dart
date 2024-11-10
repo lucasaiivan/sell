@@ -11,8 +11,12 @@ import 'package:sell/app/core/utils/widgets_utils.dart';
 import 'package:sell/app/domain/entities/ticket_model.dart'; 
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart'; 
+import '../../../data/providers/firebase_data_provider.dart';
+import '../../../data/providers/local_data_provider.dart';
+import '../../../data/repositories/catalogue_repository.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../core/utils/dynamicTheme_lb.dart';
+import '../../../domain/use_cases/get_case_catalogue.dart';
 import '../../home/controller/home_controller.dart';
 import '../controller/sell_controller.dart'; 
 
@@ -116,6 +120,23 @@ class SalesView extends StatelessWidget {
           ),
         )
       : Container();
+
+       final getUserUseCase = GetCatalogueUseCase(CatalogueRepositoryImpl(FirebaseCatalogueProvider(),LocalCatalogueProvider()));
+    
+    // widget : lista de productos en el cátalogo
+    Widget listWidget = StreamBuilder<List<ProductCatalogue>>(
+        stream: getUserUseCase.stream('CW4T9tXSHLSM5hr4XNxLXhKufT12'),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        } else if (snapshot.hasData) {
+          final products = snapshot.data as List<ProductCatalogue>;
+          return Text("User: ${products.length}");
+        } else {
+          return const Text("Error loading user");
+        }
+      },
+    );
     // view : cuerpo de la app
     return NestedScrollView(
       /* le permite crear una lista de elementos que se desplazarían hasta que el cuerpo alcanzara la parte superior */
@@ -126,6 +147,7 @@ class SalesView extends StatelessWidget {
           // atentos a cualquier cambio que surja en los datos de la lista de marcas
           SliverList(
               delegate: SliverChildListDelegate([
+                listWidget,
                 updateview,
                 widgeSuggestedProducts(context: context ), 
               ])
