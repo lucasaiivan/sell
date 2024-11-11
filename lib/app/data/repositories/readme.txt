@@ -1,1 +1,0 @@
-Implementaciones de los repositorios

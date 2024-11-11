@@ -352,7 +352,7 @@ class ProfileAccountModel {
       creation: creation ?? this.creation,
       trial: trial,
       trialStart: trialStart,
-      trialEnd: trialEnd,
+      trialEnd: trialEnd,  
     );
   }
 

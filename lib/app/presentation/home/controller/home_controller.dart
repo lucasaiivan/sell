@@ -9,15 +9,20 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart'; 
-import 'package:purchases_flutter/purchases_flutter.dart'; 
+import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:sell/app/data/repositories/account_repository.dart'; 
 import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart'; 
 import '../../../core/routes/app_pages.dart';
 import '../../../data/datasource/constant.dart';
+import '../../../data/providers/firebase_data_provider.dart';
+import '../../../data/providers/local_data_provider.dart';
+import '../../../data/repositories/catalogue_repository.dart';
 import '../../../domain/entities/cashRegister_model.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../domain/entities/user_model.dart';
 import '../../../core/utils/widgets_utils.dart';
+import '../../../domain/use_cases/get_case_catalogue.dart';
 import '../../auth/controller/login_controller.dart'; 
 import '../views/home_view.dart';
 
@@ -661,8 +666,28 @@ class HomeController extends GetxController {
     readUserAccountsList(email: getUserAuth.email ?? '');
     // obtenemos los datos de la cuenta
     if (idAccount!= '') {
+
+      // use case : obtener los productos del catálogo
+    final getAccount = GetAccountUseCase(AccountRepositoryImpl(FirebaseAccountProvider() ));
+
+    getAccount.getAccount(idAccount: idAccount).then((value) {
+      if(value.id!=''){
+        setProfileAccountSelected = value;
+        // subcription premium  : inicializamos la identidad de revenue cat
+        initIdentityRevenueCat();  
+        // load
+        loadCashRegisters(); // obtenemos las cajas registradoras activas
+        readProductsCatalogue(idAccount: idAccount); // obtenemos los productos del catálogo
+        readListCategoryListFuture(idAccount: idAccount); // obtenemos las categorias creadas por el usuario
+        readProvidersListFuture(idAccount: idAccount); // obtenemos los proveedores creados por el usuario
+        readDataAdminUser( email: getUserAuth.email ?? '', idAccount: idAccount); // obtenemos los datos del usuario administrador de la cuenta
+        readAdminsUsers(idAccount: idAccount);  // obtenemos los usuarios administradores de la cuenta
+      }
+      
+      }) ;
+      /*
       // firebase : obtenemos los datos de la cuenta
-      Database.readProfileAccountModelFuture(idAccount).then((value) {
+       Database.readProfileAccountModelFuture(idAccount).then((value) {
         // condition : ¿El documento existe?
         if (value.exists) {
           //get profile account
@@ -680,7 +705,7 @@ class HomeController extends GetxController {
           readDataAdminUser( email: getUserAuth.email ?? '', idAccount: idAccount); // obtenemos los datos del usuario administrador de la cuenta
           readAdminsUsers(idAccount: idAccount);  // obtenemos los usuarios administradores de la cuenta
         }
-      });
+      }); */
     }
   }
 
@@ -710,15 +735,13 @@ class HomeController extends GetxController {
     });
   }
 
-  getTheBestSellingProducts({required String idAccount}) {
-    // obtenemos los productos más vendidos
-    // Firestore get
-    Database.readSalesProduct(idAccount: idAccount, limit: 100).listen((value) {
-      // values
+  getTheBestSellingProducts({required List<ProductCatalogue> productsList}) {
+    
+    // values
       List<ProductCatalogue> list = [];
       //  obtenemos todos los productos ordenas con más ventas
-      for (var element in value.docs) {
-        list.add(ProductCatalogue.fromMap(element.data()));
+      for (var element in productsList) {
+        list.add(element);
       }
 
       // filtramos los productos que esten marcados como favoritos
@@ -751,11 +774,24 @@ class HomeController extends GetxController {
         SellController salesController = Get.find();
         salesController.update();
       } catch (_) {}
-    });
   }
 
   void readProductsCatalogue({required String idAccount}) {
- 
+
+    // use case : obtener los productos del catálogo
+    final getCatalogue = GetCatalogueUseCase(CatalogueRepositoryImpl(FirebaseCatalogueProvider(),LocalCatalogueProvider()));
+
+    // future : obtenemos los productos del catálogo una sola ves
+    getCatalogue.getProducts(id:idAccount).then((value) {
+      // set : productos del catálogo
+      setCatalogueProducts = value;
+      // obtenemos los productos más vendidos
+      getTheBestSellingProducts(productsList: value);  
+    }).onError((error, stackTrace) {
+      // error
+      setCatalogueProducts = [];
+    });
+ /* 
     // future : obtenemos los productos del catálogo una sola ves
     CollectionReference referenceCollectionCatalogue = Database.refFirestoreCatalogueProduct(idAccount: idAccount); 
     referenceCollectionCatalogue.get().then((value) {
@@ -782,7 +818,7 @@ class HomeController extends GetxController {
       // error
       setCatalogueProducts = [];
     }
-    ); 
+    );  */
   }
 
   void readAdminsUsers({required String idAccount}) {

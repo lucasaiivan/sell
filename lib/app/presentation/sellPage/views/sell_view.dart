@@ -119,24 +119,7 @@ class SalesView extends StatelessWidget {
             )),
           ),
         )
-      : Container();
-
-       final getUserUseCase = GetCatalogueUseCase(CatalogueRepositoryImpl(FirebaseCatalogueProvider(),LocalCatalogueProvider()));
-    
-    // widget : lista de productos en el cátalogo
-    Widget listWidget = StreamBuilder<List<ProductCatalogue>>(
-        stream: getUserUseCase.stream('CW4T9tXSHLSM5hr4XNxLXhKufT12'),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
-        } else if (snapshot.hasData) {
-          final products = snapshot.data as List<ProductCatalogue>;
-          return Text("User: ${products.length}");
-        } else {
-          return const Text("Error loading user");
-        }
-      },
-    );
+      : Container(); 
     // view : cuerpo de la app
     return NestedScrollView(
       /* le permite crear una lista de elementos que se desplazarían hasta que el cuerpo alcanzara la parte superior */
@@ -146,8 +129,7 @@ class SalesView extends StatelessWidget {
         return [
           // atentos a cualquier cambio que surja en los datos de la lista de marcas
           SliverList(
-              delegate: SliverChildListDelegate([
-                listWidget,
+              delegate: SliverChildListDelegate([ 
                 updateview,
                 widgeSuggestedProducts(context: context ), 
               ])

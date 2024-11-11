@@ -1,4 +1,5 @@
 
+// readme : Implementar los metodos definidos en el repositorio
 
 import '../../domain/entities/catalogo_model.dart';
 import '../../domain/repositories/catalogue_repository.dart';
@@ -29,6 +30,22 @@ class CatalogueRepositoryImpl implements CatalogueRepository {
   Stream<List<ProductCatalogue>> getCatalogueLocalStream(String idAccount) async* {
     // Transforma los datos locales en un Stream.
     yield await localProvider.getCatalogueProducts();
+  }
+  
+  @override
+  Future<List<ProductCatalogue>> getCatalogueLocalList(String id) {
+    // obtengo los datos del preoveedor [Local]
+    return localProvider.getCatalogueProducts();
+  }
+  
+  @override
+  void deleteProduct( String idAccount, String productId ) async {
+    try {
+      // Elimina el producto de Firestore usando su id
+      await firebaseDataProvider.deleteProduct(idAccount:idAccount, productId: productId);
+    } catch (e) {
+      throw Exception('Error al eliminar el producto: $e');
+    }
   }
 
   // Otros métodos para agregar, actualizar y eliminar productos localmentex
