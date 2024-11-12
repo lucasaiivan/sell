@@ -8,5 +8,9 @@ abstract class CatalogueRepository {
   Stream<List<ProductCatalogue>> getCatalogueListStream(String id);
   Stream<List<ProductCatalogue>> getCatalogueLocalStream(String id);
 
-  void deleteProduct(String idAccount,String productId);
+
+  Future<void> addProduct(String idAccount,ProductCatalogue product);
+  Future<void> updateProduct(String idAccount,ProductCatalogue product);
+  Future<void> deleteProduct(String idAccount,String productId);
+
 }

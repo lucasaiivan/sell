@@ -39,15 +39,20 @@ class CatalogueRepositoryImpl implements CatalogueRepository {
   }
   
   @override
-  void deleteProduct( String idAccount, String productId ) async {
-    try {
-      // Elimina el producto de Firestore usando su id
-      await firebaseDataProvider.deleteProduct(idAccount:idAccount, productId: productId);
-    } catch (e) {
-      throw Exception('Error al eliminar el producto: $e');
-    }
+  Future<void> addProduct(String idAccount,ProductCatalogue product) async {
+    return await firebaseDataProvider.addProduct(idAccount,product);
   }
-
+  
+  @override
+  Future<void> deleteProduct(String idAccount,String productId) async {
+    return await firebaseDataProvider.deleteProduct(idAccount,productId);
+  }
+  
+  @override
+  Future<void> updateProduct(String idAccount,ProductCatalogue product) async {
+    return await firebaseDataProvider.updateProduct(idAccount,product); 
+  }
+   
   // Otros métodos para agregar, actualizar y eliminar productos localmentex
   //  @override ...
     

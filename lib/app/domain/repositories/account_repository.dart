@@ -3,8 +3,12 @@
 import '../entities/user_model.dart';
 
 abstract class AccountRepository {
-  // obtener los datos de la cuenta
+  // get : obtener los datos de la cuenta
   Future<ProfileAccountModel> getAccount(String idAccount); 
   // update : actualiza los datos de la cuenta
   Future<void> updateAccount(ProfileAccountModel account);
+  // get : obtego los administradores de la cuenta
+  Future<List<UserModel>> getAccountAdmins(String idAccount);
+
+
 }

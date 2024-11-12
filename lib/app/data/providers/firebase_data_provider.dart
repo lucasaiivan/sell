@@ -1,42 +1,80 @@
  
 
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sell/app/domain/entities/catalogo_model.dart';
 import '../../domain/entities/user_model.dart';
 
-class FirebaseUserProvider {
-  Future<UserModel> getUser(String id) async {
-    //  get : obtengo los datos de Firestore
-    return UserModel(id:id,creation:Timestamp.now(),lastUpdate: Timestamp.now(),name: 'Usuario (firebase)');
-  }
-}
-
+//
 // FirestoreCollections : representa las colecciones de Firestore
+//
 class FirestoreCollections {
+  // collections
+  static CollectionReference<Map<String, dynamic>> users() =>FirebaseFirestore.instance.collection('/USERS/');
   static CollectionReference<Map<String, dynamic>> accounts() => FirebaseFirestore.instance.collection('/ACCOUNTS/'); 
   static CollectionReference<Map<String, dynamic>> catalogue(String idAccount) =>  FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/CATALOGUE/');
   static CollectionReference<Map<String, dynamic>> productsPublicDb() => FirebaseFirestore.instance.collection('/APP/ARG/PRODUCTOS');
+  static CollectionReference<Map<String, dynamic>> refCollectionUsersAccountAdministrators({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/USERS/');
+  static CollectionReference<Map<String, dynamic>> redCollectionUserManagedaccounts({required String email}) =>FirebaseFirestore.instance.collection('/USERS/$email/ACCOUNTS/');
+  // future
+  static Future<DocumentSnapshot<Map<String, dynamic>>>readAdminUserFuture({required String idAccount,required String email}) =>FirebaseFirestore.instance.collection('ACCOUNTS').doc(idAccount).collection('USERS').doc(email).get();
+  // ...
+}  
 
-  // Agrega más métodos según sea necesario
-} 
+// user : perdil del usuario 
+class FirebaseUserProfileProvider {
+  // future : obtengo los datos del perfil del usuario
+  Future<UserModel> getAdminProfile(String idAccount,String email) async {
+    try {
+      
+      final docSnapshot = await FirestoreCollections.readAdminUserFuture(idAccount:idAccount,email: email);
 
-// account : cuenta del negocio
+      if (docSnapshot.exists) {
+        return UserModel.fromDocumentSnapshot(documentSnapshot: docSnapshot);
+      } else {
+        return UserModel( creation: Timestamp.now(),lastUpdate: Timestamp.now());
+      }
+    } catch (e) {
+      return UserModel( creation: Timestamp.now(),lastUpdate: Timestamp.now());
+    }
+  }
+  // future : obtengo los datos del perfil del usuario
+  Future<UserModel> getUser(String idUser) async {
+    try {
+      final docSnapshot = await FirestoreCollections.users().doc(idUser).get();
+      if (docSnapshot.exists) {
+        return UserModel.fromDocumentSnapshot(documentSnapshot: docSnapshot);
+      } else {
+        return UserModel(creation: Timestamp.now(),lastUpdate: Timestamp.now());
+      }
+    } catch (e) {
+      return UserModel(creation: Timestamp.now(),lastUpdate: Timestamp.now());
+    }
+  }
+  // futute : obtengo las cuentas administradas por el usuario
+  Future<List<UserModel>> getUserManagedAccounts(String email) async {
+    try {
+      final querySnapshot = await FirestoreCollections.redCollectionUserManagedaccounts(email:email).get();
+      return querySnapshot.docs.map((doc) { return UserModel.fromDocumentSnapshot(documentSnapshot: doc);}).toList();
+    } catch (e) {
+      return [];
+    }
+  } 
+  
+}
+
+// account : perfil de la cuenta del negocio
 class FirebaseAccountProvider {
  
   // account : obtenemos los datos de la cuenta
   Future<ProfileAccountModel> getAccount(String idAccount) async {
-    try { 
-
+    try {  
       final docSnapshot = await FirestoreCollections.accounts().doc(idAccount).get();
       if (docSnapshot.exists) { 
         return ProfileAccountModel.fromDocumentSnapshot(documentSnapshot: docSnapshot ); 
-      } else {
-        return ProfileAccountModel(creation: Timestamp.now(),trialEnd: Timestamp.now(),trialStart: Timestamp.now()  );
-        
-      }
-    } catch (e) { 
-      return ProfileAccountModel(creation: Timestamp.now(),trialEnd: Timestamp.now(),trialStart: Timestamp.now()  );
-    }
+      } else {return ProfileAccountModel(creation: Timestamp.now(),trialEnd: Timestamp.now(),trialStart: Timestamp.now());}
+    } catch (e) { return ProfileAccountModel(creation: Timestamp.now(),trialEnd: Timestamp.now(),trialStart: Timestamp.now()  );}
   }
   // update : actualiza los datos de la cuenta
   Future<void> updateAccount(ProfileAccountModel account) async {
@@ -46,6 +84,19 @@ class FirebaseAccountProvider {
         throw Exception('Error al actualizar la cuenta: $e');
      }
     }
+
+  // futute : obtengo los administradores de la cuenta
+  Future<List<UserModel>> getUsersAccountAdministrators(String idAccount) async {
+    try {
+      final querySnapshot = await FirestoreCollections.refCollectionUsersAccountAdministrators(idAccount: idAccount).get();
+      List<UserModel> accounts = querySnapshot.docs.map((doc) {
+        return UserModel.fromDocumentSnapshot(documentSnapshot: doc);
+      }).toList();
+      return accounts;
+    } catch (e) {
+      return [];
+    }
+  }
   
   }
 
@@ -75,13 +126,18 @@ class FirebaseCatalogueProvider {
         return ProductCatalogue.fromMap(doc.data() );
       }).toList();
     });
+  } 
+
+  Future<void> addProduct(String idAccount,ProductCatalogue product) async {
+    await FirestoreCollections.catalogue(idAccount).doc(product.id).set(product.toJson());
   }
-  // void : eliminar un producto del catalogo
-  Future<void> deleteProduct({required String productId,required String idAccount}) async {
-    try {
-      await FirestoreCollections.catalogue(idAccount).doc(productId).delete();
-    } catch (e) {
-      throw Exception('Error al eliminar el producto: $e');
-    }
+
+  Future<void> updateProduct(String idAccount,ProductCatalogue product) async {
+    await FirestoreCollections.catalogue(idAccount).doc(product.id).update(product.toJson());
   }
+
+  Future<void> deleteProduct(String idAccount,String productId) async {
+    await FirestoreCollections.catalogue(idAccount).doc(productId).delete();
+  }
+  
 }

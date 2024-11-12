@@ -18,11 +18,14 @@ import '../../../data/datasource/constant.dart';
 import '../../../data/providers/firebase_data_provider.dart';
 import '../../../data/providers/local_data_provider.dart';
 import '../../../data/repositories/catalogue_repository.dart';
+import '../../../data/repositories/user_repository_impl.dart';
 import '../../../domain/entities/cashRegister_model.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../domain/entities/user_model.dart';
 import '../../../core/utils/widgets_utils.dart';
+import '../../../domain/use_cases/get_case_account.dart';
 import '../../../domain/use_cases/get_case_catalogue.dart';
+import '../../../domain/use_cases/get_case_user.dart';
 import '../../auth/controller/login_controller.dart'; 
 import '../views/home_view.dart';
 
@@ -667,10 +670,12 @@ class HomeController extends GetxController {
     // obtenemos los datos de la cuenta
     if (idAccount!= '') {
 
-      // use case : obtener los productos del catálogo
-    final getAccount = GetAccountUseCase(AccountRepositoryImpl(FirebaseAccountProvider() ));
+    // use case : obtener los productos del catálogo
+    final getAccount = GetAccountUseCase();
 
+    // future : obtenemos los productos del catálogo una sola ves
     getAccount.getAccount(idAccount: idAccount).then((value) {
+
       if(value.id!=''){
         setProfileAccountSelected = value;
         // subcription premium  : inicializamos la identidad de revenue cat
@@ -779,7 +784,7 @@ class HomeController extends GetxController {
   void readProductsCatalogue({required String idAccount}) {
 
     // use case : obtener los productos del catálogo
-    final getCatalogue = GetCatalogueUseCase(CatalogueRepositoryImpl(FirebaseCatalogueProvider(),LocalCatalogueProvider()));
+    final getCatalogue = GetCatalogueUseCase();
 
     // future : obtenemos los productos del catálogo una sola ves
     getCatalogue.getProducts(id:idAccount).then((value) {
@@ -822,8 +827,22 @@ class HomeController extends GetxController {
   }
 
   void readAdminsUsers({required String idAccount}) {
+
+    // use case : obtener los usuarios administradores de la cuenta
+    final usersAssociate = GetAccountUseCase().getAccountAdmins(idAccount: idAccount);
+
     // obtenemos los usuarios administradores de la cuenta
-    Database.readQueryStreamAdminsUsers(idAccount: idAccount).listen((value) {
+    usersAssociate.then((value) {
+      List<UserModel> list = [];
+      for (var element in value) {
+        list.add(element);
+      }
+      // ordenamos la lista por fecha de actualizacion
+      list.sort((a, b) => b.lastUpdate.compareTo(a.lastUpdate));
+      //  set values
+      setAdminsUsersList = list;
+    });
+    /* Database.readQueryStreamAdminsUsers(idAccount: idAccount).listen((value) {
       List<UserModel> list = [];
       //  get
       for (var element in value.docs) {
@@ -835,15 +854,19 @@ class HomeController extends GetxController {
       setAdminsUsersList = list;
     }).onError((error) {
       // error
-    });
+    }); */
   }
   
   void readDataAdminUser({required String idAccount, required String email}) {
+
+    // use case : obtener los datos del usuario administrador de la cuenta
+    final getAccount = GetUserUseCase().getAdminProfile(idAccount: idAccount,idUser: email);
+
     // obtenemos los datos de los permisos del usuario en la cuenta
-    Database.readFutureAdminUser(idAccount: idAccount, email: email).then((value) {
-      if (value.exists) { 
+    getAccount.then((value) {
+        if (value.email != '') { 
         // set : datos de los permisos del usuario en la cuenta
-        setProfileAdminUser = UserModel.fromDocumentSnapshot(documentSnapshot: value);   
+        setProfileAdminUser = value;   
         // condition : comprobar que el usuario no este inactivo
         if(getProfileAdminUser.inactivate == true){
           //  ------------------------------------  //
@@ -930,23 +953,19 @@ class HomeController extends GetxController {
         }
         
       }
-    }).onError((error, stackTrace) {
-      // message : verificamos si hay conexión a internet
-      Get.snackbar('Error', 'Error al obtener los datos, verifica tu conexión a internet');
-
-    });
+    },);
   }
 
   void readUserAccountsList({required String email}) { 
+
+    // use case : obtener las cuentas administradas por el usuario
+    final getAccounts = GetUserUseCase().getUserAssociatedAccounts(email: email);
  
 
     // firebase : obtenemos la lista de cuentas del usuario
-    Database.refFirestoreUserAccountsList(email: email).get().then((value) { 
+    getAccounts.then((value) { 
       //  recorre la lista de cuentas
-      for (var element in value.docs){
-        
-        // get : obtenemos los datos del perfil del usuario
-        UserModel userModel = UserModel.fromDocumentSnapshot(documentSnapshot: element); 
+      for (var userModel in value){ 
         // condition : si el id de la cuenta es diferente de vacio para evitar errores de consulta inexistentes
         if (userModel.account != '') {
           // firebase : obtenemos los datos de la cuenta
@@ -959,7 +978,7 @@ class HomeController extends GetxController {
           });
         }
       } 
-      if(value.docs.isEmpty){
+      if(value.isEmpty){
         setLoadedManagedAccountsList = true;
       }
       
