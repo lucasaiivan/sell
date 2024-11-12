@@ -163,9 +163,7 @@ class SellController extends GetxController {
           // Crea una instancia de la clase CashRegister a partir de los datos del documento
           CashRegister cashRegister = CashRegister.fromMap(snapshot.data() as Map<String, dynamic>);
           // agrega el id del usuario que registra la venta si esq no existe en la lista
-          if(!cashRegister.cashiers.contains(idUser)){
-            cashRegister.cashiers.add(idUser);
-          }
+          if(!cashRegister.cashiers.contains(idUser)){ cashRegister.cashiers.add(idUser);  }
           // incrementa el valor total de la facturacion de la caja
           cashRegister.billing += amount; 
           // incrementa el valor si es que existe un descuento

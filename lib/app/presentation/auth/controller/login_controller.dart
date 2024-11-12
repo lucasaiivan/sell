@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:get/get.dart'; 
+import '../../../domain/use_cases/authenticate_use_case.dart';
 import '../../splash/controllers/splash_controller.dart';
 
 class LoginController extends GetxController {
@@ -43,7 +43,12 @@ class LoginController extends GetxController {
       // set state load
       CustomFullScreenDialog.showDialog();
 
-      // signIn : Inicia la secuencia de inicio de sesión de Google.
+      await AuthenticateUserUseCase().authenticateWithGoogle();
+
+      // finalizamos el diálogo alerta
+      CustomFullScreenDialog.cancelDialog();
+
+      /* // signIn : Inicia la secuencia de inicio de sesión de Google.
       GoogleSignInAccount? googleSignInAccount = await GoogleSignIn().signIn(); 
       // condition : Si googleSignInAccount es nulo, significa que el usuario no ha iniciado sesión.
       if (googleSignInAccount == null) {
@@ -57,7 +62,7 @@ class LoginController extends GetxController {
         await homeController.firebaseAuth.signInWithCredential(oAuthCredential);
         // finalizamos el diálogo alerta
         CustomFullScreenDialog.cancelDialog();
-      }
+      } */
 
     } else {
       // message for user
@@ -73,8 +78,10 @@ class LoginController extends GetxController {
     CustomFullScreenDialog.showDialog();
 
     try {
-      // signInAnonymously : Inicia sesión en Firebase con una cuenta anónima.
-      await auth.signInAnonymously();
+      // user case : signInAnonymously
+      final auth = AuthenticateUserUseCase();
+      auth.signInAnonymously();
+      
       CustomFullScreenDialog.cancelDialog();
     } catch (e) {
       // message : Error: [firebase_auth/operation-not-allowed] Anonymous Sign-In is not enabled for this project. Enable it in the Firebase Console, under the Sign-in method tab of the Auth section.

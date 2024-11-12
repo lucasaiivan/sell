@@ -13,10 +13,10 @@ import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart'; 
 import '../../../data/providers/firebase_data_provider.dart';
 import '../../../data/providers/local_data_provider.dart';
-import '../../../data/repositories/catalogue_repository.dart';
+import '../../../data/repositories/catalogue_repository_impl.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../core/utils/dynamicTheme_lb.dart';
-import '../../../domain/use_cases/get_case_catalogue.dart';
+import '../../../domain/use_cases/catalogue_use_case.dart';
 import '../../home/controller/home_controller.dart';
 import '../controller/sell_controller.dart'; 
 

@@ -1,8 +1,6 @@
  
-
-import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:sell/app/domain/entities/cashRegister_model.dart';
 import 'package:sell/app/domain/entities/catalogo_model.dart';
 import '../../domain/entities/user_model.dart';
 
@@ -17,12 +15,13 @@ class FirestoreCollections {
   static CollectionReference<Map<String, dynamic>> productsPublicDb() => FirebaseFirestore.instance.collection('/APP/ARG/PRODUCTOS');
   static CollectionReference<Map<String, dynamic>> refCollectionUsersAccountAdministrators({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/USERS/');
   static CollectionReference<Map<String, dynamic>> redCollectionUserManagedaccounts({required String email}) =>FirebaseFirestore.instance.collection('/USERS/$email/ACCOUNTS/');
+  static CollectionReference<Map<String, dynamic>> refCollectionAccountTransactions({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/TRANSACTIONS');
   // future
   static Future<DocumentSnapshot<Map<String, dynamic>>>readAdminUserFuture({required String idAccount,required String email}) =>FirebaseFirestore.instance.collection('ACCOUNTS').doc(idAccount).collection('USERS').doc(email).get();
   // ...
 }  
 
-// user : perdil del usuario 
+// user : perfil del usuario 
 class FirebaseUserProfileProvider {
   // future : obtengo los datos del perfil del usuario
   Future<UserModel> getAdminProfile(String idAccount,String email) async {
@@ -140,4 +139,20 @@ class FirebaseCatalogueProvider {
     await FirestoreCollections.catalogue(idAccount).doc(productId).delete();
   }
   
+}
+
+// transaction : transacciones de la cuenta
+class FirebaseTransactionProvider {
+  // future : obtengo las transacciones de la cuenta
+  Future<List<CashRegister>> getTransactions(String idAccount) async {
+    try {
+      final querySnapshot = await FirestoreCollections.refCollectionAccountTransactions(idAccount: idAccount).get();
+      List<CashRegister> transactions = querySnapshot.docs.map((doc) {
+        return CashRegister.fromMap(doc.data());
+      }).toList();
+      return transactions;
+    } catch (e) {
+      return [];
+    }
+  } 
 }
