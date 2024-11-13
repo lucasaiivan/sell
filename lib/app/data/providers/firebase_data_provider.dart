@@ -16,6 +16,11 @@ class FirestoreCollections {
   static CollectionReference<Map<String, dynamic>> refCollectionUsersAccountAdministrators({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/USERS/');
   static CollectionReference<Map<String, dynamic>> redCollectionUserManagedaccounts({required String email}) =>FirebaseFirestore.instance.collection('/USERS/$email/ACCOUNTS/');
   static CollectionReference<Map<String, dynamic>> refCollectionAccountTransactions({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/TRANSACTIONS');
+
+  static CollectionReference refFirestoreRecords({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/RECORDS/'); // registros de los arqueos de caja
+  static CollectionReference refFirestoreCashRegisters({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/CASHREGISTERS/'); // cajas registradoras activas
+  static CollectionReference refFirestoreFixedsDescriptions({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/FIXERDESCRIPTIONS/');  // fixed descriptions
+
   // future
   static Future<DocumentSnapshot<Map<String, dynamic>>>readAdminUserFuture({required String idAccount,required String email}) =>FirebaseFirestore.instance.collection('ACCOUNTS').doc(idAccount).collection('USERS').doc(email).get();
   // ...
@@ -154,5 +159,68 @@ class FirebaseTransactionProvider {
     } catch (e) {
       return [];
     }
-  } 
+  }  
+  // TRANSACTION : agrega al historial de arqueo de caja
+  Future<void> addHistoryRecord(String idAccount,CashRegister cashRegister) async {
+    try {
+      await FirestoreCollections.refFirestoreRecords(idAccount: idAccount).add(cashRegister.toJson());
+    } catch (e) {
+      throw Exception('Error al agregar el registro: $e');
+    }
+  }
+  // TRANSACTIONS : elimina un registro del historial de arqueo de caja
+  Future<void> deleteHistoryRecord(String idAccount,String idRecord) async {
+    try {
+      await FirestoreCollections.refFirestoreRecords(idAccount: idAccount).doc(idRecord).delete();
+    } catch (e) {
+      throw Exception('Error al eliminar el registro: $e');
+    }
+  }
+ 
+  // CASH REGISTER : actualiza la caja registradora activa
+  Future<void> setCashRegister(String idAccount,CashRegister cashRegister) async {
+    try {
+      await FirestoreCollections.refFirestoreCashRegisters(idAccount: idAccount).doc(cashRegister.id).set(cashRegister.toJson());
+    } catch (e) {
+      throw Exception('Error al actualizar la caja registradora: $e');
+    }
+  }
+  // CASH REGISTER : elimina la caja registradora activa
+  Future<void> deleteCashRegister(String idAccount,String idCashRegister) async {
+    try {
+      await FirestoreCollections.refFirestoreCashRegisters(idAccount: idAccount).doc(idCashRegister).delete();
+    } catch (e) {
+      throw Exception('Error al eliminar la caja registradora: $e');
+    }
+  }
+  
+  // FIXERS : elimina una descripción fijada
+  Future<void> deleteFixedDescription(String idAccount,String idDescription) async {
+    try {
+      await FirestoreCollections.refFirestoreFixedsDescriptions(idAccount: idAccount).doc(idDescription).delete();
+    } catch (e) {
+      throw Exception('Error al eliminar la descripción fijada: $e');
+    }
+  }
+  // FIXERS : registra una descripción fija
+  Future<void> createFixedDescription(String idAccount,String idDescription) async {
+    try {
+      await FirestoreCollections.refFirestoreFixedsDescriptions(idAccount: idAccount).doc(idDescription).set({'description':idDescription},SetOptions(merge: true));
+    } catch (e) {
+      throw Exception('Error al agregar la descripción fijada: $e');
+    }
+  }
+  // FIXERS : obtiene las descripciones fijadas
+  Future<List<Map>> getFixedsDescriptions(String idAccount) async {
+    try {
+      final querySnapshot = await FirestoreCollections.refFirestoreFixedsDescriptions(idAccount: idAccount).get();
+      List<Map> transactionsj = querySnapshot.docs.map((doc) {
+        return doc.data() as Map;
+      }).toList();
+      return transactionsj;
+    } catch (e) {
+      return [];
+    }
+  }
+
 }

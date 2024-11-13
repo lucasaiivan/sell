@@ -1448,6 +1448,12 @@ class _WidgetBottomSheetSubcriptionState extends State<WidgetBottomSheetSubcript
                       Text(title,textAlign: TextAlign.center,style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800,color: Colors.white)),
                       const SizedBox(height: 5),
                       homeController.getButtonTrialActive?trialActivateTextButton:homeController.getTrialActive == false ?Container():trialResumenTextButton,
+                      // button moderador : button activacion premiun
+                      TextButton(child: const Text('Activar Premium'),onPressed:(){
+                        // activar la suscripción premium
+                        Get.back();
+                        homeController.setIsSubscribedPremium = true ;
+                      }),
                       const SizedBox(height: 5),
                       // text : descripción
                       Padding(
