@@ -52,6 +52,40 @@ class CatalogueRepositoryImpl implements CatalogueRepository {
   Future<void> updateProduct(String idAccount,ProductCatalogue product) async {
     return await firebaseDataProvider.updateProduct(idAccount,product); 
   }
+
+  
+  
+  @override
+  Future<void> decrementStock(String idAccount, String productId, int quantity) async {
+    return await firebaseDataProvider.decrementProductStock(idAccount, productId, quantity);
+  }
+  
+  @override
+  Future<void> incrementSales(String idAccount, String productId, int quantity) async {
+    return firebaseDataProvider.incrementProductStockSales(idAccount, productId, quantity);
+  }
+  
+  @override
+  Future<void> incrementStock(String idAccount, String productId, int quantity) async {
+    return await firebaseDataProvider.incrementProductStock(idAccount, productId, quantity);
+  }
+  
+  @override
+  Future<void> updateProductFromMap(String idAccount,String idProduct, Map values) {
+    return firebaseDataProvider.updateProductCatalogueFromMap(idAccount, idProduct, values);
+  }
+  
+  @override
+  Future<void> registerPricePublic(String idProduct , ProductPrice productPrice) {
+    return firebaseDataProvider.addPriceRegisterPublic(idProduct, productPrice);
+  }
+  
+  @override
+  Future<Product> getProductPublic(String productId) {
+    return firebaseDataProvider.getProductPublic(productId);
+  }
+
+
    
   // Otros métodos para agregar, actualizar y eliminar productos localmentex
   //  @override ...

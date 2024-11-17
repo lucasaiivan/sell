@@ -13,7 +13,7 @@ class TicketModel {
   double discount = 0.0; // descuento aplicado a la venta
   String currencySymbol = '\$';
   List<dynamic> listPoduct= [];
-  late Timestamp creation; // Marca de tiempo ( hora en que se reporto el producto )
+  Timestamp ?creation; // Marca de tiempo ( hora en que se reporto el producto )
 
   TicketModel({
     this.id = "",
@@ -26,8 +26,8 @@ class TicketModel {
     this.priceTotal = 0.0,
     this.valueReceived = 0.0,
     this.discount = 0.0,
-    required this.listPoduct,
-    required this.creation,
+    this.listPoduct= const[],
+    this.creation,
   });
   int getProductsQuantity() {
     int count = 0;
@@ -65,7 +65,7 @@ class TicketModel {
         "discount": discount,
         // refactorizamos los valores [Timestamp]  a un [String] 
         "listPoduct": listPoduct.map((e) => ProductCatalogue.fromMap(e).toMap()).toList(),  
-        "creation": creation.millisecondsSinceEpoch, // convertimos a milisegundos
+        "creation": creation?.millisecondsSinceEpoch, // convertimos a milisegundos
       };
 
   Map<String, dynamic> toJson({bool cache =false}) => {
@@ -113,7 +113,7 @@ class TicketModel {
       valueReceived:  data.containsKey('valueReceived') ? (data['valueReceived'] ?? 0).toDouble() : 0.0,
       discount: data.containsKey('discount') ? (data['discount'] ?? 0.0).toDouble() : 0.0,
       listPoduct: data.containsKey('listPoduct') ? data['listPoduct'] : [],
-      creation: data.containsKey('creation') ? data['creation'] : Timestamp.now(),
+      creation: data.containsKey('creation') ? data['creation'] :null,
     );
   }
   TicketModel.fromDocumentSnapshot({required DocumentSnapshot documentSnapshot}) {

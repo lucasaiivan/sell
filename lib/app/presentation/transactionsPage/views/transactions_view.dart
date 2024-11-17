@@ -101,7 +101,7 @@ class TransactionsView extends StatelessWidget {
  
 
     // define una variable currentDate para realizar el seguimiento de la fecha actual en la que se está construyendo la lista. Inicializa esta variable con la fecha de la primera transacción en la lista
-    DateTime currentDate = transactionsController.getVisibilityTransactionsList[0].creation.toDate();
+    DateTime currentDate = transactionsController.getVisibilityTransactionsList[0].creation!.toDate();
     // lista de widgets List<Widget> donde se almacenarán los elementos de la lista
     List<Widget> transactions = [];  
     // add : Itera sobre la lista de transacciones y verifica si la fecha de la transacción actual es diferente a la fecha actual. Si es así, crea un elemento Divider y actualiza la fecha actual
@@ -114,11 +114,11 @@ class TransactionsView extends StatelessWidget {
         transactions.add(const Padding(padding: EdgeInsets.only(left: 8.0,top: 20.0,bottom:4.0),child: Text('Registros',style:TextStyle(fontSize: 24,fontWeight: FontWeight.w300))));
       }
       // condition : si la fecha actual es diferente a la fecha de la transacción actual
-      if (currentDate.day != transactionsController.getVisibilityTransactionsList[i].creation.toDate().day || i==0) {
+      if (currentDate.day != transactionsController.getVisibilityTransactionsList[i].creation?.toDate().day || i==0) {
         //  set : actualiza la fecha actual de la variable
-        currentDate = transactionsController.getVisibilityTransactionsList[i].creation.toDate();
+        currentDate = transactionsController.getVisibilityTransactionsList[i].creation!.toDate();
         // add : añade un Container con el texto de la fecha como divisor
-        transactions.add(Container(padding: const EdgeInsets.symmetric(horizontal: 8.0,vertical: 8.0),width: double.infinity,color: Colors.grey.withOpacity(.05),child: Opacity(opacity: 0.8,child: Text(Publications.getFechaPublicacionSimple(  transactionsController.getVisibilityTransactionsList[i].creation.toDate(),Timestamp.now().toDate()),textAlign: TextAlign.center,style: const TextStyle(fontSize: 18,fontWeight: FontWeight.w300)))));
+        transactions.add(Container(padding: const EdgeInsets.symmetric(horizontal: 8.0,vertical: 8.0),width: double.infinity,color: Colors.grey.withOpacity(.05),child: Opacity(opacity: 0.8,child: Text(Publications.getFechaPublicacionSimple(  transactionsController.getVisibilityTransactionsList[i].creation!.toDate(),Timestamp.now().toDate()),textAlign: TextAlign.center,style: const TextStyle(fontSize: 18,fontWeight: FontWeight.w300)))));
       }
       //  add : añade el elemento de la lista actual a la lista de widgets
       transactions.add(tileItem(ticketModel: transactionsController.getVisibilityTransactionsList[i]),);
@@ -202,7 +202,7 @@ class TransactionsView extends StatelessWidget {
                       )),
                     Opacity(opacity:0.3,child: dividerCircle),
                     // fecha de transacción
-                    Text(Publications.getFechaPublicacion(fechaActual: Timestamp.now().toDate(),fechaPublicacion: ticketModel.creation.toDate()),style: TextStyle(color: primaryTextColor.withOpacity(0.3),fontWeight: FontWeight.w400 )),
+                    Text(Publications.getFechaPublicacion(fechaActual: Timestamp.now().toDate(),fechaPublicacion: ticketModel.creation!.toDate()),style: TextStyle(color: primaryTextColor.withOpacity(0.3),fontWeight: FontWeight.w400 )),
                   ],
                 ),
                 Column(
@@ -324,14 +324,14 @@ class TransactionInfoView extends StatelessWidget {
     double valueReceived = ticket.valueReceived;
     double changeAmount = valueReceived==0?0.0: valueReceived - priceTotal;
     String currencySymbol = ticket.currencySymbol; 
-    Timestamp creation = ticket.creation;
+    Timestamp? creation = ticket.creation;
 
     // controllers
     final TransactionsController transactionsController = Get.find();
 
     // Formatear marca de tiempo como fecha
     var formatter = DateFormat('dd/MM/yyyy  HH:mm');
-    var formattedCreationDate = formatter.format(creation.toDate());
+    var formattedCreationDate = formatter.format(creation!.toDate());
  
 
     // var 
@@ -568,14 +568,14 @@ class TicketView extends StatelessWidget {
     double valueReceived = ticket.valueReceived;
     double changeAmount =  valueReceived == 0 ? 0.0 : valueReceived - priceTotal;
     String currencySymbol = ticket.currencySymbol; 
-    Timestamp creation = ticket.creation;
+    Timestamp? creation = ticket.creation;
 
     // controllers
     final HomeController homeController = Get.find();
 
     // Formatear marca de tiempo como fecha
     var formatter = DateFormat('dd/MM/yyyy  HH:mm');
-    var formattedCreationDate = formatter.format(creation.toDate());
+    var formattedCreationDate = formatter.format(creation!.toDate());
  
 
     // var 

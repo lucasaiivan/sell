@@ -10,17 +10,16 @@ import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';  
 import 'package:sell/app/domain/entities/cashRegister_model.dart';
-import 'package:sell/app/presentation/home/controller/home_controller.dart';
-import 'package:sell/app/data/datasource/database_cloud.dart';
+import 'package:sell/app/presentation/home/controller/home_controller.dart'; 
 import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:sell/app/core/utils/widgets_utils.dart';
 import 'package:uuid/uuid.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../domain/entities/ticket_model.dart';
+import '../../../domain/use_cases/cash_register_use_case.dart';
+import '../../../domain/use_cases/catalogue_use_case.dart';
 import '../../../domain/use_cases/transactions_user_case.dart';
 import '../views/sell_view.dart';   
-
-
 
 
 class SellController extends GetxController {
@@ -55,16 +54,16 @@ class SellController extends GetxController {
   //  cash register  // 
   void deleteFixedDescription({required String description}){
     // case use : elimina una descripción fija
-    GetTransactionUseCase().deleteFixedDescription(homeController.getIdAccountSelected, description); 
+    CashRegisterUseCase().deleteFixedDescription(homeController.getIdAccountSelected, description); 
   }
   void registerFixerDescription({required String description}){
     if(description=='') return;
     // case use : crea una descripción fija
-    GetTransactionUseCase().createFixedDescription(homeController.getIdAccountSelected, description); 
+    CashRegisterUseCase().createFixedDescription(homeController.getIdAccountSelected, description); 
   }
   Future<List<String>> loadFixerDescriotions(){
 
-    return GetTransactionUseCase().getFixedsDescriptions(homeController.getIdAccountSelected).then((value) {
+    return CashRegisterUseCase().getFixedsDescriptions(homeController.getIdAccountSelected).then((value) {
       List<String> list = [];
       for (var element in value) {
         list.add(element['description'] as String);
@@ -86,7 +85,7 @@ class SellController extends GetxController {
     homeController.cashRegisterActive.expectedBalance += expectedBalance;  // asigna el dinero esperado a la caja al iniciar
     cashRegisterLocalSave(); // guarda el id de la caja en el dispositivo
     // firebase : guarda un documento de la caja registradora
-    GetTransactionUseCase().updateCashRegister(homeController.getIdAccountSelected, homeController.cashRegisterActive);
+    CashRegisterUseCase().createUpdateCashRegister(homeController.getIdAccountSelected, homeController.cashRegisterActive);
     //Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(uniqueId).set(homeController.cashRegisterActive.toJson());
     update(); // actualiza la vista
   }  
@@ -95,10 +94,10 @@ class SellController extends GetxController {
     homeController.cashRegisterActive.closure = DateTime.now(); // asigna la fecha de cierre
     homeController.cashRegisterActive.expectedBalance = homeController.cashRegisterActive.getExpectedBalance; // actualizamos el balance de la caja actual 
     // firebase : guardamos un copia del documento de la caja en la colección de cajas cerradas
-    GetTransactionUseCase().addHistoryRecord(homeController.getIdAccountSelected, homeController.cashRegisterActive);
+    CashRegisterUseCase().addCashRegisterHistory(homeController.getIdAccountSelected, homeController.cashRegisterActive);
     //Database.refFirestoreRecords(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegisterActive.id).set(homeController.cashRegisterActive.toJson());
     // firebase : eliminamos el documento de la caja de la colección de cajas abiertas
-    GetTransactionUseCase().deleteCashRegister(homeController.getIdAccountSelected, homeController.cashRegisterActive.id);
+    CashRegisterUseCase().deleteCashRegister(homeController.getIdAccountSelected, homeController.cashRegisterActive.id);
     //Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegisterActive.id).delete();
     // default values
     homeController.cashRegisterActive = CashRegister.initialData();
@@ -115,7 +114,7 @@ class SellController extends GetxController {
     cashRegister.cashOutFlowList.add(CashFlow(id: const Uuid().v4(),userId: homeController.getIdAccountSelected,description: description,amount: amount,date: DateTime.now(),).toJson());
     
     // case use : actualiza la caja registradora
-    GetTransactionUseCase().updateCashRegister(homeController.getIdAccountSelected, cashRegister);
+    CashRegisterUseCase().createUpdateCashRegister(homeController.getIdAccountSelected, cashRegister);
      
   }
   void cashRegisterInFlow({required double amount,String description = ''}){
@@ -131,7 +130,7 @@ class SellController extends GetxController {
     cashRegister.cashInFlowList.add(CashFlow(id: const Uuid().v4(),description: description,userId: homeController.getIdAccountSelected,amount: amount,date: DateTime.now(),).toJson());
     
     // case use : actualiza la caja registradora
-    GetTransactionUseCase().updateCashRegister(homeController.getIdAccountSelected, cashRegister);
+    CashRegisterUseCase().createUpdateCashRegister(homeController.getIdAccountSelected, cashRegister);
     
   } 
   void cashRegisterSetTransaction({required double amount,double discount = 0.0 ,required String idUser}){
@@ -150,7 +149,7 @@ class SellController extends GetxController {
     cashRegister.sales ++;
     
     // case use : actualiza la caja registradora
-    GetTransactionUseCase().updateCashRegister(homeController.getIdAccountSelected, cashRegister);
+    CashRegisterUseCase().createUpdateCashRegister(homeController.getIdAccountSelected, cashRegister);
 
   } 
 
@@ -220,13 +219,13 @@ class SellController extends GetxController {
   }
  
   // ticket : ticket de la ultima venta
-  TicketModel _lastTicket = TicketModel(creation: Timestamp.now(), listPoduct: []);
+  TicketModel _lastTicket = TicketModel( listPoduct: []);
   TicketModel get getLastTicket => _lastTicket;
   set setLastTicket(TicketModel value){
     _lastTicket = value; 
   }
   // ticket : ticket de venta actual
-  TicketModel ticket = TicketModel(creation: Timestamp.now(), listPoduct: []);
+  TicketModel ticket = TicketModel( listPoduct: []);
   TicketModel get getTicket => ticket;
   set setTicket(TicketModel value){
     ticket = value;
@@ -291,7 +290,7 @@ class SellController extends GetxController {
     getTicket.sellerId = homeController.getProfileAdminUser.email;
     getTicket.priceTotal = getTicket.getTotalPrice;
     getTicket.valueReceived = getValueReceivedTicket; 
-    getTicket.creation = Timestamp.now();
+    getTicket.creation =  Timestamp.now();
 
     // set  : replicamos el ticket actual temporalmente  
     setLastTicket = TicketModel.fromMap(getTicket.toJson()); 
@@ -302,7 +301,9 @@ class SellController extends GetxController {
     }
     
     // set firestore : guarda la transacción
-    Database.refFirestoretransactions(idAccount: homeController.getIdAccountSelected).doc(getTicket.id).set(getTicket.toJson()).whenComplete((){
+    GetTransactionUseCase().addTransaction(homeController.getIdAccountSelected, getTicket).then(
+      (value) {
+        
       // incrementamos la cantidad de venta y descrementamos el stock de los productos del catálogo
       for (dynamic data in getTicket.listPoduct) { 
         // obj
@@ -312,12 +313,14 @@ class SellController extends GetxController {
 
         // firestore : hace un incremento de 1 en el valor 'sales' del producto
         productCatalogue.sales ++;
-        Database.dbProductStockSalesIncrement(idAccount: homeController.getIdAccountSelected,idProduct: product.id,quantity: 1 );
+        GetCatalogueUseCase().incrementSales(homeController.getIdAccountSelected, product.id, 1);
+        //Database.dbProductStockSalesIncrement(idAccount: homeController.getIdAccountSelected,idProduct: product.id,quantity: 1 );
         // condition :  hace un descremento en el valor 'stock' del producto si es que tiene stock habilitado
         if (product.stock && homeController.getIsSubscribedPremium ) {
           //  firestore : hace un descremento en el valor 'stock'
           productCatalogue.quantityStock -= product.quantity;
-          Database.dbProductStockDecrement(idAccount: homeController.getIdAccountSelected,idProduct: product.id,quantity: product.quantity);
+          //Database.dbProductStockDecrement(idAccount: homeController.getIdAccountSelected,idProduct: product.id,quantity: product.quantity);
+          GetCatalogueUseCase().decrementStock(homeController.getIdAccountSelected, product.id, product.quantity);
         }
         // actualizamos la lista de producto de  catálogo  en memoria de la app
         homeController.sincronizeCatalogueProducts(product: productCatalogue);
@@ -325,34 +328,39 @@ class SellController extends GetxController {
       setStateConfirmPurchaseComplete = true;
       // set : default values  
       setTicket = TicketModel(creation: Timestamp.now(), listPoduct: []);
-    });
+
+      }
+    );
+
+    /* Database.refFirestoretransactions(idAccount: homeController.getIdAccountSelected).doc(getTicket.id).set(getTicket.toJson()).whenComplete((){
+      
+    }); */
     
   }
   Future<void> pricesProductCatalogueUpdate({required ProductCatalogue product,double salePrice=0.0,double purchasePrice = 0.0})async {
 
     // obj : se obtiene los datos para registrar del precio al publico del producto en una colección publica de la db
-    ProductPrice precio = ProductPrice(id: homeController.getProfileAccountSelected.id,idAccount: homeController.getProfileAccountSelected.id,imageAccount: homeController.getProfileAccountSelected.image,nameAccount: homeController.getProfileAccountSelected.name,price: product.salePrice,currencySign: product.currencySign,province: homeController.getProfileAccountSelected.province,town: homeController.getProfileAccountSelected.town,time: Timestamp.fromDate(DateTime.now()));
+    final ProductPrice precio = ProductPrice(id: homeController.getProfileAccountSelected.id,idAccount: homeController.getProfileAccountSelected.id,imageAccount: homeController.getProfileAccountSelected.image,nameAccount: homeController.getProfileAccountSelected.name,price: product.salePrice,currencySign: product.currencySign,province: homeController.getProfileAccountSelected.province,town: homeController.getProfileAccountSelected.town,time: Timestamp.fromDate(DateTime.now()));
+     
     // var
     Timestamp upgrade =  Timestamp.now();
     Map data = {'upgrade':upgrade};
     if(salePrice!=0){ 
       data['salePrice']=salePrice; 
       product.salePrice = salePrice;
+      precio.price = salePrice; 
       }
     if(purchasePrice!=0){ 
       data['purchasePrice']=purchasePrice; 
       product.purchasePrice = purchasePrice;
       }
     // set : fecha de actualización del producto
-    product.upgrade = upgrade; 
+    product.upgrade = upgrade;
 
-    // ref : referencias de firebase
-    var docRefProductCatalogue = Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(product.id);
-    var docRefRegisterPrice = Database.refFirestoreRegisterPrice(idProducto: product.id, isoPAis: 'ARG').doc(precio.id);
-    // firebase : se crea un registro de precio al publico del producto en una colección publica de la db
-    docRefRegisterPrice.set(precio.toJson());
-    // firebase : Actualizamos los datos
-    docRefProductCatalogue.set(Map<String, dynamic>.from(data), SetOptions(merge: true));
+    // case use : registramos el precio del producto en la colección de precios publicos
+    GetCatalogueUseCase().registerPricePublic( product.id,precio);
+    // case use : Actualizamos los datos del producto
+    GetCatalogueUseCase().updateProductFromMap(homeController.getIdAccountSelected, product.id,data);
 
     // actualiza la lista de productos seleccionados
     getTicket.updateData(product: product);
@@ -366,11 +374,10 @@ class SellController extends GetxController {
     
     // var
     Map data = {'favorite':favorite};
-    product.favorite = favorite;
-    // ref : referencias de firebase
-    var docRefProductCatalogue = Database.refFirestoreCatalogueProduct(idAccount: homeController.getProfileAccountSelected.id).doc(product.id);
-    // firebase : Actualizamos los datos
-    docRefProductCatalogue.set(Map<String, dynamic>.from(data), SetOptions(merge: true));
+    product.favorite = favorite; 
+    // case use : Actualizamos los datos
+    GetCatalogueUseCase().updateProductFromMap(homeController.getIdAccountSelected, product.id,data);
+    //docRefProductCatalogue.set(Map<String, dynamic>.from(data), SetOptions(merge: true));
     // actualiza la lista de productos seleccionados
     getTicket.updateData(product: product);
     // actualiza la lista de productos del cátalogo en la memoria de la app
@@ -491,19 +498,17 @@ class SellController extends GetxController {
   void queryProductDbPublic({required String id}) {
     // consulta el código existe en la base de datos de productos publicos
     if (id != '') {
-      // firebase
-      Future<DocumentSnapshot<Map<String, dynamic>>> documentSnapshot = Database.readProductPublicFuture(id: id);
-      // query
-      documentSnapshot.then((value) { 
+      // case use : consulta el producto en la base de datos de productos publicos
+      GetCatalogueUseCase().getProductPublic(id).then((data) {
+        if(data.id=='') throw 'null';
 
         // get : product
-        ProductCatalogue product = ProductCatalogue.fromMap(value.data() as Map);
+        ProductCatalogue product = data.convertProductCatalogue();
         // set : marca de tiempo
         product.upgrade = Timestamp.now();
         // show dialog
         showDialogAddProductNew(productCatalogue:product);
-      
-      }).onError((error, stackTrace) { 
+      }).onError((error, stackTrace) {
         // no se encontro el producto en la base de datos
         //
         // dialog : agregar producto nuevo
@@ -511,7 +516,7 @@ class SellController extends GetxController {
       }).catchError((error) {
         // error al consultar db
         Get.snackbar('ah ocurrido algo', 'Fallo el escaneo');
-      });
+      }); 
     }
   }
 
@@ -560,7 +565,7 @@ class SellController extends GetxController {
       // set : default values  
       setStateConfirmPurchaseComplete = true; 
       setLastTicket = TicketModel.fromMap(getTicket.toJson()); 
-      setTicket = TicketModel(creation: Timestamp.now(), listPoduct: []);
+      setTicket = TicketModel();
     }
     
   }
