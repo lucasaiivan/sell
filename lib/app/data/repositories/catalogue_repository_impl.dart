@@ -37,6 +37,12 @@ class CatalogueRepositoryImpl implements CatalogueRepository {
     // obtengo los datos del preoveedor [Local]
     return localProvider.getCatalogueProducts();
   }
+
+   @override
+  Stream<List<Category>> getCategoryListStream(String idAccount) {
+    return firebaseDataProvider.getCategoriesStream(idAccount);
+  }
+
   
   @override
   Future<void> addProduct(String idAccount,ProductCatalogue product) async {
@@ -84,7 +90,23 @@ class CatalogueRepositoryImpl implements CatalogueRepository {
   Future<Product> getProductPublic(String productId) {
     return firebaseDataProvider.getProductPublic(productId);
   }
-
+  
+  @override
+  Future<List<Category>> getCategoriesList(String idAccount) {
+    return firebaseDataProvider.getCategories(idAccount);
+  }
+  
+  @override
+  Stream<List<Provider>> getProviderListStream(String idAccount) {
+    return firebaseDataProvider.getProvidersStream(idAccount);
+  }
+  
+  @override
+  Future<void> deleteCategory(String idAccount, String idCategory) {
+    return firebaseDataProvider.deleteCategory(idAccount, idCategory);
+  }
+  
+ 
 
    
   // Otros métodos para agregar, actualizar y eliminar productos localmentex

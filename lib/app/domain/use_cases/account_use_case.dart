@@ -10,6 +10,12 @@ class GetAccountUseCase{
   final AccountRepository catalogueRepository;  
   GetAccountUseCase() : catalogueRepository = AccountRepositoryImpl(FirebaseAccountProvider());
 
+  // future : Acutalizar datos de la cuenta
+  Future<void> updateAccountData({required String idAccount,required Map<String, dynamic> data}) async {
+    // logic business
+    // ... 
+    return await catalogueRepository.updateAccountData(idAccount,data);
+  }
   // future : obtener datos de la cuenta
   Future<ProfileAccountModel> getAccount({required String idAccount}) async {
     // logic business
@@ -22,4 +28,11 @@ class GetAccountUseCase{
     // ... 
     return await catalogueRepository.getAccountAdmins(idAccount);
   }
+  // void : actualizar pin de la cuenta
+  Future<void> updateAccountPin({required ProfileAccountModel account,String pin = ''}) async {
+    // logic business
+    if(pin.isEmpty){return;}
+    // ... 
+    return await catalogueRepository.updatePinAccount(account.id,pin);
+  } 
 }

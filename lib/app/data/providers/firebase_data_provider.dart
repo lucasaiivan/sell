@@ -1,5 +1,6 @@
  
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:sell/app/domain/entities/cashRegister_model.dart';
 import 'package:sell/app/domain/entities/catalogo_model.dart';
 import '../../domain/entities/ticket_model.dart';
@@ -9,24 +10,25 @@ import '../../domain/entities/user_model.dart';
 // FirestoreCollections : representa las colecciones de Firestore
 //
 class FirestoreCollections {
-  // collections : app
-  static CollectionReference<Map<String, dynamic>> collectionRefPRegisterPrice({required String idProducto, String isoPAis = 'ARG'}) =>FirebaseFirestore.instance.collection('/APP/$isoPAis/PRODUCTOS/$idProducto/PRICES/');
-  static CollectionReference<Map<String, dynamic>> collectionRefProductsPublicDb({String isoPAis = 'ARG'}) => FirebaseFirestore.instance.collection('/APP/$isoPAis/PRODUCTOS');
-  // collections : account
-  static CollectionReference<Map<String, dynamic>> collectionRefAccounts() => FirebaseFirestore.instance.collection('/ACCOUNTS/'); 
-  static CollectionReference<Map<String, dynamic>> collectionRefAatalogue(String idAccount) =>  FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/CATALOGUE/');
-  static CollectionReference<Map<String, dynamic>> collectionRefUsersAccountAdministrators({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/USERS/');
+  // collections : /APP
+  static CollectionReference<Map<String, dynamic>> collectionRefPRegisterPrice({required String idProducto, String isoPAis = 'ARG'}) =>FirebaseFirestore.instance.collection('/APP/$isoPAis/PRODUCTOS/$idProducto/PRICES/'); // registro de precios de cada producto
+  static CollectionReference<Map<String, dynamic>> collectionRefProductsPublicDb({String isoPAis = 'ARG'}) => FirebaseFirestore.instance.collection('/APP/$isoPAis/PRODUCTOS'); // productos publicos
+  // collections : /ACCOUNTS
+  static CollectionReference<Map<String, dynamic>> collectionRefAccounts() => FirebaseFirestore.instance.collection('/ACCOUNTS/');  // cuentas de los negocios
+  static CollectionReference<Map<String, dynamic>> collectionRefCatalogue(String idAccount) =>  FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/CATALOGUE/'); // catalogo de productos
+  static CollectionReference<Map<String, dynamic>> collectionRefUsersAccountAdministrators({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/USERS/'); // administradores de la cuenta
   static CollectionReference<Map<String, dynamic>> collectionRefAccountTransactions({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/TRANSACTIONS'); // historial de transacciones
+  static CollectionReference<Map<String, dynamic>>  collectionRefCategories({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/CATEGORY'); // categorias del catalogo
+  static CollectionReference<Map<String, dynamic>> readCollectionProviders({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/PROVIDER') ; // proveedores del catalogo
   static CollectionReference<Map<String, dynamic>> collectionRefAccountRecors({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/RECORDS'); // historial de arqueos de caja 
-  static CollectionReference<Map<String, dynamic>> collectionRefRecords({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/RECORDS/'); // registros de los arqueos de caja
   static CollectionReference<Map<String, dynamic>> collectionRefCashRegisters({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/CASHREGISTERS/'); // cajas registradoras activas
   static CollectionReference<Map<String, dynamic>> collectionRefFixedsDescriptions({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/FIXERDESCRIPTIONS/');  // fixed descriptions
-  // collections : user
-  static CollectionReference<Map<String, dynamic>> collectionRefUsers() =>FirebaseFirestore.instance.collection('/USERS/');
-  static CollectionReference<Map<String, dynamic>> collectionRefUserManagedaccounts({required String email}) =>FirebaseFirestore.instance.collection('/USERS/$email/ACCOUNTS/');
-  // future
-  static Future<DocumentSnapshot<Map<String, dynamic>>>readAdminUserFuture({required String idAccount,required String email}) =>FirebaseFirestore.instance.collection('ACCOUNTS').doc(idAccount).collection('USERS').doc(email).get();
-  // ...
+  // collections : /USERS
+  static CollectionReference<Map<String, dynamic>> collectionRefUsers() =>FirebaseFirestore.instance.collection('/USERS/'); // usuarios
+  static CollectionReference<Map<String, dynamic>> collectionRefUserManagedaccounts({required String email}) =>FirebaseFirestore.instance.collection('/USERS/$email/ACCOUNTS/'); // cuentas administradas por el usuario
+  // streams
+  static Stream<QuerySnapshot<Map<String, dynamic>>> collectionRefCategoriesQueryStream({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/CATEGORY') .snapshots(); // categorias del catalogo
+  static Stream<QuerySnapshot<Map<String, dynamic>>> collectionRefProvidersStream({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/PROVIDER').snapshots(); // proveedores del catalogo
 }  
 
 // user : perfil del usuario 
@@ -35,8 +37,7 @@ class FirebaseUserProfileProvider {
   Future<UserModel> getAdminProfile(String idAccount,String email) async {
     try {
       
-      final docSnapshot = await FirestoreCollections.readAdminUserFuture(idAccount:idAccount,email: email);
-
+      final docSnapshot = await FirestoreCollections.collectionRefUsersAccountAdministrators( idAccount: idAccount).doc(email).get();
       if (docSnapshot.exists) {
         return UserModel.fromDocumentSnapshot(documentSnapshot: docSnapshot);
       } else {
@@ -83,6 +84,14 @@ class FirebaseAccountProvider {
       } else {return ProfileAccountModel(creation: Timestamp.now(),trialEnd: Timestamp.now(),trialStart: Timestamp.now());}
     } catch (e) { return ProfileAccountModel(creation: Timestamp.now(),trialEnd: Timestamp.now(),trialStart: Timestamp.now()  );}
   }
+  // update : actualizar datos de la cuenta 
+ Future<void> updateAccountData(String idAccount,Map<String,dynamic> values) async {
+    try {
+      await FirestoreCollections.collectionRefAccounts().doc(idAccount).set( Map<String, dynamic>.from(values),SetOptions(merge: true));
+    } catch (e) {
+      throw Exception('Error al actualizar la cuenta: $e');
+    }
+  }
   // update : actualiza los datos de la cuenta
   Future<void> updateAccount(ProfileAccountModel account) async {
     try {
@@ -91,7 +100,22 @@ class FirebaseAccountProvider {
         throw Exception('Error al actualizar la cuenta: $e');
      }
     }
-
+  // future : actualizar pind de la cuenta
+  Future<void> updateAccountPin(String idAccount,String pin) async {
+    try {
+      await FirestoreCollections.collectionRefAccounts().doc(idAccount).update({'pin': pin});
+    } catch (e) {
+      throw Exception('Error al actualizar el pin: $e');
+    }
+  }
+  // future : actualizar siertos datos de la cuenta
+  Future<void> updateAccountFromMap(String idAccount,Map values) async {
+    try {
+      await FirestoreCollections.collectionRefAccounts().doc(idAccount).set( Map<String, dynamic>.from(values),SetOptions(merge: true));
+    } catch (e) {
+      throw Exception('Error al actualizar la cuenta: $e');
+    }
+  }
   // futute : obtengo los administradores de la cuenta
   Future<List<UserModel>> getUsersAccountAdministrators(String idAccount) async {
     try {
@@ -105,12 +129,11 @@ class FirebaseAccountProvider {
     }
   }
   
-  }
-
- // catalogue : obtenemos los productos del catalogo
+}
+// catalogue : obtenemos los productos del catalogo
 class FirebaseCatalogueProvider { 
 
-  // return : Product : obtiene un producto de la db publica
+  // obtiene un producto de la db publica
   Future<Product> getProductPublic(String idProduct) async {
     try {
       final docSnapshot = await FirestoreCollections.collectionRefProductsPublicDb().doc(idProduct).get();
@@ -123,12 +146,12 @@ class FirebaseCatalogueProvider {
       return Product(upgrade: Timestamp.now(),creation: Timestamp.now());
     }
   }
-  //  
+  // obtenemos los productos del catalogo de la cuenta
   Future<List<ProductCatalogue>> getCatalogueProducts(String idAccount) async {
     try {
 
       // firebase
-      final querySnapshot = await FirestoreCollections.collectionRefAatalogue(idAccount).get();
+      final querySnapshot = await FirestoreCollections.collectionRefCatalogue(idAccount).get();
       
       // Mapea cada documento de Firestore a una instancia de ProductCatalogue
       List<ProductCatalogue> products = querySnapshot.docs.map((doc) {
@@ -140,38 +163,85 @@ class FirebaseCatalogueProvider {
       return [];
     }
   }
-
+  // obtiene los productos del catalogo y escucha los cambios
   Stream<List<ProductCatalogue>> getCatalogueProductsStream(String idAccount) {
-    return  FirestoreCollections.collectionRefAatalogue(idAccount).snapshots().map((querySnapshot) {
+    return  FirestoreCollections.collectionRefCatalogue(idAccount).snapshots().map((querySnapshot) {
       return querySnapshot.docs.map((doc) {
         return ProductCatalogue.fromMap(doc.data() );
       }).toList();
     });
   } 
-
+  // obtenemos la categorias creadas por el usuario y escucha los cambios
+  Stream<List<Category>> getCategoriesStream(String idAccount) {
+    return FirestoreCollections.collectionRefCategoriesQueryStream(idAccount: idAccount).map((querySnapshot) {
+      return querySnapshot.docs.map((doc) {
+        return Category.fromMap(doc.data());
+      }).toList();
+    });
+  }
+  // obtenemos las categorias del catalogo
+  Future<List<Category>> getCategories(String idAccount) async {
+    try {
+      final querySnapshot = await FirestoreCollections.collectionRefCategoriesQueryStream(idAccount: idAccount).first;
+      List<Category> categories = querySnapshot.docs.map((doc) {
+        return Category.fromMap(doc.data());
+      }).toList();
+      return categories;
+    } catch (e) {
+      return [];
+    }
+  }
+  // obtiene los proveedores de la cuenta
+  Future<List<Provider>> getProviders(String idAccount) async {
+    try {
+      final querySnapshot = await FirestoreCollections.readCollectionProviders(idAccount: idAccount).get();
+      List<Provider> providers = querySnapshot.docs.map((doc) {
+        return Provider.fromMap(doc.data());
+      }).toList();
+      return providers;
+    } catch (e) {
+      return [];
+    }
+  }
+  // obtiene los proveedores y escucha los cambios
+  Stream <List<Provider>> getProvidersStream(String idAccount) {
+    return FirestoreCollections.collectionRefProvidersStream(idAccount: idAccount).map((querySnapshot) {
+      return querySnapshot.docs.map((doc) {
+        return Provider.fromMap(doc.data());
+      }).toList();
+    });
+  }
+  // agrega un producto al catalogo
   Future<void> addProduct(String idAccount,ProductCatalogue product) async {
-    await FirestoreCollections.collectionRefAatalogue(idAccount).doc(product.id).set(product.toJson());
+    await FirestoreCollections.collectionRefCatalogue(idAccount).doc(product.id).set(product.toJson());
   }
-
+  // actualiza un producto del catalogo
   Future<void> updateProduct(String idAccount,ProductCatalogue product) async {
-    await FirestoreCollections.collectionRefAatalogue(idAccount).doc(product.id).update(product.toJson());
+    await FirestoreCollections.collectionRefCatalogue(idAccount).doc(product.id).update(product.toJson());
   }
-
+  // elimina un producto del catalogo
   Future<void> deleteProduct(String idAccount,String productId) async {
-    await FirestoreCollections.collectionRefAatalogue(idAccount).doc(productId).delete();
+    await FirestoreCollections.collectionRefCatalogue(idAccount).doc(productId).delete();
   }
-
+  // eliminar categoria 
+  Future<void> deleteCategory(String idAccount,String idCategory) async {
+    await FirestoreCollections.collectionRefCategories(idAccount: idAccount).doc(idCategory).delete();
+  }
+  // void : eliminar proveedor
+  Future<void> deleteProvider(String idAccount,String idProvider) async {
+    await FirestoreCollections.readCollectionProviders(idAccount: idAccount).doc(idProvider).delete();
+  }
   // void : increment stock : incrementa las ventas de un producto
   Future<void> incrementProductStock(String idAccount,String productId,int quantity) async {
-    await FirestoreCollections.collectionRefAatalogue(idAccount).doc(productId).update({"quantityStock": FieldValue.increment(quantity)});
+    await FirestoreCollections.collectionRefCatalogue(idAccount).doc(productId).update({"quantityStock": FieldValue.increment(quantity)});
   }
   // void : descrement stock : decrementa las ventas de un producto
   Future<void> decrementProductStock(String idAccount,String productId,int quantity) async {
-    await FirestoreCollections.collectionRefAatalogue(idAccount).doc(productId).update({"quantityStock": FieldValue.increment(-quantity)});
+    await FirestoreCollections.collectionRefCatalogue(idAccount).doc(productId).update({"quantityStock": FieldValue.increment(-quantity)});
   }
   // void : increment sales : incrementa las ventas de un producto
   Future<void> incrementProductStockSales(String idAccount,String productId,int quantity) async {
-    await FirestoreCollections.collectionRefAatalogue(idAccount).doc(productId).update({"sales": FieldValue.increment(quantity)});
+    await FirestoreCollections.collectionRefCatalogue(idAccount).doc(productId).update({"sales": FieldValue.increment(quantity)});
   }
 
   // void : add : crea un registro del precio del producto
@@ -180,8 +250,9 @@ class FirebaseCatalogueProvider {
   }
   // void : update : actualiza datos del producto
   Future<void> updateProductCatalogueFromMap(String idAccount,String idProduct,Map values) async {
-    await FirestoreCollections.collectionRefAatalogue(idAccount).doc(idProduct).set( Map<String, dynamic>.from(values),SetOptions(merge: true));
+    await FirestoreCollections.collectionRefCatalogue(idAccount).doc(idProduct).set( Map<String, dynamic>.from(values),SetOptions(merge: true));
   }
+
 }
 
 // transaction : transacciones de la cuenta
@@ -219,6 +290,20 @@ class FirebaseTransactionProvider {
 
 // historial de arqueos de caja
 class FirebaseHistoryCashRegisterProvider {
+
+  // retur : list : CashRegister : obtengo los registros de arqueo de caja activos
+  Future<List<CashRegister>> getCashRegistersActive(String idAccount) async {
+    try {
+      final querySnapshot = await FirestoreCollections.collectionRefCashRegisters(idAccount: idAccount).get();
+      List<CashRegister> cashRegisters = querySnapshot.docs.map((doc) {
+        return CashRegister.fromMap(doc.data());
+      }).toList();
+      return cashRegisters;
+    } catch (e) {
+      return [];
+    }
+  }
+  
   // return : list : CashRegister : obtengo los registros de arqueo de caja
   Future<List<CashRegister>> getHistoryCashRegisters(String idAccount) async {
     try {
@@ -234,9 +319,7 @@ class FirebaseHistoryCashRegisterProvider {
   // return : list : CashRegister : obtengo los registros de arqueo de caja
   Stream<List<CashRegister>> getHistoryCashRegistersStream(String idAccount) {
     return FirestoreCollections.collectionRefAccountRecors(idAccount: idAccount).snapshots().map((querySnapshot) {
-      return querySnapshot.docs.map((doc) {
-        return CashRegister.fromMap(doc.data());
-      }).toList();
+      return querySnapshot.docs.map((doc) { return CashRegister.fromMap(doc.data()); }).toList();
     });
   }
   
@@ -251,7 +334,7 @@ class FirebaseHistoryCashRegisterProvider {
   // void : delete : elimina un registro de arqueo de caja
   Future<void> deleteHistoryCashRegister(String idAccount,CashRegister cashRegister) async {
     try {
-      await FirestoreCollections.collectionRefAccountRecors(idAccount: idAccount).doc(cashRegister.id).delete();
+      await FirestoreCollections.collectionRefCashRegisters(idAccount: idAccount).doc(cashRegister.id).delete();
     } catch (e) {
       throw Exception('Error al eliminar el registro: $e');
     }

@@ -14,6 +14,7 @@ import 'package:sell/app/presentation/home/controller/home_controller.dart';
 import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:sell/app/core/utils/widgets_utils.dart';
 import 'package:uuid/uuid.dart';
+import '../../../data/datasource/database_cloud.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../domain/entities/ticket_model.dart';
 import '../../../domain/use_cases/cash_register_use_case.dart';
@@ -86,19 +87,16 @@ class SellController extends GetxController {
     cashRegisterLocalSave(); // guarda el id de la caja en el dispositivo
     // firebase : guarda un documento de la caja registradora
     CashRegisterUseCase().createUpdateCashRegister(homeController.getIdAccountSelected, homeController.cashRegisterActive);
-    //Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(uniqueId).set(homeController.cashRegisterActive.toJson());
     update(); // actualiza la vista
   }  
   void closeCashRegisterDefault() {
     // cierre de la caja seleccionada
     homeController.cashRegisterActive.closure = DateTime.now(); // asigna la fecha de cierre
     homeController.cashRegisterActive.expectedBalance = homeController.cashRegisterActive.getExpectedBalance; // actualizamos el balance de la caja actual 
-    // firebase : guardamos un copia del documento de la caja en la colección de cajas cerradas
+    // firebase : guardamos el arqueo de caja en el historial de arqueos
     CashRegisterUseCase().addCashRegisterHistory(homeController.getIdAccountSelected, homeController.cashRegisterActive);
-    //Database.refFirestoreRecords(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegisterActive.id).set(homeController.cashRegisterActive.toJson());
     // firebase : eliminamos el documento de la caja de la colección de cajas abiertas
-    CashRegisterUseCase().deleteCashRegister(homeController.getIdAccountSelected, homeController.cashRegisterActive.id);
-    //Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegisterActive.id).delete();
+    Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegisterActive.id).delete();
     // default values
     homeController.cashRegisterActive = CashRegister.initialData();
     update();
@@ -1503,7 +1501,6 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
   }
 }
  
-
 class CurrencyTextEditingController extends TextEditingController {
   final NumberFormat _formatter = NumberFormat.currency(
     locale: 'es_ES',

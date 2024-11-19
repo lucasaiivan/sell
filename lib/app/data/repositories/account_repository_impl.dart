@@ -27,6 +27,18 @@ class AccountRepositoryImpl implements AccountRepository {
   Future<List<UserModel>> getAccountAdmins(String idAccount) {
     // obtengo los administradores de la cuenta
     return firebaseDataProvider.getUsersAccountAdministrators(idAccount);
+  }
+  
+  @override
+  Future<void> updatePinAccount(String idAccount, String pin) {
+    // actualizar pin de la cuenta
+    return firebaseDataProvider.updateAccountPin(idAccount, pin);
+  }
+  
+  @override
+  Future<void> updateAccountData(String idAccount, Map<String, dynamic> data) {
+    // obtener los datos de la cuenta
+    return firebaseDataProvider.updateAccountData(idAccount, data);
   } 
     
 }

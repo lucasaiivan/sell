@@ -10,10 +10,18 @@ class CashRegisterUseCase {
   final CashRegisterHistoryRepository cashRegisterHistoryRepository;  
   CashRegisterUseCase() : cashRegisterHistoryRepository = CashRegisterHistory(FirebaseHistoryCashRegisterProvider());
 
+  // List : list : CashRegister : obtengo arqueo de caja activados
+  Future<List<CashRegister>> getCashRegisterActive(String idAccount) {
+    return cashRegisterHistoryRepository.getCashRegisterActive(idAccount);
+  }
 
-  // return : list : CashRegister : obtengo los registros de arqueo de caja
+  // List : list : CashRegister : obtengo los registros de arqueo de caja
   Future<List<CashRegister>> getCashRegisterHistory(String idAccount) {
     return cashRegisterHistoryRepository.getCashRegisterHistory(idAccount);
+  }
+  // stream : list : CashRegister : obtengo los registros de arqueo de caja
+  Stream<List<CashRegister>> getCashRegisterHistoryStream(String idAccount) {
+    return cashRegisterHistoryRepository.getCashRegisterHistoryStream(idAccount);
   }
   // void : add : obtengo los registros de arqueo de caja 
   Future<void> addCashRegisterHistory(String idAccount, CashRegister cashRegister) {
@@ -23,7 +31,6 @@ class CashRegisterUseCase {
   Future<void> deleteCashRegisterHistory(String idAccount, CashRegister cashRegister) {
     return cashRegisterHistoryRepository.deleteCashRegisterHistory(idAccount, cashRegister);
   }
-
   // void : create/update : actualiza la caja registradora activas
   Future<void> createUpdateCashRegister(String idAccount, CashRegister cashRegister) {
     return cashRegisterHistoryRepository.createUpdateCashRegister(idAccount, cashRegister);
@@ -32,7 +39,6 @@ class CashRegisterUseCase {
   Future<void> deleteCashRegister(String idAccount, String idCashRegister) {
     return cashRegisterHistoryRepository.deleteCashRegister(idAccount, idCashRegister);
   }
-
   // fixers descriptions
   Future<void> createFixedDescription(String idAccount, String description) {
     return cashRegisterHistoryRepository.createFixedDescription(idAccount, description);
@@ -43,6 +49,5 @@ class CashRegisterUseCase {
   Future<List<Map>> getFixedsDescriptions(String idAccount) {
     return cashRegisterHistoryRepository.getFixedsDescriptions(idAccount);
   }
-  
 
 }

@@ -9,6 +9,22 @@ class CashRegisterHistory extends CashRegisterHistoryRepository {
   final FirebaseHistoryCashRegisterProvider firebaseTransactionProvider; 
   CashRegisterHistory(this.firebaseTransactionProvider);
 
+
+  @override
+  Future<List<CashRegister>> getCashRegisterActive(String idAccount) { 
+    return firebaseTransactionProvider.getCashRegistersActive(idAccount);
+  }
+
+  @override
+  Stream<List<CashRegister>> getCashRegisterHistoryStream(String idAccount) { 
+    return firebaseTransactionProvider.getHistoryCashRegistersStream(idAccount);
+  } 
+
+  @override
+  Future<List<CashRegister>> getCashRegisterHistory(String idAccount) { 
+    return firebaseTransactionProvider.getHistoryCashRegisters(idAccount);
+  }
+
   @override
   Future<void> addCashRegisterHistory(String idAccount, CashRegister cashRegister) {
     return firebaseTransactionProvider.addHistoryCashRegister(idAccount, cashRegister);
@@ -38,17 +54,13 @@ class CashRegisterHistory extends CashRegisterHistoryRepository {
   Future<void> deleteFixedDescription(String idAccount, String idDescription) { 
     return firebaseTransactionProvider.deleteFixedDescription(idAccount, idDescription);
   }
-
-  @override
-  Future<List<CashRegister>> getCashRegisterHistory(String idAccount) { 
-    return firebaseTransactionProvider.getHistoryCashRegisters(idAccount);
-  }
  
 
   @override
   Future<List<Map>> getFixedsDescriptions(String idAccount) { 
     return firebaseTransactionProvider.getFixedsDescriptions(idAccount);
-  } 
+  }
+  
    
   
 }

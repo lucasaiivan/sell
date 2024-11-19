@@ -4,7 +4,9 @@ import 'package:sell/app/domain/entities/catalogo_model.dart';
 abstract class CatalogueRepository {
   Future<List<ProductCatalogue>> getCatalogueList(String id);
   Future<List<ProductCatalogue>> getCatalogueLocalList(String id);
-
+  Future<List<Category>> getCategoriesList(String idAccount);
+  Stream<List<Category>> getCategoryListStream(String idAccount);
+  Stream<List<Provider>> getProviderListStream(String idAccount);
   Stream<List<ProductCatalogue>> getCatalogueListStream(String id);
   Stream<List<ProductCatalogue>> getCatalogueLocalStream(String id);
  
@@ -20,4 +22,5 @@ abstract class CatalogueRepository {
   Future<void> updateProduct(String idAccount,ProductCatalogue product);
   Future<void> deleteProduct(String idAccount,String productId);
 
+  Future<void> deleteCategory(String idAccount,String idCategory);
 }

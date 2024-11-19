@@ -26,6 +26,31 @@ class GetCatalogueUseCase {
     //return await catalogueRepository.getCatalogueLocalList(id);
     return await catalogueRepository.getCatalogueList(id);
   }
+  // stream : obtener la lista de categorias del catalogo
+  Stream<List<Category>> getCategoriesStream({required String idAccount}) {
+    // logic business
+    // ...
+
+    // return : obtenemos los datos y devolvemos el stream de categorias
+    return catalogueRepository.getCategoryListStream(idAccount);
+  }
+  // future : obtener lista de categorias del catalogo
+  Future<List<Category>> getCategories({required String idAccount}) async { 
+
+    // logic business
+    // ...
+
+    // return : obtenemos los datos y devolvemos la lista de categorias
+    return await catalogueRepository.getCategoriesList(idAccount);
+  }
+  // stream : obtener los proveedores del catalogo
+  Stream<List<Provider>> getProviderListStream({required String idAccount}) {
+    // logic business
+    // ...
+
+    // return : obtenemos los datos y devolvemos el stream de proveedores
+    return catalogueRepository.getProviderListStream(idAccount);
+  }
 
   // stream : obtener stream con los productos del catalogo
   Stream<List<ProductCatalogue>> catalogueStream(String idAccount) {
@@ -75,6 +100,10 @@ class GetCatalogueUseCase {
   // future : obtener producto de la DB publica
   Future<Product> getProductPublic(String productId) async {
     return await catalogueRepository.getProductPublic(productId);
+  }
+  // eliminar categoria
+  Future<void> deleteCategory({required String idAccount,required String idCategory}) async {
+    return await catalogueRepository.deleteCategory(idAccount,idCategory);
   }
   
 

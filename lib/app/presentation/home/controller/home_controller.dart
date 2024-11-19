@@ -1,14 +1,14 @@
 import 'dart:io';    
+import 'package:google_sign_in/google_sign_in.dart'; 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
-import 'package:google_sign_in/google_sign_in.dart'; 
 import 'package:purchases_flutter/purchases_flutter.dart'; 
 import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart';
 import 'package:sell/app/data/datasource/database_cloud.dart'; 
@@ -19,6 +19,7 @@ import '../../../domain/entities/catalogo_model.dart';
 import '../../../domain/entities/user_model.dart';
 import '../../../core/utils/widgets_utils.dart';
 import '../../../domain/use_cases/account_use_case.dart';
+import '../../../domain/use_cases/cash_register_use_case.dart';
 import '../../../domain/use_cases/catalogue_use_case.dart';
 import '../../../domain/use_cases/user_use_case.dart';
 import '../../auth/controller/login_controller.dart'; 
@@ -191,22 +192,22 @@ class HomeController extends GetxController {
       openingCashiers: '',
     );
   List<CashRegister> listCashRegister = [];
+  
   void loadCashRegisters() {
-    // description : carga las cajas registradoras activas de la cuenta seleccionada
-    // firebase : create 'Stream' de la  collecion de cajas registradoras
-    Stream<QuerySnapshot<Map<String, dynamic>>> db = Database.readCashRegistersStream(idAccount: getProfileAccountSelected.id);
-    db.listen((event) {
+    // user case : obtener las caajas registradoras activas
+    CashRegisterUseCase().getCashRegisterActive(getProfileAccountSelected.id).then((value) {
       // default values
       listCashRegister.clear(); // limpiamos la lista de cajas
       // condition : si hay cajas registradoras
-      if (event.docs.isNotEmpty) {
+      if (value.isNotEmpty) {
         // añadimos las cajas disponibles
-        for (var element in event.docs) { 
-          listCashRegister.add(CashRegister.fromMap(element.data()));
+        for (var element in value) {
+          listCashRegister.add(element);
         }
         upgradeCashRegister(); // actualizamos el arqueo de caja actual activo
       }
     });
+    
   }
 
   upgradeCashRegister({String id = ''}) async {
@@ -497,14 +498,13 @@ class HomeController extends GetxController {
   }
 
   // FIRESTORE //
-  void createPin({required String pin}) { 
-    // ref
-     CollectionReference referenceCollection = Database.refFirestoreAccount();
-    // set
-    getProfileAccountSelected.pin = pin;
+  void createPin({required String pin}) {
 
-    // firebase : guarda el pin en la cuenta
-    referenceCollection.doc(getProfileAccountSelected.id).update({'pin': pin});
+    // case use : actualizar el pin de la cuenta
+    final updatePinAccount = GetAccountUseCase();
+    // apdate  
+    updatePinAccount.updateAccountPin( account: getProfileAccountSelected, pin: pin);
+    getProfileAccountSelected.pin = pin; 
     
   }
   Future<void> isAppUpdated() async {
@@ -684,53 +684,29 @@ class HomeController extends GetxController {
         readAdminsUsers(idAccount: idAccount);  // obtenemos los usuarios administradores de la cuenta
       }
       
-      }) ;
-      /*
-      // firebase : obtenemos los datos de la cuenta
-       Database.readProfileAccountModelFuture(idAccount).then((value) {
-        // condition : ¿El documento existe?
-        if (value.exists) {
-          //get profile account
-          setProfileAccountSelected = ProfileAccountModel.fromDocumentSnapshot(documentSnapshot: value);
-          
-          
-          // subcription premium  : inicializamos la identidad de revenue cat
-          initIdentityRevenueCat();  
-          
-          // load
-          loadCashRegisters(); // obtenemos las cajas registradoras activas
-          readProductsCatalogue(idAccount: idAccount); // obtenemos los productos del catálogo
-          readListCategoryListFuture(idAccount: idAccount); // obtenemos las categorias creadas por el usuario
-          readProvidersListFuture(idAccount: idAccount); // obtenemos los proveedores creados por el usuario
-          readDataAdminUser( email: getUserAuth.email ?? '', idAccount: idAccount); // obtenemos los datos del usuario administrador de la cuenta
-          readAdminsUsers(idAccount: idAccount);  // obtenemos los usuarios administradores de la cuenta
-        }
-      }); */
+      }) ; 
     }
   }
 
   void readListCategoryListFuture({required String idAccount}) {
      
 
-    // obtenemos la categorias creadas por el usuario
-    Database.readCategoriesQueryStream(idAccount: idAccount).listen((event) {
+    // case use : obtener las categorias creadas por el usuario
+    final getCategories = GetCatalogueUseCase();
+
+    getCategories.getCategoriesStream(idAccount: idAccount).listen((event) {
       List<Category> list = [];
-      for (var element in event.docs) {
-        // obj
-        Category category = Category.fromMap(element.data()); 
-        // add : añadimos la categoria a la lista
-        list.add(category);
-      }
+      for ( var category in event) { list.add(category); }
       setCatalogueCategoryList = list;
-    });
+    }); 
   }
   void readProvidersListFuture({required String idAccount}) {
-    // obtenemos la categorias creadas por el usuario
-    Database.readProvidersQueryStream(idAccount: idAccount).listen((event) {
+
+    // case use : obtener los proveedores
+    final getProviders = GetCatalogueUseCase();
+    getProviders.getProviderListStream(idAccount: idAccount).listen((event) {
       List<Provider> list = [];
-      for (var element in event.docs) {
-        list.add(Provider.fromMap(element.data()));
-      }
+      for ( var provider in event) { list.add(provider); }
       setProviderList = list;
     });
   }
@@ -791,34 +767,6 @@ class HomeController extends GetxController {
       // error
       setCatalogueProducts = [];
     });
- /* 
-    // future : obtenemos los productos del catálogo una sola ves
-    CollectionReference referenceCollectionCatalogue = Database.refFirestoreCatalogueProduct(idAccount: idAccount); 
-    referenceCollectionCatalogue.get().then((value) {
-
-      // incrementamos el valor de veces que se obtuvo datos de la db o en su defecto creamos la variable en el almacenamiento local
-      /* String dateId = DateFormat('ddMMyyyy').format(Timestamp.now().toDate()).toString();
-      int count = GetStorage().hasData(dateId) ? GetStorage().read(dateId) : 0;
-      GetStorage().write(dateId, count + value.docs.length ); */
-
-      // values
-      List<ProductCatalogue> list = [];
-      if (value.docs.isNotEmpty) {
-        for (var element in value.docs) {
-          // obj
-          ProductCatalogue product = ProductCatalogue.fromMap(element.data() as Map<String, dynamic>);
-          // add
-          list.add(product);
-        }
-      }
-      //  obtenemos los productos más vendidos
-      getTheBestSellingProducts(idAccount: idAccount);
-      setCatalogueProducts = list;
-    }).onError((error, stackTrace) {
-      // error
-      setCatalogueProducts = [];
-    }
-    );  */
   }
 
   void readAdminsUsers({required String idAccount}) {
@@ -836,20 +784,7 @@ class HomeController extends GetxController {
       list.sort((a, b) => b.lastUpdate.compareTo(a.lastUpdate));
       //  set values
       setAdminsUsersList = list;
-    });
-    /* Database.readQueryStreamAdminsUsers(idAccount: idAccount).listen((value) {
-      List<UserModel> list = [];
-      //  get
-      for (var element in value.docs) {
-        list.add(UserModel.fromMap(element.data()));
-      }
-      // ordenamos la lista por fecha de actualizacion
-      list.sort((a, b) => b.lastUpdate.compareTo(a.lastUpdate));
-      //  set values
-      setAdminsUsersList = list;
-    }).onError((error) {
-      // error
-    }); */
+    }); 
   }
   
   void readDataAdminUser({required String idAccount, required String email}) {
@@ -963,14 +898,13 @@ class HomeController extends GetxController {
       for (var userModel in value){ 
         // condition : si el id de la cuenta es diferente de vacio para evitar errores de consulta inexistentes
         if (userModel.account != '') {
-          // firebase : obtenemos los datos de la cuenta
-          Database.readProfileAccountModelFuture(userModel.account).then((value) { 
-            // get : obtenemos los perfiles de las cuentas administradas
-            ProfileAccountModel profileAccountModel = ProfileAccountModel.fromDocumentSnapshot(documentSnapshot:value);
-            // set
-            addManagedAccountsList = profileAccountModel;  
+          // case use : obtener los datos de la cuenta
+          final accountProfileFuture = GetAccountUseCase().getAccount(idAccount: userModel.account);
+          accountProfileFuture.then((value) {
+            // set : datos de la cuenta
+            addManagedAccountsList = value;
             setLoadedManagedAccountsList = true;
-          });
+          }); 
         }
       } 
       if(value.isEmpty){
@@ -989,17 +923,22 @@ class HomeController extends GetxController {
     // var 
     Timestamp trialStart = Timestamp.fromDate(DateTime.now());
     Timestamp trialEnd = Timestamp.fromDate(DateTime.now().add(const Duration(days:30))); 
-    // ref
-    var documentReferencer = Database.refFirestoreAccount().doc(getProfileAccountSelected.id);
-    // set
-    documentReferencer.update({'trialEnd': trialEnd,'trialStart': trialStart,'trial': true});
-    // set
+    
+    // case use : actualizar datos de la cuenta
+    final account = GetAccountUseCase();
+     // set
+    account.updateAccountData(idAccount: getProfileAccountSelected.id, data: {'trialEnd': trialEnd,'trialStart': trialStart,'trial': true});
     getProfileAccountSelected.trialEnd = trialEnd;
     getProfileAccountSelected.trialStart = trialStart;
     // set
     setIsSubscribedPremium = true;
   }
-  Future<void> categoryDelete({required String idCategory}) async => await Database.refFirestoreCategory(idAccount: getProfileAccountSelected.id).doc(idCategory).delete();
+  Future<void> categoryDelete({required String idCategory}) async{
+
+    // case use : eliminar la categoria
+    return GetCatalogueUseCase().deleteCategory( idAccount: getProfileAccountSelected.id, idCategory: idCategory);
+    //return await Database.refFirestoreCategory(idAccount: getProfileAccountSelected.id).doc(idCategory).delete();
+  }
   Future<void> categoryUpdate({required Category categoria}) async {
     // refactorizamos el nombre de la cátegoria
     String name = categoria.name.substring(0, 1).toUpperCase() + categoria.name.substring(1);
@@ -1011,6 +950,7 @@ class HomeController extends GetxController {
   }
   Future<void> providerDelete({required String idProvider}) async => await Database.refFirestoreProvider(idAccount: getProfileAccountSelected.id).doc(idProvider).delete();
   Future<void> providerSave({required Provider provider}) async {
+    
     // firestore : reference
     var documentReferencer = Database.refFirestoreProvider(idAccount: getProfileAccountSelected.id).doc(provider.id);
     // firestore : Actualizamos los datos
