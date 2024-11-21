@@ -1,8 +1,8 @@
  
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; 
 import 'package:sell/app/domain/entities/cashRegister_model.dart';
 import 'package:sell/app/domain/entities/catalogo_model.dart';
+import '../../domain/entities/app_info.dart';
 import '../../domain/entities/ticket_model.dart';
 import '../../domain/entities/user_model.dart';
 
@@ -11,6 +11,7 @@ import '../../domain/entities/user_model.dart';
 //
 class FirestoreCollections {
   // collections : /APP
+  static CollectionReference<Map<String, dynamic>> collectionRefApp() => FirebaseFirestore.instance.collection('/APP/'); // informacion de la aplicacion
   static CollectionReference<Map<String, dynamic>> collectionRefPRegisterPrice({required String idProducto, String isoPAis = 'ARG'}) =>FirebaseFirestore.instance.collection('/APP/$isoPAis/PRODUCTOS/$idProducto/PRICES/'); // registro de precios de cada producto
   static CollectionReference<Map<String, dynamic>> collectionRefProductsPublicDb({String isoPAis = 'ARG'}) => FirebaseFirestore.instance.collection('/APP/$isoPAis/PRODUCTOS'); // productos publicos
   // collections : /ACCOUNTS
@@ -30,6 +31,22 @@ class FirestoreCollections {
   static Stream<QuerySnapshot<Map<String, dynamic>>> collectionRefCategoriesQueryStream({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/CATEGORY') .snapshots(); // categorias del catalogo
   static Stream<QuerySnapshot<Map<String, dynamic>>> collectionRefProvidersStream({required String idAccount}) =>FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/PROVIDER').snapshots(); // proveedores del catalogo
 }  
+
+// app info : informacion de la aplicacion
+class FirebaseAppInfoProvider {
+  
+  // future : obtengo la informacion de la aplicacion
+  Future<AppInfo> getAppInfo() async {
+    try {
+      final docSnapshot = await FirestoreCollections.collectionRefApp().doc('INFO').get();
+      if (docSnapshot.exists) {
+        return AppInfo.fromDocumentSnapshot( docSnapshot );
+      } else {
+        return AppInfo(urlPlayStore: '',versionApp: 0);
+      }
+    } catch (e) { return AppInfo(urlPlayStore: '',versionApp: 0); }
+  }
+}
 
 // user : perfil del usuario 
 class FirebaseUserProfileProvider {
@@ -228,8 +245,12 @@ class FirebaseCatalogueProvider {
     await FirestoreCollections.collectionRefCategories(idAccount: idAccount).doc(idCategory).delete();
   }
   // void : eliminar proveedor
-  Future<void> deleteProvider(String idAccount,String idProvider) async {
-    await FirestoreCollections.readCollectionProviders(idAccount: idAccount).doc(idProvider).delete();
+  Future<void> deleteProvider(String idAccount,Provider provider) async {
+    await FirestoreCollections.readCollectionProviders(idAccount: idAccount).doc(provider.id).delete();
+  }
+  // incrementa numero de seguidores de un producto publico
+  Future<void> incrementFollowersProductPublic(String idProduct) async {
+    await FirestoreCollections.collectionRefProductsPublicDb().doc(idProduct).update({"followers": FieldValue.increment(1)});
   }
   // void : increment stock : incrementa las ventas de un producto
   Future<void> incrementProductStock(String idAccount,String productId,int quantity) async {
@@ -243,14 +264,30 @@ class FirebaseCatalogueProvider {
   Future<void> incrementProductStockSales(String idAccount,String productId,int quantity) async {
     await FirestoreCollections.collectionRefCatalogue(idAccount).doc(productId).update({"sales": FieldValue.increment(quantity)});
   }
-
-  // void : add : crea un registro del precio del producto
-  Future<void> addPriceRegisterPublic(String idProduct,ProductPrice priceRegister) async {
-     FirestoreCollections.collectionRefPRegisterPrice(idProducto: idProduct).doc(priceRegister.id).set(priceRegister.toJson());
-  }
+ 
   // void : update : actualiza datos del producto
   Future<void> updateProductCatalogueFromMap(String idAccount,String idProduct,Map values) async {
     await FirestoreCollections.collectionRefCatalogue(idAccount).doc(idProduct).set( Map<String, dynamic>.from(values),SetOptions(merge: true));
+  }
+  // void : update : actualiza la categoria
+  Future<void> updateCategory(String idAccount,Category category) async {
+    await FirestoreCollections.collectionRefCategories(idAccount: idAccount).doc(category.id).set(category.toJson());
+  }
+  // void : update : actualiza el proveedor
+  Future<void> updateProvider(String idAccount,Provider provider) async {
+    await FirestoreCollections.readCollectionProviders(idAccount: idAccount).doc(provider.id).set(provider.toJson(),SetOptions(merge: true));
+  }
+  
+  
+  // APP/{ISO}/PRODUCTOS  
+  
+  // void : create : registra un producto publico
+  Future<void> createProductPublic(Product product) async {
+    await FirestoreCollections.collectionRefProductsPublicDb().doc(product.id).set(product.toJson(),SetOptions(merge: true));
+  }
+  // void : add : registra un producto publico
+  Future<void> registerPriceProductPublic(ProductPrice price) async {
+    await FirestoreCollections.collectionRefPRegisterPrice(idProducto: price.idProduct).doc(price.id).set(price.toJson(),SetOptions(merge: true));
   }
 
 }
@@ -343,7 +380,7 @@ class FirebaseHistoryCashRegisterProvider {
   // create/update : actualiza la caja registradora activas
   Future<void> setCashRegister(String idAccount,CashRegister cashRegister) async {
     try {
-      await FirestoreCollections.collectionRefCashRegisters(idAccount: idAccount).doc(cashRegister.id).set(cashRegister.toJson());
+      await FirestoreCollections.collectionRefCashRegisters(idAccount: idAccount).doc(cashRegister.id).set(cashRegister.toJson(),SetOptions(merge: true));
     } catch (e) {
       throw Exception('Error al actualizar la caja registradora: $e');
     }

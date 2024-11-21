@@ -643,7 +643,7 @@ class CataloguePage extends StatelessWidget {
               middleText: '¿Desea continuar eliminando este proveedor?',
               confirm: TextButton.icon(
                   onPressed: () async {
-                    homeController.providerDelete(idProvider: supplier.id);
+                    homeController.providerDelete(provider: supplier);
                     Get.back();
                   },
                   icon: const Icon(Icons.check),

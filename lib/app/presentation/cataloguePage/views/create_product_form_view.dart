@@ -1542,7 +1542,7 @@ class _SelectProviderState extends State<SelectProvider> {
                     TextButton(
                         child: loadSave == false? const Text("ELIMINAR"): const CircularProgressIndicator(),
                         onPressed: () async {
-                          controller.providerDelete(idProvider: provider.id).then((value) {
+                          controller.providerDelete(provider: provider).then((value) {
                               setState(() {
                                 provider.name = ''; 
                                 controllerCreateProductForm.controllerTextEditProvider.text = '';

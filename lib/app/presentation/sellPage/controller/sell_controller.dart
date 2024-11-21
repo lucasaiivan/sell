@@ -356,7 +356,7 @@ class SellController extends GetxController {
     product.upgrade = upgrade;
 
     // case use : registramos el precio del producto en la colección de precios publicos
-    GetCatalogueUseCase().registerPricePublic( product.id,precio);
+    GetCatalogueUseCase().registerPriceProductPublic( price: precio );
     // case use : Actualizamos los datos del producto
     GetCatalogueUseCase().updateProductFromMap(homeController.getIdAccountSelected, product.id,data);
 

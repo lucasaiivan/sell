@@ -67,15 +67,27 @@ class GetCatalogueUseCase {
     catalogueRepository.deleteProduct(idAccount,productId);
   }
  
+  // void : create : crea un nuevo producto en la Data Base publica
+  Future<void> createProductPublic({required Product product}) async {
+    return await catalogueRepository.createProductPublic(product);
+  }
+  // void : update : actualiza los datos de un producto de la Data Base publica
+  Future<void> updateProductPublic({required Product product}) async {
+    return await catalogueRepository.createProductPublic(product);
+  }
 
   Future<void> addProduct(String idAccount,ProductCatalogue product) async {
     return await catalogueRepository.addProduct(idAccount,product);
   }
-  Future<void> updateProduct(String idAccount,ProductCatalogue product) async {
+  Future<void> updateProduct({required idAccount,required ProductCatalogue product}) async {
     return await catalogueRepository.updateProduct(idAccount,product );
   }
   Future<void> deleteProduct(String idAccount,String productId) async {
     return await catalogueRepository.deleteProduct(idAccount,productId);
+  }
+  // void : incrementar seguidor al producto publico
+  Future<void> incrementFollowersProductPublic({required String idProduct}) async {
+    return await catalogueRepository.incrementFollowersProductPublic(idProduct);
   }
   Future<void> incrementStock(String idAccount,String productId,int quantity) async {
     return await catalogueRepository.incrementStock(idAccount,productId,quantity);
@@ -88,15 +100,22 @@ class GetCatalogueUseCase {
   }
  
  // void : register : registra el precio publico de un producto
-  Future<void> registerPricePublic(String idProduct,ProductPrice productPrice) async {
-    return await catalogueRepository.registerPricePublic(idProduct,productPrice);
+  Future<void> registerPriceProductPublic( {required ProductPrice price}) async {
+    return await catalogueRepository.registerPriceProductPublic( price);
   }
 
   // void : update : actualiza los datos de un producto
   Future<void> updateProductFromMap(String idAccount,String idProduct,Map values) async {
     return await catalogueRepository.updateProductFromMap(idAccount,idProduct,values);
   }
-
+  // void : update : actualiza los datos de una categoria
+  Future<void> updateCategory({required String idAccount,required Category category}) async {
+    return await catalogueRepository.updateCategory(idAccount,category);
+  }
+  // void : update : actualiza los datos de un proveedor
+  Future<void> updateProvider({required String idAccount,required Provider provider}) async {
+    return await catalogueRepository.updateProvider(idAccount,provider);
+  }
   // future : obtener producto de la DB publica
   Future<Product> getProductPublic(String productId) async {
     return await catalogueRepository.getProductPublic(productId);
@@ -105,6 +124,12 @@ class GetCatalogueUseCase {
   Future<void> deleteCategory({required String idAccount,required String idCategory}) async {
     return await catalogueRepository.deleteCategory(idAccount,idCategory);
   }
+  // eliminar proveedor
+  Future<void> deleteProvider({required String idAccount,required Provider provider}) async {
+    return await catalogueRepository.deleteProvider(idAccount,provider);
+  }
+  
+
   
 
 }

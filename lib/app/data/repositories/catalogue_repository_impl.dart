@@ -70,6 +70,11 @@ class CatalogueRepositoryImpl implements CatalogueRepository {
   Future<void> incrementSales(String idAccount, String productId, int quantity) async {
     return firebaseDataProvider.incrementProductStockSales(idAccount, productId, quantity);
   }
+  // increment seguidores del producto publico
+  @override 
+  Future<void> incrementFollowersProductPublic(String idProduct) {
+    return firebaseDataProvider.incrementFollowersProductPublic(idProduct);
+  }
   
   @override
   Future<void> incrementStock(String idAccount, String productId, int quantity) async {
@@ -82,8 +87,8 @@ class CatalogueRepositoryImpl implements CatalogueRepository {
   }
   
   @override
-  Future<void> registerPricePublic(String idProduct , ProductPrice productPrice) {
-    return firebaseDataProvider.addPriceRegisterPublic(idProduct, productPrice);
+  Future<void> registerPriceProductPublic( ProductPrice price) {
+    return firebaseDataProvider.registerPriceProductPublic(price);
   }
   
   @override
@@ -105,6 +110,27 @@ class CatalogueRepositoryImpl implements CatalogueRepository {
   Future<void> deleteCategory(String idAccount, String idCategory) {
     return firebaseDataProvider.deleteCategory(idAccount, idCategory);
   }
+  
+  @override
+  Future<void> updateCategory(String idAccount, Category category) {
+    return firebaseDataProvider.updateCategory(idAccount, category);
+  }
+  
+  @override
+  Future<void> deleteProvider(String idAccount, Provider provider) {
+    return firebaseDataProvider.deleteProvider(idAccount, provider);
+  }
+  
+  @override
+  Future<void> updateProvider(String idAccount, Provider provider) { 
+    return firebaseDataProvider.updateProvider(idAccount, provider);
+  }
+  
+  @override
+  Future<void> createProductPublic(Product product) {
+    return firebaseDataProvider.createProductPublic(product);
+  }
+   
   
  
 

@@ -11,14 +11,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:purchases_flutter/purchases_flutter.dart'; 
 import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart';
-import 'package:sell/app/data/datasource/database_cloud.dart'; 
 import '../../../core/routes/app_pages.dart';
 import '../../../data/datasource/constant.dart'; 
+import '../../../domain/entities/app_info.dart';
 import '../../../domain/entities/cashRegister_model.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../domain/entities/user_model.dart';
 import '../../../core/utils/widgets_utils.dart';
 import '../../../domain/use_cases/account_use_case.dart';
+import '../../../domain/use_cases/app_use_case.dart';
 import '../../../domain/use_cases/cash_register_use_case.dart';
 import '../../../domain/use_cases/catalogue_use_case.dart';
 import '../../../domain/use_cases/user_use_case.dart';
@@ -512,10 +513,12 @@ class HomeController extends GetxController {
     try {
       final packageInfo = await PackageInfo.fromPlatform();
       final currentVersion = int.parse(packageInfo.buildNumber);
-      final docSnapshot = await Database.readVersionApp();
-      final firestoreVersion = docSnapshot.data()!['versionApp'] as int;
+      // case use : obtener información de la app
+      AppInfo appInfo = await GetAppInfo().getAppInfo(); 
+      final firestoreVersion = appInfo.versionApp;
       //urlPlayStore
-      setUrlPlayStore = docSnapshot.data()!['urlPlayStore'] as String;
+      setUrlPlayStore = appInfo.urlPlayStore;
+
       setUpdateApp = firestoreVersion > currentVersion;
     } catch (e) {
       setUpdateApp = false;
@@ -940,26 +943,30 @@ class HomeController extends GetxController {
     //return await Database.refFirestoreCategory(idAccount: getProfileAccountSelected.id).doc(idCategory).delete();
   }
   Future<void> categoryUpdate({required Category categoria}) async {
+
     // refactorizamos el nombre de la cátegoria
     String name = categoria.name.substring(0, 1).toUpperCase() + categoria.name.substring(1);
     categoria.name = name;
-    // ref
-    var documentReferencer = Database.refFirestoreCategory(idAccount: getProfileAccountSelected.id).doc(categoria.id);
-    // Actualizamos los datos
-    documentReferencer.set(Map<String, dynamic>.from(categoria.toJson()), SetOptions(merge: true));
+
+    // case use : actualizar la categoria
+    return GetCatalogueUseCase().updateCategory( idAccount: getProfileAccountSelected.id, category: categoria); 
   }
-  Future<void> providerDelete({required String idProvider}) async => await Database.refFirestoreProvider(idAccount: getProfileAccountSelected.id).doc(idProvider).delete();
-  Future<void> providerSave({required Provider provider}) async {
-    
-    // firestore : reference
-    var documentReferencer = Database.refFirestoreProvider(idAccount: getProfileAccountSelected.id).doc(provider.id);
-    // firestore : Actualizamos los datos
-    documentReferencer.set(Map<String, dynamic>.from(provider.toJson()),SetOptions(merge: true));
+  Future<void> providerDelete({required Provider provider}) async => {
+    // case use : eliminar el proveedor
+     await GetCatalogueUseCase().deleteProvider( idAccount: getProfileAccountSelected.id, provider: provider)
+  };
+  Future<void> providerSave({required Provider provider}) async { 
+
+    // case use : actualizar el proveedor
+    return GetCatalogueUseCase().updateProvider( idAccount: getProfileAccountSelected.id, provider: provider);
   }
   
   void addProductToCatalogue({required ProductCatalogue product,required isProductNew}) async {
     // obj : se obtiene los datos para registrar del precio al publico del producto en una colección publica de la db
-    ProductPrice precio = ProductPrice(id: getProfileAccountSelected.id,idAccount: getProfileAccountSelected.id,imageAccount: getProfileAccountSelected.image,nameAccount: getProfileAccountSelected.name,price: product.salePrice,currencySign: product.currencySign,province: getProfileAccountSelected.province,town: getProfileAccountSelected.town,time: Timestamp.fromDate(DateTime.now()));
+    ProductPrice precio = ProductPrice(
+      id: getProfileAccountSelected.id,
+      idProduct: product.id, 
+      idAccount: getProfileAccountSelected.id,imageAccount: getProfileAccountSelected.image,nameAccount: getProfileAccountSelected.name,price: product.salePrice,currencySign: product.currencySign,province: getProfileAccountSelected.province,town: getProfileAccountSelected.town,time: Timestamp.fromDate(DateTime.now()));
     // condition : si el producto es nuevo se le asigna los valores de creación
     if(isProductNew){
       // el producto no existe 
@@ -967,20 +974,20 @@ class HomeController extends GetxController {
       product.followers++; // incrementamos el contador de los seguidores del producto publico 
    
     }else{
-      // el producto ya existe
       //
-      // firebase : acutalizamos los seguidores del producto publico 
-      Database.refFirestoreProductPublic().doc(product.id).update({'followers': FieldValue.increment(1)});
+      // el producto ya existe
+      // 
+      // case use : incrementar el contador de seguidores del producto publico 
+      GetCatalogueUseCase().incrementFollowersProductPublic(idProduct: product.id);
     }
     // set : fecha de actualización del producto
-    product.upgrade = Timestamp.fromDate(DateTime.now()); 
-    
-    // Firebase : se crea un registro de precio al publico del producto en una colección publica de la db
-    Database.refFirestoreRegisterPrice(idProducto: product.id, isoPAis: 'ARG').doc(precio.id).set(precio.toJson());
-    
-    // Firebase : se actualiza el documento del producto del cátalogo
-    Database.refFirestoreCatalogueProduct(idAccount: getProfileAccountSelected.id).doc(product.id).set(product.toJson());
+    product.upgrade = Timestamp.fromDate(DateTime.now());  
+    // case use : publica el precio del producto en la colección de precios publicos
+    GetCatalogueUseCase().registerPriceProductPublic(price: precio);
 
+    // case use : se actualiza el documento del producto del cátalogo
+    GetCatalogueUseCase().updateProduct(idAccount: getProfileAccountSelected.id, product: product);
+     
     // actualiza la lista de productos del cátalogo en la memoria de la app
     sincronizeCatalogueProducts(product: product);
     
@@ -1008,11 +1015,11 @@ class HomeController extends GetxController {
 
     // dondition : si el producto es nuevo se crea un documento, si no se actualiza
     if (isNew && product.verified == false) { 
-      // firebase : se crea un documento en la colección publica
-      Database.refFirestoreProductPublic().doc(product.id).set(product.toJson());
+      // case use : crear un documento en la colección publica de productos
+      GetCatalogueUseCase().createProductPublic(product: product); 
     } else {
-      // firebase : se actualiza un documento en la colección publica
-      Database.refFirestoreProductPublic().doc(product.id).update(product.toJsonUpdate());
+      // case use : actualizar un documento en la colección publica de productos
+      GetCatalogueUseCase().updateProductPublic(product: product);
     }
   }
 

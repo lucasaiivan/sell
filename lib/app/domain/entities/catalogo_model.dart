@@ -572,6 +572,7 @@ class ProductCatalogue {
 
 class ProductPrice {
   String id = '';
+  String idProduct = ''; // id del producto
   double price = 0.0;
   late Timestamp time; // marca de tiempo en la que se registro el precio
   String currencySign = ""; // signo de la moneda
@@ -584,6 +585,7 @@ class ProductPrice {
 
   ProductPrice({
     required this.id,
+    this.idProduct='',
     required this.idAccount,
     required this.imageAccount,
     required this.nameAccount,
@@ -596,6 +598,7 @@ class ProductPrice {
 
   ProductPrice.fromMap(Map data) {
     id = data['id'] ?? '';
+    idProduct = data['idProduct'] ?? '';
     idAccount = data['idAccount'] ?? '';
     imageAccount = data.containsKey('imageAccount')
         ? data['imageAccount']
@@ -613,6 +616,7 @@ class ProductPrice {
   }
   Map<String, dynamic> toJson() => {
         'id': id,
+        'idProduct': idProduct,
         "idAccount": idAccount,
         "imageAccount": imageAccount,
         "nameAccount": nameAccount,

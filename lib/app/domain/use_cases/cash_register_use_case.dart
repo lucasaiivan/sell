@@ -33,6 +33,7 @@ class CashRegisterUseCase {
   }
   // void : create/update : actualiza la caja registradora activas
   Future<void> createUpdateCashRegister(String idAccount, CashRegister cashRegister) {
+    if(cashRegister.id == '') {return Future.value();  }
     return cashRegisterHistoryRepository.createUpdateCashRegister(idAccount, cashRegister);
   }
   // delete : elimina la caja registradora activa
@@ -41,6 +42,7 @@ class CashRegisterUseCase {
   }
   // fixers descriptions
   Future<void> createFixedDescription(String idAccount, String description) {
+    if(description == '') {return Future.value();  }
     return cashRegisterHistoryRepository.createFixedDescription(idAccount, description);
   }
   Future<void> deleteFixedDescription(String idAccount, String idDescription) {
