@@ -1,17 +1,13 @@
-import 'dart:io';    
-import 'package:google_sign_in/google_sign_in.dart'; 
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:get_storage/get_storage.dart';
+import 'dart:io';      
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/services.dart'; 
 import 'package:purchases_flutter/purchases_flutter.dart'; 
 import 'package:sell/app/presentation/sellPage/controller/sell_controller.dart';
 import '../../../core/routes/app_pages.dart';
+import '../../../core/utils/fuctions.dart';
 import '../../../data/datasource/constant.dart'; 
 import '../../../domain/entities/app_info.dart';
 import '../../../domain/entities/cashRegister_model.dart';
@@ -20,13 +16,14 @@ import '../../../domain/entities/user_model.dart';
 import '../../../core/utils/widgets_utils.dart';
 import '../../../domain/use_cases/account_use_case.dart';
 import '../../../domain/use_cases/app_use_case.dart';
+import '../../../domain/use_cases/authenticate_use_case.dart';
 import '../../../domain/use_cases/cash_register_use_case.dart';
 import '../../../domain/use_cases/catalogue_use_case.dart';
-import '../../../domain/use_cases/user_use_case.dart';
-import '../../auth/controller/login_controller.dart'; 
+import '../../../domain/use_cases/user_use_case.dart';  
 import '../views/home_view.dart';
 
 class HomeController extends GetxController {
+   
 
   // var : tutorial para el usuario
   final GlobalKey floatingActionButtonRegisterFlashKeyButton = GlobalKey();
@@ -36,17 +33,22 @@ class HomeController extends GetxController {
   final GlobalKey floatingActionButtonScanCodeBarKey = GlobalKey();
   final GlobalKey floatingActionButtonSelectedCajaKey = GlobalKey();
   final GlobalKey buttonsPaymenyMode = GlobalKey();
- 
+  
+  // user auth
+  late UserAuth? _userAuth = UserAuth();
+  set setUserAuth(UserAuth value) => _userAuth = value;
+  UserAuth? get getUserAuth => _userAuth;
 
   // user anonymous
-  bool _userAnonymous = false;
-  set setUserAnonymous(bool value) => _userAnonymous = value;
-  bool get getUserAnonymous => _userAnonymous;
-
-  // Firebase : auth 
-  late FirebaseAuth _firebaseAuth;
-  set setFirebaseAuth(FirebaseAuth value) => _firebaseAuth = value;
-  get getFirebaseAuth => _firebaseAuth;
+  final RxBool _userAnonymous = false.obs;
+  set setUserAnonymous(bool value){
+    
+    // guardar dato en el almacenamiento local [SharedPreferences] 
+    _userAnonymous.value = value;
+    // obtenemos datos de prueba para que el usaurio pueda probar la app sin autenticarse
+    if(value)readAccountsInviteData();
+  }
+  bool get getUserAnonymous => _userAnonymous.value;
 
   // info app
   String _urlPlayStore = '';
@@ -56,14 +58,14 @@ class HomeController extends GetxController {
   } 
 
   // modo cajero 
+  bool _cashierMode = false;
   set setCashierMode(bool value) { 
     // guardar dato en el almacenamiento local [SharedPreferences]
-    GetStorage().write('cashierMode', value);
+    GetAppData().setStorageLocalCashierMode(value); 
+    _cashierMode = value;
   }
-  bool get getCashierMode{
-    // obtener dato en el almacenamiento local [SharedPreferences]  
-    return GetStorage().hasData('cashierMode') ? GetStorage().read('cashierMode') : false;
-  
+  bool get getCashierMode{  
+    return _cashierMode;
   }
   
  // estado de actualización de la app
@@ -214,8 +216,8 @@ class HomeController extends GetxController {
   upgradeCashRegister({String id = ''}) async {
     // description : si se selecciono una, actualiza el arqueo de caja actual 
     // condition : si no se actualiza el arqueo de caja actual verificamos si hay un arqueo de caja seleccionada 
-    if (id == '') {
-      id = GetStorage().read('cashRegisterID') ?? '';
+    if (id == '') { 
+      id = await GetAppData().getStorageLocalCashRegisterID();
     }
     for (CashRegister item in listCashRegister) {
       if (item.id == id) {
@@ -242,7 +244,7 @@ class HomeController extends GetxController {
     _markList.clear();
     for (ProductCatalogue item in _catalogueBusiness) {
       // object : obtenemos los datos de la marca
-      Mark mark = Mark(id: item.idMark, name: item.nameMark,image: item.imageMark,creation: Timestamp.now(),upgrade: Timestamp.now());
+      Mark mark = Mark(id: item.idMark, name: item.nameMark,image: item.imageMark,creation: Utils().getTimestampNow(),upgrade: Utils().getTimestampNow() );
       // condition : validamos la marca del producto
       if(mark.id !='' && mark.name != ''){
         // condition : si la marca no esta en la lista la añadimos
@@ -266,14 +268,10 @@ class HomeController extends GetxController {
   addToListProductSelecteds({required ProductCatalogue item}) { 
     _productsOutstandingList.insert(0, item);
   }
-
-  //  authentication account profile
-  late User _userFirebaseAuth;
-  User get getUserAuth => _userFirebaseAuth;
-  set setUserAuth(User user) => _userFirebaseAuth = user;
+ 
 
   //  perfil de usuario administrador actual de la cuenta
-  UserModel _adminUser = UserModel(creation: Timestamp.now(),lastUpdate: Timestamp.now());
+  UserModel _adminUser = UserModel(creation: Utils().getTimestampNow(),lastUpdate: Utils().getTimestampNow());
   UserModel get getProfileAdminUser => _adminUser;
   set setProfileAdminUser(UserModel user) {
     _adminUser = user;  
@@ -281,7 +279,7 @@ class HomeController extends GetxController {
   }
 
   // profile account selected
-  ProfileAccountModel _accountProfileSelected = ProfileAccountModel(creation: Timestamp.now(),trialEnd: Timestamp.now(),trialStart: Timestamp.now());
+  ProfileAccountModel _accountProfileSelected = ProfileAccountModel(creation: Utils().getTimestampNow(),trialEnd: Utils().getTimestampNow(),trialStart: Utils().getTimestampNow());
   ProfileAccountModel get getProfileAccountSelected => _accountProfileSelected;
   set setProfileAccountSelected(ProfileAccountModel value) => _accountProfileSelected = value;
   String get getIdAccountSelected => _accountProfileSelected.id;
@@ -316,7 +314,7 @@ class HomeController extends GetxController {
 
   bool get checkAccountExistence {
     // comprobamos si el usuario autenticado ya creo un cuenta
-    String idAccountAthentication = getUserAuth.uid; 
+    String idAccountAthentication = getUserAuth!.uid; 
     for (ProfileAccountModel element in getManagedAccountsList) {
       if (idAccountAthentication == element.id) {
         return true;
@@ -324,6 +322,7 @@ class HomeController extends GetxController {
     }
     return false;
   }
+     
 
 // index
   final RxInt _indexPage = 0.obs;
@@ -387,10 +386,11 @@ class HomeController extends GetxController {
   }
   ProductCatalogue getProductCatalogue({required String id}) {
     ProductCatalogue product = ProductCatalogue(
-        creation: Timestamp.now(),
-        upgrade: Timestamp.now(),
-        documentCreation: Timestamp.now(),
-        documentUpgrade: Timestamp.now());
+        creation: Utils().getTimestampNow(),
+        upgrade: Utils().getTimestampNow(),
+        documentCreation: Utils().getTimestampNow(),
+        documentUpgrade: Utils().getTimestampNow(),
+      );
     for (final element in getCataloProducts) {
       if (element.id == id) {
         product = element;
@@ -420,78 +420,28 @@ class HomeController extends GetxController {
     // ordenamos por fecha de actualización
     getCataloProducts.sort((a, b) => b.upgrade.compareTo(a.upgrade));
   }
-  // fuction :login
-  void login() async {
-    // Inicio de sesión con Google
-    // Primero comprobamos que el usuario acepto los términos de uso de servicios y que a leído las politicas de privacidad
 
-    // FirebaseAuth and GoogleSignIn instances
-    late final GoogleSignIn googleSign = GoogleSignIn();
-    final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
-
-    // set state load
-    CustomFullScreenDialog.showDialog();
-
-    // signIn : Inicia la secuencia de inicio de sesión de Google.
-    GoogleSignInAccount? googleSignInAccount = await googleSign.signIn();
-    // condition : Si googleSignInAccount es nulo, significa que el usuario no ha iniciado sesión.
-    if (googleSignInAccount == null) {
-      CustomFullScreenDialog.cancelDialog();
-    } else {
-      // Obtenga los detalles de autenticación de la solicitud
-      GoogleSignInAuthentication googleSignInAuthentication =
-          await googleSignInAccount.authentication;
-      // Crea una nueva credencial de OAuth genérica.
-      OAuthCredential oAuthCredential = GoogleAuthProvider.credential(
-          accessToken: googleSignInAuthentication.accessToken,
-          idToken: googleSignInAuthentication.idToken);
-      // Una vez que haya iniciado sesión, devuelva el UserCredential
-      await firebaseAuth.signInWithCredential(oAuthCredential);
-      // navigation : navegamos a la pantalla principal
-      Get.offAllNamed(Routes.home, arguments: {
-        'currentUser': firebaseAuth.currentUser,
-        'idAccount': ''
-      });
-      // finalizamos el diálogo alerta
-      CustomFullScreenDialog.cancelDialog();
-    }
-  }
   // fuction : cerrar sesion de firebase
-  Future<void> signOutFirebase() async {
-    // visualizamos un diálogo alerta
-    CustomFullScreenDialog.showDialog();
-    // FirebaseAuth and GoogleSignIn instances
-    final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
-    // signOut : Cierra la sesión del usuario actual.
-    await firebaseAuth.signOut();
+  Future<void> navigationLogin() async {
+    // case use : cerrar sesión de google y firebase
+    await signOutGoogleAndFirebase();
     // navigation : navegamos a la pantalla principal
     Get.offAllNamed(Routes.login);
-    // finalizamos el diálogo alerta
-    CustomFullScreenDialog.cancelDialog();
   }
   // fuction : cerrar sesión de google y firebase
   Future<void> signOutGoogleAndFirebase() async {
-    // intancias de FirebaseAuth para proceder a cerrar sesión
-    final FirebaseAuth auth = FirebaseAuth.instance;
-    final GoogleSignIn googleSignIn = GoogleSignIn();
+    // case use : intancias de FirebaseAuth para proceder a cerrar sesión
+    
     // cerramos sesión
     try {
       // Eliminar los datos de la memoria del dispositivo
-      await const FlutterSecureStorage().deleteAll();
-      // elimina los datos de shared preferences
-      await GetStorage().erase();
-      // set : id de la cuenta seleccionada nulo por defecto
-      await GetStorage().write('idAccount','');
+      await GetAppData().clearLocalData();
+      // set : id de la cuenta seleccionada nulo por defecto 
+      await GetAppData().setStorageLocalIdAccount('');
       
+       // case use : cerrar sesión de firebase y google 
+      await AuthenticateUserUseCase().signOut();
 
-      // 1. Cerrar sesión de Google
-      await googleSignIn.signOut();
-
-      // 2. Cerrar sesión de Firebase
-      await auth.signOut();
-
-      // 3. Revocar el token de acceso actual
-      await googleSignIn.disconnect();
 
     } catch (error) {
       print('#### error : signOutGoogle');
@@ -514,7 +464,7 @@ class HomeController extends GetxController {
       final packageInfo = await PackageInfo.fromPlatform();
       final currentVersion = int.parse(packageInfo.buildNumber);
       // case use : obtener información de la app
-      AppInfo appInfo = await GetAppInfo().getAppInfo(); 
+      AppInfo appInfo = await GetAppData().getAppInfo(); 
       final firestoreVersion = appInfo.versionApp;
       //urlPlayStore
       setUrlPlayStore = appInfo.urlPlayStore;
@@ -526,15 +476,14 @@ class HomeController extends GetxController {
   }
 
   void readAccountsInviteData() {
-    //default values
-    setUserAnonymous = true;
+    //default values 
     setCatalogueCategoryList = []; // lista de categorias del catálogo
     setCatalogueProducts = [
       ProductCatalogue(
-          creation: Timestamp.now(),
-          upgrade: Timestamp.now(),
-          documentCreation: Timestamp.now(),
-          documentUpgrade: Timestamp.now(),
+          creation: Utils().getTimestampNow(),
+          upgrade: Utils().getTimestampNow(),
+          documentCreation: Utils().getTimestampNow(),
+          documentUpgrade: Utils().getTimestampNow(),
           image: 'https://ardiaprod.vtexassets.com/arquivos/ids/298980/Gaseosa-CocaCola-Sabor-Original-500-Ml-_1.jpg',
           id: '7790895000782',
           code: '7790895000782',
@@ -546,11 +495,10 @@ class HomeController extends GetxController {
           stock: true,
           quantityStock: 22),
       ProductCatalogue(
-          creation: Timestamp.now(),
-          upgrade: Timestamp.fromDate(
-              DateTime.now().subtract(const Duration(days: 1))),
-          documentCreation: Timestamp.now(),
-          documentUpgrade: Timestamp.now(),
+          creation: Utils().getTimestampNow(),
+          upgrade: Utils().getTimestampNow(),
+          documentCreation: Utils().getTimestampNow(),
+          documentUpgrade: Utils().getTimestampNow(),
           image: 'https://img.sistemastock.com/img/7795735000335.jpg',
           id: '7795735000335',
           code: '7795735000335',
@@ -562,11 +510,10 @@ class HomeController extends GetxController {
           favorite: true,
           quantityStock: 47),
       ProductCatalogue(
-          creation: Timestamp.now(),
-          upgrade: Timestamp.fromDate(
-              DateTime.now().subtract(const Duration(days: 1))),
-          documentCreation: Timestamp.now(),
-          documentUpgrade: Timestamp.now(),
+          creation: Utils().getTimestampNow(),
+          upgrade: Utils().getTimestampNow(),
+          documentCreation:Utils().getTimestampNow(),
+          documentUpgrade: Utils().getTimestampNow(),
           image: 'https://img.sistemastock.com/img/7790310984192.jpg',
           id: '7790310984192',
           code: '7790310984192',
@@ -578,11 +525,10 @@ class HomeController extends GetxController {
           quantityStock: 18,
           ),
         ProductCatalogue(
-          creation: Timestamp.now(),
-          upgrade: Timestamp.fromDate(
-              DateTime.now().subtract(const Duration(days: 1))),
-          documentCreation: Timestamp.now(),
-          documentUpgrade: Timestamp.now(),
+          creation: Utils().getTimestampNow(),
+          upgrade: Utils().getTimestampNow(),
+          documentCreation: Utils().getTimestampNow(),
+          documentUpgrade: Utils().getTimestampNow(),
           image: 'https://img.sistemastock.com/img/0000077953124.jpg',
           id: '77953124',
           code: '77953124',
@@ -594,11 +540,10 @@ class HomeController extends GetxController {
           quantityStock: 18,
           ),
         ProductCatalogue(
-          creation: Timestamp.now(),
-          upgrade: Timestamp.fromDate(
-              DateTime.now().subtract(const Duration(days: 1))),
-          documentCreation: Timestamp.now(),
-          documentUpgrade: Timestamp.now(),
+          creation: Utils().getTimestampNow(),
+          upgrade: Utils().getTimestampNow(),
+          documentCreation: Utils().getTimestampNow(),
+          documentUpgrade: Utils().getTimestampNow(),
           image: 'https://img.sistemastock.com/img/7790895000836.jpg',
           id: '7790895000836',
           code: '7790895000836',
@@ -610,10 +555,10 @@ class HomeController extends GetxController {
           quantityStock: 18,
           ),
           ProductCatalogue(
-          creation: Timestamp.now(),
-          upgrade: Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 1))),
-          documentCreation: Timestamp.now(),
-          documentUpgrade: Timestamp.now(),
+          creation: Utils().getTimestampNow(),
+          upgrade: Utils().getTimestampNow(),
+          documentCreation: Utils().getTimestampNow(),
+          documentUpgrade: Utils().getTimestampNow(),
           image: 'https://img.sistemastock.com/img/7790387015324.jpg',
           id: '7790387015324',
           code: '7790387015324',
@@ -625,10 +570,10 @@ class HomeController extends GetxController {
           quantityStock: 18,
           ),
           ProductCatalogue(
-          creation: Timestamp.now(),
-          upgrade: Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 1))),
-          documentCreation: Timestamp.now(),
-          documentUpgrade: Timestamp.now(),
+          creation:Utils().getTimestampNow(),
+          upgrade: Utils().getTimestampNow(),
+          documentCreation: Utils().getTimestampNow(),
+          documentUpgrade: Utils().getTimestampNow(),
           image: 'https://img.sistemastock.com/img/7791324157022.jpg',
           id: '7791324157022',
           code: '7791324157022',
@@ -641,14 +586,14 @@ class HomeController extends GetxController {
           ),
     ]; // lista de productos del catálogo
     setProductsOutstandingList = getCataloProducts.toList(); // lista de productos destacados
-    setProfileAccountSelected = ProfileAccountModel(creation: Timestamp.now(),name: 'Mi negocio',trialEnd: Timestamp.now(),trialStart: Timestamp.now()); // datos de la cuenta
+    setProfileAccountSelected = ProfileAccountModel(creation: Utils().getTimestampNow(),name: 'Mi negocio',trialEnd: Utils().getTimestampNow(),trialStart: Utils().getTimestampNow()); // datos de la cuenta
     setManagedAccountsList = []; // lista de cuentas gestionadas
     setProfileAdminUser = UserModel(
         superAdmin: true,
         admin: true,
         email: 'userInvite@correo.com',
-        creation: Timestamp.now(),
-        lastUpdate: Timestamp.now(),
+        creation: Utils().getTimestampNow(),
+        lastUpdate: Utils().getTimestampNow(),
         ); // datos del usuario
     setAdminsUsersList = []; // lista de usuarios administradores
   }
@@ -660,11 +605,11 @@ class HomeController extends GetxController {
     setCatalogueCategoryList = [];
     setCatalogueProducts = [];
     setProductsOutstandingList = [];
-    setProfileAccountSelected = ProfileAccountModel(creation: Timestamp.now(),trialEnd: Timestamp.now(),trialStart: Timestamp.now());
+    setProfileAccountSelected = ProfileAccountModel(creation: Utils().getTimestampNow(),trialEnd: Utils().getTimestampNow(),trialStart:Utils().getTimestampNow());
     getProfileAccountSelected.id = idAccount; // asignamos el id de la cuenta
 
     // obtenemos las cuentas asociada a este email
-    readUserAccountsList(email: getUserAuth.email ?? '');
+    readUserAccountsList(email: getUserAuth?.email ?? '');
     // obtenemos los datos de la cuenta
     if (idAccount!= '') {
 
@@ -683,7 +628,7 @@ class HomeController extends GetxController {
         readProductsCatalogue(idAccount: idAccount); // obtenemos los productos del catálogo
         readListCategoryListFuture(idAccount: idAccount); // obtenemos las categorias creadas por el usuario
         readProvidersListFuture(idAccount: idAccount); // obtenemos los proveedores creados por el usuario
-        readDataAdminUser( email: getUserAuth.email ?? '', idAccount: idAccount); // obtenemos los datos del usuario administrador de la cuenta
+        readDataAdminUser( email: getUserAuth?.email ?? '', idAccount: idAccount); // obtenemos los datos del usuario administrador de la cuenta
         readAdminsUsers(idAccount: idAccount);  // obtenemos los usuarios administradores de la cuenta
       }
       
@@ -924,8 +869,8 @@ class HomeController extends GetxController {
   Future<void> activateTrial() async {
     // registramos la fecha de inicio y fin de la prueba gratuita
     // var 
-    Timestamp trialStart = Timestamp.fromDate(DateTime.now());
-    Timestamp trialEnd = Timestamp.fromDate(DateTime.now().add(const Duration(days:30))); 
+    var  trialEnd = Utils().getFreeTrialTimesTampEnd();
+    var  trialStart = Utils().getTimestampNow();
     
     // case use : actualizar datos de la cuenta
     final account = GetAccountUseCase();
@@ -966,11 +911,11 @@ class HomeController extends GetxController {
     ProductPrice precio = ProductPrice(
       id: getProfileAccountSelected.id,
       idProduct: product.id, 
-      idAccount: getProfileAccountSelected.id,imageAccount: getProfileAccountSelected.image,nameAccount: getProfileAccountSelected.name,price: product.salePrice,currencySign: product.currencySign,province: getProfileAccountSelected.province,town: getProfileAccountSelected.town,time: Timestamp.fromDate(DateTime.now()));
+      idAccount: getProfileAccountSelected.id,imageAccount: getProfileAccountSelected.image,nameAccount: getProfileAccountSelected.name,price: product.salePrice,currencySign: product.currencySign,province: getProfileAccountSelected.province,town: getProfileAccountSelected.town,time: Utils().getTimestampNow() );
     // condition : si el producto es nuevo se le asigna los valores de creación
     if(isProductNew){
       // el producto no existe 
-      product.creation = Timestamp.fromDate(DateTime.now()); // fecha de creación del producto 
+      product.creation = Utils().getTimestampNow(); // fecha de creación del producto 
       product.followers++; // incrementamos el contador de los seguidores del producto publico 
    
     }else{
@@ -981,7 +926,7 @@ class HomeController extends GetxController {
       GetCatalogueUseCase().incrementFollowersProductPublic(idProduct: product.id);
     }
     // set : fecha de actualización del producto
-    product.upgrade = Timestamp.fromDate(DateTime.now());  
+    product.upgrade = Utils().getTimestampNow();  
     // case use : publica el precio del producto en la colección de precios publicos
     GetCatalogueUseCase().registerPriceProductPublic(price: precio);
 
@@ -1006,10 +951,10 @@ class HomeController extends GetxController {
     if (isNew && product.verified == false) {
       // datos de creación por primera vez 
       product.idUserCreation = getProfileAdminUser.email;
-      product.creation = Timestamp.fromDate(DateTime.now());
+      product.creation = Utils().getTimestampNow();
     }
     //  set : marca de tiempo que se actualizo el documenti
-    product.upgrade = Timestamp.fromDate(DateTime.now());
+    product.upgrade = Utils().getTimestampNow();
     //  set : id del usuario que actualizo el documento
     product.idUserUpgrade = getProfileAdminUser.email;
 
@@ -1025,7 +970,7 @@ class HomeController extends GetxController {
 
   void accountChange({required String idAccount}) async {
     // save key/values Storage
-    await GetStorage().write('idAccount', idAccount);
+    await GetAppData().setStorageLocalIdAccount(idAccount); 
     // navegar hacia otra pantalla
     Get.offAllNamed(Routes.home,arguments: {'currentUser': getUserAuth, 'idAccount': idAccount} );
   }
@@ -1214,23 +1159,26 @@ class HomeController extends GetxController {
   @override
   void onInit() async {
     super.onInit(); 
-  
-    // inicialización de la variable
-    setFirebaseAuth = FirebaseAuth.instance; // inicializamos la autenticación de firebase
+
+    // GetX : obtenemos por parametro los datos de la cuenta de atentificación
+    final Map arguments = Get.arguments; 
+
+    // case use : obtenemos [AuthenticateUserUseCase] 
+    final getFirebaseAuth = AuthenticateUserUseCase();
+ 
+    // inicialización de la variable  
+    setUserAnonymous =  await getFirebaseAuth.isUserAnonymous();
     isAppUpdated(); // verificamos si la app esta actualizada 
+    setUserAuth = await  getFirebaseAuth.getUserAuth();   
+    setCashierMode = await GetAppData().getStorageLocalCashierMode();
+ 
     
     // condition : comprobamos si el usuario esta autenticado o es un usuario anonimo
-    if (getFirebaseAuth.currentUser.isAnonymous) {
-      // obtenemos datos de prueba para que el usaurio pueda probar la app sin autenticarse
-      readAccountsInviteData();
-    } else {
-      // GetX : obtenemos por parametro los datos de la cuenta de atentificación
-      final Map arguments = Get.arguments;
-      // verificamos y obtenemos los datos pasados por parametro
-      setUserAuth = arguments['currentUser'];
+    if (!getUserAnonymous) { 
       // obtenemos el id de la cuenta seleccionada si es que existe 
-      readAccountsData(idAccount: arguments['idAccount']);
+      readAccountsData( idAccount: arguments['idAccount'] );
     }
+
   }
 
   @override

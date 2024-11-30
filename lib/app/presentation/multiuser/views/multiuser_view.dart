@@ -77,7 +77,7 @@ class LoadingInitView extends StatelessWidget {
     // controllers
     final MultiUserController controller = Get.find();
 
-    if(controller.homeController.getFirebaseAuth.currentUser!.isAnonymous){ return const Center(child: Text('Debes iniciar sesión para para ver esta sección'));}
+    if(controller.homeController.getUserAnonymous){ return const Center(child: Text('Debes iniciar sesión para para ver esta sección'));}
     if(controller.getUsersList.isEmpty ){ return const  Center(child: CircularProgressIndicator());}
 
     return ListView.builder(

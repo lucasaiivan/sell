@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart'; 
 import '../../../domain/use_cases/authenticate_use_case.dart';
@@ -10,9 +10,7 @@ class LoginController extends GetxController {
   String sellImagen = "assets/sell02.jpeg";
   String transactionImage = "assets/sell05.jpeg";
   String catalogueImage = "assets/catalogue03.jpeg";
-
-  // firebase
-  final FirebaseAuth auth = FirebaseAuth.instance;
+ 
 
   // controllers
   SplashController homeController = Get.find<SplashController>();
@@ -35,7 +33,7 @@ class LoginController extends GetxController {
   void onClose() {}
 
   void login() async {
-    // LOGIN
+    // LOGIN // 
     // Inicio de sesión con Google
     // Primero comprobamos que el usuario acepto los términos de uso de servicios y que a leído las politicas de privacidad
     if (getStateCheckAcceptPrivacyAndUsePolicy) {
@@ -43,26 +41,14 @@ class LoginController extends GetxController {
       // set state load
       CustomFullScreenDialog.showDialog();
 
-      await AuthenticateUserUseCase().authenticateWithGoogle();
-
-      // finalizamos el diálogo alerta
-      CustomFullScreenDialog.cancelDialog();
-
-      /* // signIn : Inicia la secuencia de inicio de sesión de Google.
-      GoogleSignInAccount? googleSignInAccount = await GoogleSignIn().signIn(); 
-      // condition : Si googleSignInAccount es nulo, significa que el usuario no ha iniciado sesión.
-      if (googleSignInAccount == null) {
-        CustomFullScreenDialog.cancelDialog();
-      } else {
-        // Obtenga los detalles de autenticación de la solicitud
-        GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
-        // Crea una nueva credencial de OAuth genérica.
-        OAuthCredential oAuthCredential = GoogleAuthProvider.credential(accessToken: googleSignInAuthentication.accessToken,idToken: googleSignInAuthentication.idToken);
-        // Una vez que haya iniciado sesión, devuelva el UserCredential
-        await homeController.firebaseAuth.signInWithCredential(oAuthCredential);
-        // finalizamos el diálogo alerta
-        CustomFullScreenDialog.cancelDialog();
-      } */
+      // case use : metodo de autenticación con Google
+      var auth = AuthenticateUserUseCase(); 
+      await auth.authenticateWithGoogle().whenComplete(
+        () {
+          // finalizamos el diálogo alerta
+          CustomFullScreenDialog.cancelDialog();
+        },
+      ); 
 
     } else {
       // message for user

@@ -403,12 +403,12 @@ Widget body({required BuildContext context}){
 
     // variables
     UserModel user = homeController.getProfileAdminUser.copyWith(); 
-    bool isAnonymous = homeController.getFirebaseAuth.currentUser!.isAnonymous;
+    bool isAnonymous = homeController.getUserAnonymous;
 
     // widgets
     final textButtonLogin = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: SizedBox(width: double.infinity,child: FloatingActionButton(onPressed: homeController.signOutFirebase,elevation: 0,child: const Text('Iniciar sesión',style: TextStyle(color: Colors.white),))),
+      child: SizedBox(width: double.infinity,child: FloatingActionButton(onPressed: homeController.navigationLogin,elevation: 0,child: const Text('Iniciar sesión',style: TextStyle(color: Colors.white),))),
     );  
     
     return Obx(() => Column(
@@ -715,7 +715,8 @@ Widget viewSelectedAccount() {
           child: Column(
             children: [
               // text : email del usuario
-              Opacity(opacity:0.5,child: Text(homeController.getFirebaseAuth.currentUser!.email??'')),
+              homeController.getUserAuth==null?Container():
+              Opacity(opacity:0.5,child: Text( homeController.getUserAuth!.email ?? '')),
               // button : cerrar sesion
               TextButton(onPressed: homeController.showDialogCerrarSesion, child: const Text('Cerrar sesión')),
             ],

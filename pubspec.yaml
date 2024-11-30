@@ -18,7 +18,7 @@ publish_to: 'none' # Quite esta línea si desea publicar en pub.dev
 version: 1.7.5+10
 
 environment:
-  sdk: '^3.0.0' 
+  sdk: '^3.5.0'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -47,6 +47,7 @@ dependencies:
   #firebase_dynamic_links: ^5.4.6
   # Google Pay
   in_app_review: ^2.0.9
+
 
   # RevanueCat  
   purchases_flutter: ^7.0.1 # Un complemento de Flutter para la API de compras de RevenueCat.

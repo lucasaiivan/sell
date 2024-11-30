@@ -179,7 +179,7 @@ class AccountController extends GetxController {
       if (newAccount) {
         //  si es una nueva cuenta se crea un nuevo id obtenido de la id de autenticacion del usuario
         // esto es para que la cuenta sea unica y no se pueda crear mas de una cuenta por usuario autenticado 
-        profileAccount.id = homeController.getUserAuth.uid; 
+        profileAccount.id = homeController.getUserAuth!.uid; 
       }
       // si se cargo una nueva imagen procede a guardar la imagen en Storage
       if (getImageUpdate) {
@@ -222,8 +222,8 @@ class AccountController extends GetxController {
     UserModel user = UserModel( 
       id: profile.id,
       account: profile.id,
-      email: homeController.getUserAuth.email ?? '', 
-      name: homeController.getUserAuth.displayName ?? '',
+      email: homeController.getUserAuth!.email ?? '', 
+      name: homeController.getUserAuth!.displayName ?? '',
       superAdmin: true,
       admin: true,
       daysOfWeek: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],

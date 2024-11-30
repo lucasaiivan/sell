@@ -34,7 +34,11 @@ class SplashController extends GetxController {
   }
   
    StreamSubscription _listenAuthStateChanges() {
-    return AuthenticateUserUseCase().authStateChanges().listen((User? user) async {
+
+
+    // case use : AuthenticateUserUseCase
+    final auth = AuthenticateUserUseCase();
+    return auth.authStateChanges().listen((User? user) async {
       if (user == null) {
         // Usuario no autenticado
 
@@ -44,7 +48,7 @@ class SplashController extends GetxController {
       } else {
         // si esta autentificado
         idAccount = GetStorage().read('idAccount') ?? ''; // Verificamos si tenemos una referencia de una cuenta guardada en GetStorage ( API del controlador de almacenamiento )
-        Get.offAllNamed(Routes.home, arguments: {'currentUser': user,'idAccount': idAccount} );
+        Get.offAllNamed(Routes.home, arguments: {'currentUser': user,'idAccount': idAccount,'isAnonymous':user.isAnonymous} );
       }
     });
   }
