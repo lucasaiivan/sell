@@ -8,6 +8,6 @@ abstract class AuthRepository {
   Future<void> signInAnonymously();
   Stream<User?> authStateChanges();
   Future<void> signOut();
-  Future<UserAuth> getUserAuth(); 
+  Future<UserAuth> getUserAuth();  
   Future<bool> get isAnonymous;
 }

@@ -32,7 +32,7 @@ class AuthenticateUserUseCase {
   // future : obtener la instancia de FirebaseAuth
   Future<UserAuth>  getUserAuth() async {
     return await authRepository.getUserAuth();
-  }
+  } 
   // future : verificar si el usuario está autenticado [isAnonymous]
   Future<bool> isUserAnonymous() async { 
     return await authRepository.isAnonymous;

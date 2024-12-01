@@ -61,7 +61,7 @@ class HomeController extends GetxController {
   bool _cashierMode = false;
   set setCashierMode(bool value) { 
     // guardar dato en el almacenamiento local [SharedPreferences]
-    GetAppData().setStorageLocalCashierMode(value); 
+    AppDataUseCase().setStorageLocalCashierMode(value); 
     _cashierMode = value;
   }
   bool get getCashierMode{  
@@ -217,7 +217,7 @@ class HomeController extends GetxController {
     // description : si se selecciono una, actualiza el arqueo de caja actual 
     // condition : si no se actualiza el arqueo de caja actual verificamos si hay un arqueo de caja seleccionada 
     if (id == '') { 
-      id = await GetAppData().getStorageLocalCashRegisterID();
+      id = await AppDataUseCase().getStorageLocalCashRegisterID();
     }
     for (CashRegister item in listCashRegister) {
       if (item.id == id) {
@@ -435,9 +435,9 @@ class HomeController extends GetxController {
     // cerramos sesión
     try {
       // Eliminar los datos de la memoria del dispositivo
-      await GetAppData().clearLocalData();
+      await AppDataUseCase().clearLocalData();
       // set : id de la cuenta seleccionada nulo por defecto 
-      await GetAppData().setStorageLocalIdAccount('');
+      await AppDataUseCase().setStorageLocalIdAccount('');
       
        // case use : cerrar sesión de firebase y google 
       await AuthenticateUserUseCase().signOut();
@@ -464,7 +464,7 @@ class HomeController extends GetxController {
       final packageInfo = await PackageInfo.fromPlatform();
       final currentVersion = int.parse(packageInfo.buildNumber);
       // case use : obtener información de la app
-      AppInfo appInfo = await GetAppData().getAppInfo(); 
+      AppInfo appInfo = await AppDataUseCase().getAppInfo(); 
       final firestoreVersion = appInfo.versionApp;
       //urlPlayStore
       setUrlPlayStore = appInfo.urlPlayStore;
@@ -970,7 +970,7 @@ class HomeController extends GetxController {
 
   void accountChange({required String idAccount}) async {
     // save key/values Storage
-    await GetAppData().setStorageLocalIdAccount(idAccount); 
+    await AppDataUseCase().setStorageLocalIdAccount(idAccount); 
     // navegar hacia otra pantalla
     Get.offAllNamed(Routes.home,arguments: {'currentUser': getUserAuth, 'idAccount': idAccount} );
   }
@@ -1163,14 +1163,15 @@ class HomeController extends GetxController {
     // GetX : obtenemos por parametro los datos de la cuenta de atentificación
     final Map arguments = Get.arguments; 
 
-    // case use : obtenemos [AuthenticateUserUseCase] 
-    final getFirebaseAuth = AuthenticateUserUseCase();
+    // case use : instancias de las clases de caso de uso
+    final getFirebaseAuth = AuthenticateUserUseCase(); 
+    final appData = AppDataUseCase();
  
     // inicialización de la variable  
     setUserAnonymous =  await getFirebaseAuth.isUserAnonymous();
-    isAppUpdated(); // verificamos si la app esta actualizada 
     setUserAuth = await  getFirebaseAuth.getUserAuth();   
-    setCashierMode = await GetAppData().getStorageLocalCashierMode();
+    setCashierMode = await appData.getStorageLocalCashierMode();
+    isAppUpdated(); // verificamos si la app esta actualizada 
  
     
     // condition : comprobamos si el usuario esta autenticado o es un usuario anonimo

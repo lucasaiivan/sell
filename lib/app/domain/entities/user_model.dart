@@ -4,12 +4,12 @@ import 'package:intl/intl.dart';
 class UserAuth {
   final String uid;
   final String email;
-  final String displayName;
+  final String displayName; 
 
   UserAuth({
     this.uid='',
     this.email='',
-    this.displayName='',
+    this.displayName='', 
   });
   
 }
@@ -37,6 +37,7 @@ class UserModel {
     this.catalogue = false,  
     this.multiuser = false,  
     this.editAccount = false, 
+    
   });
 
   String id = ""; // id de autenticación del usuario

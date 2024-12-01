@@ -7,10 +7,10 @@ import '../../data/repositories/app_info_impl.dart';
 import '../entities/app_info.dart';
 import '../repositories/app_repository.dart';
 
-class GetAppData {
+class AppDataUseCase {
   final AppInfoRepository appRepository;
 
-  GetAppData() : appRepository = AppInfoImpl(FirebaseAppInfoProvider() , LocalAppDataProvider());
+  AppDataUseCase() : appRepository = AppInfoImpl(FirebaseAppInfoProvider() , LocalAppDataProvider());
 
 
   // get : int : obtener informacion de la aplicacion
