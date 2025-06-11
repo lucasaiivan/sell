@@ -13,6 +13,7 @@ abstract class CashRegisterHistoryRepository {
   // return : list : CashRegister : obtengo los registros de arqueo de caja
   Future<List<CashRegister>> getCashRegisterActive(String idAccount);
   Future<List<CashRegister>> getCashRegisterHistory(String idAccount); 
+  Future<List<CashRegister>> getCashRegisterToday(String idAccount);
   Stream<List<CashRegister>> getCashRegisterHistoryStream(String idAccount);
 
   // void : add : obtengo los registros de arqueo de caja

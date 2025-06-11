@@ -49,7 +49,7 @@ class HomeView extends GetView<HomeController> {
     return Obx(() {
 
       //  condition : si el usuario no ha seleccionado una cuenta
-      if (  controller.getProfileAccountSelected.id == '' && controller.getUserAnonymous == false ){
+      if (  controller.getProfileAccountSelected.id == '' && controller.getUserAuth!.isAnonymous == false ){
         // viewDefault : se muestra la vista por defecto para iniciar sesión de una cuenta existente o crear una nueva cuenta
         return viewSelectedAccount();
       }

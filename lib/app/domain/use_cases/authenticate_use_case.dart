@@ -21,7 +21,7 @@ class AuthenticateUserUseCase {
     return await authRepository.signInAnonymously();
   }
   // stream : escuchar cambios en el estado de autenticación
-  Stream<User?> authStateChanges() {
+  Stream<UserAuth?> authStateChanges() {
     return authRepository.authStateChanges();
   }
   // future : cerrar sesión de firebase y google

@@ -328,7 +328,7 @@ class FirebaseTransactionProvider {
 // historial de arqueos de caja
 class FirebaseHistoryCashRegisterProvider {
 
-  // retur : list : CashRegister : obtengo los registros de arqueo de caja activos
+  // return : list : CashRegister : obtengo los registros de arqueo de caja activos
   Future<List<CashRegister>> getCashRegistersActive(String idAccount) async {
     try {
       final querySnapshot = await FirestoreCollections.collectionRefCashRegisters(idAccount: idAccount).get();
@@ -340,7 +340,25 @@ class FirebaseHistoryCashRegisterProvider {
       return [];
     }
   }
-  
+  // return : list : CashRegister : obtengo los registros de arqueo de caja del dia actual
+ Future<List<CashRegister>> getCashRegisterToday(String idAccount) async {
+  try {
+    CollectionReference<Map<String, dynamic>> query = FirestoreCollections.collectionRefAccountRecors(idAccount: idAccount);
+    // obtenemos los  documento solo del dia actual
+    final querySnapshot = await query.where('date',isGreaterThanOrEqualTo: DateTime.now().subtract(const Duration(days: 1))).get();
+    return querySnapshot.docs.map((doc) {
+      // print 
+      print(' historial db: ############# ');
+      print('CashRegister.fromMap(doc.data())');
+      return CashRegister.fromMap(doc.data());
+    }).toList();
+  } catch (e, stacktrace) {
+    // Log the error and stacktrace for debugging purposes
+    print('Error fetching cash registers: $e');
+    print('Stacktrace: $stacktrace');
+    return [];
+  }
+}
   // return : list : CashRegister : obtengo los registros de arqueo de caja
   Future<List<CashRegister>> getHistoryCashRegisters(String idAccount) async {
     try {

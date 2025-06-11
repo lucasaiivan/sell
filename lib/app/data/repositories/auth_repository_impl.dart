@@ -32,8 +32,13 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Stream<User?> authStateChanges() {
-    return firebaseAuth.authStateChanges();
+  Stream<UserAuth?> authStateChanges() { 
+    return firebaseAuth.authStateChanges().map((user) => user == null ? UserAuth() : UserAuth(
+      uid: user.uid,
+      email: user.email as String,
+      displayName: user.displayName as String,
+      isAnonymous: user.isAnonymous,
+    ));
   }
   
   @override
@@ -55,6 +60,7 @@ class AuthRepositoryImpl implements AuthRepository {
       uid: firebaseAuth.currentUser!.uid,
       email: firebaseAuth.currentUser!.email as String,
       displayName: firebaseAuth.currentUser!.displayName as String, 
+      isAnonymous: firebaseAuth.currentUser!.isAnonymous,
     ));
   }
   

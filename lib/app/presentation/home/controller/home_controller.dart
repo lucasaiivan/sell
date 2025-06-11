@@ -1163,13 +1163,14 @@ class HomeController extends GetxController {
     // GetX : obtenemos por parametro los datos de la cuenta de atentificación
     final Map arguments = Get.arguments; 
 
-    // case use : instancias de las clases de caso de uso
-    final getFirebaseAuth = AuthenticateUserUseCase(); 
+    // case use : instancias de las clases de caso de uso 
     final appData = AppDataUseCase();
+
+    // obtenemos los datos pasados por argumentos de [get.arguments]
+    setUserAuth = arguments['currentUser'] ?? UserAuth(); 
+    setUserAnonymous = getUserAuth!.isAnonymous;
  
-    // inicialización de la variable  
-    setUserAnonymous =  await getFirebaseAuth.isUserAnonymous();
-    setUserAuth = await  getFirebaseAuth.getUserAuth();   
+    // inicialización de la variable     
     setCashierMode = await appData.getStorageLocalCashierMode();
     isAppUpdated(); // verificamos si la app esta actualizada 
  

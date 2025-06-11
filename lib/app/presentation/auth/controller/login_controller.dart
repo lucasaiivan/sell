@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart'; 
+import '../../../domain/use_cases/app_use_case.dart';
 import '../../../domain/use_cases/authenticate_use_case.dart';
 import '../../splash/controllers/splash_controller.dart';
 
@@ -66,6 +67,8 @@ class LoginController extends GetxController {
     try {
       // user case : signInAnonymously
       final auth = AuthenticateUserUseCase();
+      final appData = AppDataUseCase();
+      appData.clearLocalData();
       auth.signInAnonymously();
       
       CustomFullScreenDialog.cancelDialog();

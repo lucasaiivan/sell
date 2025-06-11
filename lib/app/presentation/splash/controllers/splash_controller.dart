@@ -1,9 +1,8 @@
-import 'dart:async';
-
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart'; 
+import 'dart:async'; 
+import 'package:get/get.dart'; 
+import 'package:sell/app/domain/entities/user_model.dart'; 
 import '../../../core/routes/app_pages.dart';
+import '../../../domain/use_cases/app_use_case.dart';
 import '../../../domain/use_cases/authenticate_use_case.dart';
 
 // Controlador para autentificacion del usuario mediante
@@ -36,18 +35,22 @@ class SplashController extends GetxController {
    StreamSubscription _listenAuthStateChanges() {
 
 
-    // case use : AuthenticateUserUseCase
-    final auth = AuthenticateUserUseCase();
-    return auth.authStateChanges().listen((User? user) async {
-      if (user == null) {
-        // Usuario no autenticado
-
-        // default values 
-        await GetStorage().write('idAccount', '');
+    // case use : definimos los casos de uso
+    final auth = AuthenticateUserUseCase(); 
+    final appData = AppDataUseCase();
+    // stream : escuchar cambios en el estado de autenticación del usuario
+    return auth.authStateChanges().listen((UserAuth? user) async {
+      if ( user!.isAnonymous) {
+        // si esta autentificado como anonimo //   
+        Get.offAllNamed(Routes.home, arguments: {'currentUser': UserAuth(),'idAccount':''} );
+      }else if ( user.uid == '' ) {
+        // Usuario no autenticado // 
+        appData.setStorageLocalIdAccount(''); 
+        appData.clearLocalData();
         Get.offAllNamed(Routes.login);
       } else {
-        // si esta autentificado
-        idAccount = GetStorage().read('idAccount') ?? ''; // Verificamos si tenemos una referencia de una cuenta guardada en GetStorage ( API del controlador de almacenamiento )
+        // si esta autentificado // 
+        idAccount = await appData.getStorageLocalIdAccount(); // obtenemos el id de la cuenta seleccionado desde el [storage local} 
         Get.offAllNamed(Routes.home, arguments: {'currentUser': user,'idAccount': idAccount,'isAnonymous':user.isAnonymous} );
       }
     });

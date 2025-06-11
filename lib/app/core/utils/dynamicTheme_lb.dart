@@ -36,11 +36,8 @@ class ThemesDataApp {
     errorContainer: Color(0xFFFFDAD6),
     onError: Color(0xFFFFFFFF),
     onErrorContainer: Color(0xFF410002),
-    background: Color(0xFFFFFBFF),
-    onBackground: Color(0xFF1B1B1F),
     surface: Color(0xFFD0E4FF),
     onSurface: Color(0xFF1B1B1F),
-    surfaceVariant: Color(0xFFE4E1EC),
     onSurfaceVariant: Color(0xFF46464F),
     outline: Color(0xFF777680),
     onInverseSurface: Color(0xFFF3EFF4),
@@ -70,11 +67,8 @@ class ThemesDataApp {
     errorContainer: Color(0xFF93000A),
     onError: Color(0xFF690005),
     onErrorContainer: Color(0xFFFFDAD6),
-    background: Color(0xFF1B1B1F),
-    onBackground: Color(0xFFE5E1E6),
     surface: Color(0xFF003356),
     onSurface: Color(0xFFE5E1E6),
-    surfaceVariant: Color(0xFF46464F),
     onSurfaceVariant: Color(0xFFC7C5D0),
     outline: Color(0xFF91909A),
     onInverseSurface: Color(0xFF1B1B1F),
@@ -88,8 +82,7 @@ class ThemesDataApp {
 
   late ThemeData themeData = ThemeData(
     colorScheme: lightColorScheme,
-    dialogTheme:
-        const DialogTheme(backgroundColor: Color.fromRGBO(249, 242, 237, 1)),
+    dialogTheme: const DialogThemeData(backgroundColor: Color.fromRGBO(249, 242, 237, 1)),
     popupMenuTheme:
         const PopupMenuThemeData(color: Color.fromRGBO(249, 242, 237, 1)),
     visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -100,21 +93,19 @@ class ThemesDataApp {
     drawerTheme: DrawerThemeData(backgroundColor: colorLight),
     canvasColor: colorLight,
     cardColor: colorLight,
-    dialogBackgroundColor: colorLight, 
     inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.black.withOpacity(0.03),
+        fillColor: Colors.black.withValues(alpha: 0.03),
         border: UnderlineInputBorder(
             borderSide: BorderSide(color: Colors.black.withOpacity(0.3)))),
   );
   late ThemeData themeDataDark = ThemeData(
     colorScheme: darkColorScheme,
-    dialogTheme: const DialogTheme(
+    dialogTheme: const DialogThemeData(
       backgroundColor: Color.fromRGBO(27, 36, 48, 1),
     ),
     popupMenuTheme:
         const PopupMenuThemeData(color: Color.fromRGBO(27, 36, 48, 1)),
-    indicatorColor: Colors.blue,
     visualDensity: VisualDensity.adaptivePlatformDensity,
     //brightness: Brightness.dark,
     useMaterial3: true,
@@ -125,7 +116,6 @@ class ThemesDataApp {
     drawerTheme: DrawerThemeData(backgroundColor: colorDark),
     canvasColor: colorDark,
     cardColor: colorDark,
-    dialogBackgroundColor: colorDark,
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: Colors.white.withOpacity(0.03),

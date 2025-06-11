@@ -14,6 +14,10 @@ class CashRegisterUseCase {
   Future<List<CashRegister>> getCashRegisterActive(String idAccount) {
     return cashRegisterHistoryRepository.getCashRegisterActive(idAccount);
   }
+  // get : list : CashRegister : obtengo los registros de arqueo de caja del dia actual
+  Future<List<CashRegister>> getCashRegisterToday(String idAccount) {
+    return cashRegisterHistoryRepository.getCashRegisterToday(idAccount);
+  }
 
   // List : list : CashRegister : obtengo los registros de arqueo de caja
   Future<List<CashRegister>> getCashRegisterHistory(String idAccount) {

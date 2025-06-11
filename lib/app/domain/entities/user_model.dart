@@ -5,11 +5,13 @@ class UserAuth {
   final String uid;
   final String email;
   final String displayName; 
+  final bool isAnonymous;
 
   UserAuth({
     this.uid='',
     this.email='',
     this.displayName='', 
+    this.isAnonymous= true,
   });
   
 }
@@ -36,8 +38,7 @@ class UserModel {
     this.transactions = false, 
     this.catalogue = false,  
     this.multiuser = false,  
-    this.editAccount = false, 
-    
+    this.editAccount = false,  
   });
 
   String id = ""; // id de autenticación del usuario

@@ -61,6 +61,11 @@ class CashRegisterHistory extends CashRegisterHistoryRepository {
     return firebaseTransactionProvider.getFixedsDescriptions(idAccount);
   }
   
+  @override
+  Future<List<CashRegister>> getCashRegisterToday(String idAccount) {
+    return firebaseTransactionProvider.getCashRegisterToday(idAccount);
+  }
+  
    
   
 }

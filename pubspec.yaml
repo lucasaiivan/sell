@@ -62,7 +62,8 @@ dependencies:
   #animations
   lottie: ^3.1.2
 
-  # others   
+  # others 
+  flutter_dotenv: ^5.2.1  
   connectivity_plus: ^6.1.0
   observe_internet_connectivity: ^1.0.2 # Un paquete de Flutter que proporciona un widget de conexión a Internet que se puede usar para verificar la conectividad a Internet
   fast_cached_network_image: ^1.2.9
@@ -130,7 +131,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-  
+      - .env
       - assets/soundBip.mp3
       - assets/scanbarcode.png
       - assets/productoLogo.png
