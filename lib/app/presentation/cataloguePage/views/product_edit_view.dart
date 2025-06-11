@@ -61,7 +61,7 @@ class ProductEdit extends StatelessWidget {
           ? Text(controller.getTextAppBar,style: TextStyle(fontSize: 18.0, color: appBarTextColor))
           : Text(controller.getItsInTheCatalogue ? 'Editar' :'Nuevo',style: TextStyle(fontSize: 18.0, color: appBarTextColor)),
       actions: <Widget>[
-        // TODO : release : disabled code
+        // TODO : release : disabled code of button moderator
         // start : contenido para desarrollo (debug) 
         // iconButton : opciones de moderador
         //
@@ -75,7 +75,7 @@ class ProductEdit extends StatelessWidget {
                   const OptionsModeratorsWidget(),
                 );
               },
-            ),  */
+            ), */
         //
         // fin contentido para desarrollo (debug)
         //
@@ -325,6 +325,7 @@ class ProductEdit extends StatelessWidget {
                             enabled: false,
                             autovalidateMode: AutovalidateMode.onUserInteraction, 
                             keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            inputFormatters: [AppMoneyInputFormatter()],
                             decoration: InputDecoration( 
                               filled: true,
                               fillColor: fillColor,
@@ -360,7 +361,8 @@ class ProductEdit extends StatelessWidget {
                             controller: controller.controllerTextEditPrecioVenta,
                             enabled: false,
                             autovalidateMode: AutovalidateMode.onUserInteraction, 
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            inputFormatters: [AppMoneyInputFormatter()],
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true), 
                             decoration: InputDecoration(
                               filled: true,
                               fillColor: fillColor,
@@ -371,7 +373,7 @@ class ProductEdit extends StatelessWidget {
                             onChanged: (value) { controller.updateAll(); },
                             // validator: validamos el texto que el usuario ha ingresado.
                             validator: (value) {
-                              if ( controller.controllerTextEditPrecioVenta.numberValue == 0.0) { return 'Por favor, escriba un precio de venta'; }
+                              if ( controller.controllerTextEditPrecioVenta.doubleValue == 0.0) { return 'Por favor, escriba un precio de venta'; }
                               return null;
                             },
                           ),
@@ -450,7 +452,7 @@ class ProductEdit extends StatelessWidget {
                                 onChanged: (value) { controller.updateAll(); },
                                 // validator: validamos el texto que el usuario ha ingresado.
                                 validator: (value) {
-                                  if ( controller.controllerTextEditPrecioVenta.numberValue == 0.0) { return 'Por favor, escriba un precio de venta'; }
+                                  if ( controller.controllerTextEditPrecioVenta.doubleValue == 0.0) { return 'Por favor, escriba un precio de venta'; }
                                   return null;
                                 },
                               ),
@@ -480,7 +482,7 @@ class ProductEdit extends StatelessWidget {
                                 ),    
                                 // validator: validamos el texto que el usuario ha ingresado.
                                 validator: (value) {
-                                  if ( controller.controllerTextEditPrecioVenta.numberValue == 0.0) { return 'Por favor, escriba un precio de venta'; }
+                                  if ( controller.controllerTextEditPrecioVenta.doubleValue == 0.0) { return 'Por favor, escriba un precio de venta'; }
                                   return null;
                                 },
                               ),
@@ -502,12 +504,13 @@ class ProductEdit extends StatelessWidget {
                 // button : guardar
                 const SizedBox(height:30),  
                 //  button : guardar el producto
-                ComponentApp().button( 
+                ComponentApp().button(  
                   disable:controller.getLoadingData == true   ,
                   onPressed: controller.save,
                   icon: Container(),
                   colorButton: Colors.blue,
-                  padding:const EdgeInsets.all(0),
+                  margin: const EdgeInsets.symmetric(vertical: 0,horizontal: 0),
+                  padding:const EdgeInsets.symmetric(vertical: 20),
                   colorAccent: Colors.white,
                   text: controller.getItsInTheCatalogue?'Actualizar':'Agregar a mi cátalogo',
                 ), 
@@ -552,8 +555,7 @@ class ProductEdit extends StatelessWidget {
           fillColor:stateEdit?fillColor:Colors.transparent , 
           labelText: labelText,
           suffix:suffix,
-          ),
-        
+          ), 
       ),
     );
   }
@@ -952,7 +954,7 @@ class _SelectProviderState extends State<SelectProvider> {
                     TextButton(
                         child: loadSave == false? const Text("ELIMINAR"): const CircularProgressIndicator(),
                         onPressed: () async {
-                          controller.providerDelete(idProvider: provider.id).then((value) {
+                          controller.providerDelete(provider: provider).then((value) {
                               setState(() {
                                 Get.back();
                               });

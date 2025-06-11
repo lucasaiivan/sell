@@ -78,7 +78,7 @@ class Database {
 
   static Stream<QuerySnapshot<Map<String, dynamic>>> readTransactionsFilterIsGreaterThanTimeStream({required String idAccount,required Timestamp timeStart}) => FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/TRANSACTIONS/')
         .orderBy('creation', descending: true)
-        .where('creation',isGreaterThan: timeStart )  
+        .where('creation',isGreaterThan: timeStart )
         .snapshots();
   static Stream<QuerySnapshot<Map<String, dynamic>>> readTransactionsFilterTimeStream({required String idAccount,required Timestamp timeEnd,required Timestamp timeStart}) => FirebaseFirestore.instance.collection('/ACCOUNTS/$idAccount/TRANSACTIONS/')
         .orderBy('creation', descending: true)

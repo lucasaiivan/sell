@@ -5,6 +5,7 @@ import 'package:sell/app/core/utils/fuctions.dart';
 import '../../../core/utils/widgets_utils.dart';
 import '../../../data/datasource/database_cloud.dart';
 import '../../../domain/entities/cashRegister_model.dart';
+import '../../../domain/use_cases/cash_register_use_case.dart';
 import '../../home/controller/home_controller.dart';
 import '../views/historyCashRegister_view.dart';
 
@@ -26,25 +27,15 @@ class HistoryCashRegisterController extends GetxController {
   // load : obtenemos los arqueos de caja del dia de hoy
   void loadCashRegisterToday() async {
     setTextFilter = 'Hoy';
-    // firebase : obtenemos los documentos de arqueos de caja del dia de hoy
-    Future<QuerySnapshot<Object?>> query = Database.refFirestoreRecords(
-            idAccount: homeController.getProfileAccountSelected.id)
-        .where('opening',
-            isGreaterThan: DateTime.now().subtract(const Duration(days: 1)))
-        .orderBy('opening', descending: true)
-        .get();
-    query.then((value) {
+
+    // case use : obtener los arqueos de caja del dia de hoy
+    CashRegisterUseCase().getCashRegisterToday(homeController.getProfileAccountSelected.id).then((value) {
+      
       getListCashRegister.clear(); // limpiamos la lista de cajas
-      if (value.docs.isNotEmpty) {
-        // añadimos las cajas disponibles
-        for (var element in value.docs) {
-          // add : seteamos y agregamos los arqueos de caja
-          getListCashRegister.add(
-              CashRegister.fromMap(element.data() as Map<String, dynamic>));
-        }
-      }
+      setListCashRegister = value;
       update(); // actualizamos la vista
-    });
+
+    }); 
   }
 
   // load : obtenemos los arqueos de caja del dia de ayer

@@ -17,6 +17,8 @@ class CashRegister {
   double balance; // monto de cierre
   List<dynamic> cashInFlowList; // lista de ingresos de caja [CashFlow]
   List<dynamic> cashOutFlowList; // lista de egresos de caja [CashFlow]
+  List<dynamic> cashiers; // usuarios cajeros que vendieron 
+  String openingCashiers; // id del cajero que hizo la apertura
 
   CashRegister({
     required this.id,
@@ -33,6 +35,9 @@ class CashRegister {
     required this.balance,
     required this.cashInFlowList,
     required this.cashOutFlowList,
+    required this.cashiers,
+    required this.openingCashiers,
+
   });
 
   // contructor 
@@ -64,6 +69,8 @@ class CashRegister {
       balance: 0.0,
       cashInFlowList: [],
       cashOutFlowList: [],
+      cashiers: [],
+      openingCashiers: '',
     );
   }
   // tojson : convierte el objeto a json
@@ -82,6 +89,8 @@ class CashRegister {
         "balance": balance,
         "cashInFlowList": cashInFlowList,
         "cashOutFlowList": cashOutFlowList,
+        "cashiers": cashiers,
+        "openingCashiers": openingCashiers,
       }; 
 
       
@@ -102,6 +111,8 @@ class CashRegister {
       balance: data.containsKey('balance')? double.parse(data['balance'].toString()): 0.0,
       cashInFlowList: data.containsKey('cashInFlowList')? data['cashInFlowList'] ?? [] : [],
       cashOutFlowList: data.containsKey('cashOutFlowList')? data['cashOutFlowList'] ?? [] : [],
+      cashiers: data.containsKey('cashiers')? data['cashiers'] ?? [] : [],
+      openingCashiers: data.containsKey('openingCashiers')? data['openingCashiers'] ?? '' : '',
     );
   }
 
@@ -121,6 +132,8 @@ class CashRegister {
     balance = documentSnapshot['balance'].toDouble();
     cashInFlowList = documentSnapshot['cashInFlowList'];
     cashOutFlowList = documentSnapshot['cashOutFlowList'];
+    cashiers = documentSnapshot['cashiers'];
+    openingCashiers = documentSnapshot['openingCashiers'];
   }
   // update : actualiza los valores individualmente de la caja 
   CashRegister update({
@@ -138,6 +151,8 @@ class CashRegister {
     double? balance,
     List<dynamic>? cashInFlowList, // lista de ingresos de caja [CashFlow]
     List<dynamic>? cashOutFlowList, // lista de egresos de caja [CashFlow]
+    List<dynamic>? cashiers,
+    String? openingCashiers,
   }) {
     return CashRegister(
       id: id ?? this.id,
@@ -154,6 +169,8 @@ class CashRegister {
       balance: balance ?? this.balance,
       cashInFlowList: cashInFlowList ?? this.cashInFlowList,
       cashOutFlowList: cashOutFlowList ?? this.cashOutFlowList,
+      cashiers: cashiers ?? this.cashiers,
+      openingCashiers: openingCashiers ?? this.openingCashiers,
     );
   }
 

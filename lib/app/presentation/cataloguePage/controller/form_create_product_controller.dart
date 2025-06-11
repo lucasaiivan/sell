@@ -1,13 +1,10 @@
 
 import 'dart:io';
-
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cached_network_image/cached_network_image.dart'; 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_masked_text2/flutter_masked_text2.dart';
+import 'package:flutter/services.dart'; 
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:search_page/search_page.dart';
@@ -37,7 +34,8 @@ class ControllerCreateProductForm extends GetxController{
 
 
   // controller : carousel de componentes para que el usuario complete los campos necesarios para crear un nuevo producto nuevo
-  CarouselController carouselController = CarouselController();
+  PageController carouselController = PageController(); 
+  
   // var : logic  para que el usuario complete los campos necesarios para crear un nuevo producto nuevo
   bool formEditing = false;
   bool theFormIsComplete = false;
@@ -66,14 +64,7 @@ class ControllerCreateProductForm extends GetxController{
     _currentSlide = value;
     update();
   }
-
-  // concentimiento del usuario
-  bool _userConsent = false;
-  set setUserConsent(bool value) {
-    _userConsent = value;
-    update();
-  }
-  bool get getUserConsent => _userConsent; 
+ 
 
   // state internet
   bool connected = false;
@@ -133,8 +124,8 @@ class ControllerCreateProductForm extends GetxController{
   TextEditingController controllerTextEditCategory = TextEditingController();
   TextEditingController controllerTextEditQuantityStock = TextEditingController();
   TextEditingController controllerTextEditAlertStock = TextEditingController();
-  MoneyMaskedTextController controllerTextEditPrecioVenta = MoneyMaskedTextController(leftSymbol: '\$');
-  MoneyMaskedTextController controllerTextEditPrecioCosto = MoneyMaskedTextController(leftSymbol: '\$');
+  AppMoneyTextEditingController controllerTextEditPrecioVenta = AppMoneyTextEditingController( );
+  AppMoneyTextEditingController controllerTextEditPrecioCosto = AppMoneyTextEditingController( );
 
   // description
   String _description = '';
@@ -286,7 +277,7 @@ class ControllerCreateProductForm extends GetxController{
   void onReady() {
     super.onReady();
     if(getProduct.local){
-      carouselController.animateToPage(1);
+      carouselController.jumpToPage(1);
     }
   }
   @override
@@ -302,11 +293,7 @@ class ControllerCreateProductForm extends GetxController{
     controllerTextEditPrecioCosto.dispose();
     controllerTextEditPrecioVenta.dispose();
     controllerTextEditQuantityStock.dispose();
-  } 
-  // TODO : release : la subcripción por defecto es [homeController.getProfileAccountSelected.subscribed;]
-  // get 
-  bool get isSubscribed =>  homeController.getProfileAccountSelected.subscribed;
-
+  }  
   //
   // FUNCTIONS
   //
@@ -314,15 +301,15 @@ class ControllerCreateProductForm extends GetxController{
 
   String get getPorcentage{
     // description : obtenemos el porcentaje de las ganancias
-    if ( controllerTextEditPrecioCosto.numberValue == 0 ) {
+    if ( controllerTextEditPrecioCosto.doubleValue == 0 ) {
       return '';
     }
-    if ( controllerTextEditPrecioVenta.numberValue == 0 ) {
+    if ( controllerTextEditPrecioVenta.doubleValue == 0 ) {
       return '0%';
     }
     
-    double ganancia = controllerTextEditPrecioVenta.numberValue - controllerTextEditPrecioCosto.numberValue;
-    double porcentajeDeGanancia = (ganancia / controllerTextEditPrecioCosto.numberValue) * 100;
+    double ganancia = controllerTextEditPrecioVenta.doubleValue - controllerTextEditPrecioCosto.doubleValue;
+    double porcentajeDeGanancia = (ganancia / controllerTextEditPrecioCosto.doubleValue) * 100;
     
     if (ganancia % 1 != 0) {
       return '${porcentajeDeGanancia.toStringAsFixed(2)}%';
@@ -391,7 +378,7 @@ class ControllerCreateProductForm extends GetxController{
     if (getProduct.id != '') {
       if ( controllerTextEditDescripcion.text != '') {
         if (getMarkSelected.id != '' && getMarkSelected.name != '') {
-          if (controllerTextEditPrecioVenta.numberValue > 0 ) {
+          if (controllerTextEditPrecioVenta.doubleValue > 0 ) {
             if ( getStock ? (getQuantityStock >= 1) : true) { 
               
               // update view
@@ -404,8 +391,8 @@ class ControllerCreateProductForm extends GetxController{
               getProduct.upgrade = Timestamp.now();
               getProduct.idMark = getMarkSelected.id;
               getProduct.nameMark = getMarkSelected.name;
-              getProduct.purchasePrice = controllerTextEditPrecioCosto.numberValue;
-              getProduct.salePrice = controllerTextEditPrecioVenta.numberValue;
+              getProduct.purchasePrice = controllerTextEditPrecioCosto.doubleValue;
+              getProduct.salePrice = controllerTextEditPrecioVenta.doubleValue;
               getProduct.favorite = getFavorite;
               getProduct.stock = getStock;
               if(controllerTextEditQuantityStock.text!=''){getProduct.quantityStock = int.parse( controllerTextEditQuantityStock.text );}
@@ -416,7 +403,7 @@ class ControllerCreateProductForm extends GetxController{
               if(controllerTextEditAlertStock.text!=''){getProduct.alertStock  = int.parse( controllerTextEditAlertStock.text );}
 
               // TODO : DISABLE RELEASE
-              //getProduct.verified = getProduct.local ? false : true; 
+              //getProduct.verified = true;
 
               // actualización de la imagen del producto
               if (getXFileImage.path != '') { 
@@ -456,7 +443,8 @@ class ControllerCreateProductForm extends GetxController{
 
               // sleep : espera 3 segundos para que se actualice la vista
               await Future.delayed(const Duration(milliseconds: 1)).then((value) {
-                setDataUploadStatus = false; Get.back(); 
+                setDataUploadStatus = false; 
+                Get.back(); 
               });
 
             } else {
@@ -565,8 +553,8 @@ class ControllerCreateProductForm extends GetxController{
     
     // set : controles de las entradas de texto
     controllerTextEditDescripcion =TextEditingController(text: getDescription);
-    controllerTextEditPrecioVenta =MoneyMaskedTextController(initialValue: getSalePrice,leftSymbol: '\$');
-    controllerTextEditPrecioCosto =MoneyMaskedTextController(initialValue: getPurchasePrice,leftSymbol: '\$');
+    controllerTextEditPrecioVenta =AppMoneyTextEditingController(value: getSalePrice.toString() );
+    controllerTextEditPrecioCosto =AppMoneyTextEditingController(value: getPurchasePrice.toString() );
     controllerTextEditQuantityStock =TextEditingController(text: getQuantityStock.toString());
     controllerTextEditAlertStock = TextEditingController(text: getAlertStock.toString());
     controllerTextEditCategory = TextEditingController(text: getCategory.name);
@@ -679,7 +667,7 @@ class ControllerCreateProductForm extends GetxController{
   }
   
   void previousPage(){
-    carouselController.animateToPage(getCurrentSlide-1); 
+    carouselController.previousPage( duration: const Duration(milliseconds: 500), curve: Curves.easeIn ); 
   }
   void next(){
     // function : verificamos que el campo actual este completo para pasar al siguiente campo y complertar el formulario
@@ -711,15 +699,10 @@ class ControllerCreateProductForm extends GetxController{
       Get.snackbar(' Stock no valido 😐', 'debe proporcionar un cantidad');
       next=false;
     }
-
-    // concentimientos del usuario : este campo es obligatorio para crear un producto nuevo
-    if(getCurrentSlide == 9 && getUserConsent == false){
-      Get.snackbar('Debes aceptar los terminos y condiciones', 'Este campo no puede dejarse vacio',snackPosition: SnackPosition.TOP,snackStyle: SnackStyle.FLOATING,);
-      next=false;
-    }
+ 
 
     // action : pasa a la siquiente vista si es posible
-    if(next){carouselController.nextPage();} 
+    if(next){carouselController.nextPage( duration: const Duration(milliseconds: 500), curve: Curves.easeIn );} 
 
     update();
  
@@ -781,8 +764,8 @@ class ControllerCreateProductForm extends GetxController{
                   //  function : guarda el nuevo porcentaje de ganancia
                   if(controller.text != ''){
                     double porcentajeDeGanancia  = double.parse(controller.text); 
-                    double ganancia = controllerTextEditPrecioCosto.numberValue * (porcentajeDeGanancia / 100);
-                    setSalePrice = controllerTextEditPrecioCosto.numberValue + ganancia; 
+                    double ganancia = controllerTextEditPrecioCosto.doubleValue * (porcentajeDeGanancia / 100);
+                    setSalePrice = controllerTextEditPrecioCosto.doubleValue + ganancia; 
                     update();
                   }
                   //  action : cierra el dialogo
@@ -1068,20 +1051,20 @@ class _WidgetSelectMarkState extends State<WidgetSelectMark> {
         items: list,
         searchLabel: 'Buscar marca',
         suggestion: const Center(child: Text('ej. Miller')),
-        failure: const Center(child: Column(
+        failure: Center(child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('No se encontro :('),
+            const Text('No se encontro :('),
             // TODO : release : disable moderador ( crear marca )
             /* const SizedBox(height: 20),
             TextButton.icon(
               onPressed: () {Get.back(); Get.to(() => CreateMark(mark: Mark(upgrade: Timestamp.now(),creation: Timestamp.now())));},
               icon: const Icon(Icons.add_box_outlined),
               label: const Text('Crear marca'),
-            ) */
+            )  */
           ],
         )),
-        filter: (product) => [Utils.normalizeText(product.name),Utils.normalizeText(product.description)],
+        filter: (product) => [Utils.normalizeText(product.name.toLowerCase()),Utils.normalizeText(product.description.toLowerCase())],
         builder: (mark) => Column(mainAxisSize: MainAxisSize.min,children: <Widget>[
           itemList(marcaSelect: mark),
           ComponentApp().divider(),

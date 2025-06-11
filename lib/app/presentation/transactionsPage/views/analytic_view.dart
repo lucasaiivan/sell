@@ -61,7 +61,7 @@ class _StaticsCardsState extends State<StaticsCards> {
         icon:  const Padding(padding: EdgeInsets.only(right: 5),child:  Material(color: Color.fromARGB(31, 94, 43, 43),shape: CircleBorder(),child: Padding(padding: EdgeInsets.all(5.0),child: Icon(Icons.show_chart_rounded,color: Colors.white,size:14)))),
         titleText: 'Ganancia',
         subtitle: '%${transactionsController.getPercentEarningsFilteredTotal()}',
-        valueText:  transactionsController.getEarningsTotalFilteredFormat,
+        valueText: transactionsController.getPercentEarningsFilteredTotal()==0? 'Sin registros': transactionsController.getEarningsTotalFilteredFormat,
         description: '',
         ),    
       // card : productos vendidos

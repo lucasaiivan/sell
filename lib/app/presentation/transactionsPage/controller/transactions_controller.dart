@@ -352,7 +352,7 @@ class TransactionsController extends GetxController {
       transactionsAlllist = value.docs.map((e) => TicketModel.fromMap(e.data())).toList();
       // obtenemos todas las transacciones del mes actual
       for (var ticket in transactionsAlllist) { 
-        if (ticket.creation.toDate().month == Timestamp.now().toDate().month) {
+        if (ticket.creation?.toDate().month == Timestamp.now().toDate().month) {
           transactionsTodayList.add(ticket);
         }
       }   

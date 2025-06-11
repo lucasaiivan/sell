@@ -195,7 +195,10 @@ class _ViewSeachProductsCataloguieState extends State<ViewSeachProductsCatalogui
     }
     // condition : si se consulto pero no se obtuvieron resultados
     if(filteredSuggestions.isEmpty && getQuery.isNotEmpty){
-      return const Center(child: Text('No se encontraron resultados'));
+      return const Center(child: Padding(
+        padding: EdgeInsets.all(20.0),
+        child: Text('No se encontraron resultados',style: TextStyle(fontSize: 30,fontWeight: FontWeight.w300),textAlign: TextAlign.center),
+      ));
     }
  
 

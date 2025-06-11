@@ -49,15 +49,15 @@ class HomeView extends GetView<HomeController> {
     return Obx(() {
 
       //  condition : si el usuario no ha seleccionado una cuenta
-      if (controller.getProfileAccountSelected.id == '' && controller.getFirebaseAuth.currentUser!.isAnonymous == false ){
+      if (  controller.getProfileAccountSelected.id == '' && controller.getUserAuth!.isAnonymous == false ){
         // viewDefault : se muestra la vista por defecto para iniciar sesión de una cuenta existente o crear una nueva cuenta
         return viewSelectedAccount();
-      } 
+      }
 
       // PopScope : nos permite controlar el botón de retroceso del dispositivo
-      return PopScope( 
+      return PopScope(
         canPop: false, // deshabilitar el botón de retroceso del dispositivo
-        onPopInvoked: (_) => controller.onBackPressed(context: context), 
+        onPopInvokedWithResult: (didPop, result) => controller.onBackPressed(context: context) , 
         child: InternetConnectivityBuilder(
           connectivityBuilder: (BuildContext context, bool hasInternetAccess, Widget? child) { 
             if(hasInternetAccess) {
@@ -161,7 +161,7 @@ class MyConfigView extends StatelessWidget {
         // ListTile : cerrar sesión
         ListTile(
           title: const Text('Cerrar sesión'),
-          subtitle: Text(homeController.getUserAuth.email ?? ''),
+          subtitle: Text(homeController.getUserAuth?.email ?? ''),
           trailing: const Icon(Icons.login_rounded),
           onTap: homeController.showDialogCerrarSesion,
         ),

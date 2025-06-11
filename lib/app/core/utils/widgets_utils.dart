@@ -1,7 +1,8 @@
 
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart'; 
-import 'package:flutter/material.dart'; 
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; 
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart'; 
 import 'package:sell/app/core/utils/dynamicTheme_lb.dart';
@@ -402,12 +403,12 @@ Widget body({required BuildContext context}){
 
     // variables
     UserModel user = homeController.getProfileAdminUser.copyWith(); 
-    bool isAnonymous = homeController.getFirebaseAuth.currentUser!.isAnonymous;
+    bool isAnonymous = homeController.getUserAnonymous;
 
     // widgets
     final textButtonLogin = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: SizedBox(width: double.infinity,child: FloatingActionButton(onPressed: homeController.signOutFirebase,elevation: 0,child: const Text('Iniciar sesión',style: TextStyle(color: Colors.white),))),
+      child: SizedBox(width: double.infinity,child: FloatingActionButton(onPressed: homeController.navigationLogin,elevation: 0,child: const Text('Iniciar sesión',style: TextStyle(color: Colors.white),))),
     );  
     
     return Obx(() => Column(
@@ -469,7 +470,7 @@ Widget body({required BuildContext context}){
                     iconColor:  Colors.amber,  
                       leading: const Icon(Icons.star_rounded),
                       title: Text(homeController.getIsSubscribedPremium?'Premium':'Obtener Premium'),
-                      subtitle: homeController.getTrialActive && homeController.getDaysLeftTrial !=0 ? Text('¡Te quedan ${homeController.getDaysLeftTrial} días de prueba!'):null,
+                      subtitle: homeController.getTrialActive? Text('¡Te quedan ${homeController.getDaysLeftTrialFormat} de prueba!'):null,
                       onTap: (){
                         // action : mostrar modal bottom sheet con  las funciones premium
                         homeController.showModalBottomSheetSubcription();
@@ -526,12 +527,7 @@ Widget body({required BuildContext context}){
                 trailing: homeController.getIndexPage != 4 ? null : const Icon(Icons.circle,size: 8),
                 title: const Text('Multi Usuario'),
                 onTap: () {
-                  if( homeController.getProfileAccountSelected.subscribed ){
-                    homeController.setIndexPage = 4;
-                  }else{
-                    Get.back(); // cierra drawer
-                    homeController.showModalBottomSheetSubcription(id: 'multiuser');
-                  }
+                  homeController.setIndexPage = 4;
                   
                 }):Container(),
               const SizedBox(height: 20),
@@ -620,27 +616,13 @@ Widget body({required BuildContext context}){
       // se muestra el avatar de la cuenta 
       listWidget.add(Positioned(
         left: ( space) * i,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(100.0),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(1.0),
-            child: ComponentApp().userAvatarCircle(urlImage: list[i].image,radius:10,iconData: Icons.storefront_sharp)),
-        ),
+        child: ComponentApp().userAvatarCircle(urlImage: list[i].image,radius:12,lineBorder: true),
       ));
     } 
     // add : posisionar el icono a lo ultimo 
     listWidget.add(Positioned(
       left: (  space) * listWidget.length,
-      child: Container(
-        decoration: BoxDecoration( color: Colors.white,borderRadius: BorderRadius.circular(100.0)),
-        child: Container( 
-          decoration: BoxDecoration( borderRadius: BorderRadius.circular(100.0)),
-          child: Icon(Icons.change_circle,color: Colors.grey.shade800,size: 26.0),
-        ),
-      ),
+      child: ComponentApp().userAvatarCircle(urlImage: '',radius: 14,iconData: Icons.change_circle_outlined,lineBorder: true),
     ));
 
     return SizedBox(
@@ -733,7 +715,8 @@ Widget viewSelectedAccount() {
           child: Column(
             children: [
               // text : email del usuario
-              Opacity(opacity:0.5,child: Text(homeController.getFirebaseAuth.currentUser!.email??'')),
+              homeController.getUserAuth==null?Container():
+              Opacity(opacity:0.5,child: Text( homeController.getUserAuth!.email ?? '')),
               // button : cerrar sesion
               TextButton(onPressed: homeController.showDialogCerrarSesion, child: const Text('Cerrar sesión')),
             ],
@@ -779,37 +762,55 @@ class ComponentApp extends StatelessWidget {
     return Padding(padding: const EdgeInsets.symmetric(horizontal: 3), child:Icon(Icons.circle,size:size, color: color.withOpacity(0.4)));
   }
   // view : imagen avatar del usuario
-  Widget userAvatarCircle({ Color? background,IconData? iconData,bool empty=false,String urlImage='',String text = '', double radius = 20.0}) {
+  Widget userAvatarCircle({ Color? background,IconData? iconData,bool empty=false,String urlImage='',String text = '', double radius = 20.0,bool lineBorder = false,Color? lineBorderColor }) {
     
     // style
+    lineBorderColor ??= Colors.white;
     Color backgroundColor =background??Get.theme.dividerColor ;
     // widgets
     late Widget avatar;
     late Widget iconDefault;
+    Widget iconText = text == ''?Container(): Text( text.substring( 0,1),style: TextStyle(color: Colors.white,fontSize: radius*0.8));
     if(empty){
       iconDefault = Container();
     }else if(urlImage == '' && text == ''){
-      iconDefault = Icon(iconData??Icons.person_outline_rounded,color: Colors.white,size: radius*1.1 );
+      iconDefault =  iconText;
     }else if(urlImage == '' && text != ''){
-      iconDefault = Text( text.substring( 0,1),style: const TextStyle(color: Colors.white));
+      iconDefault = iconText;
     }else{
       iconDefault = Container();
+    }
+    if(iconData!=null){
+      iconDefault = Icon(iconData,color:lineBorderColor);
     }
     
     // crear avatar
     avatar = urlImage == ''
-      ? CircleAvatar(backgroundColor:backgroundColor,radius:radius, child: Center(child: iconDefault))
+      ? CircleAvatar(
+        backgroundColor:lineBorderColor,
+        radius:radius,
+        child: CircleAvatar(backgroundColor:backgroundColor,radius:lineBorder==false?radius:radius-0.5, child: Center(child: iconDefault)))
         : CachedNetworkImage(
           imageUrl: urlImage,
-          placeholder: (context, url) => CircleAvatar(backgroundColor:backgroundColor,radius:radius, child:iconDefault),
-          imageBuilder: (context, image) => CircleAvatar(backgroundImage: image,radius:radius),
+          placeholder: (context, url) => CircleAvatar(
+            backgroundColor:lineBorderColor,
+            radius:radius,
+            child: CircleAvatar(backgroundColor:backgroundColor,radius:lineBorder==false?radius:radius-0.5, child:iconDefault)),
+          imageBuilder: (context, image) => CircleAvatar(
+            backgroundColor:lineBorderColor,
+            radius:radius,
+            child: CircleAvatar(backgroundImage: image,radius:lineBorder==false?radius:radius-0.5, child: iconDefault)),
           errorWidget: (context, url, error) {
             // return : un circleView con la inicial de nombre como icon 
             return CircleAvatar(
-              backgroundColor: backgroundColor,
+              backgroundColor:lineBorderColor,
               radius:radius,
-              child: Center(child: iconDefault),
-              );
+              child: CircleAvatar(
+                backgroundColor: backgroundColor,
+                radius:lineBorder==false?radius:radius-0.5,
+                child: Center(child: iconText),
+                ),
+            );
           },
     );
 
@@ -850,7 +851,7 @@ class ComponentApp extends StatelessWidget {
       ),
     );
   } 
-  Widget button( {bool defaultStyle = false,double elevation=0,double fontSize = 14,double width = double.infinity,bool disable = false, Widget? icon, String text = '',required dynamic onPressed,EdgeInsets padding =const EdgeInsets.symmetric(horizontal: 12, vertical: 12),Color? colorButton= Colors.blue,Color colorAccent = Colors.white , EdgeInsets margin =const EdgeInsets.symmetric(horizontal: 12, vertical: 12)}) {
+  Widget button( {bool defaultStyle = false,double elevation=0,double fontSize = 14,double width = double.infinity,bool disable = false, Widget? icon, String text = '',required dynamic onPressed,EdgeInsets padding =const EdgeInsets.symmetric(horizontal:0, vertical:16),Color? colorButton= Colors.blue,Color colorAccent = Colors.white , EdgeInsets margin =const EdgeInsets.symmetric(horizontal: 0, vertical: 0)}) {
      
     // button : personalizado
     return FadeIn(
@@ -1181,42 +1182,77 @@ class _EditProductSelectedDialogViewState extends State<EditProductSelectedDialo
   
   // controllers
   final SellController controller = Get.find<SellController>();
-
+  // var 
+  bool favorite = false;  
   
   
   @override
-  Widget build(BuildContext context) { 
-
+  Widget build(BuildContext context) {
+  
+    // set values
+    favorite = widget.product.favorite;
     // widgets
-    Widget titleWidget = Text(widget.product.description,style: const TextStyle(fontWeight: FontWeight.w500),maxLines: 5,overflow: TextOverflow.ellipsis);
-    Widget subtitleWidget = Text(Publications.getFormatoPrecio(value: widget.product.salePrice * widget.product.quantity),style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 20,color: Colors.blue ));
+    Widget titleWidget = Text(widget.product.description,style: const TextStyle(fontWeight: FontWeight.w400),maxLines: 5,overflow: TextOverflow.ellipsis);
+    Widget subtitleWidget = Text(Publications.getFormatoPrecio(value: widget.product.salePrice),style: const TextStyle(fontWeight: FontWeight.bold));
+    Widget priceTotalText = Text(Publications.getFormatoPrecio(value: widget.product.salePrice * widget.product.quantity),style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 18,color: Colors.blue ));
+
 
     return AlertDialog(
       title: Row(
         children: [
+          // text : titulo barrar superior
           Flexible(
             fit: FlexFit.tight,
-            child: Text(widget.product.code==''?'Item':widget.product.code,style: const TextStyle(fontWeight: FontWeight.w400))),
+            child: Text(widget.product.code==''?'Item':widget.product.code,style: const TextStyle(fontWeight: FontWeight.w300,fontSize: 18),overflow: TextOverflow.ellipsis,)
+           ),
+           // button : agregar a favorito
+          widget.product.code==''?Container():!controller.homeController.getProfileAdminUser.catalogue?Container()
+          :IconButton(
+            onPressed: (){
+              setState(() {
+                favorite=!favorite;
+                controller.setProductFavorite(product: widget.product, favorite: favorite);
+              });
+            },
+            icon: Icon(favorite?Icons.star: Icons.star_border,color: favorite?Colors.amber:null,)),
+          // button : editar product
+          widget.product.code==''?Container():!controller.homeController.getProfileAdminUser.catalogue?Container()
+          :IconButton(
+            onPressed: (){
+              Get.back();
+              controller.showUpdatePricePurchaseAndSalesDialog(product: widget.product);
+            },
+            icon: const Icon(Icons.edit_outlined),
+          ),
+          // button : cerrar dialog
           IconButton(
             onPressed: Get.back,
-            icon: const Icon(Icons.close),
-          ),
+            icon: const Icon(Icons.close)),
         ],
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          ListTile(
-            leading: ImageProductAvatarApp(url: widget.product.image),
-            title:widget.product.description==''?subtitleWidget:titleWidget,
+          ListTile( 
+            leading: ImageProductAvatarApp(url: widget.product.image,size: 35),
+            title:widget.product.description==''?subtitleWidget:titleWidget, 
             // subtitle : codigo del producto si es q existe 
             subtitle: widget.product.description==''? null:subtitleWidget,
-          ), 
-          const SizedBox(height: 12),
-          const Divider(thickness:0.6,),
-          // text : cantidad
-          const Text('Cantidad'),
-          const SizedBox(height: 12),
+          ),  
+          //priceTotalText,
+          // divider : seleccionar cantidad 
+          Row(  
+            children: [
+              const Flexible(child: Divider(thickness:0.6 )), 
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: widget.product.quantity==1?const Text('Cantidad'): priceTotalText,
+              ),
+              const Flexible(child: Divider(thickness:0.6)),
+            ],
+          ),
+          const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -1235,7 +1271,7 @@ class _EditProductSelectedDialogViewState extends State<EditProductSelectedDialo
               ),
               Padding(
                 padding: const EdgeInsets.all(18.0),
-                child: Text(widget.product.quantity.toString(),style: const TextStyle(fontSize: 20)),
+                child: Text(widget.product.quantity.toString(),style: const TextStyle(fontSize: 20,fontWeight: FontWeight.bold)),
               ),
               // button : aumentar cantidad
               FloatingActionButton(
@@ -1259,7 +1295,7 @@ class _EditProductSelectedDialogViewState extends State<EditProductSelectedDialo
             controller.update();
             Get.back();
           },
-          child: Text('Eliminar',style: TextStyle(color: Colors.red.shade400)),
+          child: Text('Quitar',style: TextStyle(color: Colors.red.shade400)),
         ),
         // button : cancelar
         TextButton(
@@ -1383,3 +1419,78 @@ class RoundedChatBubble extends StatelessWidget {
   }
 }
 
+
+// AppMoneyInputFormatter : Formateador de texto para campos de dinero
+// Este formateador se encarga de formatear el texto de un campo de texto para que se vea como un monto de dinero
+class AppMoneyInputFormatter extends TextInputFormatter {
+
+  final String symbol; 
+  AppMoneyInputFormatter({this.symbol = '\$'});
+
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue,TextEditingValue newValue) { 
+    
+    // Eliminar cualquier cosa que no sea un número o una coma
+    var newText = newValue.text.replaceAll(RegExp(r'[^0-9,]'), '');
+    // elimina el 0 si es que esta al principioque existe de la primera posición
+    if (newText.length > 1 && newText[0] == '0') {
+      newText = newText.substring(1);
+    }
+
+    // Separar la parte entera y la parte decimal
+    var parts = newText.split(',');
+    var integerPart = parts[0];
+    var decimalPart = parts.length > 1 ? parts[1] : '';
+
+    // Limitar a 2 decimales
+    if (decimalPart.length > 2) {
+      decimalPart = decimalPart.substring(0, 2);
+    }
+
+    // Formatear la parte entera con puntos de miles
+    var buffer = StringBuffer();
+    for (var i = 0; i < integerPart.length; i++) {
+      if (i > 0 && (integerPart.length - i) % 3 == 0) {
+        buffer.write('.');
+      }
+      buffer.write(integerPart[i]);
+    }
+
+    // Construir el texto formateado
+    var formattedText = buffer.toString();
+    if (newText.contains(',')) {
+      formattedText += ',$decimalPart';
+    }
+
+    // Añadir el signo de dólar al principio
+    formattedText = '$symbol$formattedText';
+
+    // Mantener la posición del cursor
+    var selectionIndex = formattedText.length;
+    return TextEditingValue(
+      text: formattedText,
+      selection: TextSelection.collapsed(offset: selectionIndex),
+    );
+  }
+}
+//  AppMoneyTextEditingController : Controlador de texto para campos de dinero
+// Este controlador se encarga de manejar el valor de un campo de texto para que se vea como un monto de dinero
+class AppMoneyTextEditingController extends TextEditingController {
+  AppMoneyTextEditingController({String? value}) : super(text: value);
+
+  // Método para obtener el valor como double
+  double get doubleValue {
+    String textWithoutCommas = text.replaceAll('.', '').replaceAll(',', '.').replaceAll('\$','');
+    return double.tryParse(textWithoutCommas) ?? 0.0;
+  }
+
+  // Método para obtener el valor formateado como string
+  String get formattedValue {
+    return text;
+  }
+  // actualizar el valor del controlador
+  void updateValue(double value) {
+    // actualiza el nuevo valor teniendo en cuenta si tiene o no decimales
+    text = Publications.getFormatoPrecio(value: value);
+  }
+}

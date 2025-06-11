@@ -81,7 +81,10 @@ class HistoryCashRegisterView extends StatelessWidget {
     if (!transactionsController.load &&
         transactionsController.getListCashRegister.isEmpty) {
       return const Center(
-        child: Text('sin datos'),
+        child: Padding(
+          padding: EdgeInsets.all(20.0),
+          child: Text('sin datos',style: TextStyle(fontSize: 30,fontWeight: FontWeight.w300),textAlign: TextAlign.center),
+        )
       );
     }
 
@@ -135,6 +138,17 @@ class CashRegisterDetailView extends StatelessWidget {
               // text : 'Detalle de arqueo'
               Text('Detalle de arqueo',style: textStyleDescription.copyWith(fontSize: 18,fontWeight: FontWeight.w600)),
               const Divider(),
+              // view info : id del usuario que hizo la apertura de la caja
+              const SizedBox(height: 8),
+              Container(
+                color: separatorColor,
+                child: Row(children: [
+                  Text('Apertura', style: textStyleDescription),
+                  const Spacer(),
+                  Text( cashRegister.openingCashiers,style: textStyleValue)
+                ]),
+              ),
+              const SizedBox(height: 12),
               // view info : descripcion
               Row(children: [
                 Text('Descripción', style: textStyleDescription),
@@ -191,6 +205,16 @@ class CashRegisterDetailView extends StatelessWidget {
                   Text(cashRegister.sales.toString(), style: textStyleValue)
                 ]),
               ),
+              // view info : efectivo incial
+              const SizedBox(height: 12),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                Text('Cajeros', style: textStyleDescription),
+                const Spacer(),
+                Text(cashRegister.cashiers.join('\n'),
+                    style: textStyleValue)
+              ]),
               
               cashRegister.cashOutFlowList.isEmpty ? Container():const SizedBox(height: 12),
               // view info : egresos

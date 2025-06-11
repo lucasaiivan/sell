@@ -68,10 +68,6 @@ class CataloguePage extends StatelessWidget {
                   PopupMenuItem(value: '3',enabled: catalogueController.homeController.getIsSubscribedPremium, child: const Text('Con stock bajos')),
                   PopupMenuItem(value: '4',enabled: catalogueController.homeController.getIsSubscribedPremium, child: const Text('Actualizado hace más de 2 meses')),
                   const PopupMenuItem(value: '5', child: Text('Actualizado hace más de 5 meses')),
-                  // TODO :release :  disabled options
-                  //const PopupMenuItem(value: '6', child: Text('Sin verificación')),
-                  //const PopupMenuItem(value: '7', child: Text('Cargar toda la Base de Datos')),
-                  //const PopupMenuItem(value: '8', child: Text('DB sin verificar')),
                 ]),
       ],
     );
@@ -127,7 +123,7 @@ class CataloguePage extends StatelessWidget {
     if (controller.getCataloProducts.isEmpty) { 
 
       return const Center(
-        child: Text('Sin productos'),
+        child: Text('Sin productos',style: TextStyle(fontSize: 30,fontWeight: FontWeight.w300)),
       );
     }
     // widget 
@@ -226,7 +222,7 @@ class CataloguePage extends StatelessWidget {
 
     if (controller.getCatalogueCategoryList.isEmpty) {
       return const Center(
-        child: Text('Sin cátegorias'),
+        child: Text('Sin cátegorias',style: TextStyle(fontSize: 30,fontWeight: FontWeight.w300)),
       );
     }
     return Obx(
@@ -281,7 +277,7 @@ class CataloguePage extends StatelessWidget {
 
     if (controller.getProviderList.isEmpty) {
       return const Center(
-        child: Text('Sin proveedores'),
+        child: Text('Sin proveedores',style: TextStyle(fontSize: 30,fontWeight: FontWeight.w300)),
       );
     }
     return Obx(
@@ -647,7 +643,7 @@ class CataloguePage extends StatelessWidget {
               middleText: '¿Desea continuar eliminando este proveedor?',
               confirm: TextButton.icon(
                   onPressed: () async {
-                    homeController.providerDelete(idProvider: supplier.id);
+                    homeController.providerDelete(provider: supplier);
                     Get.back();
                   },
                   icon: const Icon(Icons.check),

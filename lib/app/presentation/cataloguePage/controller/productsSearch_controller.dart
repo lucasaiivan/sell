@@ -19,6 +19,9 @@ class ButtonData {
 
 class ControllerProductsSearch extends GetxController {
 
+  // TODO : delete release 
+  //bool moderator = false;
+
   // controllers 
   late HomeController homeController;
 
@@ -261,7 +264,7 @@ class ControllerProductsSearch extends GetxController {
   void toProductNew({required String id}) {
 
     // TODO : disable for release [local] en (debug) es siempre [true] para poder verificar el codigo
-    //  productSelect.local = false;
+    //productSelect.local = !moderator;
 
     //values default
     clean();
@@ -269,7 +272,7 @@ class ControllerProductsSearch extends GetxController {
     productSelect.id = id;
     productSelect.code = id; 
     // navega hacia una nueva vista para crear un nuevo producto
-    Get.toNamed(Routes.createProductForm,arguments: { 'product': productSelect});
+    Get.toNamed(Routes.createProductForm,arguments: { 'product': productSelect.copyWith()});
   }
 
   // OVERRIDE // 
