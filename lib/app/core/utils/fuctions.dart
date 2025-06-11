@@ -54,7 +54,6 @@ class Publications {
 
     return formatter.format(value.abs());
   }
-
   
   static String getFormatAmount({required int value}){
     final formatCurrency = NumberFormat('#,##0', 'es_ES');
@@ -264,4 +263,9 @@ class Utils {
 
     Share.shareXFiles([XFile(file.path)], text: 'Compartir Ticket',subject: 'hello',sharePositionOrigin: Rect.zero );
   }
+  
+  // TimesTamp : devuelve una marca de tiempo actual
+  Timestamp getTimestampNow() => Timestamp.now(); 
+  // trialEnd : devuelve una marca de tiempo de fin de prueba
+  Timestamp getFreeTrialTimesTampEnd() => Timestamp.fromDate(Timestamp.now().toDate().add(const Duration(days: 30)));
 }

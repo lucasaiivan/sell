@@ -77,7 +77,7 @@ class LoadingInitView extends StatelessWidget {
     // controllers
     final MultiUserController controller = Get.find();
 
-    if(controller.homeController.getFirebaseAuth.currentUser!.isAnonymous){ return const Center(child: Text('Debes iniciar sesión para para ver esta sección'));}
+    if(controller.homeController.getUserAnonymous){ return const Center(child: Text('Debes iniciar sesión para para ver esta sección'));}
     if(controller.getUsersList.isEmpty ){ return const  Center(child: CircularProgressIndicator());}
 
     return ListView.builder(
@@ -97,7 +97,7 @@ class LoadingInitView extends StatelessWidget {
       children: [
         ListTile( 
           contentPadding:  const EdgeInsets.symmetric(horizontal: 20,vertical: 12),
-          leading:  ComponentApp().userAvatarCircle(iconData: user.superAdmin?Icons.security_rounded:user.admin?Icons.admin_panel_settings_outlined:null),
+          leading:  ComponentApp().userAvatarCircle(iconData: user.superAdmin?Icons.security_rounded:user.admin?Icons.admin_panel_settings_outlined:Icons.person_outline_sharp),
           title: Text(user.name==''?user.email:user.name,maxLines:1,overflow:TextOverflow.clip,style: const TextStyle(fontSize: 14,fontWeight: FontWeight.w500)),
           subtitle: Opacity(opacity: 0.5,child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

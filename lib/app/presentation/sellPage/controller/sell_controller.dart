@@ -1,7 +1,6 @@
  
 import 'dart:async'; 
-import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter_masked_text2/flutter_masked_text2.dart'; 
+import 'package:audioplayers/audioplayers.dart'; 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,16 +10,17 @@ import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';  
 import 'package:sell/app/domain/entities/cashRegister_model.dart';
-import 'package:sell/app/presentation/home/controller/home_controller.dart';
-import 'package:sell/app/data/datasource/database_cloud.dart';
+import 'package:sell/app/presentation/home/controller/home_controller.dart'; 
 import 'package:sell/app/core/utils/fuctions.dart';
 import 'package:sell/app/core/utils/widgets_utils.dart';
 import 'package:uuid/uuid.dart';
+import '../../../data/datasource/database_cloud.dart';
 import '../../../domain/entities/catalogo_model.dart';
 import '../../../domain/entities/ticket_model.dart';
+import '../../../domain/use_cases/cash_register_use_case.dart';
+import '../../../domain/use_cases/catalogue_use_case.dart';
+import '../../../domain/use_cases/transactions_user_case.dart';
 import '../views/sell_view.dart';   
-
-
 
 
 class SellController extends GetxController {
@@ -54,22 +54,23 @@ class SellController extends GetxController {
 
   //  cash register  // 
   void deleteFixedDescription({required String description}){
-    // firebase : elimina una descripción fijada
-    Database.refFirestoreFixedDescriptions(idAccount:homeController.getProfileAccountSelected.id).doc(description).delete();
+    // case use : elimina una descripción fija
+    CashRegisterUseCase().deleteFixedDescription(homeController.getIdAccountSelected, description); 
   }
   void registerFixerDescription({required String description}){
-    // firebase : registra una descripción fija
-    Database.refFirestoreFixedDescriptions(idAccount:homeController.getProfileAccountSelected.id).doc(description).set({'description':description});
+    if(description=='') return;
+    // case use : crea una descripción fija
+    CashRegisterUseCase().createFixedDescription(homeController.getIdAccountSelected, description); 
   }
   Future<List<String>> loadFixerDescriotions(){
-    // firebase : obtenemos las descripciones fijadas por el usuario
-    return Database.refFirestoreFixedDescriptions(idAccount:homeController.getProfileAccountSelected.id).get().then((value) {
+
+    return CashRegisterUseCase().getFixedsDescriptions(homeController.getIdAccountSelected).then((value) {
       List<String> list = [];
-      for (var element in value.docs) {
+      for (var element in value) {
         list.add(element['description'] as String);
       }
       return list;
-    });
+    }); 
     
   }
   void startCashRegister({required String description,required double initialCash,required double expectedBalance}){   
@@ -79,20 +80,21 @@ class SellController extends GetxController {
     // set
     String uniqueId = Publications.generateUid(); // genera un id unico
     homeController.cashRegisterActive.id=uniqueId; // asigna el id unico a la caja
+    homeController.cashRegisterActive.openingCashiers = homeController.getProfileAdminUser.email; // asigna el id del usuario que hace la apertura de la caja
     homeController.cashRegisterActive.description=description; // asigna la descripcion a la caja 
     homeController.cashRegisterActive.initialCash = initialCash; // asigna el dinero inicial a la caja
     homeController.cashRegisterActive.expectedBalance += expectedBalance;  // asigna el dinero esperado a la caja al iniciar
     cashRegisterLocalSave(); // guarda el id de la caja en el dispositivo
     // firebase : guarda un documento de la caja registradora
-    Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(uniqueId).set(homeController.cashRegisterActive.toJson());
+    CashRegisterUseCase().createUpdateCashRegister(homeController.getIdAccountSelected, homeController.cashRegisterActive);
     update(); // actualiza la vista
   }  
   void closeCashRegisterDefault() {
     // cierre de la caja seleccionada
     homeController.cashRegisterActive.closure = DateTime.now(); // asigna la fecha de cierre
     homeController.cashRegisterActive.expectedBalance = homeController.cashRegisterActive.getExpectedBalance; // actualizamos el balance de la caja actual 
-    // firebase : guardamos un copia del documento de la caja en la colección de cajas cerradas
-    Database.refFirestoreRecords(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegisterActive.id).set(homeController.cashRegisterActive.toJson());
+    // firebase : guardamos el arqueo de caja en el historial de arqueos
+    CashRegisterUseCase().addCashRegisterHistory(homeController.getIdAccountSelected, homeController.cashRegisterActive);
     // firebase : eliminamos el documento de la caja de la colección de cajas abiertas
     Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegisterActive.id).delete();
     // default values
@@ -100,80 +102,58 @@ class SellController extends GetxController {
     update();
   }
   void cashRegisterOutFlow({required double amount,String description = ''}){
+    //
     // egreso de dinero al flujo de caja
     //
-    // firebase
-    FirebaseFirestore  firebaseFirestoreInstance  = FirebaseFirestore.instance;
-    firebaseFirestoreInstance.runTransaction((transaction) async {
-      // Obtiene el documento actual
-      DocumentReference documentRef = Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegisterActive.id);
-      // creamos una transacción de firebase 
-      DocumentSnapshot snapshot = await transaction.get(documentRef);
-      // Verifica si el documento existe y contiene un campo 'numero'
-      if (snapshot.exists) {
-        // Crea una instancia de la clase CashRegister a partir de los datos del documento
-        CashRegister cashRegister = CashRegister.fromMap(snapshot.data() as Map<String, dynamic>);
-        // incrementa el valor total de los ingresos
-        cashRegister.cashOutFlow += amount;
-        // agregamos el registro del ingreso
-        cashRegister.cashOutFlowList.add(CashFlow(id: const Uuid().v4(),userId: homeController.getIdAccountSelected,description: description,amount: amount,date: DateTime.now(),).toJson());
-        // Actualiza el valor del número en el documento
-        transaction.update(documentRef, cashRegister.toJson());
-      }
-    }); 
+    final CashRegister cashRegister = homeController.cashRegisterActive;
+    // incrementa el valor total de los ingresos
+    cashRegister.cashOutFlow += amount;
+    // agregamos el registro del ingreso
+    cashRegister.cashOutFlowList.add(CashFlow(id: const Uuid().v4(),userId: homeController.getIdAccountSelected,description: description,amount: amount,date: DateTime.now(),).toJson());
+    
+    // case use : actualiza la caja registradora
+    CashRegisterUseCase().createUpdateCashRegister(homeController.getIdAccountSelected, cashRegister);
+     
   }
   void cashRegisterInFlow({required double amount,String description = ''}){
+    //
     // ingreso de dinero al flujo de caja 
     //
-    // firebase
-    FirebaseFirestore  firebaseFirestoreInstance  = FirebaseFirestore.instance;
-    firebaseFirestoreInstance.runTransaction((transaction) async {
-      // Obtiene el documento actual
-      DocumentReference documentRef = Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegisterActive.id);
-      // creamos una transacción de firebase 
-      DocumentSnapshot snapshot = await transaction.get(documentRef);
-      // Verifica si el documento existe y contiene un campo 'numero'
-      if (snapshot.exists) {
-        // Crea una instancia de la clase CashRegister a partir de los datos del documento
-        CashRegister cashRegister = CashRegister.fromMap(snapshot.data() as Map<String, dynamic>);
-        // incrementa el valor total de los ingresos
-        cashRegister.cashInFlow += amount;
-        // agregamos el registro del ingreso
-        cashRegister.cashInFlowList.add(CashFlow(id: const Uuid().v4(),description: description,userId: homeController.getIdAccountSelected,amount: amount,date: DateTime.now(),).toJson());
-        // Actualiza el valor del número en el documento
-        transaction.update(documentRef, cashRegister.toJson());
-      }
-    }); 
+
+    // Crea una instancia de la clase CashRegister a partir de los datos del documento
+    final CashRegister cashRegister = homeController.cashRegisterActive;
+    // incrementa el valor total de los ingresos
+    cashRegister.cashInFlow += amount;
+    // agregamos el registro del ingreso
+    cashRegister.cashInFlowList.add(CashFlow(id: const Uuid().v4(),description: description,userId: homeController.getIdAccountSelected,amount: amount,date: DateTime.now(),).toJson());
+    
+    // case use : actualiza la caja registradora
+    CashRegisterUseCase().createUpdateCashRegister(homeController.getIdAccountSelected, cashRegister);
+    
   } 
-  void cashRegisterSetTransaction({required double amount,double discount = 0.0 }){
+  void cashRegisterSetTransaction({required double amount,double discount = 0.0 ,required String idUser}){
     // incrementar monto de transaccion de caja
     //
-    // firebase
-    if(homeController.cashRegisterActive.id!=''){
-      FirebaseFirestore  firebaseFirestoreInstance  = FirebaseFirestore.instance;
-      firebaseFirestoreInstance.runTransaction((transaction) async {
-        // Obtiene el documento actual
-        DocumentReference documentRef = Database.refFirestoreCashRegisters(idAccount:homeController.getProfileAccountSelected.id).doc(homeController.cashRegisterActive.id);
-        // creamos una transacción de firebase 
-        DocumentSnapshot snapshot = await transaction.get(documentRef);
-        // Verifica si el documento existe y contiene un campo 'numero'
-        if (snapshot.exists) {
-          // Crea una instancia de la clase CashRegister a partir de los datos del documento
-          CashRegister cashRegister = CashRegister.fromMap(snapshot.data() as Map<String, dynamic>);
-          // incrementa el valor total de la facturacion de la caja
-          cashRegister.billing += amount; 
-          // incrementa el valor si es que existe un descuento
-          cashRegister.discount += discount;
-          // incrementa el valor de las ventas de la caja
-          cashRegister.sales ++;
-          // Actualiza el valor del número en el documento
-          transaction.update(documentRef, cashRegister.toJson());
-        }
-      }); 
-    }
+    
+    // Crea una instancia de la clase CashRegister a partir de los datos del documento
+    CashRegister cashRegister = homeController.cashRegisterActive;
+    // agrega el id del usuario que registra la venta si esq no existe en la lista
+    if(!cashRegister.cashiers.contains(idUser)){ cashRegister.cashiers.add(idUser);  }
+    // incrementa el valor total de la facturacion de la caja
+    cashRegister.billing += amount; 
+    // incrementa el valor si es que existe un descuento
+    cashRegister.discount += discount;
+    // incrementa el valor de las ventas de la caja
+    cashRegister.sales ++;
+    
+    // case use : actualiza la caja registradora
+    CashRegisterUseCase().createUpdateCashRegister(homeController.getIdAccountSelected, cashRegister);
+
   } 
 
-  void cashRegisterLocalSave()async{  await GetStorage().write('cashRegisterID', homeController.cashRegisterActive.id);}
+  void cashRegisterLocalSave()async{  
+      await GetStorage().write('cashRegisterID', homeController.cashRegisterActive.id);
+    }
   void upgradeCashRegister({required String id})async{
     await homeController.upgradeCashRegister(id: id);
     cashRegisterLocalSave();
@@ -203,9 +183,9 @@ class SellController extends GetxController {
   }
 
   // text field controllers 
-  final MoneyMaskedTextController textEditingControllerAddFlashPrice = MoneyMaskedTextController(leftSymbol: '\$',decimalSeparator: ',',thousandSeparator: '.',precision:2);
+  final AppMoneyTextEditingController textEditingControllerAddFlashPrice = AppMoneyTextEditingController();
   final TextEditingController textEditingControllerAddFlashDescription =TextEditingController();
-  final TextEditingController textEditingControllerTicketMount =TextEditingController();
+  final AppMoneyTextEditingController textEditingControllerTicketMount =AppMoneyTextEditingController();
 
   // xfiel : imagen temporal del producto
   XFile _xFileImageCaptureBarCode = XFile('');
@@ -237,13 +217,13 @@ class SellController extends GetxController {
   }
  
   // ticket : ticket de la ultima venta
-  TicketModel _lastTicket = TicketModel(creation: Timestamp.now(), listPoduct: []);
+  TicketModel _lastTicket = TicketModel( listPoduct: []);
   TicketModel get getLastTicket => _lastTicket;
   set setLastTicket(TicketModel value){
     _lastTicket = value; 
   }
   // ticket : ticket de venta actual
-  TicketModel ticket = TicketModel(creation: Timestamp.now(), listPoduct: []);
+  TicketModel ticket = TicketModel( listPoduct: []);
   TicketModel get getTicket => ticket;
   set setTicket(TicketModel value){
     ticket = value;
@@ -298,7 +278,7 @@ class SellController extends GetxController {
   // FIREBASE 
   void registerTransaction() {
 
-    // Procederemos a guardar un documento con la transacción
+    // Procederemos a guardar la transacción
  
     //  set values
     getTicket.id = Publications.generateUid(); // generate id  
@@ -308,18 +288,20 @@ class SellController extends GetxController {
     getTicket.sellerId = homeController.getProfileAdminUser.email;
     getTicket.priceTotal = getTicket.getTotalPrice;
     getTicket.valueReceived = getValueReceivedTicket; 
-    getTicket.creation = Timestamp.now();
+    getTicket.creation =  Timestamp.now();
 
     // set  : replicamos el ticket actual temporalmente  
     setLastTicket = TicketModel.fromMap(getTicket.toJson()); 
 
     // registramos el monto en caja
     if( homeController.getIsSubscribedPremium ){
-      cashRegisterSetTransaction(amount: getTicket.priceTotal,discount: getTicket.discount);
+      cashRegisterSetTransaction(amount: getTicket.priceTotal,discount: getTicket.discount,idUser: homeController.getProfileAdminUser.email);
     }
     
     // set firestore : guarda la transacción
-    Database.refFirestoretransactions(idAccount: homeController.getIdAccountSelected).doc(getTicket.id).set(getTicket.toJson()).whenComplete((){
+    GetTransactionUseCase().addTransaction(homeController.getIdAccountSelected, getTicket).then(
+      (value) {
+        
       // incrementamos la cantidad de venta y descrementamos el stock de los productos del catálogo
       for (dynamic data in getTicket.listPoduct) { 
         // obj
@@ -329,12 +311,14 @@ class SellController extends GetxController {
 
         // firestore : hace un incremento de 1 en el valor 'sales' del producto
         productCatalogue.sales ++;
-        Database.dbProductStockSalesIncrement(idAccount: homeController.getIdAccountSelected,idProduct: product.id,quantity: 1 );
+        GetCatalogueUseCase().incrementSales(homeController.getIdAccountSelected, product.id, 1);
+        //Database.dbProductStockSalesIncrement(idAccount: homeController.getIdAccountSelected,idProduct: product.id,quantity: 1 );
         // condition :  hace un descremento en el valor 'stock' del producto si es que tiene stock habilitado
         if (product.stock && homeController.getIsSubscribedPremium ) {
           //  firestore : hace un descremento en el valor 'stock'
           productCatalogue.quantityStock -= product.quantity;
-          Database.dbProductStockDecrement(idAccount: homeController.getIdAccountSelected,idProduct: product.id,quantity: product.quantity);
+          //Database.dbProductStockDecrement(idAccount: homeController.getIdAccountSelected,idProduct: product.id,quantity: product.quantity);
+          GetCatalogueUseCase().decrementStock(homeController.getIdAccountSelected, product.id, product.quantity);
         }
         // actualizamos la lista de producto de  catálogo  en memoria de la app
         homeController.sincronizeCatalogueProducts(product: productCatalogue);
@@ -342,10 +326,62 @@ class SellController extends GetxController {
       setStateConfirmPurchaseComplete = true;
       // set : default values  
       setTicket = TicketModel(creation: Timestamp.now(), listPoduct: []);
-    });
+
+      }
+    );
+
+    /* Database.refFirestoretransactions(idAccount: homeController.getIdAccountSelected).doc(getTicket.id).set(getTicket.toJson()).whenComplete((){
+      
+    }); */
     
   }
-  
+  Future<void> pricesProductCatalogueUpdate({required ProductCatalogue product,double salePrice=0.0,double purchasePrice = 0.0})async {
+
+    // obj : se obtiene los datos para registrar del precio al publico del producto en una colección publica de la db
+    final ProductPrice precio = ProductPrice(id: homeController.getProfileAccountSelected.id,idAccount: homeController.getProfileAccountSelected.id,imageAccount: homeController.getProfileAccountSelected.image,nameAccount: homeController.getProfileAccountSelected.name,price: product.salePrice,currencySign: product.currencySign,province: homeController.getProfileAccountSelected.province,town: homeController.getProfileAccountSelected.town,time: Timestamp.fromDate(DateTime.now()));
+     
+    // var
+    Timestamp upgrade =  Timestamp.now();
+    Map data = {'upgrade':upgrade};
+    if(salePrice!=0){ 
+      data['salePrice']=salePrice; 
+      product.salePrice = salePrice;
+      precio.price = salePrice; 
+      }
+    if(purchasePrice!=0){ 
+      data['purchasePrice']=purchasePrice; 
+      product.purchasePrice = purchasePrice;
+      }
+    // set : fecha de actualización del producto
+    product.upgrade = upgrade;
+
+    // case use : registramos el precio del producto en la colección de precios publicos
+    GetCatalogueUseCase().registerPriceProductPublic( price: precio );
+    // case use : Actualizamos los datos del producto
+    GetCatalogueUseCase().updateProductFromMap(homeController.getIdAccountSelected, product.id,data);
+
+    // actualiza la lista de productos seleccionados
+    getTicket.updateData(product: product);
+    // actualiza la lista de productos del cátalogo en la memoria de la app
+    homeController.sincronizeCatalogueProducts(product: product);
+    // vuelve a abrir el dialog para editar la cantidad del producto seleccionado
+    Get.dialog( EditProductSelectedDialogView(product: product) ); 
+    update();
+  }
+  Future<void> setProductFavorite({required ProductCatalogue product,required bool favorite})async {
+    
+    // var
+    Map data = {'favorite':favorite};
+    product.favorite = favorite; 
+    // case use : Actualizamos los datos
+    GetCatalogueUseCase().updateProductFromMap(homeController.getIdAccountSelected, product.id,data);
+    //docRefProductCatalogue.set(Map<String, dynamic>.from(data), SetOptions(merge: true));
+    // actualiza la lista de productos seleccionados
+    getTicket.updateData(product: product);
+    // actualiza la lista de productos del cátalogo en la memoria de la app
+    homeController.sincronizeCatalogueProducts(product: product);
+  }
+
   // FUCTIONS  
   void showSeach({required BuildContext context}) {
     // Busca entre los productos de mi catálogo 
@@ -460,19 +496,17 @@ class SellController extends GetxController {
   void queryProductDbPublic({required String id}) {
     // consulta el código existe en la base de datos de productos publicos
     if (id != '') {
-      // firebase
-      Future<DocumentSnapshot<Map<String, dynamic>>> documentSnapshot = Database.readProductPublicFuture(id: id);
-      // query
-      documentSnapshot.then((value) { 
+      // case use : consulta el producto en la base de datos de productos publicos
+      GetCatalogueUseCase().getProductPublic(id).then((data) {
+        if(data.id=='') throw 'null';
 
         // get : product
-        ProductCatalogue product = ProductCatalogue.fromMap(value.data() as Map);
+        ProductCatalogue product = data.convertProductCatalogue();
         // set : marca de tiempo
         product.upgrade = Timestamp.now();
         // show dialog
         showDialogAddProductNew(productCatalogue:product);
-      
-      }).onError((error, stackTrace) { 
+      }).onError((error, stackTrace) {
         // no se encontro el producto en la base de datos
         //
         // dialog : agregar producto nuevo
@@ -480,7 +514,7 @@ class SellController extends GetxController {
       }).catchError((error) {
         // error al consultar db
         Get.snackbar('ah ocurrido algo', 'Fallo el escaneo');
-      });
+      }); 
     }
   }
 
@@ -502,10 +536,9 @@ class SellController extends GetxController {
     Get.back();
   } 
   void addSaleFlash() {
-    // generate new ID
     var id = Publications.generateUid();
     // var
-    double  valuePrice = textEditingControllerAddFlashPrice.numberValue;
+    double  valuePrice = textEditingControllerAddFlashPrice.doubleValue;
     String valueDescription = textEditingControllerAddFlashDescription.text == '' ? 'Sin descripción' : textEditingControllerAddFlashDescription.text;
 
     if (valuePrice != 0) {
@@ -530,11 +563,11 @@ class SellController extends GetxController {
       // set : default values  
       setStateConfirmPurchaseComplete = true; 
       setLastTicket = TicketModel.fromMap(getTicket.toJson()); 
-      setTicket = TicketModel(creation: Timestamp.now(), listPoduct: []);
+      setTicket = TicketModel();
     }
     
   }
-  
+
   // Getters //
   String getValueChange() {
 
@@ -547,7 +580,7 @@ class SellController extends GetxController {
     // text format : devuelte un texto formateado del monto que el vendedor recibio
     return Publications.getFormatoPrecio(value: getValueReceivedTicket);
   }
-  
+
   // DIALOG // 
   void showDialogAddProductNew({ required ProductCatalogue productCatalogue}) {
     // dialog : muestra este dialog cuando el producto no se encuentra en el cáatalogo de la cuenta
@@ -575,9 +608,9 @@ class SellController extends GetxController {
   void showDialogQuickSale( ) {
     // Dialog view : Hacer una venta rapida 
 
-    //var
-    final FocusNode myFocusNode = FocusNode(); 
-
+    //var 
+    final FocusNode myFocusNode = FocusNode();  
+    
     // style
     final Color colorAccent = Get.isDarkMode?Colors.white:Colors.black; 
     // widgets
@@ -609,15 +642,15 @@ class SellController extends GetxController {
                       controller: textEditingControllerAddFlashPrice,
                       keyboardType: const TextInputType.numberWithOptions(decimal: false),
                       inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp('[1234567890]'))
+                        AppMoneyInputFormatter()
                       ],
                       decoration: InputDecoration(  
-                        labelText: "Precio",
-                        prefixIcon: const Icon(Icons.attach_money_rounded), 
+                        labelText: "Ingrese el monto",
+                        hintText: '\$0', 
                         border: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent)),
                         enabledBorder: OutlineInputBorder(borderSide:  BorderSide(color: colorAccent), )
                       ),
-                      style: const TextStyle(fontSize: 20.0),
+                      style: const TextStyle(fontSize: 40.0),
                       textInputAction: TextInputAction.next,
                     ),
                   ),
@@ -650,7 +683,8 @@ class SellController extends GetxController {
               width: double.infinity,
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
-                child: ComponentApp().button( 
+                child: ComponentApp().button(  
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                   colorButton: Colors.blue,
                   text: 'Agregar',
                   onPressed: () {
@@ -691,7 +725,7 @@ class SellController extends GetxController {
           child: TextButton(
               onPressed: () {
                 //var
-                double valueReceived = textEditingControllerTicketMount.text == '' ? 0.0 : double.parse(textEditingControllerTicketMount.text);
+                double valueReceived = textEditingControllerTicketMount.doubleValue;
                 // condition : verificar si el usaurio ingreso un monto valido y que sea mayor al monto total del ticket
                 if (valueReceived >= getTicket.getTotalPrice && textEditingControllerTicketMount.text != '') {
                   setValueReceivedTicket = valueReceived;
@@ -811,9 +845,7 @@ class SellController extends GetxController {
                 autofocus: true,
                 controller: textEditingControllerTicketMount,
                 keyboardType: const TextInputType.numberWithOptions(decimal: false),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp('[1234567890]'))
-                ],
+                inputFormatters: [AppMoneyInputFormatter()],
                 decoration: const InputDecoration(
                   hintText: '\$',
                   labelText: "Escribe el monto",
@@ -822,12 +854,10 @@ class SellController extends GetxController {
                 textInputAction: TextInputAction.done,
                 onSubmitted: (value) {
                   //var
-                  double valueReceived = textEditingControllerTicketMount.text ==''
-                      ? 0.0
-                      : double.parse(textEditingControllerTicketMount.text);
+                  double valueReceived = textEditingControllerTicketMount.doubleValue;
                   // condition : verificar si el usaurio ingreso un monto valido y que sea mayor al monto total del ticket
                   if (valueReceived >= getTicket.getTotalPrice && textEditingControllerTicketMount.text != '') {
-                    setValueReceivedTicket = double.parse(textEditingControllerTicketMount.text);
+                    setValueReceivedTicket = textEditingControllerTicketMount.doubleValue;
                     textEditingControllerTicketMount.text = '';
                     setPayModeTicket = 'effective';
                     Get.back();
@@ -839,7 +869,6 @@ class SellController extends GetxController {
           ],
         ));
   }
-
   void checkDataAdminUser() {
   Timer.periodic(const Duration(seconds: 1), (timer) {
     if ( homeController.getProfileAdminUser.email != '') {
@@ -848,7 +877,67 @@ class SellController extends GetxController {
     }
   });
 }
+  void showUpdatePricePurchaseAndSalesDialog({required ProductCatalogue product}){
+    // controllers
+    AppMoneyTextEditingController pricePurchaseController = AppMoneyTextEditingController();
+    AppMoneyTextEditingController priceSaleController = AppMoneyTextEditingController();
 
+    // set values 
+    pricePurchaseController.updateValue(product.purchasePrice);
+    priceSaleController.updateValue(product.salePrice);
+
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Actualizar precios'),  
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // textfield : precio de compra
+            TextField( 
+              autofocus: false,
+              controller: pricePurchaseController,
+              enabled: true, 
+              inputFormatters: [AppMoneyInputFormatter()],
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(filled: true,labelText: 'Costo',prefixIcon: Icon(Icons.monetization_on_rounded)),
+            ),
+            const SizedBox(height: 10),
+            // textfield : precio de venta
+            TextField( 
+              autofocus: false,
+              controller: priceSaleController,
+              enabled: true, 
+              inputFormatters: [AppMoneyInputFormatter()],
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(filled: true,labelText: 'Venta al público',prefixIcon: Icon(Icons.monetization_on_rounded)),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+              // fuction : actualizar precios de los productos seleccionado
+              pricesProductCatalogueUpdate(
+                product: product,
+                purchasePrice: pricePurchaseController.doubleValue,  
+                salePrice: priceSaleController.doubleValue,
+              );
+              
+            },
+            child: const Text('Actualizar'),
+          ),
+        ],
+      )
+    );
+  }
   // OVERRIDE //
   @override
   void onInit() { 
@@ -888,7 +977,7 @@ class _NewProductViewState extends State<NewProductView> {
   final HomeController homeController = Get.find<HomeController>();
   final SellController salesController = Get.find<SellController>();
   late TextEditingController controllerTextEditDescripcion = TextEditingController(text: widget.productCatalogue.description);
-  late MoneyMaskedTextController controllerTextEditPrecioVenta = MoneyMaskedTextController(initialValue: widget.productCatalogue.salePrice);
+  late AppMoneyTextEditingController controllerTextEditPrecioVenta = AppMoneyTextEditingController();
   // keys form
   GlobalKey<FormState> descriptionFormKey = GlobalKey<FormState>();
   GlobalKey<FormState> priceFormKey = GlobalKey<FormState>();
@@ -999,8 +1088,8 @@ class _NewProductViewState extends State<NewProductView> {
           },
         ),
       ),
-    );
-    // TODO : error :  RangeError TextFormField : cuando el usuario mantiene presionado el boton de borrar > 'RangeError : Invalid value: only valid value is 0: -1'
+    ); 
+    // widget : entrada de monto del precio de venta al publico 
     Widget widgetTextFieldPrice = Padding(
           padding: const EdgeInsets.symmetric(horizontal:12, vertical: 6),
           child: Form(
@@ -1013,9 +1102,10 @@ class _NewProductViewState extends State<NewProductView> {
               enabled: true,
               autovalidateMode: AutovalidateMode.onUserInteraction,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),  
+              inputFormatters: [AppMoneyInputFormatter()],
               decoration: InputDecoration(
                 labelText: 'Precio de venta al públuco',
-                hintText: 'ej. agua saborisada 500 ml',  
+                hintText: '0.0',  
                 hintStyle: hintStyle,
                 labelStyle: labelStyle,
                 prefixIcon: const Icon(Icons.attach_money_rounded), 
@@ -1026,13 +1116,13 @@ class _NewProductViewState extends State<NewProductView> {
                 ), 
               onChanged: (value) {
                 // condition : comprobar si es un monto valido 
-                if (controllerTextEditPrecioVenta.numberValue > 0.0) {
-                  widget.productCatalogue.salePrice = controllerTextEditPrecioVenta.numberValue;
+                if (controllerTextEditPrecioVenta.doubleValue > 0.0) {
+                  widget.productCatalogue.salePrice = controllerTextEditPrecioVenta.doubleValue;
                 }
               },
               // validator: validamos el texto que el usuario ha ingresado.
               validator: (value) {
-                if ( controllerTextEditPrecioVenta.numberValue == 0.0) { return 'Por favor, introduzca el precio del producto'; }
+                if ( controllerTextEditPrecioVenta.doubleValue == 0.0) { return 'Por favor, introduzca el precio del producto'; }
                 return null;
               },
             ),
@@ -1043,8 +1133,7 @@ class _NewProductViewState extends State<NewProductView> {
       width:double.infinity, 
       duration: const Duration(milliseconds: 500),
       decoration: BoxDecoration(border: Border.all(color: checkAddCatalogue?checkActiveColor:colorAccent,width: 0.5),color: checkAddCatalogue?checkActiveColor.withOpacity(0.2):Colors.transparent,borderRadius: BorderRadius.circular(5)), 
-      child: CheckboxListTile(
-        contentPadding: const EdgeInsets.symmetric(vertical: 5,horizontal: 12),
+      child: CheckboxListTile( 
         title: Text('Agregar a mi cátalogo', style: TextStyle(fontSize: 14,color: colorAccent)),
         value: checkAddCatalogue, 
         checkColor: Colors.white,
@@ -1071,7 +1160,7 @@ class _NewProductViewState extends State<NewProductView> {
           if (  conditionPrice && conditionDescription) {
             // set 
             widget.productCatalogue.description = controllerTextEditDescripcion.text;
-            widget.productCatalogue.salePrice = controllerTextEditPrecioVenta.numberValue;
+            widget.productCatalogue.salePrice = controllerTextEditPrecioVenta.doubleValue;
             //
             // condition : si el usuario quiere agregar el producto a la lista de productos del catálogo
             // entonces lo agregamos a la lista de productos del catálogo y a la colección de productos publica de la DB
@@ -1270,7 +1359,10 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
 
       // condition : si no hay ningun producto en el catalogo
       if(filteredSuggestions.isEmpty){
-        return const Center(child: Opacity(opacity: 0.5,child: Text('aun no hay productos en el catálogo',)));
+        return const Center(child: Padding(
+          padding: EdgeInsets.all(20.0),
+          child: Text('aun no hay productos en el catálogo',textAlign: TextAlign.center,style: TextStyle(fontSize: 30)),
+        ));
       }
 
       return Padding(
@@ -1285,7 +1377,10 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
     }
     // condition : si se consulto pero no se obtuvieron resultados
     if(filteredSuggestions.isEmpty && query.isNotEmpty){
-      return const Center(child: Text('No se encontraron resultados'));
+      return const Center(child: Padding(
+        padding: EdgeInsets.all(20.0),
+        child: Text('No se encontraron resultados',style: TextStyle(fontSize: 30),textAlign: TextAlign.center),
+      ));
     } 
     return ListView.builder(
       itemCount: filteredSuggestions.length,
@@ -1406,7 +1501,6 @@ class CustomSearchDelegate<T> extends SearchDelegate<T> {
   }
 }
  
-
 class CurrencyTextEditingController extends TextEditingController {
   final NumberFormat _formatter = NumberFormat.currency(
     locale: 'es_ES',
@@ -1431,3 +1525,4 @@ class CurrencyTextEditingController extends TextEditingController {
     );
   }
 }
+

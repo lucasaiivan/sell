@@ -228,13 +228,13 @@ class ProductController extends GetxController {
   void sendReportProduct({required List reports, required String description}){
 
     // generate id  : code mas id de firebase 
-    String id = '${getProduct.code}-${homeController.getUserAuth.uid}';
+    String id = '${getProduct.code}-${homeController.getUserAuth?.uid}';
     // function : envia un reporte del producto
     Database.refFirestoreReportProduct().doc(id).set(
       ReportProduct(
         id: id,
         idProduct: getProduct.code,
-        idUserReport: homeController.getUserAuth.uid,
+        idUserReport: homeController.getUserAuth!.uid,
         time: Timestamp.now(),
         description:description,
         reports: reports, 

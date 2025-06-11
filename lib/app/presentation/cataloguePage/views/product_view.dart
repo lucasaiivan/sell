@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; 
 import 'package:flutter/material.dart'; 
 import 'package:get/get.dart';
@@ -111,7 +110,32 @@ class ProductView extends StatelessWidget {
     const Color colorText = Colors.white; 
     // var 
     String numberOfStoresText = controller.getListPricesForProduct.isEmpty? '':'${Publications.getFormatAmount(value: controller.getListPricesForProduct.length )}${controller.getListPricesForProduct.length == 1 ? ' comercio publicó su precio' : ' comercios publicaron su precio'}';
-
+    // widget : genera 3 avatar de comercio como maximo o lo que allan disponibles en la lista de precios publicados 
+      Widget avatarStores = controller.getListPricesForProduct.isEmpty
+      ? Container()
+      : SizedBox(
+          height: 16,
+          width: controller.getListPricesForProduct.length >= 3 ? 28 : controller.getListPricesForProduct.length == 2 ? 22 : controller.getListPricesForProduct.length == 1 ?15:0,
+          child: Stack(
+            children: List.generate(
+              controller.getListPricesForProduct.length > 3 ? 3 : controller.getListPricesForProduct.length,
+              (index) {
+              
+                return Positioned(
+                  left: index * 6.0, // Ajusta este valor para controlar la superposición
+                  child: ComponentApp().userAvatarCircle(
+                    urlImage: controller.getListPricesForProduct[index].imageAccount,
+                    text: controller.getListPricesForProduct[index].nameAccount,
+                    radius: 8, 
+                    lineBorder: true,
+                    lineBorderColor: colorBackground,
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+    // widget : contenido de la cabecera persistente
     Widget content = ClipRRect(
       borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
       child: Container(
@@ -233,16 +257,17 @@ class ProductView extends StatelessWidget {
                     // text : cantidad de precios publicados
                     numberOfStoresText==''?Container()
                     :Material( 
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withOpacity(0.15),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical:1,horizontal:5),
+                        padding: const EdgeInsets.only(left: 4.0, right: 8.0, top: 3.0, bottom: 3.0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.store_mall_directory_rounded,size:14,color: colorText),
-                            const SizedBox(width: 4),
+                            // avatars : de los comercios que publicaron el precio
+                            avatarStores,
+                            const SizedBox(width: 4), 
                             Text(
                               numberOfStoresText,
                               style: const TextStyle(color: colorText, fontSize: 12.0),

@@ -1,6 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart'; 
 import 'package:intl/intl.dart';
 
+class UserAuth {
+  final String uid;
+  final String email;
+  final String displayName; 
+  final bool isAnonymous;
+
+  UserAuth({
+    this.uid='',
+    this.email='',
+    this.displayName='', 
+    this.isAnonymous= true,
+  });
+  
+}
+
 class UserModel {
   
   UserModel({
@@ -23,7 +38,7 @@ class UserModel {
     this.transactions = false, 
     this.catalogue = false,  
     this.multiuser = false,  
-    this.editAccount = false, 
+    this.editAccount = false,  
   });
 
   String id = ""; // id de autenticación del usuario
@@ -272,7 +287,7 @@ class ProfileAccountModel {
   String currencySign = "\$";
 
   // account info
-  bool subscribed = false;
+  //bool subscribed = false;
   bool blockingAccount = false;
   String blockingMessage = "";
   bool verifiedAccount = false; // Cuenta verificada
@@ -292,8 +307,7 @@ class ProfileAccountModel {
     // informacion de cuenta
     // location
     // data user creation
-    this.id = "",
-    this.subscribed=true, // subcripción
+    this.id = "", 
     this.countrycode = "",
     this.username = '',
     this.image = "",
@@ -337,8 +351,7 @@ class ProfileAccountModel {
       // informacion de cuenta
       // location
       // data user creation
-      id: id ?? this.id,
-      subscribed: subscribed ?? this.subscribed,
+      id: id ?? this.id, 
       countrycode: countrycode ?? this.countrycode,
       username: username ?? this.username,
       image: image ?? this.image,
@@ -354,14 +367,13 @@ class ProfileAccountModel {
       creation: creation ?? this.creation,
       trial: trial,
       trialStart: trialStart,
-      trialEnd: trialEnd,
+      trialEnd: trialEnd,  
     );
   }
 
   ProfileAccountModel.fromMap(Map data) {
     id = data['id'];
-    username = data['username'];
-    subscribed = true;// data['subscribed']??false;
+    username = data['username']; 
     image =data.containsKey('image') ? data['image'] : data['imagen_perfil'] ?? '';
     name = data.containsKey('name') ? data['name'] : data['nombre_negocio']; 
     creation = data.containsKey('creation')? data['creation']: data['timestamp_creation']?? Timestamp.now();
@@ -416,9 +428,7 @@ class ProfileAccountModel {
     if (documentSnapshot.data() != null) {data = documentSnapshot.data() as Map; }
 
     //  set
-    creation = data["creation"]??Timestamp.now();
-    // TODO: variable que se tiene que evaluar en cada inicio de la app
-    subscribed = true; //data.containsKey('subscribed') ? data['subscribed'] : false;
+    creation = data["creation"]??Timestamp.now(); 
     id = data.containsKey('id') ? data['id'] : documentSnapshot.id;
     username = data["username"] ?? '';
     image = data.containsKey('image') ? data['image'] : data["imagen_perfil"] ?? '';
